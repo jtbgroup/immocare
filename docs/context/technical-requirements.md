@@ -4,7 +4,7 @@
 
 ### Overview
 
-SlaGen is built as a **mono-repository** containing both frontend and backend code, along with complete documentation, configuration files, and deployment scripts. This approach facilitates:
+SandwichesMgt is built as a **mono-repository** containing both frontend and backend code, along with complete documentation, configuration files, and deployment scripts. This approach facilitates:
 
 - Coordinated development across frontend and backend
 - Unified version control
@@ -13,9 +13,10 @@ SlaGen is built as a **mono-repository** containing both frontend and backend co
 
 ### Repository Structure
 ```
-slaGen/
-├── backend/              # Spring Boot application
-├── frontend/             # Angular application
+Sandiches_Mgt/
+├── code
+|    ├── backend/              # Spring Boot application
+|    └── frontend/             # Angular application
 ├── docker/               # Container orchestration
 ├── docs/                 # Complete documentation
 ├── README.md
@@ -165,7 +166,7 @@ slaGen/
 └──────────┬────────────────┬─────────────┘
            │                │
            │                │
-    ┌──────▼──────┐  ┌─────▼──────────┐
+    ┌──────▼──────┐  ┌──────▼─────────┐
     │  Frontend   │  │    Backend     │
     │  Container  │  │   Container    │
     │  (Angular)  │  │  (Spring Boot) │
@@ -183,7 +184,7 @@ slaGen/
 
 ### Design Principle
 
-SlaGen follows an **API-First design approach** where the REST API is the primary interface to all business logic. The API is completely independent of any frontend implementation.
+SandwichesMgt follows an **API-First design approach** where the REST API is the primary interface to all business logic. The API is completely independent of any frontend implementation.
 
 ### API Independence
 
@@ -203,8 +204,29 @@ SlaGen follows an **API-First design approach** where the REST API is the primar
 
 ### Communication Flow
 
-┌─────────────────┐ │ Any Frontend │ (Angular, React, Mobile, CLI, etc.) │ Application │ └────────┬────────┘ │ HTTP/HTTPS │ JSON ▼ ┌─────────────────┐ │ REST API │ /api/v1/* │ (Backend) │ - Authentication │ │ - Business Logic │ │ - Data Access └────────┬────────┘ │ JDBC ▼ ┌─────────────────┐ │ PostgreSQL │ │ Database │ └─────────────────┘
-
+```
+┌─────────────────┐ 
+│ Any Frontend    │ (Angular, React, Mobile, CLI, etc.)
+│ Application     │
+└────────┬────────┘
+         │ HTTP/HTTPS
+         │ JSON
+┌────────▼─────────┐
+│ REST API         │
+│ /api/v1/*        │ 
+└────────┬─────────┘
+         │ (Backend)
+┌────────▼─────────┐
+│ - Authentication │
+│ - Business Logic │
+│ - Data Access    │
+└────────┬─────────┘
+         │ JDBC  
+┌────────▼─────────┐
+│ PostgreSQL       │
+│ Database         │
+└──────────────────┘
+```
 
 ### Benefits
 
@@ -213,7 +235,7 @@ SlaGen follows an **API-First design approach** where the REST API is the primar
 3. **Testing**: API can be tested independently of UI
 4. **Integration**: Easy integration with other systems
 5. **Future-Proof**: New clients can be added without API changes
-6. 
+   
 ## Authentication & Authorization
 
 ### Phase 1: Embedded User Management
@@ -243,7 +265,6 @@ SlaGen follows an **API-First design approach** where the REST API is the primar
 - **Maven 3.8+**: Build automation
 - **Docker Desktop**: Container development
 - **Git**: Version control
-- **IDE**: IntelliJ IDEA (recommended) or VS Code
 
 ### Development Setup
 
@@ -262,7 +283,7 @@ SlaGen follows an **API-First design approach** where the REST API is the primar
 
 ### Development Deployment
 ```bash
-docker-compose -f docker-compose.dev.yml up
+docker compose -f docker-compose.dev.yml up
 ```
 
 - Hot reload enabled
@@ -272,7 +293,7 @@ docker-compose -f docker-compose.dev.yml up
 
 ### Production Deployment
 ```bash
-docker-compose -f docker-compose.prod.yml up -d
+docker compose -f docker-compose.prod.yml up -d
 ```
 
 - Optimized builds
@@ -287,7 +308,7 @@ docker-compose -f docker-compose.prod.yml up -d
 ```bash
    mvn clean package -DskipTests
 ```
-   Produces: `target/slagen-0.1.0.jar`
+   Produces: `target/sandwichesmgt-0.1.0.jar`
 
 2. **Frontend Build**:
 ```bash
@@ -297,8 +318,8 @@ docker-compose -f docker-compose.prod.yml up -d
 
 3. **Docker Image Build**:
 ```bash
-   docker build -t slagen-backend:0.1.0 .
-   docker build -t slagen-frontend:0.1.0 .
+   docker build -t sandwichesmgt-backend:0.1.0 .
+   docker build -t sandwichesmgt-frontend:0.1.0 .
 ```
 
 ## Non-Functional Requirements
@@ -376,8 +397,8 @@ docker-compose -f docker-compose.prod.yml up -d
 
 ### Data Retention
 
-- **Active SLAs**: Indefinite retention
-- **Archived SLAs**: Retained for compliance (minimum 7 years)
+- **Active SANDWICHES**: Indefinite retention
+- **Archived SANDWICHES**: Retained for compliance (minimum 7 years)
 - **Audit Logs**: Retained for 3 years
 - **User Sessions**: 24 hours or until logout
 
@@ -392,7 +413,7 @@ docker-compose -f docker-compose.prod.yml up -d
 
 ### RESTful Principles
 
-- **Resources**: Nouns representing entities (e.g., `/api/slas`, `/api/systems`)
+- **Resources**: Nouns representing entities (e.g., `/api/sandwiches`, `/api/systems`)
 - **HTTP Methods**: GET (read), POST (create), PUT (update), DELETE (delete)
 - **Status Codes**: Appropriate HTTP status codes
 - **Versioning**: `/api/v1/...` for future compatibility
@@ -405,14 +426,14 @@ docker-compose -f docker-compose.prod.yml up -d
 
 ### Example Endpoints
 ```
-GET    /api/v1/slas              # List all SLAs
-GET    /api/v1/slas/{id}         # Get SLA by ID
-POST   /api/v1/slas              # Create new SLA
-PUT    /api/v1/slas/{id}         # Update SLA
-DELETE /api/v1/slas/{id}         # Delete SLA
-POST   /api/v1/slas/{id}/submit  # Submit for validation
-POST   /api/v1/slas/{id}/validate # Validate SLA
-GET    /api/v1/slas/{id}/pdf     # Generate PDF
+GET    /api/v1/sandwiches              # List all SANDWICHES
+GET    /api/v1/sandwiches/{id}         # Get SANDWICHES by ID
+POST   /api/v1/sandwiches              # Create new SANDWICHES
+PUT    /api/v1/sandwiches/{id}         # Update SANDWICHES
+DELETE /api/v1/sandwiches/{id}         # Delete SANDWICHES
+POST   /api/v1/sandwiches/{id}/submit  # Submit for validation
+POST   /api/v1/sandwiches/{id}/validate # Validate SANDWICHES
+GET    /api/v1/sandwiches/{id}/pdf     # Generate PDF
 ```
 
 ## Version Control Strategy
@@ -488,8 +509,8 @@ GET    /api/v1/slas/{id}/pdf     # Generate PDF
 # Database
 DB_HOST=localhost
 DB_PORT=5432
-DB_NAME=slagen
-DB_USER=slagen_user
+DB_NAME=sandwichesmgt
+DB_USER=sandwichesmgt_user
 DB_PASSWORD=secure_password
 
 # Application
