@@ -1,0 +1,89 @@
+version: '3.8'
+
+services:
+  # PostgreSQL Database
+  postgres:
+    image: postgres:15-alpine
+    container_name: immocare-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: immocare
+      POSTGRES_USER: immocare_user
+      POSTGRES_PASSWORD: immocare_password
+      PGDATA: /var/lib/postgresql/data/pgdata
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U immocare_user -d immocare"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - immocare-network
+
+  # Backend (Spring Boot) - Optional, can run locally with mvn spring-boot:run
+  backend:
+    build:
+      context: ./code/backend
+      dockerfile: Dockerfile
+    container_name: immocare-backend
+    restart: unless-stopped
+    environment:
+      SPRING_PROFILES_ACTIVE: dev
+      DB_HOST: postgres
+      DB_PORT: 5432
+      DB_NAME: immocare
+      DB_USER: immocare_user
+      DB_PASSWORD: immocare_password
+    ports:
+      - "8080:8080"
+    depends_on:
+      postgres:
+        condition: service_healthy
+    networks:
+      - immocare-network
+    # Uncomment to run backend in container (requires Dockerfile)
+    # profiles:
+    #   - full-stack
+
+  # Frontend (Angular) - Optional, can run locally with npm start
+  frontend:
+    build:
+      context: ./code/frontend
+      dockerfile: Dockerfile
+    container_name: immocare-frontend
+    restart: unless-stopped
+    ports:
+      - "4200:80"
+    depends_on:
+      - backend
+    networks:
+      - immocare-network
+    # Uncomment to run frontend in container (requires Dockerfile)
+    # profiles:
+    #   - full-stack
+
+volumes:
+  postgres_data:
+    driver: local
+
+networks:
+  immocare-network:
+    driver: bridge
+
+# Usage:
+# Development (PostgreSQL only):
+#   docker-compose up -d postgres
+#   mvn spring-boot:run  # Run backend locally
+#   npm start            # Run frontend locally
+#
+# Full stack (all containers):
+#   docker-compose --profile full-stack up -d
+#
+# Stop all:
+#   docker-compose down
+#
+# Stop and remove volumes:
+#   docker-compose down -v
