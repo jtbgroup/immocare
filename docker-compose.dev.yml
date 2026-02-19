@@ -1,0 +1,83 @@
+version: '3.8'
+
+# Development configuration with volume mounting for hot reload
+
+services:
+  # PostgreSQL Database
+  postgres:
+    image: postgres:15-alpine
+    container_name: immocare-postgres-dev
+    environment:
+      POSTGRES_DB: immocare
+      POSTGRES_USER: immocare
+      POSTGRES_PASSWORD: immocare
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres-data-dev:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U immocare"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - immocare-network
+
+  # Spring Boot Backend (Development mode)
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile.dev
+    container_name: immocare-backend-dev
+    environment:
+      - SPRING_DATASOURCE_URL=jdbc:postgresql://postgres:5432/immocare
+      - SPRING_DATASOURCE_USERNAME=immocare
+      - SPRING_DATASOURCE_PASSWORD=immocare
+      - SPRING_JPA_HIBERNATE_DDL_AUTO=validate
+      - SPRING_FLYWAY_ENABLED=true
+      - SPRING_DEVTOOLS_RESTART_ENABLED=true
+    ports:
+      - "8080:8080"
+      - "5005:5005"  # Debug port
+    volumes:
+      - ./backend/src:/app/src:ro
+      - ./backend/pom.xml:/app/pom.xml:ro
+      - maven-cache:/root/.m2
+    depends_on:
+      postgres:
+        condition: service_healthy
+    networks:
+      - immocare-network
+    command: mvn spring-boot:run -Dspring-boot.run.jvmArguments="-agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=*:5005"
+
+  # Angular Frontend (Development mode)
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile.dev
+    container_name: immocare-frontend-dev
+    ports:
+      - "4200:4200"
+    volumes:
+      - ./frontend/src:/app/src:ro
+      - ./frontend/angular.json:/app/angular.json:ro
+      - ./frontend/tsconfig.json:/app/tsconfig.json:ro
+      - ./frontend/package.json:/app/package.json:ro
+      - node-modules:/app/node_modules
+    depends_on:
+      - backend
+    networks:
+      - immocare-network
+    command: npm start -- --host 0.0.0.0 --poll 2000
+
+volumes:
+  postgres-data-dev:
+    driver: local
+  maven-cache:
+    driver: local
+  node-modules:
+    driver: local
+
+networks:
+  immocare-network:
+    driver: bridge

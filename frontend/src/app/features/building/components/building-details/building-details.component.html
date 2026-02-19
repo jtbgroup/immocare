@@ -1,0 +1,133 @@
+<div class="building-details-container">
+  <!-- Loading State -->
+  <div *ngIf="loading" class="loading">
+    Loading building details...
+  </div>
+
+  <!-- Error State -->
+  <div *ngIf="error && !loading" class="error-container">
+    <p class="error">{{ error }}</p>
+    <button class="btn btn-primary" (click)="goBack()">
+      Back to Buildings
+    </button>
+  </div>
+
+  <!-- Building Details -->
+  <div *ngIf="building && !loading" class="details-content">
+    <div class="header">
+      <h1>{{ building.name }}</h1>
+      <div class="actions">
+        <button class="btn btn-secondary" (click)="goBack()">
+          Back
+        </button>
+        <button class="btn btn-primary" (click)="editBuilding()">
+          Edit
+        </button>
+        <button class="btn btn-danger" (click)="confirmDelete()">
+          Delete
+        </button>
+      </div>
+    </div>
+
+    <!-- Delete Error -->
+    <div *ngIf="deleteError" class="alert alert-error">
+      {{ deleteError }}
+    </div>
+
+    <!-- Building Information -->
+    <div class="info-card">
+      <h2>Building Information</h2>
+      
+      <div class="info-grid">
+        <div class="info-item">
+          <label>Building Name</label>
+          <p>{{ building.name }}</p>
+        </div>
+
+        <div class="info-item">
+          <label>Street Address</label>
+          <p>{{ building.streetAddress }}</p>
+        </div>
+
+        <div class="info-item">
+          <label>Postal Code</label>
+          <p>{{ building.postalCode }}</p>
+        </div>
+
+        <div class="info-item">
+          <label>City</label>
+          <p>{{ building.city }}</p>
+        </div>
+
+        <div class="info-item">
+          <label>Country</label>
+          <p>{{ building.country }}</p>
+        </div>
+
+        <div class="info-item">
+          <label>Owner</label>
+          <p>{{ building.ownerName || 'Not specified' }}</p>
+        </div>
+
+        <div class="info-item">
+          <label>Housing Units</label>
+          <p>{{ building.unitCount }} units</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Audit Information -->
+    <div class="info-card">
+      <h2>Audit Information</h2>
+      
+      <div class="info-grid">
+        <div class="info-item">
+          <label>Created By</label>
+          <p>{{ building.createdByUsername || 'N/A' }}</p>
+        </div>
+
+        <div class="info-item">
+          <label>Created At</label>
+          <p>{{ formatDate(building.createdAt) }}</p>
+        </div>
+
+        <div class="info-item">
+          <label>Last Updated</label>
+          <p>{{ formatDate(building.updatedAt) }}</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Housing Units Section (Future) -->
+    <div class="info-card">
+      <h2>Housing Units</h2>
+      <p class="empty-message">
+        {{ building.unitCount === 0 ? 'No housing units yet' : building.unitCount + ' housing units' }}
+      </p>
+      <!-- TODO: List housing units when implemented -->
+    </div>
+  </div>
+
+  <!-- Delete Confirmation Dialog -->
+  <div *ngIf="showDeleteConfirm" class="modal-overlay" (click)="cancelDelete()">
+    <div class="modal-content" (click)="$event.stopPropagation()">
+      <div class="modal-header">
+        <h2>Delete Building?</h2>
+      </div>
+      
+      <div class="modal-body">
+        <p>Are you sure you want to delete <strong>{{ building?.name }}</strong>?</p>
+        <p class="warning">⚠️ This action cannot be undone</p>
+      </div>
+      
+      <div class="modal-actions">
+        <button class="btn btn-secondary" (click)="cancelDelete()" [disabled]="loading">
+          Cancel
+        </button>
+        <button class="btn btn-danger" (click)="deleteBuilding()" [disabled]="loading">
+          {{ loading ? 'Deleting...' : 'Delete' }}
+        </button>
+      </div>
+    </div>
+  </div>
+</div>

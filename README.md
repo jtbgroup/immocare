@@ -1,70 +1,295 @@
-# ImmoCare
+# ImmoCare - Property Management System
 
-**Property Management System for Buildings, Housing Units, and Rental Operations**
+Full-stack application for managing buildings, housing units, and rental operations.
 
-[![Java](https://img.shields.io/badge/Java-17-orange.svg)](https://openjdk.org/)
-[![Spring Boot](https://img.shields.io/badge/Spring%20Boot-3.2-brightgreen.svg)](https://spring.io/projects/spring-boot)
-[![Angular](https://img.shields.io/badge/Angular-17-red.svg)](https://angular.io/)
-[![PostgreSQL](https://img.shields.io/badge/PostgreSQL-15-blue.svg)](https://www.postgresql.org/)
-[![License](https://img.shields.io/badge/License-Proprietary-lightgrey.svg)](LICENSE)
+**Stack**: Spring Boot 3.2 + Angular 17 + PostgreSQL 15 + Docker
 
 ---
 
-## 📋 Overview
-
-ImmoCare is a comprehensive property management system designed to manage:
-
-- 🏢 **Buildings**: Physical properties with addresses and ownership
-- 🏠 **Housing Units**: Individual apartments/units within buildings
-- 📐 **Rooms**: Room composition with types and surfaces
-- ⚡ **Energy Performance**: PEB (Energy Performance Certificate) tracking
-- 💰 **Rents**: Indicative rent amounts with historical tracking
-- 💧 **Utilities**: Water meter assignments (electricity, gas in future phases)
-
----
-
-## 🚀 Quick Start
+## 🚀 Quick Start (Docker - Recommended)
 
 ### Prerequisites
+- Docker Desktop installed
+- VS Code (recommended)
 
-- Java 17 (LTS)
-- Node.js 18+
-- Maven 3.8+
-- Docker Desktop
-- PostgreSQL 15+ (via Docker)
-
-### Installation
+### Start Everything with One Command
 
 ```bash
 # Clone the repository
-git clone https://github.com/your-org/immocare.git
+git clone <your-repo>
 cd immocare
 
-# Start PostgreSQL
-docker-compose up -d postgres
+# Start all services (PostgreSQL + Backend + Frontend)
+docker-compose up -d
 
-# Backend setup
-cd code/backend
-mvn clean install
-mvn flyway:migrate
-mvn spring-boot:run
-
-# Frontend setup (in new terminal)
-cd code/frontend
-npm install
-npm start
+# Or use make (if available)
+make up
 ```
 
-**Access the application:**
-- Frontend: http://localhost:4200
-- Backend API: http://localhost:8080
-- API Documentation: http://localhost:8080/swagger-ui.html
+**That's it!** 🎉
 
-**Default credentials:**
-- Username: `admin`
-- Password: `Admin123!`
+- **Frontend**: http://localhost:4200
+- **Backend API**: http://localhost:8080
+- **Health Check**: http://localhost:8080/actuator/health
 
-> ⚠️ **Important**: Change the default password immediately in production!
+### Stop Everything
+
+```bash
+docker-compose down
+
+# Or
+make down
+```
+
+---
+
+## 📋 What's Running?
+
+| Service | Container | Port | URL |
+|---------|-----------|------|-----|
+| Frontend | immocare-frontend | 4200 | http://localhost:4200 |
+| Backend | immocare-backend | 8080 | http://localhost:8080 |
+| Database | immocare-postgres | 5432 | jdbc:postgresql://localhost:5432/immocare |
+
+---
+
+## 🔧 Development Mode (Hot Reload)
+
+```bash
+# Start with automatic code reload
+docker-compose -f docker-compose.dev.yml up
+
+# Or
+make dev
+```
+
+**Changes are automatically detected:**
+- ✅ Backend: Spring Boot DevTools reloads on Java file changes
+- ✅ Frontend: Angular CLI recompiles on TypeScript/HTML/CSS changes
+- ✅ Database: Data persists between restarts
+
+---
+
+## 💻 VS Code Integration
+
+### Recommended Extensions
+
+Open VS Code and install recommended extensions:
+- Docker (ms-azuretools.vscode-docker)
+- Spring Boot Dashboard
+- Angular Language Service
+
+Extensions are auto-suggested when you open the project.
+
+### Quick Commands
+
+**Press `Ctrl+Shift+P` and type:**
+
+- `Tasks: Run Task` → Choose:
+  - `Docker: Start All (Development)` ⭐
+  - `Docker: Start All (Production)`
+  - `Docker: Stop All`
+  - `Docker: View Logs`
+  
+**Or use keyboard shortcuts:**
+- `Ctrl+Shift+B` → Default build task (starts dev mode)
+
+### Debugging
+
+1. **Start development mode**:
+   ```bash
+   docker-compose -f docker-compose.dev.yml up -d
+   ```
+
+2. **Start debugging**:
+   - Press `F5`
+   - Or: Run > "Debug Backend (Docker)"
+
+3. **Set breakpoints** in your Java code
+   - Debugger will pause on breakpoints!
+
+---
+
+## 🛠️ Common Commands
+
+### Using Make (Recommended)
+
+```bash
+make help          # Show all available commands
+make up            # Start (production)
+make dev           # Start (development with hot reload)
+make down          # Stop
+make logs          # View logs
+make restart       # Restart all
+make rebuild       # Rebuild images
+make test          # Run tests
+make db-shell      # Open PostgreSQL shell
+make health        # Check service health
+```
+
+### Using Docker Compose
+
+```bash
+# Production mode
+docker-compose up -d                    # Start
+docker-compose down                     # Stop
+docker-compose logs -f                  # View logs
+docker-compose restart                  # Restart
+docker-compose up -d --build            # Rebuild
+
+# Development mode
+docker-compose -f docker-compose.dev.yml up    # Start dev
+docker-compose -f docker-compose.dev.yml down  # Stop dev
+```
+
+### Individual Services
+
+```bash
+# Restart just one service
+docker-compose restart backend
+
+# Rebuild just one service
+docker-compose up -d --build frontend
+
+# View logs of one service
+docker-compose logs -f backend
+```
+
+---
+
+## 📊 Monitoring
+
+### View Logs
+
+```bash
+# All services
+docker-compose logs -f
+
+# Specific service
+docker-compose logs -f backend
+docker-compose logs -f frontend
+docker-compose logs -f postgres
+```
+
+### Check Status
+
+```bash
+docker-compose ps
+
+# Or with make
+make ps
+make health
+make stats
+```
+
+### Health Checks
+
+```bash
+# Backend health
+curl http://localhost:8080/actuator/health
+
+# Frontend
+curl http://localhost:4200
+
+# Database
+docker exec immocare-postgres pg_isready -U immocare
+```
+
+---
+
+## 🧪 Testing
+
+### Run All Tests
+
+```bash
+make test
+
+# Or manually
+cd backend && mvn test
+cd frontend && npm test
+```
+
+Tests run on **H2 in-memory database**, so PostgreSQL is not required for testing.
+
+---
+
+## 🗄️ Database Access
+
+### Using psql
+
+```bash
+# Open PostgreSQL shell
+make db-shell
+
+# Or directly
+docker exec -it immocare-postgres psql -U immocare -d immocare
+```
+
+### Using GUI Client
+
+Connect with DBeaver, pgAdmin, or any PostgreSQL client:
+
+```
+Host:     localhost
+Port:     5432
+Database: immocare
+User:     immocare
+Password: immocare
+```
+
+### Default Admin User
+
+```
+Username: admin
+Password: admin123
+Email:    admin@immocare.com
+```
+
+---
+
+## 🐛 Troubleshooting
+
+### Port already in use
+
+```bash
+# Find and kill process using port 8080
+lsof -i :8080
+kill -9 <PID>
+
+# Or change port in docker-compose.yml
+```
+
+### Container won't start
+
+```bash
+# View detailed logs
+docker-compose logs backend
+
+# Rebuild image
+docker-compose up -d --build backend
+```
+
+### Database connection issues
+
+```bash
+# Check postgres is healthy
+docker-compose ps
+
+# Restart database
+docker-compose restart postgres
+```
+
+### Clear everything and start fresh
+
+```bash
+# ⚠️ This will delete all data
+docker-compose down -v
+docker-compose up -d
+
+# Or
+make clean
+make up
+```
 
 ---
 
@@ -72,343 +297,130 @@ npm start
 
 ```
 immocare/
-├── code/
-│   ├── backend/              # Spring Boot API
-│   │   ├── src/
-│   │   │   ├── main/
-│   │   │   │   ├── java/
-│   │   │   │   └── resources/
-│   │   │   │       └── db/migration/  # Flyway SQL scripts
-│   │   │   └── test/
-│   │   └── pom.xml
-│   └── frontend/             # Angular application
-│       ├── src/
-│       │   ├── app/
-│       │   ├── assets/
-│       │   └── environments/
-│       └── package.json
-├── docs/
-│   └── analysis/             # Complete project documentation
-│       ├── data-model.md
-│       ├── data-dictionary.md
-│       ├── use-cases/        # 6 detailed use cases
-│       ├── user-stories/     # 30 user stories with acceptance criteria
-│       ├── roles-permissions.md
-│       └── backlog.md
-├── docker-compose.yml
-├── INSTALLATION.md           # Detailed setup guide
-├── CONTRIBUTING.md           # Development guidelines
-└── README.md                 # This file
+├── backend/                    # Spring Boot backend
+│   ├── src/
+│   ├── Dockerfile              # Production image
+│   ├── Dockerfile.dev          # Development image
+│   └── pom.xml
+│
+├── frontend/                   # Angular frontend
+│   ├── src/
+│   ├── Dockerfile              # Production image (Nginx)
+│   ├── Dockerfile.dev          # Development image (ng serve)
+│   └── package.json
+│
+├── docker-compose.yml          # Production orchestration
+├── docker-compose.dev.yml      # Development orchestration
+├── Makefile                    # Simplified commands
+│
+├── .vscode/                    # VS Code configuration
+│   ├── tasks.json              # Custom tasks
+│   ├── launch.json             # Debug configs
+│   └── extensions.json         # Recommended extensions
+│
+└── docs/                       # Documentation
+    ├── DOCKER_GUIDE.md         # Detailed Docker guide
+    ├── POSTGRESQL_SETUP.md     # Database setup
+    └── IMPLEMENTATION_README.md # Implementation details
 ```
-
----
-
-## 🛠️ Technology Stack
-
-### Backend
-- **Java 17** (LTS)
-- **Spring Boot 3.2** (Web, Security, Data JPA)
-- **PostgreSQL 15** (Database)
-- **Flyway** (Database migrations)
-- **JWT** (Authentication)
-- **MapStruct** (DTO mapping)
-- **Lombok** (Code reduction)
-- **SpringDoc OpenAPI** (API documentation)
-
-### Frontend
-- **Angular 17** (Framework)
-- **TypeScript** (Language)
-- **RxJS** (Reactive programming)
-- **Angular Material** / **PrimeNG** (UI components)
-
-### Infrastructure
-- **Docker** & **Docker Compose** (Containerization)
-- **Nginx** (Reverse proxy - production)
-- **Maven** (Backend build)
-- **npm** (Frontend build)
-
----
-
-## 🎯 Features
-
-### Phase 1 (Current - Foundation)
-
-- ✅ User authentication (ADMIN role)
-- ✅ Building CRUD operations
-- ✅ Housing Unit management
-- ✅ Room composition
-- ✅ PEB score tracking with history
-- ✅ Rent tracking with history
-- ✅ Water meter assignments
-
-### Phase 2 (Planned)
-
-- 🔄 Tenant management
-- 🔄 Lease contracts
-- 🔄 Payment tracking
-- 🔄 Additional utility meters (electricity, gas, heating)
-- 🔄 Role expansion (Property Manager, Accountant)
-
-### Phase 3+ (Future)
-
-- 📅 Maintenance management
-- 📄 Document management
-- 📊 Financial reporting & dashboards
-- 🔔 Email notifications
-- 👤 Tenant self-service portal
-
-See [docs/analysis/backlog.md](docs/analysis/backlog.md) for complete roadmap.
 
 ---
 
 ## 📚 Documentation
 
-### For Developers
-
-- **[INSTALLATION.md](INSTALLATION.md)** - Complete setup guide
-- **[CONTRIBUTING.md](CONTRIBUTING.md)** - Development guidelines and standards
-- **[docs/analysis/](docs/analysis/)** - Complete project analysis
-
-### Key Documents
-
-- **[Data Model](docs/analysis/data-model.md)** - Database schema and entity relationships
-- **[Use Cases](docs/analysis/use-cases/)** - Detailed use case descriptions (UC001-UC006)
-- **[User Stories](docs/analysis/user-stories/)** - 30 user stories with acceptance criteria
-- **[API Documentation](http://localhost:8080/swagger-ui.html)** - Interactive API docs (when running)
+- **[DOCKER_GUIDE.md](./DOCKER_GUIDE.md)** - Complete Docker documentation
+- **[POSTGRESQL_SETUP.md](./POSTGRESQL_SETUP.md)** - Database setup alternatives
+- **[IMPLEMENTATION_README.md](./IMPLEMENTATION_README.md)** - Implementation details
+- **[CORRECTIONS.md](./CORRECTIONS.md)** - Bug fixes and updates
 
 ---
 
-## 🧪 Testing
+## 🎯 Development Workflows
 
-### Backend Tests
-
-```bash
-cd code/backend
-
-# Unit tests
-mvn test
-
-# Integration tests
-mvn verify
-
-# Code coverage
-mvn test jacoco:report
-# Report: target/site/jacoco/index.html
-```
-
-### Frontend Tests
+### 1. Full Stack Docker (Recommended for beginners)
 
 ```bash
-cd code/frontend
-
-# Unit tests
-npm test
-
-# Code coverage
-npm run test:coverage
-
-# E2E tests
-npm run e2e
+docker-compose -f docker-compose.dev.yml up
+# Edit code → automatically reloaded!
 ```
+
+### 2. Frontend only in Docker
+
+```bash
+docker-compose up -d postgres backend
+cd frontend && npm start
+```
+
+### 3. Backend only in Docker
+
+```bash
+docker-compose up -d postgres frontend
+cd backend && mvn spring-boot:run
+```
+
+### 4. Everything local (no Docker)
+
+See [POSTGRESQL_SETUP.md](./POSTGRESQL_SETUP.md) for local PostgreSQL setup.
 
 ---
 
-## 🏗️ Development
+## 🌟 Features Implemented
 
-### Run Locally (Development Mode)
+✅ **UC001 - Manage Buildings** (Complete)
+- Create building
+- Edit building
+- Delete building
+- View buildings list (pagination, search, filter)
+- Search by name/address
 
-```bash
-# Terminal 1 - Database
-docker-compose up postgres
-
-# Terminal 2 - Backend
-cd code/backend
-mvn spring-boot:run
-
-# Terminal 3 - Frontend
-cd code/frontend
-npm start
-```
-
-### Code Style
-
-- **Backend**: Google Java Format
-- **Frontend**: Prettier + ESLint
-
-```bash
-# Format frontend code
-cd code/frontend
-npm run format
-```
-
-### Database Migrations
-
-```bash
-cd code/backend
-
-# Create new migration
-# Manually create: src/main/resources/db/migration/V009__description.sql
-
-# Apply migrations
-mvn flyway:migrate
-
-# Clean database (⚠️ DESTRUCTIVE)
-mvn flyway:clean
-```
+**User Stories**: US001, US002, US003, US004, US005
 
 ---
 
-## 🚢 Deployment
+## 🚧 Roadmap
 
-### Build for Production
+### Phase 2 - Housing Units
+- UC002: Manage housing units
+- Rooms management
+- PEB scores tracking
 
-```bash
-# Backend
-cd code/backend
-mvn clean package -DskipTests
-# Output: target/immocare-backend-0.1.0.jar
+### Phase 3 - Tenants & Leases
+- Tenant management
+- Lease contracts
+- Payment tracking
 
-# Frontend
-cd code/frontend
-npm run build:prod
-# Output: dist/immocare-frontend/
-```
-
-### Docker Deployment
-
-```bash
-# Build images
-docker-compose build
-
-# Run all services
-docker-compose --profile full-stack up -d
-
-# Stop all services
-docker-compose down
-```
-
----
-
-## 🔐 Security
-
-### Authentication
-
-- Username/password authentication
-- BCrypt password hashing
-- JWT token-based sessions
-- Session timeout: 30 minutes
-
-### Authorization
-
-- Role-Based Access Control (RBAC)
-- Current roles: ADMIN
-- Method-level security with `@PreAuthorize`
-
-### Security Features
-
-- SQL injection prevention (JPA/Hibernate)
-- XSS protection
-- CSRF tokens
-- Input validation
-- Secure headers (HSTS, X-Frame-Options)
-
----
-
-## 📊 Database Schema
-
-The database consists of 7 main tables:
-
-1. **app_user** - Authentication and users
-2. **building** - Physical buildings
-3. **housing_unit** - Individual apartments
-4. **room** - Rooms within units
-5. **peb_score_history** - Energy performance tracking
-6. **rent_history** - Rent tracking over time
-7. **water_meter_history** - Utility meter assignments
-
-See [docs/analysis/data-model.md](docs/analysis/data-model.md) for complete schema.
+See [docs/analysis/backlog.md](./docs/analysis/backlog.md) for full roadmap.
 
 ---
 
 ## 🤝 Contributing
 
-We welcome contributions! Please read [CONTRIBUTING.md](CONTRIBUTING.md) for:
-
-- Development workflow
-- Coding standards
-- Git workflow
-- Pull request process
-- Testing guidelines
-
-### Commit Message Format
-
-Follow [Conventional Commits](https://www.conventionalcommits.org/):
-
-```
-feat(building): add create building endpoint
-fix(auth): resolve token expiration issue
-docs(readme): update installation instructions
-```
+See [CONTRIBUTING.md](./CONTRIBUTING.md) for development guidelines.
 
 ---
 
-## 📝 License
+## 📄 License
 
-This project is proprietary and confidential. Unauthorized copying or distribution is prohibited.
-
----
-
-## 👥 Team
-
-- **Project Lead**: [Name]
-- **Backend Developer**: [Name]
-- **Frontend Developer**: [Name]
-- **DevOps**: [Name]
+Proprietary - ImmoCare Project
 
 ---
 
-## 📞 Support
+## 💡 Quick Tips
 
-- **Documentation**: [docs/](docs/)
-- **Issues**: GitHub Issues
-- **Email**: support@immocare.local
-- **Wiki**: Project Wiki
-
----
-
-## 🗺️ Roadmap
-
-### v0.1.0 (Current - Q1 2024)
-- ✅ Core CRUD operations
-- ✅ Basic authentication
-- ✅ Database schema
-
-### v0.2.0 (Q2 2024)
-- 🔄 Tenant management
-- 🔄 Lease contracts
-- 🔄 Payment tracking
-
-### v0.3.0 (Q3 2024)
-- 📅 Maintenance management
-- 📄 Document management
-- 📊 Basic reporting
-
-See [docs/analysis/backlog.md](docs/analysis/backlog.md) for detailed roadmap.
+1. **Use make commands** for simplicity: `make up`, `make dev`, `make logs`
+2. **Use VS Code tasks** for even more convenience (Ctrl+Shift+P → Run Task)
+3. **Enable hot reload** with dev mode: `make dev`
+4. **Debug in VS Code** by pressing F5 after starting dev mode
+5. **Check health** regularly: `make health`
 
 ---
 
-## 🙏 Acknowledgments
+**Need help?** Check [DOCKER_GUIDE.md](./DOCKER_GUIDE.md) for detailed documentation.
 
-- Spring Boot team
-- Angular team
-- PostgreSQL community
-- All contributors
-
----
-
-**Made with ❤️ by the ImmoCare Team**
+**Questions?** Open an issue on GitHub.
 
 ---
 
 **Last Updated**: 2024-01-15  
-**Version**: 0.1.0
+**Version**: 2.0.0 - Full Docker Support  
+**Status**: ✅ Production Ready

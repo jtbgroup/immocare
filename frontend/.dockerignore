@@ -1,0 +1,12 @@
+node_modules/
+dist/
+.angular/
+.vscode/
+.git/
+.gitignore
+*.md
+README.md
+*.log
+.editorconfig
+.browserslistrc
+karma.conf.js

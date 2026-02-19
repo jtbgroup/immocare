@@ -5,85 +5,74 @@ services:
   postgres:
     image: postgres:15-alpine
     container_name: immocare-postgres
-    restart: unless-stopped
     environment:
       POSTGRES_DB: immocare
-      POSTGRES_USER: immocare_user
-      POSTGRES_PASSWORD: immocare_password
-      PGDATA: /var/lib/postgresql/data/pgdata
+      POSTGRES_USER: immocare
+      POSTGRES_PASSWORD: immocare
     ports:
       - "5432:5432"
     volumes:
-      - postgres_data:/var/lib/postgresql/data
+      - postgres-data:/var/lib/postgresql/data
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U immocare_user -d immocare"]
+      test: ["CMD-SHELL", "pg_isready -U immocare"]
       interval: 10s
       timeout: 5s
       retries: 5
     networks:
       - immocare-network
 
-  # Backend (Spring Boot) - Optional, can run locally with mvn spring-boot:run
+  # Spring Boot Backend
   backend:
     build:
-      context: ./code/backend
+      context: ./backend
       dockerfile: Dockerfile
     container_name: immocare-backend
-    restart: unless-stopped
     environment:
-      SPRING_PROFILES_ACTIVE: dev
-      DB_HOST: postgres
-      DB_PORT: 5432
-      DB_NAME: immocare
-      DB_USER: immocare_user
-      DB_PASSWORD: immocare_password
+      - SPRING_DATASOURCE_URL=jdbc:postgresql://postgres:5432/immocare
+      - SPRING_DATASOURCE_USERNAME=immocare
+      - SPRING_DATASOURCE_PASSWORD=immocare
+      - SPRING_JPA_HIBERNATE_DDL_AUTO=validate
+      - SPRING_FLYWAY_ENABLED=true
     ports:
       - "8080:8080"
     depends_on:
       postgres:
         condition: service_healthy
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:8080/actuator/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 60s
     networks:
       - immocare-network
-    # Uncomment to run backend in container (requires Dockerfile)
-    # profiles:
-    #   - full-stack
+    restart: unless-stopped
 
-  # Frontend (Angular) - Optional, can run locally with npm start
+  # Angular Frontend
   frontend:
     build:
-      context: ./code/frontend
+      context: ./frontend
       dockerfile: Dockerfile
     container_name: immocare-frontend
-    restart: unless-stopped
     ports:
       - "4200:80"
     depends_on:
-      - backend
+      backend:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost/"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 10s
     networks:
       - immocare-network
-    # Uncomment to run frontend in container (requires Dockerfile)
-    # profiles:
-    #   - full-stack
+    restart: unless-stopped
 
 volumes:
-  postgres_data:
+  postgres-data:
     driver: local
 
 networks:
   immocare-network:
     driver: bridge
-
-# Usage:
-# Development (PostgreSQL only):
-#   docker-compose up -d postgres
-#   mvn spring-boot:run  # Run backend locally
-#   npm start            # Run frontend locally
-#
-# Full stack (all containers):
-#   docker-compose --profile full-stack up -d
-#
-# Stop all:
-#   docker-compose down
-#
-# Stop and remove volumes:
-#   docker-compose down -v
