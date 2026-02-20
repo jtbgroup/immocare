@@ -93,10 +93,10 @@ This document defines user roles and their associated permissions in the ImmoCar
 - ✅ Encrypted password storage
 - ✅ Session timeout (30 minutes of inactivity)
 - ✅ CSRF protection
-- ✅ Secure password reset (future)
-- ❌ Multi-factor authentication (future - Phase 2)
+- ❌ Multi-factor authentication (future)
 - ❌ Account lockout (future)
 - ❌ Password history (future)
+- ❌ Secure password reset (future)
 
 ---
 
@@ -118,129 +118,12 @@ If user lacks required role → **DENY (403 Forbidden)**
 
 ---
 
-## Future Roles (Backlog - Phase 2+)
-
-### PROPERTY_MANAGER
-**Purpose**: Manage properties but not users or system config
-
-**Potential Capabilities**:
-- Full access to buildings, units, rooms
-- Manage PEB scores, rents, meters
-- View tenants and leases (future feature)
-- Create maintenance requests (future feature)
-- Generate reports
-- ❌ Cannot manage users
-- ❌ Cannot access system configuration
-
----
-
-### ACCOUNTANT
-**Purpose**: Financial oversight and reporting
-
-**Potential Capabilities**:
-- View all properties and units (read-only)
-- Full access to rent history
-- View payment records (future feature)
-- Generate financial reports
-- Export financial data
-- ❌ Cannot modify property data
-- ❌ Cannot manage users
-
----
-
-### MAINTENANCE_STAFF
-**Purpose**: Handle maintenance requests and work orders
-
-**Potential Capabilities**:
-- View buildings and units (read-only)
-- View maintenance requests (future feature)
-- Update maintenance status (future feature)
-- Add maintenance notes
-- ❌ Cannot modify property details
-- ❌ Cannot access financial data
-- ❌ Cannot manage users
-
----
-
-### TENANT (PORTAL)
-**Purpose**: Self-service tenant portal (future)
-
-**Potential Capabilities**:
-- View own unit details (read-only)
-- View own lease information
-- Submit maintenance requests
-- View payment history
-- Update contact information
-- ❌ Cannot view other units
-- ❌ Cannot access financial details beyond own payments
-
----
-
-### VIEWER
-**Purpose**: Read-only access for stakeholders
-
-**Potential Capabilities**:
-- View all properties and units (read-only)
-- View reports
-- Export data (limited)
-- ❌ Cannot create, edit, or delete anything
-
----
-
-## Role Evolution Strategy
-
-### Phase 1 (Current)
-- **Single Role**: ADMIN
-- **Focus**: Core functionality
-- **Users**: Internal property managers only
-
-### Phase 2 (Planned)
-- **Add Roles**: PROPERTY_MANAGER, ACCOUNTANT
-- **Focus**: Role segregation for larger teams
-- **Authorization Model**: Expand Spring Security configuration
-
-### Phase 3 (Future)
-- **Add Roles**: MAINTENANCE_STAFF, VIEWER
-- **Focus**: Operational roles
-- **Fine-grained Permissions**: Resource-level permissions
-
-### Phase 4 (Future)
-- **Add Role**: TENANT (Portal)
-- **Focus**: Customer-facing portal
-- **Multi-tenant**: Data isolation by tenant
-- **Self-registration**: Tenant invitation system
-
----
-
-## Permission Inheritance
-
-**Future Consideration**: Role hierarchy for permission inheritance
-
-```
-ADMIN
-  └─ PROPERTY_MANAGER
-       ├─ ACCOUNTANT
-       └─ MAINTENANCE_STAFF
-            └─ VIEWER
-```
-
-Higher roles inherit permissions from lower roles.
-
----
-
 ## Data Access Rules
 
 ### Phase 1 (ADMIN)
 - **Scope**: All data
 - **Filter**: None
 - **Restriction**: None
-
-### Future Phases
-- **Property Manager**: All properties assigned to them
-- **Accountant**: All properties (read-only)
-- **Maintenance Staff**: Only units with active maintenance requests
-- **Tenant**: Only their own unit
-- **Viewer**: All properties (read-only)
 
 ---
 
@@ -286,12 +169,6 @@ public List<Building> getAllBuildings() { ... }
 - At least one digit
 - At least one special character (optional)
 
-### Future Enhancements (Phase 2+)
-- Password history (prevent reuse of last 5 passwords)
-- Password expiration (90 days)
-- Account lockout after 5 failed attempts
-- Password complexity scoring
-
 ---
 
 ## Audit Trail
@@ -318,7 +195,7 @@ public List<Building> getAllBuildings() { ... }
 @Configuration
 @EnableWebSecurity
 public class SecurityConfig {
-    
+
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) {
         http
@@ -350,7 +227,7 @@ public PasswordEncoder passwordEncoder() {
 
 ---
 
-## Migration Path to OAuth 2.0 / Keycloak (Phase 2+)
+## Migration Path to OAuth 2.0 / Keycloak (Future)
 
 ### Planned Migration
 - **From**: Embedded user management
@@ -373,5 +250,4 @@ public PasswordEncoder passwordEncoder() {
 
 **Last Updated**: 2024-01-15  
 **Version**: 1.0  
-**Status**: Draft for Review  
-**Next Review**: Before Phase 2 implementation
+**Status**: Draft for Review
