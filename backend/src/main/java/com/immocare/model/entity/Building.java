@@ -63,7 +63,7 @@ public class Building {
 
   @ManyToOne(fetch = FetchType.LAZY)
   @JoinColumn(name = "created_by")
-  private User createdBy;
+  private AppUser createdBy;
 
   @CreationTimestamp
   @Column(name = "created_at", nullable = false, updatable = false)
@@ -143,11 +143,11 @@ public class Building {
     this.ownerName = ownerName;
   }
 
-  public User getCreatedBy() {
+  public AppUser getCreatedBy() {
     return createdBy;
   }
 
-  public void setCreatedBy(User createdBy) {
+  public void setCreatedBy(AppUser createdBy) {
     this.createdBy = createdBy;
   }
 
