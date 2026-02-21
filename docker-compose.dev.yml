@@ -61,7 +61,7 @@ services:
       - ./frontend/angular.json:/app/angular.json:ro
       - ./frontend/tsconfig.json:/app/tsconfig.json:ro
       - ./frontend/package.json:/app/package.json:ro
-      - node_modules:/app/node_modules
+      # node_modules intentionally excluded — must not override image-installed packages
     depends_on:
       - backend
     networks:
@@ -72,8 +72,6 @@ volumes:
   postgres_data_dev:
     driver: local
   maven_cache:
-    driver: local
-  node_modules:
     driver: local
 
 networks:
