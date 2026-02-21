@@ -73,6 +73,10 @@ export class UserListComponent implements OnInit {
     return this.sortedUsers.slice(start, start + this.pageSize);
   }
 
+  get endIndex(): number {
+    return Math.min(this.currentPage * this.pageSize, this.users.length);
+  }
+
   pages(): number[] {
     return Array.from({ length: this.totalPages }, (_, i) => i + 1);
   }

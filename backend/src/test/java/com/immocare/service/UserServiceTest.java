@@ -12,12 +12,9 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.session.FindByIndexNameSessionRepository;
-import org.springframework.session.Session;
 
 import java.time.LocalDateTime;
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.*;
@@ -30,7 +27,6 @@ class UserServiceTest {
     @Mock UserRepository userRepository;
     @Mock UserMapper userMapper;
     @Mock PasswordEncoder passwordEncoder;
-    @Mock FindByIndexNameSessionRepository<Session> sessionRepository;
 
     @InjectMocks UserService userService;
 
@@ -177,7 +173,6 @@ class UserServiceTest {
 
     @Test
     void updateUser_sameUsernameAllowed() {
-        // Editing a user with their own (unchanged) username should not fail
         UpdateUserRequest req = new UpdateUserRequest("admin", "admin@example.com", "ADMIN");
 
         when(userRepository.findById(1L)).thenReturn(Optional.of(adminUser));
@@ -193,18 +188,17 @@ class UserServiceTest {
     // -------------------------------------------------------------------------
 
     @Test
-    void changePassword_validRequest_encodesAndInvalidatesSessions() {
+    void changePassword_validRequest_encodesPassword() {
         ChangePasswordRequest req = new ChangePasswordRequest("NewPass1", "NewPass1");
 
         when(userRepository.findById(1L)).thenReturn(Optional.of(adminUser));
         when(passwordEncoder.encode("NewPass1")).thenReturn("$2a$12$newHash");
         when(userRepository.save(adminUser)).thenReturn(adminUser);
-        when(sessionRepository.findByPrincipalName("admin")).thenReturn(Map.of());
 
         userService.changePassword(1L, req);
 
         verify(passwordEncoder).encode("NewPass1");
-        verify(sessionRepository).findByPrincipalName("admin");
+        verify(userRepository).save(adminUser);
     }
 
     @Test

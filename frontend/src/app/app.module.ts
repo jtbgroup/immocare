@@ -5,6 +5,7 @@ import { RouterModule } from '@angular/router';
 
 import { AppComponent } from './app.component';
 import { AuthInterceptor } from './core/auth/auth.interceptor';
+import { AuthGuard } from './core/auth/auth.guard';
 
 @NgModule({
   declarations: [
@@ -20,7 +21,13 @@ import { AuthInterceptor } from './core/auth/auth.interceptor';
       },
       {
         path: 'buildings',
+        canActivate: [AuthGuard],
         loadChildren: () => import('./features/building/building.module').then(m => m.BuildingModule)
+      },
+      {
+        path: 'users',
+        canActivate: [AuthGuard],
+        loadChildren: () => import('./features/user/user.module').then(m => m.UserModule)
       },
       {
         path: '',

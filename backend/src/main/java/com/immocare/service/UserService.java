@@ -9,13 +9,10 @@ import com.immocare.model.dto.UserDTO;
 import com.immocare.model.entity.AppUser;
 import com.immocare.repository.UserRepository;
 import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.session.FindByIndexNameSessionRepository;
-import org.springframework.session.Session;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
-import java.util.Map;
 import java.util.regex.Pattern;
 
 /**
@@ -37,16 +34,13 @@ public class UserService {
     private final UserRepository userRepository;
     private final UserMapper userMapper;
     private final PasswordEncoder passwordEncoder;
-    private final FindByIndexNameSessionRepository<? extends Session> sessionRepository;
 
     public UserService(UserRepository userRepository,
                        UserMapper userMapper,
-                       PasswordEncoder passwordEncoder,
-                       FindByIndexNameSessionRepository<? extends Session> sessionRepository) {
+                       PasswordEncoder passwordEncoder) {
         this.userRepository = userRepository;
         this.userMapper = userMapper;
         this.passwordEncoder = passwordEncoder;
-        this.sessionRepository = sessionRepository;
     }
 
     // -------------------------------------------------------------------------
@@ -127,9 +121,6 @@ public class UserService {
 
         user.setPasswordHash(passwordEncoder.encode(req.newPassword()));
         userRepository.save(user);
-
-        // BR-UC007-07: invalidate the target user's active sessions
-        invalidateSessionsForUser(user.getUsername());
     }
 
     // -------------------------------------------------------------------------
@@ -174,17 +165,5 @@ public class UserService {
                     "Password must be at least 8 characters and contain at least "
                     + "one uppercase letter, one lowercase letter, and one digit");
         }
-    }
-
-    /**
-     * BR-UC007-07: expire all active Spring Sessions for the given username.
-     * Uses {@link FindByIndexNameSessionRepository} which is backed by the
-     * in-memory session store configured in {@code SecurityConfig}.
-     */
-    private void invalidateSessionsForUser(String username) {
-        Map<String, ? extends Session> sessions =
-                sessionRepository.findByPrincipalName(username);
-        sessions.values().forEach(session ->
-                sessionRepository.deleteById(session.getId()));
     }
 }

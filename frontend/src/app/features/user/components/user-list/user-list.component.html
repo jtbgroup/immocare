@@ -57,7 +57,7 @@
     </div>
 
     <p class="pagination__info" *ngIf="users.length > 0">
-      Showing {{ (currentPage - 1) * pageSize + 1 }}–{{ [currentPage * pageSize, users.length] | min }} of {{ users.length }} users
+      Showing {{ (currentPage - 1) * pageSize + 1 }}–{{ endIndex }} of {{ users.length }} users
     </p>
   </ng-container>
 </div>
