@@ -1,20 +1,19 @@
-version: '3.8'
-
-# Development configuration with volume mounting for hot reload
+name: immocare-dev
 
 services:
   # PostgreSQL Database
   postgres:
-    image: postgres:15-alpine
+    image: postgres:16-alpine
     container_name: immocare-postgres-dev
     environment:
       POSTGRES_DB: immocare
       POSTGRES_USER: immocare
       POSTGRES_PASSWORD: immocare
+      PGDATA: /var/lib/postgresql/data/pgdata
     ports:
       - "5432:5432"
     volumes:
-      - postgres-data-dev:/var/lib/postgresql/data
+      - postgres_data_dev:/var/lib/postgresql/data
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U immocare"]
       interval: 10s
@@ -23,7 +22,7 @@ services:
     networks:
       - immocare-network
 
-  # Spring Boot Backend (Development mode)
+  # Spring Boot Backend (hot reload via DevTools)
   backend:
     build:
       context: ./backend
@@ -38,19 +37,18 @@ services:
       - SPRING_DEVTOOLS_RESTART_ENABLED=true
     ports:
       - "8080:8080"
-      - "5005:5005"  # Debug port
+      - "5005:5005"
     volumes:
       - ./backend/src:/app/src:ro
       - ./backend/pom.xml:/app/pom.xml:ro
-      - maven-cache:/root/.m2
+      - maven_cache:/root/.m2
     depends_on:
       postgres:
         condition: service_healthy
     networks:
       - immocare-network
-    command: mvn spring-boot:run -Dspring-boot.run.jvmArguments="-agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=*:5005"
 
-  # Angular Frontend (Development mode)
+  # Angular Frontend (hot reload)
   frontend:
     build:
       context: ./frontend
@@ -63,7 +61,7 @@ services:
       - ./frontend/angular.json:/app/angular.json:ro
       - ./frontend/tsconfig.json:/app/tsconfig.json:ro
       - ./frontend/package.json:/app/package.json:ro
-      - node-modules:/app/node_modules
+      - node_modules:/app/node_modules
     depends_on:
       - backend
     networks:
@@ -71,11 +69,11 @@ services:
     command: npm start -- --host 0.0.0.0 --poll 2000
 
 volumes:
-  postgres-data-dev:
+  postgres_data_dev:
     driver: local
-  maven-cache:
+  maven_cache:
     driver: local
-  node-modules:
+  node_modules:
     driver: local
 
 networks:

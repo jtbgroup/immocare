@@ -1,132 +1,174 @@
-.PHONY: help up down dev logs restart rebuild clean test backend-test frontend-test db-shell health
+# ImmoCare - Makefile
+.PHONY: help build up down restart logs shell db-shell backup restore \
+        clean clean-all rebuild dev prod health install update \
+        backend-test nginx-reload nginx-test
 
-# Default target
-.DEFAULT_GOAL := help
+# Variables
+APP_NAME = immocare
+VERSION  = 1.0
+BACKUP_DIR = ./backups
 
-help: ## Show this help message
-	@echo "ImmoCare - Docker Commands"
+help: ## Show available commands
+	@echo "ImmoCare v$(VERSION) - Available commands:"
 	@echo ""
-	@grep -E '^[a-zA-Z_-]+:.*?## .*$$' $(MAKEFILE_LIST) | sort | awk 'BEGIN {FS = ":.*?## "}; {printf "\033[36m%-20s\033[0m %s\n", $$1, $$2}'
+	@grep -E '^[a-zA-Z_-]+:.*?## .*$$' $(MAKEFILE_LIST) | sort | \
+		awk 'BEGIN {FS = ":.*?## "}; {printf "\033[36m%-20s\033[0m %s\n", $$1, $$2}'
 
-# Production commands
-up: ## Start all containers (production mode)
-	docker-compose up -d
-	@echo "✅ All containers started!"
-	@echo "🌐 Frontend: http://localhost:4200"
-	@echo "🔧 Backend API: http://localhost:8080"
-	@echo "💚 Health: http://localhost:8080/actuator/health"
+# ── Production ────────────────────────────────────────────────────────────────
 
-down: ## Stop all containers
-	docker-compose down
-	@echo "✅ All containers stopped"
+build: ## Build Docker image
+	@echo "Building $(APP_NAME):$(VERSION)..."
+	docker compose build
 
-clean: ## Stop containers and remove volumes (⚠️  deletes database)
-	docker-compose down -v
-	@echo "✅ All containers and volumes removed"
+up: ## Start services
+	@echo "Starting services..."
+	docker compose up -d
+	@echo "✓ Services started"
+	@echo "  Application : http://localhost:8090"
+	@echo "  Health      : http://localhost:8080/actuator/health"
 
-# Development commands
-dev: ## Start in development mode (hot reload)
-	docker-compose -f docker-compose.dev.yml up
-	@echo "🔥 Development mode with hot reload"
+down: ## Stop services
+	@echo "Stopping services..."
+	docker compose down
+	@echo "✓ Services stopped"
 
-dev-d: ## Start in development mode (detached)
-	docker-compose -f docker-compose.dev.yml up -d
-	@echo "✅ Development containers started in background"
+restart: ## Restart services
+	docker compose restart
+	@echo "✓ Services restarted"
 
-# Logs
-logs: ## View logs from all containers
-	docker-compose logs -f
+prod: ## Build and start in production mode
+	docker compose up -d --build
+	@echo "✓ Production deployment complete"
+	@echo "  Application : http://localhost:8090"
 
-logs-backend: ## View backend logs
-	docker-compose logs -f backend
+rebuild: ## Full rebuild without cache
+	@echo "Rebuilding from scratch..."
+	docker compose build --no-cache
+	@echo "✓ Rebuild complete"
 
-logs-frontend: ## View frontend logs
-	docker-compose logs -f frontend
+# ── Development ───────────────────────────────────────────────────────────────
+
+dev: ## Start in development mode with hot reload (logs visible)
+	docker compose -f docker-compose.dev.yml up --build
+
+dev-d: ## Start in development mode detached
+	docker compose -f docker-compose.dev.yml up -d --build
+	@echo "✓ Dev services started"
+	@echo "  Frontend : http://localhost:4200"
+	@echo "  Backend  : http://localhost:8080"
+
+dev-down: ## Stop development services
+	docker compose -f docker-compose.dev.yml down
+	@echo "✓ Dev services stopped"
+
+# ── Logs ──────────────────────────────────────────────────────────────────────
+
+logs: ## View all logs
+	docker compose logs -f
+
+logs-app: ## View application logs
+	docker compose logs -f app
 
 logs-db: ## View database logs
-	docker-compose logs -f postgres
+	docker compose logs -f postgres
 
-# Restart
-restart: ## Restart all containers
-	docker-compose restart
-	@echo "✅ All containers restarted"
+# ── Database ──────────────────────────────────────────────────────────────────
 
-restart-backend: ## Restart backend only
-	docker-compose restart backend
-	@echo "✅ Backend restarted"
+db-shell: ## Open PostgreSQL shell
+	docker compose exec postgres psql -U immocare -d immocare
 
-restart-frontend: ## Restart frontend only
-	docker-compose restart frontend
-	@echo "✅ Frontend restarted"
+backup: ## Backup database
+	@mkdir -p $(BACKUP_DIR)
+	@echo "Creating backup..."
+	@docker compose exec -T postgres pg_dump -U immocare immocare \
+		> $(BACKUP_DIR)/backup_$$(date +%Y%m%d_%H%M%S).sql
+	@echo "✓ Backup created in $(BACKUP_DIR)"
 
-# Rebuild
-rebuild: ## Rebuild and restart all containers
-	docker-compose up -d --build
-	@echo "✅ All containers rebuilt and started"
+restore: ## Restore database (usage: make restore FILE=backup.sql)
+	@if [ -z "$(FILE)" ]; then \
+		echo "Error: Please specify FILE=backup.sql"; \
+		exit 1; \
+	fi
+	@echo "Restoring from $(FILE)..."
+	@docker compose exec -T postgres psql -U immocare immocare < $(FILE)
+	@echo "✓ Backup restored"
 
-rebuild-backend: ## Rebuild backend only
-	docker-compose up -d --build backend
-	@echo "✅ Backend rebuilt"
-
-rebuild-frontend: ## Rebuild frontend only
-	docker-compose up -d --build frontend
-	@echo "✅ Frontend rebuilt"
-
-# Testing
-test: backend-test ## Run all tests
+# ── Tests ─────────────────────────────────────────────────────────────────────
 
 backend-test: ## Run backend tests
 	cd backend && mvn test
-	@echo "✅ Backend tests completed"
+	@echo "✓ Backend tests complete"
 
-frontend-test: ## Run frontend tests
-	cd frontend && npm test
-	@echo "✅ Frontend tests completed"
+# ── Shell access ──────────────────────────────────────────────────────────────
 
-# Database
-db-shell: ## Open PostgreSQL shell
-	docker exec -it immocare-postgres psql -U immocare -d immocare
+shell: ## Open shell in app container
+	docker compose exec app sh
 
-db-dump: ## Dump database to file
-	docker exec immocare-postgres pg_dump -U immocare immocare > backup_$$(date +%Y%m%d_%H%M%S).sql
-	@echo "✅ Database dumped"
+shell-db: ## Open shell in database container
+	docker compose exec postgres sh
 
-db-restore: ## Restore database from latest dump (usage: make db-restore FILE=backup.sql)
-	docker exec -i immocare-postgres psql -U immocare immocare < $(FILE)
-	@echo "✅ Database restored"
+# ── Nginx ─────────────────────────────────────────────────────────────────────
 
-# Health & Status
-health: ## Check health of all services
-	@echo "Checking health..."
-	@docker-compose ps
+nginx-reload: ## Reload nginx configuration
+	docker compose exec app nginx -s reload
+	@echo "✓ Nginx configuration reloaded"
+
+nginx-test: ## Test nginx configuration
+	docker compose exec app nginx -t
+
+# ── Health & Status ───────────────────────────────────────────────────────────
+
+status: ## Show service status
+	docker compose ps
+
+health: ## Check service health
+	@echo "Checking service health..."
+	@docker compose ps
 	@echo ""
-	@echo "Backend health:"
-	@curl -s http://localhost:8080/actuator/health | grep -o '"status":"[^"]*"' || echo "❌ Backend not responding"
-	@echo ""
-	@echo "Frontend health:"
-	@curl -s http://localhost:4200 > /dev/null && echo "✅ Frontend OK" || echo "❌ Frontend not responding"
+	@curl -s -o /dev/null -w "App health : HTTP %{http_code}\n" \
+		http://localhost:8090/api/v1/buildings || echo "App: not responding"
 
-ps: ## Show container status
-	docker-compose ps
+monitor: ## Show container resource usage
+	docker stats immocare-app immocare-db
 
-stats: ## Show container resource usage
-	docker stats --no-stream
+# ── Cleanup ───────────────────────────────────────────────────────────────────
 
-# Shell access
-shell-backend: ## Shell into backend container
-	docker exec -it immocare-backend sh
-
-shell-frontend: ## Shell into frontend container
-	docker exec -it immocare-frontend sh
-
-shell-db: ## Shell into database container
-	docker exec -it immocare-postgres sh
-
-# Cleanup
-prune: ## Remove unused Docker resources
+clean: ## Remove unused Docker resources
+	@echo "Cleaning up..."
 	docker system prune -f
-	@echo "✅ Unused Docker resources removed"
+	@echo "✓ Cleanup complete"
 
-prune-all: ## Remove all unused Docker resources including volumes
-	docker system prune -a --volumes -f
-	@echo "✅ All unused Docker resources removed"
+clean-all: ## Remove everything including volumes ⚠️  deletes all data
+	@echo "⚠️  WARNING: This will delete all data!"
+	@read -p "Are you sure? [y/N] " -n 1 -r; \
+	echo; \
+	if [[ $$REPLY =~ ^[Yy]$$ ]]; then \
+		docker compose down -v; \
+		docker system prune -a -f; \
+		echo "✓ Full cleanup complete"; \
+	fi
+
+# ── Installation ──────────────────────────────────────────────────────────────
+
+install: ## Full initial installation
+	@echo "=== ImmoCare Installation ==="
+	@echo "1. Building images..."
+	@$(MAKE) build
+	@echo "2. Starting services..."
+	@$(MAKE) up
+	@echo "3. Waiting for services to be ready..."
+	@sleep 15
+	@echo "4. Checking health..."
+	@$(MAKE) health
+	@echo ""
+	@echo "✓ Installation complete!"
+	@echo "  Application : http://localhost:8090"
+	@echo "  Credentials : admin / Admin1234!"
+
+update: ## Update application (pull + rebuild + restart)
+	@echo "Updating application..."
+	@git pull
+	@$(MAKE) down
+	@$(MAKE) build
+	@$(MAKE) up
+	@echo "✓ Update complete"

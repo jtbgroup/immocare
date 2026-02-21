@@ -7,38 +7,45 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+import static org.springframework.test.web.servlet.setup.MockMvcBuilders.webAppContextSetup;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.immocare.model.dto.CreateBuildingRequest;
 import com.immocare.model.dto.UpdateBuildingRequest;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.context.WebApplicationContext;
 
 /**
  * Integration tests for BuildingController.
- * Tests full request-response cycle with actual database.
+ * Compatible with Spring Boot 4 (no @AutoConfigureMockMvc).
  */
-@SpringBootTest
-@AutoConfigureMockMvc
+@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.MOCK)
 @Transactional
 @TestPropertySource(locations = "classpath:application-test.properties")
 class BuildingControllerTest {
 
   @Autowired
-  private MockMvc mockMvc;
+  private WebApplicationContext webApplicationContext;
 
   @Autowired
   private ObjectMapper objectMapper;
 
+  private MockMvc mockMvc;
+
+  @BeforeEach
+  void setUp() {
+    mockMvc = webAppContextSetup(webApplicationContext).build();
+  }
+
   @Test
   void createBuilding_WithValidData_ReturnsCreated() throws Exception {
-    // Given
     CreateBuildingRequest request = new CreateBuildingRequest(
         "Résidence Soleil",
         "123 Rue de la Loi",
@@ -47,8 +54,7 @@ class BuildingControllerTest {
         "Belgium",
         "Jean Dupont"
     );
-    
-    // When & Then
+
     mockMvc.perform(post("/api/v1/buildings")
             .contentType(MediaType.APPLICATION_JSON)
             .content(objectMapper.writeValueAsString(request)))
@@ -60,7 +66,6 @@ class BuildingControllerTest {
 
   @Test
   void createBuilding_WithMissingRequiredField_ReturnsBadRequest() throws Exception {
-    // Given
     String invalidJson = """
         {
           "name": "Test Building",
@@ -68,8 +73,7 @@ class BuildingControllerTest {
           "postalCode": "1000"
         }
         """;
-    
-    // When & Then
+
     mockMvc.perform(post("/api/v1/buildings")
             .contentType(MediaType.APPLICATION_JSON)
             .content(invalidJson))
@@ -79,17 +83,15 @@ class BuildingControllerTest {
 
   @Test
   void createBuilding_WithFieldTooLong_ReturnsBadRequest() throws Exception {
-    // Given
     CreateBuildingRequest request = new CreateBuildingRequest(
-        "A".repeat(101), // Exceeds 100 char limit
+        "A".repeat(101),
         "123 Street",
         "1000",
         "Brussels",
         "Belgium",
         null
     );
-    
-    // When & Then
+
     mockMvc.perform(post("/api/v1/buildings")
             .contentType(MediaType.APPLICATION_JSON)
             .content(objectMapper.writeValueAsString(request)))
@@ -98,7 +100,6 @@ class BuildingControllerTest {
 
   @Test
   void getBuildingById_WhenExists_ReturnsBuilding() throws Exception {
-    // Given - Create a building first
     CreateBuildingRequest createRequest = new CreateBuildingRequest(
         "Test Building",
         "123 Street",
@@ -107,17 +108,16 @@ class BuildingControllerTest {
         "Belgium",
         null
     );
-    
+
     String response = mockMvc.perform(post("/api/v1/buildings")
             .contentType(MediaType.APPLICATION_JSON)
             .content(objectMapper.writeValueAsString(createRequest)))
         .andReturn()
         .getResponse()
         .getContentAsString();
-    
+
     Long buildingId = objectMapper.readTree(response).get("id").asLong();
-    
-    // When & Then
+
     mockMvc.perform(get("/api/v1/buildings/" + buildingId))
         .andExpect(status().isOk())
         .andExpect(jsonPath("$.id").value(buildingId))
@@ -126,7 +126,6 @@ class BuildingControllerTest {
 
   @Test
   void getBuildingById_WhenNotExists_ReturnsNotFound() throws Exception {
-    // When & Then
     mockMvc.perform(get("/api/v1/buildings/99999"))
         .andExpect(status().isNotFound())
         .andExpect(jsonPath("$.error").value("Building not found"));
@@ -134,7 +133,6 @@ class BuildingControllerTest {
 
   @Test
   void updateBuilding_WithValidData_ReturnsUpdatedBuilding() throws Exception {
-    // Given - Create a building first
     CreateBuildingRequest createRequest = new CreateBuildingRequest(
         "Original Building",
         "123 Street",
@@ -143,16 +141,16 @@ class BuildingControllerTest {
         "Belgium",
         null
     );
-    
+
     String createResponse = mockMvc.perform(post("/api/v1/buildings")
             .contentType(MediaType.APPLICATION_JSON)
             .content(objectMapper.writeValueAsString(createRequest)))
         .andReturn()
         .getResponse()
         .getContentAsString();
-    
+
     Long buildingId = objectMapper.readTree(createResponse).get("id").asLong();
-    
+
     UpdateBuildingRequest updateRequest = new UpdateBuildingRequest(
         "Updated Building",
         "456 Avenue",
@@ -161,8 +159,7 @@ class BuildingControllerTest {
         "Belgium",
         "Marie Martin"
     );
-    
-    // When & Then
+
     mockMvc.perform(put("/api/v1/buildings/" + buildingId)
             .contentType(MediaType.APPLICATION_JSON)
             .content(objectMapper.writeValueAsString(updateRequest)))
@@ -173,7 +170,6 @@ class BuildingControllerTest {
 
   @Test
   void deleteBuilding_WhenExists_ReturnsSuccess() throws Exception {
-    // Given - Create a building first
     CreateBuildingRequest createRequest = new CreateBuildingRequest(
         "Building to Delete",
         "123 Street",
@@ -182,29 +178,26 @@ class BuildingControllerTest {
         "Belgium",
         null
     );
-    
+
     String createResponse = mockMvc.perform(post("/api/v1/buildings")
             .contentType(MediaType.APPLICATION_JSON)
             .content(objectMapper.writeValueAsString(createRequest)))
         .andReturn()
         .getResponse()
         .getContentAsString();
-    
+
     Long buildingId = objectMapper.readTree(createResponse).get("id").asLong();
-    
-    // When & Then
+
     mockMvc.perform(delete("/api/v1/buildings/" + buildingId))
         .andExpect(status().isOk())
         .andExpect(jsonPath("$.message").value("Building deleted successfully"));
-    
-    // Verify it's deleted
+
     mockMvc.perform(get("/api/v1/buildings/" + buildingId))
         .andExpect(status().isNotFound());
   }
 
   @Test
   void getAllBuildings_ReturnsPagedResults() throws Exception {
-    // Given - Create some buildings
     for (int i = 1; i <= 3; i++) {
       CreateBuildingRequest request = new CreateBuildingRequest(
           "Building " + i,
@@ -214,13 +207,12 @@ class BuildingControllerTest {
           "Belgium",
           null
       );
-      
+
       mockMvc.perform(post("/api/v1/buildings")
           .contentType(MediaType.APPLICATION_JSON)
           .content(objectMapper.writeValueAsString(request)));
     }
-    
-    // When & Then
+
     mockMvc.perform(get("/api/v1/buildings"))
         .andExpect(status().isOk())
         .andExpect(jsonPath("$.content", hasSize(3)))
@@ -229,7 +221,6 @@ class BuildingControllerTest {
 
   @Test
   void searchBuildings_ByName_ReturnsMatchingResults() throws Exception {
-    // Given
     CreateBuildingRequest request1 = new CreateBuildingRequest(
         "Résidence Soleil",
         "123 Street",
@@ -238,7 +229,7 @@ class BuildingControllerTest {
         "Belgium",
         null
     );
-    
+
     CreateBuildingRequest request2 = new CreateBuildingRequest(
         "Appartements Luna",
         "456 Avenue",
@@ -247,16 +238,15 @@ class BuildingControllerTest {
         "Belgium",
         null
     );
-    
+
     mockMvc.perform(post("/api/v1/buildings")
         .contentType(MediaType.APPLICATION_JSON)
         .content(objectMapper.writeValueAsString(request1)));
-    
+
     mockMvc.perform(post("/api/v1/buildings")
         .contentType(MediaType.APPLICATION_JSON)
         .content(objectMapper.writeValueAsString(request2)));
-    
-    // When & Then
+
     mockMvc.perform(get("/api/v1/buildings?search=Soleil"))
         .andExpect(status().isOk())
         .andExpect(jsonPath("$.content", hasSize(1)))
