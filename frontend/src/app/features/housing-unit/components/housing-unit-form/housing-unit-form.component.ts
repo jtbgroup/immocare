@@ -61,23 +61,20 @@ import {
 
         <div *ngIf="form.value.hasTerrace" class="sub-section">
           <div class="form-group">
-            <label>Terrace Surface (m²) <span class="required">*</span></label>
+            <label>Terrace Surface (m²)</label>
             <input type="number" step="0.01" formControlName="terraceSurface" />
             <div class="error" *ngIf="isInvalid('terraceSurface')">
-              Terrace surface is required.
+              Terrace surface must be greater than 0.
             </div>
           </div>
           <div class="form-group">
-            <label>Terrace Orientation <span class="required">*</span></label>
+            <label>Terrace Orientation</label>
             <select formControlName="terraceOrientation">
               <option value="">— Select —</option>
               <option *ngFor="let o of orientations" [value]="o">
                 {{ o }}
               </option>
             </select>
-            <div class="error" *ngIf="isInvalid('terraceOrientation')">
-              Terrace orientation is required.
-            </div>
           </div>
         </div>
 
@@ -91,23 +88,20 @@ import {
 
         <div *ngIf="form.value.hasGarden" class="sub-section">
           <div class="form-group">
-            <label>Garden Surface (m²) <span class="required">*</span></label>
+            <label>Garden Surface (m²)</label>
             <input type="number" step="0.01" formControlName="gardenSurface" />
             <div class="error" *ngIf="isInvalid('gardenSurface')">
-              Garden surface is required.
+              Garden surface must be greater than 0.
             </div>
           </div>
           <div class="form-group">
-            <label>Garden Orientation <span class="required">*</span></label>
+            <label>Garden Orientation</label>
             <select formControlName="gardenOrientation">
               <option value="">— Select —</option>
               <option *ngFor="let o of orientations" [value]="o">
                 {{ o }}
               </option>
             </select>
-            <div class="error" *ngIf="isInvalid('gardenOrientation')">
-              Garden orientation is required.
-            </div>
           </div>
         </div>
 
@@ -208,13 +202,13 @@ export class HousingUnitFormComponent implements OnInit, OnDestroy {
       this.buildingId = +(qp.get("buildingId") ?? 0);
     }
 
-    // Dynamically apply validators for terrace
+    // Apply optional validators (min only) when terrace is toggled
     this.form
       .get("hasTerrace")!
       .valueChanges.pipe(takeUntil(this.destroy$))
       .subscribe((v) => this.toggleOutdoorValidators("terrace", v));
 
-    // Dynamically apply validators for garden
+    // Apply optional validators (min only) when garden is toggled
     this.form
       .get("hasGarden")!
       .valueChanges.pipe(takeUntil(this.destroy$))
@@ -255,19 +249,24 @@ export class HousingUnitFormComponent implements OnInit, OnDestroy {
       });
   }
 
+  /**
+   * When a checkbox is checked: apply min(0.01) on surface only (no required).
+   * When unchecked: clear all validators and reset values.
+   */
   private toggleOutdoorValidators(
     feature: "terrace" | "garden",
-    required: boolean,
+    checked: boolean,
   ): void {
     const surfaceCtrl = this.form.get(`${feature}Surface`)!;
     const orientationCtrl = this.form.get(`${feature}Orientation`)!;
 
-    if (required) {
-      surfaceCtrl.setValidators([Validators.required, Validators.min(0.01)]);
-      orientationCtrl.setValidators(Validators.required);
+    if (checked) {
+      surfaceCtrl.setValidators([Validators.min(0.01)]);
     } else {
       surfaceCtrl.clearValidators();
       orientationCtrl.clearValidators();
+      surfaceCtrl.reset(null);
+      orientationCtrl.reset("");
     }
     surfaceCtrl.updateValueAndValidity();
     orientationCtrl.updateValueAndValidity();
