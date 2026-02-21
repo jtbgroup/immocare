@@ -43,7 +43,6 @@ public class HousingUnitService {
    * Implements US009 - View Housing Unit Details (list within building).
    */
   public List<HousingUnitDTO> getUnitsByBuilding(Long buildingId) {
-    // Verify building exists
     if (!buildingRepository.existsById(buildingId)) {
       throw new BuildingNotFoundException(buildingId);
     }
@@ -81,16 +80,10 @@ public class HousingUnitService {
           "Unit number '" + request.getUnitNumber() + "' already exists in this building.");
     }
 
-    // BR-UC002-04 / 05: conditional terrace & garden validation
-    validateTerraceAndGarden(request.getHasTerrace(), request.getTerraceSurface(),
-        request.getTerraceOrientation(), "Terrace");
-    validateTerraceAndGarden(request.getHasGarden(), request.getGardenSurface(),
-        request.getGardenOrientation(), "Garden");
-
     HousingUnit unit = housingUnitMapper.toEntity(request);
     unit.setBuilding(building);
 
-    // Clear terrace/garden data when flags are false
+    // BR-UC002-04 / 05: clear terrace/garden data when flags are false
     if (!Boolean.TRUE.equals(request.getHasTerrace())) {
       unit.setTerraceSurface(null);
       unit.setTerraceOrientation(null);
@@ -120,15 +113,9 @@ public class HousingUnitService {
           "Unit number '" + request.getUnitNumber() + "' already exists in this building.");
     }
 
-    // BR-UC002-04 / 05: conditional terrace & garden validation
-    validateTerraceAndGarden(request.getHasTerrace(), request.getTerraceSurface(),
-        request.getTerraceOrientation(), "Terrace");
-    validateTerraceAndGarden(request.getHasGarden(), request.getGardenSurface(),
-        request.getGardenOrientation(), "Garden");
-
     housingUnitMapper.updateEntityFromRequest(request, unit);
 
-    // Clear terrace/garden data when flags are false
+    // BR-UC002-04 / 05: clear terrace/garden data when flags are false
     if (!Boolean.TRUE.equals(request.getHasTerrace())) {
       unit.setTerraceSurface(null);
       unit.setTerraceOrientation(null);
@@ -152,7 +139,7 @@ public class HousingUnitService {
     HousingUnit unit = findEntityById(id);
 
     // TODO: extend when Room / PEB / Rent / WaterMeter entities are implemented
-    long roomCount = 0L; // housingUnitRepository.countRoomsByUnitId(id);
+    long roomCount = 0L;
 
     if (roomCount > 0) {
       throw new HousingUnitHasDataException(id, roomCount);
@@ -184,22 +171,5 @@ public class HousingUnitService {
     dto.setRoomCount(0L);
 
     return dto;
-  }
-
-  /**
-   * Validate that surface and orientation are provided when the flag is true.
-   */
-  private void validateTerraceAndGarden(Boolean hasFeature, Object surface,
-                                        Object orientation, String featureName) {
-    if (!Boolean.TRUE.equals(hasFeature)) return;
-
-    if (surface == null) {
-      throw new IllegalArgumentException(featureName + " surface is required when Has "
-          + featureName + " is checked.");
-    }
-    if (orientation == null || (orientation instanceof String s && s.isBlank())) {
-      throw new IllegalArgumentException(featureName + " orientation is required when Has "
-          + featureName + " is checked.");
-    }
   }
 }

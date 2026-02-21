@@ -11,10 +11,6 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.HttpStatusEntryPoint;
 
-/**
- * Security configuration for ImmoCare.
- * Compatible with Spring Boot 3.x / Spring Security 6.x.
- */
 @Configuration
 @EnableWebSecurity
 public class SecurityConfig {
@@ -22,16 +18,12 @@ public class SecurityConfig {
   @Bean
   public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
     http
-        // Enable CORS — delegates to CorsConfig bean (required in Spring Security 6)
         .cors(Customizer.withDefaults())
-
         .csrf(csrf -> csrf.disable())
-
         .authorizeHttpRequests(auth -> auth
-            .requestMatchers("/api/v1/auth/login", "/actuator/health").permitAll()
+            .requestMatchers("/api/v1/auth/login", "/actuator/health", "/actuator/info").permitAll()
             .anyRequest().authenticated()
         )
-
         .formLogin(form -> form
             .loginProcessingUrl("/api/v1/auth/login")
             .successHandler((req, res, authentication) ->
@@ -40,7 +32,6 @@ public class SecurityConfig {
                 res.setStatus(HttpStatus.UNAUTHORIZED.value()))
             .permitAll()
         )
-
         .exceptionHandling(ex -> ex
             .authenticationEntryPoint(new HttpStatusEntryPoint(HttpStatus.UNAUTHORIZED))
         );

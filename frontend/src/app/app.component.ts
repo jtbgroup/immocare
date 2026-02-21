@@ -1,6 +1,7 @@
-import { Component } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
 import { AuthService } from './core/auth/auth.service';
+import { VersionService } from './core/services/version.service';
 
 @Component({
   selector: 'app-root',
@@ -24,6 +25,9 @@ import { AuthService } from './core/auth/auth.service';
       <main class="app-content">
         <router-outlet></router-outlet>
       </main>
+      <footer class="app-footer">
+        <span>v{{ version }}</span>
+      </footer>
     </div>
   `,
   styles: [`
@@ -103,12 +107,29 @@ import { AuthService } from './core/auth/auth.service';
       flex: 1;
       background: #f5f7fa;
     }
+
+    .app-footer {
+      text-align: center;
+      padding: 0.4rem;
+      font-size: 0.7rem;
+      color: #bbb;
+      background: #f5f7fa;
+    }
   `]
 })
-export class AppComponent {
+export class AppComponent implements OnInit {
   title = 'ImmoCare';
+  version = '…';
 
-  constructor(private authService: AuthService, private router: Router) {}
+  constructor(
+    private authService: AuthService,
+    private router: Router,
+    private versionService: VersionService
+  ) {}
+
+  ngOnInit(): void {
+    this.versionService.getVersion().subscribe(v => this.version = v);
+  }
 
   logout(): void {
     this.authService.logout();

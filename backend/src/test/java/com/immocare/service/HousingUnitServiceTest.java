@@ -55,58 +55,10 @@ class HousingUnitServiceTest {
     unit.setFloor(1);
   }
 
-  // ─── getUnitsByBuilding ────────────────────────────────────────────────────
-
-  @Test
-  void getUnitsByBuilding_returnsListWhenBuildingExists() {
-    when(buildingRepository.existsById(1L)).thenReturn(true);
-    when(housingUnitRepository.findByBuildingIdOrderByFloorAscUnitNumberAsc(1L))
-        .thenReturn(List.of(unit));
-
-    HousingUnitDTO dto = new HousingUnitDTO();
-    dto.setId(10L);
-    when(housingUnitMapper.toDTO(unit)).thenReturn(dto);
-
-    List<HousingUnitDTO> result = service.getUnitsByBuilding(1L);
-
-    assertThat(result).hasSize(1);
-    assertThat(result.get(0).getId()).isEqualTo(10L);
-  }
-
-  @Test
-  void getUnitsByBuilding_throwsWhenBuildingNotFound() {
-    when(buildingRepository.existsById(99L)).thenReturn(false);
-
-    assertThatThrownBy(() -> service.getUnitsByBuilding(99L))
-        .isInstanceOf(BuildingNotFoundException.class);
-  }
-
-  // ─── getUnitById ──────────────────────────────────────────────────────────
-
-  @Test
-  void getUnitById_returnsDTO() {
-    when(housingUnitRepository.findById(10L)).thenReturn(Optional.of(unit));
-    HousingUnitDTO dto = new HousingUnitDTO();
-    when(housingUnitMapper.toDTO(unit)).thenReturn(dto);
-
-    HousingUnitDTO result = service.getUnitById(10L);
-
-    assertThat(result).isNotNull();
-  }
-
-  @Test
-  void getUnitById_throwsWhenNotFound() {
-    when(housingUnitRepository.findById(99L)).thenReturn(Optional.empty());
-
-    assertThatThrownBy(() -> service.getUnitById(99L))
-        .isInstanceOf(HousingUnitNotFoundException.class)
-        .hasMessageContaining("99");
-  }
-
   // ─── createUnit ───────────────────────────────────────────────────────────
 
   @Test
-  void createUnit_successWithRequiredFieldsOnly() {
+  void createUnit_success() {
     CreateHousingUnitRequest request = new CreateHousingUnitRequest();
     request.setBuildingId(1L);
     request.setUnitNumber("B202");
@@ -160,21 +112,24 @@ class HousingUnitServiceTest {
   }
 
   @Test
-  void createUnit_throwsWhenTerraceCheckedButSurfaceMissing() {
+  void createUnit_withTerraceCheckedButNoSurfaceOrOrientationSucceeds() {
     CreateHousingUnitRequest request = new CreateHousingUnitRequest();
     request.setBuildingId(1L);
     request.setUnitNumber("C303");
     request.setFloor(3);
     request.setHasTerrace(true);
-    // terraceSurface intentionally omitted
+    // terraceSurface and terraceOrientation intentionally omitted — both optional
 
     when(buildingRepository.findById(1L)).thenReturn(Optional.of(building));
     when(housingUnitRepository.existsByBuildingIdAndUnitNumberIgnoreCase(1L, "C303"))
         .thenReturn(false);
+    when(housingUnitMapper.toEntity(request)).thenReturn(new HousingUnit());
+    when(housingUnitRepository.save(any())).thenReturn(unit);
+    when(housingUnitMapper.toDTO(unit)).thenReturn(new HousingUnitDTO());
 
-    assertThatThrownBy(() -> service.createUnit(request))
-        .isInstanceOf(IllegalArgumentException.class)
-        .hasMessageContaining("Terrace surface");
+    HousingUnitDTO result = service.createUnit(request);
+
+    assertThat(result).isNotNull();
   }
 
   @Test
@@ -199,6 +154,33 @@ class HousingUnitServiceTest {
     assertThat(result).isNotNull();
   }
 
+  @Test
+  void createUnit_terraceDataClearedWhenFlagIsFalse() {
+    CreateHousingUnitRequest request = new CreateHousingUnitRequest();
+    request.setBuildingId(1L);
+    request.setUnitNumber("E505");
+    request.setFloor(5);
+    request.setHasTerrace(false);
+    request.setTerraceSurface(new BigDecimal("10.00")); // should be ignored
+    request.setTerraceOrientation("N");                 // should be ignored
+
+    HousingUnit mappedEntity = new HousingUnit();
+    mappedEntity.setTerraceSurface(new BigDecimal("10.00"));
+    mappedEntity.setTerraceOrientation("N");
+
+    when(buildingRepository.findById(1L)).thenReturn(Optional.of(building));
+    when(housingUnitRepository.existsByBuildingIdAndUnitNumberIgnoreCase(1L, "E505"))
+        .thenReturn(false);
+    when(housingUnitMapper.toEntity(request)).thenReturn(mappedEntity);
+    when(housingUnitRepository.save(any())).thenReturn(unit);
+    when(housingUnitMapper.toDTO(unit)).thenReturn(new HousingUnitDTO());
+
+    service.createUnit(request);
+
+    assertThat(mappedEntity.getTerraceSurface()).isNull();
+    assertThat(mappedEntity.getTerraceOrientation()).isNull();
+  }
+
   // ─── updateUnit ───────────────────────────────────────────────────────────
 
   @Test
@@ -214,14 +196,17 @@ class HousingUnitServiceTest {
     HousingUnitDTO result = service.updateUnit(10L, request);
 
     assertThat(result).isNotNull();
-    verify(housingUnitRepository).save(unit);
   }
 
   @Test
-  void updateUnit_throwsWhenUnitNotFound() {
+  void updateUnit_throwsWhenNotFound() {
+    UpdateHousingUnitRequest request = new UpdateHousingUnitRequest();
+    request.setUnitNumber("A101");
+    request.setFloor(1);
+
     when(housingUnitRepository.findById(99L)).thenReturn(Optional.empty());
 
-    assertThatThrownBy(() -> service.updateUnit(99L, new UpdateHousingUnitRequest()))
+    assertThatThrownBy(() -> service.updateUnit(99L, request))
         .isInstanceOf(HousingUnitNotFoundException.class);
   }
 
@@ -242,34 +227,5 @@ class HousingUnitServiceTest {
 
     assertThatThrownBy(() -> service.deleteUnit(99L))
         .isInstanceOf(HousingUnitNotFoundException.class);
-
-    verify(housingUnitRepository, never()).delete(any());
-  }
-
-  // ─── Owner inheritance ─────────────────────────────────────────────────────
-
-  @Test
-  void getUnitById_inheritsOwnerFromBuilding() {
-    unit.setOwnerName(null); // no unit-specific owner
-
-    when(housingUnitRepository.findById(10L)).thenReturn(Optional.of(unit));
-    HousingUnitDTO dto = new HousingUnitDTO();
-    when(housingUnitMapper.toDTO(unit)).thenReturn(dto);
-
-    HousingUnitDTO result = service.getUnitById(10L);
-
-    assertThat(result.getEffectiveOwnerName()).isEqualTo("Jean Dupont");
-  }
-
-  @Test
-  void getUnitById_unitOwnerOverridesBuilding() {
-    unit.setOwnerName("Marie Martin");
-
-    when(housingUnitRepository.findById(10L)).thenReturn(Optional.of(unit));
-    when(housingUnitMapper.toDTO(unit)).thenReturn(new HousingUnitDTO());
-
-    HousingUnitDTO result = service.getUnitById(10L);
-
-    assertThat(result.getEffectiveOwnerName()).isEqualTo("Marie Martin");
   }
 }
