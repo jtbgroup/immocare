@@ -1,9 +1,11 @@
+# ImmoCare - UC007 Manage Users — Implementation Prompt
+
 I want to implement Use Case UC007 - Manage Users for ImmoCare.
 
 ## CONTEXT
 
 - Project: ImmoCare (property management system)
-- Stack: Spring Boot 3.x (backend) + Angular 17+ (frontend) + PostgreSQL 15
+- Stack: Spring Boot 4.x (backend) + Angular 19+ (frontend) + PostgreSQL 16
 - Architecture: API-First, mono-repo
 - Authentication: Form-based login (username + password), already implemented
 - Authorization: ADMIN role only (Phase 1)
@@ -78,23 +80,36 @@ frontend/src/app/
    - `AppUser → UserDTO`
    - Never map `password_hash`
 
-6. **`service/UserService.java`**:
+6. **`repository/UserRepository.java`** — add the following methods to the existing interface
+   (Spring Data JPA will auto-implement them — no `@Query` needed):
+   ```java
+   boolean existsByUsernameIgnoreCase(String username);
+   boolean existsByEmailIgnoreCase(String email);
+   long countByRole(String role);
+   ```
+
+7. **`service/UserService.java`**:
+   - Constructor injects only: `UserRepository`, `UserMapper`, `PasswordEncoder`
+   - **DO NOT inject `FindByIndexNameSessionRepository`** — not available with standard HTTP sessions
    - `getAllUsers()` → List<UserDTO>
    - `getUserById(Long id)` → UserDTO
    - `createUser(CreateUserRequest)` → UserDTO
    - `updateUser(Long id, UpdateUserRequest)` → UserDTO
-   - `changePassword(Long id, ChangePasswordRequest)` → void
+   - `changePassword(Long id, ChangePasswordRequest)` → void (no session invalidation in Phase 1)
    - `deleteUser(Long id, Long currentUserId)` → void
    - Business rules enforced:
-     - Username uniqueness check
-     - Email uniqueness check
+     - Username uniqueness check (case-insensitive)
+     - Email uniqueness check (case-insensitive)
      - Password and confirmPassword match
      - Password complexity (min 8 chars, 1 uppercase, 1 lowercase, 1 digit)
      - Cannot delete own account (currentUserId == id)
      - Cannot delete last remaining ADMIN
-     - Session invalidation after password change
 
-7. **`controller/UserController.java`**:
+   > **Note BR-UC007-07**: Session invalidation after password change is deferred to a future
+   > phase (requires Spring Session JDBC). In Phase 1, the changed password takes effect on
+   > the target user's next login after their current session expires naturally (30 min).
+
+8. **`controller/UserController.java`**:
    - `GET    /api/v1/users` → list all users (US031)
    - `GET    /api/v1/users/{id}` → get user details
    - `POST   /api/v1/users` → create user (US032)
@@ -103,22 +118,26 @@ frontend/src/app/
    - `DELETE /api/v1/users/{id}` → delete user (US035)
    - All endpoints: `@PreAuthorize("hasRole('ADMIN')")`
 
-8. **`exception/UserNotFoundException.java`**
-9. **`exception/UsernameTakenException.java`**
-10. **`exception/EmailTakenException.java`**
-11. **`exception/CannotDeleteSelfException.java`**
-12. **`exception/CannotDeleteLastAdminException.java`**
+9. **`exception/UserNotFoundException.java`**
+10. **`exception/UsernameTakenException.java`**
+11. **`exception/EmailTakenException.java`**
+12. **`exception/CannotDeleteSelfException.java`**
+13. **`exception/CannotDeleteLastAdminException.java`**
     - Wire all into existing `GlobalExceptionHandler`
+    - Do NOT create a `GlobalExceptionHandler_ADDITIONS.java` file — add directly to the existing handler
 
-13. **`service/UserServiceTest.java`** (unit tests with Mockito)
-14. **`controller/UserControllerTest.java`** (integration tests with MockMvc)
+14. **`service/UserServiceTest.java`** (unit tests with Mockito)
+    - Do NOT mock `FindByIndexNameSessionRepository` — it is not used
+    - `changePassword` test verifies only `passwordEncoder.encode()` and `userRepository.save()`
+
+15. **`controller/UserControllerTest.java`** (integration tests with MockMvc)
 
 ### Frontend
 
-15. **`models/user.model.ts`**:
+16. **`models/user.model.ts`**:
     - `User`, `CreateUserRequest`, `UpdateUserRequest`, `ChangePasswordRequest` interfaces
 
-16. **`core/services/user.service.ts`**:
+17. **`core/services/user.service.ts`**:
     - `getAll()` → GET `/api/v1/users`
     - `getById(id)` → GET `/api/v1/users/{id}`
     - `create(req)` → POST `/api/v1/users`
@@ -126,30 +145,44 @@ frontend/src/app/
     - `changePassword(id, req)` → PATCH `/api/v1/users/{id}/password`
     - `delete(id)` → DELETE `/api/v1/users/{id}`
 
-17. **`features/user/`** module and routing:
+18. **`features/user/`** module and routing:
     - `/users` → `UserListComponent`
     - `/users/new` → `UserFormComponent` (create mode)
     - `/users/:id` → `UserDetailsComponent`
     - `/users/:id/edit` → `UserFormComponent` (edit mode)
 
-18. **`features/user/components/user-list/`**:
+19. **`features/user/components/user-list/`**:
     - Table: username, email, role, created at
     - Sort by any column
-    - Pagination (20/page)
+    - Pagination (20/page) — use a `get endIndex()` getter for display, NOT the `| min` pipe
+      (Angular has no built-in `min` pipe)
     - "Create User" button
     - Click row → navigate to details (US031)
 
-19. **`features/user/components/user-form/`** (create + edit mode):
+20. **`features/user/components/user-form/`** (create + edit mode):
     - Fields: username, email, password + confirm (create only), role (dropdown)
     - Real-time validation feedback
     - "Save" and "Cancel" buttons (US032, US033)
 
-20. **`features/user/components/user-details/`**:
+21. **`features/user/components/user-details/`**:
     - Display user info (read-only)
     - "Edit" button
     - "Change Password" button → inline form or modal (US034)
     - "Delete" button: disabled with tooltip if self or last admin (US035)
     - Confirmation dialog before delete
+
+22. **`app.module.ts`** — add the `/users` lazy-loaded route with `AuthGuard`:
+    ```typescript
+    {
+      path: 'users',
+      canActivate: [AuthGuard],
+      loadChildren: () => import('./features/user/user.module').then(m => m.UserModule)
+    }
+    ```
+
+23. **`app.component.ts`** — add a navigation bar with links to `/buildings` and `/users`,
+    and a Logout button that calls `authService.logout()` directly (it returns `void`, not
+    an `Observable` — do NOT call `.subscribe()` on it).
 
 ## BUSINESS RULES (must be enforced server-side, not only in UI)
 
@@ -159,7 +192,7 @@ frontend/src/app/
 - BR-UC007-04: Password stored as BCrypt hash (strength 10), never plain text, never returned
 - BR-UC007-05: Cannot delete own account
 - BR-UC007-06: Cannot delete last remaining ADMIN
-- BR-UC007-07: Invalidate target user's session after password change
+- BR-UC007-07: Session invalidation after password change — **deferred to Phase 2**
 - BR-UC007-08: No self-registration — only ADMIN can create users
 
 ## API ENDPOINTS
@@ -179,15 +212,20 @@ frontend/src/app/
 - All endpoints require ROLE_ADMIN
 - Self-deletion and last-admin-deletion blocked server-side (not only UI)
 - BCrypt strength 10 for all password hashing
-- Session invalidation on password change applies only to the target user
 
 ## WHAT NOT TO DO
 
+- Do NOT inject `FindByIndexNameSessionRepository` anywhere — it requires Spring Session JDBC
+  which is not configured in this project
+- Do NOT create `*_ADDITIONS.java` files — always modify existing files directly
+- Do NOT use the `| min` pipe in Angular templates — it does not exist; use a TypeScript getter
+- Do NOT call `.subscribe()` on `authService.logout()` — it returns `void`
 - No self-registration endpoint
 - No password reset by email (future feature)
 - No user profile self-service (future feature)
 - Do not expose `password_hash` anywhere
 - Do not add a Flyway migration for the user table (already exists from security feature)
+- Do not modify `BuildingService.java` — it does not need `HousingUnitRepository`
 
 ## ACCEPTANCE CRITERIA
 
@@ -195,25 +233,29 @@ frontend/src/app/
 - [ ] POST /api/v1/users creates a user with hashed password
 - [ ] POST /api/v1/users returns 409 if username or email already exists
 - [ ] PUT /api/v1/users/{id} updates username/email/role
-- [ ] PATCH /api/v1/users/{id}/password updates password and invalidates target session
+- [ ] PATCH /api/v1/users/{id}/password updates password hash
 - [ ] DELETE /api/v1/users/{id} deletes user
 - [ ] DELETE /api/v1/users/{id} returns 403 when attempting self-deletion
 - [ ] DELETE /api/v1/users/{id} returns 409 when attempting to delete last ADMIN
 - [ ] Angular user list displays username, email, role, created at
 - [ ] Angular create form validates all fields before submission
 - [ ] Angular delete button disabled with tooltip for self and last admin
+- [ ] Navigation bar shows links to Buildings and Users
 - [ ] All acceptance criteria from US031 to US035 are met
 
 ## IMPLEMENTATION ORDER
 
 1. `UserDTO`, `CreateUserRequest`, `UpdateUserRequest`, `ChangePasswordRequest`
 2. `UserMapper`
-3. `UserService` + `UserServiceTest`
-4. Exception classes + `GlobalExceptionHandler` updates
-5. `UserController` + `UserControllerTest`
-6. `user.model.ts`
-7. `user.service.ts`
-8. `UserListComponent`
-9. `UserFormComponent`
-10. `UserDetailsComponent`
-11. User module, routing, and navigation links
+3. `UserRepository` (add 3 methods)
+4. `UserService` + `UserServiceTest`
+5. Exception classes + `GlobalExceptionHandler` updates (in-place)
+6. `UserController` + `UserControllerTest`
+7. `user.model.ts`
+8. `user.service.ts`
+9. `UserListComponent`
+10. `UserFormComponent`
+11. `UserDetailsComponent`
+12. User module and routing (`user.module.ts`)
+13. `app.module.ts` (add `/users` route)
+14. `app.component.ts` (add navigation bar)

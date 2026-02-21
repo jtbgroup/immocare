@@ -1,14 +1,14 @@
-import { Injectable } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
-import { Observable } from 'rxjs';
-import { environment } from '../../environments/environment';
+import { HttpClient } from "@angular/common/http";
+import { Injectable } from "@angular/core";
+import { Observable } from "rxjs";
+import { environment } from "../../../environments/environment";
 import {
-  HousingUnit,
   CreateHousingUnitRequest,
+  HousingUnit,
   UpdateHousingUnitRequest,
-} from '../models/housing-unit.model';
+} from "../../models/housing-unit.model";
 
-@Injectable({ providedIn: 'root' })
+@Injectable({ providedIn: "root" })
 export class HousingUnitService {
   private readonly baseUrl = `${environment.apiUrl}`;
 
@@ -20,7 +20,7 @@ export class HousingUnitService {
    */
   getUnitsByBuilding(buildingId: number): Observable<HousingUnit[]> {
     return this.http.get<HousingUnit[]>(
-      `${this.baseUrl}/buildings/${buildingId}/units`
+      `${this.baseUrl}/buildings/${buildingId}/units`,
     );
   }
 
@@ -44,7 +44,10 @@ export class HousingUnitService {
    * Update an existing housing unit.
    * PUT /api/v1/units/{id}
    */
-  update(id: number, request: UpdateHousingUnitRequest): Observable<HousingUnit> {
+  update(
+    id: number,
+    request: UpdateHousingUnitRequest,
+  ): Observable<HousingUnit> {
     return this.http.put<HousingUnit>(`${this.baseUrl}/units/${id}`, request);
   }
 

@@ -1,7 +1,20 @@
+export type Orientation = "N" | "S" | "E" | "W" | "NE" | "NW" | "SE" | "SW";
+
+export const ORIENTATIONS: Orientation[] = [
+  "N",
+  "S",
+  "E",
+  "W",
+  "NE",
+  "NW",
+  "SE",
+  "SW",
+];
+
 export interface HousingUnit {
   id: number;
   buildingId: number;
-  buildingName: string;
+  buildingName?: string;
   unitNumber: string;
   floor: number;
   landingNumber?: string;
@@ -13,15 +26,10 @@ export interface HousingUnit {
   gardenSurface?: number;
   gardenOrientation?: Orientation;
   ownerName?: string;
-  effectiveOwnerName?: string;
-  roomCount: number;
-  createdAt: string;
-  updatedAt: string;
+  roomCount?: number;
+  createdAt?: string;
+  updatedAt?: string;
 }
-
-export type Orientation = 'N' | 'S' | 'E' | 'W' | 'NE' | 'NW' | 'SE' | 'SW';
-
-export const ORIENTATIONS: Orientation[] = ['N', 'S', 'E', 'W', 'NE', 'NW', 'SE', 'SW'];
 
 export interface CreateHousingUnitRequest {
   buildingId: number;

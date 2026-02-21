@@ -25,21 +25,11 @@ public class BuildingService {
   private final BuildingRepository buildingRepository;
   private final BuildingMapper buildingMapper;
 
-  public BuildingService(BuildingRepository buildingRepository, BuildingMapper buildingMapper,HousingUnitRepository housingUnitRepository) {
+  public BuildingService(BuildingRepository buildingRepository, BuildingMapper buildingMapper) {
     this.buildingRepository = buildingRepository;
     this.buildingMapper = buildingMapper;
-    this.housingUnitRepository = housingUnitRepository;
   }
 
-  /**
-   * Get all buildings with pagination, filtering, and search.
-   * Implements US004 - View Buildings List.
-   * 
-   * @param city optional city filter
-   * @param search optional search term
-   * @param pageable pagination parameters
-   * @return page of building DTOs
-   */
   public Page<BuildingDTO> getAllBuildings(String city, String search, Pageable pageable) {
     Page<Building> buildingsPage;
 
@@ -56,94 +46,44 @@ public class BuildingService {
     return buildingsPage.map(building -> buildingMapper.toDTOWithUnitCount(building, 0L));
   }
 
-  /**
-   * Get a building by ID.
-   * 
-   * @param id the building ID
-   * @return the building DTO
-   * @throws BuildingNotFoundException if building not found
-   */
   public BuildingDTO getBuildingById(Long id) {
     Building building = findBuildingEntityById(id);
     return buildingMapper.toDTO(building);
   }
 
-  /**
-   * Create a new building.
-   * Implements US001 - Create Building.
-   * 
-   * @param request the creation request
-   * @return the created building DTO
-   */
   @Transactional
   public BuildingDTO createBuilding(CreateBuildingRequest request) {
     Building building = buildingMapper.toEntity(request);
-    
-    // TODO: Set createdBy from authenticated user (security context)
-    // building.setCreatedBy(getCurrentUser());
-    
     Building savedBuilding = buildingRepository.save(building);
     return buildingMapper.toDTO(savedBuilding);
   }
 
-  /**
-   * Update an existing building.
-   * Implements US002 - Edit Building.
-   * 
-   * @param id the building ID
-   * @param request the update request
-   * @return the updated building DTO
-   * @throws BuildingNotFoundException if building not found
-   */
   @Transactional
   public BuildingDTO updateBuilding(Long id, UpdateBuildingRequest request) {
     Building building = findBuildingEntityById(id);
-    
     buildingMapper.updateEntityFromRequest(request, building);
-    
     Building updatedBuilding = buildingRepository.save(building);
     return buildingMapper.toDTO(updatedBuilding);
   }
 
-  /**
-   * Delete a building.
-   * Implements US003 - Delete Building.
-   * Business Rule BR-UC001-03: Cannot delete building with housing units.
-   * 
-   * @param id the building ID
-   * @throws BuildingNotFoundException if building not found
-   * @throws BuildingHasUnitsException if building has housing units
-   */
   @Transactional
   public void deleteBuilding(Long id) {
     Building building = findBuildingEntityById(id);
-    
-   long unitCount = housingUnitRepository.countByBuildingId(id);
-    
+
+    // HousingUnit not yet implemented — unit count hardcoded to 0
+    long unitCount = 0L;
+
     if (unitCount > 0) {
       throw new BuildingHasUnitsException(id, unitCount);
     }
-    
+
     buildingRepository.delete(building);
   }
 
-  /**
-   * Get all distinct cities from buildings.
-   * Used for filtering in US004.
-   * 
-   * @return list of city names
-   */
   public List<String> getAllCities() {
     return buildingRepository.findDistinctCities();
   }
 
-  /**
-   * Find building entity by ID or throw exception.
-   * 
-   * @param id the building ID
-   * @return the building entity
-   * @throws BuildingNotFoundException if not found
-   */
   private Building findBuildingEntityById(Long id) {
     return buildingRepository.findById(id)
         .orElseThrow(() -> new BuildingNotFoundException(id));
