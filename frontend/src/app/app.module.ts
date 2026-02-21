@@ -3,7 +3,7 @@ import { NgModule } from "@angular/core";
 import { BrowserModule } from "@angular/platform-browser";
 import { RouterModule } from "@angular/router";
 
-import { AppComponent } from "./app.component copy";
+import { AppComponent } from "./app.component";
 import { AuthGuard } from "./core/auth/auth.guard";
 import { AuthInterceptor } from "./core/auth/auth.interceptor";
 

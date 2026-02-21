@@ -1,7 +1,8 @@
 # ImmoCare - Makefile
 .PHONY: help build up down restart logs shell db-shell backup restore \
         clean clean-all rebuild dev prod health install update \
-        backend-test nginx-reload nginx-test
+        backend-test nginx-reload nginx-test \
+        start stop dev-build logs-dev
 
 # Variables
 APP_NAME = immocare
@@ -46,12 +47,36 @@ rebuild: ## Full rebuild without cache
 	docker compose build --no-cache
 	@echo "✓ Rebuild complete"
 
-# ── Development ───────────────────────────────────────────────────────────────
+# ── Development (daily use) ───────────────────────────────────────────────────
 
-dev: ## Start in development mode with hot reload (logs visible)
+start: ## ▶  Start dev environment WITHOUT rebuild (daily use)
+	@echo "Starting dev environment..."
+	docker compose -f docker-compose.dev.yml up -d
+	@echo "✓ Dev environment started (no rebuild)"
+	@echo "  Frontend : http://localhost:4200"
+	@echo "  Backend  : http://localhost:8080"
+
+stop: ## ⏹  Stop dev environment
+	@echo "Stopping dev environment..."
+	docker compose -f docker-compose.dev.yml down
+	@echo "✓ Dev environment stopped"
+
+dev-build: ## 🔨 Rebuild dev images (only after pom.xml / package.json changes)
+	@echo "Rebuilding dev images..."
+	docker compose -f docker-compose.dev.yml up -d --build
+	@echo "✓ Dev images rebuilt and started"
+	@echo "  Frontend : http://localhost:4200"
+	@echo "  Backend  : http://localhost:8080"
+
+logs-dev: ## View dev logs
+	docker compose -f docker-compose.dev.yml logs -f
+
+# ── Legacy dev commands (kept for compatibility) ──────────────────────────────
+
+dev: ## Start in development mode with logs visible (rebuilds — use 'start' for daily use)
 	docker compose -f docker-compose.dev.yml up --build
 
-dev-d: ## Start in development mode detached
+dev-d: ## Start in development mode detached (rebuilds — use 'start' for daily use)
 	docker compose -f docker-compose.dev.yml up -d --build
 	@echo "✓ Dev services started"
 	@echo "  Frontend : http://localhost:4200"
