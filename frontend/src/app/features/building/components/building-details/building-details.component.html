@@ -1,8 +1,6 @@
 <div class="building-details-container">
   <!-- Loading State -->
-  <div *ngIf="loading" class="loading">
-    Loading building details...
-  </div>
+  <div *ngIf="loading" class="loading">Loading building details...</div>
 
   <!-- Error State -->
   <div *ngIf="error && !loading" class="error-container">
@@ -17,15 +15,9 @@
     <div class="header">
       <h1>{{ building.name }}</h1>
       <div class="actions">
-        <button class="btn btn-secondary" (click)="goBack()">
-          Back
-        </button>
-        <button class="btn btn-primary" (click)="editBuilding()">
-          Edit
-        </button>
-        <button class="btn btn-danger" (click)="confirmDelete()">
-          Delete
-        </button>
+        <button class="btn btn-secondary" (click)="goBack()">Back</button>
+        <button class="btn btn-primary" (click)="editBuilding()">Edit</button>
+        <button class="btn btn-danger" (click)="confirmDelete()">Delete</button>
       </div>
     </div>
 
@@ -37,7 +29,7 @@
     <!-- Building Information -->
     <div class="info-card">
       <h2>Building Information</h2>
-      
+
       <div class="info-grid">
         <div class="info-item">
           <label>Building Name</label>
@@ -66,7 +58,7 @@
 
         <div class="info-item">
           <label>Owner</label>
-          <p>{{ building.ownerName || 'Not specified' }}</p>
+          <p>{{ building.ownerName || "Not specified" }}</p>
         </div>
 
         <div class="info-item">
@@ -79,11 +71,11 @@
     <!-- Audit Information -->
     <div class="info-card">
       <h2>Audit Information</h2>
-      
+
       <div class="info-grid">
         <div class="info-item">
           <label>Created By</label>
-          <p>{{ building.createdByUsername || 'N/A' }}</p>
+          <p>{{ building.createdByUsername || "N/A" }}</p>
         </div>
 
         <div class="info-item">
@@ -102,9 +94,13 @@
     <div class="info-card">
       <h2>Housing Units</h2>
       <p class="empty-message">
-        {{ building.unitCount === 0 ? 'No housing units yet' : building.unitCount + ' housing units' }}
+        {{
+          building.unitCount === 0
+            ? "No housing units yet"
+            : building.unitCount + " housing units"
+        }}
       </p>
-      <!-- TODO: List housing units when implemented -->
+      <app-housing-unit-list [buildingId]="building.id"></app-housing-unit-list>
     </div>
   </div>
 
@@ -114,18 +110,29 @@
       <div class="modal-header">
         <h2>Delete Building?</h2>
       </div>
-      
+
       <div class="modal-body">
-        <p>Are you sure you want to delete <strong>{{ building?.name }}</strong>?</p>
+        <p>
+          Are you sure you want to delete <strong>{{ building?.name }}</strong
+          >?
+        </p>
         <p class="warning">⚠️ This action cannot be undone</p>
       </div>
-      
+
       <div class="modal-actions">
-        <button class="btn btn-secondary" (click)="cancelDelete()" [disabled]="loading">
+        <button
+          class="btn btn-secondary"
+          (click)="cancelDelete()"
+          [disabled]="loading"
+        >
           Cancel
         </button>
-        <button class="btn btn-danger" (click)="deleteBuilding()" [disabled]="loading">
-          {{ loading ? 'Deleting...' : 'Delete' }}
+        <button
+          class="btn btn-danger"
+          (click)="deleteBuilding()"
+          [disabled]="loading"
+        >
+          {{ loading ? "Deleting..." : "Delete" }}
         </button>
       </div>
     </div>

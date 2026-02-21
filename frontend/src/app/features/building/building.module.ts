@@ -1,10 +1,11 @@
-import { NgModule } from '@angular/core';
-import { CommonModule } from '@angular/common';
-import { ReactiveFormsModule, FormsModule } from '@angular/forms';
-import { BuildingRoutingModule } from './building-routing.module';
-import { BuildingListComponent } from './components/building-list/building-list.component';
-import { BuildingFormComponent } from './components/building-form/building-form.component';
-import { BuildingDetailsComponent } from './components/building-details/building-details.component';
+import { CommonModule } from "@angular/common";
+import { NgModule } from "@angular/core";
+import { FormsModule, ReactiveFormsModule } from "@angular/forms";
+import { HousingUnitModule } from "../housing-unit/housing-unit.module";
+import { BuildingRoutingModule } from "./building-routing.module";
+import { BuildingDetailsComponent } from "./components/building-details/building-details.component";
+import { BuildingFormComponent } from "./components/building-form/building-form.component";
+import { BuildingListComponent } from "./components/building-list/building-list.component";
 
 /**
  * Feature module for Building management.
@@ -14,13 +15,14 @@ import { BuildingDetailsComponent } from './components/building-details/building
   declarations: [
     BuildingListComponent,
     BuildingFormComponent,
-    BuildingDetailsComponent
+    BuildingDetailsComponent,
   ],
   imports: [
     CommonModule,
     ReactiveFormsModule,
     FormsModule,
-    BuildingRoutingModule
-  ]
+    BuildingRoutingModule,
+    HousingUnitModule, // provides <app-housing-unit-list>
+  ],
 })
 export class BuildingModule {}

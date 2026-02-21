@@ -25,9 +25,10 @@ public class BuildingService {
   private final BuildingRepository buildingRepository;
   private final BuildingMapper buildingMapper;
 
-  public BuildingService(BuildingRepository buildingRepository, BuildingMapper buildingMapper) {
+  public BuildingService(BuildingRepository buildingRepository, BuildingMapper buildingMapper,HousingUnitRepository housingUnitRepository) {
     this.buildingRepository = buildingRepository;
     this.buildingMapper = buildingMapper;
+    this.housingUnitRepository = housingUnitRepository;
   }
 
   /**
@@ -117,9 +118,7 @@ public class BuildingService {
   public void deleteBuilding(Long id) {
     Building building = findBuildingEntityById(id);
     
-    // TODO: Check for housing units when HousingUnit entity is implemented
-    // For now, we'll allow deletion
-    long unitCount = 0L; // countHousingUnits(id);
+   long unitCount = housingUnitRepository.countByBuildingId(id);
     
     if (unitCount > 0) {
       throw new BuildingHasUnitsException(id, unitCount);
