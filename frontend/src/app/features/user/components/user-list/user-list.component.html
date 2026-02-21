@@ -1,0 +1,63 @@
+<div class="user-list">
+  <div class="user-list__header">
+    <h1>Users</h1>
+    <button class="btn btn--primary" (click)="create()">+ Create User</button>
+  </div>
+
+  <div *ngIf="errorMessage" class="alert alert--error">{{ errorMessage }}</div>
+  <div *ngIf="loading" class="loading">Loading…</div>
+
+  <ng-container *ngIf="!loading">
+    <table class="table" *ngIf="users.length > 0; else empty">
+      <thead>
+        <tr>
+          <th (click)="sort('username')" class="sortable">
+            Username <span>{{ sortIcon('username') }}</span>
+          </th>
+          <th (click)="sort('email')" class="sortable">
+            Email <span>{{ sortIcon('email') }}</span>
+          </th>
+          <th (click)="sort('role')" class="sortable">
+            Role <span>{{ sortIcon('role') }}</span>
+          </th>
+          <th (click)="sort('createdAt')" class="sortable">
+            Created At <span>{{ sortIcon('createdAt') }}</span>
+          </th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let user of pagedUsers"
+            class="table__row--clickable"
+            (click)="navigateTo(user)">
+          <td>{{ user.username }}</td>
+          <td>{{ user.email }}</td>
+          <td><span class="badge badge--role">{{ user.role }}</span></td>
+          <td>{{ user.createdAt | date:'yyyy-MM-dd HH:mm' }}</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <ng-template #empty>
+      <p class="empty-state">No users found.</p>
+    </ng-template>
+
+    <div class="pagination" *ngIf="totalPages > 1">
+      <button class="btn btn--sm" [disabled]="currentPage === 1" (click)="goToPage(currentPage - 1)">
+        &laquo; Prev
+      </button>
+      <button *ngFor="let p of pages()"
+              class="btn btn--sm"
+              [class.btn--active]="p === currentPage"
+              (click)="goToPage(p)">
+        {{ p }}
+      </button>
+      <button class="btn btn--sm" [disabled]="currentPage === totalPages" (click)="goToPage(currentPage + 1)">
+        Next &raquo;
+      </button>
+    </div>
+
+    <p class="pagination__info" *ngIf="users.length > 0">
+      Showing {{ (currentPage - 1) * pageSize + 1 }}–{{ [currentPage * pageSize, users.length] | min }} of {{ users.length }} users
+    </p>
+  </ng-container>
+</div>

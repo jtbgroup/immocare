@@ -1,0 +1,103 @@
+<div class="user-details">
+
+  <div *ngIf="loading" class="loading">Loading…</div>
+  <div *ngIf="errorMessage" class="alert alert--error">{{ errorMessage }}</div>
+
+  <ng-container *ngIf="user && !loading">
+
+    <div class="user-details__header">
+      <div>
+        <button class="btn btn--ghost" (click)="back()">← Back</button>
+        <h1>{{ user.username }}</h1>
+      </div>
+      <div class="user-details__actions">
+        <button class="btn btn--secondary" (click)="edit()">Edit</button>
+        <button class="btn btn--secondary" (click)="togglePasswordForm()">
+          {{ showPasswordForm ? 'Cancel Password Change' : 'Change Password' }}
+        </button>
+
+        <!-- Delete button — disabled with tooltip for self or last admin -->
+        <ng-container *ngTemplateOutlet="deleteBtn; context: { $implicit: false }"></ng-container>
+      </div>
+    </div>
+
+    <!-- Success banner after password change -->
+    <div *ngIf="pwSuccess" class="alert alert--success">Password updated successfully.</div>
+    <div *ngIf="deleteError" class="alert alert--error">{{ deleteError }}</div>
+
+    <!-- User info card -->
+    <div class="card">
+      <div class="card__row">
+        <span class="card__label">Username</span>
+        <span class="card__value">{{ user.username }}</span>
+      </div>
+      <div class="card__row">
+        <span class="card__label">Email</span>
+        <span class="card__value">{{ user.email }}</span>
+      </div>
+      <div class="card__row">
+        <span class="card__label">Role</span>
+        <span class="card__value"><span class="badge badge--role">{{ user.role }}</span></span>
+      </div>
+      <div class="card__row">
+        <span class="card__label">Created At</span>
+        <span class="card__value">{{ user.createdAt | date:'yyyy-MM-dd HH:mm' }}</span>
+      </div>
+      <div class="card__row">
+        <span class="card__label">Updated At</span>
+        <span class="card__value">{{ user.updatedAt | date:'yyyy-MM-dd HH:mm' }}</span>
+      </div>
+    </div>
+
+    <!-- Inline change-password form (US034) -->
+    <div class="password-form card" *ngIf="showPasswordForm">
+      <h2>Change Password</h2>
+
+      <div *ngIf="pwError" class="alert alert--error">{{ pwError }}</div>
+
+      <form [formGroup]="pwForm" (ngSubmit)="submitPassword()" novalidate>
+
+        <div class="form-field">
+          <label for="newPassword">New Password <span class="required">*</span></label>
+          <input id="newPassword" type="password" formControlName="newPassword"
+                 [class.invalid]="pwForm.get('newPassword')?.invalid && pwForm.get('newPassword')?.touched"
+                 placeholder="Min. 8 chars, 1 upper, 1 lower, 1 digit" />
+          <span class="field-error" *ngIf="pwFieldError('newPassword')">{{ pwFieldError('newPassword') }}</span>
+        </div>
+
+        <div class="form-field">
+          <label for="confirmPassword">Confirm Password <span class="required">*</span></label>
+          <input id="confirmPassword" type="password" formControlName="confirmPassword"
+                 [class.invalid]="(pwForm.get('confirmPassword')?.invalid && pwForm.get('confirmPassword')?.touched) || pwMismatch"
+                 placeholder="Repeat new password" />
+          <span class="field-error" *ngIf="pwMismatch">Passwords do not match</span>
+          <span class="field-error" *ngIf="!pwMismatch && pwFieldError('confirmPassword')">{{ pwFieldError('confirmPassword') }}</span>
+        </div>
+
+        <div class="form-actions">
+          <button type="submit" class="btn btn--primary" [disabled]="pwSubmitting">
+            {{ pwSubmitting ? 'Saving…' : 'Save Password' }}
+          </button>
+          <button type="button" class="btn btn--secondary" (click)="togglePasswordForm()">Cancel</button>
+        </div>
+      </form>
+    </div>
+
+  </ng-container>
+
+  <!-- Delete button template — reused with isLastAdmin context -->
+  <ng-template #deleteBtn let-isLastAdmin>
+    <span
+      [title]="isSelf ? 'You cannot delete your own account'
+             : isLastAdmin ? 'Cannot delete the last administrator account'
+             : ''">
+      <button
+        class="btn btn--danger"
+        [disabled]="isSelf || isLastAdmin || deleting"
+        (click)="confirmDelete(isLastAdmin)">
+        {{ deleting ? 'Deleting…' : 'Delete' }}
+      </button>
+    </span>
+  </ng-template>
+
+</div>
