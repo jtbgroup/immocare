@@ -3,6 +3,7 @@ package com.immocare.config;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpStatus;
+import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
@@ -12,7 +13,7 @@ import org.springframework.security.web.authentication.HttpStatusEntryPoint;
 
 /**
  * Security configuration for ImmoCare.
- * Compatible with Spring Boot 4 / Spring Security 6.4.
+ * Compatible with Spring Boot 3.x / Spring Security 6.x.
  */
 @Configuration
 @EnableWebSecurity
@@ -21,6 +22,9 @@ public class SecurityConfig {
   @Bean
   public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
     http
+        // Enable CORS — delegates to CorsConfig bean (required in Spring Security 6)
+        .cors(Customizer.withDefaults())
+
         .csrf(csrf -> csrf.disable())
 
         .authorizeHttpRequests(auth -> auth
