@@ -1,52 +1,45 @@
 import { Component, OnInit, OnDestroy } from '@angular/core';
+import { CommonModule } from '@angular/common';
+import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
 import { Subject } from 'rxjs';
 import { takeUntil, debounceTime, distinctUntilChanged } from 'rxjs/operators';
 import { BuildingService } from '../../../../core/services/building.service';
 import { Building, Page } from '../../../../models/building.model';
 
-/**
- * Component for displaying the list of buildings.
- * Implements US004 - View Buildings List and US005 - Search Buildings.
- */
 @Component({
   selector: 'app-building-list',
+  standalone: true,
+  imports: [CommonModule, FormsModule],
   templateUrl: './building-list.component.html',
   styleUrls: ['./building-list.component.scss']
 })
 export class BuildingListComponent implements OnInit, OnDestroy {
   buildings: Building[] = [];
   cities: string[] = [];
-  
-  // Pagination
+
   currentPage = 0;
   pageSize = 20;
   totalElements = 0;
   totalPages = 0;
-  
-  // Filters
+
   selectedCity = '';
   searchTerm = '';
   sortField = 'name';
   sortDirection: 'asc' | 'desc' = 'asc';
-  
-  // Search subject for debouncing
+
   private searchSubject = new Subject<string>();
   private destroy$ = new Subject<void>();
-  
+
   loading = false;
   error: string | null = null;
 
-  constructor(
-    private buildingService: BuildingService,
-    private router: Router
-  ) {}
+  constructor(private buildingService: BuildingService, private router: Router) {}
 
   ngOnInit(): void {
     this.loadCities();
     this.loadBuildings();
-    
-    // Setup debounced search
+
     this.searchSubject.pipe(
       debounceTime(300),
       distinctUntilChanged(),
@@ -63,22 +56,12 @@ export class BuildingListComponent implements OnInit, OnDestroy {
     this.destroy$.complete();
   }
 
-  /**
-   * Load buildings with current filters.
-   */
   loadBuildings(): void {
     this.loading = true;
     this.error = null;
-    
     const sort = `${this.sortField},${this.sortDirection}`;
-    
-    this.buildingService.getAllBuildings(
-      this.currentPage,
-      this.pageSize,
-      sort,
-      this.selectedCity || undefined,
-      this.searchTerm || undefined
-    ).pipe(takeUntil(this.destroy$))
+    this.buildingService.getAllBuildings(this.currentPage, this.pageSize, sort, this.selectedCity || undefined, this.searchTerm || undefined)
+      .pipe(takeUntil(this.destroy$))
       .subscribe({
         next: (page: Page<Building>) => {
           this.buildings = page.content;
@@ -87,100 +70,25 @@ export class BuildingListComponent implements OnInit, OnDestroy {
           this.currentPage = page.number;
           this.loading = false;
         },
-        error: (err) => {
-          this.error = 'Failed to load buildings';
-          this.loading = false;
-          console.error('Error loading buildings:', err);
-        }
+        error: () => { this.error = 'Failed to load buildings'; this.loading = false; }
       });
   }
 
-  /**
-   * Load all cities for filter dropdown.
-   */
   loadCities(): void {
-    this.buildingService.getAllCities()
-      .pipe(takeUntil(this.destroy$))
-      .subscribe({
-        next: (cities) => {
-          this.cities = cities;
-        },
-        error: (err) => {
-          console.error('Error loading cities:', err);
-        }
-      });
+    this.buildingService.getAllCities().pipe(takeUntil(this.destroy$))
+      .subscribe({ next: (cities) => { this.cities = cities; } });
   }
 
-  /**
-   * Handle search input.
-   */
-  onSearchChange(searchTerm: string): void {
-    this.searchSubject.next(searchTerm);
-  }
-
-  /**
-   * Handle city filter change.
-   */
-  onCityFilterChange(city: string): void {
-    this.selectedCity = city;
-    this.currentPage = 0;
-    this.loadBuildings();
-  }
-
-  /**
-   * Handle sort change.
-   */
+  onSearchChange(searchTerm: string): void { this.searchSubject.next(searchTerm); }
+  onCityFilterChange(city: string): void { this.selectedCity = city; this.currentPage = 0; this.loadBuildings(); }
   onSortChange(field: string): void {
-    if (this.sortField === field) {
-      this.sortDirection = this.sortDirection === 'asc' ? 'desc' : 'asc';
-    } else {
-      this.sortField = field;
-      this.sortDirection = 'asc';
-    }
+    if (this.sortField === field) { this.sortDirection = this.sortDirection === 'asc' ? 'desc' : 'asc'; }
+    else { this.sortField = field; this.sortDirection = 'asc'; }
     this.loadBuildings();
   }
-
-  /**
-   * Navigate to previous page.
-   */
-  previousPage(): void {
-    if (this.currentPage > 0) {
-      this.currentPage--;
-      this.loadBuildings();
-    }
-  }
-
-  /**
-   * Navigate to next page.
-   */
-  nextPage(): void {
-    if (this.currentPage < this.totalPages - 1) {
-      this.currentPage++;
-      this.loadBuildings();
-    }
-  }
-
-  /**
-   * Navigate to building details.
-   */
-  viewBuilding(building: Building): void {
-    this.router.navigate(['/buildings', building.id]);
-  }
-
-  /**
-   * Navigate to create building form.
-   */
-  createBuilding(): void {
-    this.router.navigate(['/buildings/new']);
-  }
-
-  /**
-   * Clear all filters.
-   */
-  clearFilters(): void {
-    this.selectedCity = '';
-    this.searchTerm = '';
-    this.currentPage = 0;
-    this.loadBuildings();
-  }
+  previousPage(): void { if (this.currentPage > 0) { this.currentPage--; this.loadBuildings(); } }
+  nextPage(): void { if (this.currentPage < this.totalPages - 1) { this.currentPage++; this.loadBuildings(); } }
+  viewBuilding(building: Building): void { this.router.navigate(['/buildings', building.id]); }
+  createBuilding(): void { this.router.navigate(['/buildings/new']); }
+  clearFilters(): void { this.selectedCity = ''; this.searchTerm = ''; this.currentPage = 0; this.loadBuildings(); }
 }
