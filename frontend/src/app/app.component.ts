@@ -32,7 +32,7 @@ import { VersionService } from './core/services/version.service';
       </footer>
     </div>
   `,
-  styles: [\`
+  styles: [`
     .app-container { min-height: 100vh; display: flex; flex-direction: column; }
     .app-header {
       background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
@@ -59,7 +59,7 @@ import { VersionService } from './core/services/version.service';
     .app-nav__logout:hover { background: rgba(255,255,255,0.25); }
     .app-content { flex: 1; background: #f5f7fa; }
     .app-footer { text-align: center; padding: 0.4rem; font-size: 0.7rem; color: #bbb; background: #f5f7fa; }
-  \`]
+  `]
 })
 export class AppComponent implements OnInit {
   version = '…';

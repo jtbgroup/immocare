@@ -61,5 +61,8 @@ export class BuildingDetailsComponent implements OnInit, OnDestroy {
   }
 
   goBack(): void { this.router.navigate(['/buildings']); }
-  formatDate(date: string): string { return date ? new Date(date).toLocaleDateString() : 'N/A'; }
+
+  formatDate(date: string | undefined): string {
+    return date ? new Date(date).toLocaleDateString() : 'N/A';
+  }
 }

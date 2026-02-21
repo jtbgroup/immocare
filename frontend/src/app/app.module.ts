@@ -19,7 +19,7 @@ import { AuthInterceptor } from "./core/auth/auth.interceptor";
           import("./features/auth/auth.module").then((m) => m.AuthModule),
       },
       {
-        path: "buildings",
+        path: "buildings",app
         canActivate: [AuthGuard],
         loadChildren: () =>
           import("./features/building/building.module").then(
