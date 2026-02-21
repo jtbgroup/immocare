@@ -13,17 +13,14 @@ export interface AuthUser {
 /**
  * Handles authentication state and communication with the backend.
  *
- * Login flow  : POST /login  (Spring Security form endpoint)
- * Logout flow : POST /api/v1/auth/logout  (session invalidation)
+ * Login flow  : POST /api/v1/auth/login  (Spring Security form endpoint)
+ * Logout flow : POST /api/v1/auth/logout
  * State check : GET  /api/v1/auth/me
- *
- * All requests use withCredentials: true so the browser sends the
- * JSESSIONID cookie automatically.
  */
 @Injectable({ providedIn: 'root' })
 export class AuthService {
 
-  private readonly loginUrl  = '/login';
+  private readonly loginUrl  = `${environment.apiUrl}/auth/login`;
   private readonly meUrl     = `${environment.apiUrl}/auth/me`;
   private readonly logoutUrl = `${environment.apiUrl}/auth/logout`;
 
@@ -32,14 +29,6 @@ export class AuthService {
 
   constructor(private http: HttpClient, private router: Router) {}
 
-  // -------------------------------------------------------------------------
-  // Public API
-  // -------------------------------------------------------------------------
-
-  /**
-   * Submits credentials to Spring Security's form-login endpoint.
-   * Uses application/x-www-form-urlencoded as required by Spring Security.
-   */
   login(username: string, password: string): Observable<void> {
     const body = new URLSearchParams();
     body.set('username', username);
@@ -53,9 +42,6 @@ export class AuthService {
     );
   }
 
-  /**
-   * Invalidates the server-side session then redirects to /login.
-   */
   logout(): void {
     this.http.post<void>(this.logoutUrl, {}, { withCredentials: true })
       .pipe(catchError(() => of(null)))
@@ -65,10 +51,6 @@ export class AuthService {
       });
   }
 
-  /**
-   * Fetches the current user from the backend.
-   * Returns null (not an error) when not authenticated.
-   */
   getCurrentUser(): Observable<AuthUser | null> {
     return this.http.get<AuthUser>(this.meUrl, { withCredentials: true })
       .pipe(
@@ -80,16 +62,9 @@ export class AuthService {
       );
   }
 
-  /**
-   * Observable boolean — true when a user is currently authenticated.
-   */
   isAuthenticated(): Observable<boolean> {
     return this.getCurrentUser().pipe(map(user => user !== null));
   }
-
-  // -------------------------------------------------------------------------
-  // Internal helpers
-  // -------------------------------------------------------------------------
 
   private fetchCurrentUser(): Observable<AuthUser | null> {
     return this.getCurrentUser();

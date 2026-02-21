@@ -1,15 +1,11 @@
--- Insert default admin user for development
--- Password: admin123 (hashed with BCrypt)
+-- V003: Insert default admin user
+-- Password: admin123
+-- Hash generated with BCryptPasswordEncoder strength 12
 
-INSERT INTO user_account (username, password_hash, email, role, created_at, updated_at)
+INSERT INTO app_user (username, password_hash, email, role)
 VALUES (
     'admin',
-    '$2a$10$N9qo8uLOickgx2ZMRZoMyeIjZAgcfl7p92ldGxad68LJZdL17lhWy', -- admin123
+    '$2a$12$5z2u7D4w9NIJbFRJ/g9/A.w3SWPX01nOyifIfuo.09HsNLkBRUiCy',
     'admin@immocare.com',
-    'ADMIN',
-    CURRENT_TIMESTAMP,
-    CURRENT_TIMESTAMP
+    'ADMIN'
 );
-
--- Add comment
-COMMENT ON TABLE user_account IS 'Default admin user created for development (username: admin, password: admin123)';

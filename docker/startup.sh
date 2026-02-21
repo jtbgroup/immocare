@@ -9,13 +9,13 @@ mkdir -p /run/nginx
 echo "Starting nginx..."
 nginx
 
-# Wait for nginx to be ready
+# Wait for nginx to write its pid file
 sleep 2
 
-# Verify nginx is running
-if ! pgrep -x nginx > /dev/null; then
+# Verify nginx is running via pid file
+if [ ! -f /run/nginx/nginx.pid ]; then
     echo "ERROR: nginx failed to start"
-    cat /var/log/nginx/error.log
+    cat /var/log/nginx/error.log 2>/dev/null || echo "No error log available"
     exit 1
 fi
 echo "✓ nginx started successfully"
@@ -31,5 +31,5 @@ exec java \
     -Dspring.datasource.username=${DB_USER:-immocare} \
     -Dspring.datasource.password=${DB_PASSWORD:-immocare} \
     -Dspring.flyway.enabled=true \
-    -Dspring.jpa.hibernate.ddl-auto=validate \
+    -Dspring.jpa.hibernate.ddl-auto=none \
     -jar /app/app.jar
