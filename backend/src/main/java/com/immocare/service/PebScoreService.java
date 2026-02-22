@@ -1,5 +1,15 @@
 package com.immocare.service;
 
+import java.time.LocalDate;
+import java.time.temporal.ChronoUnit;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Optional;
+import java.util.stream.Collectors;
+
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
 import com.immocare.exception.HousingUnitNotFoundException;
 import com.immocare.exception.InvalidPebScoreDateException;
 import com.immocare.exception.InvalidValidityPeriodException;
@@ -9,18 +19,9 @@ import com.immocare.model.dto.PebImprovementDTO;
 import com.immocare.model.dto.PebScoreDTO;
 import com.immocare.model.dto.PebScoreStepDTO;
 import com.immocare.model.entity.HousingUnit;
-import com.immocare.model.entity.PebScore;
 import com.immocare.model.entity.PebScoreHistory;
 import com.immocare.repository.HousingUnitRepository;
 import com.immocare.repository.PebScoreRepository;
-import java.time.LocalDate;
-import java.time.temporal.ChronoUnit;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
-import java.util.stream.Collectors;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
 /**
  * Service layer for PEB score management.
@@ -37,8 +38,8 @@ public class PebScoreService {
     private final PebScoreMapper pebScoreMapper;
 
     public PebScoreService(PebScoreRepository pebScoreRepository,
-                           HousingUnitRepository housingUnitRepository,
-                           PebScoreMapper pebScoreMapper) {
+            HousingUnitRepository housingUnitRepository,
+            PebScoreMapper pebScoreMapper) {
         this.pebScoreRepository = pebScoreRepository;
         this.housingUnitRepository = housingUnitRepository;
         this.pebScoreMapper = pebScoreMapper;
@@ -56,7 +57,8 @@ public class PebScoreService {
         HousingUnit unit = housingUnitRepository.findById(unitId)
                 .orElseThrow(() -> new HousingUnitNotFoundException(unitId));
 
-        // BR-UC004-03: score_date cannot be in the future (also enforced by @PastOrPresent)
+        // BR-UC004-03: score_date cannot be in the future (also enforced by
+        // @PastOrPresent)
         if (request.getScoreDate().isAfter(LocalDate.now())) {
             throw new InvalidPebScoreDateException("Score date cannot be in the future");
         }

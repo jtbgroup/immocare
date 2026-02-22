@@ -1,28 +1,31 @@
+import { CommonModule } from "@angular/common";
 import {
   Component,
   Input,
   OnChanges,
   OnDestroy,
   SimpleChanges,
-} from '@angular/core';
+} from "@angular/core";
 import {
   AbstractControl,
   FormBuilder,
   FormGroup,
+  ReactiveFormsModule,
   Validators,
-} from '@angular/forms';
-import { Subject } from 'rxjs';
-import { takeUntil } from 'rxjs/operators';
+} from "@angular/forms";
+import { Subject } from "rxjs";
+import { takeUntil } from "rxjs/operators";
+import { WaterMeterService } from "../../../../core/services/water-meter.service";
 import {
   AssignMeterRequest,
   RemoveMeterRequest,
   REPLACEMENT_REASON_LABELS,
+  ReplacementReason,
   ReplaceMeterRequest,
   WaterMeterHistory,
-} from '../../../../models/water-meter.model';
-import { WaterMeterService } from '../../../../core/services/water-meter.service';
+} from "../../../../models/water-meter.model";
 
-type MeterFormMode = 'assign' | 'replace' | 'remove' | null;
+type MeterFormMode = "assign" | "replace" | "remove" | null;
 
 /**
  * Water Meter section component — integrates into HousingUnitDetailsComponent.
@@ -32,12 +35,13 @@ type MeterFormMode = 'assign' | 'replace' | 'remove' | null;
  *   <app-water-meter-section [unitId]="unit.id"></app-water-meter-section>
  */
 @Component({
-  selector: 'app-water-meter-section',
-  templateUrl: './water-meter-section.component.html',
-  styleUrls: ['./water-meter-section.component.scss'],
+  selector: "app-water-meter-section",
+  standalone: true,
+  imports: [CommonModule, ReactiveFormsModule],
+  templateUrl: "./water-meter-section.component.html",
+  styleUrls: ["./water-meter-section.component.scss"],
 })
 export class WaterMeterSectionComponent implements OnChanges, OnDestroy {
-
   @Input() unitId!: number;
 
   activeMeter: WaterMeterHistory | null = null;
@@ -55,19 +59,21 @@ export class WaterMeterSectionComponent implements OnChanges, OnDestroy {
   meterForm!: FormGroup;
   removeForm!: FormGroup;
   readonly replacementReasonLabels = REPLACEMENT_REASON_LABELS;
-  readonly replacementReasons = Object.keys(REPLACEMENT_REASON_LABELS);
+  readonly replacementReasons = Object.keys(
+    REPLACEMENT_REASON_LABELS,
+  ) as ReplacementReason[];
 
   private destroy$ = new Subject<void>();
 
   constructor(
     private fb: FormBuilder,
-    private meterService: WaterMeterService
+    private meterService: WaterMeterService,
   ) {
     this.buildForms();
   }
 
   ngOnChanges(changes: SimpleChanges): void {
-    if (changes['unitId'] && this.unitId) {
+    if (changes["unitId"] && this.unitId) {
       this.loadActiveMeter();
     }
   }
@@ -83,10 +89,11 @@ export class WaterMeterSectionComponent implements OnChanges, OnDestroy {
 
   loadActiveMeter(): void {
     this.loading = true;
-    this.meterService.getActiveMeter(this.unitId)
+    this.meterService
+      .getActiveMeter(this.unitId)
       .pipe(takeUntil(this.destroy$))
       .subscribe({
-        next: meter => {
+        next: (meter) => {
           this.activeMeter = meter;
           this.loading = false;
         },
@@ -98,14 +105,15 @@ export class WaterMeterSectionComponent implements OnChanges, OnDestroy {
   }
 
   loadHistory(): void {
-    this.meterService.getMeterHistory(this.unitId)
+    this.meterService
+      .getMeterHistory(this.unitId)
       .pipe(takeUntil(this.destroy$))
       .subscribe({
-        next: history => {
+        next: (history) => {
           this.history = history;
           this.showHistory = true;
         },
-        error: () => this.showError('Failed to load meter history.'),
+        error: () => this.showError("Failed to load meter history."),
       });
   }
 
@@ -123,20 +131,20 @@ export class WaterMeterSectionComponent implements OnChanges, OnDestroy {
 
   openAssignForm(): void {
     this.meterForm.reset({ installationDate: this.today() });
-    this.formMode = 'assign';
+    this.formMode = "assign";
     this.clearMessages();
   }
 
   openReplaceForm(): void {
     this.sameNumberWarning = false;
     this.meterForm.reset({ newInstallationDate: this.today() });
-    this.formMode = 'replace';
+    this.formMode = "replace";
     this.clearMessages();
   }
 
   openRemoveForm(): void {
     this.removeForm.reset({ removalDate: this.today() });
-    this.formMode = 'remove';
+    this.formMode = "remove";
     this.clearMessages();
   }
 
@@ -159,31 +167,33 @@ export class WaterMeterSectionComponent implements OnChanges, OnDestroy {
       installationDate: this.meterForm.value.installationDate,
     };
     this.saving = true;
-    this.meterService.assignMeter(this.unitId, req)
+    this.meterService
+      .assignMeter(this.unitId, req)
       .pipe(takeUntil(this.destroy$))
       .subscribe({
-        next: meter => {
+        next: (meter) => {
           this.activeMeter = meter;
           this.formMode = null;
           this.showHistory = false;
           this.saving = false;
-          this.showSuccess('Water meter assigned successfully.');
+          this.showSuccess("Water meter assigned successfully.");
         },
-        error: err => {
+        error: (err) => {
           this.saving = false;
-          this.showError(err?.error?.message || 'Failed to assign meter.');
+          this.showError(err?.error?.message || "Failed to assign meter.");
         },
       });
   }
 
   /** US027 — check same-number warning before submitting */
   checkAndSubmitReplace(): void {
+    if (!this.activeMeter) return;
     if (this.meterForm.invalid) return;
     const newNumber = this.meterForm.value.newMeterNumber?.trim();
     if (
-      !this.sameNumberWarning
-      && this.activeMeter
-      && newNumber === this.activeMeter.meterNumber
+      !this.sameNumberWarning &&
+      this.activeMeter &&
+      newNumber === this.activeMeter.meterNumber
     ) {
       this.sameNumberWarning = true;
       return; // TS-UC006-07: show warning, let user confirm
@@ -191,7 +201,8 @@ export class WaterMeterSectionComponent implements OnChanges, OnDestroy {
     this.submitReplace();
   }
 
-  private submitReplace(): void {
+  submitReplace(): void {
+    if (!this.activeMeter) return;
     const req: ReplaceMeterRequest = {
       newMeterNumber: this.meterForm.value.newMeterNumber.trim(),
       newMeterLocation: this.meterForm.value.newMeterLocation?.trim() || null,
@@ -199,20 +210,21 @@ export class WaterMeterSectionComponent implements OnChanges, OnDestroy {
       reason: this.meterForm.value.reason || undefined,
     };
     this.saving = true;
-    this.meterService.replaceMeter(this.unitId, req)
+    this.meterService
+      .replaceMeter(this.unitId, req)
       .pipe(takeUntil(this.destroy$))
       .subscribe({
-        next: meter => {
+        next: (meter) => {
           this.activeMeter = meter;
           this.formMode = null;
           this.showHistory = false;
           this.sameNumberWarning = false;
           this.saving = false;
-          this.showSuccess('Water meter replaced successfully.');
+          this.showSuccess("Water meter replaced successfully.");
         },
-        error: err => {
+        error: (err) => {
           this.saving = false;
-          this.showError(err?.error?.message || 'Failed to replace meter.');
+          this.showError(err?.error?.message || "Failed to replace meter.");
         },
       });
   }
@@ -224,7 +236,8 @@ export class WaterMeterSectionComponent implements OnChanges, OnDestroy {
       removalDate: this.removeForm.value.removalDate,
     };
     this.saving = true;
-    this.meterService.removeMeter(this.unitId, req)
+    this.meterService
+      .removeMeter(this.unitId, req)
       .pipe(takeUntil(this.destroy$))
       .subscribe({
         next: () => {
@@ -232,11 +245,11 @@ export class WaterMeterSectionComponent implements OnChanges, OnDestroy {
           this.formMode = null;
           this.showHistory = false;
           this.saving = false;
-          this.showSuccess('Water meter removed successfully.');
+          this.showSuccess("Water meter removed successfully.");
         },
-        error: err => {
+        error: (err) => {
           this.saving = false;
-          this.showError(err?.error?.message || 'Failed to remove meter.');
+          this.showError(err?.error?.message || "Failed to remove meter.");
         },
       });
   }
@@ -253,37 +266,55 @@ export class WaterMeterSectionComponent implements OnChanges, OnDestroy {
   private buildForms(): void {
     this.meterForm = this.fb.group({
       // assign fields
-      meterNumber: ['', [Validators.required, Validators.maxLength(50),
-        Validators.pattern('^[A-Za-z0-9\\-_]+$')]],
-      meterLocation: ['', Validators.maxLength(100)],
-      installationDate: ['', Validators.required],
+      meterNumber: [
+        "",
+        [
+          Validators.required,
+          Validators.maxLength(50),
+          Validators.pattern("^[A-Za-z0-9\\-_]+$"),
+        ],
+      ],
+      meterLocation: ["", Validators.maxLength(100)],
+      installationDate: ["", Validators.required],
       // replace-only fields
-      newMeterNumber: ['', [Validators.maxLength(50),
-        Validators.pattern('^[A-Za-z0-9\\-_]+$')]],
-      newMeterLocation: ['', Validators.maxLength(100)],
-      newInstallationDate: [''],
+      newMeterNumber: [
+        "",
+        [Validators.maxLength(50), Validators.pattern("^[A-Za-z0-9\\-_]+$")],
+      ],
+      newMeterLocation: ["", Validators.maxLength(100)],
+      newInstallationDate: [""],
       reason: [null],
     });
 
     this.removeForm = this.fb.group({
-      removalDate: ['', Validators.required],
+      removalDate: ["", Validators.required],
     });
   }
 
-  get meterNumberCtrl(): AbstractControl { return this.meterForm.get('meterNumber')!; }
-  get installationDateCtrl(): AbstractControl { return this.meterForm.get('installationDate')!; }
-  get newMeterNumberCtrl(): AbstractControl { return this.meterForm.get('newMeterNumber')!; }
-  get newInstallationDateCtrl(): AbstractControl { return this.meterForm.get('newInstallationDate')!; }
-  get removalDateCtrl(): AbstractControl { return this.removeForm.get('removalDate')!; }
+  get meterNumberCtrl(): AbstractControl {
+    return this.meterForm.get("meterNumber")!;
+  }
+  get installationDateCtrl(): AbstractControl {
+    return this.meterForm.get("installationDate")!;
+  }
+  get newMeterNumberCtrl(): AbstractControl {
+    return this.meterForm.get("newMeterNumber")!;
+  }
+  get newInstallationDateCtrl(): AbstractControl {
+    return this.meterForm.get("newInstallationDate")!;
+  }
+  get removalDateCtrl(): AbstractControl {
+    return this.removeForm.get("removalDate")!;
+  }
 
   private today(): string {
-    return new Date().toISOString().split('T')[0];
+    return new Date().toISOString().split("T")[0];
   }
 
   private showSuccess(msg: string): void {
     this.successMessage = msg;
     this.errorMessage = null;
-    setTimeout(() => this.successMessage = null, 4000);
+    setTimeout(() => (this.successMessage = null), 4000);
   }
 
   private showError(msg: string): void {
