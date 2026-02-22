@@ -7,6 +7,7 @@ WORKDIR /app
 COPY package.json ./
 
 # Use --force to resolve peer dependency conflicts (Angular major version upgrades)
+# postinstall script will automatically patch entities exports
 RUN npm install --force && npm cache clean --force
 
 # Copy source code
