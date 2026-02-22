@@ -8,13 +8,8 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 import static org.springframework.test.web.servlet.setup.MockMvcBuilders.webAppContextSetup;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.immocare.model.dto.CreateHousingUnitRequest;
-import com.immocare.model.dto.UpdateHousingUnitRequest;
-import com.immocare.model.entity.Building;
-import com.immocare.repository.BuildingRepository;
-import com.immocare.repository.HousingUnitRepository;
 import java.math.BigDecimal;
+
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -25,15 +20,26 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.context.WebApplicationContext;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.immocare.model.dto.CreateHousingUnitRequest;
+import com.immocare.model.dto.UpdateHousingUnitRequest;
+import com.immocare.model.entity.Building;
+import com.immocare.repository.BuildingRepository;
+import com.immocare.repository.HousingUnitRepository;
+
 @SpringBootTest
 @TestPropertySource(locations = "classpath:application-test.properties")
 @Transactional
 class HousingUnitControllerTest {
 
-  @Autowired private WebApplicationContext context;
-  @Autowired private ObjectMapper objectMapper;
-  @Autowired private BuildingRepository buildingRepository;
-  @Autowired private HousingUnitRepository housingUnitRepository;
+  @Autowired
+  private WebApplicationContext context;
+  @Autowired
+  private ObjectMapper objectMapper;
+  @Autowired
+  private BuildingRepository buildingRepository;
+  @Autowired
+  private HousingUnitRepository housingUnitRepository;
 
   private MockMvc mockMvc;
   private Long buildingId;
@@ -77,8 +83,8 @@ class HousingUnitControllerTest {
     req.setFloor(1);
 
     mockMvc.perform(post("/api/v1/units")
-            .contentType(MediaType.APPLICATION_JSON)
-            .content(objectMapper.writeValueAsString(req)))
+        .contentType(MediaType.APPLICATION_JSON)
+        .content(objectMapper.writeValueAsString(req)))
         .andExpect(status().isCreated())
         .andExpect(jsonPath("$.unitNumber").value("A101"))
         .andExpect(jsonPath("$.floor").value(1))
@@ -97,8 +103,8 @@ class HousingUnitControllerTest {
     req.setTerraceOrientation("S");
 
     mockMvc.perform(post("/api/v1/units")
-            .contentType(MediaType.APPLICATION_JSON)
-            .content(objectMapper.writeValueAsString(req)))
+        .contentType(MediaType.APPLICATION_JSON)
+        .content(objectMapper.writeValueAsString(req)))
         .andExpect(status().isCreated())
         .andExpect(jsonPath("$.hasTerrace").value(true))
         .andExpect(jsonPath("$.terraceOrientation").value("S"));
@@ -114,8 +120,8 @@ class HousingUnitControllerTest {
     req.setHasTerrace(true);
 
     mockMvc.perform(post("/api/v1/units")
-            .contentType(MediaType.APPLICATION_JSON)
-            .content(objectMapper.writeValueAsString(req)))
+        .contentType(MediaType.APPLICATION_JSON)
+        .content(objectMapper.writeValueAsString(req)))
         .andExpect(status().isCreated())
         .andExpect(jsonPath("$.hasTerrace").value(true));
   }
@@ -127,8 +133,8 @@ class HousingUnitControllerTest {
     req1.setUnitNumber("A101");
     req1.setFloor(1);
     mockMvc.perform(post("/api/v1/units")
-            .contentType(MediaType.APPLICATION_JSON)
-            .content(objectMapper.writeValueAsString(req1)))
+        .contentType(MediaType.APPLICATION_JSON)
+        .content(objectMapper.writeValueAsString(req1)))
         .andExpect(status().isCreated());
 
     CreateHousingUnitRequest req2 = new CreateHousingUnitRequest();
@@ -136,8 +142,8 @@ class HousingUnitControllerTest {
     req2.setUnitNumber("A101");
     req2.setFloor(2);
     mockMvc.perform(post("/api/v1/units")
-            .contentType(MediaType.APPLICATION_JSON)
-            .content(objectMapper.writeValueAsString(req2)))
+        .contentType(MediaType.APPLICATION_JSON)
+        .content(objectMapper.writeValueAsString(req2)))
         .andExpect(status().isConflict());
   }
 
@@ -149,8 +155,8 @@ class HousingUnitControllerTest {
     req.setFloor(1);
 
     mockMvc.perform(post("/api/v1/units")
-            .contentType(MediaType.APPLICATION_JSON)
-            .content(objectMapper.writeValueAsString(req)))
+        .contentType(MediaType.APPLICATION_JSON)
+        .content(objectMapper.writeValueAsString(req)))
         .andExpect(status().isBadRequest());
   }
 
@@ -164,8 +170,8 @@ class HousingUnitControllerTest {
     req.setFloor(2);
 
     String response = mockMvc.perform(post("/api/v1/units")
-            .contentType(MediaType.APPLICATION_JSON)
-            .content(objectMapper.writeValueAsString(req)))
+        .contentType(MediaType.APPLICATION_JSON)
+        .content(objectMapper.writeValueAsString(req)))
         .andReturn().getResponse().getContentAsString();
 
     Long id = objectMapper.readTree(response).get("id").asLong();
@@ -191,8 +197,8 @@ class HousingUnitControllerTest {
     create.setFloor(3);
 
     String created = mockMvc.perform(post("/api/v1/units")
-            .contentType(MediaType.APPLICATION_JSON)
-            .content(objectMapper.writeValueAsString(create)))
+        .contentType(MediaType.APPLICATION_JSON)
+        .content(objectMapper.writeValueAsString(create)))
         .andReturn().getResponse().getContentAsString();
 
     Long id = objectMapper.readTree(created).get("id").asLong();
@@ -202,8 +208,8 @@ class HousingUnitControllerTest {
     update.setFloor(5);
 
     mockMvc.perform(put("/api/v1/units/{id}", id)
-            .contentType(MediaType.APPLICATION_JSON)
-            .content(objectMapper.writeValueAsString(update)))
+        .contentType(MediaType.APPLICATION_JSON)
+        .content(objectMapper.writeValueAsString(update)))
         .andExpect(status().isOk())
         .andExpect(jsonPath("$.floor").value(5));
   }
@@ -218,8 +224,8 @@ class HousingUnitControllerTest {
     req.setFloor(4);
 
     String created = mockMvc.perform(post("/api/v1/units")
-            .contentType(MediaType.APPLICATION_JSON)
-            .content(objectMapper.writeValueAsString(req)))
+        .contentType(MediaType.APPLICATION_JSON)
+        .content(objectMapper.writeValueAsString(req)))
         .andReturn().getResponse().getContentAsString();
 
     Long id = objectMapper.readTree(created).get("id").asLong();

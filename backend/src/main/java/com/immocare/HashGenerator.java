@@ -1,13 +1,16 @@
+package com.immocare;
+
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 
-
-/**  To execute:
-
-cd backend
-mvn compile
-java -cp target/classes:$(mvn -q dependency:build-classpath -Dmdep.outputFile=/dev/stdout) HashGenerator
-
-*/
+/**
+ * To execute:
+ * 
+ * cd backend
+ * mvn compile
+ * java -cp target/classes:$(mvn -q dependency:build-classpath
+ * -Dmdep.outputFile=/dev/stdout) HashGenerator
+ * 
+ */
 
 public class HashGenerator {
 
