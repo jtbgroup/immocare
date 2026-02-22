@@ -1,4 +1,5 @@
 export const environment = {
-  production: false,
-  apiUrl: "/api/v1", // relative, through Nginx
+  production: true,
+  apiUrl: "/api/v1",
+  actuatorUrl: "",
 };
