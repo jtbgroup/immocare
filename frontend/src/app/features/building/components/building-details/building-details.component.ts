@@ -5,11 +5,12 @@ import { Subject } from "rxjs";
 import { takeUntil } from "rxjs/operators";
 import { BuildingService } from "../../../../core/services/building.service";
 import { Building } from "../../../../models/building.model";
+import { HousingUnitListComponent } from "../../../housing-unit/components/housing-unit-list/housing-unit-list.component";
 
 @Component({
   selector: "app-building-details",
   standalone: true,
-  imports: [CommonModule],
+  imports: [CommonModule, HousingUnitListComponent],
   templateUrl: "./building-details.component.html",
   styleUrls: ["./building-details.component.scss"],
 })
