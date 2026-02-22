@@ -1,12 +1,8 @@
 package com.immocare.controller;
 
-import com.immocare.model.dto.CreateHousingUnitRequest;
-import com.immocare.model.dto.HousingUnitDTO;
-import com.immocare.model.dto.UpdateHousingUnitRequest;
-import com.immocare.service.HousingUnitService;
-import jakarta.validation.Valid;
 import java.util.List;
 import java.util.Map;
+
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -15,19 +11,25 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+
+import com.immocare.model.dto.CreateHousingUnitRequest;
+import com.immocare.model.dto.HousingUnitDTO;
+import com.immocare.model.dto.UpdateHousingUnitRequest;
+import com.immocare.service.HousingUnitService;
+
+import jakarta.validation.Valid;
 
 /**
  * REST controller for Housing Unit management.
  * Implements UC002 - Manage Housing Units.
  *
  * Endpoints:
- *   GET  /api/v1/buildings/{buildingId}/units  — list units in a building
- *   GET  /api/v1/units/{id}                   — get unit details
- *   POST /api/v1/units                         — create unit
- *   PUT  /api/v1/units/{id}                   — update unit
- *   DELETE /api/v1/units/{id}                 — delete unit
+ * GET /api/v1/buildings/{buildingId}/units — list units in a building
+ * GET /api/v1/units/{id} — get unit details
+ * POST /api/v1/units — create unit
+ * PUT /api/v1/units/{id} — update unit
+ * DELETE /api/v1/units/{id} — delete unit
  */
 @RestController
 public class HousingUnitController {

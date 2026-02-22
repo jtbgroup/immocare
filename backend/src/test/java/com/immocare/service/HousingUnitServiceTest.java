@@ -7,8 +7,17 @@ import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import java.math.BigDecimal;
+import java.util.Optional;
+
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
+
 import com.immocare.exception.BuildingNotFoundException;
-import com.immocare.exception.HousingUnitHasDataException;
 import com.immocare.exception.HousingUnitNotFoundException;
 import com.immocare.mapper.HousingUnitMapper;
 import com.immocare.model.dto.CreateHousingUnitRequest;
@@ -18,22 +27,16 @@ import com.immocare.model.entity.Building;
 import com.immocare.model.entity.HousingUnit;
 import com.immocare.repository.BuildingRepository;
 import com.immocare.repository.HousingUnitRepository;
-import java.math.BigDecimal;
-import java.util.List;
-import java.util.Optional;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
-import org.mockito.junit.jupiter.MockitoExtension;
 
 @ExtendWith(MockitoExtension.class)
 class HousingUnitServiceTest {
 
-  @Mock private HousingUnitRepository housingUnitRepository;
-  @Mock private BuildingRepository buildingRepository;
-  @Mock private HousingUnitMapper housingUnitMapper;
+  @Mock
+  private HousingUnitRepository housingUnitRepository;
+  @Mock
+  private BuildingRepository buildingRepository;
+  @Mock
+  private HousingUnitMapper housingUnitMapper;
 
   @InjectMocks
   private HousingUnitService service;
@@ -45,7 +48,7 @@ class HousingUnitServiceTest {
   void setUp() {
     building = new Building();
     building.setId(1L);
-    building.setName("Résidence Soleil");
+    building.setName("Residence Soleil");
     building.setOwnerName("Jean Dupont");
 
     unit = new HousingUnit();
@@ -162,7 +165,7 @@ class HousingUnitServiceTest {
     request.setFloor(5);
     request.setHasTerrace(false);
     request.setTerraceSurface(new BigDecimal("10.00")); // should be ignored
-    request.setTerraceOrientation("N");                 // should be ignored
+    request.setTerraceOrientation("N"); // should be ignored
 
     HousingUnit mappedEntity = new HousingUnit();
     mappedEntity.setTerraceSurface(new BigDecimal("10.00"));

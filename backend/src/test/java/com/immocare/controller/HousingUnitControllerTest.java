@@ -25,7 +25,6 @@ import com.immocare.model.dto.CreateHousingUnitRequest;
 import com.immocare.model.dto.UpdateHousingUnitRequest;
 import com.immocare.model.entity.Building;
 import com.immocare.repository.BuildingRepository;
-import com.immocare.repository.HousingUnitRepository;
 
 @SpringBootTest
 @TestPropertySource(locations = "classpath:application-test.properties")
@@ -38,8 +37,6 @@ class HousingUnitControllerTest {
   private ObjectMapper objectMapper;
   @Autowired
   private BuildingRepository buildingRepository;
-  @Autowired
-  private HousingUnitRepository housingUnitRepository;
 
   private MockMvc mockMvc;
   private Long buildingId;

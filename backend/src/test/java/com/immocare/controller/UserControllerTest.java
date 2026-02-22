@@ -19,11 +19,11 @@ import java.util.List;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.mockito.Mock;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
+import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
 import org.springframework.security.test.context.support.WithMockUser;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -39,7 +39,7 @@ import com.immocare.model.dto.UserDTO;
 import com.immocare.model.entity.AppUser;
 import com.immocare.service.UserService;
 
-@WebMvcTest(UserController.class)
+@SpringBootTest
 class UserControllerTest {
 
         @Autowired
@@ -47,7 +47,7 @@ class UserControllerTest {
         @Autowired
         ObjectMapper objectMapper;
 
-        @Mock
+        @MockitoBean
         UserService userService;
 
         private UserDTO sampleDTO;
@@ -57,10 +57,6 @@ class UserControllerTest {
                 sampleDTO = new UserDTO(1L, "admin", "admin@example.com", "ADMIN",
                                 LocalDateTime.now(), LocalDateTime.now());
         }
-
-        // -------------------------------------------------------------------------
-        // GET /api/v1/users
-        // -------------------------------------------------------------------------
 
         @Test
         @WithMockUser(roles = "ADMIN")
@@ -72,10 +68,6 @@ class UserControllerTest {
                                 .andExpect(jsonPath("$[0].username").value("admin"))
                                 .andExpect(jsonPath("$[0].passwordHash").doesNotExist());
         }
-
-        // -------------------------------------------------------------------------
-        // GET /api/v1/users/{id}
-        // -------------------------------------------------------------------------
 
         @Test
         @WithMockUser(roles = "ADMIN")
@@ -95,10 +87,6 @@ class UserControllerTest {
                 mockMvc.perform(get("/api/v1/users/99"))
                                 .andExpect(status().isNotFound());
         }
-
-        // -------------------------------------------------------------------------
-        // POST /api/v1/users
-        // -------------------------------------------------------------------------
 
         @Test
         @WithMockUser(roles = "ADMIN")
@@ -143,7 +131,6 @@ class UserControllerTest {
         @Test
         @WithMockUser(roles = "ADMIN")
         void createUser_missingUsername_returns400WithFieldError() throws Exception {
-                // username blank — Bean Validation fires before service
                 String body = """
                                 {"username":"","email":"x@x.com","password":"Password1",
                                  "confirmPassword":"Password1","role":"ADMIN"}""";
@@ -154,10 +141,6 @@ class UserControllerTest {
                                 .andExpect(status().isBadRequest())
                                 .andExpect(jsonPath("$.fieldErrors.username").exists());
         }
-
-        // -------------------------------------------------------------------------
-        // PUT /api/v1/users/{id}
-        // -------------------------------------------------------------------------
 
         @Test
         @WithMockUser(roles = "ADMIN")
@@ -171,10 +154,6 @@ class UserControllerTest {
                                 .andExpect(status().isOk());
         }
 
-        // -------------------------------------------------------------------------
-        // PATCH /api/v1/users/{id}/password
-        // -------------------------------------------------------------------------
-
         @Test
         @WithMockUser(roles = "ADMIN")
         void changePassword_validBody_returnsNoContent() throws Exception {
@@ -186,10 +165,6 @@ class UserControllerTest {
                                 .content(objectMapper.writeValueAsString(req)))
                                 .andExpect(status().isNoContent());
         }
-
-        // -------------------------------------------------------------------------
-        // DELETE /api/v1/users/{id}
-        // -------------------------------------------------------------------------
 
         @Test
         void deleteUser_valid_returnsNoContent() throws Exception {
