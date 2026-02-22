@@ -10,8 +10,8 @@ import { HousingUnit } from "../../../../models/housing-unit.model";
   selector: "app-housing-unit-details",
   standalone: true,
   imports: [CommonModule, RouterLink],
-  // templateUrl: "./housing-unit-details.component.html",
-  // styleUrls: ["./housing-unit-details.component.scss"],
+  templateUrl: "./housing-unit-details.component.html",
+  styleUrls: ["./housing-unit-details.component.scss"],
 })
 export class HousingUnitDetailsComponent implements OnInit, OnDestroy {
   unit?: HousingUnit;
