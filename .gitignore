@@ -1,0 +1,268 @@
+# ImmoCare .gitignore
+
+#################
+# Java / Maven
+#################
+
+# Compiled class files
+*.class
+
+# Log files
+*.log
+
+# Package Files
+*.jar
+*.war
+*.nar
+*.ear
+*.zip
+*.tar.gz
+*.rar
+
+# Maven
+target/
+pom.xml.tag
+pom.xml.releaseBackup
+pom.xml.versionsBackup
+pom.xml.next
+release.properties
+dependency-reduced-pom.xml
+buildNumber.properties
+.mvn/timing.properties
+.mvn/wrapper/maven-wrapper.jar
+
+# Eclipse
+.apt_generated
+.classpath
+.factorypath
+.project
+.settings
+.springBeans
+.sts4-cache
+
+# IntelliJ IDEA
+.idea/
+*.iws
+*.iml
+*.ipr
+out/
+
+# NetBeans
+/nbproject/private/
+/nbbuild/
+/dist/
+/nbdist/
+/.nb-gradle/
+build/
+
+# VS Code
+.vscode/
+*.code-workspace
+
+#################
+# Node / Angular
+#################
+
+# Dependencies
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+package-lock.json
+yarn.lock
+
+# Angular build outputs
+/dist/
+/tmp/
+/out-tsc/
+/bazel-out/
+
+# Angular cache
+.angular/
+
+# Compiled output
+*.js.map
+*.ngfactory.js
+*.ngstyle.js
+*.ngsummary.json
+
+#################
+# Database
+#################
+
+# PostgreSQL
+*.sql~
+*.backup
+
+# H2 Database (for tests)
+*.h2.db
+*.trace.db
+
+#################
+# Environment
+#################
+
+# Environment variables
+.env
+.env.local
+.env.*.local
+*.env
+
+# Application properties (with sensitive data)
+application-local.yml
+application-local.properties
+application-secret.yml
+application-secret.properties
+
+#################
+# Docker
+#################
+
+# Docker volumes
+docker-compose.override.yml
+
+#################
+# Operating System
+#################
+
+# macOS
+.DS_Store
+.AppleDouble
+.LSOverride
+._*
+
+# Windows
+Thumbs.db
+Thumbs.db:encryptable
+ehthumbs.db
+ehthumbs_vista.db
+Desktop.ini
+$RECYCLE.BIN/
+
+# Linux
+*~
+.directory
+.Trash-*
+
+#################
+# Editors
+#################
+
+# Vim
+*.swp
+*.swo
+*~
+
+# Emacs
+*~
+\#*\#
+/.emacs.desktop
+/.emacs.desktop.lock
+
+# Sublime Text
+*.sublime-workspace
+*.sublime-project
+
+#################
+# Testing
+#################
+
+# Coverage reports
+/coverage/
+*.lcov
+.nyc_output/
+
+# Test results
+test-results/
+junit/
+*.xml
+
+#################
+# Documentation
+#################
+
+# Generated docs
+/docs/generated/
+
+# Diagrams (keep source, ignore exports)
+*.png
+*.jpg
+*.jpeg
+*.svg
+# But keep asset images
+!src/assets/**/*.png
+!src/assets/**/*.jpg
+!src/assets/**/*.svg
+
+#################
+# Build artifacts
+#################
+
+# Frontend build
+/code/frontend/dist/
+/code/frontend/.angular/
+
+# Backend build
+/code/backend/target/
+
+#################
+# Logs
+#################
+
+logs/
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+lerna-debug.log*
+.pnpm-debug.log*
+
+#################
+# Temporary files
+#################
+
+*.tmp
+*.temp
+*.bak
+*.swp
+*.swo
+
+#################
+# Security
+#################
+
+# Private keys
+*.pem
+*.key
+*.crt
+*.p12
+*.jks
+*.keystore
+
+# Secrets
+secrets/
+.secrets
+
+#################
+# CI/CD
+#################
+
+# Deployment scripts (if they contain secrets)
+deploy-local.sh
+
+#################
+# Keep these files
+#################
+
+# Keep example configs
+!application-example.yml
+!.env.example
+
+# Keep important documentation
+!README.md
+!INSTALLATION.md
+!CONTRIBUTING.md
+!LICENSE
+
+# Keep SQL migrations
+!**/db/migration/**/*.sql
