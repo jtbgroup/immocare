@@ -1,5 +1,5 @@
 export const environment = {
-  production: true,
+  production: false,
   apiUrl: "/api/v1",
-  actuatorUrl: "",
+  actuatorUrl: "http://localhost:8080",
 };
