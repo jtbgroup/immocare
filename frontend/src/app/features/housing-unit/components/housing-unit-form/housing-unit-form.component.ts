@@ -19,8 +19,8 @@ import {
   selector: "app-housing-unit-form",
   standalone: true,
   imports: [CommonModule, ReactiveFormsModule],
-  //templateUrl: "./housing-unit-form.component.html",
-  //styleUrls: ["./housing-unit-form.component.scss"],
+  templateUrl: "./housing-unit-form.component.html",
+  styleUrls: ["./housing-unit-form.component.scss"],
 })
 export class HousingUnitFormComponent implements OnInit, OnDestroy {
   form!: FormGroup;
