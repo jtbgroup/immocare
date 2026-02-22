@@ -1,5 +1,9 @@
 package com.immocare.model.entity;
 
+import java.math.BigDecimal;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
@@ -10,20 +14,7 @@ import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.PrePersist;
 import jakarta.persistence.Table;
-import java.math.BigDecimal;
-import java.time.LocalDate;
-import java.time.LocalDateTime;
 
-/**
- * Append-only rent history for a housing unit.
- *
- * <p>Business rules:
- * <ul>
- *   <li>current rent  → effective_to = NULL (only one per unit at a time)</li>
- *   <li>historical rent → effective_to is set</li>
- *   <li>Records are never updated or deleted.</li>
- * </ul>
- */
 @Entity
 @Table(name = "rent_history")
 public class RentHistory {
@@ -60,13 +51,14 @@ public class RentHistory {
     // Constructors
     // -------------------------------------------------------------------------
 
-    protected RentHistory() {}
+    protected RentHistory() {
+    }
 
     public RentHistory(HousingUnit housingUnit,
-                       BigDecimal monthlyRent,
-                       LocalDate effectiveFrom,
-                       LocalDate effectiveTo,
-                       String notes) {
+            BigDecimal monthlyRent,
+            LocalDate effectiveFrom,
+            LocalDate effectiveTo,
+            String notes) {
         this.housingUnit = housingUnit;
         this.monthlyRent = monthlyRent;
         this.effectiveFrom = effectiveFrom;
@@ -78,18 +70,47 @@ public class RentHistory {
     // Getters & setters
     // -------------------------------------------------------------------------
 
-    public Long getId() { return id; }
+    public Long getId() {
+        return id;
+    }
 
-    public HousingUnit getHousingUnit() { return housingUnit; }
+    public HousingUnit getHousingUnit() {
+        return housingUnit;
+    }
 
-    public BigDecimal getMonthlyRent() { return monthlyRent; }
+    public BigDecimal getMonthlyRent() {
+        return monthlyRent;
+    }
 
-    public LocalDate getEffectiveFrom() { return effectiveFrom; }
+    public void setMonthlyRent(BigDecimal monthlyRent) {
+        this.monthlyRent = monthlyRent;
+    }
 
-    public LocalDate getEffectiveTo() { return effectiveTo; }
-    public void setEffectiveTo(LocalDate effectiveTo) { this.effectiveTo = effectiveTo; }
+    public LocalDate getEffectiveFrom() {
+        return effectiveFrom;
+    }
 
-    public String getNotes() { return notes; }
+    public void setEffectiveFrom(LocalDate effectiveFrom) {
+        this.effectiveFrom = effectiveFrom;
+    }
 
-    public LocalDateTime getCreatedAt() { return createdAt; }
+    public LocalDate getEffectiveTo() {
+        return effectiveTo;
+    }
+
+    public void setEffectiveTo(LocalDate effectiveTo) {
+        this.effectiveTo = effectiveTo;
+    }
+
+    public String getNotes() {
+        return notes;
+    }
+
+    public void setNotes(String notes) {
+        this.notes = notes;
+    }
+
+    public LocalDateTime getCreatedAt() {
+        return createdAt;
+    }
 }

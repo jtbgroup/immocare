@@ -5,6 +5,7 @@ import { Subject } from "rxjs";
 import { takeUntil } from "rxjs/operators";
 import { HousingUnitService } from "../../../../core/services/housing-unit.service";
 import { HousingUnit } from "../../../../models/housing-unit.model";
+import { PEB_SCORE_DISPLAY } from "../../../../models/peb-score.model";
 
 @Component({
   selector: "app-housing-unit-list",
@@ -29,6 +30,8 @@ import { HousingUnit } from "../../../../models/housing-unit.model";
             <th>Floor</th>
             <th>Surface (m²)</th>
             <th>Rooms</th>
+            <th>Rent</th>
+            <th>PEB</th>
             <th>Owner</th>
           </tr>
         </thead>
@@ -42,6 +45,24 @@ import { HousingUnit } from "../../../../models/housing-unit.model";
             <td>{{ unit.floor }}</td>
             <td>{{ unit.totalSurface ?? "—" }}</td>
             <td>{{ unit.roomCount }}</td>
+            <td>
+              {{
+                unit.currentMonthlyRent
+                  ? "€" + unit.currentMonthlyRent + "/mo"
+                  : "—"
+              }}
+            </td>
+            <td>
+              <span
+                *ngIf="unit.currentPebScore"
+                class="peb-badge"
+                [style.background]="pebDisplay[unit.currentPebScore].color"
+                [style.color]="pebDisplay[unit.currentPebScore].textColor"
+              >
+                {{ pebDisplay[unit.currentPebScore].label }}
+              </span>
+              <span *ngIf="!unit.currentPebScore">—</span>
+            </td>
             <td>{{ unit.ownerName ?? "—" }}</td>
           </tr>
         </tbody>
@@ -95,6 +116,15 @@ import { HousingUnit } from "../../../../models/housing-unit.model";
       .btn-primary:hover {
         background: #0056b3;
       }
+      .peb-badge {
+        display: inline-block;
+        padding: 2px 8px;
+        border-radius: 4px;
+        font-weight: 700;
+        font-size: 0.85rem;
+        min-width: 32px;
+        text-align: center;
+      }
     `,
   ],
 })
@@ -103,6 +133,7 @@ export class HousingUnitListComponent implements OnInit, OnDestroy {
   units: HousingUnit[] = [];
   loading = false;
   private destroy$ = new Subject<void>();
+  readonly pebDisplay = PEB_SCORE_DISPLAY;
 
   constructor(
     private housingUnitService: HousingUnitService,

@@ -1,5 +1,12 @@
 package com.immocare.service;
 
+import java.util.List;
+import java.util.stream.Collectors;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
 import com.immocare.exception.BuildingNotFoundException;
 import com.immocare.exception.HousingUnitHasDataException;
 import com.immocare.exception.HousingUnitNotFoundException;
@@ -11,11 +18,9 @@ import com.immocare.model.entity.Building;
 import com.immocare.model.entity.HousingUnit;
 import com.immocare.repository.BuildingRepository;
 import com.immocare.repository.HousingUnitRepository;
+import com.immocare.repository.PebScoreRepository;
+import com.immocare.repository.RentHistoryRepository;
 import com.immocare.repository.RoomRepository;
-import java.util.List;
-import java.util.stream.Collectors;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
 /**
  * Service layer for Housing Unit management.
@@ -31,11 +36,15 @@ public class HousingUnitService {
   private final BuildingRepository buildingRepository;
   private final HousingUnitMapper housingUnitMapper;
   private final RoomRepository roomRepository;
+  @Autowired
+  private RentHistoryRepository rentHistoryRepository;
+  @Autowired
+  private PebScoreRepository pebScoreRepository;
 
   public HousingUnitService(HousingUnitRepository housingUnitRepository,
-                             BuildingRepository buildingRepository,
-                             HousingUnitMapper housingUnitMapper,
-                             RoomRepository roomRepository) {
+      BuildingRepository buildingRepository,
+      HousingUnitMapper housingUnitMapper,
+      RoomRepository roomRepository) {
     this.housingUnitRepository = housingUnitRepository;
     this.buildingRepository = buildingRepository;
     this.housingUnitMapper = housingUnitMapper;
@@ -81,7 +90,7 @@ public class HousingUnitService {
 
     // BR-UC002-01: unit number unique within building
     if (housingUnitRepository.existsByBuildingIdAndUnitNumberIgnoreCase(
-            building.getId(), request.getUnitNumber())) {
+        building.getId(), request.getUnitNumber())) {
       throw new IllegalArgumentException(
           "Unit number '" + request.getUnitNumber() + "' already exists in this building.");
     }
@@ -175,6 +184,16 @@ public class HousingUnitService {
 
     // UC003: real room count from repository
     dto.setRoomCount(roomRepository.countByHousingUnitId(unit.getId()));
+
+    // Current renting
+    rentHistoryRepository
+        .findByHousingUnitIdAndEffectiveToIsNull(unit.getId())
+        .ifPresent(r -> dto.setCurrentMonthlyRent(r.getMonthlyRent()));
+
+    // PEB score
+    pebScoreRepository
+        .findFirstByHousingUnitIdOrderByScoreDateDesc(unit.getId())
+        .ifPresent(p -> dto.setCurrentPebScore(p.getPebScore()));
 
     return dto;
   }

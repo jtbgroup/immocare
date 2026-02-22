@@ -1,45 +1,167 @@
 .water-meter-section {
-  .section-title {
-    font-size: 1rem;
-    font-weight: 600;
-    margin-bottom: 0.75rem;
-    border-bottom: 1px solid #dee2e6;
-    padding-bottom: 0.5rem;
+  .section-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1rem;
   }
 
   .meter-card {
-    padding: 0.75rem;
-    background-color: #f8f9fa;
+    display: flex;
+    align-items: flex-start;
+    gap: 1rem;
+    padding: 1rem;
+    border: 1px solid #e0e0e0;
     border-radius: 6px;
-    border: 1px solid #dee2e6;
+    background: #fafafa;
   }
 
-  .meter-info {
+  .meter-badge {
+    flex-shrink: 0;
+    padding-top: 0.15rem;
+  }
+
+  .meter-details {
+    flex: 1;
+    line-height: 1.8;
+    font-size: 0.9rem;
+  }
+
+  .meter-date {
+    color: #555;
+  }
+
+  .badge-warning-inline {
+    font-size: 0.8rem;
+    color: #e65100;
+    background: #fff3e0;
+    padding: 0.15rem 0.5rem;
+    border-radius: 4px;
+    display: inline-block;
+  }
+
+  .meter-actions {
+    margin-top: 0.5rem;
     display: flex;
     align-items: center;
     gap: 0.5rem;
-    font-size: 1rem;
-    margin-bottom: 0.4rem;
   }
 
-  .meter-dates {
-    font-size: 0.875rem;
-    color: #6c757d;
+  .btn-link {
+    background: none;
+    border: none;
+    color: #007bff;
+    cursor: pointer;
+    padding: 0;
+    font-size: 0.9rem;
+    &:hover {
+      text-decoration: underline;
+    }
+    &.danger {
+      color: #c62828;
+    }
   }
 
-  .meter-form {
+  .separator {
+    color: #ccc;
+  }
+
+  .history-panel {
+    border: 1px solid #e0e0e0;
     border-radius: 6px;
+    padding: 1.25rem;
+    margin-top: 1rem;
+    background: #fff;
   }
 
-  .meter-history {
-    overflow-x: auto;
-
-    table {
-      font-size: 0.875rem;
+  .history-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1rem;
+    h4 {
+      margin: 0;
+      font-size: 1rem;
+      font-weight: 600;
     }
+  }
 
-    .badge {
-      font-size: 0.75rem;
+  .btn-close {
+    background: none;
+    border: none;
+    font-size: 1.1rem;
+    cursor: pointer;
+    color: #555;
+    &:hover {
+      color: #000;
     }
+  }
+
+  .history-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.9rem;
+    th,
+    td {
+      padding: 0.6rem 0.8rem;
+      border-bottom: 1px solid #e0e0e0;
+      text-align: left;
+    }
+    th {
+      font-weight: 600;
+      background: #fafafa;
+    }
+  }
+
+  .status-badge {
+    display: inline-block;
+    padding: 0.15rem 0.5rem;
+    border-radius: 4px;
+    font-size: 0.78rem;
+    font-weight: 600;
+  }
+  .status-current {
+    background: #e3f2fd;
+    color: #1565c0;
+  }
+  .status-historical {
+    background: #f5f5f5;
+    color: #616161;
+  }
+
+  .meter-form-panel {
+    border: 1px solid #e0e0e0;
+    border-radius: 6px;
+    padding: 1.25rem;
+    margin-top: 1rem;
+    background: #fff;
+    &.border-danger {
+      border-color: #f44336;
+    }
+  }
+
+  .no-data {
+    color: #888;
+    font-style: italic;
+  }
+  .loading {
+    color: #888;
+    padding: 0.5rem 0;
+  }
+  .alert-success {
+    background: #e8f5e9;
+    color: #2e7d32;
+    padding: 0.75rem;
+    border-radius: 4px;
+    margin-bottom: 1rem;
+    font-size: 0.9rem;
+  }
+  .alert-danger {
+    background: #ffebee;
+    color: #c62828;
+    padding: 0.75rem;
+    border-radius: 4px;
+    margin-bottom: 1rem;
+    font-size: 0.9rem;
   }
 }

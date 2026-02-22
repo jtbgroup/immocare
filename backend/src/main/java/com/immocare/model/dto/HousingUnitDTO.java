@@ -3,6 +3,8 @@ package com.immocare.model.dto;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
+import com.immocare.model.entity.PebScore;
+
 /**
  * DTO for housing unit responses.
  * Includes computed fields: effectiveOwnerName, roomCount.
@@ -22,8 +24,12 @@ public class HousingUnitDTO {
   private Boolean hasGarden;
   private BigDecimal gardenSurface;
   private String gardenOrientation;
+  private BigDecimal currentMonthlyRent;
+  private PebScore currentPebScore;
 
-  /** Unit-specific owner name (may be null; use effectiveOwnerName for display). */
+  /**
+   * Unit-specific owner name (may be null; use effectiveOwnerName for display).
+   */
   private String ownerName;
 
   /** Resolved owner: unit-specific if set, otherwise inherited from building. */
@@ -38,57 +44,163 @@ public class HousingUnitDTO {
   }
 
   // Getters and Setters
-  public Long getId() { return id; }
-  public void setId(Long id) { this.id = id; }
+  public Long getId() {
+    return id;
+  }
 
-  public Long getBuildingId() { return buildingId; }
-  public void setBuildingId(Long buildingId) { this.buildingId = buildingId; }
+  public void setId(Long id) {
+    this.id = id;
+  }
 
-  public String getBuildingName() { return buildingName; }
-  public void setBuildingName(String buildingName) { this.buildingName = buildingName; }
+  public Long getBuildingId() {
+    return buildingId;
+  }
 
-  public String getUnitNumber() { return unitNumber; }
-  public void setUnitNumber(String unitNumber) { this.unitNumber = unitNumber; }
+  public void setBuildingId(Long buildingId) {
+    this.buildingId = buildingId;
+  }
 
-  public Integer getFloor() { return floor; }
-  public void setFloor(Integer floor) { this.floor = floor; }
+  public String getBuildingName() {
+    return buildingName;
+  }
 
-  public String getLandingNumber() { return landingNumber; }
-  public void setLandingNumber(String landingNumber) { this.landingNumber = landingNumber; }
+  public void setBuildingName(String buildingName) {
+    this.buildingName = buildingName;
+  }
 
-  public BigDecimal getTotalSurface() { return totalSurface; }
-  public void setTotalSurface(BigDecimal totalSurface) { this.totalSurface = totalSurface; }
+  public String getUnitNumber() {
+    return unitNumber;
+  }
 
-  public Boolean getHasTerrace() { return hasTerrace; }
-  public void setHasTerrace(Boolean hasTerrace) { this.hasTerrace = hasTerrace; }
+  public void setUnitNumber(String unitNumber) {
+    this.unitNumber = unitNumber;
+  }
 
-  public BigDecimal getTerraceSurface() { return terraceSurface; }
-  public void setTerraceSurface(BigDecimal terraceSurface) { this.terraceSurface = terraceSurface; }
+  public Integer getFloor() {
+    return floor;
+  }
 
-  public String getTerraceOrientation() { return terraceOrientation; }
-  public void setTerraceOrientation(String terraceOrientation) { this.terraceOrientation = terraceOrientation; }
+  public void setFloor(Integer floor) {
+    this.floor = floor;
+  }
 
-  public Boolean getHasGarden() { return hasGarden; }
-  public void setHasGarden(Boolean hasGarden) { this.hasGarden = hasGarden; }
+  public String getLandingNumber() {
+    return landingNumber;
+  }
 
-  public BigDecimal getGardenSurface() { return gardenSurface; }
-  public void setGardenSurface(BigDecimal gardenSurface) { this.gardenSurface = gardenSurface; }
+  public void setLandingNumber(String landingNumber) {
+    this.landingNumber = landingNumber;
+  }
 
-  public String getGardenOrientation() { return gardenOrientation; }
-  public void setGardenOrientation(String gardenOrientation) { this.gardenOrientation = gardenOrientation; }
+  public BigDecimal getTotalSurface() {
+    return totalSurface;
+  }
 
-  public String getOwnerName() { return ownerName; }
-  public void setOwnerName(String ownerName) { this.ownerName = ownerName; }
+  public void setTotalSurface(BigDecimal totalSurface) {
+    this.totalSurface = totalSurface;
+  }
 
-  public String getEffectiveOwnerName() { return effectiveOwnerName; }
-  public void setEffectiveOwnerName(String effectiveOwnerName) { this.effectiveOwnerName = effectiveOwnerName; }
+  public Boolean getHasTerrace() {
+    return hasTerrace;
+  }
 
-  public Long getRoomCount() { return roomCount; }
-  public void setRoomCount(Long roomCount) { this.roomCount = roomCount; }
+  public void setHasTerrace(Boolean hasTerrace) {
+    this.hasTerrace = hasTerrace;
+  }
 
-  public LocalDateTime getCreatedAt() { return createdAt; }
-  public void setCreatedAt(LocalDateTime createdAt) { this.createdAt = createdAt; }
+  public BigDecimal getTerraceSurface() {
+    return terraceSurface;
+  }
 
-  public LocalDateTime getUpdatedAt() { return updatedAt; }
-  public void setUpdatedAt(LocalDateTime updatedAt) { this.updatedAt = updatedAt; }
+  public void setTerraceSurface(BigDecimal terraceSurface) {
+    this.terraceSurface = terraceSurface;
+  }
+
+  public String getTerraceOrientation() {
+    return terraceOrientation;
+  }
+
+  public void setTerraceOrientation(String terraceOrientation) {
+    this.terraceOrientation = terraceOrientation;
+  }
+
+  public Boolean getHasGarden() {
+    return hasGarden;
+  }
+
+  public void setHasGarden(Boolean hasGarden) {
+    this.hasGarden = hasGarden;
+  }
+
+  public BigDecimal getGardenSurface() {
+    return gardenSurface;
+  }
+
+  public void setGardenSurface(BigDecimal gardenSurface) {
+    this.gardenSurface = gardenSurface;
+  }
+
+  public String getGardenOrientation() {
+    return gardenOrientation;
+  }
+
+  public void setGardenOrientation(String gardenOrientation) {
+    this.gardenOrientation = gardenOrientation;
+  }
+
+  public String getOwnerName() {
+    return ownerName;
+  }
+
+  public void setOwnerName(String ownerName) {
+    this.ownerName = ownerName;
+  }
+
+  public String getEffectiveOwnerName() {
+    return effectiveOwnerName;
+  }
+
+  public void setEffectiveOwnerName(String effectiveOwnerName) {
+    this.effectiveOwnerName = effectiveOwnerName;
+  }
+
+  public Long getRoomCount() {
+    return roomCount;
+  }
+
+  public void setRoomCount(Long roomCount) {
+    this.roomCount = roomCount;
+  }
+
+  public BigDecimal getCurrentMonthlyRent() {
+    return currentMonthlyRent;
+  }
+
+  public void setCurrentMonthlyRent(BigDecimal currentMonthlyRent) {
+    this.currentMonthlyRent = currentMonthlyRent;
+  }
+
+  public PebScore getCurrentPebScore() {
+    return currentPebScore;
+  }
+
+  public void setCurrentPebScore(PebScore currentPebScore) {
+    this.currentPebScore = currentPebScore;
+  }
+
+  public LocalDateTime getCreatedAt() {
+    return createdAt;
+  }
+
+  public void setCreatedAt(LocalDateTime createdAt) {
+    this.createdAt = createdAt;
+  }
+
+  public LocalDateTime getUpdatedAt() {
+    return updatedAt;
+  }
+
+  public void setUpdatedAt(LocalDateTime updatedAt) {
+    this.updatedAt = updatedAt;
+  }
 }

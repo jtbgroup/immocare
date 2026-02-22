@@ -1,3 +1,4 @@
+import { PebScore } from "./peb-score.model";
 export type Orientation = "N" | "S" | "E" | "W" | "NE" | "NW" | "SE" | "SW";
 
 export const ORIENTATIONS: Orientation[] = [
@@ -27,6 +28,8 @@ export interface HousingUnit {
   gardenOrientation?: Orientation;
   ownerName?: string;
   roomCount?: number;
+  currentMonthlyRent?: number;
+  currentPebScore?: PebScore;
   createdAt?: string;
   updatedAt?: string;
 }
