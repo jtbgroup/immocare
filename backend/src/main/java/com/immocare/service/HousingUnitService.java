@@ -11,6 +11,7 @@ import com.immocare.model.entity.Building;
 import com.immocare.model.entity.HousingUnit;
 import com.immocare.repository.BuildingRepository;
 import com.immocare.repository.HousingUnitRepository;
+import com.immocare.repository.RoomRepository;
 import java.util.List;
 import java.util.stream.Collectors;
 import org.springframework.stereotype.Service;
@@ -19,6 +20,8 @@ import org.springframework.transaction.annotation.Transactional;
 /**
  * Service layer for Housing Unit management.
  * Implements business logic for UC002 - Manage Housing Units.
+ *
+ * Updated for UC003: roomCount is now populated from the real RoomRepository.
  */
 @Service
 @Transactional(readOnly = true)
@@ -27,13 +30,16 @@ public class HousingUnitService {
   private final HousingUnitRepository housingUnitRepository;
   private final BuildingRepository buildingRepository;
   private final HousingUnitMapper housingUnitMapper;
+  private final RoomRepository roomRepository;
 
   public HousingUnitService(HousingUnitRepository housingUnitRepository,
                              BuildingRepository buildingRepository,
-                             HousingUnitMapper housingUnitMapper) {
+                             HousingUnitMapper housingUnitMapper,
+                             RoomRepository roomRepository) {
     this.housingUnitRepository = housingUnitRepository;
     this.buildingRepository = buildingRepository;
     this.housingUnitMapper = housingUnitMapper;
+    this.roomRepository = roomRepository;
   }
 
   // ─── Queries ────────────────────────────────────────────────────────────────
@@ -132,14 +138,14 @@ public class HousingUnitService {
   /**
    * Delete a housing unit.
    * Implements US008 - Delete Housing Unit.
-   * BR-UC002-06: blocked when unit has associated data.
+   * BR-UC002-06: blocked when unit has rooms.
    */
   @Transactional
   public void deleteUnit(Long id) {
     HousingUnit unit = findEntityById(id);
 
-    // TODO: extend when Room / PEB / Rent / WaterMeter entities are implemented
-    long roomCount = 0L;
+    // UC003: check real room count
+    long roomCount = roomRepository.countByHousingUnitId(id);
 
     if (roomCount > 0) {
       throw new HousingUnitHasDataException(id, roomCount);
@@ -167,8 +173,8 @@ public class HousingUnitService {
         : unit.getBuilding().getOwnerName();
     dto.setEffectiveOwnerName(effective);
 
-    // Room count placeholder (0 until UC003)
-    dto.setRoomCount(0L);
+    // UC003: real room count from repository
+    dto.setRoomCount(roomRepository.countByHousingUnitId(unit.getId()));
 
     return dto;
   }

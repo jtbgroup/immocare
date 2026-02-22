@@ -40,34 +40,24 @@
       </div>
       <div *ngIf="unit.hasTerrace">
         <label>Terrace</label>
-        <span
-          >{{ unit.terraceSurface ? unit.terraceSurface + " m²" : "—"
-          }}{{
-            unit.terraceOrientation ? " · " + unit.terraceOrientation : ""
-          }}</span
-        >
+        <span>
+          {{ unit.terraceSurface ? unit.terraceSurface + " m²" : "—" }}
+          {{ unit.terraceOrientation ? " · " + unit.terraceOrientation : "" }}
+        </span>
       </div>
       <div *ngIf="unit.hasGarden">
         <label>Garden</label>
-        <span
-          >{{ unit.gardenSurface ? unit.gardenSurface + " m²" : "—"
-          }}{{
-            unit.gardenOrientation ? " · " + unit.gardenOrientation : ""
-          }}</span
-        >
+        <span>
+          {{ unit.gardenSurface ? unit.gardenSurface + " m²" : "—" }}
+          {{ unit.gardenOrientation ? " · " + unit.gardenOrientation : "" }}
+        </span>
       </div>
     </div>
   </section>
 
-  <!-- Rooms placeholder -->
+  <!-- Rooms section — UC003 -->
   <section>
-    <div class="section-header">
-      <h3>Rooms</h3>
-      <button class="btn btn-sm" disabled title="Available in UC003">
-        Add Room
-      </button>
-    </div>
-    <p class="placeholder-text">Room management will be available in UC003.</p>
+    <app-room-section [unitId]="unit.id"></app-room-section>
   </section>
 
   <!-- PEB placeholder -->
@@ -81,13 +71,10 @@
     <p class="placeholder-text">PEB management will be available in UC004.</p>
   </section>
 
-  <!-- Rent placeholder -->
+  <!-- Rent section -->
   <section>
     <div class="section-header">
       <h3>Rent</h3>
-      <button class="btn btn-sm" disabled title="Available in UC005">
-        Add Rent
-      </button>
     </div>
     <app-rent-section [unitId]="unit.id"></app-rent-section>
   </section>

@@ -6,11 +6,12 @@ import { takeUntil } from "rxjs/operators";
 import { HousingUnitService } from "../../../../core/services/housing-unit.service";
 import { HousingUnit } from "../../../../models/housing-unit.model";
 import { RentSectionComponent } from "../rent-section/rent-section.component";
+import { RoomSectionComponent } from "../room-section/room-section.component";
 
 @Component({
   selector: "app-housing-unit-details",
   standalone: true,
-  imports: [CommonModule, RouterLink, RentSectionComponent],
+  imports: [CommonModule, RouterLink, RentSectionComponent, RoomSectionComponent],
   templateUrl: "./housing-unit-details.component.html",
   styleUrls: ["./housing-unit-details.component.scss"],
 })
@@ -58,6 +59,7 @@ export class HousingUnitDetailsComponent implements OnInit, OnDestroy {
       this.router.navigate(["/units", this.unit.id, "edit"]);
     }
   }
+
   confirmDelete(): void {
     this.showDeleteConfirm = true;
   }
