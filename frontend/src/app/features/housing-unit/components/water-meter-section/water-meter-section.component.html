@@ -1,0 +1,220 @@
+<!-- UC006 — Water Meter Section (US026-US030) -->
+<div class="water-meter-section">
+  <h3 class="section-title">Water Meter</h3>
+
+  <!-- Success / Error messages -->
+  <div *ngIf="successMessage" class="alert alert-success">{{ successMessage }}</div>
+  <div *ngIf="errorMessage" class="alert alert-danger">{{ errorMessage }}</div>
+
+  <!-- Loading state -->
+  <div *ngIf="loading" class="text-muted">Loading...</div>
+
+  <!-- No form open: display current meter or empty state -->
+  <ng-container *ngIf="!formMode && !loading">
+
+    <!-- US026 AC1: No meter assigned -->
+    <ng-container *ngIf="!activeMeter">
+      <p class="text-muted">No water meter assigned.</p>
+      <button class="btn btn-primary btn-sm" (click)="openAssignForm()">
+        Assign Meter
+      </button>
+    </ng-container>
+
+    <!-- US028 AC1, US030: Active meter details -->
+    <ng-container *ngIf="activeMeter">
+      <div class="meter-card">
+        <div class="meter-info">
+          <span class="badge bg-success">Active</span>
+          <strong>{{ activeMeter.meterNumber }}</strong>
+
+          <span *ngIf="activeMeter.meterLocation" class="text-muted ms-2">
+            — {{ activeMeter.meterLocation }}
+          </span>
+        </div>
+
+        <!-- US030: installation date + active duration -->
+        <div class="meter-dates">
+          <span>Installed: {{ activeMeter.installationDate | date:'dd/MM/yyyy' }}</span>
+          <span class="ms-3">Active for: {{ activeMeter.durationMonths }} months</span>
+          <!-- US030 AC4: optional age warning -->
+          <span *ngIf="isMeterOld(activeMeter)" class="badge bg-warning text-dark ms-2">
+            Old meter — consider replacement
+          </span>
+        </div>
+
+        <!-- Action buttons -->
+        <div class="meter-actions mt-2">
+          <button class="btn btn-outline-primary btn-sm me-2" (click)="openReplaceForm()">
+            Replace Meter
+          </button>
+          <button class="btn btn-outline-danger btn-sm me-2" (click)="openRemoveForm()">
+            Remove Meter
+          </button>
+          <button class="btn btn-link btn-sm" (click)="toggleHistory()">
+            {{ showHistory ? 'Hide History' : 'View History' }}
+          </button>
+        </div>
+      </div>
+    </ng-container>
+
+    <!-- US028: History table -->
+    <div *ngIf="showHistory" class="meter-history mt-3">
+      <table class="table table-sm table-bordered">
+        <thead>
+          <tr>
+            <th>Meter Number</th>
+            <th>Location</th>
+            <th>Installation Date</th>
+            <th>Removal Date</th>
+            <th>Duration</th>
+            <th>Status</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let m of history">
+            <td>{{ m.meterNumber }}</td>
+            <td>{{ m.meterLocation || '—' }}</td>
+            <td>{{ m.installationDate | date:'dd/MM/yyyy' }}</td>
+            <td>{{ m.removalDate ? (m.removalDate | date:'dd/MM/yyyy') : 'Active' }}</td>
+            <!-- US030 AC3: duration in months -->
+            <td>{{ m.durationMonths }} months</td>
+            <!-- US028 AC5: status badge -->
+            <td>
+              <span [class]="m.isActive ? 'badge bg-success' : 'badge bg-secondary'">
+                {{ m.status }}
+              </span>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+  </ng-container>
+
+  <!-- ===== US026: ASSIGN FORM ===== -->
+  <div *ngIf="formMode === 'assign'" class="meter-form card p-3 mt-2">
+    <h5>Assign Water Meter</h5>
+    <form [formGroup]="meterForm" (ngSubmit)="submitAssign()">
+
+      <div class="mb-3">
+        <label class="form-label">Meter Number <span class="text-danger">*</span></label>
+        <input formControlName="meterNumber" class="form-control"
+               placeholder="e.g. WM-2024-001"
+               [class.is-invalid]="meterNumberCtrl.invalid && meterNumberCtrl.touched">
+        <div class="invalid-feedback">
+          <span *ngIf="meterNumberCtrl.errors?.['required']">Meter number is required.</span>
+          <span *ngIf="meterNumberCtrl.errors?.['pattern']">Invalid format: use letters, digits, hyphens or underscores only.</span>
+        </div>
+      </div>
+
+      <div class="mb-3">
+        <label class="form-label">Location</label>
+        <input formControlName="meterLocation" class="form-control"
+               placeholder="e.g. Kitchen under sink">
+      </div>
+
+      <div class="mb-3">
+        <label class="form-label">Installation Date <span class="text-danger">*</span></label>
+        <input type="date" formControlName="installationDate" class="form-control"
+               [class.is-invalid]="installationDateCtrl.invalid && installationDateCtrl.touched">
+        <div class="invalid-feedback">Installation date is required.</div>
+      </div>
+
+      <div class="d-flex gap-2">
+        <button type="submit" class="btn btn-primary" [disabled]="saving || meterForm.invalid">
+          {{ saving ? 'Saving…' : 'Save' }}
+        </button>
+        <button type="button" class="btn btn-secondary" (click)="cancel()">Cancel</button>
+      </div>
+    </form>
+  </div>
+
+  <!-- ===== US027: REPLACE FORM ===== -->
+  <div *ngIf="formMode === 'replace'" class="meter-form card p-3 mt-2">
+    <h5>Replace Water Meter</h5>
+
+    <!-- Show current meter as read-only (US027 AC1) -->
+    <div *ngIf="activeMeter" class="alert alert-info py-2">
+      Current meter: <strong>{{ activeMeter.meterNumber }}</strong>
+      — installed {{ activeMeter.installationDate | date:'dd/MM/yyyy' }}
+    </div>
+
+    <!-- TS-UC006-07: same number warning -->
+    <div *ngIf="sameNumberWarning" class="alert alert-warning">
+      The new meter number is the same as the current one. Are you sure?
+      <div class="mt-2">
+        <button class="btn btn-warning btn-sm me-2" (click)="submitReplace()">Yes, continue</button>
+        <button class="btn btn-secondary btn-sm" (click)="sameNumberWarning = false">Cancel</button>
+      </div>
+    </div>
+
+    <form [formGroup]="meterForm" (ngSubmit)="checkAndSubmitReplace()" *ngIf="!sameNumberWarning">
+
+      <div class="mb-3">
+        <label class="form-label">New Meter Number <span class="text-danger">*</span></label>
+        <input formControlName="newMeterNumber" class="form-control"
+               placeholder="e.g. WM-2024-002"
+               [class.is-invalid]="newMeterNumberCtrl.invalid && newMeterNumberCtrl.touched">
+        <div class="invalid-feedback">
+          <span *ngIf="newMeterNumberCtrl.errors?.['pattern']">Invalid format.</span>
+        </div>
+      </div>
+
+      <div class="mb-3">
+        <label class="form-label">New Meter Location</label>
+        <input formControlName="newMeterLocation" class="form-control">
+      </div>
+
+      <div class="mb-3">
+        <label class="form-label">Installation Date <span class="text-danger">*</span></label>
+        <input type="date" formControlName="newInstallationDate" class="form-control"
+               [class.is-invalid]="newInstallationDateCtrl.invalid && newInstallationDateCtrl.touched">
+      </div>
+
+      <!-- US027 AC4: reason dropdown -->
+      <div class="mb-3">
+        <label class="form-label">Reason</label>
+        <select formControlName="reason" class="form-select">
+          <option [ngValue]="null">Select a reason…</option>
+          <option *ngFor="let r of replacementReasons" [value]="r">
+            {{ replacementReasonLabels[r] }}
+          </option>
+        </select>
+      </div>
+
+      <div class="d-flex gap-2">
+        <button type="submit" class="btn btn-primary" [disabled]="saving || meterForm.invalid">
+          {{ saving ? 'Saving…' : 'Replace' }}
+        </button>
+        <button type="button" class="btn btn-secondary" (click)="cancel()">Cancel</button>
+      </div>
+    </form>
+  </div>
+
+  <!-- ===== US029: REMOVE FORM ===== -->
+  <div *ngIf="formMode === 'remove'" class="meter-form card p-3 mt-2 border-danger">
+    <h5>Remove Water Meter</h5>
+
+    <div *ngIf="activeMeter" class="alert alert-warning py-2">
+      <strong>Remove water meter {{ activeMeter.meterNumber }}?</strong><br>
+      The unit will have no active meter. You can assign a new meter later.
+    </div>
+
+    <form [formGroup]="removeForm" (ngSubmit)="submitRemove()">
+      <div class="mb-3">
+        <label class="form-label">Removal Date <span class="text-danger">*</span></label>
+        <input type="date" formControlName="removalDate" class="form-control"
+               [class.is-invalid]="removalDateCtrl.invalid && removalDateCtrl.touched">
+        <div class="invalid-feedback">Removal date is required.</div>
+      </div>
+
+      <div class="d-flex gap-2">
+        <button type="submit" class="btn btn-danger" [disabled]="saving || removeForm.invalid">
+          {{ saving ? 'Removing…' : 'Confirm Remove' }}
+        </button>
+        <button type="button" class="btn btn-secondary" (click)="cancel()">Cancel</button>
+      </div>
+    </form>
+  </div>
+
+</div>

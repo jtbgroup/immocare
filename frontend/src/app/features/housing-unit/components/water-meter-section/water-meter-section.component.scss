@@ -1,0 +1,45 @@
+.water-meter-section {
+  .section-title {
+    font-size: 1rem;
+    font-weight: 600;
+    margin-bottom: 0.75rem;
+    border-bottom: 1px solid #dee2e6;
+    padding-bottom: 0.5rem;
+  }
+
+  .meter-card {
+    padding: 0.75rem;
+    background-color: #f8f9fa;
+    border-radius: 6px;
+    border: 1px solid #dee2e6;
+  }
+
+  .meter-info {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 1rem;
+    margin-bottom: 0.4rem;
+  }
+
+  .meter-dates {
+    font-size: 0.875rem;
+    color: #6c757d;
+  }
+
+  .meter-form {
+    border-radius: 6px;
+  }
+
+  .meter-history {
+    overflow-x: auto;
+
+    table {
+      font-size: 0.875rem;
+    }
+
+    .badge {
+      font-size: 0.75rem;
+    }
+  }
+}
