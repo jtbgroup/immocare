@@ -60,18 +60,12 @@
     <app-room-section [unitId]="unit.id"></app-room-section>
   </section>
 
-  <!-- PEB placeholder -->
+  <!-- PEB section — UC004 -->
   <section>
-    <div class="section-header">
-      <h3>Energy Performance (PEB)</h3>
-      <button class="btn btn-sm" disabled title="Available in UC004">
-        Add PEB Score
-      </button>
-    </div>
-    <p class="placeholder-text">PEB management will be available in UC004.</p>
+    <app-peb-section [unitId]="unit.id"></app-peb-section>
   </section>
 
-  <!-- Rent section -->
+  <!-- Rent section — UC005 -->
   <section>
     <div class="section-header">
       <h3>Rent</h3>
@@ -79,7 +73,7 @@
     <app-rent-section [unitId]="unit.id"></app-rent-section>
   </section>
 
-  <!-- Water Meter placeholder -->
+  <!-- Water Meter placeholder — UC006 -->
   <section>
     <div class="section-header">
       <h3>Water Meter</h3>
@@ -91,24 +85,4 @@
       Water meter management will be available in UC006.
     </p>
   </section>
-</div>
-
-<!-- Loading -->
-<div *ngIf="loading" class="loading">Loading unit…</div>
-
-<!-- Delete confirmation dialog -->
-<div class="dialog-overlay" *ngIf="showDeleteConfirm">
-  <div class="dialog">
-    <h3>Delete Unit {{ unit?.unitNumber }}?</h3>
-    <p class="warning">This action cannot be undone.</p>
-    <div class="dialog-error" *ngIf="deleteError">{{ deleteError }}</div>
-    <div class="dialog-actions">
-      <button class="btn btn-secondary" (click)="showDeleteConfirm = false">
-        Cancel
-      </button>
-      <button class="btn btn-danger" (click)="delete()" [disabled]="deleting">
-        {{ deleting ? "Deleting…" : "Confirm Delete" }}
-      </button>
-    </div>
-  </div>
 </div>

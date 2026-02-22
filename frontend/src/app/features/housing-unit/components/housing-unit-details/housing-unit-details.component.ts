@@ -5,13 +5,14 @@ import { Subject } from "rxjs";
 import { takeUntil } from "rxjs/operators";
 import { HousingUnitService } from "../../../../core/services/housing-unit.service";
 import { HousingUnit } from "../../../../models/housing-unit.model";
+import { PebSectionComponent } from "../peb-section/peb-section.component";
 import { RentSectionComponent } from "../rent-section/rent-section.component";
 import { RoomSectionComponent } from "../room-section/room-section.component";
 
 @Component({
   selector: "app-housing-unit-details",
   standalone: true,
-  imports: [CommonModule, RouterLink, RentSectionComponent, RoomSectionComponent],
+  imports: [CommonModule, RouterLink, RoomSectionComponent, PebSectionComponent, RentSectionComponent],
   templateUrl: "./housing-unit-details.component.html",
   styleUrls: ["./housing-unit-details.component.scss"],
 })
@@ -38,13 +39,8 @@ export class HousingUnitDetailsComponent implements OnInit, OnDestroy {
         .getUnitById(id)
         .pipe(takeUntil(this.destroy$))
         .subscribe({
-          next: (u) => {
-            this.unit = u;
-            this.loading = false;
-          },
-          error: () => {
-            this.loading = false;
-          },
+          next: (u) => { this.unit = u; this.loading = false; },
+          error: () => { this.loading = false; },
         });
     }
   }
@@ -71,9 +67,7 @@ export class HousingUnitDetailsComponent implements OnInit, OnDestroy {
       .delete(this.unit.id)
       .pipe(takeUntil(this.destroy$))
       .subscribe({
-        next: () => {
-          this.router.navigate(["/buildings", this.unit!.buildingId]);
-        },
+        next: () => { this.router.navigate(["/buildings", this.unit!.buildingId]); },
         error: (err) => {
           this.deleting = false;
           this.deleteError = err.error?.message ?? "Failed to delete unit.";

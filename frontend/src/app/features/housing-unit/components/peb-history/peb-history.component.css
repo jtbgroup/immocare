@@ -1,0 +1,83 @@
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.4);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+}
+
+.modal-panel {
+  background: #fff;
+  border-radius: 8px;
+  width: 90%;
+  max-width: 800px;
+  max-height: 85vh;
+  overflow-y: auto;
+  padding: 1.5rem;
+  box-shadow: 0 8px 32px rgba(0,0,0,0.18);
+}
+
+.modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1rem;
+}
+.modal-header h3 { margin: 0; }
+
+.btn-close {
+  background: none;
+  border: none;
+  font-size: 1.25rem;
+  cursor: pointer;
+  color: #555;
+}
+.btn-close:hover { color: #000; }
+
+.improvement-summary {
+  padding: 0.75rem 1rem;
+  background: #f5f5f5;
+  border-radius: 6px;
+  margin-bottom: 1rem;
+  font-size: 0.9rem;
+}
+
+.history-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.9rem;
+}
+.history-table th,
+.history-table td {
+  padding: 0.6rem 0.8rem;
+  border-bottom: 1px solid #e0e0e0;
+  text-align: left;
+}
+.history-table th { font-weight: 600; background: #fafafa; }
+
+.score-badge {
+  display: inline-block;
+  padding: 0.2rem 0.6rem;
+  border-radius: 4px;
+  font-weight: 700;
+  font-size: 0.85rem;
+}
+
+.status-badge {
+  display: inline-block;
+  padding: 0.15rem 0.5rem;
+  border-radius: 4px;
+  font-size: 0.78rem;
+  font-weight: 600;
+}
+.status-current   { background: #e3f2fd; color: #1565c0; }
+.status-historical { background: #f5f5f5; color: #616161; }
+.status-expired   { background: #ffebee; color: #c62828; }
+
+.improved  { color: #2e7d32; font-weight: 700; font-size: 1rem; }
+.degraded  { color: #c62828; font-weight: 700; font-size: 1rem; }
+.unchanged { color: #9e9e9e; font-weight: 700; font-size: 1rem; }
+
+.loading, .no-data { color: #888; padding: 0.5rem 0; }
