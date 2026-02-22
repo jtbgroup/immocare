@@ -5,11 +5,12 @@ import { Subject } from "rxjs";
 import { takeUntil } from "rxjs/operators";
 import { HousingUnitService } from "../../../../core/services/housing-unit.service";
 import { HousingUnit } from "../../../../models/housing-unit.model";
+import { RentSectionComponent } from "../rent-section/rent-section.component";
 
 @Component({
   selector: "app-housing-unit-details",
   standalone: true,
-  imports: [CommonModule, RouterLink],
+  imports: [CommonModule, RouterLink, RentSectionComponent],
   templateUrl: "./housing-unit-details.component.html",
   styleUrls: ["./housing-unit-details.component.scss"],
 })

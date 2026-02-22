@@ -1,9 +1,10 @@
 <div class="details-container" *ngIf="unit">
-
   <!-- Header -->
   <div class="details-header">
     <div>
-      <a [routerLink]="['/buildings', unit.buildingId]" class="breadcrumb">{{ unit.buildingName }}</a>
+      <a [routerLink]="['/buildings', unit.buildingId]" class="breadcrumb">{{
+        unit.buildingName
+      }}</a>
       <span class="separator">›</span>
       <h2>Unit {{ unit.unitNumber }}</h2>
     </div>
@@ -35,15 +36,25 @@
       </div>
       <div>
         <label>Owner</label>
-        <span>{{ unit.ownerName ?? '—' }}</span>
+        <span>{{ unit.ownerName ?? "—" }}</span>
       </div>
       <div *ngIf="unit.hasTerrace">
         <label>Terrace</label>
-        <span>{{ unit.terraceSurface ? unit.terraceSurface + ' m²' : '—' }}{{ unit.terraceOrientation ? ' · ' + unit.terraceOrientation : '' }}</span>
+        <span
+          >{{ unit.terraceSurface ? unit.terraceSurface + " m²" : "—"
+          }}{{
+            unit.terraceOrientation ? " · " + unit.terraceOrientation : ""
+          }}</span
+        >
       </div>
       <div *ngIf="unit.hasGarden">
         <label>Garden</label>
-        <span>{{ unit.gardenSurface ? unit.gardenSurface + ' m²' : '—' }}{{ unit.gardenOrientation ? ' · ' + unit.gardenOrientation : '' }}</span>
+        <span
+          >{{ unit.gardenSurface ? unit.gardenSurface + " m²" : "—"
+          }}{{
+            unit.gardenOrientation ? " · " + unit.gardenOrientation : ""
+          }}</span
+        >
       </div>
     </div>
   </section>
@@ -52,7 +63,9 @@
   <section>
     <div class="section-header">
       <h3>Rooms</h3>
-      <button class="btn btn-sm" disabled title="Available in UC003">Add Room</button>
+      <button class="btn btn-sm" disabled title="Available in UC003">
+        Add Room
+      </button>
     </div>
     <p class="placeholder-text">Room management will be available in UC003.</p>
   </section>
@@ -61,7 +74,9 @@
   <section>
     <div class="section-header">
       <h3>Energy Performance (PEB)</h3>
-      <button class="btn btn-sm" disabled title="Available in UC004">Add PEB Score</button>
+      <button class="btn btn-sm" disabled title="Available in UC004">
+        Add PEB Score
+      </button>
     </div>
     <p class="placeholder-text">PEB management will be available in UC004.</p>
   </section>
@@ -70,20 +85,25 @@
   <section>
     <div class="section-header">
       <h3>Rent</h3>
-      <button class="btn btn-sm" disabled title="Available in UC005">Add Rent</button>
+      <button class="btn btn-sm" disabled title="Available in UC005">
+        Add Rent
+      </button>
     </div>
-    <p class="placeholder-text">Rent management will be available in UC005.</p>
+    <app-rent-section [unitId]="unit.id"></app-rent-section>
   </section>
 
   <!-- Water Meter placeholder -->
   <section>
     <div class="section-header">
       <h3>Water Meter</h3>
-      <button class="btn btn-sm" disabled title="Available in UC006">Add Meter</button>
+      <button class="btn btn-sm" disabled title="Available in UC006">
+        Add Meter
+      </button>
     </div>
-    <p class="placeholder-text">Water meter management will be available in UC006.</p>
+    <p class="placeholder-text">
+      Water meter management will be available in UC006.
+    </p>
   </section>
-
 </div>
 
 <!-- Loading -->
@@ -96,9 +116,11 @@
     <p class="warning">This action cannot be undone.</p>
     <div class="dialog-error" *ngIf="deleteError">{{ deleteError }}</div>
     <div class="dialog-actions">
-      <button class="btn btn-secondary" (click)="showDeleteConfirm = false">Cancel</button>
+      <button class="btn btn-secondary" (click)="showDeleteConfirm = false">
+        Cancel
+      </button>
       <button class="btn btn-danger" (click)="delete()" [disabled]="deleting">
-        {{ deleting ? 'Deleting…' : 'Confirm Delete' }}
+        {{ deleting ? "Deleting…" : "Confirm Delete" }}
       </button>
     </div>
   </div>
