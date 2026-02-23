@@ -1,11 +1,11 @@
-# User Story US022: Update Rent Amount
+# User Story US022: Edit a Rent Record
 
 ## Story Information
 
 | Attribute | Value |
 |-----------|-------|
 | **Story ID** | US022 |
-| **Story Name** | Update Rent Amount |
+| **Story Name** | Edit a Rent Record |
 | **Epic** | Rent Management |
 | **Related UC** | UC005 - Manage Rents |
 | **Priority** | MUST HAVE |
@@ -16,58 +16,58 @@
 
 ## User Story
 
-**As an** ADMIN  
-**I want to** update the rent amount when it changes  
-**So that** I can track rent increases or decreases over time
+**As an** ADMIN
+**I want to** edit an existing rent record
+**So that** I can correct mistakes or adjust amounts and dates
 
 ---
 
 ## Acceptance Criteria
 
-### AC1: Display Update Rent Form
-**Given** a unit has current rent €850.00  
-**When** I click "Update Rent"  
-**Then** update form is displayed  
-**And** current rent shown as read-only  
-**And** new rent field is empty
+### AC1: Edit Button in History
+**Given** a unit has rent history
+**When** I open the history panel
+**Then** each row has an ✏️ edit button
 
-### AC2: Increase Rent
-**Given** current rent is €850.00  
-**When** I enter new rent €900.00  
-**And** effective from 2024-07-01  
-**And** I save  
-**Then** new rent becomes current  
-**And** old rent gets effective_to = 2024-06-30  
-**And** both preserved in history
+### AC2: Form Pre-filled
+**Given** I click ✏️ on a rent record
+**Then** the inline form opens pre-filled with:
+- Current monthly rent amount
+- Current effective from date
+- Current notes
 
-### AC3: Show Change Calculation
-**Given** I am updating from €850 to €900  
-**When** I enter new amount  
-**Then** I see calculated change: "+€50.00 (+5.88%)" in green
+### AC3: Show Change Preview
+**Given** I am editing a record and modify the amount
+**When** the record has a previous (older) record
+**Then** I see a live change preview: "+€50.00 (+5.88%)" in green or "-€50.00 (-5.56%)" in red
 
-### AC4: Decrease Rent
-**Given** current rent is €900.00  
-**When** I enter €850.00  
-**Then** change shows "-€50.00 (-5.56%)" in red  
-**And** update is saved
+### AC4: Adjacent Periods Recalculated on Save
+**Given** I change the `effective_from` date of a record
+**When** I save
+**Then** the previous record's `effective_to` = new `effectiveFrom - 1 day`
+**And** this record's `effective_to` = next record's `effectiveFrom - 1 day` (or NULL if most recent)
 
-### AC5: Automatic Period Closure
-**Given** current rent from 2024-01-01 with no end date  
-**When** I add new rent from 2024-07-01  
-**Then** old rent's effective_to = 2024-06-30  
-**And** new rent's effective_to = NULL
+### AC5: Current Rent Card Updated
+**Given** I edited the most recent rent record
+**When** the save completes
+**Then** the current rent card reflects the new amount and date
 
-### AC6: Validation - New Rent Required
-**Given** I am updating rent  
-**When** I leave new rent empty  
-**Then** I see error "New rent is required"
+### AC6: Validation — Positive Amount
+**Given** I am editing a rent record
+**When** I enter amount ≤ 0
+**Then** I see error "Rent must be positive"
 
-### AC7: Validation - Date Not Before Current
-**Given** current rent from 2024-06-01  
-**When** I try effective from 2024-01-01  
-**Then** I see error "Cannot backdate before current period"
+### AC7: Validation — Date Required
+**Given** I am editing a rent record
+**When** I clear the effective from date
+**Then** I see error "Effective from date is required"
+
+### AC8: Validation — Not Too Far in Future
+**Given** I am editing a rent record
+**When** I set a date more than 1 year in the future
+**Then** I see error "Effective from date cannot be more than 1 year in the future"
 
 ---
 
-**Last Updated**: 2024-01-15  
-**Status**: Ready for Development
+**Last Updated**: 2026-02-23
+**Status**: ✅ Implemented

@@ -624,6 +624,11 @@ export class RentSectionComponent implements OnChanges, OnDestroy {
         next: (rent) => {
           this.currentRent = rent ?? null;
           this.loading = false;
+          // FIX : charger l'historique immédiatement pour calculer lastChange
+          // même si l'historique n'est pas affiché visuellement
+          if (this.currentRent) {
+            this.loadHistoryForChange();
+          }
         },
         error: (err) => {
           if (err.status === 204 || err.status === 404) this.currentRent = null;
@@ -632,9 +637,27 @@ export class RentSectionComponent implements OnChanges, OnDestroy {
       });
   }
 
+  loadHistoryForChange(): void {
+    this.rentService
+      .getRentHistory(this.unitId)
+      .pipe(takeUntil(this.destroy$))
+      .subscribe({
+        next: (history) => {
+          this.history = history;
+          this.computeChanges();
+          // Note : on ne met pas showHistory = true ici,
+          // le panneau reste fermé — c'est juste pour calculer lastChange
+        },
+      });
+  }
+
   toggleHistory(): void {
     this.showHistory = !this.showHistory;
-    if (this.showHistory) this.loadHistory();
+    // L'historique est déjà chargé via loadHistoryForChange(),
+    // mais on le recharge si showHistory passe à true pour avoir les données fraîches
+    if (this.showHistory && this.history.length === 0) {
+      this.loadHistory();
+    }
   }
 
   loadHistory(): void {

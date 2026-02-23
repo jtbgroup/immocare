@@ -46,6 +46,8 @@
         <th>Valid Until</th>
         <th>Status</th>
         <th>Change</th>
+        <!-- FIX #3 : colonne actions -->
+        <th></th>
       </tr>
     </thead>
     <tbody>
@@ -71,6 +73,23 @@
           <span [ngClass]="improvementClass(rowDirection(item))">
             {{ improvementIcon(rowDirection(item)) }}
           </span>
+        </td>
+        <!-- FIX #3 : icônes edit + delete -->
+        <td class="row-actions">
+          <button
+            class="icon-btn-sm"
+            title="Edit"
+            (click)="editRequest.emit(item)"
+          >
+            ✏️
+          </button>
+          <button
+            class="icon-btn-sm icon-btn-delete"
+            title="Delete"
+            (click)="deleteRequest.emit(item)"
+          >
+            🗑️
+          </button>
         </td>
       </tr>
     </tbody>

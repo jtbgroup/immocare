@@ -6,8 +6,8 @@
 |-----------|-------|
 | **Use Case ID** | UC005 |
 | **Use Case Name** | Manage Rents |
-| **Version** | 1.0 |
-| **Status** | ✅ Ready for Implementation |
+| **Version** | 2.0 |
+| **Status** | ✅ Implemented |
 | **Priority** | HIGH - Foundation |
 | **Actor(s)** | ADMIN |
 | **Preconditions** | User authenticated as ADMIN; Housing unit exists |
@@ -18,7 +18,7 @@
 
 ## Description
 
-This use case describes how an administrator manages indicative rent amounts for housing units. Rents are tracked over time with full history retention, supporting rent increases, decreases, and adjustments.
+This use case describes how an administrator manages indicative rent amounts for housing units. Rents are tracked over time with full history. Records can be added, edited, and deleted — adjacent periods are automatically recalculated on any change.
 
 ---
 
@@ -27,7 +27,7 @@ This use case describes how an administrator manages indicative rent amounts for
 ### Primary Actor: ADMIN
 - **Role**: System administrator
 - **Goal**: Record and track rent amounts over time
-- **Characteristics**: 
+- **Characteristics**:
   - Knows rent pricing for units
   - Tracks rent changes (indexation, market adjustments)
 
@@ -43,188 +43,168 @@ This use case describes how an administrator manages indicative rent amounts for
 
 ## Basic Flow
 
-### 1. View Rent History
+### 1. View Current Rent
 
 **Trigger**: ADMIN views housing unit details
 
 1. System displays Rent section showing:
-   - **Current Rent**: Most recent amount (e.g., "€850.00/month")
+   - **Current Rent**: Most recent amount as badge (e.g., "€900")
    - **Effective From**: Start date of current rent
-   - **Last Change**: Previous amount and date (if exists)
+   - **Last Change**: vs previous amount with ↑/↓ indicator (if history exists)
    - Link: "View History"
+   - Button: "+ Set Rent" (only if no rent defined)
 
-2. If no rent defined, show: "No rent recorded"
+2. If no rent defined, show: "No rent recorded" + "+ Set Rent" button
 
-3. ADMIN can click "View History"
-
-4. System displays history table:
-   - Monthly Rent (€)
-   - Effective From
-   - Effective To
-   - Duration (calculated)
-   - Notes
-   - Actions (View details)
-
-5. History sorted by effective_from DESC
-
-**Result**: ADMIN sees current and historical rents
+**Result**: ADMIN sees current rent at a glance
 
 ---
 
 ### 2. Add First Rent
 
-**Trigger**: ADMIN clicks "Set Rent" button (no rent exists yet)
+**Trigger**: ADMIN clicks "+ Set Rent" button (no rent exists yet)
 
-1. System displays rent form:
-   - **Housing Unit** (pre-selected, read-only)
+1. System displays inline rent form:
    - **Monthly Rent (€)** (required, decimal)
    - **Effective From** (required, date picker)
-   - **Notes** (optional, text area)
+   - **Notes** (optional, text area with quick-select templates)
 
-2. ADMIN fills form
+2. ADMIN fills form and clicks "Save"
 
-3. ADMIN clicks "Save"
-
-4. System validates:
+3. System validates:
    - Rent amount > 0
    - Effective from date provided
-   - Effective from not too far in future (< 1 year)
+   - Effective from not more than 1 year in the future
 
-5. System saves rent:
-   - effective_to = NULL (current rent)
-   - Append to history table
+4. System saves rent record with `effective_to = NULL`
 
-6. System displays success message
-
-7. System updates unit details with new rent
+5. System refreshes section with new current rent
 
 **Result**: First rent is recorded
 
 ---
 
-### 3. Update Rent (Add New Amount)
+### 3. Add New Rent Record
 
-**Trigger**: ADMIN clicks "Update Rent" button (rent exists)
+**Trigger**: ADMIN clicks "+ Set Rent" (rent already exists — button visible when no current rent, e.g., after a delete)
 
-1. System displays rent update form:
-   - **Current Rent**: Display current amount (read-only)
-   - **New Monthly Rent (€)** (required, decimal)
-   - **Effective From** (required, date picker, default: today)
-   - **Notes** (optional, text area, placeholder: "Annual indexation", "Market adjustment", etc.)
+1. Same form as Flow 2
 
-2. System shows calculated change:
-   - If increase: "+€50.00 (+5.88%)" in green
-   - If decrease: "-€50.00 (-5.88%)" in red
+2. System inserts new record at the correct position in the timeline:
+   - If most recent date → previous record gets `effective_to = new effectiveFrom - 1 day`
+   - If inserted in middle → gets `effective_to = next record's effectiveFrom - 1 day`, previous record gets `effective_to = new effectiveFrom - 1 day`
 
-3. ADMIN fills form
+3. System recalculates adjacent periods automatically
 
-4. ADMIN clicks "Save"
-
-5. System validates:
-   - New rent amount > 0
-   - Effective from >= current rent's effective_from
-   - Effective from not in distant future
-
-6. System updates rent history:
-   - Set current rent's effective_to = new effective_from - 1 day
-   - Add new rent record with effective_to = NULL
-   - Both records preserved in history
-
-7. System displays success message
-
-8. System updates unit details with new rent
-
-**Result**: Rent is updated; old rent becomes historical
+**Result**: New rent inserted; adjacent periods recalculated
 
 ---
 
-### 4. View Rent Details
+### 4. Edit a Rent Record
 
-**Trigger**: ADMIN clicks on a rent in history table
+**Trigger**: ADMIN clicks ✏️ on a row in the history table
 
-1. System displays rent details modal:
-   - Monthly Rent (large, formatted)
-   - Effective From
-   - Effective To (or "Current" if NULL)
-   - Duration (calculated)
+1. System opens inline form pre-filled with current values:
+   - Monthly Rent (editable)
+   - Effective From (editable)
+   - Notes (editable)
+   - If editing current rent: live change preview vs previous
+
+2. ADMIN modifies fields and clicks "Save"
+
+3. System validates (same rules as creation)
+
+4. System updates the record and recalculates neighbours:
+   - Previous record (older): `effective_to = new effectiveFrom - 1 day`
+   - This record: `effective_to = next record's effectiveFrom - 1 day` (or NULL if most recent)
+
+5. System refreshes current rent card and history
+
+**Result**: Record corrected; adjacent periods recalculated
+
+---
+
+### 5. Delete a Rent Record
+
+**Trigger**: ADMIN clicks 🗑️ on a row in the history table
+
+1. System shows inline confirmation with record details
+
+2. ADMIN clicks "Confirm Delete"
+
+3. System deletes the record and recalculates neighbours:
+   - Previous record (older) inherits the deleted record's `effective_to`
+   - If deleted record was the most recent → previous record becomes current (`effective_to = NULL`)
+
+4. System refreshes current rent card and history
+
+**Result**: Record removed; previous record inherits the period
+
+---
+
+### 6. View Rent History
+
+**Trigger**: ADMIN clicks "View History" link
+
+1. System expands inline history panel below the card
+
+2. Panel shows:
+   - Total change summary (first rent → current): "+€100 (+13.33%)" in green/red
+   - Table sorted by `effectiveFrom` DESC
+
+3. Table columns:
+   - Monthly Rent
+   - From
+   - To (or "Current")
+   - Duration (months)
+   - Change vs previous (↑/↓ with amount and %)
    - Notes
-   - Created at timestamp
+   - Actions (✏️ 🗑️)
 
-2. If not current rent, show comparison:
-   - "This rent was replaced by €XXX on [date]"
+4. ADMIN clicks "Hide History" or ✕ to collapse
 
-**Result**: ADMIN sees complete rent information
-
----
-
-### 5. Backdate Rent Entry
-
-**Trigger**: ADMIN needs to enter historical rent retroactively
-
-1. ADMIN clicks "Add Historical Rent"
-
-2. System displays form with warning:
-   - "Adding historical rent - ensure dates don't overlap with existing rents"
-
-3. ADMIN enters past rent with old effective_from date
-
-4. System validates no overlap with existing rent periods
-
-5. System saves historical rent
-
-**Result**: Historical rent added to timeline
+**Result**: Full rent history visible inline
 
 ---
 
 ## Alternative Flows
 
-### Alternative Flow 3A: Validation Errors
+### Alternative Flow 2A / 3A / 4A: Validation Errors
 
-**Trigger**: Validation fails in step 5 of Basic Flow 3
+**Trigger**: Validation fails on save
 
-1. System displays errors:
-   - "New rent is required"
+1. System displays inline errors:
    - "Rent must be positive"
-   - "Effective from is required"
-   - "Effective from cannot be before current rent start date"
-   - "Effective from too far in future"
+   - "Effective from date is required"
+   - "Effective from date cannot be more than 1 year in the future"
 
-2. ADMIN corrects errors
+2. ADMIN corrects errors and retries
 
-3. Return to step 4 of Basic Flow 3
-
-**Result**: Errors must be fixed
+**Result**: Errors must be fixed before saving
 
 ---
 
-### Alternative Flow 3B: Same Rent Amount Warning
+### Alternative Flow 2B: Same Rent Amount Warning
 
-**Trigger**: New rent equals current rent in step 2
+**Trigger**: New rent amount equals current rent
 
-1. System shows warning:
-   - "New rent is same as current rent"
-   - "Continue anyway?"
+1. System shows warning: "New rent is the same as the current rent. Continue anyway?"
 
-2. ADMIN clicks "Yes" or "No"
-   - Yes: Allow save (may be adjusting dates)
-   - No: Return to form
+2. ADMIN can save anyway (useful for date corrections)
 
 **Result**: Warning shown but not blocked
 
 ---
 
-### Alternative Flow 5A: Overlapping Dates Error
+### Alternative Flow 5A: Delete with No Previous Record
 
-**Trigger**: Historical rent dates overlap with existing rent in step 4
+**Trigger**: ADMIN deletes the only rent record
 
-1. System displays error:
-   - "Date overlap detected"
-   - "This date range conflicts with existing rent from [date] to [date]"
-   - Show conflicting rent details
+1. System deletes the record
 
-2. ADMIN adjusts dates or cancels
+2. Section returns to empty state: "No rent recorded" + "+ Set Rent" button
 
-**Result**: Overlaps prevented
+**Result**: Unit has no rent recorded
 
 ---
 
@@ -234,39 +214,41 @@ This use case describes how an administrator manages indicative rent amounts for
 
 **Trigger**: Database unavailable
 
-1. System displays error message
+1. System displays inline error message
 
 2. ADMIN can retry
 
-**Result**: Rent not saved
+**Result**: Operation not performed
 
 ---
 
 ## Business Rules
 
-### BR-UC005-01: Append-Only History
-Rent records are never deleted, only appended.
+### BR-UC005-01: Full Audit Trail
+Rent records can be added, edited, and deleted. All changes automatically recalculate adjacent `effective_to` dates to maintain a consistent, non-overlapping timeline.
 
-**Rationale**: Complete audit trail of all rent changes
+**Rationale**: Data accuracy is more important than append-only immutability; recalculation ensures the timeline is always coherent
 
 ---
 
 ### BR-UC005-02: Current Rent Definition
-Current rent = record with effective_to = NULL.
+Current rent = record with `effective_to = NULL`. Only one per unit at any time.
 
 **Rationale**: Only one active rent per unit at any time
 
 ---
 
-### BR-UC005-03: Automatic Period Closure
-When adding new rent, system automatically sets previous rent's effective_to.
+### BR-UC005-03: Automatic Period Recalculation
+On any add, edit, or delete:
+- Previous record (older): `effective_to = new/edited effectiveFrom - 1 day`
+- Deleted record: previous record inherits deleted record's `effective_to`
 
-**Rationale**: Prevent manual calculation errors
+**Rationale**: Prevent manual calculation errors; always maintain a gapless timeline
 
 ---
 
 ### BR-UC005-04: No Overlapping Periods
-Rent periods for same unit cannot overlap.
+Rent periods for the same unit cannot overlap. The system enforces this via automatic recalculation.
 
 **Rationale**: Unit cannot have two different rents simultaneously
 
@@ -280,7 +262,7 @@ Rent must be > 0.
 ---
 
 ### BR-UC005-06: Future Date Limit
-Effective from date cannot be more than 1 year in future.
+`effective_from` cannot be more than 1 year in the future.
 
 **Rationale**: Prevent accidental far-future dates
 
@@ -293,17 +275,10 @@ Rents are indicative/target amounts, not actual tenant payments.
 
 ---
 
-### BR-UC005-08: Sequential Dates
-New rent's effective_from must be >= current rent's effective_from.
-
-**Rationale**: Cannot backdate new rent before current period starts
-
----
-
 ## Data Elements
 
 ### Input Data
-- Housing unit ID (selected)
+- Housing unit ID (pre-selected)
 - Monthly rent (decimal, EUR)
 - Effective from (date)
 - Notes (text, optional)
@@ -312,7 +287,7 @@ New rent's effective_from must be >= current rent's effective_from.
 - Rent ID (generated)
 - All input data
 - Effective to (calculated or NULL)
-- Created_at timestamp
+- Created at timestamp
 - Duration (calculated)
 - Change percentage (calculated)
 
@@ -321,32 +296,44 @@ New rent's effective_from must be >= current rent's effective_from.
 ## User Interface Requirements
 
 ### Rent Section (in Housing Unit Details)
-- Current rent amount (large, formatted: "€850.00/month")
+- Badge showing current rent amount (e.g., "€900")
 - Effective from date
-- Rent change indicator (↑ or ↓ with percentage)
-- "Update Rent" button
-- "View History" link
+- Rent change indicator (↑/↓ with amount and %) vs previous
+- "+ Set Rent" button (header, only when no rent exists)
+- "View History" link (below card, only when rent exists)
 
-### Rent History Modal/Page
-- Timeline view (optional)
-- Table with all rents
-- Visual indicators for increases/decreases
-- Filter by date range
-- Export option
+### Rent History Panel (inline, expandable)
+- Total change summary since first rent
+- Table sorted by date descending
+- Columns: Monthly Rent | From | To | Duration | Change | Notes | Actions
+- ✏️ Edit and 🗑️ Delete buttons per row
+- ✕ button to close panel
 
-### Rent Form (Set/Update)
-- Rent amount input with € prefix
-- Date picker
-- Notes text area with common templates
-- Change calculator (update only)
+### Rent Form (inline panel)
+- Monthly rent input (€, required)
+- Effective from date picker (required)
+- Live change preview vs current rent (edit mode only)
+- Notes field with quick-select templates: "Annual indexation", "Market adjustment", "After renovation", "Tenant negotiation"
 - "Save" and "Cancel" buttons
+
+---
+
+## API Endpoints
+
+| Method | Path | Description |
+|--------|------|-------------|
+| GET | `/api/v1/housing-units/{unitId}/rents` | Full history, newest first |
+| GET | `/api/v1/housing-units/{unitId}/rents/current` | Current rent (204 if none) |
+| POST | `/api/v1/housing-units/{unitId}/rents` | Add new rent record |
+| PUT | `/api/v1/housing-units/{unitId}/rents/{rentId}` | Edit existing record |
+| DELETE | `/api/v1/housing-units/{unitId}/rents/{rentId}` | Delete record |
 
 ---
 
 ## Performance Requirements
 
 - Rent section loads with unit (< 500ms)
-- Add/update rent completes in < 500ms
+- Add/edit/delete rent completes in < 500ms
 - History loads in < 500ms
 
 ---
@@ -361,61 +348,71 @@ New rent's effective_from must be >= current rent's effective_from.
 ## Test Scenarios
 
 ### TS-UC005-01: Set First Rent
-**Given**: Unit has no rent  
-**When**: ADMIN sets rent €850 from 2024-01-01  
-**Then**: Rent saved as current
+**Given**: Unit has no rent
+**When**: ADMIN sets rent €850 from 2024-01-01
+**Then**: Rent saved as current with `effective_to = NULL`
 
-### TS-UC005-02: Increase Rent
-**Given**: Current rent €850 from 2024-01-01  
-**When**: ADMIN sets €900 from 2024-07-01  
-**Then**: New rent current, old rent effective_to = 2024-06-30
+### TS-UC005-02: Add More Recent Rent
+**Given**: Current rent €850 from 2024-01-01
+**When**: ADMIN adds €900 from 2024-07-01
+**Then**: New rent current; old rent `effective_to = 2024-06-30`
 
-### TS-UC005-03: Decrease Rent
-**Given**: Current rent €900  
-**When**: ADMIN sets €850  
-**Then**: Decrease recorded, percentage shown
+### TS-UC005-03: Add Rent in Middle of History
+**Given**: History has €800 (2023-01-01) and €900 (2024-01-01)
+**When**: ADMIN adds €850 from 2023-07-01
+**Then**: €800 gets `effective_to = 2023-06-30`; €850 gets `effective_to = 2023-12-31`
 
-### TS-UC005-04: Negative Rent Error
-**Given**: ADMIN updating rent  
-**When**: Enters amount = -100  
+### TS-UC005-04: Edit Rent Date
+**Given**: Rent €850 from 2024-01-01 (current)
+**When**: ADMIN edits date to 2024-03-01
+**Then**: Previous record gets `effective_to = 2024-02-28`
+
+### TS-UC005-05: Delete Current Rent
+**Given**: Two records: €800 (2023) and €900 (2024, current)
+**When**: ADMIN deletes €900
+**Then**: €800 becomes current (`effective_to = NULL`)
+
+### TS-UC005-06: Delete Middle Record
+**Given**: Three records: €750 (2022), €800 (2023), €900 (2024)
+**When**: ADMIN deletes €800
+**Then**: €750 `effective_to` updated to 2023-12-31 (was end of €800's period)
+
+### TS-UC005-07: Negative Rent Error
+**Given**: ADMIN adding rent
+**When**: Enters amount = -100
 **Then**: Error "Rent must be positive"
 
-### TS-UC005-05: Future Date Too Far Error
-**Given**: ADMIN setting rent  
-**When**: Sets effective from 2 years ahead  
+### TS-UC005-08: Future Date Too Far Error
+**Given**: ADMIN adding rent
+**When**: Sets effective from 2 years ahead
 **Then**: Error "Date too far in future"
 
-### TS-UC005-06: View Rent History
-**Given**: Unit has 3 rent periods  
-**When**: ADMIN views history  
-**Then**: All 3 shown with durations
+### TS-UC005-09: View Rent History
+**Given**: Unit has 3 rent periods
+**When**: ADMIN clicks "View History"
+**Then**: Panel expands inline; all 3 shown with durations and ↑/↓ indicators
 
-### TS-UC005-07: Calculate Duration
-**Given**: Rent from 2024-01-01 to 2024-06-30  
-**When**: Viewing history  
-**Then**: Duration shows "6 months"
+### TS-UC005-10: Calculate Duration
+**Given**: Rent from 2024-01-01 to 2024-06-30
+**When**: Viewing history
+**Then**: Duration shows "5 months"
 
-### TS-UC005-08: Same Amount Warning
-**Given**: Current rent €850  
-**When**: ADMIN enters new rent €850  
+### TS-UC005-11: Same Amount Warning
+**Given**: Current rent €850
+**When**: ADMIN enters new rent €850
 **Then**: Warning shown, can continue
 
-### TS-UC005-09: Backdate New Rent Error
-**Given**: Current rent from 2024-06-01  
-**When**: ADMIN tries effective from 2024-01-01  
-**Then**: Error "Cannot backdate before current period"
-
-### TS-UC005-10: Add Historical Rent
-**Given**: Current rent from 2024-06-01  
-**When**: ADMIN adds historical rent 2023-01-01 to 2024-05-31  
-**Then**: Historical rent added successfully
+### TS-UC005-12: Delete Only Record
+**Given**: Unit has exactly one rent record
+**When**: ADMIN deletes it
+**Then**: Section shows "No rent recorded" + "+ Set Rent" button
 
 ---
 
 ## Related User Stories
 
 - **US021**: Set initial rent for housing unit
-- **US022**: Update rent amount
+- **US022**: Edit a rent record
 - **US023**: View rent history
 - **US024**: Track rent increases over time
 - **US025**: Add notes to rent changes
@@ -434,6 +431,6 @@ New rent's effective_from must be >= current rent's effective_from.
 
 ---
 
-**Last Updated**: 2024-01-15  
-**Version**: 1.0  
-**Status**: ✅ Ready for Implementation
+**Last Updated**: 2026-02-23
+**Version**: 2.0
+**Status**: ✅ Implemented

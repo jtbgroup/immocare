@@ -13,6 +13,7 @@ import org.springframework.transaction.annotation.Transactional;
 import com.immocare.exception.HousingUnitNotFoundException;
 import com.immocare.exception.InvalidPebScoreDateException;
 import com.immocare.exception.InvalidValidityPeriodException;
+import com.immocare.exception.PebScoreNotFoundException;
 import com.immocare.mapper.PebScoreMapper;
 import com.immocare.model.dto.CreatePebScoreRequest;
 import com.immocare.model.dto.PebImprovementDTO;
@@ -50,20 +51,15 @@ public class PebScoreService {
     /**
      * Add a new PEB score record for a housing unit.
      * Implements US017 - Add PEB Score.
-     * Enforces BR-UC004-01 through BR-UC004-07.
      */
     @Transactional
     public PebScoreDTO addScore(Long unitId, CreatePebScoreRequest request) {
         HousingUnit unit = housingUnitRepository.findById(unitId)
                 .orElseThrow(() -> new HousingUnitNotFoundException(unitId));
 
-        // BR-UC004-03: score_date cannot be in the future (also enforced by
-        // @PastOrPresent)
         if (request.getScoreDate().isAfter(LocalDate.now())) {
             throw new InvalidPebScoreDateException("Score date cannot be in the future");
         }
-
-        // BR-UC004-04: valid_until must be after score_date if provided
         if (request.getValidUntil() != null && !request.getValidUntil().isAfter(request.getScoreDate())) {
             throw new InvalidValidityPeriodException("Valid until must be after score date");
         }
@@ -77,6 +73,56 @@ public class PebScoreService {
 
         PebScoreHistory saved = pebScoreRepository.save(entity);
         return enrichDTO(pebScoreMapper.toDTO(saved), saved, true);
+    }
+
+    /**
+     * Update an existing PEB score (correction use case).
+     */
+    @Transactional
+    public PebScoreDTO updateScore(Long unitId, Long scoreId, CreatePebScoreRequest request) {
+        if (!housingUnitRepository.existsById(unitId)) {
+            throw new HousingUnitNotFoundException(unitId);
+        }
+
+        PebScoreHistory entity = pebScoreRepository.findById(scoreId)
+                .filter(e -> e.getHousingUnit().getId().equals(unitId))
+                .orElseThrow(() -> new PebScoreNotFoundException(scoreId));
+
+        if (request.getScoreDate().isAfter(LocalDate.now())) {
+            throw new InvalidPebScoreDateException("Score date cannot be in the future");
+        }
+        if (request.getValidUntil() != null && !request.getValidUntil().isAfter(request.getScoreDate())) {
+            throw new InvalidValidityPeriodException("Valid until must be after score date");
+        }
+
+        entity.setPebScore(request.getPebScore());
+        entity.setScoreDate(request.getScoreDate());
+        entity.setCertificateNumber(request.getCertificateNumber());
+        entity.setValidUntil(request.getValidUntil());
+
+        PebScoreHistory saved = pebScoreRepository.save(entity);
+
+        // Recalculate isCurrent after potential date change
+        Optional<PebScoreHistory> current = pebScoreRepository
+                .findFirstByHousingUnitIdOrderByScoreDateDesc(unitId);
+        boolean isCurrent = current.map(c -> c.getId().equals(scoreId)).orElse(false);
+
+        return enrichDTO(pebScoreMapper.toDTO(saved), saved, isCurrent);
+    }
+
+    /**
+     * Delete a PEB score entry.
+     */
+    @Transactional
+    public void deleteScore(Long unitId, Long scoreId) {
+        if (!housingUnitRepository.existsById(unitId)) {
+            throw new HousingUnitNotFoundException(unitId);
+        }
+        PebScoreHistory entity = pebScoreRepository.findById(scoreId)
+                .filter(e -> e.getHousingUnit().getId().equals(unitId))
+                .orElseThrow(() -> new PebScoreNotFoundException(scoreId));
+
+        pebScoreRepository.delete(entity);
     }
 
     // ─── Queries ─────────────────────────────────────────────────────────────
@@ -137,7 +183,6 @@ public class PebScoreService {
         dto.setGradesImproved(first.getPebScore().gradesTo(current.getPebScore()));
         dto.setYearsCovered((int) ChronoUnit.YEARS.between(first.getScoreDate(), current.getScoreDate()));
 
-        // Build step history (chronological order, oldest → newest)
         List<PebScoreStepDTO> steps = new ArrayList<>();
         for (int i = records.size() - 1; i > 0; i--) {
             PebScoreHistory from = records.get(i);
@@ -157,7 +202,6 @@ public class PebScoreService {
         LocalDate today = LocalDate.now();
         LocalDate validUntil = entity.getValidUntil();
 
-        // Compute status
         if (validUntil != null && validUntil.isBefore(today)) {
             dto.setStatus("EXPIRED");
         } else if (isCurrent) {
@@ -166,7 +210,6 @@ public class PebScoreService {
             dto.setStatus("HISTORICAL");
         }
 
-        // Compute expiry warning (US019)
         if (validUntil == null) {
             dto.setExpiryWarning("NO_DATE");
         } else if (validUntil.isBefore(today)) {

@@ -3,6 +3,7 @@ package com.immocare.exception;
 import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.Map;
+
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.FieldError;
@@ -65,6 +66,11 @@ public class GlobalExceptionHandler {
     return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(error);
   }
 
+  @ExceptionHandler(PebScoreNotFoundException.class)
+  public ResponseEntity<ErrorResponse> handlePebScoreNotFound(PebScoreNotFoundException ex) {
+    return notFound("PEB score not found", ex.getMessage());
+  }
+
   // ─── Generic ──────────────────────────────────────────────────────────────
 
   @ExceptionHandler(IllegalArgumentException.class)
@@ -101,5 +107,6 @@ public class GlobalExceptionHandler {
         .body(new ErrorResponse(HttpStatus.NOT_FOUND.value(), error, message, LocalDateTime.now()));
   }
 
-  public record ErrorResponse(int status, String error, String message, LocalDateTime timestamp) {}
+  public record ErrorResponse(int status, String error, String message, LocalDateTime timestamp) {
+  }
 }

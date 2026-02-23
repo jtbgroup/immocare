@@ -1,21 +1,32 @@
 <div class="peb-section">
   <div class="section-header">
     <h3>Energy Performance (PEB)</h3>
-    <button class="btn btn-sm btn-primary" (click)="openForm()">Add PEB Score</button>
+    <!-- Bouton masqué quand le formulaire est ouvert, comme le rent -->
+    <button
+      *ngIf="!showForm && !loading"
+      class="btn btn-sm btn-primary"
+      (click)="openForm()"
+    >
+      + Set PEB
+    </button>
   </div>
 
   <div *ngIf="loading" class="loading">Loading…</div>
 
   <!-- Current score card -->
-  <ng-container *ngIf="!loading && current">
+  <ng-container *ngIf="!loading && current && !showForm">
     <div class="peb-card">
-      <div class="peb-score-badge"
-           [style.background]="display[current.pebScore].color"
-           [style.color]="display[current.pebScore].textColor">
+      <div
+        class="peb-score-badge"
+        [style.background]="display[current.pebScore].color"
+        [style.color]="display[current.pebScore].textColor"
+      >
         {{ display[current.pebScore].label }}
       </div>
       <div class="peb-details">
-        <div class="peb-date">Score date: <strong>{{ current.scoreDate }}</strong></div>
+        <div class="peb-date">
+          Score date: <strong>{{ current.scoreDate }}</strong>
+        </div>
         <div *ngIf="current.validUntil" class="peb-validity">
           Valid until: <strong>{{ current.validUntil }}</strong>
           <span class="badge" [ngClass]="expiryClass">{{ expiryLabel }}</span>
@@ -28,20 +39,24 @@
         </div>
       </div>
     </div>
+    <!-- FIX #2 : toggle correct avec showHistory -->
     <div class="peb-actions">
-      <button class="btn btn-link" (click)="showHistory = true">View History</button>
+      <button class="btn btn-link" (click)="toggleHistory()">
+        {{ showHistory ? "Hide History" : "View History" }}
+      </button>
     </div>
   </ng-container>
 
   <!-- No score state -->
-  <p *ngIf="!loading && !current && !showForm" class="no-data">No PEB score recorded.</p>
+  <p *ngIf="!loading && !current && !showForm" class="no-data">
+    No PEB score recorded.
+  </p>
 
-  <!-- Add PEB Score form -->
+  <!-- FIX #1 : Add PEB Score form inline (même philosophie que rent) -->
   <div *ngIf="showForm" class="peb-form-panel">
-    <h4>Add PEB Score</h4>
+    <h4>Set PEB Score</h4>
     <div *ngIf="saveError" class="error-banner">{{ saveError }}</div>
-    <form [formGroup]="form">
-
+    <form [formGroup]="form" (ngSubmit)="save()">
       <div class="form-group">
         <label>PEB Score <span class="required">*</span></label>
         <select formControlName="pebScore" class="form-control">
@@ -50,43 +65,78 @@
             {{ display[s].label }}
           </option>
         </select>
-        <div *ngIf="form.get('pebScore')?.invalid && form.get('pebScore')?.touched"
-             class="field-error">PEB score is required</div>
+        <div
+          *ngIf="form.get('pebScore')?.invalid && form.get('pebScore')?.touched"
+          class="field-error"
+        >
+          PEB score is required
+        </div>
       </div>
 
       <div class="form-group">
         <label>Score Date <span class="required">*</span></label>
-        <input type="date" formControlName="scoreDate" [max]="today" class="form-control" />
-        <div *ngIf="form.get('scoreDate')?.invalid && form.get('scoreDate')?.touched"
-             class="field-error">Score date is required</div>
+        <input
+          type="date"
+          formControlName="scoreDate"
+          [max]="today"
+          class="form-control"
+        />
+        <div
+          *ngIf="
+            form.get('scoreDate')?.invalid && form.get('scoreDate')?.touched
+          "
+          class="field-error"
+        >
+          Score date is required
+        </div>
       </div>
 
       <div class="form-group">
         <label>Certificate Number</label>
-        <input type="text" formControlName="certificateNumber" maxlength="50"
-               placeholder="e.g. PEB-2024-123456" class="form-control" />
+        <input
+          type="text"
+          formControlName="certificateNumber"
+          maxlength="50"
+          placeholder="e.g. PEB-2024-123456"
+          class="form-control"
+        />
       </div>
 
+      <!-- FIX #1 : Valid Until entré manuellement (pas de calcul automatique) -->
       <div class="form-group">
         <label>Valid Until</label>
         <input type="date" formControlName="validUntil" class="form-control" />
+        <div
+          *ngIf="form.get('validUntil')?.errors?.['invalidRange']"
+          class="field-error"
+        >
+          Valid until must be after score date
+        </div>
       </div>
 
       <div class="form-actions">
-        <button type="button" class="btn btn-primary" (click)="save()" [disabled]="saving">
-          {{ saving ? 'Saving…' : 'Save' }}
+        <button type="submit" class="btn btn-primary" [disabled]="saving">
+          {{ saving ? "Saving…" : "Save" }}
         </button>
-        <button type="button" class="btn btn-secondary" (click)="closeForm()" [disabled]="saving">
+        <button
+          type="button"
+          class="btn btn-secondary"
+          (click)="closeForm()"
+          [disabled]="saving"
+        >
           Cancel
         </button>
       </div>
     </form>
   </div>
 
-  <!-- History modal -->
+  <!-- History panel inline -->
   <app-peb-history
-    *ngIf="showHistory"
+    *ngIf="showHistory && !showForm"
     [unitId]="unitId"
-    (close)="showHistory = false">
+    (close)="showHistory = false"
+    (editRequest)="onEditPeb($event)"
+    (deleteRequest)="onDeletePeb($event)"
+  >
   </app-peb-history>
 </div>
