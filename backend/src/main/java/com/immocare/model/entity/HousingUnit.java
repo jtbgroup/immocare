@@ -1,5 +1,11 @@
 package com.immocare.model.entity;
 
+import java.math.BigDecimal;
+import java.time.LocalDateTime;
+
+import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.annotations.UpdateTimestamp;
+
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
@@ -17,10 +23,6 @@ import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
-import java.math.BigDecimal;
-import java.time.LocalDateTime;
-import org.hibernate.annotations.CreationTimestamp;
-import org.hibernate.annotations.UpdateTimestamp;
 
 /**
  * Entity representing an individual housing unit (apartment) within a building.
@@ -29,17 +31,13 @@ import org.hibernate.annotations.UpdateTimestamp;
  * - Must belong to a building
  * - Unit number must be unique within a building
  * - Floor must be between -10 and 100
- * - Terrace/garden surfaces required when has_terrace/has_garden = true (enforced in service)
+ * - Terrace/garden surfaces required when has_terrace/has_garden = true
+ * (enforced in service)
  * - owner_name overrides building.owner_name when set
  */
 @Entity
-@Table(
-    name = "housing_unit",
-    uniqueConstraints = @UniqueConstraint(
-        name = "uq_housing_unit_number",
-        columnNames = {"building_id", "unit_number"}
-    )
-)
+@Table(name = "housing_unit", uniqueConstraints = @UniqueConstraint(name = "uq_housing_unit_number", columnNames = {
+    "building_id", "unit_number" }))
 public class HousingUnit {
 
   @Id
@@ -115,53 +113,133 @@ public class HousingUnit {
   }
 
   // Getters and Setters
-  public Long getId() { return id; }
-  public void setId(Long id) { this.id = id; }
+  public Long getId() {
+    return id;
+  }
 
-  public Building getBuilding() { return building; }
-  public void setBuilding(Building building) { this.building = building; }
+  public void setId(Long id) {
+    this.id = id;
+  }
 
-  public String getUnitNumber() { return unitNumber; }
-  public void setUnitNumber(String unitNumber) { this.unitNumber = unitNumber; }
+  public Building getBuilding() {
+    return building;
+  }
 
-  public Integer getFloor() { return floor; }
-  public void setFloor(Integer floor) { this.floor = floor; }
+  public void setBuilding(Building building) {
+    this.building = building;
+  }
 
-  public String getLandingNumber() { return landingNumber; }
-  public void setLandingNumber(String landingNumber) { this.landingNumber = landingNumber; }
+  public String getUnitNumber() {
+    return unitNumber;
+  }
 
-  public BigDecimal getTotalSurface() { return totalSurface; }
-  public void setTotalSurface(BigDecimal totalSurface) { this.totalSurface = totalSurface; }
+  public void setUnitNumber(String unitNumber) {
+    this.unitNumber = unitNumber;
+  }
 
-  public Boolean getHasTerrace() { return hasTerrace; }
-  public void setHasTerrace(Boolean hasTerrace) { this.hasTerrace = hasTerrace; }
+  public Integer getFloor() {
+    return floor;
+  }
 
-  public BigDecimal getTerraceSurface() { return terraceSurface; }
-  public void setTerraceSurface(BigDecimal terraceSurface) { this.terraceSurface = terraceSurface; }
+  public void setFloor(Integer floor) {
+    this.floor = floor;
+  }
 
-  public String getTerraceOrientation() { return terraceOrientation; }
-  public void setTerraceOrientation(String terraceOrientation) { this.terraceOrientation = terraceOrientation; }
+  public String getLandingNumber() {
+    return landingNumber;
+  }
 
-  public Boolean getHasGarden() { return hasGarden; }
-  public void setHasGarden(Boolean hasGarden) { this.hasGarden = hasGarden; }
+  public void setLandingNumber(String landingNumber) {
+    this.landingNumber = landingNumber;
+  }
 
-  public BigDecimal getGardenSurface() { return gardenSurface; }
-  public void setGardenSurface(BigDecimal gardenSurface) { this.gardenSurface = gardenSurface; }
+  public BigDecimal getTotalSurface() {
+    return totalSurface;
+  }
 
-  public String getGardenOrientation() { return gardenOrientation; }
-  public void setGardenOrientation(String gardenOrientation) { this.gardenOrientation = gardenOrientation; }
+  public void setTotalSurface(BigDecimal totalSurface) {
+    this.totalSurface = totalSurface;
+  }
 
-  public String getOwnerName() { return ownerName; }
-  public void setOwnerName(String ownerName) { this.ownerName = ownerName; }
+  public Boolean getHasTerrace() {
+    return hasTerrace;
+  }
 
-  public AppUser getCreatedBy() { return createdBy; }
-  public void setCreatedBy(AppUser createdBy) { this.createdBy = createdBy; }
+  public void setHasTerrace(Boolean hasTerrace) {
+    this.hasTerrace = hasTerrace;
+  }
 
-  public LocalDateTime getCreatedAt() { return createdAt; }
-  public void setCreatedAt(LocalDateTime createdAt) { this.createdAt = createdAt; }
+  public BigDecimal getTerraceSurface() {
+    return terraceSurface;
+  }
 
-  public LocalDateTime getUpdatedAt() { return updatedAt; }
-  public void setUpdatedAt(LocalDateTime updatedAt) { this.updatedAt = updatedAt; }
+  public void setTerraceSurface(BigDecimal terraceSurface) {
+    this.terraceSurface = terraceSurface;
+  }
+
+  public String getTerraceOrientation() {
+    return terraceOrientation;
+  }
+
+  public void setTerraceOrientation(String terraceOrientation) {
+    this.terraceOrientation = terraceOrientation;
+  }
+
+  public Boolean getHasGarden() {
+    return hasGarden;
+  }
+
+  public void setHasGarden(Boolean hasGarden) {
+    this.hasGarden = hasGarden;
+  }
+
+  public BigDecimal getGardenSurface() {
+    return gardenSurface;
+  }
+
+  public void setGardenSurface(BigDecimal gardenSurface) {
+    this.gardenSurface = gardenSurface;
+  }
+
+  public String getGardenOrientation() {
+    return gardenOrientation;
+  }
+
+  public void setGardenOrientation(String gardenOrientation) {
+    this.gardenOrientation = gardenOrientation;
+  }
+
+  public String getOwnerName() {
+    return ownerName;
+  }
+
+  public void setOwnerName(String ownerName) {
+    this.ownerName = ownerName;
+  }
+
+  public AppUser getCreatedBy() {
+    return createdBy;
+  }
+
+  public void setCreatedBy(AppUser createdBy) {
+    this.createdBy = createdBy;
+  }
+
+  public LocalDateTime getCreatedAt() {
+    return createdAt;
+  }
+
+  public void setCreatedAt(LocalDateTime createdAt) {
+    this.createdAt = createdAt;
+  }
+
+  public LocalDateTime getUpdatedAt() {
+    return updatedAt;
+  }
+
+  public void setUpdatedAt(LocalDateTime updatedAt) {
+    this.updatedAt = updatedAt;
+  }
 
   @Override
   public String toString() {
