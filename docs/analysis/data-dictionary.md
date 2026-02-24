@@ -233,38 +233,64 @@ WHERE housing_unit_id = ?
 
 ---
 
-## Entity: WATER_METER_HISTORY
+## Entity: METER
 
-**Purpose**: Water meter assignments over time
+**Purpose**: Utility meter assignments (water, gas, electricity) over time for housing units and buildings. Replaces the former `WATER_METER_HISTORY` table and extends tracking to all utility types and to buildings.
 
 | Attribute | Data Type | Constraints | Nullable | Default | Description | Example |
 |-----------|-----------|-------------|----------|---------|-------------|---------|
-| id | BIGINT | PK, AUTO_INCREMENT | NO | - | Unique identifier | 1 |
-| housing_unit_id | BIGINT | FK(HOUSING_UNIT), NOT NULL | NO | - | Parent housing unit | 1 |
-| meter_number | VARCHAR(50) | NOT NULL | NO | - | Meter identifier | WM-2024-ABC123 |
-| meter_location | VARCHAR(100) | - | YES | NULL | Physical location | Kitchen under sink |
-| installation_date | DATE | NOT NULL | NO | - | Installation date | 2024-01-15 |
-| removal_date | DATE | - | YES | NULL | Removal date | NULL |
-| created_at | TIMESTAMP | NOT NULL | NO | CURRENT_TIMESTAMP | Creation timestamp | 2024-01-15 10:30:00 |
+| id | BIGINT | PK, GENERATED ALWAYS AS IDENTITY | NO | — | Unique identifier | 1 |
+| type | VARCHAR(20) | NOT NULL, CHECK(WATER/GAS/ELECTRICITY) | NO | — | Meter type | WATER |
+| meter_number | VARCHAR(50) | NOT NULL | NO | — | Physical meter identifier | WTR-001 |
+| label | VARCHAR(100) | — | YES | NULL | Optional human-readable label | Kitchen |
+| ean_code | VARCHAR(18) | — | YES | NULL | Required for GAS and ELECTRICITY | 541000000000001234 |
+| installation_number | VARCHAR(50) | — | YES | NULL | Required for WATER | INST-51515 |
+| customer_number | VARCHAR(50) | — | YES | NULL | Required for WATER on BUILDING | CLI-00123 |
+| owner_type | VARCHAR(20) | NOT NULL, CHECK(HOUSING_UNIT/BUILDING) | NO | — | Polymorphic owner type | HOUSING_UNIT |
+| owner_id | BIGINT | NOT NULL | NO | — | FK to housing_unit.id or building.id | 1 |
+| start_date | DATE | NOT NULL | NO | — | Activation date | 2024-01-15 |
+| end_date | DATE | CHECK(end_date >= start_date) | YES | NULL | Closure date — NULL = active | NULL |
+| created_at | TIMESTAMP | NOT NULL | NO | NOW() | Record creation timestamp | 2024-01-15 10:30:00 |
 
 **Validation Rules**:
-- `meter_number`: 1-50 characters, alphanumeric with hyphens
-- `meter_location`: 0-100 characters (optional)
-- `installation_date`: Cannot be in future
-- `removal_date`: Must be after `installation_date` (if provided)
-- Only one record per housing unit should have `removal_date = NULL` (active meter)
+- `type`: Must be WATER, GAS, or ELECTRICITY
+- `meter_number`: 1–50 characters
+- `label`: 0–100 characters (optional)
+- `ean_code`: max 18 characters; required when `type` is GAS or ELECTRICITY
+- `installation_number`: max 50 characters; required when `type` is WATER
+- `customer_number`: max 50 characters; required when `type` is WATER and `owner_type` is BUILDING
+- `start_date`: Cannot be in the future
+- `end_date`: Must be ≥ `start_date` when provided
+
+**Business Rules**:
+- Append-only: records are never updated or deleted
+- Active meter = `end_date IS NULL`
+- Multiple active meters of the same type are allowed per owner (no uniqueness constraint)
+- A meter belongs to exactly one owner; no sharing across owners
+- Replace is atomic: closing the current meter and creating the new one happen in the same transaction
+- New `start_date` on replace must be ≥ current meter's `start_date`
+- No DB-level foreign key on `owner_id` — polymorphic owner pattern; integrity enforced at service level
 
 **Indexes**:
 - PRIMARY KEY (id)
-- INDEX (housing_unit_id, installation_date DESC) - for retrieving history
-- INDEX (housing_unit_id, removal_date) - for finding active meter
-- INDEX (meter_number) - for meter lookup
+- PARTIAL INDEX on (owner_type, owner_id) WHERE end_date IS NULL — for active meter queries
+- INDEX on (owner_type, owner_id, start_date DESC) — for history queries
 
-**Query Pattern for Active Meter**:
+**Query Pattern — Active Meters for a Housing Unit**:
 ```sql
-SELECT * FROM water_meter_history
-WHERE housing_unit_id = ?
-  AND removal_date IS NULL;
+SELECT * FROM meter
+WHERE owner_type = 'HOUSING_UNIT'
+  AND owner_id = ?
+  AND end_date IS NULL
+ORDER BY type, start_date DESC;
+```
+
+**Query Pattern — Full History for a Building**:
+```sql
+SELECT * FROM meter
+WHERE owner_type = 'BUILDING'
+  AND owner_id = ?
+ORDER BY start_date DESC;
 ```
 
 ---

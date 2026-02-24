@@ -6,7 +6,7 @@
 |-----------|-------|
 | **Use Case ID** | UC008 |
 | **Use Case Name** | Manage Meters |
-| **Version** | 1.0 |
+| **Version** | 1.1 |
 | **Status** | ✅ Ready for Implementation |
 | **Priority** | HIGH |
 | **Actor(s)** | ADMIN |
@@ -50,6 +50,7 @@ This use case describes how an administrator manages utility meters (water, gas,
 | `id` | BIGINT PK | Auto-generated |
 | `type` | ENUM(WATER, GAS, ELECTRICITY) | Meter type |
 | `meter_number` | VARCHAR(50) NOT NULL | Physical meter identifier — all types |
+| `label` | VARCHAR(100) NULL | Optional human-readable label (e.g. Kitchen, Basement) |
 | `ean_code` | VARCHAR(18) | Required for GAS and ELECTRICITY |
 | `installation_number` | VARCHAR(50) | Required for WATER |
 | `customer_number` | VARCHAR(50) | Required for WATER on a BUILDING |
@@ -71,6 +72,7 @@ This use case describes how an administrator manages utility meters (water, gas,
 | BR-06 | `installation_number` is required for WATER meters |
 | BR-07 | `customer_number` is required for WATER meters on a BUILDING |
 | BR-08 | Append-only: existing records are never modified — closing a meter sets `end_date` and creates a new record |
+| BR-09 | New `start_date` on replace must be ≥ current meter's `start_date` |
 
 ---
 
@@ -81,102 +83,96 @@ This use case describes how an administrator manages utility meters (water, gas,
 **Trigger**: ADMIN views housing unit details
 
 1. System displays the Meters section with active meters grouped by type (WATER, GAS, ELECTRICITY)
-2. Each active meter shows: type, meter number, EAN or installation number, start date, duration
-3. For each type, if no active meter exists: "No [type] meter assigned"
-4. ADMIN can click "View History" to see all records (active + closed) for that owner
+2. Each active meter card shows: label (if set), meter number, EAN / installation number, customer number (BUILDING only), start date, duration in months
+3. Each card has "Replace" and "Remove" buttons
+4. A "View History" link is shown if at least one meter exists (active or closed)
 
-**Result**: ADMIN sees all active meters and can access history
+**Result**: ADMIN sees all active meters grouped by type
 
 ---
 
 ### 2. View Meters of a Building
 
-**Trigger**: ADMIN views building details
-
-Same flow as §1, applied to the building context. The customer number is additionally displayed for WATER meters.
+Same as Flow 1, with additionally the customer number shown for WATER meters.
 
 ---
 
 ### 3. Add a Meter
 
-**Trigger**: ADMIN clicks "Add Meter" on a housing unit or building details page
+**Trigger**: ADMIN clicks "+ Add Meter" in a type block
 
-1. System displays the add meter form:
-   - **Type** (required): WATER / GAS / ELECTRICITY
+1. Inline form opens within the block:
+   - **Label** (optional, max 100 chars)
    - **Meter Number** (required)
-   - **EAN Code** (required if GAS or ELECTRICITY)
-   - **Installation Number** (required if WATER)
-   - **Customer Number** (required if WATER and owner is BUILDING)
-   - **Start Date** (required, date picker, default: today)
+   - **EAN Code** (shown + required for GAS/ELECTRICITY)
+   - **Installation Number** (shown + required for WATER)
+   - **Customer Number** (shown + required for WATER on BUILDING)
+   - **Start Date** (required, default: today)
 
-2. ADMIN fills the form and clicks "Save"
+2. ADMIN fills in the form and clicks "Save"
 
-3. System validates according to BR-01, BR-05, BR-06, BR-07
+3. System validates all fields and business rules (BR-01, BR-05, BR-06, BR-07)
 
-4. System saves the meter with `end_date = NULL` (active)
+4. System saves the new meter with `end_date = NULL`
 
-5. System displays success message and updates the meters section
+5. System displays success message and refreshes the meter list
 
-**Result**: New meter is active and visible in the section
-
----
-
-### 4. Replace a Meter (Append-Only)
-
-**Trigger**: ADMIN clicks "Replace" on an active meter
-
-1. System displays the replace form:
-   - Current meter shown read-only
-   - New meter fields: Type (pre-filled, read-only), Meter Number, EAN / Installation Number / Customer Number, Start Date
-   - **Reason** (optional): BROKEN / END_OF_LIFE / UPGRADE / CALIBRATION_ISSUE / OTHER
-
-2. ADMIN fills the new meter fields and clicks "Save"
-
-3. System validates:
-   - New meter fields per type rules (BR-05 to BR-07)
-   - New `start_date` ≥ current meter's `start_date` (BR-02)
-   - New `start_date` not in future (BR-01)
-
-4. System atomically:
-   - Sets `end_date` on the current meter = new meter's `start_date`
-   - Creates new meter record with `end_date = NULL`
-
-5. System displays success message
-
-**Result**: Old meter is closed, new meter is active
+**Result**: New active meter is added
 
 ---
 
-### 5. Remove a Meter (Without Replacement)
+### 4. Replace a Meter
 
-**Trigger**: ADMIN clicks "Remove" on an active meter
+**Trigger**: ADMIN clicks "Replace" on an active meter card
 
-1. System displays confirmation dialog:
-   - Meter type and number shown
-   - Warning: "This meter will be deactivated. No replacement will be created."
+1. Inline form replaces the card, showing:
+   - Current meter info (read-only): label, meter number, EAN / installation number, start date
+   - **New Label** (optional, pre-filled with current label)
+   - **New Meter Number** (required)
+   - Conditional new fields (EAN / installation / customer number)
+   - **New Start Date** (required, default: today)
+   - **Reason** (optional dropdown)
+
+2. ADMIN confirms
+
+3. System atomically closes the current meter (`end_date = newStartDate`) and creates a new active meter
+
+4. History panel is automatically shown after replace
+
+**Result**: Old meter is closed, new meter is active, both visible in history
+
+---
+
+### 5. Remove a Meter
+
+**Trigger**: ADMIN clicks "Remove" on an active meter card
+
+1. System displays inline confirmation:
+   - Meter label and number shown
+   - Warning message
    - Date picker for `end_date` (default: today)
 
-2. ADMIN confirms and clicks "Remove"
+2. ADMIN confirms
 
 3. System validates:
    - `end_date` ≥ meter's `start_date` (BR-02)
-   - `end_date` not in future (BR-01)
 
 4. System sets `end_date` on the meter record
 
-5. System displays success message and updates section
+5. System displays success message and updates the meter list
 
-**Result**: Meter is closed, no active meter of that type remains (unless others exist)
+**Result**: Meter is closed, no active replacement is created
 
 ---
 
 ### 6. View Meter History
 
-**Trigger**: ADMIN clicks "View History" on a meters section
+**Trigger**: ADMIN clicks "View History"
 
 1. System displays a history table for all meters of that owner, sorted by `start_date` DESC
-2. Columns: Type, Meter Number, EAN / Installation Number, Start Date, End Date (or "Active"), Duration, Status badge
+2. Columns: Type | Label | Meter Number | EAN / Installation Number | Customer Number (BUILDING only) | Start Date | End Date | Duration | Status badge
 3. Active meters show green "Active" badge; closed meters show gray "Closed" badge
+4. History is also automatically shown after a Replace operation
 
 **Result**: ADMIN sees full meter history
 
@@ -204,8 +200,9 @@ Same flow as §1, applied to the building context. The customer number is additi
 | TS-UC008-04 | Replace meter with new start_date before current start_date | Error: "Start date must be ≥ current meter start date" |
 | TS-UC008-05 | Remove meter with end_date before start_date | Error: "End date must be ≥ start date" |
 | TS-UC008-06 | Add two ELECTRICITY meters to same unit | Both saved and shown as active |
-| TS-UC008-07 | Replace meter successfully | Old meter closed, new meter active, both in history |
+| TS-UC008-07 | Replace meter successfully | Old meter closed, new meter active, history panel opens automatically |
 | TS-UC008-08 | View history with 3 past meters | Table shows 3 rows sorted by start_date DESC |
+| TS-UC008-09 | Add meter with label "Kitchen" | Label displayed as blue badge before meter number in card |
 
 ---
 
@@ -221,6 +218,6 @@ Same flow as §1, applied to the building context. The customer number is additi
 
 ---
 
-**Last Updated**: 2025-02-23
-**Version**: 1.0
-**Status**: ✅ Ready for Implementation
+**Last Updated**: 2026-02-24
+**Version**: 1.1
+**Status**: ✅ Implemented

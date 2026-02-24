@@ -43,6 +43,7 @@ meter {
   id                   BIGINT PK AUTO_INCREMENT
   type                 VARCHAR(20) NOT NULL    -- enum: WATER, GAS, ELECTRICITY
   meter_number         VARCHAR(50) NOT NULL
+  label                VARCHAR(100) NULL       -- optional human-readable label (e.g. Kitchen, Basement)
   ean_code             VARCHAR(18) NULL        -- required for GAS, ELECTRICITY
   installation_number  VARCHAR(50) NULL        -- required for WATER
   customer_number      VARCHAR(50) NULL        -- required for WATER on BUILDING
@@ -100,11 +101,8 @@ frontend/src/app/
 │   └── meter.service.ts              ← new
 ├── models/
 │   └── meter.model.ts                ← new
-└── features/
-    ├── housing-unit/components/
-    │   └── meter-section/            ← new, integrated into HousingUnitDetailsComponent
-    └── building/components/
-        └── meter-section/            ← new, integrated into BuildingDetailsComponent
+└── shared/components/
+    └── meter-section/                ← new, shared by HousingUnitDetails + BuildingDetails
 ```
 
 ---
@@ -113,24 +111,29 @@ frontend/src/app/
 
 ### 1. Flyway Migration
 
-File `VXX__create_meter.sql`:
+File `V008__create_meter.sql`:
 ```sql
 CREATE TABLE meter (
-    id                  BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
-    type                VARCHAR(20)  NOT NULL,
-    meter_number        VARCHAR(50)  NOT NULL,
+    id                  BIGINT      GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+    type                VARCHAR(20) NOT NULL,
+    meter_number        VARCHAR(50) NOT NULL,
+    label               VARCHAR(100),
     ean_code            VARCHAR(18),
     installation_number VARCHAR(50),
     customer_number     VARCHAR(50),
-    owner_type          VARCHAR(20)  NOT NULL,
-    owner_id            BIGINT       NOT NULL,
-    start_date          DATE         NOT NULL,
+    owner_type          VARCHAR(20) NOT NULL,
+    owner_id            BIGINT      NOT NULL,
+    start_date          DATE        NOT NULL,
     end_date            DATE,
-    created_at          TIMESTAMP    NOT NULL
+    created_at          TIMESTAMP   NOT NULL DEFAULT NOW(),
+
+    CONSTRAINT chk_meter_type       CHECK (type IN ('WATER', 'GAS', 'ELECTRICITY')),
+    CONSTRAINT chk_meter_owner_type CHECK (owner_type IN ('HOUSING_UNIT', 'BUILDING')),
+    CONSTRAINT chk_meter_end_after_start CHECK (end_date IS NULL OR end_date >= start_date)
 );
 
-CREATE INDEX idx_meter_owner ON meter (owner_type, owner_id);
-CREATE INDEX idx_meter_active ON meter (owner_type, owner_id, end_date) WHERE end_date IS NULL;
+CREATE INDEX idx_meter_owner_active  ON meter (owner_type, owner_id) WHERE end_date IS NULL;
+CREATE INDEX idx_meter_owner_history ON meter (owner_type, owner_id, start_date DESC);
 ```
 
 No FK constraint on `owner_id` (polymorphic owner pattern). Integrity enforced at service level.
@@ -141,7 +144,7 @@ No FK constraint on `owner_id` (polymorphic owner pattern). Integrity enforced a
 
 - `@Entity`, `@Table(name = "meter")`
 - No `@ManyToOne` — owner is polymorphic (`owner_type` + `owner_id`)
-- Fields: `id`, `type` (String), `meterNumber`, `eanCode`, `installationNumber`, `customerNumber`, `ownerType` (String), `ownerId`, `startDate`, `endDate`, `createdAt`
+- Fields: `id`, `type` (String), `meterNumber`, `label`, `eanCode`, `installationNumber`, `customerNumber`, `ownerType` (String), `ownerId`, `startDate`, `endDate`, `createdAt`
 - `@PrePersist` sets `createdAt`
 - Setters required on: `endDate` (for closing a meter)
 
@@ -154,6 +157,7 @@ public record MeterDTO(
     Long id,
     String type,               // WATER, GAS, ELECTRICITY
     String meterNumber,
+    String label,              // optional human-readable label
     String eanCode,
     String installationNumber,
     String customerNumber,
@@ -161,9 +165,8 @@ public record MeterDTO(
     Long ownerId,
     LocalDate startDate,
     LocalDate endDate,         // null = active
-    LocalDateTime createdAt,
-    boolean isActive,          // computed: endDate == null
-    long durationMonths        // computed: startDate → endDate (or today)
+    String status,             // computed: "ACTIVE" | "CLOSED"
+    LocalDateTime createdAt
 ) {}
 ```
 
@@ -173,8 +176,9 @@ public record MeterDTO(
 
 ```java
 public record AddMeterRequest(
-    @NotBlank String type,            // WATER, GAS, ELECTRICITY
+    @NotBlank String type,
     @NotBlank @Size(max = 50) String meterNumber,
+    @Size(max = 100) String label,              // optional
     @Size(max = 18) String eanCode,
     @Size(max = 50) String installationNumber,
     @Size(max = 50) String customerNumber,
@@ -191,11 +195,12 @@ Cross-field validation enforced at service level (not via Bean Validation annota
 ```java
 public record ReplaceMeterRequest(
     @NotBlank @Size(max = 50) String newMeterNumber,
+    @Size(max = 100) String newLabel,           // optional
     @Size(max = 18) String newEanCode,
     @Size(max = 50) String newInstallationNumber,
     @Size(max = 50) String newCustomerNumber,
     @NotNull LocalDate newStartDate,
-    String reason                     // optional: BROKEN, END_OF_LIFE, UPGRADE, CALIBRATION_ISSUE, OTHER
+    String reason   // optional: BROKEN, END_OF_LIFE, UPGRADE, CALIBRATION_ISSUE, OTHER
 ) {}
 ```
 
@@ -204,8 +209,7 @@ public record ReplaceMeterRequest(
 ### 6. `mapper/MeterMapper.java` (MapStruct)
 
 - `Meter → MeterDTO`
-- Compute `isActive` (`endDate == null`)
-- Compute `durationMonths`: `ChronoUnit.MONTHS.between(startDate, endDate != null ? endDate : LocalDate.now())`
+- Compute `status`: `endDate == null ? "ACTIVE" : "CLOSED"`
 
 ---
 
@@ -227,7 +231,7 @@ Optional<Meter> findByIdAndEndDateIsNull(Long id);
 ### 8. `service/MeterService.java`
 
 #### `getActiveMeters(ownerType, ownerId)`
-- Validates that the owner exists (call `HousingUnitRepository` or `BuildingRepository` depending on `ownerType`)
+- Validates that the owner exists
 - Returns active meters sorted by type then start_date DESC
 
 #### `getMeterHistory(ownerType, ownerId)`
@@ -236,12 +240,10 @@ Optional<Meter> findByIdAndEndDateIsNull(Long id);
 
 #### `addMeter(ownerType, ownerId, request)`
 - Validates owner exists
-- Validates cross-field rules:
-  - GAS or ELECTRICITY → `eanCode` required
-  - WATER → `installationNumber` required
-  - WATER + BUILDING → `customerNumber` required
+- Validates cross-field rules (BR-05, BR-06, BR-07)
 - Validates `startDate` not in future (BR-01)
 - Saves new meter with `endDate = null`
+- `label` stored as-is (null if not provided)
 
 #### `replaceMeter(ownerType, ownerId, meterId, request)`
 - Fetches active meter by `meterId` — throws `MeterNotFoundException` if not found or already closed
@@ -250,7 +252,7 @@ Optional<Meter> findByIdAndEndDateIsNull(Long id);
 - Validates cross-field rules for new meter
 - **Atomic (single transaction)**:
   1. Sets `endDate = newStartDate` on current meter
-  2. Creates new meter with same `type`, `ownerType`, `ownerId` and `endDate = null`
+  2. Creates new meter with `newLabel`, same `type`, `ownerType`, `ownerId`, `endDate = null`
 - Returns new meter DTO
 
 #### `removeMeter(ownerType, ownerId, meterId, endDate)`
@@ -262,8 +264,6 @@ Optional<Meter> findByIdAndEndDateIsNull(Long id);
 ---
 
 ### 9. `controller/MeterController.java`
-
-Two sets of endpoints, sharing the same service:
 
 ```
 -- Housing Unit meters --
@@ -282,8 +282,6 @@ DELETE /api/v1/buildings/{buildingId}/meters/{meterId}     → removeMeter()    
 ```
 
 All endpoints: `@PreAuthorize("hasRole('ADMIN')")`
-
-The controller resolves `ownerType` from the URL path (HOUSING_UNIT vs BUILDING) and delegates to `MeterService` with the appropriate `ownerType` and `ownerId`.
 
 **HTTP error mapping**:
 - Owner not found → 404
@@ -307,63 +305,29 @@ Add handler in `GlobalExceptionHandler` → 409 Conflict.
 
 ---
 
-### 11. Backend Tests
-
-**`MeterServiceTest.java`** — unit tests with Mockito:
-- `addMeter` — GAS without eanCode → `IllegalArgumentException`
-- `addMeter` — ELECTRICITY without eanCode → `IllegalArgumentException`
-- `addMeter` — WATER without installationNumber → `IllegalArgumentException`
-- `addMeter` — WATER on BUILDING without customerNumber → `IllegalArgumentException`
-- `addMeter` — future startDate → `IllegalArgumentException`
-- `addMeter` — valid GAS on HOUSING_UNIT → meter saved with endDate = null
-- `addMeter` — two ELECTRICITY meters on same unit → both saved active (no conflict)
-- `replaceMeter` — valid replacement → old meter closed, new meter active
-- `replaceMeter` — newStartDate before current startDate → `IllegalArgumentException`
-- `replaceMeter` — meter already closed → `MeterNotFoundException`
-- `removeMeter` — valid removal → endDate set correctly
-- `removeMeter` — endDate before startDate → `IllegalArgumentException`
-- `removeMeter` — future endDate → `IllegalArgumentException`
-- `getActiveMeters` / `getMeterHistory` — unknown owner → owner-specific NotFoundException
-
-**`MeterControllerTest.java`** — MockMvc tests:
-- `GET /housing-units/{id}/meters` → 200 with list
-- `GET /housing-units/{id}/meters?status=active` → 200 with active only
-- `POST /housing-units/{id}/meters` → 201 on valid GAS meter
-- `POST /housing-units/{id}/meters` → 400 on missing eanCode for GAS
-- `PUT /housing-units/{id}/meters/{mid}/replace` → 200 on valid replace
-- `DELETE /housing-units/{id}/meters/{mid}` → 204 on valid removal
-- Same scenarios mirrored for `/buildings/{id}/meters`
-
----
-
-## FRONTEND
-
-### 12. `models/meter.model.ts`
+### 11. Frontend: `models/meter.model.ts`
 
 ```typescript
-export type MeterType = 'WATER' | 'GAS' | 'ELECTRICITY';
-export type MeterOwnerType = 'HOUSING_UNIT' | 'BUILDING';
-export type ReplacementReason = 'BROKEN' | 'END_OF_LIFE' | 'UPGRADE' | 'CALIBRATION_ISSUE' | 'OTHER';
-
-export interface Meter {
+export interface MeterDTO {
   id: number;
   type: MeterType;
   meterNumber: string;
-  eanCode: string | null;
-  installationNumber: string | null;
-  customerNumber: string | null;
+  label?: string | null;            // optional label
+  eanCode?: string | null;
+  installationNumber?: string | null;
+  customerNumber?: string | null;
   ownerType: MeterOwnerType;
   ownerId: number;
-  startDate: string;          // ISO date YYYY-MM-DD
-  endDate: string | null;     // null = active
+  startDate: string;
+  endDate?: string | null;
+  status: 'ACTIVE' | 'CLOSED';
   createdAt: string;
-  isActive: boolean;
-  durationMonths: number;
 }
 
 export interface AddMeterRequest {
   type: MeterType;
   meterNumber: string;
+  label?: string | null;            // optional
   eanCode?: string | null;
   installationNumber?: string | null;
   customerNumber?: string | null;
@@ -372,31 +336,18 @@ export interface AddMeterRequest {
 
 export interface ReplaceMeterRequest {
   newMeterNumber: string;
+  newLabel?: string | null;         // optional
   newEanCode?: string | null;
   newInstallationNumber?: string | null;
   newCustomerNumber?: string | null;
   newStartDate: string;
   reason?: ReplacementReason;
 }
-
-export const METER_TYPE_LABELS: Record<MeterType, string> = {
-  WATER: 'Water',
-  GAS: 'Gas',
-  ELECTRICITY: 'Electricity',
-};
-
-export const REPLACEMENT_REASON_LABELS: Record<ReplacementReason, string> = {
-  BROKEN: 'Broken',
-  END_OF_LIFE: 'End of life',
-  UPGRADE: 'Upgrade',
-  CALIBRATION_ISSUE: 'Calibration issue',
-  OTHER: 'Other',
-};
 ```
 
 ---
 
-### 13. `core/services/meter.service.ts`
+### 12. `core/services/meter.service.ts`
 
 ```typescript
 // Housing Unit endpoints
@@ -404,21 +355,21 @@ getUnitMeterHistory(unitId)                      → GET  /housing-units/{unitId
 getUnitActiveMeters(unitId)                      → GET  /housing-units/{unitId}/meters?status=active
 addUnitMeter(unitId, req)                        → POST /housing-units/{unitId}/meters
 replaceUnitMeter(unitId, meterId, req)           → PUT  /housing-units/{unitId}/meters/{meterId}/replace
-removeUnitMeter(unitId, meterId, endDate)        → DELETE /housing-units/{unitId}/meters/{meterId}
+removeUnitMeter(unitId, meterId, req)            → DELETE /housing-units/{unitId}/meters/{meterId}
 
 // Building endpoints
 getBuildingMeterHistory(buildingId)              → GET  /buildings/{buildingId}/meters
 getBuildingActiveMeters(buildingId)              → GET  /buildings/{buildingId}/meters?status=active
 addBuildingMeter(buildingId, req)                → POST /buildings/{buildingId}/meters
 replaceBuildingMeter(buildingId, meterId, req)   → PUT  /buildings/{buildingId}/meters/{meterId}/replace
-removeBuildingMeter(buildingId, meterId, endDate)→ DELETE /buildings/{buildingId}/meters/{meterId}
+removeBuildingMeter(buildingId, meterId, req)    → DELETE /buildings/{buildingId}/meters/{meterId}
 ```
 
 For `removeMeter`, pass `endDate` as a JSON body: `{ endDate: string }`.
 
 ---
 
-### 14. `meter-section` component (shared logic, two usages)
+### 13. `meter-section` component (shared logic, two usages)
 
 Create **one shared component** `MeterSectionComponent` with inputs:
 ```typescript
@@ -429,19 +380,20 @@ Create **one shared component** `MeterSectionComponent` with inputs:
 The component delegates to `meter.service.ts` using the appropriate methods based on `ownerType`.
 
 **Layout**:
-- Three collapsible blocks, one per meter type (WATER / GAS / ELECTRICITY)
-- Each block header: type label + "Add Meter" button
-- Each block body: list of active meters as cards, or "No [type] meter assigned" if empty
+- Three blocks, one per meter type (WATER / GAS / ELECTRICITY)
+- Each block header: type label + "Add Meter" button (btn-primary)
+- Each block body: list of active meter cards, or "No [type] meter assigned" if empty
 - Each meter card shows:
+  - **Label badge** (blue, shown first if set)
   - Meter number (bold)
   - EAN code (GAS/ELECTRICITY) or Installation number (WATER)
   - Customer number (WATER on BUILDING only)
   - Start date + duration in months
-  - "Replace" button + "Remove" button
-- At section bottom: "View History" link (shown only when at least 1 meter exists)
+  - "Replace" button (btn-secondary) + "Remove" button (btn-danger)
+- At section bottom: "View History" link (shown when at least 1 meter exists)
 
 **Add Meter form** (inline, shown per type block):
-- Type (pre-filled from the block, read-only)
+- Label (optional)
 - Meter Number (required)
 - EAN Code (shown + required for GAS/ELECTRICITY)
 - Installation Number (shown + required for WATER)
@@ -449,29 +401,38 @@ The component delegates to `meter.service.ts` using the appropriate methods base
 - Start Date (required, default: today)
 
 **Replace form** (inline, replaces meter card):
-- Current meter shown read-only
+- Current meter shown read-only (label + number + EAN/install + start date)
+- New Label (optional, pre-filled with current label)
 - New Meter Number, new conditional fields, new Start Date
 - Reason (optional dropdown)
 
 **Remove confirmation** (inline dialog):
-- Meter type + number shown
+- Meter label and number shown
 - Warning message
 - End Date picker (default: today)
 - Confirm / Cancel
 
-**History panel** (inline, toggled by "View History" link):
-- Table columns: Type | Meter Number | EAN / Installation Number | Customer Number (BUILDING only) | Start Date | End Date | Duration | Status badge
+**History panel** (inline, toggled by "View History" / automatically opened after Replace):
+- Table columns: Type | Label | Meter Number | EAN / Installation Number | Customer Number (BUILDING only) | Start Date | End Date | Duration | Status badge
 - Sorted by start_date DESC
 - Active badge: green "Active" — Closed badge: gray "Closed"
 
+**Button styles** — consistent with Rent / PEB sections:
+- Save / Confirm Replace → `btn btn-primary btn-sm`
+- Cancel → `btn btn-secondary btn-sm`
+- Confirm Remove → `btn btn-danger btn-sm`
+- Replace (on card) → `btn btn-secondary btn-sm`
+- Remove (on card) → `btn btn-danger btn-sm`
+
+**Post-replace behaviour**: always call `loadHistory()` after a successful replace, regardless of whether the history panel was already open, so the panel opens automatically.
+
 ---
 
-### 15. Integration into existing detail pages
+### 14. Integration into existing detail pages
 
 **`HousingUnitDetailsComponent`**:
 - Add `MeterSectionComponent` to `imports`
 - Add `<app-meter-section [ownerType]="'HOUSING_UNIT'" [ownerId]="unit.id">` in the template
-- Remove any remaining `WaterMeterSectionComponent` references if still present
 
 **`BuildingDetailsComponent`**:
 - Add `MeterSectionComponent` to `imports`
@@ -491,14 +452,15 @@ The component delegates to `meter.service.ts` using the appropriate methods base
 | newStartDate ≥ current startDate on replace | Service + frontend |
 | Replace is atomic | @Transactional on service method |
 | Multiple active meters of same type allowed | No uniqueness constraint |
+| label is optional (max 100 chars) | @Size on DTO + optional in form |
 
 ---
 
 ## IMPLEMENTATION ORDER
 
-1. Flyway migration `VXX__create_meter.sql`
+1. `V008__create_meter.sql`
 2. `model/entity/Meter.java`
-3. `model/dto/MeterDTO.java`, `AddMeterRequest.java`, `ReplaceMeterRequest.java`
+3. `model/dto/MeterDTO.java`, `AddMeterRequest.java`, `ReplaceMeterRequest.java`, `RemoveMeterRequest.java`
 4. `mapper/MeterMapper.java`
 5. `repository/MeterRepository.java`
 6. `service/MeterService.java` + `MeterServiceTest.java`
@@ -518,7 +480,7 @@ The component delegates to `meter.service.ts` using the appropriate methods base
 - [ ] GET `/housing-units/{id}/meters?status=active` returns only active meters
 - [ ] POST `/housing-units/{id}/meters` — GAS without eanCode → 400
 - [ ] POST `/housing-units/{id}/meters` — WATER on BUILDING without customerNumber → 400
-- [ ] POST `/housing-units/{id}/meters` — valid → 201, meter active
+- [ ] POST `/housing-units/{id}/meters` — valid with label → 201, label stored and returned
 - [ ] POST — two ELECTRICITY meters on same unit → both saved (no conflict)
 - [ ] PUT `/housing-units/{id}/meters/{mid}/replace` — valid → 200, old closed, new active
 - [ ] PUT replace — newStartDate before current startDate → 409
@@ -528,13 +490,17 @@ The component delegates to `meter.service.ts` using the appropriate methods base
 - [ ] Angular meter section renders active meters grouped by type
 - [ ] Angular add form shows correct conditional fields per type
 - [ ] Angular add form for WATER on BUILDING shows customerNumber field
+- [ ] Angular label field shown in add and replace forms (optional)
+- [ ] Angular label shown as blue badge (first) in meter card when set
 - [ ] Angular replace form shows current meter read-only + new meter fields
-- [ ] Angular history table shows all records with correct status badges
+- [ ] Angular history table shows Label column
+- [ ] History panel opens automatically after a successful Replace
+- [ ] Button styles consistent with Rent/PEB sections (btn-primary, btn-secondary, btn-danger)
 - [ ] MeterSectionComponent works identically for HOUSING_UNIT and BUILDING
 - [ ] All acceptance criteria from US036 to US042 are met
 
 ---
 
-**Last Updated**: 2025-02-23
+**Last Updated**: 2026-02-24
 **Branch**: `develop`
 **Status**: Ready for Implementation

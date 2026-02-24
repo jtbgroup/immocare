@@ -2,7 +2,7 @@
 
 ## Overview
 
-This document describes the data model for the ImmoCare application, which manages buildings, housing units, and associated information including PEB scores, rents, and water meters.
+This document describes the data model for the ImmoCare application, which manages buildings, housing units, and associated information including PEB scores, rents, and utility meters.
 
 ## Entity Relationship Diagram
 
@@ -14,8 +14,9 @@ erDiagram
     HOUSING_UNIT ||--o{ ROOM : contains
     HOUSING_UNIT ||--o{ PEB_SCORE_HISTORY : has
     HOUSING_UNIT ||--o{ RENT_HISTORY : has
-    HOUSING_UNIT ||--o{ WATER_METER_HISTORY : has
-    
+    HOUSING_UNIT ||--o{ METER : has
+    BUILDING ||--o{ METER : has
+
     USER {
         bigint id PK
         string username UK
@@ -25,7 +26,7 @@ erDiagram
         timestamp created_at
         timestamp updated_at
     }
-    
+
     BUILDING {
         bigint id PK
         string name
@@ -38,7 +39,7 @@ erDiagram
         timestamp created_at
         timestamp updated_at
     }
-    
+
     HOUSING_UNIT {
         bigint id PK
         bigint building_id FK
@@ -57,7 +58,7 @@ erDiagram
         timestamp created_at
         timestamp updated_at
     }
-    
+
     ROOM {
         bigint id PK
         bigint housing_unit_id FK
@@ -66,7 +67,7 @@ erDiagram
         timestamp created_at
         timestamp updated_at
     }
-    
+
     PEB_SCORE_HISTORY {
         bigint id PK
         bigint housing_unit_id FK
@@ -76,7 +77,7 @@ erDiagram
         date valid_until
         timestamp created_at
     }
-    
+
     RENT_HISTORY {
         bigint id PK
         bigint housing_unit_id FK
@@ -86,14 +87,19 @@ erDiagram
         string notes
         timestamp created_at
     }
-    
-    WATER_METER_HISTORY {
+
+    METER {
         bigint id PK
-        bigint housing_unit_id FK
+        string type
         string meter_number
-        string meter_location
-        date installation_date
-        date removal_date
+        string label
+        string ean_code
+        string installation_number
+        string customer_number
+        string owner_type
+        bigint owner_id
+        date start_date
+        date end_date
         timestamp created_at
     }
 ```
@@ -105,73 +111,57 @@ erDiagram
 
 **Attributes**:
 - `id`: Primary key (auto-generated)
-- `username`: Unique username for login
+- `username`: Unique login name
 - `password_hash`: BCrypt hashed password
 - `email`: Unique email address
-- `role`: User role (ADMIN for now)
+- `role`: User role (ADMIN)
 - `created_at`, `updated_at`: Audit timestamps
-
-**Business Rules**:
-- Username must be unique
-- Email must be unique and valid format
-- Password must be hashed using BCrypt
-- Role is ADMIN by default in Phase 1
 
 ---
 
 ### BUILDING
-**Purpose**: Represents a physical building containing housing units.
+**Purpose**: Physical buildings containing housing units.
 
 **Attributes**:
 - `id`: Primary key (auto-generated)
-- `name`: Building name or identifier
-- `street_address`: Street address
-- `postal_code`: Postal/ZIP code
-- `city`: City name
-- `country`: Country name
-- `owner_name`: Building owner (optional, nullable)
-- `created_by`: Foreign key to USER
+- `name`: Building name
+- `street_address`, `postal_code`, `city`, `country`: Full address
+- `owner_name`: Optional owner name
+- `created_by`: FK to USER
 - `created_at`, `updated_at`: Audit timestamps
 
 **Business Rules**:
-- A building must have a complete address
-- Owner name is optional at building level
-- If building has an owner, housing units inherit it unless overridden
-- A building can contain multiple housing units
+- Must have a complete address
+- Owner name is optional
+- Deletion cascades to housing units and all related data
 
 ---
 
 ### HOUSING_UNIT
-**Purpose**: Represents an individual apartment or housing unit within a building.
+**Purpose**: Individual apartments or units within buildings.
 
 **Attributes**:
 - `id`: Primary key (auto-generated)
 - `building_id`: Foreign key to BUILDING
-- `unit_number`: Unit identifier (e.g., "A1", "101")
-- `floor`: Floor number (integer, can be negative for basement)
-- `landing_number`: Landing/staircase identifier (optional)
-- `total_surface`: Total surface area in m² (can be manually entered or calculated)
-- `has_terrace`: Boolean flag for terrace presence
-- `terrace_surface`: Terrace surface in m² (nullable)
-- `terrace_orientation`: Cardinal direction (N, S, E, W, NE, NW, SE, SW) (nullable)
-- `has_garden`: Boolean flag for garden presence
-- `garden_surface`: Garden surface in m² (nullable)
-- `garden_orientation`: Cardinal direction (nullable)
-- `owner_name`: Unit-specific owner (optional, overrides building owner)
-- `created_by`: Foreign key to USER
+- `unit_number`: Unit identifier (unique within building)
+- `floor`: Floor number (-10 to 100)
+- `landing_number`: Optional landing/staircase identifier
+- `total_surface`: Total area in m² (optional)
+- `has_terrace`, `terrace_surface`, `terrace_orientation`: Terrace details
+- `has_garden`, `garden_surface`, `garden_orientation`: Garden details
+- `owner_name`: Optional override (inherits from building if null)
+- `created_by`: FK to USER
 - `created_at`, `updated_at`: Audit timestamps
 
 **Business Rules**:
-- Must belong to a building
 - Unit number must be unique within a building
-- Total surface can be calculated from rooms or manually entered
-- Owner name inherits from building if not specified
-- Terrace/garden surfaces only apply if has_terrace/has_garden is true
+- If `owner_name` is NULL, display building's owner name
+- Cannot be deleted if it has rooms, PEB scores, rent history, or meters
 
 ---
 
 ### ROOM
-**Purpose**: Represents individual rooms within a housing unit.
+**Purpose**: Individual rooms within housing units.
 
 **Attributes**:
 - `id`: Primary key (auto-generated)
@@ -181,16 +171,7 @@ erDiagram
 - `created_at`, `updated_at`: Audit timestamps
 
 **Room Types** (enumeration):
-- LIVING_ROOM
-- BEDROOM
-- KITCHEN
-- BATHROOM
-- TOILET
-- HALLWAY
-- STORAGE
-- OFFICE
-- DINING_ROOM
-- OTHER
+- LIVING_ROOM, BEDROOM, KITCHEN, BATHROOM, TOILET, HALLWAY, STORAGE, OFFICE, DINING_ROOM, OTHER
 
 **Business Rules**:
 - Must belong to a housing unit
@@ -205,27 +186,17 @@ erDiagram
 **Attributes**:
 - `id`: Primary key (auto-generated)
 - `housing_unit_id`: Foreign key to HOUSING_UNIT
-- `peb_score`: Energy performance score (A++, A+, A, B, C, D, E, F, G)
+- `peb_score`: Energy performance score (A++ to G)
 - `score_date`: Date when score was issued
 - `certificate_number`: Official certificate identifier (optional)
 - `valid_until`: Expiration date of certificate (optional)
 - `created_at`: Audit timestamp
 
-**PEB Score Values** (enumeration):
-- A_PLUS_PLUS (A++)
-- A_PLUS (A+)
-- A
-- B
-- C
-- D
-- E
-- F
-- G
+**PEB Score Values**: A_PLUS_PLUS, A_PLUS, A, B, C, D, E, F, G
 
 **Business Rules**:
-- One housing unit can have multiple PEB scores over time
-- Score date determines which score is current
-- Most recent score_date is the active PEB score
+- Append-only: records are never updated or deleted
+- Most recent `score_date` = current active score
 - Historical scores are retained for compliance and tracking
 
 ---
@@ -238,37 +209,43 @@ erDiagram
 - `housing_unit_id`: Foreign key to HOUSING_UNIT
 - `monthly_rent`: Monthly rent amount in EUR
 - `effective_from`: Start date of this rent amount
-- `effective_to`: End date of this rent amount (nullable for current rent)
+- `effective_to`: End date (nullable = current rent)
 - `notes`: Optional notes about rent change
 - `created_at`: Audit timestamp
 
 **Business Rules**:
-- One housing unit can have multiple rent records over time
 - Current rent has `effective_to = NULL`
 - When updating rent, previous record's `effective_to` is set to day before new `effective_from`
-- Rent periods should not overlap
-- This is indicative rent (not actual tenant payments - that's in backlog)
+- Indicative only (not actual tenant payments)
 
 ---
 
-### WATER_METER_HISTORY
-**Purpose**: Tracks water meter assignments over time.
+### METER
+**Purpose**: Tracks utility meter assignments (water, gas, electricity) over time for housing units and buildings.
 
 **Attributes**:
 - `id`: Primary key (auto-generated)
-- `housing_unit_id`: Foreign key to HOUSING_UNIT
-- `meter_number`: Unique meter identifier
-- `meter_location`: Physical location description (optional)
-- `installation_date`: Date meter was installed/assigned
-- `removal_date`: Date meter was removed/replaced (nullable for active meter)
+- `type`: Meter type — WATER, GAS, ELECTRICITY
+- `meter_number`: Physical meter identifier (all types)
+- `label`: Optional human-readable label (e.g. Kitchen, Basement)
+- `ean_code`: Required for GAS and ELECTRICITY meters
+- `installation_number`: Required for WATER meters
+- `customer_number`: Required for WATER meters on a BUILDING
+- `owner_type`: Polymorphic owner type — HOUSING_UNIT or BUILDING
+- `owner_id`: FK to `housing_unit.id` or `building.id` (no DB-level FK — polymorphic pattern)
+- `start_date`: Activation date — cannot be in the future
+- `end_date`: Closure date — NULL = active
 - `created_at`: Audit timestamp
 
 **Business Rules**:
-- One housing unit can have multiple meter records over time
-- Current meter has `removal_date = NULL`
-- When replacing meter, previous record's `removal_date` is set to installation_date of new meter
-- Meter periods should not overlap for the same housing unit
-- Future: Other utility meters (electricity, gas) will follow same pattern
+- Append-only: existing records are never modified
+- Active meter = `end_date IS NULL`
+- Multiple active meters of the same type are allowed per owner
+- `ean_code` required for GAS and ELECTRICITY
+- `installation_number` required for WATER
+- `customer_number` required for WATER on BUILDING
+- Replace is atomic: closes current meter and creates new one in a single transaction
+- New `start_date` on replace must be ≥ current meter's `start_date`
 
 ---
 
@@ -280,43 +257,44 @@ erDiagram
   - Delete BUILDING → cascade delete HOUSING_UNIT and all related history
   - Delete HOUSING_UNIT → cascade delete ROOM and all history tables
   - Delete USER → set created_by to NULL (retain data)
+- METER uses a polymorphic owner pattern (no DB-level FK on `owner_id`) — integrity enforced at service level
 
 ### Audit Trail
 - All tables have `created_at` timestamp (set on insert)
 - Main entities have `updated_at` timestamp (set on update)
-- History tables are append-only (no updates/deletes)
+- History/append-only tables have only `created_at`
 
 ### Uniqueness Constraints
 - USER: username, email
-- BUILDING: none (can have duplicate names)
+- BUILDING: none
 - HOUSING_UNIT: (building_id, unit_number) composite unique
 - ROOM: none
-- History tables: none (allow duplicates for correction scenarios)
+- History / append-only tables: none
 
 ---
 
 ## Historization Pattern
 
-For time-based data (PEB, Rent, Water Meter), we use a **history table pattern**:
+For time-based data (PEB, Rent, Meters), we use an **append-only pattern**:
 
 1. **Append-only**: Records are never updated or deleted
 2. **Time-based validity**: Use date fields to determine current vs historical
 3. **Current record**: Identified by NULL end date or most recent date
 4. **Corrections**: Add new record, don't modify existing
 
-**Example Query Pattern** (Current Rent):
+**Example — Active Meters**:
 ```sql
-SELECT * FROM rent_history 
-WHERE housing_unit_id = ? 
-  AND effective_to IS NULL;
+SELECT * FROM meter
+WHERE owner_type = 'HOUSING_UNIT'
+  AND owner_id = ?
+  AND end_date IS NULL;
 ```
 
-**Example Query Pattern** (Rent at specific date):
+**Example — Current Rent**:
 ```sql
-SELECT * FROM rent_history 
-WHERE housing_unit_id = ? 
-  AND effective_from <= ? 
-  AND (effective_to IS NULL OR effective_to >= ?);
+SELECT * FROM rent_history
+WHERE housing_unit_id = ?
+  AND effective_to IS NULL;
 ```
 
 ---
@@ -327,12 +305,11 @@ WHERE housing_unit_id = ?
 - **Lease Contracts**: Formal rental agreements
 - **Payments**: Actual rent payments received
 - **Maintenance**: Maintenance requests and work orders
-- **Other Meters**: Electricity, gas, heating meters
 - **Documents**: File attachments (contracts, invoices, photos)
 - **Portfolio Management**: Multi-owner support with complex permissions
 
 ---
 
-**Last Updated**: 2024-01-15  
-**Version**: 1.0  
-**Status**: Draft for Review
+**Last Updated**: 2026-02-24
+**Version**: 1.1
+**Status**: Up to date
