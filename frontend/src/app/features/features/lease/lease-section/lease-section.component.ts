@@ -13,7 +13,7 @@ import {
   standalone: true,
   imports: [CommonModule, RouterModule],
   templateUrl: "./lease-section.component.html",
-  //styleUrls: ["./lease-section.component.scss"],
+  styleUrls: ["./lease-section.component.scss"],
 })
 export class LeaseSectionComponent implements OnInit {
   @Input() unitId!: number;

@@ -11,7 +11,7 @@ import { Person } from "../../../models/person.model";
   standalone: true,
   imports: [CommonModule, RouterModule],
   templateUrl: "./person-details.component.html",
-  //styleUrls: ['./person-details.component.scss']
+  styleUrls: ["./person-details.component.scss"],
 })
 export class PersonDetailsComponent implements OnInit {
   person?: Person;

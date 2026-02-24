@@ -64,6 +64,7 @@
               class="form-control"
               formControlName="durationMonths"
               min="1"
+              [class.is-invalid]="isInvalid('durationMonths')"
             />
           </div>
           <div class="col-md-4">
@@ -280,7 +281,7 @@
     <div class="card shadow-sm mb-4">
       <div class="card-header fw-semibold">7 — Tenants</div>
       <div class="card-body">
-        <!-- Current tenants -->
+        <!-- Tenant list -->
         <div
           *ngFor="let t of pendingTenants; let i = index"
           class="d-flex align-items-center gap-3 mb-2 p-2 border rounded"
@@ -290,8 +291,8 @@
           >
           <select
             class="form-select form-select-sm w-auto"
-            [(ngModel)]="t.role"
-            [ngModelOptions]="{ standalone: true }"
+            [value]="t.role"
+            (change)="updateTenantRole(i, $event)"
           >
             <option value="PRIMARY">Primary</option>
             <option value="CO_TENANT">Co-Tenant</option>
@@ -305,15 +306,18 @@
             ✕
           </button>
         </div>
+
         <div *ngIf="!hasPrimaryTenant()" class="text-danger small mb-2">
           At least one PRIMARY tenant is required.
         </div>
-        <!-- Person Picker to add -->
+
+        <!-- Person picker to add -->
         <app-person-picker
           label="Add Tenant"
           [required]="false"
           (personSelected)="addTenantToForm($event)"
-        ></app-person-picker>
+        >
+        </app-person-picker>
       </div>
     </div>
 

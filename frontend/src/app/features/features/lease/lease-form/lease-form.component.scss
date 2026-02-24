@@ -1,0 +1,284 @@
+// lease-form.component.scss
+
+// ─── Layout ──────────────────────────────────────────────────────────────────
+
+.container {
+  max-width: 860px;
+}
+
+h2.h4 {
+  font-size: 1.3rem;
+  font-weight: 700;
+  color: #212121;
+}
+
+// ─── Section Cards ────────────────────────────────────────────────────────────
+
+.card {
+  border: 1px solid #e0e0e0;
+  border-radius: 8px;
+  overflow: hidden;
+
+  .card-header {
+    background: #f5f5f5;
+    border-bottom: 1px solid #e0e0e0;
+    padding: 0.65rem 1rem;
+    font-size: 0.95rem;
+    font-weight: 600;
+    color: #333;
+  }
+
+  .card-body {
+    padding: 1.25rem 1rem;
+  }
+}
+
+// ─── Form Controls ────────────────────────────────────────────────────────────
+
+.form-label {
+  font-size: 0.85rem;
+  font-weight: 500;
+  color: #555;
+  margin-bottom: 0.3rem;
+
+  .text-danger {
+    color: #d32f2f;
+    margin-left: 2px;
+  }
+}
+
+.form-control,
+.form-select {
+  font-size: 0.9rem;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  padding: 0.4rem 0.65rem;
+  transition:
+    border-color 0.15s,
+    box-shadow 0.15s;
+
+  &:focus {
+    border-color: #1976d2;
+    box-shadow: 0 0 0 2px rgba(25, 118, 210, 0.15);
+    outline: none;
+  }
+
+  &[readonly] {
+    background: #f8f9fa;
+    color: #757575;
+    cursor: default;
+  }
+
+  &.is-invalid {
+    border-color: #d32f2f;
+
+    &:focus {
+      border-color: #d32f2f;
+      box-shadow: 0 0 0 2px rgba(211, 47, 47, 0.15);
+    }
+  }
+}
+
+.invalid-feedback {
+  font-size: 0.8rem;
+  color: #d32f2f;
+  margin-top: 0.2rem;
+}
+
+// ─── Checkbox (Insurance) ─────────────────────────────────────────────────────
+
+.form-check {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+
+  .form-check-input {
+    width: 1rem;
+    height: 1rem;
+    border: 1px solid #bdbdbd;
+    border-radius: 3px;
+    cursor: pointer;
+    flex-shrink: 0;
+
+    &:checked {
+      background-color: #1976d2;
+      border-color: #1976d2;
+    }
+  }
+
+  .form-check-label {
+    font-size: 0.9rem;
+    color: #333;
+    cursor: pointer;
+  }
+}
+
+// ─── Tenant section ───────────────────────────────────────────────────────────
+
+.tenant-list {
+  list-style: none;
+  padding: 0;
+  margin: 0 0 1rem;
+
+  li {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0.5rem 0.75rem;
+    border: 1px solid #e0e0e0;
+    border-radius: 4px;
+    margin-bottom: 0.4rem;
+    background: #fafafa;
+    font-size: 0.9rem;
+
+    .tenant-role {
+      font-size: 0.75rem;
+      font-weight: 600;
+      padding: 0.2em 0.5em;
+      border-radius: 3px;
+      margin-left: 0.5rem;
+
+      &.PRIMARY {
+        background: #e3f2fd;
+        color: #1565c0;
+      }
+      &.CO_TENANT {
+        background: #e8f5e9;
+        color: #2e7d32;
+      }
+      &.GUARANTOR {
+        background: #fff3e0;
+        color: #e65100;
+      }
+    }
+  }
+}
+
+.tenant-picker-row {
+  display: flex;
+  align-items: flex-end;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+
+  .role-select {
+    width: 160px;
+    flex-shrink: 0;
+  }
+}
+
+// ─── Alerts ───────────────────────────────────────────────────────────────────
+
+.alert {
+  border-radius: 6px;
+  font-size: 0.875rem;
+  padding: 0.75rem 1rem;
+
+  &.alert-danger {
+    background: #ffebee;
+    border-color: #ef9a9a;
+    color: #b71c1c;
+  }
+
+  &.alert-warning {
+    background: #fff8e1;
+    border-color: #ffe082;
+    color: #5d4037;
+  }
+}
+
+// ─── Bottom action bar ────────────────────────────────────────────────────────
+
+.form-actions {
+  display: flex;
+  gap: 0.75rem;
+  align-items: center;
+  padding-top: 0.5rem;
+  flex-wrap: wrap;
+}
+
+// ─── Buttons ─────────────────────────────────────────────────────────────────
+
+.btn {
+  font-size: 0.9rem;
+  padding: 0.5rem 1.25rem;
+  border-radius: 4px;
+  font-weight: 500;
+  cursor: pointer;
+  border: none;
+  transition:
+    opacity 0.15s,
+    background 0.15s;
+
+  &:disabled {
+    opacity: 0.6;
+    cursor: default;
+  }
+  &:hover:not(:disabled) {
+    opacity: 0.88;
+  }
+
+  &.btn-sm {
+    font-size: 0.82rem;
+    padding: 0.3rem 0.75rem;
+  }
+
+  &.btn-primary {
+    background: #1976d2;
+    color: #fff;
+    &:hover:not(:disabled) {
+      background: #1565c0;
+      opacity: 1;
+    }
+  }
+
+  &.btn-success {
+    background: #2e7d32;
+    color: #fff;
+    &:hover:not(:disabled) {
+      background: #1b5e20;
+      opacity: 1;
+    }
+  }
+
+  &.btn-secondary {
+    background: #e0e0e0;
+    color: #333;
+    &:hover:not(:disabled) {
+      background: #bdbdbd;
+      opacity: 1;
+    }
+  }
+
+  &.btn-outline-danger {
+    background: transparent;
+    color: #c62828;
+    border: 1px solid #ef9a9a;
+    &:hover:not(:disabled) {
+      background: #ffebee;
+      opacity: 1;
+    }
+  }
+}
+
+// ─── Spinner ─────────────────────────────────────────────────────────────────
+
+.spinner-border {
+  width: 2rem;
+  height: 2rem;
+  border-width: 0.2em;
+  color: #1976d2;
+
+  &.spinner-border-sm {
+    width: 0.9rem;
+    height: 0.9rem;
+    border-width: 0.15em;
+  }
+}
+
+.text-center {
+  text-align: center;
+}
+.py-5 {
+  padding-top: 3rem;
+  padding-bottom: 3rem;
+}

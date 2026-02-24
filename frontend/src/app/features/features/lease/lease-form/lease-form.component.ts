@@ -16,6 +16,7 @@ import {
   LEASE_DURATION_MONTHS,
   LEASE_TYPE_LABELS,
   LeaseType,
+  TenantRole,
 } from "../../../../models/lease.model";
 import { PersonPickerComponent } from "../../../../shared/components/person-picker/person-picker.component";
 
@@ -29,7 +30,7 @@ import { PersonPickerComponent } from "../../../../shared/components/person-pick
     PersonPickerComponent,
   ],
   templateUrl: "./lease-form.component.html",
-  // styleUrls: ['./lease-form.component.scss']
+  styleUrls: ["./lease-form.component.scss"],
 })
 export class LeaseFormComponent implements OnInit {
   form!: FormGroup;
@@ -44,8 +45,7 @@ export class LeaseFormComponent implements OnInit {
   readonly LEASE_TYPES = Object.keys(LEASE_TYPE_LABELS) as LeaseType[];
   readonly LEASE_TYPE_LABELS = LEASE_TYPE_LABELS;
 
-  // Tenant management in form
-  pendingTenants: Array<{ person: any; role: string }> = [];
+  pendingTenants: Array<{ person: any; role: TenantRole }> = [];
 
   constructor(
     private fb: FormBuilder,
@@ -73,7 +73,7 @@ export class LeaseFormComponent implements OnInit {
       leaseType: ["MAIN_RESIDENCE_9Y", Validators.required],
       durationMonths: [108, [Validators.required, Validators.min(1)]],
       noticePeriodMonths: [3, [Validators.required, Validators.min(1)]],
-      indexationNoticeDays: [30, Validators.required],
+      indexationNoticeDays: [30],
       indexationAnniversaryMonth: [null],
       // Section 2 — Financial
       monthlyRent: ["", [Validators.required, Validators.min(0.01)]],
@@ -96,7 +96,6 @@ export class LeaseFormComponent implements OnInit {
       tenantInsuranceExpiry: [null],
     });
 
-    // Auto-compute end date when start or duration changes
     this.form
       .get("startDate")!
       .valueChanges.subscribe(() => this.computeEndDate());
@@ -104,13 +103,15 @@ export class LeaseFormComponent implements OnInit {
       .get("durationMonths")!
       .valueChanges.subscribe(() => this.computeEndDate());
 
-    // Auto-fill notice period when lease type changes
     this.form.get("leaseType")!.valueChanges.subscribe((type) => {
       if (type) {
-        this.form.patchValue({
-          noticePeriodMonths: DEFAULT_NOTICE_MONTHS[type as LeaseType] || 3,
-          durationMonths: LEASE_DURATION_MONTHS[type as LeaseType] || 108,
-        });
+        this.form.patchValue(
+          {
+            noticePeriodMonths: DEFAULT_NOTICE_MONTHS[type as LeaseType] || 3,
+            durationMonths: LEASE_DURATION_MONTHS[type as LeaseType] || 108,
+          },
+          { emitEvent: false },
+        );
       }
     });
   }
@@ -152,7 +153,7 @@ export class LeaseFormComponent implements OnInit {
           tenantInsuranceReference: lease.tenantInsuranceReference,
           tenantInsuranceExpiry: lease.tenantInsuranceExpiry,
         });
-        this.pendingTenants = lease.tenants.map((t) => ({
+        this.pendingTenants = (lease.tenants || []).map((t) => ({
           person: {
             id: t.personId,
             lastName: t.lastName,
@@ -160,8 +161,8 @@ export class LeaseFormComponent implements OnInit {
           },
           role: t.role,
         }));
-        this.computeEndDate();
         this.unitId = lease.housingUnitId;
+        this.computeEndDate();
         this.isLoading = false;
       },
       error: () => {
@@ -171,24 +172,34 @@ export class LeaseFormComponent implements OnInit {
     });
   }
 
-  addTenantToForm(person: any): void {
-    if (!person) return;
-    if (!this.pendingTenants.find((t) => t.person.id === person.id)) {
-      this.pendingTenants.push({ person, role: "PRIMARY" });
-    }
+  get showInsuranceDetails(): boolean {
+    return this.form.get("tenantInsuranceConfirmed")!.value === true;
   }
 
-  removeTenantFromForm(index: number): void {
-    this.pendingTenants.splice(index, 1);
+  isInvalid(field: string): boolean {
+    const c = this.form.get(field);
+    return !!(c && c.invalid && (c.dirty || c.touched));
   }
 
   hasPrimaryTenant(): boolean {
     return this.pendingTenants.some((t) => t.role === "PRIMARY");
   }
 
-  isInvalid(field: string): boolean {
-    const c = this.form.get(field);
-    return !!(c && c.invalid && (c.dirty || c.touched));
+  addTenantToForm(person: any): void {
+    if (!person) return;
+    if (this.pendingTenants.some((t) => t.person.id === person.id)) return;
+    const role: TenantRole =
+      this.pendingTenants.length === 0 ? "PRIMARY" : "CO_TENANT";
+    this.pendingTenants.push({ person, role });
+  }
+
+  removeTenantFromForm(index: number): void {
+    this.pendingTenants.splice(index, 1);
+  }
+
+  updateTenantRole(index: number, event: Event): void {
+    this.pendingTenants[index].role = (event.target as HTMLSelectElement)
+      .value as TenantRole;
   }
 
   saveAsDraft(): void {
@@ -198,11 +209,9 @@ export class LeaseFormComponent implements OnInit {
     this.submit(true);
   }
 
-  submit(activate: boolean): void {
-    if (this.form.invalid) {
-      this.form.markAllAsTouched();
-      return;
-    }
+  private submit(activate: boolean): void {
+    this.form.markAllAsTouched();
+    if (this.form.invalid) return;
     if (!this.hasPrimaryTenant()) {
       this.errorMessage = "At least one PRIMARY tenant is required.";
       return;
@@ -211,23 +220,27 @@ export class LeaseFormComponent implements OnInit {
     this.isSaving = true;
     this.errorMessage = "";
 
-    const value = this.form.value;
     const tenants: AddTenantRequest[] = this.pendingTenants.map((t) => ({
       personId: t.person.id,
       role: t.role,
     }));
 
     if (this.isEditMode) {
-      this.leaseService.update(this.leaseId!, { ...value }).subscribe({
-        next: (lease) => this.router.navigate(["/leases", lease.id]),
-        error: (err) => {
-          this.errorMessage = err.error?.message || "Error saving lease.";
-          this.isSaving = false;
-        },
-      });
+      this.leaseService
+        .update(this.leaseId!, { ...this.form.value })
+        .subscribe({
+          next: (lease) => this.router.navigate(["/leases", lease.id]),
+          error: (err) => {
+            this.errorMessage = err.error?.message || "Error saving lease.";
+            this.isSaving = false;
+          },
+        });
     } else {
       this.leaseService
-        .create({ ...value, housingUnitId: this.unitId!, tenants }, activate)
+        .create(
+          { ...this.form.value, housingUnitId: this.unitId!, tenants },
+          activate,
+        )
         .subscribe({
           next: (lease) => this.router.navigate(["/leases", lease.id]),
           error: (err) => {
@@ -239,11 +252,10 @@ export class LeaseFormComponent implements OnInit {
   }
 
   cancel(): void {
-    if (this.isEditMode) this.router.navigate(["/leases", this.leaseId]);
-    else this.router.navigate(["/housing-units", this.unitId]);
-  }
-
-  get showInsuranceDetails(): boolean {
-    return !!this.form.get("tenantInsuranceConfirmed")?.value;
+    if (this.isEditMode) {
+      this.router.navigate(["/leases", this.leaseId]);
+    } else {
+      this.router.navigate(["/housing-units", this.unitId]);
+    }
   }
 }
