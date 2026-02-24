@@ -1,5 +1,11 @@
 package com.immocare.service;
 
+import java.time.LocalDate;
+import java.util.List;
+
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
 import com.immocare.exception.BuildingNotFoundException;
 import com.immocare.exception.HousingUnitNotFoundException;
 import com.immocare.exception.MeterBusinessRuleException;
@@ -12,22 +18,19 @@ import com.immocare.model.entity.Meter;
 import com.immocare.repository.BuildingRepository;
 import com.immocare.repository.HousingUnitRepository;
 import com.immocare.repository.MeterRepository;
-import lombok.RequiredArgsConstructor;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
-import java.time.LocalDate;
-import java.util.List;
+import lombok.RequiredArgsConstructor;
 
 /**
  * Business logic for UC008 - Manage Meters.
  *
  * <h3>Append-only pattern</h3>
  * <ul>
- *   <li>Records are NEVER modified once created.</li>
- *   <li>Closing a meter sets {@code endDate}.</li>
- *   <li>Active meter = {@code endDate IS NULL}.</li>
- *   <li>Multiple active meters of the same type per owner are allowed (BR-03).</li>
+ * <li>Records are NEVER modified once created.</li>
+ * <li>Closing a meter sets {@code endDate}.</li>
+ * <li>Active meter = {@code endDate IS NULL}.</li>
+ * <li>Multiple active meters of the same type per owner are allowed
+ * (BR-03).</li>
  * </ul>
  */
 @Service
@@ -36,19 +39,20 @@ import java.util.List;
 public class MeterService {
 
     private static final String OWNER_HOUSING_UNIT = "HOUSING_UNIT";
-    private static final String OWNER_BUILDING     = "BUILDING";
+    private static final String OWNER_BUILDING = "BUILDING";
 
-    private final MeterRepository     meterRepository;
+    private final MeterRepository meterRepository;
     private final HousingUnitRepository housingUnitRepository;
-    private final BuildingRepository  buildingRepository;
-    private final MeterMapper         meterMapper;
+    private final BuildingRepository buildingRepository;
+    private final MeterMapper meterMapper;
 
     // ─────────────────────────────────────────────────────────────────────────
     // READ
     // ─────────────────────────────────────────────────────────────────────────
 
     /**
-     * Returns active meters for the given owner, sorted by type then startDate DESC.
+     * Returns active meters for the given owner, sorted by type then startDate
+     * DESC.
      * US036, US037.
      */
     public List<MeterDTO> getActiveMeters(String ownerType, Long ownerId) {
@@ -85,14 +89,16 @@ public class MeterService {
      * Adds a new meter for the given owner.
      * US038, US039.
      *
-     * <p>Business rules enforced:
+     * <p>
+     * Business rules enforced:
      * <ul>
-     *   <li>BR-01: startDate not in future</li>
-     *   <li>BR-05: eanCode required for GAS and ELECTRICITY</li>
-     *   <li>BR-06: installationNumber required for WATER</li>
-     *   <li>BR-07: customerNumber required for WATER on BUILDING</li>
+     * <li>BR-01: startDate not in future</li>
+     * <li>BR-05: eanCode required for GAS and ELECTRICITY</li>
+     * <li>BR-06: installationNumber required for WATER</li>
+     * <li>BR-07: customerNumber required for WATER on BUILDING</li>
      * </ul>
      */
+
     @Transactional
     public MeterDTO addMeter(String ownerType, Long ownerId, AddMeterRequest request) {
         validateOwnerExists(ownerType, ownerId);
@@ -104,13 +110,14 @@ public class MeterService {
         Meter meter = new Meter();
         meter.setType(request.type());
         meter.setMeterNumber(request.meterNumber());
+        meter.setLabel(request.label()); // ← NEW
         meter.setEanCode(request.eanCode());
         meter.setInstallationNumber(request.installationNumber());
         meter.setCustomerNumber(request.customerNumber());
         meter.setOwnerType(ownerType);
         meter.setOwnerId(ownerId);
         meter.setStartDate(request.startDate());
-        meter.setEndDate(null); // active
+        meter.setEndDate(null);
 
         return meterMapper.toDTO(meterRepository.save(meter));
     }
@@ -123,12 +130,13 @@ public class MeterService {
      * Atomically closes the current meter and creates a new one.
      * US040.
      *
-     * <p>Business rules enforced:
+     * <p>
+     * Business rules enforced:
      * <ul>
-     *   <li>BR-01: newStartDate not in future</li>
-     *   <li>BR-09: newStartDate >= current meter's startDate</li>
-     *   <li>BR-05/06/07: conditional fields per type and owner</li>
-     *   <li>BR-08: atomic transaction</li>
+     * <li>BR-01: newStartDate not in future</li>
+     * <li>BR-09: newStartDate >= current meter's startDate</li>
+     * <li>BR-05/06/07: conditional fields per type and owner</li>
+     * <li>BR-08: atomic transaction</li>
      * </ul>
      */
     @Transactional
@@ -140,7 +148,6 @@ public class MeterService {
 
         validateStartDateNotFuture(request.newStartDate());
 
-        // BR-09: newStartDate must be >= current meter's startDate
         if (request.newStartDate().isBefore(current.getStartDate())) {
             throw new MeterBusinessRuleException(
                     "Start date must be ≥ current meter start date (" + current.getStartDate() + ")");
@@ -149,21 +156,20 @@ public class MeterService {
         validateConditionalFields(current.getType(), ownerType,
                 request.newEanCode(), request.newInstallationNumber(), request.newCustomerNumber());
 
-        // Close the current meter
         current.setEndDate(request.newStartDate());
         meterRepository.save(current);
 
-        // Create the new meter
         Meter newMeter = new Meter();
         newMeter.setType(current.getType());
         newMeter.setMeterNumber(request.newMeterNumber());
+        newMeter.setLabel(request.newLabel()); // ← NEW
         newMeter.setEanCode(request.newEanCode());
         newMeter.setInstallationNumber(request.newInstallationNumber());
         newMeter.setCustomerNumber(request.newCustomerNumber());
         newMeter.setOwnerType(ownerType);
         newMeter.setOwnerId(ownerId);
         newMeter.setStartDate(request.newStartDate());
-        newMeter.setEndDate(null); // active
+        newMeter.setEndDate(null);
 
         return meterMapper.toDTO(meterRepository.save(newMeter));
     }
@@ -176,10 +182,11 @@ public class MeterService {
      * Closes an active meter without creating a replacement.
      * US041.
      *
-     * <p>Business rules enforced:
+     * <p>
+     * Business rules enforced:
      * <ul>
-     *   <li>BR-01: endDate not in future</li>
-     *   <li>BR-02: endDate >= meter's startDate</li>
+     * <li>BR-01: endDate not in future</li>
+     * <li>BR-02: endDate >= meter's startDate</li>
      * </ul>
      */
     @Transactional
@@ -244,7 +251,7 @@ public class MeterService {
      * BR-07: customerNumber required for WATER on BUILDING.
      */
     private void validateConditionalFields(String type, String ownerType,
-                                           String eanCode, String installationNumber, String customerNumber) {
+            String eanCode, String installationNumber, String customerNumber) {
         switch (type) {
             case "GAS", "ELECTRICITY" -> {
                 if (eanCode == null || eanCode.isBlank()) {

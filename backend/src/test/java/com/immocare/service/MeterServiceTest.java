@@ -1,15 +1,16 @@
 package com.immocare.service;
 
-import com.immocare.exception.MeterBusinessRuleException;
-import com.immocare.exception.MeterNotFoundException;
-import com.immocare.mapper.MeterMapper;
-import com.immocare.model.dto.AddMeterRequest;
-import com.immocare.model.dto.MeterDTO;
-import com.immocare.model.dto.ReplaceMeterRequest;
-import com.immocare.model.entity.Meter;
-import com.immocare.repository.BuildingRepository;
-import com.immocare.repository.HousingUnitRepository;
-import com.immocare.repository.MeterRepository;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
+
+import java.time.LocalDate;
+import java.util.List;
+import java.util.Optional;
+
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
@@ -20,30 +21,38 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import java.time.LocalDate;
-import java.util.List;
-import java.util.Optional;
-
-import static org.assertj.core.api.Assertions.*;
-import static org.mockito.ArgumentMatchers.*;
-import static org.mockito.Mockito.*;
+import com.immocare.exception.MeterBusinessRuleException;
+import com.immocare.exception.MeterNotFoundException;
+import com.immocare.mapper.MeterMapper;
+import com.immocare.model.dto.AddMeterRequest;
+import com.immocare.model.dto.MeterDTO;
+import com.immocare.model.dto.ReplaceMeterRequest;
+import com.immocare.model.entity.Meter;
+import com.immocare.repository.BuildingRepository;
+import com.immocare.repository.HousingUnitRepository;
+import com.immocare.repository.MeterRepository;
 
 @ExtendWith(MockitoExtension.class)
 @DisplayName("MeterService")
 class MeterServiceTest {
 
-    @Mock MeterRepository     meterRepository;
-    @Mock HousingUnitRepository housingUnitRepository;
-    @Mock BuildingRepository  buildingRepository;
-    @Mock MeterMapper         meterMapper;
+    @Mock
+    MeterRepository meterRepository;
+    @Mock
+    HousingUnitRepository housingUnitRepository;
+    @Mock
+    BuildingRepository buildingRepository;
+    @Mock
+    MeterMapper meterMapper;
 
-    @InjectMocks MeterService meterService;
+    @InjectMocks
+    MeterService meterService;
 
-    private static final Long   UNIT_ID     = 1L;
-    private static final Long   BUILDING_ID = 2L;
-    private static final Long   METER_ID    = 10L;
-    private static final String HU          = "HOUSING_UNIT";
-    private static final String BLD         = "BUILDING";
+    private static final Long UNIT_ID = 1L;
+    private static final Long BUILDING_ID = 2L;
+    private static final Long METER_ID = 10L;
+    private static final String HU = "HOUSING_UNIT";
+    private static final String BLD = "BUILDING";
 
     @BeforeEach
     void stubOwnerExists() {
@@ -62,7 +71,7 @@ class MeterServiceTest {
         @Test
         @DisplayName("TS-UC008-01 — GAS without eanCode → MeterBusinessRuleException")
         void addGasMeter_withoutEanCode_throwsException() {
-            var req = new AddMeterRequest("GAS", "GAS-001", null, null, null, LocalDate.now());
+            var req = new AddMeterRequest("GAS", "GAS-001", "GAS meter", null, null, null, LocalDate.now());
             assertThatThrownBy(() -> meterService.addMeter(HU, UNIT_ID, req))
                     .isInstanceOf(MeterBusinessRuleException.class)
                     .hasMessageContaining("EAN code is required for gas meters");
@@ -71,7 +80,8 @@ class MeterServiceTest {
         @Test
         @DisplayName("TS-UC008-01b — ELECTRICITY without eanCode → MeterBusinessRuleException")
         void addElectricityMeter_withoutEanCode_throwsException() {
-            var req = new AddMeterRequest("ELECTRICITY", "ELC-001", null, null, null, LocalDate.now());
+            var req = new AddMeterRequest("ELECTRICITY", "ELC-001", "ELECTRICITY meter", null, null, null,
+                    LocalDate.now());
             assertThatThrownBy(() -> meterService.addMeter(HU, UNIT_ID, req))
                     .isInstanceOf(MeterBusinessRuleException.class)
                     .hasMessageContaining("EAN code is required for electricity meters");
@@ -80,7 +90,7 @@ class MeterServiceTest {
         @Test
         @DisplayName("TS-UC008-02 — WATER on BUILDING without customerNumber → MeterBusinessRuleException")
         void addWaterMeter_buildingWithoutCustomerNumber_throwsException() {
-            var req = new AddMeterRequest("WATER", "WTR-B01", null, "IN-001", null, LocalDate.now());
+            var req = new AddMeterRequest("WATER", "WTR-B01", "WATER meter", null, "IN-001", null, LocalDate.now());
             assertThatThrownBy(() -> meterService.addMeter(BLD, BUILDING_ID, req))
                     .isInstanceOf(MeterBusinessRuleException.class)
                     .hasMessageContaining("Customer number is required for water meters on a building");
@@ -89,7 +99,7 @@ class MeterServiceTest {
         @Test
         @DisplayName("TS-UC008-02b — WATER on HOUSING_UNIT without customerNumber → OK (not required)")
         void addWaterMeter_housingUnitWithoutCustomerNumber_succeeds() {
-            var req = new AddMeterRequest("WATER", "WTR-001", null, "IN-001", null, LocalDate.now());
+            var req = new AddMeterRequest("WATER", "WTR-001", "WATER meter", null, "IN-001", null, LocalDate.now());
             Meter saved = buildMeter("WATER", HU, UNIT_ID, LocalDate.now(), null);
             when(meterRepository.save(any())).thenReturn(saved);
             MeterDTO dto = buildDTO(saved);
@@ -102,7 +112,7 @@ class MeterServiceTest {
         @Test
         @DisplayName("TS-UC008-03 — startDate in future → MeterBusinessRuleException")
         void addMeter_futurStartDate_throwsException() {
-            var req = new AddMeterRequest("GAS", "GAS-001", "54100000000001",
+            var req = new AddMeterRequest("GAS", "GAS-001", "GAS meter", "54100000000001",
                     null, null, LocalDate.now().plusDays(1));
             assertThatThrownBy(() -> meterService.addMeter(HU, UNIT_ID, req))
                     .isInstanceOf(MeterBusinessRuleException.class)
@@ -112,9 +122,9 @@ class MeterServiceTest {
         @Test
         @DisplayName("TS-UC008-06 — Two ELECTRICITY meters on same unit → both saved")
         void addTwoElectricityMeters_sameUnit_bothSaved() {
-            var req1 = new AddMeterRequest("ELECTRICITY", "ELC-001", "54200000000001",
+            var req1 = new AddMeterRequest("ELECTRICITY", "ELC-001", "ELECTRICITY1 meter", "54200000000001",
                     null, null, LocalDate.now());
-            var req2 = new AddMeterRequest("ELECTRICITY", "ELC-002", "54200000000002",
+            var req2 = new AddMeterRequest("ELECTRICITY", "ELC-002", "ELECTRICITY2 meter", "54200000000002",
                     null, null, LocalDate.now());
 
             Meter m1 = buildMeter("ELECTRICITY", HU, UNIT_ID, LocalDate.now(), null);
@@ -133,7 +143,7 @@ class MeterServiceTest {
         @Test
         @DisplayName("Valid GAS meter → saved with endDate = null")
         void addGasMeter_valid_savedActive() {
-            var req = new AddMeterRequest("GAS", "GAS-001", "54100000000001",
+            var req = new AddMeterRequest("GAS", "GAS-001", "GAS meter", "54100000000001",
                     null, null, LocalDate.now());
             Meter saved = buildMeter("GAS", HU, UNIT_ID, LocalDate.now(), null);
             when(meterRepository.save(any())).thenReturn(saved);
@@ -163,7 +173,7 @@ class MeterServiceTest {
             Meter current = buildMeter("ELECTRICITY", HU, UNIT_ID, currentStart, null);
             when(meterRepository.findByIdAndEndDateIsNull(METER_ID)).thenReturn(Optional.of(current));
 
-            var req = new ReplaceMeterRequest("ELC-002", "54200000000002",
+            var req = new ReplaceMeterRequest("ELC-002", "54200000000002", "ELECTRICITY meter",
                     null, null, LocalDate.of(2024, 5, 1), null);
 
             assertThatThrownBy(() -> meterService.replaceMeter(HU, UNIT_ID, METER_ID, req))
@@ -175,7 +185,7 @@ class MeterServiceTest {
         @DisplayName("Meter not found → MeterNotFoundException")
         void replaceMeter_notFound_throwsException() {
             when(meterRepository.findByIdAndEndDateIsNull(METER_ID)).thenReturn(Optional.empty());
-            var req = new ReplaceMeterRequest("ELC-002", "54200000000002",
+            var req = new ReplaceMeterRequest("ELC-002", "54200000000002", "ELECTRICITY meter",
                     null, null, LocalDate.now(), null);
 
             assertThatThrownBy(() -> meterService.replaceMeter(HU, UNIT_ID, METER_ID, req))
@@ -186,7 +196,7 @@ class MeterServiceTest {
         @DisplayName("TS-UC008-07 — valid replace → old closed, new active")
         void replaceMeter_valid_oldClosedNewActive() {
             LocalDate currentStart = LocalDate.of(2023, 1, 1);
-            LocalDate newStart     = LocalDate.of(2024, 1, 1);
+            LocalDate newStart = LocalDate.of(2024, 1, 1);
             Meter current = buildMeter("ELECTRICITY", HU, UNIT_ID, currentStart, null);
             when(meterRepository.findByIdAndEndDateIsNull(METER_ID)).thenReturn(Optional.of(current));
 
@@ -194,7 +204,7 @@ class MeterServiceTest {
             when(meterRepository.save(any())).thenReturn(current).thenReturn(newMeter);
             when(meterMapper.toDTO(newMeter)).thenReturn(buildDTO(newMeter));
 
-            var req = new ReplaceMeterRequest("ELC-002", "54200000000002",
+            var req = new ReplaceMeterRequest("ELC-002", "54200000000002", "ELECTRICITY meter",
                     null, null, newStart, "UPGRADE");
 
             MeterDTO result = meterService.replaceMeter(HU, UNIT_ID, METER_ID, req);
@@ -244,7 +254,7 @@ class MeterServiceTest {
         @DisplayName("Valid remove → endDate set on meter")
         void removeMeter_valid_endDateSet() {
             LocalDate startDate = LocalDate.of(2024, 1, 1);
-            LocalDate endDate   = LocalDate.now();
+            LocalDate endDate = LocalDate.now();
             Meter meter = buildMeter("WATER", HU, UNIT_ID, startDate, null);
             when(meterRepository.findByIdAndEndDateIsNull(METER_ID)).thenReturn(Optional.of(meter));
             when(meterRepository.save(any())).thenReturn(meter);
@@ -296,7 +306,7 @@ class MeterServiceTest {
     // ─────────────────────────────────────────────────────────────────────────
 
     private Meter buildMeter(String type, String ownerType, Long ownerId,
-                             LocalDate startDate, LocalDate endDate) {
+            LocalDate startDate, LocalDate endDate) {
         Meter m = new Meter();
         m.setType(type);
         m.setOwnerType(ownerType);
@@ -309,12 +319,11 @@ class MeterServiceTest {
 
     private MeterDTO buildDTO(Meter m) {
         return new MeterDTO(
-                1L, m.getType(), m.getMeterNumber(),
+                1L, m.getType(), m.getMeterNumber(), m.getLabel(),
                 m.getEanCode(), m.getInstallationNumber(), m.getCustomerNumber(),
                 m.getOwnerType(), m.getOwnerId(),
                 m.getStartDate(), m.getEndDate(),
                 m.getEndDate() == null ? "ACTIVE" : "CLOSED",
-                null
-        );
+                null);
     }
 }
