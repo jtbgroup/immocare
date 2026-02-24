@@ -90,50 +90,36 @@
       </div>
     </div>
 
-    <!-- Housing Units Section (Future) -->
+    <!-- Meters section — UC008 -->
     <div class="info-card">
-      <h2>Housing Units</h2>
-      <p class="empty-message">
-        {{
-          building.unitCount === 0
-            ? "No housing units yet"
-            : building.unitCount + " housing units"
-        }}
-      </p>
+      <app-meter-section
+        [ownerType]="'BUILDING'"
+        [ownerId]="building.id">
+      </app-meter-section>
+    </div>
+
+    <!-- Housing Units section — UC002 -->
+    <div class="info-card">
       <app-housing-unit-list [buildingId]="building.id"></app-housing-unit-list>
     </div>
-  </div>
 
-  <!-- Delete Confirmation Dialog -->
-  <div *ngIf="showDeleteConfirm" class="modal-overlay" (click)="cancelDelete()">
-    <div class="modal-content" (click)="$event.stopPropagation()">
-      <div class="modal-header">
-        <h2>Delete Building?</h2>
-      </div>
-
-      <div class="modal-body">
+    <!-- Delete Confirmation Modal -->
+    <div *ngIf="showDeleteConfirm" class="modal-overlay">
+      <div class="modal-content">
+        <h3>Delete Building</h3>
         <p>
-          Are you sure you want to delete <strong>{{ building?.name }}</strong
-          >?
+          Are you sure you want to delete
+          <strong>{{ building.name }}</strong>?
         </p>
-        <p class="warning">⚠️ This action cannot be undone</p>
-      </div>
-
-      <div class="modal-actions">
-        <button
-          class="btn btn-secondary"
-          (click)="cancelDelete()"
-          [disabled]="loading"
-        >
-          Cancel
-        </button>
-        <button
-          class="btn btn-danger"
-          (click)="deleteBuilding()"
-          [disabled]="loading"
-        >
-          {{ loading ? "Deleting..." : "Delete" }}
-        </button>
+        <p class="warning">This action cannot be undone.</p>
+        <div class="modal-actions">
+          <button class="btn btn-secondary" (click)="cancelDelete()">
+            Cancel
+          </button>
+          <button class="btn btn-danger" (click)="deleteBuilding()">
+            Delete
+          </button>
+        </div>
       </div>
     </div>
   </div>

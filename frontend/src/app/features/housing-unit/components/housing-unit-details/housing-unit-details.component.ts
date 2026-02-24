@@ -5,6 +5,7 @@ import { Subject } from "rxjs";
 import { takeUntil } from "rxjs/operators";
 import { HousingUnitService } from "../../../../core/services/housing-unit.service";
 import { HousingUnit } from "../../../../models/housing-unit.model";
+import { MeterSectionComponent } from "../../../../shared/components/meter-section/meter-section.component";
 import { PebSectionComponent } from "../peb-section/peb-section.component";
 import { RentSectionComponent } from "../rent-section/rent-section.component";
 import { RoomSectionComponent } from "../room-section/room-section.component";
@@ -18,6 +19,7 @@ import { RoomSectionComponent } from "../room-section/room-section.component";
     RoomSectionComponent,
     PebSectionComponent,
     RentSectionComponent,
+    MeterSectionComponent, // UC008
   ],
   templateUrl: "./housing-unit-details.component.html",
   styleUrls: ["./housing-unit-details.component.scss"],

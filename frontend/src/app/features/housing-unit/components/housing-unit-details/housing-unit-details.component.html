@@ -69,4 +69,10 @@
   <section>
     <app-rent-section [unitId]="unit.id"></app-rent-section>
   </section>
+
+  <!-- Meters section — UC008 -->
+  <section *ngIf="unit">
+    <app-meter-section [ownerType]="'HOUSING_UNIT'" [ownerId]="unit.id">
+    </app-meter-section>
+  </section>
 </div>

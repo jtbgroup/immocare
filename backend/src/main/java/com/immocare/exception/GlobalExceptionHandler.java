@@ -71,6 +71,30 @@ public class GlobalExceptionHandler {
     return notFound("PEB score not found", ex.getMessage());
   }
 
+  // ─── UC008 - Meters ───────────────────────────────────────────────────────
+
+  /**
+   * Meter not found or already closed → 409 Conflict.
+   * Using 409 instead of 404 to signal a state conflict (meter exists but is closed).
+   */
+  @ExceptionHandler(MeterNotFoundException.class)
+  public ResponseEntity<ErrorResponse> handleMeterNotFound(MeterNotFoundException ex) {
+    ErrorResponse error = new ErrorResponse(
+        HttpStatus.CONFLICT.value(), "Meter not found or already closed", ex.getMessage(), LocalDateTime.now());
+    return ResponseEntity.status(HttpStatus.CONFLICT).body(error);
+  }
+
+  /**
+   * Meter business rule violation → 409 Conflict.
+   * E.g., startDate in future, endDate before startDate, newStartDate before currentStartDate.
+   */
+  @ExceptionHandler(MeterBusinessRuleException.class)
+  public ResponseEntity<ErrorResponse> handleMeterBusinessRule(MeterBusinessRuleException ex) {
+    ErrorResponse error = new ErrorResponse(
+        HttpStatus.CONFLICT.value(), "Meter business rule violation", ex.getMessage(), LocalDateTime.now());
+    return ResponseEntity.status(HttpStatus.CONFLICT).body(error);
+  }
+
   // ─── Generic ──────────────────────────────────────────────────────────────
 
   @ExceptionHandler(IllegalArgumentException.class)
