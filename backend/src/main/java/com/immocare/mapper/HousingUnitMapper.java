@@ -18,10 +18,12 @@ public interface HousingUnitMapper {
 
   /**
    * Convert HousingUnit entity to HousingUnitDTO.
+   * ownerName is derived from the owner Person (firstName + lastName).
    * effectiveOwnerName and roomCount are set manually in the service.
    */
   @Mapping(target = "buildingId", source = "building.id")
   @Mapping(target = "buildingName", source = "building.name")
+  @Mapping(target = "ownerName", expression = "java(unit.getOwner() == null ? null : (unit.getOwner().getFirstName() + \" \" + unit.getOwner().getLastName()).trim())")
   @Mapping(target = "effectiveOwnerName", ignore = true)
   @Mapping(target = "roomCount", ignore = true)
   @Mapping(target = "currentMonthlyRent", ignore = true)
@@ -30,10 +32,11 @@ public interface HousingUnitMapper {
 
   /**
    * Convert CreateHousingUnitRequest to HousingUnit entity.
-   * building is set manually in the service after loading it by buildingId.
+   * building, owner and createdBy are set manually in the service.
    */
   @Mapping(target = "id", ignore = true)
   @Mapping(target = "building", ignore = true)
+  @Mapping(target = "owner", ignore = true)
   @Mapping(target = "createdBy", ignore = true)
   @Mapping(target = "createdAt", ignore = true)
   @Mapping(target = "updatedAt", ignore = true)
@@ -41,10 +44,11 @@ public interface HousingUnitMapper {
 
   /**
    * Apply UpdateHousingUnitRequest fields onto an existing HousingUnit entity.
-   * building and audit fields are never changed on update.
+   * building, owner and audit fields are never changed by the mapper.
    */
   @Mapping(target = "id", ignore = true)
   @Mapping(target = "building", ignore = true)
+  @Mapping(target = "owner", ignore = true)
   @Mapping(target = "createdBy", ignore = true)
   @Mapping(target = "createdAt", ignore = true)
   @Mapping(target = "updatedAt", ignore = true)

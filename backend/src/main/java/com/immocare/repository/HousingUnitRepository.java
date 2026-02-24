@@ -1,7 +1,5 @@
 package com.immocare.repository;
 
-/
-
 import java.util.List;
 
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -23,13 +21,15 @@ public interface HousingUnitRepository extends JpaRepository<HousingUnit, Long> 
   List<HousingUnit> findByBuildingIdOrderByFloorAscUnitNumberAsc(Long buildingId);
 
   /**
-   * Count units in a building — used by BuildingService to guard against deletion.
+   * Count units in a building — used by BuildingService to guard against
+   * deletion.
    */
   long countByBuildingId(Long buildingId);
 
   /**
    * Check for duplicate unit number within a building, excluding a given unit ID.
-   * Used when editing a unit (id != excludeId) or creating (excludeId = null via separate method).
+   * Used when editing a unit (id != excludeId) or creating (excludeId = null via
+   * separate method).
    */
   @Query("""
       SELECT COUNT(u) > 0
@@ -41,8 +41,7 @@ public interface HousingUnitRepository extends JpaRepository<HousingUnit, Long> 
   boolean existsByBuildingIdAndUnitNumberIgnoreCaseExcluding(
       @Param("buildingId") Long buildingId,
       @Param("unitNumber") String unitNumber,
-      @Param("excludeId") Long excludeId
-  );
+      @Param("excludeId") Long excludeId);
 
   /**
    * Check for duplicate unit number within a building (used during creation).
@@ -56,21 +55,19 @@ public interface HousingUnitRepository extends JpaRepository<HousingUnit, Long> 
   @Query("SELECT 0L")
   Long countRoomsByUnitId(@Param("unitId") Long unitId);
 
+  // Existing methods (keep as-is) ...
 
+  // ---- NEW: owner_id queries for UC009 ----
 
-    // Existing methods (keep as-is) ...
+  /** True if any housing unit references this person as direct owner. */
+  boolean existsByOwnerId(Long ownerId);
 
-    // ---- NEW: owner_id queries for UC009 ----
+  /** List all housing units owned by a given person (direct, not inherited). */
+  List<HousingUnit> findByOwnerId(Long ownerId);
 
-    /** True if any housing unit references this person as direct owner. */
-    boolean existsByOwnerId(Long ownerId);
+  /** Find all units for a given building. */
+  List<HousingUnit> findByBuildingId(Long buildingId);
 
-    /** List all housing units owned by a given person (direct, not inherited). */
-    List<HousingUnit> findByOwnerId(Long ownerId);
-
-    /** Find all units for a given building. */
-    List<HousingUnit> findByBuildingId(Long buildingId);
-
-    /** True if a building has any housing units (used for delete check). */
-    boolean existsByBuildingId(Long buildingId);
+  /** True if a building has any housing units (used for delete check). */
+  boolean existsByBuildingId(Long buildingId);
 }

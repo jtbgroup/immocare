@@ -176,25 +176,37 @@ public class HousingUnitService {
   private HousingUnitDTO toEnrichedDTO(HousingUnit unit) {
     HousingUnitDTO dto = housingUnitMapper.toDTO(unit);
 
-    // BR-UC002-09: effective owner = unit owner ?? building owner
-    String effective = unit.getOwnerName() != null
-        ? unit.getOwnerName()
-        : unit.getBuilding().getOwnerName();
+    // BR-UC002-09: effective owner = unit owner ?? building owner (Person → display
+    // name)
+    String effective = resolveOwnerName(unit.getOwner());
+    if (effective == null) {
+      effective = resolveOwnerName(unit.getBuilding().getOwner());
+    }
     dto.setEffectiveOwnerName(effective);
 
     // UC003: real room count from repository
     dto.setRoomCount(roomRepository.countByHousingUnitId(unit.getId()));
 
-    // Current renting
+    // Current rent
     rentHistoryRepository
         .findByHousingUnitIdAndEffectiveToIsNull(unit.getId())
         .ifPresent(r -> dto.setCurrentMonthlyRent(r.getMonthlyRent()));
 
-    // PEB score
+    // Current PEB score
     pebScoreRepository
         .findFirstByHousingUnitIdOrderByScoreDateDesc(unit.getId())
         .ifPresent(p -> dto.setCurrentPebScore(p.getPebScore()));
 
     return dto;
+  }
+
+  /**
+   * Build a display name from a Person entity.
+   * Returns null if the person is null.
+   */
+  private String resolveOwnerName(com.immocare.model.entity.Person person) {
+    if (person == null)
+      return null;
+    return (person.getFirstName() + " " + person.getLastName()).trim();
   }
 }

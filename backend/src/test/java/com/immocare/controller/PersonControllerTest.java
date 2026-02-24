@@ -1,35 +1,50 @@
 package com.immocare.controller;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.immocare.exception.PersonNotFoundException;
-import com.immocare.exception.PersonReferencedException;
-import com.immocare.model.dto.*;
-import com.immocare.service.PersonService;
-import org.junit.jupiter.api.DisplayName;
-import org.junit.jupiter.api.Test;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
-import org.springframework.data.domain.PageImpl;
-import org.springframework.http.MediaType;
-import org.springframework.security.test.context.support.WithMockUser;
-import org.springframework.test.web.servlet.MockMvc;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.doNothing;
+import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.when;
+import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import java.util.List;
 
-import static org.mockito.ArgumentMatchers.*;
-import static org.mockito.Mockito.*;
-import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.http.MediaType;
+import org.springframework.security.test.context.support.WithMockUser;
+import org.springframework.test.context.TestPropertySource;
+import org.springframework.test.web.servlet.MockMvc;
 
-@WebMvcTest(PersonController.class)
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.immocare.exception.PersonNotFoundException;
+import com.immocare.exception.PersonReferencedException;
+import com.immocare.model.dto.CreatePersonRequest;
+import com.immocare.model.dto.PersonDTO;
+import com.immocare.model.dto.PersonSummaryDTO;
+import com.immocare.model.dto.UpdatePersonRequest;
+import com.immocare.service.PersonService;
+
+@SpringBootTest
+@TestPropertySource(locations = "classpath:application-test.properties")
 @WithMockUser(roles = "ADMIN")
 class PersonControllerTest {
 
-    @Autowired MockMvc mockMvc;
-    @Autowired ObjectMapper objectMapper;
-    @MockBean PersonService personService;
+    @Autowired
+    MockMvc mockMvc;
+    @Autowired
+    ObjectMapper objectMapper;
+    @Autowired
+    PersonService personService;
 
     // ---- GET /api/v1/persons ----
 
@@ -98,9 +113,9 @@ class PersonControllerTest {
         when(personService.create(any())).thenReturn(dto);
 
         mockMvc.perform(post("/api/v1/persons")
-                        .with(csrf())
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(request)))
+                .with(csrf())
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isCreated())
                 .andExpect(jsonPath("$.id").value(2L));
     }
@@ -113,9 +128,9 @@ class PersonControllerTest {
         // lastName is missing → @NotBlank
 
         mockMvc.perform(post("/api/v1/persons")
-                        .with(csrf())
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(request)))
+                .with(csrf())
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isBadRequest());
     }
 
@@ -133,9 +148,9 @@ class PersonControllerTest {
         when(personService.update(eq(1L), any())).thenReturn(dto);
 
         mockMvc.perform(put("/api/v1/persons/1")
-                        .with(csrf())
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(request)))
+                .with(csrf())
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isOk());
     }
 

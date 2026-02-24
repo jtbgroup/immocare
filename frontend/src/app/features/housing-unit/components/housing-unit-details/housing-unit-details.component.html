@@ -71,8 +71,37 @@
   </section>
 
   <!-- Meters section — UC008 -->
-  <section *ngIf="unit">
+  <section>
     <app-meter-section [ownerType]="'HOUSING_UNIT'" [ownerId]="unit.id">
     </app-meter-section>
   </section>
+
+  <!-- Lease section — UC010 -->
+  <section>
+    <app-lease-section [unitId]="unit.id"></app-lease-section>
+  </section>
+
+  <!-- Delete confirmation -->
+  <div *ngIf="showDeleteConfirm" class="modal-overlay">
+    <div class="modal-content">
+      <h3>Delete Unit</h3>
+      <p>
+        Are you sure you want to delete unit
+        <strong>{{ unit.unitNumber }}</strong
+        >?
+      </p>
+      <p class="warning">This action cannot be undone.</p>
+      <div *ngIf="deleteError" class="error-msg">{{ deleteError }}</div>
+      <div class="modal-actions">
+        <button class="btn btn-secondary" (click)="showDeleteConfirm = false">
+          Cancel
+        </button>
+        <button class="btn btn-danger" (click)="delete()" [disabled]="deleting">
+          {{ deleting ? "Deleting…" : "Delete" }}
+        </button>
+      </div>
+    </div>
+  </div>
 </div>
+
+<div *ngIf="loading" class="loading-state">Loading…</div>

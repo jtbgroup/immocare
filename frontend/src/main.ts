@@ -26,6 +26,40 @@ bootstrapApplication(AppComponent, {
             (m) => m.LoginComponent,
           ),
       },
+      // ─── Persons ───────────────────────────────────────────────────────────
+      {
+        path: "persons",
+        canActivate: [AuthGuard],
+        loadComponent: () =>
+          import("./app/features/person/person-list/person-list.component").then(
+            (m) => m.PersonListComponent,
+          ),
+      },
+      {
+        path: "persons/new",
+        canActivate: [AuthGuard],
+        loadComponent: () =>
+          import("./app/features/person/person-form/person-form.component").then(
+            (m) => m.PersonFormComponent,
+          ),
+      },
+      {
+        path: "persons/:id/edit",
+        canActivate: [AuthGuard],
+        loadComponent: () =>
+          import("./app/features/person/person-form/person-form.component").then(
+            (m) => m.PersonFormComponent,
+          ),
+      },
+      {
+        path: "persons/:id",
+        canActivate: [AuthGuard],
+        loadComponent: () =>
+          import("./app/features/person/person-details/person-details.component").then(
+            (m) => m.PersonDetailsComponent,
+          ),
+      },
+      // ─── Buildings ─────────────────────────────────────────────────────────
       {
         path: "buildings",
         canActivate: [AuthGuard],
@@ -58,6 +92,65 @@ bootstrapApplication(AppComponent, {
             (m) => m.BuildingFormComponent,
           ),
       },
+      // ─── Housing Units ─────────────────────────────────────────────────────
+      {
+        path: "units/new",
+        canActivate: [AuthGuard],
+        loadComponent: () =>
+          import("./app/features/housing-unit/components/housing-unit-form/housing-unit-form.component").then(
+            (m) => m.HousingUnitFormComponent,
+          ),
+      },
+      {
+        path: "units/:id",
+        canActivate: [AuthGuard],
+        loadComponent: () =>
+          import("./app/features/housing-unit/components/housing-unit-details/housing-unit-details.component").then(
+            (m) => m.HousingUnitDetailsComponent,
+          ),
+      },
+      {
+        path: "units/:id/edit",
+        canActivate: [AuthGuard],
+        loadComponent: () =>
+          import("./app/features/housing-unit/components/housing-unit-form/housing-unit-form.component").then(
+            (m) => m.HousingUnitFormComponent,
+          ),
+      },
+      // ─── Leases (UC010) ────────────────────────────────────────────────────
+      {
+        path: "housing-units/:unitId/leases/new",
+        canActivate: [AuthGuard],
+        loadComponent: () =>
+          import("./app/features/features/lease/lease-form/lease-form.component").then(
+            (m) => m.LeaseFormComponent,
+          ),
+      },
+      {
+        path: "leases/alerts",
+        canActivate: [AuthGuard],
+        loadComponent: () =>
+          import("./app/features/features/lease/alerts/alerts.component").then(
+            (m) => m.AlertsComponent,
+          ),
+      },
+      {
+        path: "leases/:id/edit",
+        canActivate: [AuthGuard],
+        loadComponent: () =>
+          import("./app/features/features/lease/lease-form/lease-form.component").then(
+            (m) => m.LeaseFormComponent,
+          ),
+      },
+      {
+        path: "leases/:id",
+        canActivate: [AuthGuard],
+        loadComponent: () =>
+          import("./app/features/features/lease/lease-details/lease-details.component").then(
+            (m) => m.LeaseDetailsComponent,
+          ),
+      },
+      // ─── Users ─────────────────────────────────────────────────────────────
       {
         path: "users",
         canActivate: [AuthGuard],
@@ -90,27 +183,7 @@ bootstrapApplication(AppComponent, {
             (m) => m.UserFormComponent,
           ),
       },
-      {
-        path: "units/new",
-        loadComponent: () =>
-          import("./app/features/housing-unit/components/housing-unit-form/housing-unit-form.component").then(
-            (m) => m.HousingUnitFormComponent,
-          ),
-      },
-      {
-        path: "units/:id",
-        loadComponent: () =>
-          import("./app/features/housing-unit/components/housing-unit-details/housing-unit-details.component").then(
-            (m) => m.HousingUnitDetailsComponent,
-          ),
-      },
-      {
-        path: "units/:id/edit",
-        loadComponent: () =>
-          import("./app/features/housing-unit/components/housing-unit-form/housing-unit-form.component").then(
-            (m) => m.HousingUnitFormComponent,
-          ),
-      },
+      // ─── Fallback ──────────────────────────────────────────────────────────
       {
         path: "",
         redirectTo: "/buildings",

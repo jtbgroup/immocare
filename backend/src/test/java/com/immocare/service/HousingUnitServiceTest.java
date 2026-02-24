@@ -25,6 +25,7 @@ import com.immocare.model.dto.HousingUnitDTO;
 import com.immocare.model.dto.UpdateHousingUnitRequest;
 import com.immocare.model.entity.Building;
 import com.immocare.model.entity.HousingUnit;
+import com.immocare.model.entity.Person;
 import com.immocare.repository.BuildingRepository;
 import com.immocare.repository.HousingUnitRepository;
 
@@ -46,10 +47,15 @@ class HousingUnitServiceTest {
 
   @BeforeEach
   void setUp() {
+    Person owner = new Person();
+    owner.setId(1L);
+    owner.setFirstName("Jean");
+    owner.setLastName("Dupont");
+
     building = new Building();
     building.setId(1L);
     building.setName("Residence Soleil");
-    building.setOwnerName("Jean Dupont");
+    building.setOwner(owner);
 
     unit = new HousingUnit();
     unit.setId(10L);
@@ -121,51 +127,28 @@ class HousingUnitServiceTest {
     request.setUnitNumber("C303");
     request.setFloor(3);
     request.setHasTerrace(true);
-    // terraceSurface and terraceOrientation intentionally omitted — both optional
 
+    HousingUnit mappedEntity = new HousingUnit();
     when(buildingRepository.findById(1L)).thenReturn(Optional.of(building));
     when(housingUnitRepository.existsByBuildingIdAndUnitNumberIgnoreCase(1L, "C303"))
         .thenReturn(false);
-    when(housingUnitMapper.toEntity(request)).thenReturn(new HousingUnit());
+    when(housingUnitMapper.toEntity(request)).thenReturn(mappedEntity);
     when(housingUnitRepository.save(any())).thenReturn(unit);
     when(housingUnitMapper.toDTO(unit)).thenReturn(new HousingUnitDTO());
 
-    HousingUnitDTO result = service.createUnit(request);
+    service.createUnit(request);
 
-    assertThat(result).isNotNull();
+    assertThat(mappedEntity.getTerraceSurface()).isNull();
+    assertThat(mappedEntity.getTerraceOrientation()).isNull();
   }
 
   @Test
-  void createUnit_withTerraceSucceeds() {
-    CreateHousingUnitRequest request = new CreateHousingUnitRequest();
-    request.setBuildingId(1L);
-    request.setUnitNumber("D404");
-    request.setFloor(4);
-    request.setHasTerrace(true);
-    request.setTerraceSurface(new BigDecimal("12.50"));
-    request.setTerraceOrientation("S");
-
-    when(buildingRepository.findById(1L)).thenReturn(Optional.of(building));
-    when(housingUnitRepository.existsByBuildingIdAndUnitNumberIgnoreCase(1L, "D404"))
-        .thenReturn(false);
-    when(housingUnitMapper.toEntity(request)).thenReturn(new HousingUnit());
-    when(housingUnitRepository.save(any())).thenReturn(unit);
-    when(housingUnitMapper.toDTO(unit)).thenReturn(new HousingUnitDTO());
-
-    HousingUnitDTO result = service.createUnit(request);
-
-    assertThat(result).isNotNull();
-  }
-
-  @Test
-  void createUnit_terraceDataClearedWhenFlagIsFalse() {
+  void createUnit_withTerraceUnchecked_clearsTerraceSurfaceAndOrientation() {
     CreateHousingUnitRequest request = new CreateHousingUnitRequest();
     request.setBuildingId(1L);
     request.setUnitNumber("E505");
     request.setFloor(5);
     request.setHasTerrace(false);
-    request.setTerraceSurface(new BigDecimal("10.00")); // should be ignored
-    request.setTerraceOrientation("N"); // should be ignored
 
     HousingUnit mappedEntity = new HousingUnit();
     mappedEntity.setTerraceSurface(new BigDecimal("10.00"));

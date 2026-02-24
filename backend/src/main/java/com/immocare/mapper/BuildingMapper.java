@@ -1,52 +1,45 @@
 package com.immocare.mapper;
 
-import com.immocare.model.dto.BuildingDTO;
-import com.immocare.model.dto.CreateBuildingRequest;
-import com.immocare.model.dto.UpdateBuildingRequest;
-import com.immocare.model.entity.Building;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.MappingTarget;
 import org.mapstruct.NullValuePropertyMappingStrategy;
 
+import com.immocare.model.dto.BuildingDTO;
+import com.immocare.model.dto.CreateBuildingRequest;
+import com.immocare.model.dto.UpdateBuildingRequest;
+import com.immocare.model.entity.Building;
+
 /**
  * MapStruct mapper for Building entity conversions.
  * Handles mapping between entities and DTOs.
  */
-@Mapper(
-    componentModel = "spring",
-    nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE
-)
+@Mapper(componentModel = "spring", nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE)
 public interface BuildingMapper {
 
   /**
    * Convert Building entity to BuildingDTO.
-   * 
-   * @param building the entity
-   * @return the DTO
+   * ownerName is derived from the owner Person (firstName + lastName).
    */
+  @Mapping(target = "ownerName", expression = "java(building.getOwner() == null ? null : (building.getOwner().getFirstName() + \" \" + building.getOwner().getLastName()).trim())")
   @Mapping(target = "createdByUsername", source = "createdBy.username")
   @Mapping(target = "unitCount", expression = "java(0L)")
   BuildingDTO toDTO(Building building);
 
   /**
    * Convert Building entity to BuildingDTO with unit count.
-   * 
-   * @param building the entity
-   * @param unitCount the number of housing units
-   * @return the DTO
    */
+  @Mapping(target = "ownerName", expression = "java(building.getOwner() == null ? null : (building.getOwner().getFirstName() + \" \" + building.getOwner().getLastName()).trim())")
   @Mapping(target = "createdByUsername", source = "building.createdBy.username")
   @Mapping(target = "unitCount", source = "unitCount")
   BuildingDTO toDTOWithUnitCount(Building building, Long unitCount);
 
   /**
    * Convert CreateBuildingRequest to Building entity.
-   * 
-   * @param request the request DTO
-   * @return the entity
+   * owner is set manually in the service from ownerId.
    */
   @Mapping(target = "id", ignore = true)
+  @Mapping(target = "owner", ignore = true)
   @Mapping(target = "createdBy", ignore = true)
   @Mapping(target = "createdAt", ignore = true)
   @Mapping(target = "updatedAt", ignore = true)
@@ -54,11 +47,10 @@ public interface BuildingMapper {
 
   /**
    * Update existing Building entity from UpdateBuildingRequest.
-   * 
-   * @param request the request DTO
-   * @param building the entity to update
+   * owner is set manually in the service from ownerId.
    */
   @Mapping(target = "id", ignore = true)
+  @Mapping(target = "owner", ignore = true)
   @Mapping(target = "createdBy", ignore = true)
   @Mapping(target = "createdAt", ignore = true)
   @Mapping(target = "updatedAt", ignore = true)

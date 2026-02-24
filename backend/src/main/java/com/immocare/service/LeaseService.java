@@ -1,18 +1,45 @@
 package com.immocare.service;
 
-import com.immocare.exception.*;
-import com.immocare.model.dto.*;
-import com.immocare.model.entity.*;
-import com.immocare.model.enums.*;
-import com.immocare.repository.*;
+import java.math.BigDecimal;
+import java.time.LocalDate;
+import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
+
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.math.BigDecimal;
-import java.math.RoundingMode;
-import java.time.LocalDate;
-import java.util.*;
-import java.util.stream.Collectors;
+import com.immocare.exception.LeaseNotEditableException;
+import com.immocare.exception.LeaseNotFoundException;
+import com.immocare.exception.LeaseOverlapException;
+import com.immocare.exception.LeaseStatusTransitionException;
+import com.immocare.model.dto.AddTenantRequest;
+import com.immocare.model.dto.ChangeLeaseStatusRequest;
+import com.immocare.model.dto.CreateLeaseRequest;
+import com.immocare.model.dto.LeaseAlertDTO;
+import com.immocare.model.dto.LeaseDTO;
+import com.immocare.model.dto.LeaseIndexationDTO;
+import com.immocare.model.dto.LeaseSummaryDTO;
+import com.immocare.model.dto.LeaseTenantDTO;
+import com.immocare.model.dto.RecordIndexationRequest;
+import com.immocare.model.dto.UpdateLeaseRequest;
+import com.immocare.model.entity.HousingUnit;
+import com.immocare.model.entity.Lease;
+import com.immocare.model.entity.LeaseIndexationHistory;
+import com.immocare.model.entity.LeaseTenant;
+import com.immocare.model.entity.Person;
+import com.immocare.model.enums.ChargesType;
+import com.immocare.model.enums.DepositType;
+import com.immocare.model.enums.LeaseStatus;
+import com.immocare.model.enums.LeaseType;
+import com.immocare.model.enums.TenantRole;
+import com.immocare.repository.HousingUnitRepository;
+import com.immocare.repository.LeaseIndexationRepository;
+import com.immocare.repository.LeaseRepository;
+import com.immocare.repository.LeaseTenantRepository;
+import com.immocare.repository.PersonRepository;
 
 @Service
 @Transactional(readOnly = true)
@@ -20,14 +47,13 @@ public class LeaseService {
 
     // Default notice periods by lease type (months)
     private static final Map<String, Integer> DEFAULT_NOTICE = Map.of(
-        "SHORT_TERM",         1,
-        "MAIN_RESIDENCE_3Y",  3,
-        "MAIN_RESIDENCE_6Y",  3,
-        "MAIN_RESIDENCE_9Y",  3,
-        "STUDENT",            1,
-        "GLIDING",            3,
-        "COMMERCIAL",         6
-    );
+            "SHORT_TERM", 1,
+            "MAIN_RESIDENCE_3Y", 3,
+            "MAIN_RESIDENCE_6Y", 3,
+            "MAIN_RESIDENCE_9Y", 3,
+            "STUDENT", 1,
+            "GLIDING", 3,
+            "COMMERCIAL", 6);
 
     private final LeaseRepository leaseRepository;
     private final LeaseTenantRepository leaseTenantRepository;
@@ -36,10 +62,10 @@ public class LeaseService {
     private final PersonRepository personRepository;
 
     public LeaseService(LeaseRepository leaseRepository,
-                        LeaseTenantRepository leaseTenantRepository,
-                        LeaseIndexationRepository indexationRepository,
-                        HousingUnitRepository housingUnitRepository,
-                        PersonRepository personRepository) {
+            LeaseTenantRepository leaseTenantRepository,
+            LeaseIndexationRepository indexationRepository,
+            HousingUnitRepository housingUnitRepository,
+            PersonRepository personRepository) {
         this.leaseRepository = leaseRepository;
         this.leaseTenantRepository = leaseTenantRepository;
         this.indexationRepository = indexationRepository;
@@ -128,11 +154,12 @@ public class LeaseService {
         }
 
         boolean valid = switch (from) {
-            case DRAFT    -> to == LeaseStatus.ACTIVE || to == LeaseStatus.CANCELLED;
-            case ACTIVE   -> to == LeaseStatus.FINISHED || to == LeaseStatus.CANCELLED;
-            default       -> false;
+            case DRAFT -> to == LeaseStatus.ACTIVE || to == LeaseStatus.CANCELLED;
+            case ACTIVE -> to == LeaseStatus.FINISHED || to == LeaseStatus.CANCELLED;
+            default -> false;
         };
-        if (!valid) throw new LeaseStatusTransitionException(from.name(), to.name());
+        if (!valid)
+            throw new LeaseStatusTransitionException(from.name(), to.name());
 
         // Before activating: re-check overlap (excluding self)
         if (to == LeaseStatus.ACTIVE) {
@@ -156,7 +183,8 @@ public class LeaseService {
     @Transactional
     public LeaseDTO addTenant(Long leaseId, AddTenantRequest req) {
         Lease lease = findLease(leaseId);
-        if (!lease.isEditable()) throw new LeaseNotEditableException(leaseId, lease.getStatus().name());
+        if (!lease.isEditable())
+            throw new LeaseNotEditableException(leaseId, lease.getStatus().name());
 
         if (leaseTenantRepository.existsByLeaseIdAndPersonId(leaseId, req.getPersonId())) {
             throw new IllegalArgumentException("Person " + req.getPersonId() + " is already a tenant on this lease.");
@@ -173,12 +201,14 @@ public class LeaseService {
     @Transactional
     public LeaseDTO removeTenant(Long leaseId, Long personId) {
         Lease lease = findLease(leaseId);
-        if (!lease.isEditable()) throw new LeaseNotEditableException(leaseId, lease.getStatus().name());
+        if (!lease.isEditable())
+            throw new LeaseNotEditableException(leaseId, lease.getStatus().name());
 
         LeaseTenant target = lease.getTenants().stream()
                 .filter(t -> t.getPerson().getId().equals(personId))
                 .findFirst()
-                .orElseThrow(() -> new IllegalArgumentException("Person " + personId + " is not a tenant on lease " + leaseId));
+                .orElseThrow(() -> new IllegalArgumentException(
+                        "Person " + personId + " is not a tenant on lease " + leaseId));
 
         // Prevent removing last PRIMARY
         if (target.getRole() == TenantRole.PRIMARY) {
@@ -272,7 +302,7 @@ public class LeaseService {
 
     private void validatePrimaryTenant(List<AddTenantRequest> tenants) {
         if (tenants == null || tenants.isEmpty() ||
-            tenants.stream().noneMatch(t -> "PRIMARY".equals(t.getRole()))) {
+                tenants.stream().noneMatch(t -> "PRIMARY".equals(t.getRole()))) {
             throw new IllegalArgumentException("At least one PRIMARY tenant is required.");
         }
     }
@@ -288,7 +318,8 @@ public class LeaseService {
         lease.setIndexationAnniversaryMonth(req.getIndexationAnniversaryMonth());
         lease.setMonthlyRent(req.getMonthlyRent());
         lease.setMonthlyCharges(req.getMonthlyCharges() != null ? req.getMonthlyCharges() : BigDecimal.ZERO);
-        lease.setChargesType(req.getChargesType() != null ? ChargesType.valueOf(req.getChargesType()) : ChargesType.FORFAIT);
+        lease.setChargesType(
+                req.getChargesType() != null ? ChargesType.valueOf(req.getChargesType()) : ChargesType.FORFAIT);
         lease.setChargesDescription(req.getChargesDescription());
         lease.setBaseIndexValue(req.getBaseIndexValue());
         lease.setBaseIndexMonth(req.getBaseIndexMonth());
@@ -313,7 +344,8 @@ public class LeaseService {
         lease.setIndexationAnniversaryMonth(req.getIndexationAnniversaryMonth());
         lease.setMonthlyRent(req.getMonthlyRent());
         lease.setMonthlyCharges(req.getMonthlyCharges() != null ? req.getMonthlyCharges() : BigDecimal.ZERO);
-        lease.setChargesType(req.getChargesType() != null ? ChargesType.valueOf(req.getChargesType()) : ChargesType.FORFAIT);
+        lease.setChargesType(
+                req.getChargesType() != null ? ChargesType.valueOf(req.getChargesType()) : ChargesType.FORFAIT);
         lease.setChargesDescription(req.getChargesDescription());
         lease.setBaseIndexValue(req.getBaseIndexValue());
         lease.setBaseIndexMonth(req.getBaseIndexMonth());
