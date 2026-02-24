@@ -6,6 +6,7 @@ import jakarta.validation.constraints.Size;
 /**
  * Request DTO for creating a new building.
  * Contains validation rules matching the entity constraints.
+ * ownerId references a Person entity (optional).
  */
 public record CreateBuildingRequest(
     @NotBlank(message = "Building name is required")
@@ -28,7 +29,6 @@ public record CreateBuildingRequest(
     @Size(max = 100, message = "Country must be 100 characters or less")
     String country,
 
-    @Size(max = 200, message = "Owner name must be 200 characters or less")
-    String ownerName
+    Long ownerId
 ) {
 }

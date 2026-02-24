@@ -20,7 +20,9 @@ public interface BuildingMapper {
   /**
    * Convert Building entity to BuildingDTO.
    * ownerName is derived from the owner Person (firstName + lastName).
+   * ownerId is mapped from owner.id.
    */
+  @Mapping(target = "ownerId", source = "owner.id")
   @Mapping(target = "ownerName", expression = "java(building.getOwner() == null ? null : (building.getOwner().getFirstName() + \" \" + building.getOwner().getLastName()).trim())")
   @Mapping(target = "createdByUsername", source = "createdBy.username")
   @Mapping(target = "unitCount", expression = "java(0L)")
@@ -29,6 +31,7 @@ public interface BuildingMapper {
   /**
    * Convert Building entity to BuildingDTO with unit count.
    */
+  @Mapping(target = "ownerId", source = "building.owner.id")
   @Mapping(target = "ownerName", expression = "java(building.getOwner() == null ? null : (building.getOwner().getFirstName() + \" \" + building.getOwner().getLastName()).trim())")
   @Mapping(target = "createdByUsername", source = "building.createdBy.username")
   @Mapping(target = "unitCount", source = "unitCount")

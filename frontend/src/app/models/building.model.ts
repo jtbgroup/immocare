@@ -9,6 +9,7 @@ export interface Building {
   postalCode: string;
   city: string;
   country: string;
+  ownerId?: number;
   ownerName?: string;
   createdByUsername?: string;
   createdAt?: string;
@@ -25,7 +26,7 @@ export interface CreateBuildingRequest {
   postalCode: string;
   city: string;
   country: string;
-  ownerName?: string;
+  ownerId?: number | null;
 }
 
 /**
@@ -37,7 +38,7 @@ export interface UpdateBuildingRequest {
   postalCode: string;
   city: string;
   country: string;
-  ownerName?: string;
+  ownerId?: number | null;
 }
 
 /**

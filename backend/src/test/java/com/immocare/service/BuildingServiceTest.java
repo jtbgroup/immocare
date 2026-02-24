@@ -47,7 +47,7 @@ class BuildingServiceTest {
         "1000",
         "Brussels",
         "Belgium",
-        "Jean Dupont");
+        0l);
 
     Building building = new Building();
     building.setName("Résidence Soleil");
@@ -58,8 +58,8 @@ class BuildingServiceTest {
 
     BuildingDTO expectedDTO = new BuildingDTO(
         1L, "Résidence Soleil", "123 Rue de la Loi",
-        "1000", "Brussels", "Belgium", "Jean Dupont",
-        null, null, null, 0L);
+        "1000", "Brussels", "Belgium", null,
+        null, null, null, null, 0L);
 
     when(buildingMapper.toEntity(request)).thenReturn(building);
     when(buildingRepository.save(building)).thenReturn(savedBuilding);
@@ -85,7 +85,7 @@ class BuildingServiceTest {
     BuildingDTO expectedDTO = new BuildingDTO(
         buildingId, "Test Building", "123 Street",
         "1000", "Brussels", "Belgium", null,
-        null, null, null, 0L);
+        null, null, null, null, 0L);
 
     when(buildingRepository.findById(buildingId)).thenReturn(Optional.of(building));
     when(buildingMapper.toDTO(building)).thenReturn(expectedDTO);
@@ -121,7 +121,7 @@ class BuildingServiceTest {
         "1050",
         "Brussels",
         "Belgium",
-        "Marie Martin");
+        null);
 
     Building existingBuilding = new Building();
     existingBuilding.setId(buildingId);
@@ -133,8 +133,8 @@ class BuildingServiceTest {
 
     BuildingDTO expectedDTO = new BuildingDTO(
         buildingId, "Updated Building", "456 Avenue Louise",
-        "1050", "Brussels", "Belgium", "Marie Martin",
-        null, null, null, 0L);
+        "1050", "Brussels", "Belgium", null,
+        null, null, null, null, 0L);
 
     when(buildingRepository.findById(buildingId)).thenReturn(Optional.of(existingBuilding));
     when(buildingRepository.save(any(Building.class))).thenReturn(updatedBuilding);

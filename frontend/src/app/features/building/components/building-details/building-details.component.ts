@@ -1,6 +1,6 @@
 import { CommonModule } from "@angular/common";
 import { Component, OnDestroy, OnInit } from "@angular/core";
-import { ActivatedRoute, Router } from "@angular/router";
+import { ActivatedRoute, Router, RouterModule } from "@angular/router";
 import { Subject } from "rxjs";
 import { takeUntil } from "rxjs/operators";
 import { BuildingService } from "../../../../core/services/building.service";
@@ -11,7 +11,7 @@ import { HousingUnitListComponent } from "../../../housing-unit/components/housi
 @Component({
   selector: "app-building-details",
   standalone: true,
-  imports: [CommonModule, HousingUnitListComponent, MeterSectionComponent],
+  imports: [CommonModule, RouterModule, HousingUnitListComponent, MeterSectionComponent],
   templateUrl: "./building-details.component.html",
   styleUrls: ["./building-details.component.scss"],
 })
@@ -67,6 +67,10 @@ export class BuildingDetailsComponent implements OnInit, OnDestroy {
     }
   }
 
+  goBack(): void {
+    this.router.navigate(["/buildings"]);
+  }
+
   confirmDelete(): void {
     this.showDeleteConfirm = true;
     this.deleteError = null;
@@ -97,13 +101,5 @@ export class BuildingDetailsComponent implements OnInit, OnDestroy {
           }
         },
       });
-  }
-
-  goBack(): void {
-    this.router.navigate(["/buildings"]);
-  }
-
-  formatDate(date: string | undefined): string {
-    return date ? new Date(date).toLocaleDateString() : "N/A";
   }
 }

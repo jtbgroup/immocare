@@ -63,7 +63,7 @@ import { LeaseAlert } from "../../../../models/lease.model";
                 <td class="fw-semibold">
                   {{ alert.deadline | date: "dd/MM/yyyy" }}
                 </td>
-                <td>{{ alert.tenantNames?.join(", ") || "—" }}</td>
+                <td>{{ alert.tenantNames.join(", ") || "—" }}</td>
                 <td>
                   <a
                     [routerLink]="['/leases', alert.leaseId]"

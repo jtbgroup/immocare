@@ -1,126 +1,106 @@
-<div class="building-details-container">
-  <!-- Loading State -->
-  <div *ngIf="loading" class="loading">Loading building details...</div>
+<div class="container py-4" style="max-width: 1100px;">
 
-  <!-- Error State -->
-  <div *ngIf="error && !loading" class="error-container">
-    <p class="error">{{ error }}</p>
-    <button class="btn btn-primary" (click)="goBack()">
-      Back to Buildings
-    </button>
+  <!-- Loading -->
+  <div *ngIf="loading" class="text-center py-5">
+    <div class="spinner-border text-primary"></div>
   </div>
 
-  <!-- Building Details -->
-  <div *ngIf="building && !loading" class="details-content">
-    <div class="header">
-      <h1>{{ building.name }}</h1>
-      <div class="actions">
-        <button class="btn btn-secondary" (click)="goBack()">Back</button>
-        <button class="btn btn-primary" (click)="editBuilding()">Edit</button>
-        <button class="btn btn-danger" (click)="confirmDelete()">Delete</button>
+  <!-- Error -->
+  <div *ngIf="error && !loading" class="text-center py-5">
+    <p class="text-danger">{{ error }}</p>
+    <button class="btn btn-primary" (click)="goBack()">Back to Buildings</button>
+  </div>
+
+  <!-- Content -->
+  <ng-container *ngIf="building && !loading">
+
+    <!-- Breadcrumb -->
+    <nav aria-label="breadcrumb" class="mb-3">
+      <ol class="breadcrumb">
+        <li class="breadcrumb-item"><a routerLink="/buildings">Buildings</a></li>
+        <li class="breadcrumb-item active">{{ building.name }}</li>
+      </ol>
+    </nav>
+
+    <!-- Header -->
+    <div class="d-flex justify-content-between align-items-center mb-4">
+      <h1 class="h3 mb-0 fw-bold">{{ building.name }}</h1>
+      <div class="d-flex gap-2">
+        <button class="btn btn-secondary btn-sm" (click)="goBack()">Back</button>
+        <button class="btn btn-primary btn-sm" (click)="editBuilding()">Edit</button>
+        <button class="btn btn-danger btn-sm" (click)="confirmDelete()">Delete</button>
       </div>
     </div>
 
-    <!-- Delete Error -->
-    <div *ngIf="deleteError" class="alert alert-error">
-      {{ deleteError }}
-    </div>
+    <!-- Delete error -->
+    <div *ngIf="deleteError" class="alert alert-danger mb-3">{{ deleteError }}</div>
 
     <!-- Building Information -->
-    <div class="info-card">
-      <h2>Building Information</h2>
+    <div class="card shadow-sm mb-3">
+      <div class="card-header fw-semibold">Building Information</div>
+      <div class="card-body">
+        <dl class="row mb-0">
+          <dt class="col-sm-4 text-muted">Name</dt>
+          <dd class="col-sm-8">{{ building.name }}</dd>
 
-      <div class="info-grid">
-        <div class="info-item">
-          <label>Building Name</label>
-          <p>{{ building.name }}</p>
-        </div>
+          <dt class="col-sm-4 text-muted">Street Address</dt>
+          <dd class="col-sm-8">{{ building.streetAddress }}</dd>
 
-        <div class="info-item">
-          <label>Street Address</label>
-          <p>{{ building.streetAddress }}</p>
-        </div>
+          <dt class="col-sm-4 text-muted">Postal Code</dt>
+          <dd class="col-sm-8">{{ building.postalCode }}</dd>
 
-        <div class="info-item">
-          <label>Postal Code</label>
-          <p>{{ building.postalCode }}</p>
-        </div>
+          <dt class="col-sm-4 text-muted">City</dt>
+          <dd class="col-sm-8">{{ building.city }}</dd>
 
-        <div class="info-item">
-          <label>City</label>
-          <p>{{ building.city }}</p>
-        </div>
+          <dt class="col-sm-4 text-muted">Country</dt>
+          <dd class="col-sm-8">{{ building.country }}</dd>
 
-        <div class="info-item">
-          <label>Country</label>
-          <p>{{ building.country }}</p>
-        </div>
+          <dt class="col-sm-4 text-muted">Owner</dt>
+          <dd class="col-sm-8">
+            <a *ngIf="building.ownerId" [routerLink]="['/persons', building.ownerId]" class="text-decoration-none">
+              {{ building.ownerName }}
+            </a>
+            <span *ngIf="!building.ownerId" class="text-muted fst-italic">Not specified</span>
+          </dd>
 
-        <div class="info-item">
-          <label>Owner</label>
-          <p>{{ building.ownerName || "Not specified" }}</p>
-        </div>
-
-        <div class="info-item">
-          <label>Housing Units</label>
-          <p>{{ building.unitCount }} units</p>
-        </div>
+          <dt class="col-sm-4 text-muted">Housing Units</dt>
+          <dd class="col-sm-8">{{ building.unitCount }} unit(s)</dd>
+        </dl>
+      </div>
+      <div class="card-footer text-muted small">
+        Created by {{ building.createdByUsername || 'N/A' }}
+        · {{ building.createdAt | date:'dd/MM/yyyy HH:mm' }}
+        · Updated {{ building.updatedAt | date:'dd/MM/yyyy HH:mm' }}
       </div>
     </div>
 
-    <!-- Audit Information -->
-    <div class="info-card">
-      <h2>Audit Information</h2>
-
-      <div class="info-grid">
-        <div class="info-item">
-          <label>Created By</label>
-          <p>{{ building.createdByUsername || "N/A" }}</p>
-        </div>
-
-        <div class="info-item">
-          <label>Created At</label>
-          <p>{{ formatDate(building.createdAt) }}</p>
-        </div>
-
-        <div class="info-item">
-          <label>Last Updated</label>
-          <p>{{ formatDate(building.updatedAt) }}</p>
-        </div>
-      </div>
+    <!-- Meters section -->
+    <div class="card shadow-sm mb-3">
+      <app-meter-section [ownerType]="'BUILDING'" [ownerId]="building.id"></app-meter-section>
     </div>
 
-    <!-- Meters section — UC008 -->
-    <div class="info-card">
-      <app-meter-section
-        [ownerType]="'BUILDING'"
-        [ownerId]="building.id">
-      </app-meter-section>
-    </div>
-
-    <!-- Housing Units section — UC002 -->
-    <div class="info-card">
+    <!-- Housing Units section -->
+    <div class="card shadow-sm mb-3">
       <app-housing-unit-list [buildingId]="building.id"></app-housing-unit-list>
     </div>
 
-    <!-- Delete Confirmation Modal -->
-    <div *ngIf="showDeleteConfirm" class="modal-overlay">
-      <div class="modal-content">
-        <h3>Delete Building</h3>
-        <p>
-          Are you sure you want to delete
-          <strong>{{ building.name }}</strong>?
-        </p>
-        <p class="warning">This action cannot be undone.</p>
-        <div class="modal-actions">
-          <button class="btn btn-secondary" (click)="cancelDelete()">
-            Cancel
-          </button>
-          <button class="btn btn-danger" (click)="deleteBuilding()">
-            Delete
-          </button>
-        </div>
+  </ng-container>
+
+  <!-- Delete Confirmation Modal -->
+  <div *ngIf="showDeleteConfirm" class="modal-overlay">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">Delete Building</h5>
+      </div>
+      <div class="modal-body">
+        <p>Are you sure you want to delete <strong>{{ building?.name }}</strong>?</p>
+        <p class="text-danger small fw-semibold">This action cannot be undone.</p>
+      </div>
+      <div class="modal-footer gap-2">
+        <button class="btn btn-secondary btn-sm" (click)="cancelDelete()">Cancel</button>
+        <button class="btn btn-danger btn-sm" (click)="deleteBuilding()">Delete</button>
       </div>
     </div>
   </div>
+
 </div>

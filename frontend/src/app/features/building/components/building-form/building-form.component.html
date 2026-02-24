@@ -1,111 +1,134 @@
 <div class="building-form-container">
   <div class="header">
-    <h1>{{ isEditMode ? 'Edit Building' : 'Create Building' }}</h1>
+    <h1>{{ isEditMode ? "Edit Building" : "Create Building" }}</h1>
   </div>
 
   <!-- Error Message -->
-  <div *ngIf="error" class="alert alert-error">
-    {{ error }}
-  </div>
+  <div *ngIf="error" class="alert alert-error">{{ error }}</div>
 
   <!-- Loading State -->
-  <div *ngIf="loading && isEditMode" class="loading">
-    Loading building...
-  </div>
+  <div *ngIf="loading && isEditMode" class="loading">Loading building...</div>
 
   <!-- Form -->
-  <form [formGroup]="buildingForm" (ngSubmit)="onSubmit()" *ngIf="!loading || !isEditMode">
+  <form
+    [formGroup]="buildingForm"
+    (ngSubmit)="onSubmit()"
+    *ngIf="!loading || !isEditMode"
+  >
     <div class="form-group">
-      <label for="name">
-        Building Name <span class="required">*</span>
-      </label>
+      <label for="name">Building Name <span class="required">*</span></label>
       <input
         type="text"
         id="name"
         formControlName="name"
-        [class.error]="hasError('name', 'required') || hasError('name', 'maxlength')"
+        [class.error]="
+          hasError('name', 'required') || hasError('name', 'maxlength')
+        "
       />
-      <div *ngIf="hasError('name', 'required') || hasError('name', 'maxlength')" class="error-message">
-        {{ getErrorMessage('name') }}
+      <div
+        *ngIf="hasError('name', 'required') || hasError('name', 'maxlength')"
+        class="error-message"
+      >
+        {{ getErrorMessage("name") }}
       </div>
     </div>
 
     <div class="form-group">
-      <label for="streetAddress">
-        Street Address <span class="required">*</span>
-      </label>
+      <label for="streetAddress"
+        >Street Address <span class="required">*</span></label
+      >
       <input
         type="text"
         id="streetAddress"
         formControlName="streetAddress"
-        [class.error]="hasError('streetAddress', 'required') || hasError('streetAddress', 'maxlength')"
+        [class.error]="
+          hasError('streetAddress', 'required') ||
+          hasError('streetAddress', 'maxlength')
+        "
       />
-      <div *ngIf="hasError('streetAddress', 'required') || hasError('streetAddress', 'maxlength')" class="error-message">
-        {{ getErrorMessage('streetAddress') }}
+      <div
+        *ngIf="
+          hasError('streetAddress', 'required') ||
+          hasError('streetAddress', 'maxlength')
+        "
+        class="error-message"
+      >
+        {{ getErrorMessage("streetAddress") }}
       </div>
     </div>
 
     <div class="form-row">
       <div class="form-group">
-        <label for="postalCode">
-          Postal Code <span class="required">*</span>
-        </label>
+        <label for="postalCode"
+          >Postal Code <span class="required">*</span></label
+        >
         <input
           type="text"
           id="postalCode"
           formControlName="postalCode"
-          [class.error]="hasError('postalCode', 'required') || hasError('postalCode', 'maxlength')"
+          [class.error]="
+            hasError('postalCode', 'required') ||
+            hasError('postalCode', 'maxlength')
+          "
         />
-        <div *ngIf="hasError('postalCode', 'required') || hasError('postalCode', 'maxlength')" class="error-message">
-          {{ getErrorMessage('postalCode') }}
+        <div
+          *ngIf="
+            hasError('postalCode', 'required') ||
+            hasError('postalCode', 'maxlength')
+          "
+          class="error-message"
+        >
+          {{ getErrorMessage("postalCode") }}
         </div>
       </div>
 
       <div class="form-group">
-        <label for="city">
-          City <span class="required">*</span>
-        </label>
+        <label for="city">City <span class="required">*</span></label>
         <input
           type="text"
           id="city"
           formControlName="city"
-          [class.error]="hasError('city', 'required') || hasError('city', 'maxlength')"
+          [class.error]="
+            hasError('city', 'required') || hasError('city', 'maxlength')
+          "
         />
-        <div *ngIf="hasError('city', 'required') || hasError('city', 'maxlength')" class="error-message">
-          {{ getErrorMessage('city') }}
+        <div
+          *ngIf="hasError('city', 'required') || hasError('city', 'maxlength')"
+          class="error-message"
+        >
+          {{ getErrorMessage("city") }}
         </div>
       </div>
     </div>
 
     <div class="form-group">
-      <label for="country">
-        Country <span class="required">*</span>
-      </label>
+      <label for="country">Country <span class="required">*</span></label>
       <input
         type="text"
         id="country"
         formControlName="country"
-        [class.error]="hasError('country', 'required') || hasError('country', 'maxlength')"
+        [class.error]="
+          hasError('country', 'required') || hasError('country', 'maxlength')
+        "
       />
-      <div *ngIf="hasError('country', 'required') || hasError('country', 'maxlength')" class="error-message">
-        {{ getErrorMessage('country') }}
+      <div
+        *ngIf="
+          hasError('country', 'required') || hasError('country', 'maxlength')
+        "
+        class="error-message"
+      >
+        {{ getErrorMessage("country") }}
       </div>
     </div>
 
+    <!-- Owner — PersonPicker via ControlValueAccessor (formControlName) -->
     <div class="form-group">
-      <label for="ownerName">
-        Owner Name
-      </label>
-      <input
-        type="text"
-        id="ownerName"
-        formControlName="ownerName"
-        [class.error]="hasError('ownerName', 'maxlength')"
-      />
-      <div *ngIf="hasError('ownerName', 'maxlength')" class="error-message">
-        {{ getErrorMessage('ownerName') }}
-      </div>
-      <small class="help-text">Optional</small>
+      <app-person-picker
+        label="Owner"
+        [required]="false"
+        formControlName="owner"
+      ></app-person-picker>
+      <small class="help-text">Optional — search by name or national ID</small>
     </div>
 
     <div class="form-actions">
@@ -113,7 +136,7 @@
         Cancel
       </button>
       <button type="submit" class="btn btn-primary" [disabled]="loading">
-        {{ loading ? 'Saving...' : 'Save' }}
+        {{ loading ? "Saving..." : "Save" }}
       </button>
     </div>
   </form>

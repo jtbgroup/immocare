@@ -13,6 +13,7 @@ public record BuildingDTO(
     String postalCode,
     String city,
     String country,
+    Long ownerId,
     String ownerName,
     String createdByUsername,
     LocalDateTime createdAt,
