@@ -1,11 +1,15 @@
 package com.immocare.repository;
 
-import com.immocare.model.entity.HousingUnit;
+/
+
 import java.util.List;
+
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
+
+import com.immocare.model.entity.HousingUnit;
 
 /**
  * Repository for HousingUnit entity.
@@ -51,4 +55,22 @@ public interface HousingUnitRepository extends JpaRepository<HousingUnit, Long> 
    */
   @Query("SELECT 0L")
   Long countRoomsByUnitId(@Param("unitId") Long unitId);
+
+
+
+    // Existing methods (keep as-is) ...
+
+    // ---- NEW: owner_id queries for UC009 ----
+
+    /** True if any housing unit references this person as direct owner. */
+    boolean existsByOwnerId(Long ownerId);
+
+    /** List all housing units owned by a given person (direct, not inherited). */
+    List<HousingUnit> findByOwnerId(Long ownerId);
+
+    /** Find all units for a given building. */
+    List<HousingUnit> findByBuildingId(Long buildingId);
+
+    /** True if a building has any housing units (used for delete check). */
+    boolean existsByBuildingId(Long buildingId);
 }

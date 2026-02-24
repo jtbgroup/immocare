@@ -1,0 +1,68 @@
+<!-- shared/components/person-picker/person-picker.component.html -->
+<div class="person-picker">
+  <label class="form-label">
+    {{ label }}
+    <span *ngIf="required" class="text-danger">*</span>
+  </label>
+
+  <!-- Selected person display -->
+  <div *ngIf="selectedPerson; else searchInput" class="selected-person d-flex align-items-center gap-2">
+    <span class="badge bg-primary fs-6 fw-normal px-3 py-2">
+      {{ selectedPerson.lastName }} {{ selectedPerson.firstName }}
+      <span *ngIf="selectedPerson.city" class="text-white-50 ms-1">— {{ selectedPerson.city }}</span>
+    </span>
+    <button type="button" class="btn btn-sm btn-outline-secondary" (click)="clearSelection()" title="Clear">
+      ✕
+    </button>
+  </div>
+
+  <!-- Search input -->
+  <ng-template #searchInput>
+    <div class="position-relative">
+      <input
+        type="text"
+        class="form-control"
+        [placeholder]="'Search ' + label.toLowerCase() + '...'"
+        [formControl]="searchControl"
+        (focus)="openPicker()"
+        (blur)="closeDropdown()"
+        autocomplete="off"
+      />
+
+      <!-- Dropdown -->
+      <div *ngIf="isOpen" class="picker-dropdown card shadow-sm">
+        <!-- Loading -->
+        <div *ngIf="isLoading" class="picker-item text-muted">
+          <span class="spinner-border spinner-border-sm me-2"></span>Searching...
+        </div>
+
+        <!-- Min chars hint -->
+        <div *ngIf="showMinCharsHint && !isLoading" class="picker-item text-muted small">
+          Type at least 2 characters to search
+        </div>
+
+        <!-- Results -->
+        <ng-container *ngIf="!isLoading && !showMinCharsHint">
+          <button
+            *ngFor="let person of results"
+            type="button"
+            class="picker-item btn-link text-start w-100"
+            (mousedown)="selectPerson(person)"
+          >
+            <span class="fw-semibold">{{ person.lastName }} {{ person.firstName }}</span>
+            <span *ngIf="person.city" class="text-muted ms-1">— {{ person.city }}</span>
+            <span *ngIf="person.nationalId" class="text-muted ms-1 small">({{ person.nationalId }})</span>
+            <span *ngIf="person.isOwner" class="badge bg-primary ms-2 small">Owner</span>
+            <span *ngIf="person.isTenant" class="badge bg-success ms-1 small">Tenant</span>
+          </button>
+
+          <!-- No results -->
+          <div *ngIf="noResults" class="picker-item">
+            <span class="text-muted">No person found.</span>
+            <a routerLink="/persons/new" target="_blank" class="ms-2 small">+ Create new person</a>
+          </div>
+        </ng-container>
+      </div>
+    </div>
+  </ng-template>
+</div>

@@ -75,7 +75,8 @@ public class GlobalExceptionHandler {
 
   /**
    * Meter not found or already closed → 409 Conflict.
-   * Using 409 instead of 404 to signal a state conflict (meter exists but is closed).
+   * Using 409 instead of 404 to signal a state conflict (meter exists but is
+   * closed).
    */
   @ExceptionHandler(MeterNotFoundException.class)
   public ResponseEntity<ErrorResponse> handleMeterNotFound(MeterNotFoundException ex) {
@@ -86,7 +87,8 @@ public class GlobalExceptionHandler {
 
   /**
    * Meter business rule violation → 409 Conflict.
-   * E.g., startDate in future, endDate before startDate, newStartDate before currentStartDate.
+   * E.g., startDate in future, endDate before startDate, newStartDate before
+   * currentStartDate.
    */
   @ExceptionHandler(MeterBusinessRuleException.class)
   public ResponseEntity<ErrorResponse> handleMeterBusinessRule(MeterBusinessRuleException ex) {
@@ -97,11 +99,15 @@ public class GlobalExceptionHandler {
 
   // ─── Generic ──────────────────────────────────────────────────────────────
 
+  // --- IllegalArgumentException (nationalId duplicate) → 409 ---
   @ExceptionHandler(IllegalArgumentException.class)
-  public ResponseEntity<ErrorResponse> handleIllegalArgument(IllegalArgumentException ex) {
-    ErrorResponse error = new ErrorResponse(
-        HttpStatus.CONFLICT.value(), "Business rule violation", ex.getMessage(), LocalDateTime.now());
-    return ResponseEntity.status(HttpStatus.CONFLICT).body(error);
+  public ResponseEntity<Map<String, Object>> handleIllegalArgument(IllegalArgumentException ex) {
+    Map<String, Object> body = new HashMap<>();
+    body.put("timestamp", LocalDateTime.now());
+    body.put("status", 409);
+    body.put("error", "DUPLICATE");
+    body.put("message", ex.getMessage());
+    return ResponseEntity.status(HttpStatus.CONFLICT).body(body);
   }
 
   @ExceptionHandler(MethodArgumentNotValidException.class)
@@ -133,4 +139,30 @@ public class GlobalExceptionHandler {
 
   public record ErrorResponse(int status, String error, String message, LocalDateTime timestamp) {
   }
+
+  // --- PersonNotFoundException → 404 ---
+  @ExceptionHandler(PersonNotFoundException.class)
+  public ResponseEntity<Map<String, Object>> handlePersonNotFound(PersonNotFoundException ex) {
+    Map<String, Object> body = new HashMap<>();
+    body.put("timestamp", LocalDateTime.now());
+    body.put("status", 404);
+    body.put("error", "NOT_FOUND");
+    body.put("message", ex.getMessage());
+    return ResponseEntity.status(HttpStatus.NOT_FOUND).body(body);
+  }
+
+  // --- PersonReferencedException → 409 ---
+  @ExceptionHandler(PersonReferencedException.class)
+  public ResponseEntity<Map<String, Object>> handlePersonReferenced(PersonReferencedException ex) {
+    Map<String, Object> body = new HashMap<>();
+    body.put("timestamp", LocalDateTime.now());
+    body.put("status", 409);
+    body.put("error", "PERSON_REFERENCED");
+    body.put("message", "This person cannot be deleted because they are still referenced.");
+    body.put("ownedBuildings", ex.getOwnedBuildings());
+    body.put("ownedUnits", ex.getOwnedUnits());
+    body.put("activeLeases", ex.getActiveLeases());
+    return ResponseEntity.status(HttpStatus.CONFLICT).body(body);
+  }
+
 }

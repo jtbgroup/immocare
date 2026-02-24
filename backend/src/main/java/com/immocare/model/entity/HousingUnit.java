@@ -1,248 +1,141 @@
 package com.immocare.model.entity;
 
-import java.math.BigDecimal;
+import jakarta.persistence.*;
 import java.time.LocalDateTime;
 
-import org.hibernate.annotations.CreationTimestamp;
-import org.hibernate.annotations.UpdateTimestamp;
-
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.FetchType;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.ManyToOne;
-import jakarta.persistence.Table;
-import jakarta.persistence.UniqueConstraint;
-import jakarta.validation.constraints.DecimalMin;
-import jakarta.validation.constraints.Max;
-import jakarta.validation.constraints.Min;
-import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.NotNull;
-import jakarta.validation.constraints.Pattern;
-import jakarta.validation.constraints.Size;
-
-/**
- * Entity representing an individual housing unit (apartment) within a building.
- *
- * Business Rules:
- * - Must belong to a building
- * - Unit number must be unique within a building
- * - Floor must be between -10 and 100
- * - Terrace/garden surfaces required when has_terrace/has_garden = true
- * (enforced in service)
- * - owner_name overrides building.owner_name when set
- */
 @Entity
-@Table(name = "housing_unit", uniqueConstraints = @UniqueConstraint(name = "uq_housing_unit_number", columnNames = {
-    "building_id", "unit_number" }))
+@Table(name = "housing_unit")
 public class HousingUnit {
 
-  @Id
-  @GeneratedValue(strategy = GenerationType.IDENTITY)
-  private Long id;
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
 
-  @NotNull(message = "Building is required")
-  @ManyToOne(fetch = FetchType.LAZY)
-  @JoinColumn(name = "building_id", nullable = false)
-  private Building building;
+    @ManyToOne(fetch = FetchType.LAZY, optional = false)
+    @JoinColumn(name = "building_id", nullable = false)
+    private Building building;
 
-  @NotBlank(message = "Unit number is required")
-  @Size(max = 20, message = "Unit number must be 20 characters or less")
-  @Column(name = "unit_number", nullable = false, length = 20)
-  private String unitNumber;
+    @Column(name = "unit_number", nullable = false, length = 20)
+    private String unitNumber;
 
-  @NotNull(message = "Floor is required")
-  @Min(value = -10, message = "Floor must be between -10 and 100")
-  @Max(value = 100, message = "Floor must be between -10 and 100")
-  @Column(name = "floor", nullable = false)
-  private Integer floor;
+    @Column(nullable = false, length = 50)
+    private String type;
 
-  @Size(max = 10, message = "Landing number must be 10 characters or less")
-  @Column(name = "landing_number", length = 10)
-  private String landingNumber;
+    @Column(name = "floor_number")
+    private Integer floorNumber;
 
-  @DecimalMin(value = "0.01", message = "Total surface must be greater than 0")
-  @Column(name = "total_surface", precision = 7, scale = 2)
-  private BigDecimal totalSurface;
+    @Column(name = "surface_m2")
+    private Double surfaceM2;
 
-  @NotNull
-  @Column(name = "has_terrace", nullable = false)
-  private Boolean hasTerrace = false;
+    @Column(name = "num_rooms")
+    private Integer numRooms;
 
-  @DecimalMin(value = "0.01", message = "Terrace surface must be greater than 0")
-  @Column(name = "terrace_surface", precision = 7, scale = 2)
-  private BigDecimal terraceSurface;
+    @Column(name = "has_terrace")
+    private Boolean hasTerrace;
 
-  @Pattern(regexp = "^(N|S|E|W|NE|NW|SE|SW)$", message = "Invalid orientation")
-  @Column(name = "terrace_orientation", length = 2)
-  private String terraceOrientation;
+    @Column(name = "terrace_surface_m2")
+    private Double terraceSurfaceM2;
 
-  @NotNull
-  @Column(name = "has_garden", nullable = false)
-  private Boolean hasGarden = false;
+    @Column(name = "terrace_orientation", length = 20)
+    private String terraceOrientation;
 
-  @DecimalMin(value = "0.01", message = "Garden surface must be greater than 0")
-  @Column(name = "garden_surface", precision = 7, scale = 2)
-  private BigDecimal gardenSurface;
+    @Column(name = "has_garden")
+    private Boolean hasGarden;
 
-  @Pattern(regexp = "^(N|S|E|W|NE|NW|SE|SW)$", message = "Invalid orientation")
-  @Column(name = "garden_orientation", length = 2)
-  private String gardenOrientation;
+    @Column(name = "garden_surface_m2")
+    private Double gardenSurfaceM2;
 
-  @Size(max = 200, message = "Owner name must be 200 characters or less")
-  @Column(name = "owner_name", length = 200)
-  private String ownerName;
+    @Column(name = "has_parking")
+    private Boolean hasParking;
 
-  @ManyToOne(fetch = FetchType.LAZY)
-  @JoinColumn(name = "created_by")
-  private AppUser createdBy;
+    @Column(name = "parking_number", length = 20)
+    private String parkingNumber;
 
-  @CreationTimestamp
-  @Column(name = "created_at", nullable = false, updatable = false)
-  private LocalDateTime createdAt;
+    /** Owner now references the Person entity instead of a free-text string */
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "owner_id")
+    private Person owner;
 
-  @UpdateTimestamp
-  @Column(name = "updated_at", nullable = false)
-  private LocalDateTime updatedAt;
+    @Column(name = "created_at", nullable = false, updatable = false)
+    private LocalDateTime createdAt;
 
-  // Constructors
-  public HousingUnit() {
-  }
+    @Column(name = "updated_at", nullable = false)
+    private LocalDateTime updatedAt;
 
-  // Getters and Setters
-  public Long getId() {
-    return id;
-  }
+    @PrePersist
+    protected void onCreate() {
+        createdAt = LocalDateTime.now();
+        updatedAt = LocalDateTime.now();
+    }
 
-  public void setId(Long id) {
-    this.id = id;
-  }
+    @PreUpdate
+    protected void onUpdate() {
+        updatedAt = LocalDateTime.now();
+    }
 
-  public Building getBuilding() {
-    return building;
-  }
+    // Getters & Setters
+    public Long getId() { return id; }
+    public void setId(Long id) { this.id = id; }
 
-  public void setBuilding(Building building) {
-    this.building = building;
-  }
+    public Building getBuilding() { return building; }
+    public void setBuilding(Building building) { this.building = building; }
 
-  public String getUnitNumber() {
-    return unitNumber;
-  }
+    public String getUnitNumber() { return unitNumber; }
+    public void setUnitNumber(String unitNumber) { this.unitNumber = unitNumber; }
 
-  public void setUnitNumber(String unitNumber) {
-    this.unitNumber = unitNumber;
-  }
+    public String getType() { return type; }
+    public void setType(String type) { this.type = type; }
 
-  public Integer getFloor() {
-    return floor;
-  }
+    public Integer getFloorNumber() { return floorNumber; }
+    public void setFloorNumber(Integer floorNumber) { this.floorNumber = floorNumber; }
 
-  public void setFloor(Integer floor) {
-    this.floor = floor;
-  }
+    public Double getSurfaceM2() { return surfaceM2; }
+    public void setSurfaceM2(Double surfaceM2) { this.surfaceM2 = surfaceM2; }
 
-  public String getLandingNumber() {
-    return landingNumber;
-  }
+    public Integer getNumRooms() { return numRooms; }
+    public void setNumRooms(Integer numRooms) { this.numRooms = numRooms; }
 
-  public void setLandingNumber(String landingNumber) {
-    this.landingNumber = landingNumber;
-  }
+    public Boolean getHasTerrace() { return hasTerrace; }
+    public void setHasTerrace(Boolean hasTerrace) { this.hasTerrace = hasTerrace; }
 
-  public BigDecimal getTotalSurface() {
-    return totalSurface;
-  }
+    public Double getTerraceSurfaceM2() { return terraceSurfaceM2; }
+    public void setTerraceSurfaceM2(Double terraceSurfaceM2) { this.terraceSurfaceM2 = terraceSurfaceM2; }
 
-  public void setTotalSurface(BigDecimal totalSurface) {
-    this.totalSurface = totalSurface;
-  }
+    public String getTerraceOrientation() { return terraceOrientation; }
+    public void setTerraceOrientation(String terraceOrientation) { this.terraceOrientation = terraceOrientation; }
 
-  public Boolean getHasTerrace() {
-    return hasTerrace;
-  }
+    public Boolean getHasGarden() { return hasGarden; }
+    public void setHasGarden(Boolean hasGarden) { this.hasGarden = hasGarden; }
 
-  public void setHasTerrace(Boolean hasTerrace) {
-    this.hasTerrace = hasTerrace;
-  }
+    public Double getGardenSurfaceM2() { return gardenSurfaceM2; }
+    public void setGardenSurfaceM2(Double gardenSurfaceM2) { this.gardenSurfaceM2 = gardenSurfaceM2; }
 
-  public BigDecimal getTerraceSurface() {
-    return terraceSurface;
-  }
+    public Boolean getHasParking() { return hasParking; }
+    public void setHasParking(Boolean hasParking) { this.hasParking = hasParking; }
 
-  public void setTerraceSurface(BigDecimal terraceSurface) {
-    this.terraceSurface = terraceSurface;
-  }
+    public String getParkingNumber() { return parkingNumber; }
+    public void setParkingNumber(String parkingNumber) { this.parkingNumber = parkingNumber; }
 
-  public String getTerraceOrientation() {
-    return terraceOrientation;
-  }
+    public Person getOwner() { return owner; }
+    public void setOwner(Person owner) { this.owner = owner; }
 
-  public void setTerraceOrientation(String terraceOrientation) {
-    this.terraceOrientation = terraceOrientation;
-  }
+    public LocalDateTime getCreatedAt() { return createdAt; }
+    public void setCreatedAt(LocalDateTime createdAt) { this.createdAt = createdAt; }
 
-  public Boolean getHasGarden() {
-    return hasGarden;
-  }
+    public LocalDateTime getUpdatedAt() { return updatedAt; }
+    public void setUpdatedAt(LocalDateTime updatedAt) { this.updatedAt = updatedAt; }
 
-  public void setHasGarden(Boolean hasGarden) {
-    this.hasGarden = hasGarden;
-  }
+    /**
+     * Returns the effective owner: own owner if set, otherwise inherited from building.
+     */
+    @Transient
+    public Person getEffectiveOwner() {
+        if (owner != null) return owner;
+        return building != null ? building.getOwner() : null;
+    }
 
-  public BigDecimal getGardenSurface() {
-    return gardenSurface;
-  }
-
-  public void setGardenSurface(BigDecimal gardenSurface) {
-    this.gardenSurface = gardenSurface;
-  }
-
-  public String getGardenOrientation() {
-    return gardenOrientation;
-  }
-
-  public void setGardenOrientation(String gardenOrientation) {
-    this.gardenOrientation = gardenOrientation;
-  }
-
-  public String getOwnerName() {
-    return ownerName;
-  }
-
-  public void setOwnerName(String ownerName) {
-    this.ownerName = ownerName;
-  }
-
-  public AppUser getCreatedBy() {
-    return createdBy;
-  }
-
-  public void setCreatedBy(AppUser createdBy) {
-    this.createdBy = createdBy;
-  }
-
-  public LocalDateTime getCreatedAt() {
-    return createdAt;
-  }
-
-  public void setCreatedAt(LocalDateTime createdAt) {
-    this.createdAt = createdAt;
-  }
-
-  public LocalDateTime getUpdatedAt() {
-    return updatedAt;
-  }
-
-  public void setUpdatedAt(LocalDateTime updatedAt) {
-    this.updatedAt = updatedAt;
-  }
-
-  @Override
-  public String toString() {
-    return "HousingUnit{id=" + id + ", unitNumber='" + unitNumber + "', floor=" + floor + "}";
-  }
+    @Transient
+    public boolean isOwnerInherited() {
+        return owner == null && building != null && building.getOwner() != null;
+    }
 }

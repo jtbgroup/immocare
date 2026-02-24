@@ -1,5 +1,12 @@
 package com.immocare.service;
 
+import java.util.List;
+
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
 import com.immocare.exception.BuildingHasUnitsException;
 import com.immocare.exception.BuildingNotFoundException;
 import com.immocare.mapper.BuildingMapper;
@@ -8,11 +15,6 @@ import com.immocare.model.dto.CreateBuildingRequest;
 import com.immocare.model.dto.UpdateBuildingRequest;
 import com.immocare.model.entity.Building;
 import com.immocare.repository.BuildingRepository;
-import java.util.List;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
 /**
  * Service layer for Building management.

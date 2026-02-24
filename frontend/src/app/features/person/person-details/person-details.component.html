@@ -1,0 +1,133 @@
+<!-- features/person/person-details/person-details.component.html -->
+<div class="container py-4" style="max-width: 800px;" *ngIf="!isLoading">
+
+  <div *ngIf="errorMessage" class="alert alert-danger">{{ errorMessage }}</div>
+
+  <ng-container *ngIf="person">
+    <!-- Header -->
+    <div class="d-flex justify-content-between align-items-start mb-4">
+      <div>
+        <nav aria-label="breadcrumb">
+          <ol class="breadcrumb small">
+            <li class="breadcrumb-item"><a routerLink="/persons">Persons</a></li>
+            <li class="breadcrumb-item active">{{ person.lastName }} {{ person.firstName }}</li>
+          </ol>
+        </nav>
+        <h1 class="h3 mb-1">{{ person.lastName }} {{ person.firstName }}</h1>
+        <div class="d-flex gap-2">
+          <span *ngIf="person.isOwner" class="badge bg-primary">Owner</span>
+          <span *ngIf="person.isTenant" class="badge bg-success">Tenant</span>
+        </div>
+      </div>
+      <div class="d-flex gap-2">
+        <a [routerLink]="['/persons', person.id, 'edit']" class="btn btn-outline-secondary btn-sm">Edit</a>
+        <button class="btn btn-outline-danger btn-sm" (click)="confirmDelete()">Delete</button>
+      </div>
+    </div>
+
+    <!-- Delete error -->
+    <div *ngIf="deleteError" class="alert alert-danger">
+      <strong>{{ deleteError }}</strong>
+      <ul *ngIf="deleteErrorDetails" class="mt-2 mb-0 small">
+        <li *ngFor="let b of deleteErrorDetails.ownedBuildings">Building: {{ b }}</li>
+        <li *ngFor="let u of deleteErrorDetails.ownedUnits">Unit: {{ u }}</li>
+        <li *ngFor="let l of deleteErrorDetails.activeLeases">Lease: {{ l }}</li>
+      </ul>
+    </div>
+
+    <!-- Delete confirm -->
+    <div *ngIf="showDeleteConfirm" class="alert alert-warning d-flex align-items-center gap-3">
+      <span>Are you sure you want to delete <strong>{{ person.lastName }} {{ person.firstName }}</strong>? This cannot be undone.</span>
+      <button class="btn btn-danger btn-sm" (click)="doDelete()" [disabled]="isDeleting">
+        <span *ngIf="isDeleting" class="spinner-border spinner-border-sm me-1"></span>
+        Confirm Delete
+      </button>
+      <button class="btn btn-secondary btn-sm" (click)="cancelDelete()">Cancel</button>
+    </div>
+
+    <!-- Info card -->
+    <div class="card shadow-sm mb-4">
+      <div class="card-header fw-semibold">Personal Information</div>
+      <div class="card-body">
+        <dl class="row mb-0">
+          <dt class="col-sm-4 text-muted">Last name</dt>
+          <dd class="col-sm-8">{{ person.lastName }}</dd>
+
+          <dt class="col-sm-4 text-muted">First name</dt>
+          <dd class="col-sm-8">{{ person.firstName }}</dd>
+
+          <dt class="col-sm-4 text-muted">Date of birth</dt>
+          <dd class="col-sm-8">{{ person.birthDate | date:'dd/MM/yyyy' || '—' }}</dd>
+
+          <dt class="col-sm-4 text-muted">Place of birth</dt>
+          <dd class="col-sm-8">{{ person.birthPlace || '—' }}</dd>
+
+          <dt class="col-sm-4 text-muted">National ID</dt>
+          <dd class="col-sm-8">{{ person.nationalId || '—' }}</dd>
+
+          <dt class="col-sm-4 text-muted">GSM</dt>
+          <dd class="col-sm-8">{{ person.gsm || '—' }}</dd>
+
+          <dt class="col-sm-4 text-muted">Email</dt>
+          <dd class="col-sm-8">
+            <a *ngIf="person.email" [href]="'mailto:' + person.email">{{ person.email }}</a>
+            <span *ngIf="!person.email">—</span>
+          </dd>
+
+          <dt class="col-sm-4 text-muted">Address</dt>
+          <dd class="col-sm-8">
+            <span *ngIf="person.streetAddress || person.postalCode || person.city">
+              {{ person.streetAddress }}, {{ person.postalCode }} {{ person.city }}, {{ person.country }}
+            </span>
+            <span *ngIf="!person.streetAddress && !person.city">—</span>
+          </dd>
+        </dl>
+      </div>
+      <div class="card-footer text-muted small">
+        Created {{ person.createdAt | date:'dd/MM/yyyy HH:mm' }} ·
+        Updated {{ person.updatedAt | date:'dd/MM/yyyy HH:mm' }}
+      </div>
+    </div>
+
+    <!-- As Owner: Buildings -->
+    <div class="card shadow-sm mb-3" *ngIf="person.ownedBuildings && person.ownedBuildings.length > 0">
+      <div class="card-header fw-semibold">As Owner — Buildings</div>
+      <ul class="list-group list-group-flush">
+        <li *ngFor="let b of person.ownedBuildings" class="list-group-item">
+          <a [routerLink]="['/buildings', b.id]">{{ b.name }}</a>
+          <span class="text-muted ms-2 small">{{ b.city }}</span>
+        </li>
+      </ul>
+    </div>
+
+    <!-- As Owner: Units -->
+    <div class="card shadow-sm mb-3" *ngIf="person.ownedUnits && person.ownedUnits.length > 0">
+      <div class="card-header fw-semibold">As Owner — Housing Units</div>
+      <ul class="list-group list-group-flush">
+        <li *ngFor="let u of person.ownedUnits" class="list-group-item">
+          <a [routerLink]="['/housing-units', u.id]">Unit {{ u.unitNumber }}</a>
+          <span class="text-muted ms-2 small">{{ u.buildingName }}</span>
+        </li>
+      </ul>
+    </div>
+
+    <!-- As Tenant: Leases -->
+    <div class="card shadow-sm mb-3" *ngIf="person.leases && person.leases.length > 0">
+      <div class="card-header fw-semibold">As Tenant — Leases</div>
+      <ul class="list-group list-group-flush">
+        <li *ngFor="let l of person.leases" class="list-group-item d-flex justify-content-between align-items-center">
+          <div>
+            <a [routerLink]="['/leases', l.leaseId]">Lease #{{ l.leaseId }}</a>
+            <span class="text-muted ms-2 small">{{ l.buildingName }} — Unit {{ l.unitNumber }}</span>
+          </div>
+          <span class="badge" [ngClass]="getStatusClass(l.status)">{{ l.status }}</span>
+        </li>
+      </ul>
+    </div>
+
+  </ng-container>
+</div>
+
+<div *ngIf="isLoading" class="text-center py-5">
+  <div class="spinner-border"></div>
+</div>

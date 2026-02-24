@@ -1,0 +1,100 @@
+<!-- features/person/person-form/person-form.component.html -->
+<div class="container py-4" style="max-width: 700px;">
+  <h2 class="h4 mb-4">{{ isEditMode ? 'Edit Person' : 'Add Person' }}</h2>
+
+  <div *ngIf="isLoading" class="text-center py-5">
+    <div class="spinner-border"></div>
+  </div>
+
+  <div *ngIf="errorMessage" class="alert alert-danger">{{ errorMessage }}</div>
+
+  <form *ngIf="!isLoading" [formGroup]="form" (ngSubmit)="submit()">
+
+    <!-- Identity section -->
+    <fieldset class="mb-4">
+      <legend class="fs-6 fw-semibold text-muted border-bottom pb-2 mb-3">Identity</legend>
+
+      <div class="row g-3">
+        <div class="col-md-6">
+          <label class="form-label">Last Name <span class="text-danger">*</span></label>
+          <input type="text" class="form-control" formControlName="lastName"
+                 [class.is-invalid]="isInvalid('lastName')" />
+          <div class="invalid-feedback">Last name is required (max 100 chars).</div>
+        </div>
+        <div class="col-md-6">
+          <label class="form-label">First Name <span class="text-danger">*</span></label>
+          <input type="text" class="form-control" formControlName="firstName"
+                 [class.is-invalid]="isInvalid('firstName')" />
+          <div class="invalid-feedback">First name is required (max 100 chars).</div>
+        </div>
+        <div class="col-md-6">
+          <label class="form-label">Date of Birth</label>
+          <input type="date" class="form-control" formControlName="birthDate" />
+        </div>
+        <div class="col-md-6">
+          <label class="form-label">Place of Birth</label>
+          <input type="text" class="form-control" formControlName="birthPlace" />
+        </div>
+        <div class="col-md-6">
+          <label class="form-label">National ID</label>
+          <input type="text" class="form-control" formControlName="nationalId"
+                 [class.is-invalid]="!!nationalIdConflictId" />
+          <div *ngIf="nationalIdConflictId" class="invalid-feedback d-block">
+            This national ID already exists.
+            <a [routerLink]="['/persons', nationalIdConflictId]" target="_blank">View existing person</a>
+          </div>
+        </div>
+      </div>
+    </fieldset>
+
+    <!-- Contact section -->
+    <fieldset class="mb-4">
+      <legend class="fs-6 fw-semibold text-muted border-bottom pb-2 mb-3">Contact</legend>
+      <div class="row g-3">
+        <div class="col-md-6">
+          <label class="form-label">GSM</label>
+          <input type="text" class="form-control" formControlName="gsm" placeholder="+32 4xx xxx xxx" />
+        </div>
+        <div class="col-md-6">
+          <label class="form-label">Email</label>
+          <input type="email" class="form-control" formControlName="email"
+                 [class.is-invalid]="isInvalid('email')" />
+          <div class="invalid-feedback">Please enter a valid email address.</div>
+        </div>
+      </div>
+    </fieldset>
+
+    <!-- Address section -->
+    <fieldset class="mb-4">
+      <legend class="fs-6 fw-semibold text-muted border-bottom pb-2 mb-3">Address</legend>
+      <div class="row g-3">
+        <div class="col-12">
+          <label class="form-label">Street Address</label>
+          <input type="text" class="form-control" formControlName="streetAddress" />
+        </div>
+        <div class="col-md-4">
+          <label class="form-label">Postal Code</label>
+          <input type="text" class="form-control" formControlName="postalCode" />
+        </div>
+        <div class="col-md-4">
+          <label class="form-label">City</label>
+          <input type="text" class="form-control" formControlName="city" />
+        </div>
+        <div class="col-md-4">
+          <label class="form-label">Country</label>
+          <input type="text" class="form-control" formControlName="country" />
+        </div>
+      </div>
+    </fieldset>
+
+    <!-- Actions -->
+    <div class="d-flex gap-2">
+      <button type="submit" class="btn btn-primary" [disabled]="isSaving || form.invalid || !!nationalIdConflictId">
+        <span *ngIf="isSaving" class="spinner-border spinner-border-sm me-2"></span>
+        {{ isEditMode ? 'Save Changes' : 'Create Person' }}
+      </button>
+      <button type="button" class="btn btn-secondary" (click)="cancel()">Cancel</button>
+    </div>
+
+  </form>
+</div>
