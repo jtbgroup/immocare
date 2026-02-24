@@ -54,12 +54,10 @@ export class MeterSectionComponent implements OnInit {
   errorMessage: string | null = null;
   successMessage: string | null = null;
 
-  // Active UI panel per meter-type block
   panelState: Record<MeterType, PanelState> = {
     WATER: 'idle', GAS: 'idle', ELECTRICITY: 'idle',
   };
 
-  // The meter currently being replaced / removed
   activeMeter: MeterDTO | null = null;
   activeMeterType: MeterType | null = null;
 
@@ -69,12 +67,12 @@ export class MeterSectionComponent implements OnInit {
   removeForm!: FormGroup;
 
   // ─── Exposed constants for template ─────────────────────────────────────
-  readonly ALL_METER_TYPES      = ALL_METER_TYPES;
-  readonly ALL_REPLACEMENT_REASONS = ALL_REPLACEMENT_REASONS;
-  readonly METER_TYPE_LABELS    = METER_TYPE_LABELS;
-  readonly METER_TYPE_ICONS     = METER_TYPE_ICONS;
+  readonly ALL_METER_TYPES           = ALL_METER_TYPES;
+  readonly ALL_REPLACEMENT_REASONS   = ALL_REPLACEMENT_REASONS;
+  readonly METER_TYPE_LABELS         = METER_TYPE_LABELS;
+  readonly METER_TYPE_ICONS          = METER_TYPE_ICONS;
   readonly REPLACEMENT_REASON_LABELS = REPLACEMENT_REASON_LABELS;
-  readonly meterDurationMonths  = meterDurationMonths;
+  readonly meterDurationMonths       = meterDurationMonths;
 
   constructor(
     private readonly meterService: MeterService,
@@ -93,6 +91,7 @@ export class MeterSectionComponent implements OnInit {
     this.addForm = this.fb.group({
       type:               ['', Validators.required],
       meterNumber:        ['', [Validators.required, Validators.maxLength(50)]],
+      label:              ['', Validators.maxLength(100)],
       eanCode:            [''],
       installationNumber: [''],
       customerNumber:     [''],
@@ -101,6 +100,7 @@ export class MeterSectionComponent implements OnInit {
 
     this.replaceForm = this.fb.group({
       newMeterNumber:        ['', [Validators.required, Validators.maxLength(50)]],
+      newLabel:              ['', Validators.maxLength(100)],
       newEanCode:            [''],
       newInstallationNumber: [''],
       newCustomerNumber:     [''],
@@ -161,6 +161,7 @@ export class MeterSectionComponent implements OnInit {
   toggleHistory(): void {
     if (this.showHistory) {
       this.showHistory = false;
+      this.cdr.markForCheck();
     } else {
       this.loadHistory();
     }
@@ -180,7 +181,6 @@ export class MeterSectionComponent implements OnInit {
     this.addForm.patchValue({ type });
   }
 
-  /** True when the add form for this type block is open */
   isAddOpen(type: MeterType): boolean {
     return this.panelState[type] === 'add';
   }
@@ -210,6 +210,7 @@ export class MeterSectionComponent implements OnInit {
     const req: AddMeterRequest = {
       type:               v.type,
       meterNumber:        v.meterNumber,
+      label:              v.label || null,
       eanCode:            v.eanCode || null,
       installationNumber: v.installationNumber || null,
       customerNumber:     v.customerNumber || null,
@@ -237,7 +238,10 @@ export class MeterSectionComponent implements OnInit {
     this.closeAllPanels();
     this.activeMeter = meter;
     this.panelState[meter.type] = 'replace';
-    this.replaceForm.reset({ newStartDate: this.today() });
+    this.replaceForm.reset({
+      newStartDate: this.today(),
+      newLabel: meter.label || '',   // pre-fill with current label
+    });
   }
 
   isReplaceOpen(type: MeterType): boolean {
@@ -256,6 +260,7 @@ export class MeterSectionComponent implements OnInit {
     const v = this.replaceForm.value;
     const req: ReplaceMeterRequest = {
       newMeterNumber:        v.newMeterNumber,
+      newLabel:              v.newLabel || null,
       newEanCode:            v.newEanCode || null,
       newInstallationNumber: v.newInstallationNumber || null,
       newCustomerNumber:     v.newCustomerNumber || null,
@@ -272,7 +277,8 @@ export class MeterSectionComponent implements OnInit {
         this.showSuccess('Meter replaced successfully.');
         this.closeAllPanels();
         this.loadActiveMeters();
-        if (this.showHistory) this.loadHistory();
+        // FIX: always reload history after replace and show it
+        this.loadHistory();
       },
       error: (err) => this.showError(err),
     });
@@ -315,15 +321,8 @@ export class MeterSectionComponent implements OnInit {
 
   // ─── Helpers ─────────────────────────────────────────────────────────────
 
-  cancelPanel(type: MeterType): void {
-    this.panelState[type] = 'idle';
-    this.activeMeter = null;
-    this.activeMeterType = null;
-    this.errorMessage = null;
-  }
-
-  private closeAllPanels(): void {
-    ALL_METER_TYPES.forEach((t) => (this.panelState[t] = 'idle'));
+  closeAllPanels(): void {
+    this.panelState = { WATER: 'idle', GAS: 'idle', ELECTRICITY: 'idle' };
     this.activeMeter = null;
     this.activeMeterType = null;
     this.errorMessage = null;
@@ -331,7 +330,9 @@ export class MeterSectionComponent implements OnInit {
 
   private showSuccess(msg: string): void {
     this.successMessage = msg;
-    setTimeout(() => { this.successMessage = null; this.cdr.markForCheck(); }, 3500);
+    this.errorMessage = null;
+    setTimeout(() => { this.successMessage = null; this.cdr.markForCheck(); }, 3000);
+    this.cdr.markForCheck();
   }
 
   private showError(err: any): void {
@@ -339,15 +340,15 @@ export class MeterSectionComponent implements OnInit {
     this.cdr.markForCheck();
   }
 
-  today(): string {
-    return new Date().toISOString().split('T')[0];
+  fieldError(form: FormGroup, field: string): string {
+    const ctrl = form.get(field);
+    if (!ctrl || !ctrl.touched || !ctrl.errors) return '';
+    if (ctrl.errors['required']) return 'This field is required.';
+    if (ctrl.errors['maxlength']) return `Max ${ctrl.errors['maxlength'].requiredLength} characters.`;
+    return '';
   }
 
-  fieldError(form: FormGroup, field: string): string | null {
-    const ctrl = form.get(field);
-    if (!ctrl?.touched || !ctrl.errors) return null;
-    if (ctrl.errors['required'])   return 'This field is required.';
-    if (ctrl.errors['maxlength'])  return `Max ${ctrl.errors['maxlength'].requiredLength} characters.`;
-    return 'Invalid value.';
+  today(): string {
+    return new Date().toISOString().split('T')[0];
   }
 }

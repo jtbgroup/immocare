@@ -20,6 +20,9 @@ public record AddMeterRequest(
         @Size(max = 50, message = "Meter number must not exceed 50 characters")
         String meterNumber,
 
+        @Size(max = 100, message = "Label must not exceed 100 characters")
+        String label,
+
         @Size(max = 18, message = "EAN code must not exceed 18 characters")
         String eanCode,
 

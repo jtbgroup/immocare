@@ -1,32 +1,18 @@
 <!-- UC008 — Meter Section (shared: HOUSING_UNIT + BUILDING) -->
 <section class="meter-section">
+
   <!-- Section header -->
   <div class="section-header">
-    <h3 class="section-title">
-      <span class="material-icons section-icon">electric_meter</span>
-      Utility Meters
-    </h3>
+    <h3 class="section-title">Utility Meters</h3>
   </div>
 
   <!-- Success / Error banners -->
-  <div *ngIf="successMessage" class="alert alert-success">
-    {{ successMessage }}
-  </div>
-  <div
-    *ngIf="
-      errorMessage &&
-      !isAddOpen('WATER') &&
-      !isAddOpen('GAS') &&
-      !isAddOpen('ELECTRICITY') &&
-      !isReplaceOpen('WATER') &&
-      !isReplaceOpen('GAS') &&
-      !isReplaceOpen('ELECTRICITY') &&
-      !isRemoveOpen('WATER') &&
-      !isRemoveOpen('GAS') &&
-      !isRemoveOpen('ELECTRICITY')
-    "
-    class="alert alert-error"
-  >
+  <div *ngIf="successMessage" class="alert alert-success">{{ successMessage }}</div>
+  <div *ngIf="errorMessage
+              && !isAddOpen('WATER') && !isAddOpen('GAS') && !isAddOpen('ELECTRICITY')
+              && !isReplaceOpen('WATER') && !isReplaceOpen('GAS') && !isReplaceOpen('ELECTRICITY')
+              && !isRemoveOpen('WATER') && !isRemoveOpen('GAS') && !isRemoveOpen('ELECTRICITY')"
+       class="alert alert-error">
     {{ errorMessage }}
   </div>
 
@@ -35,58 +21,47 @@
 
   <!-- Type blocks -->
   <div *ngIf="!loading" class="type-blocks">
+
     <div *ngFor="let block of blocks" class="type-block">
+
       <!-- Block header -->
       <div class="type-block-header">
         <div class="type-label">
-          <span class="material-icons">{{ block.icon }}</span>
-          <span>{{ block.label }}</span>
+          <span class="type-label-text">{{ block.label }}</span>
         </div>
-        <button
-          class="btn btn-sm btn-outline"
-          (click)="openAddForm(block.type)"
-        >
+        <button class="btn btn-sm btn-primary" (click)="openAddForm(block.type)"
+                *ngIf="!isAddOpen(block.type)">
           + Add Meter
         </button>
       </div>
 
       <!-- ── ADD FORM ──────────────────────────────────────────────────── -->
-      <div *ngIf="isAddOpen(block.type)" class="inline-form card">
+      <div *ngIf="isAddOpen(block.type)" class="inline-form">
         <h4>Add {{ block.label }} Meter</h4>
 
-        <div *ngIf="errorMessage" class="alert alert-error">
-          {{ errorMessage }}
-        </div>
+        <div *ngIf="errorMessage" class="alert alert-error">{{ errorMessage }}</div>
 
         <form [formGroup]="addForm" (ngSubmit)="submitAdd()" novalidate>
+
+          <!-- Label (optional) -->
+          <div class="form-group">
+            <label>Label <span class="optional">(optional)</span></label>
+            <input formControlName="label" type="text" placeholder="e.g. Kitchen, Basement">
+            <span class="field-error">{{ fieldError(addForm, 'label') }}</span>
+          </div>
+
           <!-- Meter Number -->
           <div class="form-group">
             <label>Meter Number <span class="required">*</span></label>
-            <input
-              formControlName="meterNumber"
-              type="text"
-              placeholder="your meter number"
-            />
-            <span class="field-error">{{
-              fieldError(addForm, "meterNumber")
-            }}</span>
+            <input formControlName="meterNumber" type="text" placeholder="Meter number">
+            <span class="field-error">{{ fieldError(addForm, 'meterNumber') }}</span>
           </div>
 
           <!-- EAN Code — GAS / ELECTRICITY -->
           <div *ngIf="needsEan(block.type)" class="form-group">
             <label>EAN Code <span class="required">*</span></label>
-            <input
-              formControlName="eanCode"
-              type="text"
-              placeholder="18-digit EAN"
-            />
-            <span
-              class="field-error"
-              *ngIf="
-                addForm.get('eanCode')?.touched &&
-                !addForm.get('eanCode')?.value
-              "
-            >
+            <input formControlName="eanCode" type="text" placeholder="18-digit EAN">
+            <span class="field-error" *ngIf="addForm.get('eanCode')?.touched && !addForm.get('eanCode')?.value">
               EAN code is required for {{ block.label | lowercase }} meters.
             </span>
           </div>
@@ -94,37 +69,17 @@
           <!-- Installation Number — WATER -->
           <div *ngIf="needsInstallation(block.type)" class="form-group">
             <label>Installation Number <span class="required">*</span></label>
-            <input
-              formControlName="installationNumber"
-              type="text"
-              placeholder="10-digit"
-            />
-            <span
-              class="field-error"
-              *ngIf="
-                addForm.get('installationNumber')?.touched &&
-                !addForm.get('installationNumber')?.value
-              "
-            >
+            <input formControlName="installationNumber" type="text" placeholder="Installation number">
+            <span class="field-error" *ngIf="addForm.get('installationNumber')?.touched && !addForm.get('installationNumber')?.value">
               Installation number is required for water meters.
             </span>
           </div>
 
-          <!-- Customer Number — WATER on BUILDING only -->
+          <!-- Customer Number — WATER on BUILDING -->
           <div *ngIf="needsCustomerNumber(block.type)" class="form-group">
             <label>Customer Number <span class="required">*</span></label>
-            <input
-              formControlName="customerNumber"
-              type="text"
-              placeholder="e.g. CLI-00123"
-            />
-            <span
-              class="field-error"
-              *ngIf="
-                addForm.get('customerNumber')?.touched &&
-                !addForm.get('customerNumber')?.value
-              "
-            >
+            <input formControlName="customerNumber" type="text" placeholder="Customer number">
+            <span class="field-error" *ngIf="addForm.get('customerNumber')?.touched && !addForm.get('customerNumber')?.value">
               Customer number is required for water meters on a building.
             </span>
           </div>
@@ -132,289 +87,203 @@
           <!-- Start Date -->
           <div class="form-group">
             <label>Start Date <span class="required">*</span></label>
-            <input formControlName="startDate" type="date" [max]="today()" />
-            <span class="field-error">{{
-              fieldError(addForm, "startDate")
-            }}</span>
+            <input formControlName="startDate" type="date">
+            <span class="field-error">{{ fieldError(addForm, 'startDate') }}</span>
           </div>
 
           <div class="form-actions">
-            <button type="submit" class="btn btn-primary">Save</button>
-            <button
-              type="button"
-              class="btn btn-ghost"
-              (click)="cancelPanel(block.type)"
-            >
-              Cancel
-            </button>
+            <button type="submit" class="btn btn-primary btn-sm">Save</button>
+            <button type="button" class="btn btn-secondary btn-sm" (click)="closeAllPanels()">Cancel</button>
           </div>
+
         </form>
       </div>
 
-      <!-- ── ACTIVE METERS LIST ─────────────────────────────────────────── -->
-      <div *ngIf="!isAddOpen(block.type)" class="meter-list">
-        <!-- Empty state -->
+      <!-- ── METER LIST ─────────────────────────────────────────────────── -->
+      <div class="meter-list" *ngIf="!isAddOpen(block.type)">
+
         <p *ngIf="block.meters.length === 0" class="empty-state">
           No {{ block.label | lowercase }} meter assigned
         </p>
 
-        <!-- Meter cards -->
         <div *ngFor="let meter of block.meters" class="meter-card">
-          <!-- ── REPLACE FORM (replaces card content) ──────────────────── -->
-          <ng-container
-            *ngIf="
-              isReplaceOpen(block.type) && activeMeter?.id === meter.id;
-              else meterView
-            "
-          >
+
+          <!-- ── REPLACE FORM (inline, replaces card content) ─────────── -->
+          <ng-container *ngIf="isReplaceOpen(block.type) && activeMeter?.id === meter.id; else meterView">
             <div class="inline-form">
               <h4>Replace {{ block.label }} Meter</h4>
-              <div *ngIf="errorMessage" class="alert alert-error">
-                {{ errorMessage }}
-              </div>
 
-              <!-- Current meter (read-only) -->
+              <div *ngIf="errorMessage" class="alert alert-error">{{ errorMessage }}</div>
+
+              <!-- Current meter read-only -->
               <div class="readonly-info">
                 <strong>Current:</strong>
+                <span *ngIf="meter.label" class="meter-label-badge">{{ meter.label }}</span>
                 {{ meter.meterNumber }}
                 <span *ngIf="meter.eanCode"> · EAN {{ meter.eanCode }}</span>
-                <span *ngIf="meter.installationNumber">
-                  · {{ meter.installationNumber }}</span
-                >
+                <span *ngIf="meter.installationNumber"> · Install #: {{ meter.installationNumber }}</span>
                 · since {{ meter.startDate }}
               </div>
 
-              <form
-                [formGroup]="replaceForm"
-                (ngSubmit)="submitReplace()"
-                novalidate
-              >
+              <form [formGroup]="replaceForm" (ngSubmit)="submitReplace()" novalidate>
+
+                <!-- New Label (optional) -->
                 <div class="form-group">
-                  <label
-                    >New Meter Number <span class="required">*</span></label
-                  >
-                  <input formControlName="newMeterNumber" type="text" />
-                  <span class="field-error">{{
-                    fieldError(replaceForm, "newMeterNumber")
-                  }}</span>
+                  <label>Label <span class="optional">(optional)</span></label>
+                  <input formControlName="newLabel" type="text" placeholder="e.g. Kitchen, Basement">
+                </div>
+
+                <!-- New Meter Number -->
+                <div class="form-group">
+                  <label>New Meter Number <span class="required">*</span></label>
+                  <input formControlName="newMeterNumber" type="text">
+                  <span class="field-error">{{ fieldError(replaceForm, 'newMeterNumber') }}</span>
                 </div>
 
                 <div *ngIf="needsEan(block.type)" class="form-group">
                   <label>New EAN Code <span class="required">*</span></label>
-                  <input formControlName="newEanCode" type="text" />
+                  <input formControlName="newEanCode" type="text">
                 </div>
 
                 <div *ngIf="needsInstallation(block.type)" class="form-group">
-                  <label
-                    >New Installation Number
-                    <span class="required">*</span></label
-                  >
-                  <input formControlName="newInstallationNumber" type="text" />
+                  <label>New Installation Number <span class="required">*</span></label>
+                  <input formControlName="newInstallationNumber" type="text">
                 </div>
 
                 <div *ngIf="needsCustomerNumber(block.type)" class="form-group">
-                  <label
-                    >New Customer Number <span class="required">*</span></label
-                  >
-                  <input formControlName="newCustomerNumber" type="text" />
+                  <label>New Customer Number <span class="required">*</span></label>
+                  <input formControlName="newCustomerNumber" type="text">
                 </div>
 
                 <div class="form-group">
                   <label>New Start Date <span class="required">*</span></label>
-                  <input
-                    formControlName="newStartDate"
-                    type="date"
-                    [max]="today()"
-                    [min]="meter.startDate"
-                  />
-                  <span class="field-error">{{
-                    fieldError(replaceForm, "newStartDate")
-                  }}</span>
+                  <input formControlName="newStartDate" type="date">
+                  <span class="field-error">{{ fieldError(replaceForm, 'newStartDate') }}</span>
                 </div>
 
                 <div class="form-group">
-                  <label>Reason (optional)</label>
+                  <label>Reason <span class="optional">(optional)</span></label>
                   <select formControlName="reason">
-                    <option [ngValue]="null">— Select reason —</option>
-                    <option
-                      *ngFor="let r of ALL_REPLACEMENT_REASONS"
-                      [value]="r"
-                    >
+                    <option [ngValue]="null">— Select a reason —</option>
+                    <option *ngFor="let r of ALL_REPLACEMENT_REASONS" [value]="r">
                       {{ REPLACEMENT_REASON_LABELS[r] }}
                     </option>
                   </select>
                 </div>
 
                 <div class="form-actions">
-                  <button type="submit" class="btn btn-primary">Save</button>
-                  <button
-                    type="button"
-                    class="btn btn-ghost"
-                    (click)="cancelPanel(block.type)"
-                  >
-                    Cancel
-                  </button>
+                  <button type="submit" class="btn btn-primary btn-sm">Confirm Replace</button>
+                  <button type="button" class="btn btn-secondary btn-sm" (click)="closeAllPanels()">Cancel</button>
                 </div>
+
               </form>
             </div>
           </ng-container>
 
-          <!-- ── REMOVE DIALOG (replaces card content) ──────────────────── -->
+          <!-- ── REMOVE DIALOG (inline) ────────────────────────────────── -->
           <ng-template #meterView>
-            <ng-container
-              *ngIf="
-                isRemoveOpen(block.type) && activeMeter?.id === meter.id;
-                else normalCard
-              "
-            >
+            <ng-container *ngIf="isRemoveOpen(block.type) && activeMeter?.id === meter.id; else meterCard">
               <div class="inline-form remove-dialog">
-                <h4>Remove {{ block.label }} Meter</h4>
-                <div *ngIf="errorMessage" class="alert alert-error">
-                  {{ errorMessage }}
-                </div>
+                <h4>Remove Meter</h4>
                 <p class="warning-text">
-                  ⚠️ This meter will be deactivated. No replacement will be
-                  created.
-                </p>
-                <p>
-                  <strong>{{ meter.meterNumber }}</strong>
+                  ⚠ You are about to close meter
+                  <strong>
+                    <span *ngIf="meter.label">{{ meter.label }} — </span>
+                    {{ meter.meterNumber }}
+                  </strong>.
+                  This action cannot be undone.
                 </p>
 
-                <form
-                  [formGroup]="removeForm"
-                  (ngSubmit)="submitRemove()"
-                  novalidate
-                >
+                <div *ngIf="errorMessage" class="alert alert-error">{{ errorMessage }}</div>
+
+                <form [formGroup]="removeForm" (ngSubmit)="submitRemove()" novalidate>
                   <div class="form-group">
                     <label>End Date <span class="required">*</span></label>
-                    <input
-                      formControlName="endDate"
-                      type="date"
-                      [max]="today()"
-                      [min]="meter.startDate"
-                    />
-                    <span class="field-error">{{
-                      fieldError(removeForm, "endDate")
-                    }}</span>
+                    <input formControlName="endDate" type="date">
+                    <span class="field-error">{{ fieldError(removeForm, 'endDate') }}</span>
                   </div>
                   <div class="form-actions">
-                    <button type="submit" class="btn btn-danger">
-                      Confirm Remove
-                    </button>
-                    <button
-                      type="button"
-                      class="btn btn-ghost"
-                      (click)="cancelPanel(block.type)"
-                    >
-                      Cancel
-                    </button>
+                    <button type="submit" class="btn btn-danger btn-sm">Confirm Remove</button>
+                    <button type="button" class="btn btn-secondary btn-sm" (click)="closeAllPanels()">Cancel</button>
                   </div>
                 </form>
               </div>
             </ng-container>
 
-            <!-- ── NORMAL CARD VIEW ───────────────────────────────────────── -->
-            <ng-template #normalCard>
+            <!-- ── METER CARD (normal view) ───────────────────────────── -->
+            <ng-template #meterCard>
               <div class="meter-card-content">
                 <div class="meter-info">
+                  <!-- Label shown first if present -->
+                  <span *ngIf="meter.label" class="meter-label-badge">{{ meter.label }}</span>
                   <span class="meter-number">{{ meter.meterNumber }}</span>
-                  <span *ngIf="meter.eanCode" class="meter-detail"
-                    >EAN: {{ meter.eanCode }}</span
-                  >
-                  <span *ngIf="meter.installationNumber" class="meter-detail">
-                    Install #: {{ meter.installationNumber }}
-                  </span>
-                  <span *ngIf="meter.customerNumber" class="meter-detail">
-                    Customer #: {{ meter.customerNumber }}
-                  </span>
-                  <span class="meter-detail">Since {{ meter.startDate }}</span>
-                  <span class="meter-detail muted">
-                    {{ meterDurationMonths(meter) }} month(s)
-                  </span>
+                  <span *ngIf="meter.eanCode" class="meter-detail">EAN: {{ meter.eanCode }}</span>
+                  <span *ngIf="meter.installationNumber" class="meter-detail">Install #: {{ meter.installationNumber }}</span>
+                  <span *ngIf="meter.customerNumber" class="meter-detail">Customer #: {{ meter.customerNumber }}</span>
+                  <span class="meter-detail muted">Since {{ meter.startDate }}</span>
+                  <span class="meter-detail muted">{{ meterDurationMonths(meter.startDate) }} month(s)</span>
                 </div>
                 <div class="meter-actions">
-                  <button
-                    class="btn btn-sm btn-outline"
-                    (click)="openReplaceForm(meter)"
-                  >
-                    Replace
-                  </button>
-                  <button
-                    class="btn btn-sm btn-danger-outline"
-                    (click)="openRemoveDialog(meter)"
-                  >
-                    Remove
-                  </button>
+                  <button class="btn btn-sm btn-secondary" (click)="openReplaceForm(meter)">Replace</button>
+                  <button class="btn btn-sm btn-danger" (click)="openRemoveDialog(meter)">Remove</button>
                 </div>
               </div>
             </ng-template>
+
           </ng-template>
         </div>
-        <!-- /meter-card -->
       </div>
-      <!-- /meter-list -->
+
     </div>
-    <!-- /type-block -->
   </div>
-  <!-- /type-blocks -->
 
   <!-- History toggle -->
-  <div *ngIf="hasAnyMeter || history.length > 0" class="history-toggle">
+  <div class="history-toggle" *ngIf="hasAnyMeter || history.length > 0">
     <button class="btn btn-link" (click)="toggleHistory()">
-      {{ showHistory ? "▲ Hide History" : "▼ View History" }}
+      {{ showHistory ? 'Hide History' : 'View History' }}
     </button>
   </div>
 
-  <!-- ── HISTORY TABLE ──────────────────────────────────────────────────── -->
+  <!-- History panel -->
   <div *ngIf="showHistory" class="history-panel">
-    <table class="data-table">
-      <thead>
-        <tr>
-          <th>Type</th>
-          <th>Meter Number</th>
-          <th>EAN / Install #</th>
-          <th *ngIf="ownerType === 'BUILDING'">Customer #</th>
-          <th>Start Date</th>
-          <th>End Date</th>
-          <th>Duration</th>
-          <th>Status</th>
-        </tr>
-      </thead>
-      <tbody>
-        <tr *ngFor="let m of history">
-          <td>
-            <span class="material-icons icon-sm">{{
-              METER_TYPE_ICONS[m.type]
-            }}</span>
-            {{ METER_TYPE_LABELS[m.type] }}
-          </td>
-          <td>{{ m.meterNumber }}</td>
-          <td>{{ m.eanCode ?? m.installationNumber ?? "—" }}</td>
-          <td *ngIf="ownerType === 'BUILDING'">
-            {{ m.customerNumber ?? "—" }}
-          </td>
-          <td>{{ m.startDate }}</td>
-          <td>{{ m.endDate ?? "—" }}</td>
-          <td>{{ meterDurationMonths(m) }} mo.</td>
-          <td>
-            <span
-              [class]="
-                m.status === 'ACTIVE' ? 'badge badge-green' : 'badge badge-gray'
-              "
-            >
-              {{ m.status }}
-            </span>
-          </td>
-        </tr>
-        <tr *ngIf="history.length === 0">
-          <td
-            [attr.colspan]="ownerType === 'BUILDING' ? 8 : 7"
-            class="text-center muted"
-          >
-            No meter history yet.
-          </td>
-        </tr>
-      </tbody>
-    </table>
+    <div class="history-header">
+      <h4>Meter History</h4>
+      <button class="btn-close" (click)="toggleHistory()" title="Close">✕</button>
+    </div>
+    <div class="history-table-wrapper">
+      <table class="data-table">
+        <thead>
+          <tr>
+            <th>Type</th>
+            <th>Label</th>
+            <th>Meter Number</th>
+            <th *ngIf="ownerType === 'BUILDING'">Customer #</th>
+            <th>EAN / Install #</th>
+            <th>Start</th>
+            <th>End</th>
+            <th>Duration</th>
+            <th>Status</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let h of history">
+            <td>{{ METER_TYPE_LABELS[h.type] }}</td>
+            <td>{{ h.label || '—' }}</td>
+            <td><strong>{{ h.meterNumber }}</strong></td>
+            <td *ngIf="ownerType === 'BUILDING'">{{ h.customerNumber || '—' }}</td>
+            <td>{{ h.eanCode || h.installationNumber || '—' }}</td>
+            <td>{{ h.startDate }}</td>
+            <td>{{ h.endDate || '—' }}</td>
+            <td>{{ meterDurationMonths(h.startDate, h.endDate) }} mo</td>
+            <td>
+              <span class="badge" [ngClass]="h.status === 'ACTIVE' ? 'badge-green' : 'badge-gray'">
+                {{ h.status }}
+              </span>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
   </div>
+
 </section>

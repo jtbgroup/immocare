@@ -11,6 +11,7 @@ public record MeterDTO(
         Long id,
         String type,
         String meterNumber,
+        String label,               // optional human-readable label (e.g. "Cuisine", "Cave")
         String eanCode,
         String installationNumber,
         String customerNumber,
@@ -18,6 +19,6 @@ public record MeterDTO(
         Long ownerId,
         LocalDate startDate,
         LocalDate endDate,
-        String status,          // computed: "ACTIVE" | "CLOSED"
+        String status,              // computed: "ACTIVE" | "CLOSED"
         LocalDateTime createdAt
 ) {}

@@ -7,14 +7,17 @@ import jakarta.validation.constraints.Size;
 import java.time.LocalDate;
 
 /**
- * Request DTO for replacing an active meter (append-only replace operation).
- * The old meter is closed (endDate = newStartDate) and a new meter is created atomically.
+ * Request DTO for replacing an active meter.
+ * The current meter is closed (endDate set) and a new meter is created atomically.
  */
 public record ReplaceMeterRequest(
 
         @NotBlank(message = "New meter number is required")
-        @Size(max = 50, message = "New meter number must not exceed 50 characters")
+        @Size(max = 50, message = "Meter number must not exceed 50 characters")
         String newMeterNumber,
+
+        @Size(max = 100, message = "Label must not exceed 100 characters")
+        String newLabel,
 
         @Size(max = 18, message = "EAN code must not exceed 18 characters")
         String newEanCode,
@@ -25,10 +28,9 @@ public record ReplaceMeterRequest(
         @Size(max = 50, message = "Customer number must not exceed 50 characters")
         String newCustomerNumber,
 
-        @NotNull(message = "New start date is required")
+        @NotNull(message = "Start date is required")
         LocalDate newStartDate,
 
-        /** Optional — BROKEN | END_OF_LIFE | UPGRADE | CALIBRATION_ISSUE | OTHER */
-        String reason
+        String reason   // optional: BROKEN, END_OF_LIFE, UPGRADE, CALIBRATION_ISSUE, OTHER
 
 ) {}

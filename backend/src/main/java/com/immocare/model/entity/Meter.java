@@ -1,63 +1,44 @@
 package com.immocare.model.entity;
 
 import jakarta.persistence.*;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
-
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 
-/**
- * Append-only utility meter record.
- * <p>
- * Records are never modified. Closing a meter sets {@code endDate}.
- * An active meter has {@code endDate == null}.
- * Multiple active meters of the same type are allowed per owner.
- */
 @Entity
 @Table(name = "meter")
-@Getter
-@Setter
-@NoArgsConstructor
 public class Meter {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    /** WATER | GAS | ELECTRICITY */
     @Column(nullable = false, length = 20)
     private String type;
 
     @Column(name = "meter_number", nullable = false, length = 50)
     private String meterNumber;
 
-    /** Required for GAS and ELECTRICITY */
+    @Column(length = 100)
+    private String label;
+
     @Column(name = "ean_code", length = 18)
     private String eanCode;
 
-    /** Required for WATER */
     @Column(name = "installation_number", length = 50)
     private String installationNumber;
 
-    /** Required for WATER on BUILDING */
     @Column(name = "customer_number", length = 50)
     private String customerNumber;
 
-    /** HOUSING_UNIT | BUILDING */
     @Column(name = "owner_type", nullable = false, length = 20)
     private String ownerType;
 
-    /** FK to housing_unit.id or building.id — polymorphic, no DB-level FK constraint */
     @Column(name = "owner_id", nullable = false)
     private Long ownerId;
 
-    /** Activation date — cannot be in the future (BR-01) */
     @Column(name = "start_date", nullable = false)
     private LocalDate startDate;
 
-    /** Closure date — null = active (BR-02: endDate >= startDate) */
     @Column(name = "end_date")
     private LocalDate endDate;
 
@@ -66,6 +47,42 @@ public class Meter {
 
     @PrePersist
     protected void onCreate() {
-        createdAt = LocalDateTime.now();
+        this.createdAt = LocalDateTime.now();
     }
+
+    // ─── Getters & Setters ───────────────────────────────────────────────────
+
+    public Long getId() { return id; }
+
+    public String getType() { return type; }
+    public void setType(String type) { this.type = type; }
+
+    public String getMeterNumber() { return meterNumber; }
+    public void setMeterNumber(String meterNumber) { this.meterNumber = meterNumber; }
+
+    public String getLabel() { return label; }
+    public void setLabel(String label) { this.label = label; }
+
+    public String getEanCode() { return eanCode; }
+    public void setEanCode(String eanCode) { this.eanCode = eanCode; }
+
+    public String getInstallationNumber() { return installationNumber; }
+    public void setInstallationNumber(String installationNumber) { this.installationNumber = installationNumber; }
+
+    public String getCustomerNumber() { return customerNumber; }
+    public void setCustomerNumber(String customerNumber) { this.customerNumber = customerNumber; }
+
+    public String getOwnerType() { return ownerType; }
+    public void setOwnerType(String ownerType) { this.ownerType = ownerType; }
+
+    public Long getOwnerId() { return ownerId; }
+    public void setOwnerId(Long ownerId) { this.ownerId = ownerId; }
+
+    public LocalDate getStartDate() { return startDate; }
+    public void setStartDate(LocalDate startDate) { this.startDate = startDate; }
+
+    public LocalDate getEndDate() { return endDate; }
+    public void setEndDate(LocalDate endDate) { this.endDate = endDate; }
+
+    public LocalDateTime getCreatedAt() { return createdAt; }
 }
