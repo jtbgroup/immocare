@@ -1,22 +1,24 @@
 // features/person/person-form/person-form.component.ts
-import { Component, OnInit } from '@angular/core';
-import { CommonModule } from '@angular/common';
-import { ActivatedRoute, Router, RouterModule } from '@angular/router';
+import { CommonModule } from "@angular/common";
+import { Component, OnInit } from "@angular/core";
 import {
-  FormBuilder, FormGroup, Validators,
-  AbstractControl, ReactiveFormsModule
-} from '@angular/forms';
-import { debounceTime, distinctUntilChanged } from 'rxjs/operators';
+  FormBuilder,
+  FormGroup,
+  ReactiveFormsModule,
+  Validators,
+} from "@angular/forms";
+import { ActivatedRoute, Router, RouterModule } from "@angular/router";
+import { debounceTime, distinctUntilChanged } from "rxjs/operators";
 
-import { PersonService } from '../../../core/services/person.service';
-import { Person } from '../../../models/person.model';
+import { PersonService } from "../../../core/services/person.service";
+import { Person } from "../../../models/person.model";
 
 @Component({
-  selector: 'app-person-form',
+  selector: "app-person-form",
   standalone: true,
   imports: [CommonModule, RouterModule, ReactiveFormsModule],
-  templateUrl: './person-form.component.html',
-  styleUrls: ['./person-form.component.scss']
+  templateUrl: "./person-form.component.html",
+  styleUrls: ["./person-form.component.scss"],
 })
 export class PersonFormComponent implements OnInit {
   form!: FormGroup;
@@ -24,21 +26,21 @@ export class PersonFormComponent implements OnInit {
   personId?: number;
   isLoading = false;
   isSaving = false;
-  errorMessage = '';
+  errorMessage = "";
   nationalIdConflictId?: number;
 
   constructor(
     private fb: FormBuilder,
     private route: ActivatedRoute,
     private router: Router,
-    private personService: PersonService
+    private personService: PersonService,
   ) {}
 
   ngOnInit(): void {
     this.buildForm();
 
-    this.route.paramMap.subscribe(params => {
-      const id = params.get('id');
+    this.route.paramMap.subscribe((params) => {
+      const id = params.get("id");
       if (id) {
         this.isEditMode = true;
         this.personId = +id;
@@ -47,34 +49,34 @@ export class PersonFormComponent implements OnInit {
     });
 
     // Real-time nationalId uniqueness check
-    this.form.get('nationalId')!.valueChanges.pipe(
-      debounceTime(500),
-      distinctUntilChanged()
-    ).subscribe(value => {
-      if (value && value.trim().length >= 2) {
-        this.checkNationalIdUniqueness(value.trim());
-      } else {
-        this.nationalIdConflictId = undefined;
-      }
-    });
+    this.form
+      .get("nationalId")!
+      .valueChanges.pipe(debounceTime(500), distinctUntilChanged())
+      .subscribe((value) => {
+        if (value && value.trim().length >= 2) {
+          this.checkNationalIdUniqueness(value.trim());
+        } else {
+          this.nationalIdConflictId = undefined;
+        }
+      });
   }
 
   buildForm(): void {
     this.form = this.fb.group({
       // Identity
-      lastName:   ['', [Validators.required, Validators.maxLength(100)]],
-      firstName:  ['', [Validators.required, Validators.maxLength(100)]],
-      birthDate:  [null],
-      birthPlace: ['', Validators.maxLength(100)],
-      nationalId: ['', Validators.maxLength(20)],
+      lastName: ["", [Validators.required, Validators.maxLength(100)]],
+      firstName: ["", [Validators.required, Validators.maxLength(100)]],
+      birthDate: [null],
+      birthPlace: ["", Validators.maxLength(100)],
+      nationalId: ["", Validators.maxLength(20)],
       // Contact
-      gsm:   ['', Validators.maxLength(20)],
-      email: ['', [Validators.email, Validators.maxLength(100)]],
+      gsm: ["", Validators.maxLength(20)],
+      email: ["", [Validators.email, Validators.maxLength(100)]],
       // Address
-      streetAddress: ['', Validators.maxLength(200)],
-      postalCode:    ['', Validators.maxLength(20)],
-      city:          ['', Validators.maxLength(100)],
-      country:       ['Belgium', Validators.maxLength(100)]
+      streetAddress: ["", Validators.maxLength(200)],
+      postalCode: ["", Validators.maxLength(20)],
+      city: ["", Validators.maxLength(100)],
+      country: ["Belgium", Validators.maxLength(100)],
     });
   }
 
@@ -83,32 +85,33 @@ export class PersonFormComponent implements OnInit {
     this.personService.getById(id).subscribe({
       next: (person: Person) => {
         this.form.patchValue({
-          lastName:      person.lastName,
-          firstName:     person.firstName,
-          birthDate:     person.birthDate,
-          birthPlace:    person.birthPlace,
-          nationalId:    person.nationalId,
-          gsm:           person.gsm,
-          email:         person.email,
+          lastName: person.lastName,
+          firstName: person.firstName,
+          birthDate: person.birthDate,
+          birthPlace: person.birthPlace,
+          nationalId: person.nationalId,
+          gsm: person.gsm,
+          email: person.email,
           streetAddress: person.streetAddress,
-          postalCode:    person.postalCode,
-          city:          person.city,
-          country:       person.country || 'Belgium'
+          postalCode: person.postalCode,
+          city: person.city,
+          country: person.country || "Belgium",
         });
         this.isLoading = false;
       },
       error: () => {
-        this.errorMessage = 'Person not found.';
+        this.errorMessage = "Person not found.";
         this.isLoading = false;
-      }
+      },
     });
   }
 
   checkNationalIdUniqueness(nationalId: string): void {
-    this.personService.searchForPicker(nationalId).subscribe(results => {
-      const conflict = results.find(p =>
-        p.nationalId?.toLowerCase() === nationalId.toLowerCase() &&
-        p.id !== this.personId
+    this.personService.searchForPicker(nationalId).subscribe((results) => {
+      const conflict = results.find(
+        (p) =>
+          p.nationalId?.toLowerCase() === nationalId.toLowerCase() &&
+          p.id !== this.personId,
       );
       this.nationalIdConflictId = conflict?.id;
     });
@@ -118,10 +121,10 @@ export class PersonFormComponent implements OnInit {
     if (this.form.invalid || this.nationalIdConflictId) return;
 
     this.isSaving = true;
-    this.errorMessage = '';
+    this.errorMessage = "";
 
     const request = { ...this.form.value };
-    if (!request.country) request.country = 'Belgium';
+    if (!request.country) request.country = "Belgium";
 
     const operation = this.isEditMode
       ? this.personService.update(this.personId!, request)
@@ -129,20 +132,21 @@ export class PersonFormComponent implements OnInit {
 
     operation.subscribe({
       next: (person) => {
-        this.router.navigate(['/persons', person.id]);
+        this.router.navigate(["/persons", person.id]);
       },
       error: (err) => {
-        this.errorMessage = err.error?.message || 'An error occurred. Please try again.';
+        this.errorMessage =
+          err.error?.message || "An error occurred. Please try again.";
         this.isSaving = false;
-      }
+      },
     });
   }
 
   cancel(): void {
     if (this.isEditMode) {
-      this.router.navigate(['/persons', this.personId]);
+      this.router.navigate(["/persons", this.personId]);
     } else {
-      this.router.navigate(['/persons']);
+      this.router.navigate(["/persons"]);
     }
   }
 

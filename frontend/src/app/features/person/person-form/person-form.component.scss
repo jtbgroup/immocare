@@ -1,0 +1,122 @@
+// ─── Layout ──────────────────────────────────────────────────────────────────
+.container {
+  max-width: 720px;
+}
+
+h2.h4 {
+  font-size: 1.3rem;
+  font-weight: 700;
+  color: #212121;
+}
+
+// ─── Section Cards ────────────────────────────────────────────────────────────
+.card {
+  border: 1px solid #e0e0e0;
+  border-radius: 8px;
+  overflow: hidden;
+
+  .card-header {
+    background: #f5f5f5;
+    border-bottom: 1px solid #e0e0e0;
+    padding: 0.65rem 1rem;
+    font-size: 0.95rem;
+    font-weight: 600;
+    color: #333;
+  }
+
+  .card-body {
+    padding: 1.25rem 1rem;
+  }
+}
+
+// ─── Form Controls ────────────────────────────────────────────────────────────
+.form-label {
+  font-size: 0.85rem;
+  font-weight: 500;
+  color: #555;
+  margin-bottom: 0.3rem;
+}
+
+.form-control,
+.form-select {
+  font-size: 0.9rem;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  padding: 0.4rem 0.65rem;
+  transition:
+    border-color 0.15s,
+    box-shadow 0.15s;
+
+  &:focus {
+    border-color: #1976d2;
+    box-shadow: 0 0 0 2px rgba(25, 118, 210, 0.15);
+    outline: none;
+  }
+
+  &.is-invalid {
+    border-color: #d32f2f;
+    &:focus {
+      box-shadow: 0 0 0 2px rgba(211, 47, 47, 0.15);
+    }
+  }
+}
+
+.invalid-feedback {
+  font-size: 0.8rem;
+  color: #d32f2f;
+}
+
+// ─── Breadcrumb ──────────────────────────────────────────────────────────────
+.breadcrumb {
+  background: none;
+  padding: 0;
+
+  .breadcrumb-item {
+    font-size: 0.85rem;
+    a {
+      color: #1976d2;
+      text-decoration: none;
+      &:hover {
+        text-decoration: underline;
+      }
+    }
+    &.active {
+      color: #757575;
+    }
+  }
+}
+
+// ─── Alerts ───────────────────────────────────────────────────────────────────
+.alert {
+  border-radius: 6px;
+  font-size: 0.875rem;
+
+  &.alert-danger {
+    background: #ffebee;
+    border-color: #ef9a9a;
+    color: #b71c1c;
+  }
+  &.alert-warning {
+    background: #fff8e1;
+    border-color: #ffe082;
+    color: #5d4037;
+  }
+  &.alert-info {
+    background: #e3f2fd;
+    border-color: #90caf9;
+    color: #0d47a1;
+  }
+}
+
+// ─── Buttons ─────────────────────────────────────────────────────────────────
+.btn {
+  font-size: 0.875rem;
+  padding: 0.4rem 1rem;
+  border-radius: 4px;
+  font-weight: 500;
+
+  &:disabled {
+    opacity: 0.6;
+    cursor: default;
+  }
+}

@@ -1,0 +1,57 @@
+// ─── Cursor ───────────────────────────────────────────────────────────────────
+.cursor-pointer {
+  cursor: pointer;
+  user-select: none;
+
+  &:hover {
+    color: #1976d2;
+  }
+}
+
+// ─── Badges ──────────────────────────────────────────────────────────────────
+.badge {
+  font-size: 0.75rem;
+  padding: 0.3em 0.7em;
+  border-radius: 4px;
+  font-weight: 600;
+
+  &.bg-primary {
+    background-color: #1565c0 !important;
+  }
+  &.bg-success {
+    background-color: #2e7d32 !important;
+  }
+}
+
+// ─── Table ────────────────────────────────────────────────────────────────────
+.table {
+  th,
+  td {
+    vertical-align: middle;
+    font-size: 0.9rem;
+  }
+
+  thead th {
+    font-weight: 600;
+    color: #495057;
+    background: #f8f9fa;
+    border-bottom: 2px solid #dee2e6;
+  }
+
+  tbody tr:hover {
+    background: #f5f5f5;
+  }
+}
+
+// ─── Card ─────────────────────────────────────────────────────────────────────
+.card {
+  border: 1px solid #e0e0e0;
+  border-radius: 8px;
+  overflow: hidden;
+
+  .card-footer {
+    background: #fafafa;
+    border-top: 1px solid #e0e0e0;
+    padding: 0.5rem 1rem;
+  }
+}

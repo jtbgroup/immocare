@@ -1,19 +1,19 @@
 // features/person/person-list/person-list.component.ts
-import { Component, OnInit } from '@angular/core';
-import { CommonModule } from '@angular/common';
-import { RouterModule } from '@angular/router';
-import { FormsModule } from '@angular/forms';
-import { debounceTime, distinctUntilChanged, Subject } from 'rxjs';
+import { CommonModule } from "@angular/common";
+import { Component, OnInit } from "@angular/core";
+import { FormsModule } from "@angular/forms";
+import { RouterModule } from "@angular/router";
+import { debounceTime, distinctUntilChanged, Subject } from "rxjs";
 
-import { PersonService } from '../../../core/services/person.service';
-import { PersonSummary } from '../../../models/person.model';
+import { PersonService } from "../../../core/services/person.service";
+import { PersonSummary } from "../../../models/person.model";
 
 @Component({
-  selector: 'app-person-list',
+  selector: "app-person-list",
   standalone: true,
   imports: [CommonModule, RouterModule, FormsModule],
-  templateUrl: './person-list.component.html',
-  styleUrls: ['./person-list.component.scss']
+  templateUrl: "./person-list.component.html",
+  styleUrls: ["./person-list.component.scss"],
 })
 export class PersonListComponent implements OnInit {
   persons: PersonSummary[] = [];
@@ -21,45 +21,44 @@ export class PersonListComponent implements OnInit {
   totalPages = 0;
   currentPage = 0;
   pageSize = 20;
-  sort = 'lastName,asc';
-  sortField = 'lastName';
-  sortDirection = 'asc';
-  searchTerm = '';
+  sort = "lastName,asc";
+  sortField = "lastName";
+  sortDirection = "asc";
+  searchTerm = "";
   isLoading = false;
-  errorMessage = '';
+  errorMessage = "";
 
   private searchSubject = new Subject<string>();
 
   constructor(private personService: PersonService) {}
 
   ngOnInit(): void {
-    this.searchSubject.pipe(
-      debounceTime(300),
-      distinctUntilChanged()
-    ).subscribe(() => {
-      this.currentPage = 0;
-      this.loadPersons();
-    });
+    this.searchSubject
+      .pipe(debounceTime(300), distinctUntilChanged())
+      .subscribe(() => {
+        this.currentPage = 0;
+        this.loadPersons();
+      });
     this.loadPersons();
   }
 
   loadPersons(): void {
     this.isLoading = true;
-    this.errorMessage = '';
-    this.personService.getAll(
-      this.currentPage, this.pageSize, this.sort, this.searchTerm
-    ).subscribe({
-      next: page => {
-        this.persons = page.content;
-        this.totalElements = page.totalElements;
-        this.totalPages = page.totalPages;
-        this.isLoading = false;
-      },
-      error: () => {
-        this.errorMessage = 'Failed to load persons. Please try again.';
-        this.isLoading = false;
-      }
-    });
+    this.errorMessage = "";
+    this.personService
+      .getAll(this.currentPage, this.pageSize, this.sort, this.searchTerm)
+      .subscribe({
+        next: (page) => {
+          this.persons = page.content;
+          this.totalElements = page.totalElements;
+          this.totalPages = page.totalPages;
+          this.isLoading = false;
+        },
+        error: () => {
+          this.errorMessage = "Failed to load persons. Please try again.";
+          this.isLoading = false;
+        },
+      });
   }
 
   onSearch(): void {
@@ -68,10 +67,10 @@ export class PersonListComponent implements OnInit {
 
   sortBy(field: string): void {
     if (this.sortField === field) {
-      this.sortDirection = this.sortDirection === 'asc' ? 'desc' : 'asc';
+      this.sortDirection = this.sortDirection === "asc" ? "desc" : "asc";
     } else {
       this.sortField = field;
-      this.sortDirection = 'asc';
+      this.sortDirection = "asc";
     }
     this.sort = `${this.sortField},${this.sortDirection}`;
     this.currentPage = 0;

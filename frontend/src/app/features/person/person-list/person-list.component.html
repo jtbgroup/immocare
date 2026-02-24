@@ -1,6 +1,5 @@
 <!-- features/person/person-list/person-list.component.html -->
 <div class="container-fluid py-4">
-
   <!-- Header -->
   <div class="d-flex justify-content-between align-items-center mb-4">
     <h1 class="h3 mb-0">Persons</h1>
@@ -15,7 +14,7 @@
       placeholder="Search by name, email, national ID..."
       [(ngModel)]="searchTerm"
       (ngModelChange)="onSearch()"
-      style="min-width: 300px;"
+      style="min-width: 300px"
     />
   </div>
 
@@ -37,25 +36,33 @@
   <div *ngIf="!isLoading && persons.length > 0" class="card shadow-sm">
     <div class="table-responsive">
       <table class="table table-hover mb-0">
+        <!-- thead — retirer Email et GSM -->
         <thead class="table-light">
           <tr>
             <th class="cursor-pointer" (click)="sortBy('lastName')">
               Last Name
-              <span *ngIf="sortField === 'lastName'">{{ sortDirection === 'asc' ? '▲' : '▼' }}</span>
+              <span *ngIf="sortField === 'lastName'">{{
+                sortDirection === "asc" ? "▲" : "▼"
+              }}</span>
             </th>
             <th class="cursor-pointer" (click)="sortBy('firstName')">
               First Name
-              <span *ngIf="sortField === 'firstName'">{{ sortDirection === 'asc' ? '▲' : '▼' }}</span>
+              <span *ngIf="sortField === 'firstName'">{{
+                sortDirection === "asc" ? "▲" : "▼"
+              }}</span>
             </th>
-            <th>Email</th>
-            <th>GSM</th>
             <th class="cursor-pointer" (click)="sortBy('city')">
               City
-              <span *ngIf="sortField === 'city'">{{ sortDirection === 'asc' ? '▲' : '▼' }}</span>
+              <span *ngIf="sortField === 'city'">{{
+                sortDirection === "asc" ? "▲" : "▼"
+              }}</span>
             </th>
+            <th>National ID</th>
             <th>Roles</th>
           </tr>
         </thead>
+
+        <!-- tbody — 5 colonnes seulement -->
         <tbody>
           <tr
             *ngFor="let person of persons"
@@ -64,13 +71,20 @@
           >
             <td class="fw-semibold">{{ person.lastName }}</td>
             <td>{{ person.firstName }}</td>
-            <td>{{ person.city || '—' }}</td>
-            <td>{{ person.nationalId || '—' }}</td>
-            <td>{{ person.city || '—' }}</td>
+            <td>{{ person.city || "—" }}</td>
+            <td>{{ person.nationalId || "—" }}</td>
             <td>
-              <span *ngIf="person.isOwner" class="badge bg-primary me-1">Owner</span>
-              <span *ngIf="person.isTenant" class="badge bg-success">Tenant</span>
-              <span *ngIf="!person.isOwner && !person.isTenant" class="text-muted small">—</span>
+              <span *ngIf="person.isOwner" class="badge bg-primary me-1"
+                >Owner</span
+              >
+              <span *ngIf="person.isTenant" class="badge bg-success"
+                >Tenant</span
+              >
+              <span
+                *ngIf="!person.isOwner && !person.isTenant"
+                class="text-muted small"
+                >—</span
+              >
             </td>
           </tr>
         </tbody>
@@ -78,18 +92,32 @@
     </div>
 
     <!-- Pagination -->
-    <div *ngIf="totalPages > 1" class="card-footer d-flex justify-content-between align-items-center">
+    <div
+      *ngIf="totalPages > 1"
+      class="card-footer d-flex justify-content-between align-items-center"
+    >
       <small class="text-muted">{{ totalElements }} person(s)</small>
       <nav>
         <ul class="pagination pagination-sm mb-0">
           <li class="page-item" [class.disabled]="currentPage === 0">
-            <button class="page-link" (click)="goToPage(currentPage - 1)">‹</button>
+            <button class="page-link" (click)="goToPage(currentPage - 1)">
+              ‹
+            </button>
           </li>
-          <li *ngFor="let p of pages" class="page-item" [class.active]="p === currentPage">
+          <li
+            *ngFor="let p of pages"
+            class="page-item"
+            [class.active]="p === currentPage"
+          >
             <button class="page-link" (click)="goToPage(p)">{{ p + 1 }}</button>
           </li>
-          <li class="page-item" [class.disabled]="currentPage === totalPages - 1">
-            <button class="page-link" (click)="goToPage(currentPage + 1)">›</button>
+          <li
+            class="page-item"
+            [class.disabled]="currentPage === totalPages - 1"
+          >
+            <button class="page-link" (click)="goToPage(currentPage + 1)">
+              ›
+            </button>
           </li>
         </ul>
       </nav>
