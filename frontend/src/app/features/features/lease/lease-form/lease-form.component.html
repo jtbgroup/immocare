@@ -1,42 +1,81 @@
 <!-- lease-form.component.html -->
-<div class="container py-4" style="max-width:860px;">
-  <h2 class="h4 mb-4">{{ isEditMode ? 'Edit Lease' : 'Create Lease' }}</h2>
+<div class="container py-4" style="max-width: 860px">
+  <h2 class="h4 mb-4">{{ isEditMode ? "Edit Lease" : "Create Lease" }}</h2>
 
-  <div *ngIf="isLoading" class="text-center py-5"><div class="spinner-border"></div></div>
+  <div *ngIf="isLoading" class="text-center py-5">
+    <div class="spinner-border"></div>
+  </div>
   <div *ngIf="errorMessage" class="alert alert-danger">{{ errorMessage }}</div>
 
   <form *ngIf="!isLoading" [formGroup]="form">
-
     <!-- Section 1: General -->
     <div class="card shadow-sm mb-3">
       <div class="card-header fw-semibold">1 — General</div>
       <div class="card-body">
         <div class="row g-3">
           <div class="col-md-4">
-            <label class="form-label">Signature Date <span class="text-danger">*</span></label>
-            <input type="date" class="form-control" formControlName="signatureDate" [class.is-invalid]="isInvalid('signatureDate')" />
+            <label class="form-label"
+              >Signature Date <span class="text-danger">*</span></label
+            >
+            <input
+              type="date"
+              class="form-control"
+              formControlName="signatureDate"
+              [class.is-invalid]="isInvalid('signatureDate')"
+            />
           </div>
           <div class="col-md-4">
-            <label class="form-label">Start Date <span class="text-danger">*</span></label>
-            <input type="date" class="form-control" formControlName="startDate" [class.is-invalid]="isInvalid('startDate')" />
+            <label class="form-label"
+              >Start Date <span class="text-danger">*</span></label
+            >
+            <input
+              type="date"
+              class="form-control"
+              formControlName="startDate"
+              [class.is-invalid]="isInvalid('startDate')"
+            />
           </div>
           <div class="col-md-4">
             <label class="form-label">End Date (computed)</label>
-            <input type="date" class="form-control" [value]="computedEndDate" readonly style="background:#f8f9fa;" />
+            <input
+              type="date"
+              class="form-control"
+              [value]="computedEndDate"
+              readonly
+              style="background: #f8f9fa"
+            />
           </div>
           <div class="col-md-4">
-            <label class="form-label">Lease Type <span class="text-danger">*</span></label>
+            <label class="form-label"
+              >Lease Type <span class="text-danger">*</span></label
+            >
             <select class="form-select" formControlName="leaseType">
-              <option *ngFor="let t of LEASE_TYPES" [value]="t">{{ LEASE_TYPE_LABELS[t] }}</option>
+              <option *ngFor="let t of LEASE_TYPES" [value]="t">
+                {{ LEASE_TYPE_LABELS[t] }}
+              </option>
             </select>
           </div>
           <div class="col-md-4">
-            <label class="form-label">Duration (months) <span class="text-danger">*</span></label>
-            <input type="number" class="form-control" formControlName="durationMonths" min="1" />
+            <label class="form-label"
+              >Duration (months) <span class="text-danger">*</span></label
+            >
+            <input
+              type="number"
+              class="form-control"
+              formControlName="durationMonths"
+              min="1"
+            />
           </div>
           <div class="col-md-4">
-            <label class="form-label">Notice Period (months) <span class="text-danger">*</span></label>
-            <input type="number" class="form-control" formControlName="noticePeriodMonths" min="1" />
+            <label class="form-label"
+              >Notice Period (months) <span class="text-danger">*</span></label
+            >
+            <input
+              type="number"
+              class="form-control"
+              formControlName="noticePeriodMonths"
+              min="1"
+            />
           </div>
         </div>
       </div>
@@ -48,12 +87,27 @@
       <div class="card-body">
         <div class="row g-3">
           <div class="col-md-4">
-            <label class="form-label">Monthly Rent (€) <span class="text-danger">*</span></label>
-            <input type="number" class="form-control" formControlName="monthlyRent" min="0.01" step="0.01" [class.is-invalid]="isInvalid('monthlyRent')" />
+            <label class="form-label"
+              >Monthly Rent (€) <span class="text-danger">*</span></label
+            >
+            <input
+              type="number"
+              class="form-control"
+              formControlName="monthlyRent"
+              min="0.01"
+              step="0.01"
+              [class.is-invalid]="isInvalid('monthlyRent')"
+            />
           </div>
           <div class="col-md-4">
             <label class="form-label">Monthly Charges (€)</label>
-            <input type="number" class="form-control" formControlName="monthlyCharges" min="0" step="0.01" />
+            <input
+              type="number"
+              class="form-control"
+              formControlName="monthlyCharges"
+              min="0"
+              step="0.01"
+            />
           </div>
           <div class="col-md-4">
             <label class="form-label">Charges Type</label>
@@ -64,7 +118,11 @@
           </div>
           <div class="col-12">
             <label class="form-label">Charges Description</label>
-            <input type="text" class="form-control" formControlName="chargesDescription" />
+            <input
+              type="text"
+              class="form-control"
+              formControlName="chargesDescription"
+            />
           </div>
         </div>
       </div>
@@ -77,22 +135,44 @@
         <div class="row g-3">
           <div class="col-md-4">
             <label class="form-label">Base Index Value</label>
-            <input type="number" class="form-control" formControlName="baseIndexValue" step="0.0001" />
+            <input
+              type="number"
+              class="form-control"
+              formControlName="baseIndexValue"
+              step="0.0001"
+            />
           </div>
           <div class="col-md-4">
             <label class="form-label">Base Index Month</label>
-            <input type="month" class="form-control" formControlName="baseIndexMonth" />
+            <input
+              type="month"
+              class="form-control"
+              formControlName="baseIndexMonth"
+            />
           </div>
           <div class="col-md-2">
             <label class="form-label">Anniversary Month</label>
-            <select class="form-select" formControlName="indexationAnniversaryMonth">
+            <select
+              class="form-select"
+              formControlName="indexationAnniversaryMonth"
+            >
               <option [value]="null">—</option>
-              <option *ngFor="let m of [1,2,3,4,5,6,7,8,9,10,11,12]" [value]="m">{{ m }}</option>
+              <option
+                *ngFor="let m of [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12]"
+                [value]="m"
+              >
+                {{ m }}
+              </option>
             </select>
           </div>
           <div class="col-md-2">
             <label class="form-label">Notice (days)</label>
-            <input type="number" class="form-control" formControlName="indexationNoticeDays" min="0" />
+            <input
+              type="number"
+              class="form-control"
+              formControlName="indexationNoticeDays"
+              min="0"
+            />
           </div>
         </div>
       </div>
@@ -105,11 +185,19 @@
         <div class="row g-3">
           <div class="col-md-6">
             <label class="form-label">SPF Finances Number</label>
-            <input type="text" class="form-control" formControlName="registrationSpf" />
+            <input
+              type="text"
+              class="form-control"
+              formControlName="registrationSpf"
+            />
           </div>
           <div class="col-md-6">
             <label class="form-label">Region Number</label>
-            <input type="text" class="form-control" formControlName="registrationRegion" />
+            <input
+              type="text"
+              class="form-control"
+              formControlName="registrationRegion"
+            />
           </div>
         </div>
       </div>
@@ -122,7 +210,13 @@
         <div class="row g-3">
           <div class="col-md-4">
             <label class="form-label">Deposit Amount (€)</label>
-            <input type="number" class="form-control" formControlName="depositAmount" min="0" step="0.01" />
+            <input
+              type="number"
+              class="form-control"
+              formControlName="depositAmount"
+              min="0"
+              step="0.01"
+            />
           </div>
           <div class="col-md-4">
             <label class="form-label">Deposit Type</label>
@@ -136,7 +230,11 @@
           </div>
           <div class="col-md-4">
             <label class="form-label">Deposit Reference</label>
-            <input type="text" class="form-control" formControlName="depositReference" />
+            <input
+              type="text"
+              class="form-control"
+              formControlName="depositReference"
+            />
           </div>
         </div>
       </div>
@@ -147,17 +245,32 @@
       <div class="card-header fw-semibold">6 — Tenant Insurance</div>
       <div class="card-body">
         <div class="form-check mb-3">
-          <input class="form-check-input" type="checkbox" formControlName="tenantInsuranceConfirmed" id="insuranceCheck" />
-          <label class="form-check-label" for="insuranceCheck">Insurance confirmed</label>
+          <input
+            class="form-check-input"
+            type="checkbox"
+            formControlName="tenantInsuranceConfirmed"
+            id="insuranceCheck"
+          />
+          <label class="form-check-label" for="insuranceCheck"
+            >Insurance confirmed</label
+          >
         </div>
         <div *ngIf="showInsuranceDetails" class="row g-3">
           <div class="col-md-6">
             <label class="form-label">Policy Reference</label>
-            <input type="text" class="form-control" formControlName="tenantInsuranceReference" />
+            <input
+              type="text"
+              class="form-control"
+              formControlName="tenantInsuranceReference"
+            />
           </div>
           <div class="col-md-4">
             <label class="form-label">Expiry Date</label>
-            <input type="date" class="form-control" formControlName="tenantInsuranceExpiry" />
+            <input
+              type="date"
+              class="form-control"
+              formControlName="tenantInsuranceExpiry"
+            />
           </div>
         </div>
       </div>
@@ -168,34 +281,77 @@
       <div class="card-header fw-semibold">7 — Tenants</div>
       <div class="card-body">
         <!-- Current tenants -->
-        <div *ngFor="let t of pendingTenants; let i = index" class="d-flex align-items-center gap-3 mb-2 p-2 border rounded">
-          <span class="fw-semibold">{{ t.person.lastName }} {{ t.person.firstName }}</span>
-          <select class="form-select form-select-sm w-auto" [(ngModel)]="t.role" [ngModelOptions]="{standalone: true}">
+        <div
+          *ngFor="let t of pendingTenants; let i = index"
+          class="d-flex align-items-center gap-3 mb-2 p-2 border rounded"
+        >
+          <span class="fw-semibold"
+            >{{ t.person.lastName }} {{ t.person.firstName }}</span
+          >
+          <select
+            class="form-select form-select-sm w-auto"
+            [(ngModel)]="t.role"
+            [ngModelOptions]="{ standalone: true }"
+          >
             <option value="PRIMARY">Primary</option>
             <option value="CO_TENANT">Co-Tenant</option>
             <option value="GUARANTOR">Guarantor</option>
           </select>
-          <button type="button" class="btn btn-sm btn-outline-danger ms-auto" (click)="removeTenantFromForm(i)">✕</button>
+          <button
+            type="button"
+            class="btn btn-sm btn-outline-danger ms-auto"
+            (click)="removeTenantFromForm(i)"
+          >
+            ✕
+          </button>
         </div>
-        <div *ngIf="!hasPrimaryTenant()" class="text-danger small mb-2">At least one PRIMARY tenant is required.</div>
+        <div *ngIf="!hasPrimaryTenant()" class="text-danger small mb-2">
+          At least one PRIMARY tenant is required.
+        </div>
         <!-- Person Picker to add -->
-        <app-person-picker label="Add Tenant" [required]="false" (personSelected)="addTenantToForm($event)"></app-person-picker>
+        <app-person-picker
+          label="Add Tenant"
+          [required]="false"
+          (personSelected)="addTenantToForm($event)"
+        ></app-person-picker>
       </div>
     </div>
 
     <!-- Actions -->
     <div class="d-flex gap-2 flex-wrap">
-      <button type="button" class="btn btn-outline-primary" (click)="saveAsDraft()" [disabled]="isSaving">
-        <span *ngIf="isSaving" class="spinner-border spinner-border-sm me-1"></span>
+      <button
+        type="button"
+        class="btn btn-outline-primary"
+        (click)="saveAsDraft()"
+        [disabled]="isSaving"
+      >
+        <span
+          *ngIf="isSaving"
+          class="spinner-border spinner-border-sm me-1"
+        ></span>
         Save as Draft
       </button>
-      <button *ngIf="!isEditMode" type="button" class="btn btn-primary" (click)="saveAndActivate()" [disabled]="isSaving">
+      <button
+        *ngIf="!isEditMode"
+        type="button"
+        class="btn btn-primary"
+        (click)="saveAndActivate()"
+        [disabled]="isSaving"
+      >
         Save &amp; Activate
       </button>
-      <button *ngIf="isEditMode" type="button" class="btn btn-primary" (click)="saveAsDraft()" [disabled]="isSaving">
+      <button
+        *ngIf="isEditMode"
+        type="button"
+        class="btn btn-primary"
+        (click)="saveAsDraft()"
+        [disabled]="isSaving"
+      >
         Save Changes
       </button>
-      <button type="button" class="btn btn-secondary" (click)="cancel()">Cancel</button>
+      <button type="button" class="btn btn-secondary" (click)="cancel()">
+        Cancel
+      </button>
     </div>
   </form>
 </div>
