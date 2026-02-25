@@ -1,0 +1,288 @@
+<section class="room-section">
+  <!-- Section header -->
+  <div class="section-header">
+    <h3>Rooms</h3>
+    <div class="header-actions">
+      <button class="btn btn-sm btn-primary" (click)="openAddForm()">
+        Add Room
+      </button>
+      <button class="btn btn-sm btn-secondary" (click)="openQuickAdd()">
+        Quick Add
+      </button>
+    </div>
+  </div>
+
+  @if (loading) {
+    <div class="loading">Loading rooms…</div>
+  }
+
+  @if (errorMessage) {
+    <div class="alert alert-error">{{ errorMessage }}</div>
+  }
+
+  @if (successMessage) {
+    <div class="alert alert-success">{{ successMessage }}</div>
+  }
+
+  @if (!loading && rooms.length === 0 && !showAddForm && !showQuickAdd) {
+    <p class="empty-state">No rooms defined yet.</p>
+  }
+
+  <!-- Room table -->
+  @if (rooms.length > 0 || editingRoomId !== null) {
+    <div class="table-wrapper">
+      <table class="rooms-table">
+        <thead>
+          <tr>
+            <th>Type</th>
+            <th>Surface (m²)</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (room of rooms; track room.id) {
+            @if (editingRoomId !== room.id) {
+              <tr>
+                <td>{{ roomLabel(room.roomType) }}</td>
+                <td>{{ room.approximateSurface | number: "1.2-2" }}</td>
+                <td class="actions">
+                  <button
+                    class="btn-icon"
+                    title="Edit"
+                    (click)="startEdit(room)"
+                    [disabled]="saving"
+                  >
+                    ✏️
+                  </button>
+                  <button
+                    class="btn-icon"
+                    title="Delete"
+                    (click)="requestDelete(room)"
+                    [disabled]="saving"
+                  >
+                    🗑️
+                  </button>
+                </td>
+              </tr>
+            } @else {
+              <tr>
+                <td>
+                  <select [formControl]="editRoomType" class="select-inline">
+                    @for (t of allTypes; track t) {
+                      <option [value]="t">{{ roomLabel(t) }}</option>
+                    }
+                  </select>
+                  @if (editRoomType.invalid && editRoomType.touched) {
+                    <span class="field-error">Type is required</span>
+                  }
+                </td>
+                <td>
+                  <input
+                    type="number"
+                    [formControl]="editApproximateSurface"
+                    class="input-inline"
+                    min="0.01"
+                    max="999.99"
+                    step="0.01"
+                  />
+                  @if (
+                    editApproximateSurface.invalid &&
+                    editApproximateSurface.touched
+                  ) {
+                    <span class="field-error"
+                      >Surface must be between 0.01 and 999.99</span
+                    >
+                  }
+                </td>
+                <td class="actions">
+                  <button
+                    class="btn btn-sm btn-primary"
+                    (click)="saveEdit(room)"
+                    [disabled]="saving"
+                  >
+                    {{ saving ? "Saving…" : "Save" }}
+                  </button>
+                  <button
+                    class="btn btn-sm btn-secondary"
+                    (click)="cancelEdit()"
+                  >
+                    Cancel
+                  </button>
+                </td>
+              </tr>
+            }
+          }
+        </tbody>
+        <tfoot>
+          <tr class="total-row">
+            <td><strong>Total</strong></td>
+            <td>
+              <strong>{{ totalSurface | number: "1.2-2" }} m²</strong>
+            </td>
+            <td></td>
+          </tr>
+        </tfoot>
+      </table>
+    </div>
+  }
+
+  <!-- Add single room form -->
+  @if (showAddForm) {
+    <div class="form-card">
+      <h4>Add Room</h4>
+      <form [formGroup]="addForm" (ngSubmit)="saveAdd()">
+        <div class="form-row">
+          <div class="form-field">
+            <label>Type <span class="required">*</span></label>
+            <select
+              formControlName="roomType"
+              [class.invalid]="isInvalidAdd('roomType')"
+            >
+              <option value="">— Select —</option>
+              @for (t of allTypes; track t) {
+                <option [value]="t">{{ roomLabel(t) }}</option>
+              }
+            </select>
+            @if (isInvalidAdd("roomType")) {
+              <span class="field-error">Type is required</span>
+            }
+          </div>
+          <div class="form-field">
+            <label>Surface (m²) <span class="required">*</span></label>
+            <input
+              type="number"
+              formControlName="approximateSurface"
+              [class.invalid]="isInvalidAdd('approximateSurface')"
+              min="0.01"
+              max="999.99"
+              step="0.01"
+              placeholder="e.g. 15.50"
+            />
+            @if (isInvalidAdd("approximateSurface")) {
+              <span class="field-error"
+                >Surface must be between 0.01 and 999.99</span
+              >
+            }
+          </div>
+        </div>
+        <div class="form-actions">
+          <button type="submit" class="btn btn-primary" [disabled]="saving">
+            {{ saving ? "Saving…" : "Save" }}
+          </button>
+          <button type="button" class="btn btn-secondary" (click)="cancelAdd()">
+            Cancel
+          </button>
+        </div>
+      </form>
+    </div>
+  }
+
+  <!-- Quick Add form -->
+  @if (showQuickAdd) {
+    <div class="form-card">
+      <h4>Quick Add Rooms</h4>
+      @if (quickError) {
+        <div class="form-error">{{ quickError }}</div>
+      }
+      <form [formGroup]="quickForm" (ngSubmit)="saveQuickAdd()">
+        <table class="quick-table">
+          <thead>
+            <tr>
+              <th>Type</th>
+              <th>Surface (m²)</th>
+              <th></th>
+            </tr>
+          </thead>
+          <tbody formArrayName="rows">
+            @for (row of quickRows.controls; track $index; let i = $index) {
+              <tr [formGroupName]="i">
+                <td>
+                  <select
+                    formControlName="roomType"
+                    [class.invalid]="isRowInvalid(i, 'roomType')"
+                  >
+                    <option value="">— Select —</option>
+                    @for (t of allTypes; track t) {
+                      <option [value]="t">{{ roomLabel(t) }}</option>
+                    }
+                  </select>
+                </td>
+                <td>
+                  <input
+                    type="number"
+                    formControlName="approximateSurface"
+                    [class.invalid]="isRowInvalid(i, 'approximateSurface')"
+                    min="0.01"
+                    max="999.99"
+                    step="0.01"
+                    placeholder="m²"
+                  />
+                </td>
+                <td>
+                  <button
+                    type="button"
+                    class="btn-icon"
+                    (click)="removeQuickRow(i)"
+                    [disabled]="quickRows.length <= 1"
+                    title="Remove row"
+                  >
+                    ✕
+                  </button>
+                </td>
+              </tr>
+            }
+          </tbody>
+        </table>
+        <div class="quick-footer">
+          <button
+            type="button"
+            class="btn btn-sm btn-secondary"
+            (click)="addQuickRow()"
+            [disabled]="quickRows.length >= 20"
+          >
+            + Add Row
+          </button>
+          <span class="row-count">{{ quickRows.length }} / 20 rows</span>
+        </div>
+        <div class="form-actions">
+          <button type="submit" class="btn btn-primary" [disabled]="saving">
+            {{ saving ? "Saving…" : "Save All" }}
+          </button>
+          <button
+            type="button"
+            class="btn btn-secondary"
+            (click)="cancelQuickAdd()"
+          >
+            Cancel
+          </button>
+        </div>
+      </form>
+    </div>
+  }
+
+  <!-- Delete confirmation dialog -->
+  @if (roomToDelete) {
+    <div class="dialog-overlay">
+      <div class="dialog">
+        <h4>Delete this room?</h4>
+        <p>
+          <strong>{{ roomLabel(roomToDelete.roomType) }}</strong>
+          — {{ roomToDelete.approximateSurface | number: "1.2-2" }} m²
+        </p>
+        <p class="warning">This action cannot be undone.</p>
+        <div class="dialog-actions">
+          <button class="btn btn-secondary" (click)="cancelDelete()">
+            Cancel
+          </button>
+          <button
+            class="btn btn-danger"
+            (click)="confirmDelete()"
+            [disabled]="deleting"
+          >
+            {{ deleting ? "Deleting…" : "Confirm" }}
+          </button>
+        </div>
+      </div>
+    </div>
+  }
+</section>

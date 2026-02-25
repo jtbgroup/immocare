@@ -1,0 +1,152 @@
+// Shared styles (loading)
+// come from global styles.scss partials.
+
+// ─── Close button ─────────────────────────────────────────────────────────────
+
+.btn-close {
+  background: none;
+  border: none;
+  font-size: 1.1rem;
+  cursor: pointer;
+  color: #555;
+
+  &:hover {
+    color: #000;
+  }
+}
+
+// ─── Panel wrapper ────────────────────────────────────────────────────────────
+
+.history-panel {
+  border: 1px solid #e0e0e0;
+  border-radius: 6px;
+  padding: 1.25rem;
+  margin-top: 1rem;
+  background: #fff;
+}
+
+.history-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1rem;
+
+  h4 {
+    margin: 0;
+    font-size: 1rem;
+    font-weight: 600;
+  }
+}
+
+// ─── Improvement summary ──────────────────────────────────────────────────────
+
+.improvement-summary {
+  padding: 0.75rem 1rem;
+  background: #f5f5f5;
+  border-radius: 6px;
+  margin-bottom: 1rem;
+  font-size: 0.9rem;
+}
+
+// ─── History table ────────────────────────────────────────────────────────────
+
+.history-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.9rem;
+
+  th,
+  td {
+    padding: 0.6rem 0.8rem;
+    border-bottom: 1px solid #e0e0e0;
+    text-align: left;
+  }
+
+  th {
+    font-weight: 600;
+    background: #fafafa;
+  }
+}
+
+// ─── Score badge ──────────────────────────────────────────────────────────────
+
+.score-badge {
+  display: inline-block;
+  padding: 0.2rem 0.6rem;
+  border-radius: 4px;
+  font-weight: 700;
+  font-size: 0.85rem;
+}
+
+// ─── Status badge ─────────────────────────────────────────────────────────────
+
+.status-badge {
+  display: inline-block;
+  padding: 0.15rem 0.5rem;
+  border-radius: 4px;
+  font-size: 0.78rem;
+  font-weight: 600;
+}
+
+.status-current {
+  background: #e3f2fd;
+  color: #1565c0;
+}
+.status-historical {
+  background: #f5f5f5;
+  color: #616161;
+}
+.status-expired {
+  background: #ffebee;
+  color: #c62828;
+}
+
+// ─── Improvement indicators ───────────────────────────────────────────────────
+
+.improved {
+  color: #2e7d32;
+  font-weight: 700;
+}
+.degraded {
+  color: #c62828;
+  font-weight: 700;
+}
+.unchanged {
+  color: #9e9e9e;
+  font-weight: 700;
+}
+
+// ─── Empty state ──────────────────────────────────────────────────────────────
+
+.no-data {
+  color: #888;
+  font-style: italic;
+  padding: 0.5rem 0;
+}
+
+// ─── Row action buttons ───────────────────────────────────────────────────────
+
+.row-actions {
+  white-space: nowrap;
+  text-align: right;
+}
+
+.icon-btn-sm {
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-size: 0.85rem;
+  padding: 0.2rem 0.3rem;
+  border-radius: 4px;
+  opacity: 0.6;
+  transition: opacity 0.15s;
+
+  &:hover {
+    opacity: 1;
+    background: #f5f5f5;
+  }
+
+  &.icon-btn-delete:hover {
+    background: #ffebee;
+  }
+}

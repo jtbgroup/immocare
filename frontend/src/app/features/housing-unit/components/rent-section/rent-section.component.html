@@ -1,0 +1,295 @@
+<section class="rent-section">
+  <!-- Header -->
+  <div class="section-header">
+    <h3>Rent</h3>
+    @if (!showForm && !loading) {
+      <button class="btn btn-sm btn-primary" (click)="openAddForm()">
+        + Set Rent
+      </button>
+    }
+  </div>
+
+  @if (loading) {
+    <div class="loading">Loading…</div>
+  }
+
+  <!-- Empty state -->
+  @if (!loading && !currentRent && !showForm) {
+    <p class="no-data">No rent recorded.</p>
+  }
+
+  <!-- Current rent card -->
+  @if (currentRent && !showForm) {
+    <div class="rent-card">
+      <div class="rent-amount-badge">
+        €{{ currentRent.monthlyRent | number: "1.0-0" }}
+      </div>
+      <div class="rent-details">
+        <div class="rent-date">
+          Effective from: <strong>{{ currentRent.effectiveFrom }}</strong>
+        </div>
+        @if (lastChange) {
+          <div
+            class="rent-change"
+            [class.positive]="lastChange.isIncrease"
+            [class.negative]="!lastChange.isIncrease"
+          >
+            {{ lastChange.isIncrease ? "↑" : "↓" }}
+            {{ lastChange.isIncrease ? "+" : "" }}€{{
+              lastChange.amount | number: "1.2-2"
+            }}
+            ({{ lastChange.isIncrease ? "+" : "" }}{{ lastChange.percentage }}%)
+            vs previous
+          </div>
+        }
+      </div>
+    </div>
+  }
+
+  <!-- View History link -->
+  @if (currentRent && !showForm) {
+    <div class="rent-actions">
+      <button class="btn-link" (click)="toggleHistory()">
+        {{ showHistory ? "Hide History" : "View History" }}
+      </button>
+    </div>
+  }
+
+  <!-- Inline form -->
+  @if (showForm) {
+    <div class="rent-form-panel">
+      <h4>{{ editingRecord ? "Edit Rent" : "Add Rent" }}</h4>
+
+      @if (editingRecord) {
+        <div class="current-read-only">
+          <span>Editing record from:</span>
+          <strong>{{ editingRecord.effectiveFrom }}</strong>
+        </div>
+      }
+
+      <form (ngSubmit)="saveForm()">
+        <div class="form-field">
+          <label>Monthly Rent (€) <span class="required">*</span></label>
+          <input
+            type="number"
+            step="0.01"
+            min="0.01"
+            [(ngModel)]="formRent"
+            name="monthlyRent"
+            required
+            (input)="onAmountChange()"
+            [class.invalid]="submitted && (!formRent || formRent <= 0)"
+          />
+          @if (submitted && (!formRent || formRent <= 0)) {
+            <span class="field-error">Rent must be positive</span>
+          }
+          @if (editingRecord && formRent && formRent > 0 && previewChange) {
+            <span
+              class="change-preview"
+              [class.positive]="previewChange.isIncrease"
+              [class.negative]="!previewChange.isIncrease"
+            >
+              {{ previewChange.isIncrease ? "+" : "" }}€{{
+                previewChange.amount | number: "1.2-2"
+              }}
+              ({{ previewChange.isIncrease ? "+" : ""
+              }}{{ previewChange.percentage }}%)
+            </span>
+          }
+        </div>
+
+        <div class="form-field">
+          <label>Effective From <span class="required">*</span></label>
+          <input
+            type="date"
+            [(ngModel)]="formDate"
+            name="effectiveFrom"
+            required
+            [class.invalid]="submitted && !formDate"
+          />
+          @if (submitted && !formDate) {
+            <span class="field-error">Date is required</span>
+          }
+        </div>
+
+        <div class="form-field">
+          <label>Notes (optional)</label>
+          <div class="notes-templates">
+            <button
+              type="button"
+              class="tag"
+              (click)="applyTemplate('Annual indexation')"
+            >
+              Annual indexation
+            </button>
+            <button
+              type="button"
+              class="tag"
+              (click)="applyTemplate('Market adjustment')"
+            >
+              Market adjustment
+            </button>
+            <button
+              type="button"
+              class="tag"
+              (click)="applyTemplate('After renovation')"
+            >
+              After renovation
+            </button>
+            <button
+              type="button"
+              class="tag"
+              (click)="applyTemplate('Tenant negotiation')"
+            >
+              Tenant negotiation
+            </button>
+          </div>
+          <textarea
+            [(ngModel)]="formNotes"
+            name="notes"
+            rows="2"
+            maxlength="500"
+            placeholder="Optional — reason for this change"
+          ></textarea>
+        </div>
+
+        @if (saveError) {
+          <div class="alert alert-error">{{ saveError }}</div>
+        }
+
+        <div class="form-actions">
+          <button type="submit" class="btn btn-primary" [disabled]="saving">
+            {{ saving ? "Saving…" : "Save" }}
+          </button>
+          <button
+            type="button"
+            class="btn btn-secondary"
+            (click)="closeForm()"
+            [disabled]="saving"
+          >
+            Cancel
+          </button>
+        </div>
+      </form>
+    </div>
+  }
+
+  <!-- Delete confirmation banner -->
+  @if (deleteTarget && !showForm) {
+    <div class="warning-banner">
+      Delete rent record from
+      <strong>{{ deleteTarget.effectiveFrom }}</strong> (€{{
+        deleteTarget.monthlyRent | number: "1.2-2"
+      }})?
+      <div class="form-actions">
+        <button
+          class="btn btn-danger btn-sm"
+          (click)="confirmDelete()"
+          [disabled]="saving"
+        >
+          {{ saving ? "Deleting…" : "Yes, delete" }}
+        </button>
+        <button
+          class="btn btn-secondary btn-sm"
+          (click)="deleteTarget = null"
+          [disabled]="saving"
+        >
+          Cancel
+        </button>
+      </div>
+    </div>
+  }
+
+  <!-- History panel -->
+  @if (showHistory && !showForm) {
+    <div class="history-panel">
+      <div class="history-header">
+        <h4>Rent History</h4>
+        <button class="btn-close" (click)="toggleHistory()">✕</button>
+      </div>
+
+      @if (totalChange) {
+        <div
+          class="improvement-summary"
+          [class.improved]="totalChange.isIncrease"
+          [class.degraded]="!totalChange.isIncrease"
+        >
+          Total since first rent:
+          {{ totalChange.isIncrease ? "+" : "" }}€{{
+            totalChange.amount | number: "1.2-2"
+          }}
+          ({{ totalChange.isIncrease ? "+" : "" }}{{ totalChange.percentage }}%)
+        </div>
+      }
+
+      @if (history.length === 0) {
+        <p class="no-data">No history available.</p>
+      }
+
+      @if (history.length > 0) {
+        <table class="history-table">
+          <thead>
+            <tr>
+              <th>Monthly Rent</th>
+              <th>From</th>
+              <th>To</th>
+              <th>Duration</th>
+              <th>Change</th>
+              <th>Notes</th>
+              <th></th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (row of history; track row.id; let i = $index) {
+              <tr>
+                <td>
+                  <strong>€{{ row.monthlyRent | number: "1.2-2" }}</strong>
+                </td>
+                <td>{{ row.effectiveFrom }}</td>
+                <td>{{ row.effectiveTo ?? "Current" }}</td>
+                <td>
+                  {{ row.durationMonths }} month{{
+                    row.durationMonths !== 1 ? "s" : ""
+                  }}
+                </td>
+                <td>
+                  @if (rowChanges[i]; as change) {
+                    <span
+                      [class.positive]="change.isIncrease"
+                      [class.negative]="!change.isIncrease"
+                    >
+                      {{ change.isIncrease ? "↑ +" : "↓ " }}€{{
+                        change.amount | number: "1.2-2"
+                      }}
+                      ({{ change.isIncrease ? "+" : ""
+                      }}{{ change.percentage }}%)
+                    </span>
+                  } @else {
+                    —
+                  }
+                </td>
+                <td>{{ row.notes ?? "—" }}</td>
+                <td class="row-actions">
+                  <button
+                    class="icon-btn-sm"
+                    title="Edit"
+                    (click)="openEditForm(row)"
+                  >
+                    ✏️
+                  </button>
+                  <button
+                    class="icon-btn-sm icon-btn-delete"
+                    title="Delete"
+                    (click)="askDelete(row)"
+                  >
+                    🗑️
+                  </button>
+                </td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      }
+    </div>
+  }
+</section>

@@ -1,0 +1,102 @@
+// Shared styles (btn, btn-sm, btn-primary, btn-secondary, btn-link,
+// form-group, form-actions, required, field-error, alert, alert-error, loading)
+// come from global styles.scss partials.
+
+// ─── Section layout ───────────────────────────────────────────────────────────
+
+.section-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1rem;
+}
+
+// ─── PEB card ─────────────────────────────────────────────────────────────────
+
+.peb-card {
+  display: flex;
+  align-items: flex-start;
+  gap: 1rem;
+  padding: 1rem;
+  border: 1px solid #e0e0e0;
+  border-radius: 6px;
+  background: #fafafa;
+}
+
+.peb-score-badge {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 3rem;
+  height: 3rem;
+  border-radius: 6px;
+  font-size: 1.1rem;
+  font-weight: 700;
+  flex-shrink: 0;
+}
+
+.peb-details {
+  flex: 1;
+  line-height: 1.8;
+}
+
+.peb-date,
+.peb-validity,
+.peb-cert {
+  font-size: 0.9rem;
+}
+
+// ─── Expiry badge ─────────────────────────────────────────────────────────────
+
+.badge {
+  display: inline-block;
+  padding: 0.15rem 0.5rem;
+  border-radius: 4px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  margin-left: 0.5rem;
+}
+
+.badge-valid {
+  background: #e8f5e9;
+  color: #2e7d32;
+}
+.badge-warning {
+  background: #fff3e0;
+  color: #e65100;
+}
+.badge-expired {
+  background: #ffebee;
+  color: #c62828;
+}
+.badge-nodate {
+  background: #f5f5f5;
+  color: #757575;
+}
+
+// ─── Actions row ──────────────────────────────────────────────────────────────
+
+.peb-actions {
+  margin-top: 0.5rem;
+}
+
+// ─── Empty state ──────────────────────────────────────────────────────────────
+
+.no-data {
+  color: #888;
+  font-style: italic;
+}
+
+// ─── Inline form panel ────────────────────────────────────────────────────────
+
+.peb-form-panel {
+  border: 1px solid #e0e0e0;
+  border-radius: 6px;
+  padding: 1.25rem;
+  margin-top: 1rem;
+  background: #fff;
+
+  h4 {
+    margin: 0 0 1rem;
+  }
+}
