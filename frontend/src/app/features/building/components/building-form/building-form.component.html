@@ -1,143 +1,147 @@
 <div class="building-form-container">
-  <div class="header">
-    <h1>{{ isEditMode ? "Edit Building" : "Create Building" }}</h1>
+  <!-- Header -->
+  <div class="details-content">
+    <div class="header">
+      <h1>{{ isEditMode ? "Edit Building" : "Create Building" }}</h1>
+    </div>
   </div>
 
-  <!-- Error Message -->
+  <!-- Error -->
   <div *ngIf="error" class="alert alert-error">{{ error }}</div>
 
-  <!-- Loading State -->
+  <!-- Loading -->
   <div *ngIf="loading && isEditMode" class="loading">Loading building...</div>
 
   <!-- Form -->
-  <form
-    [formGroup]="buildingForm"
-    (ngSubmit)="onSubmit()"
-    *ngIf="!loading || !isEditMode"
-  >
-    <div class="form-group">
-      <label for="name">Building Name <span class="required">*</span></label>
-      <input
-        type="text"
-        id="name"
-        formControlName="name"
-        [class.error]="
-          hasError('name', 'required') || hasError('name', 'maxlength')
-        "
-      />
-      <div
-        *ngIf="hasError('name', 'required') || hasError('name', 'maxlength')"
-        class="error-message"
-      >
-        {{ getErrorMessage("name") }}
-      </div>
-    </div>
-
-    <div class="form-group">
-      <label for="streetAddress"
-        >Street Address <span class="required">*</span></label
-      >
-      <input
-        type="text"
-        id="streetAddress"
-        formControlName="streetAddress"
-        [class.error]="
-          hasError('streetAddress', 'required') ||
-          hasError('streetAddress', 'maxlength')
-        "
-      />
-      <div
-        *ngIf="
-          hasError('streetAddress', 'required') ||
-          hasError('streetAddress', 'maxlength')
-        "
-        class="error-message"
-      >
-        {{ getErrorMessage("streetAddress") }}
-      </div>
-    </div>
-
-    <div class="form-row">
+  <div class="form-card" *ngIf="!loading || !isEditMode">
+    <form [formGroup]="buildingForm" (ngSubmit)="onSubmit()">
       <div class="form-group">
-        <label for="postalCode"
-          >Postal Code <span class="required">*</span></label
+        <label for="name">Building Name <span class="required">*</span></label>
+        <input
+          type="text"
+          id="name"
+          formControlName="name"
+          [class.error]="
+            hasError('name', 'required') || hasError('name', 'maxlength')
+          "
+        />
+        <span
+          *ngIf="hasError('name', 'required') || hasError('name', 'maxlength')"
+          class="error-message"
+        >
+          {{ getErrorMessage("name") }}
+        </span>
+      </div>
+
+      <div class="form-group">
+        <label for="streetAddress"
+          >Street Address <span class="required">*</span></label
         >
         <input
           type="text"
-          id="postalCode"
-          formControlName="postalCode"
+          id="streetAddress"
+          formControlName="streetAddress"
           [class.error]="
-            hasError('postalCode', 'required') ||
-            hasError('postalCode', 'maxlength')
+            hasError('streetAddress', 'required') ||
+            hasError('streetAddress', 'maxlength')
           "
         />
-        <div
+        <span
           *ngIf="
-            hasError('postalCode', 'required') ||
-            hasError('postalCode', 'maxlength')
+            hasError('streetAddress', 'required') ||
+            hasError('streetAddress', 'maxlength')
           "
           class="error-message"
         >
-          {{ getErrorMessage("postalCode") }}
+          {{ getErrorMessage("streetAddress") }}
+        </span>
+      </div>
+
+      <div class="form-row">
+        <div class="form-group">
+          <label for="postalCode"
+            >Postal Code <span class="required">*</span></label
+          >
+          <input
+            type="text"
+            id="postalCode"
+            formControlName="postalCode"
+            [class.error]="
+              hasError('postalCode', 'required') ||
+              hasError('postalCode', 'maxlength')
+            "
+          />
+          <span
+            *ngIf="
+              hasError('postalCode', 'required') ||
+              hasError('postalCode', 'maxlength')
+            "
+            class="error-message"
+          >
+            {{ getErrorMessage("postalCode") }}
+          </span>
+        </div>
+
+        <div class="form-group">
+          <label for="city">City <span class="required">*</span></label>
+          <input
+            type="text"
+            id="city"
+            formControlName="city"
+            [class.error]="
+              hasError('city', 'required') || hasError('city', 'maxlength')
+            "
+          />
+          <span
+            *ngIf="
+              hasError('city', 'required') || hasError('city', 'maxlength')
+            "
+            class="error-message"
+          >
+            {{ getErrorMessage("city") }}
+          </span>
         </div>
       </div>
 
       <div class="form-group">
-        <label for="city">City <span class="required">*</span></label>
+        <label for="country">Country <span class="required">*</span></label>
         <input
           type="text"
-          id="city"
-          formControlName="city"
+          id="country"
+          formControlName="country"
           [class.error]="
-            hasError('city', 'required') || hasError('city', 'maxlength')
+            hasError('country', 'required') || hasError('country', 'maxlength')
           "
         />
-        <div
-          *ngIf="hasError('city', 'required') || hasError('city', 'maxlength')"
+        <span
+          *ngIf="
+            hasError('country', 'required') || hasError('country', 'maxlength')
+          "
           class="error-message"
         >
-          {{ getErrorMessage("city") }}
-        </div>
+          {{ getErrorMessage("country") }}
+        </span>
       </div>
-    </div>
 
-    <div class="form-group">
-      <label for="country">Country <span class="required">*</span></label>
-      <input
-        type="text"
-        id="country"
-        formControlName="country"
-        [class.error]="
-          hasError('country', 'required') || hasError('country', 'maxlength')
-        "
-      />
-      <div
-        *ngIf="
-          hasError('country', 'required') || hasError('country', 'maxlength')
-        "
-        class="error-message"
-      >
-        {{ getErrorMessage("country") }}
+      <div class="form-group">
+        <app-person-picker
+          label="Owner"
+          [required]="false"
+          formControlName="owner"
+        ></app-person-picker>
+        <small class="help-text"
+          >Optional — search by name or national ID</small
+        >
       </div>
-    </div>
 
-    <!-- Owner — PersonPicker via ControlValueAccessor (formControlName) -->
-    <div class="form-group">
-      <app-person-picker
-        label="Owner"
-        [required]="false"
-        formControlName="owner"
-      ></app-person-picker>
-      <small class="help-text">Optional — search by name or national ID</small>
-    </div>
-
-    <div class="form-actions">
-      <button type="button" class="btn btn-secondary" (click)="onCancel()">
-        Cancel
-      </button>
-      <button type="submit" class="btn btn-primary" [disabled]="loading">
-        {{ loading ? "Saving..." : "Save" }}
-      </button>
-    </div>
-  </form>
+      <div class="form-actions">
+        <button type="button" class="btn btn-secondary" (click)="onCancel()">
+          Cancel
+        </button>
+        <button type="submit" class="btn btn-primary" [disabled]="loading">
+          {{ loading ? "Saving..." : "Save" }}
+        </button>
+      </div>
+    </form>
+  </div>
 </div>

@@ -1,107 +1,119 @@
-<div class="details-container" *ngIf="unit">
+<div class="unit-details-container" *ngIf="unit">
+  <!-- Breadcrumb -->
+  <nav class="breadcrumb" aria-label="breadcrumb">
+    <a [routerLink]="['/buildings', unit.buildingId]">{{
+      unit.buildingName
+    }}</a>
+    <span class="breadcrumb-separator">›</span>
+    <span>Unit {{ unit.unitNumber }}</span>
+  </nav>
+
   <!-- Header -->
-  <div class="details-header">
-    <div>
-      <a [routerLink]="['/buildings', unit.buildingId]" class="breadcrumb">{{
-        unit.buildingName
-      }}</a>
-      <span class="separator">›</span>
-      <h2>Unit {{ unit.unitNumber }}</h2>
-    </div>
-    <div class="header-actions">
-      <button class="btn btn-secondary" (click)="edit()">Edit</button>
-      <button class="btn btn-danger" (click)="confirmDelete()">Delete</button>
+  <div class="details-content">
+    <div class="header">
+      <h1>Unit {{ unit.unitNumber }}</h1>
+      <div class="actions">
+        <button class="btn btn-secondary" (click)="edit()">Edit</button>
+        <button class="btn btn-danger" (click)="confirmDelete()">Delete</button>
+      </div>
     </div>
   </div>
 
-  <!-- Info section -->
-  <section>
-    <h3>Information</h3>
+  <!-- Information -->
+  <div class="info-card">
+    <h2>Information</h2>
     <div class="info-grid">
-      <div>
+      <div class="info-item">
         <label>Unit Number</label>
-        <span>{{ unit.unitNumber }}</span>
+        <p>{{ unit.unitNumber }}</p>
       </div>
-      <div>
+      <div class="info-item">
         <label>Floor</label>
-        <span>{{ unit.floor }}</span>
+        <p>{{ unit.floor }}</p>
       </div>
-      <div *ngIf="unit.landingNumber">
+      <div class="info-item" *ngIf="unit.landingNumber">
         <label>Landing</label>
-        <span>{{ unit.landingNumber }}</span>
+        <p>{{ unit.landingNumber }}</p>
       </div>
-      <div *ngIf="unit.totalSurface">
+      <div class="info-item" *ngIf="unit.totalSurface">
         <label>Total Surface</label>
-        <span>{{ unit.totalSurface }} m²</span>
+        <p>{{ unit.totalSurface }} m²</p>
       </div>
-      <div>
+      <div class="info-item">
         <label>Owner</label>
-        <span>{{ unit.ownerName ?? "—" }}</span>
+        <p>{{ unit.ownerName ?? "—" }}</p>
       </div>
-      <div *ngIf="unit.hasTerrace">
+      <div class="info-item" *ngIf="unit.hasTerrace">
         <label>Terrace</label>
-        <span>
+        <p>
           {{ unit.terraceSurface ? unit.terraceSurface + " m²" : "—" }}
           {{ unit.terraceOrientation ? " · " + unit.terraceOrientation : "" }}
-        </span>
+        </p>
       </div>
-      <div *ngIf="unit.hasGarden">
+      <div class="info-item" *ngIf="unit.hasGarden">
         <label>Garden</label>
-        <span>
+        <p>
           {{ unit.gardenSurface ? unit.gardenSurface + " m²" : "—" }}
           {{ unit.gardenOrientation ? " · " + unit.gardenOrientation : "" }}
-        </span>
+        </p>
       </div>
     </div>
-  </section>
+  </div>
 
-  <!-- Rooms section — UC003 -->
-  <section>
+  <!-- Rooms — UC003 -->
+  <div class="info-card">
     <app-room-section [unitId]="unit.id"></app-room-section>
-  </section>
+  </div>
 
-  <!-- PEB section — UC004 -->
-  <section>
+  <!-- PEB — UC004 -->
+  <div class="info-card">
     <app-peb-section [unitId]="unit.id"></app-peb-section>
-  </section>
+  </div>
 
-  <!-- Rent section — UC005 -->
-  <section>
+  <!-- Rent — UC005 -->
+  <div class="info-card">
     <app-rent-section [unitId]="unit.id"></app-rent-section>
-  </section>
+  </div>
 
-  <!-- Meters section — UC008 -->
-  <section>
-    <app-meter-section [ownerType]="'HOUSING_UNIT'" [ownerId]="unit.id">
-    </app-meter-section>
-  </section>
+  <!-- Meters — UC008 -->
+  <div class="info-card">
+    <app-meter-section
+      [ownerType]="'HOUSING_UNIT'"
+      [ownerId]="unit.id"
+    ></app-meter-section>
+  </div>
 
-  <!-- Lease section — UC010 -->
-  <section>
+  <!-- Lease — UC010 -->
+  <div class="info-card">
     <app-lease-section [unitId]="unit.id"></app-lease-section>
-  </section>
-
-  <!-- Delete confirmation -->
-  <div *ngIf="showDeleteConfirm" class="modal-overlay">
-    <div class="modal-content">
-      <h3>Delete Unit</h3>
-      <p>
-        Are you sure you want to delete unit
-        <strong>{{ unit.unitNumber }}</strong
-        >?
-      </p>
-      <p class="warning">This action cannot be undone.</p>
-      <div *ngIf="deleteError" class="error-msg">{{ deleteError }}</div>
-      <div class="modal-actions">
-        <button class="btn btn-secondary" (click)="showDeleteConfirm = false">
-          Cancel
-        </button>
-        <button class="btn btn-danger" (click)="delete()" [disabled]="deleting">
-          {{ deleting ? "Deleting…" : "Delete" }}
-        </button>
-      </div>
-    </div>
   </div>
 </div>
 
-<div *ngIf="loading" class="loading-state">Loading…</div>
+<!-- Loading -->
+<div *ngIf="loading" class="loading">Loading...</div>
+
+<!-- Delete Confirmation Modal -->
+<div *ngIf="showDeleteConfirm" class="modal-overlay">
+  <div class="modal-content">
+    <div class="modal-header">
+      <h2>Delete Unit</h2>
+    </div>
+    <div class="modal-body">
+      <p>
+        Are you sure you want to delete unit
+        <strong>{{ unit?.unitNumber }}</strong
+        >?
+      </p>
+      <p class="warning">This action cannot be undone.</p>
+      <div *ngIf="deleteError" class="alert alert-error">{{ deleteError }}</div>
+    </div>
+    <div class="modal-actions">
+      <button class="btn btn-secondary" (click)="showDeleteConfirm = false">
+        Cancel
+      </button>
+      <button class="btn btn-danger" (click)="delete()" [disabled]="deleting">
+        {{ deleting ? "Deleting..." : "Delete" }}
+      </button>
+    </div>
+  </div>
+</div>

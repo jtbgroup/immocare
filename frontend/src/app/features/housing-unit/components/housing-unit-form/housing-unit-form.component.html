@@ -1,95 +1,116 @@
-<div class="form-container">
-  <h2>{{ isEditMode ? 'Edit Housing Unit' : 'New Housing Unit' }}</h2>
-
-  <div class="error-banner" *ngIf="errorMessage">{{ errorMessage }}</div>
-
-  <form [formGroup]="form" (ngSubmit)="onSubmit()">
-
-    <!-- Unit Number -->
-    <div class="form-group">
-      <label>Unit Number <span class="required">*</span></label>
-      <input formControlName="unitNumber" placeholder="e.g. A101" />
-      <div class="error" *ngIf="isInvalid('unitNumber')">Unit number is required.</div>
+<div class="unit-form-container">
+  <!-- Header -->
+  <div class="details-content">
+    <div class="header">
+      <h1>{{ isEditMode ? "Edit Housing Unit" : "New Housing Unit" }}</h1>
     </div>
+  </div>
 
-    <!-- Floor -->
-    <div class="form-group">
-      <label>Floor <span class="required">*</span></label>
-      <input type="number" formControlName="floor" />
-      <div class="error" *ngIf="isInvalid('floor')">Floor is required (−10 to 100).</div>
-    </div>
+  <!-- Error -->
+  <div *ngIf="errorMessage" class="alert alert-error">{{ errorMessage }}</div>
 
-    <!-- Landing -->
-    <div class="form-group">
-      <label>Landing / Staircase</label>
-      <input formControlName="landingNumber" placeholder="Optional" />
-    </div>
-
-    <!-- Total Surface -->
-    <div class="form-group">
-      <label>Total Surface (m²)</label>
-      <input type="number" step="0.01" formControlName="totalSurface" />
-    </div>
-
-    <!-- Owner -->
-    <div class="form-group">
-      <label>Owner Name</label>
-      <input formControlName="ownerName" placeholder="Leave empty to inherit from building" />
-    </div>
-
-    <!-- Terrace -->
-    <div class="section-toggle">
-      <label>
-        <input type="checkbox" formControlName="hasTerrace" />
-        Has Terrace
-      </label>
-    </div>
-
-    <div *ngIf="form.value.hasTerrace" class="sub-section">
-      <div class="form-group">
-        <label>Terrace Surface (m²)</label>
-        <input type="number" step="0.01" formControlName="terraceSurface" />
-        <div class="error" *ngIf="isInvalid('terraceSurface')">Terrace surface must be greater than 0.</div>
+  <div class="form-card">
+    <form [formGroup]="form" (ngSubmit)="onSubmit()">
+      <div class="form-row">
+        <div class="form-group">
+          <label>Unit Number <span class="required">*</span></label>
+          <input formControlName="unitNumber" placeholder="e.g. A101" />
+          <span class="error-message" *ngIf="isInvalid('unitNumber')"
+            >Unit number is required.</span
+          >
+        </div>
+        <div class="form-group">
+          <label>Floor <span class="required">*</span></label>
+          <input type="number" formControlName="floor" />
+          <span class="error-message" *ngIf="isInvalid('floor')"
+            >Floor is required (−10 to 100).</span
+          >
+        </div>
       </div>
-      <div class="form-group">
-        <label>Terrace Orientation</label>
-        <select formControlName="terraceOrientation">
-          <option value="">— Select —</option>
-          <option *ngFor="let o of orientations" [value]="o">{{ o }}</option>
-        </select>
+
+      <div class="form-row">
+        <div class="form-group">
+          <label>Landing / Staircase</label>
+          <input formControlName="landingNumber" placeholder="Optional" />
+        </div>
+        <div class="form-group">
+          <label>Total Surface (m²)</label>
+          <input type="number" step="0.01" formControlName="totalSurface" />
+        </div>
       </div>
-    </div>
 
-    <!-- Garden -->
-    <div class="section-toggle">
-      <label>
-        <input type="checkbox" formControlName="hasGarden" />
-        Has Garden
-      </label>
-    </div>
-
-    <div *ngIf="form.value.hasGarden" class="sub-section">
       <div class="form-group">
-        <label>Garden Surface (m²)</label>
-        <input type="number" step="0.01" formControlName="gardenSurface" />
-        <div class="error" *ngIf="isInvalid('gardenSurface')">Garden surface must be greater than 0.</div>
+        <label>Owner Name</label>
+        <input
+          formControlName="ownerName"
+          placeholder="Leave empty to inherit from building"
+        />
       </div>
-      <div class="form-group">
-        <label>Garden Orientation</label>
-        <select formControlName="gardenOrientation">
-          <option value="">— Select —</option>
-          <option *ngFor="let o of orientations" [value]="o">{{ o }}</option>
-        </select>
+
+      <!-- Terrace -->
+      <div class="section-toggle">
+        <label>
+          <input type="checkbox" formControlName="hasTerrace" />
+          Has Terrace
+        </label>
       </div>
-    </div>
+      <div *ngIf="form.value.hasTerrace" class="sub-section">
+        <div class="form-row">
+          <div class="form-group">
+            <label>Terrace Surface (m²)</label>
+            <input type="number" step="0.01" formControlName="terraceSurface" />
+            <span class="error-message" *ngIf="isInvalid('terraceSurface')"
+              >Must be greater than 0.</span
+            >
+          </div>
+          <div class="form-group">
+            <label>Terrace Orientation</label>
+            <select formControlName="terraceOrientation">
+              <option value="">— Select —</option>
+              <option *ngFor="let o of orientations" [value]="o">
+                {{ o }}
+              </option>
+            </select>
+          </div>
+        </div>
+      </div>
 
-    <!-- Actions -->
-    <div class="form-actions">
-      <button type="submit" class="btn btn-primary" [disabled]="saving">
-        {{ saving ? 'Saving…' : 'Save' }}
-      </button>
-      <button type="button" class="btn btn-secondary" (click)="onCancel()">Cancel</button>
-    </div>
+      <!-- Garden -->
+      <div class="section-toggle">
+        <label>
+          <input type="checkbox" formControlName="hasGarden" />
+          Has Garden
+        </label>
+      </div>
+      <div *ngIf="form.value.hasGarden" class="sub-section">
+        <div class="form-row">
+          <div class="form-group">
+            <label>Garden Surface (m²)</label>
+            <input type="number" step="0.01" formControlName="gardenSurface" />
+            <span class="error-message" *ngIf="isInvalid('gardenSurface')"
+              >Must be greater than 0.</span
+            >
+          </div>
+          <div class="form-group">
+            <label>Garden Orientation</label>
+            <select formControlName="gardenOrientation">
+              <option value="">— Select —</option>
+              <option *ngFor="let o of orientations" [value]="o">
+                {{ o }}
+              </option>
+            </select>
+          </div>
+        </div>
+      </div>
 
-  </form>
+      <div class="form-actions">
+        <button type="button" class="btn btn-secondary" (click)="onCancel()">
+          Cancel
+        </button>
+        <button type="submit" class="btn btn-primary" [disabled]="saving">
+          {{ saving ? "Saving..." : "Save" }}
+        </button>
+      </div>
+    </form>
+  </div>
 </div>

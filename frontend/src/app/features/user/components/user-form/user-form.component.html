@@ -1,66 +1,124 @@
-<div class="user-form">
-  <h1>{{ isEdit ? 'Edit User' : 'Create User' }}</h1>
-
-  <div *ngIf="loading" class="loading">Loading…</div>
-
-  <form *ngIf="!loading" [formGroup]="form" (ngSubmit)="submit()" novalidate>
-
-    <div *ngIf="errorMessage" class="alert alert--error">{{ errorMessage }}</div>
-
-    <!-- Username -->
-    <div class="form-field">
-      <label for="username">Username <span class="required">*</span></label>
-      <input id="username" type="text" formControlName="username"
-             [class.invalid]="form.get('username')?.invalid && form.get('username')?.touched"
-             placeholder="e.g. john_doe" />
-      <span class="field-error" *ngIf="fieldError('username')">{{ fieldError('username') }}</span>
+<div class="user-form-container">
+  <!-- Header -->
+  <div class="details-content">
+    <div class="header">
+      <h1>{{ isEdit ? "Edit User" : "Create User" }}</h1>
     </div>
+  </div>
 
-    <!-- Email -->
-    <div class="form-field">
-      <label for="email">Email <span class="required">*</span></label>
-      <input id="email" type="email" formControlName="email"
-             [class.invalid]="form.get('email')?.invalid && form.get('email')?.touched"
-             placeholder="e.g. john@example.com" />
-      <span class="field-error" *ngIf="fieldError('email')">{{ fieldError('email') }}</span>
-    </div>
+  <!-- Loading -->
+  <div *ngIf="loading" class="loading">Loading...</div>
 
-    <!-- Password fields — create mode only -->
-    <ng-container *ngIf="!isEdit">
-      <div class="form-field">
-        <label for="password">Password <span class="required">*</span></label>
-        <input id="password" type="password" formControlName="password"
-               [class.invalid]="form.get('password')?.invalid && form.get('password')?.touched"
-               placeholder="Min. 8 chars, 1 upper, 1 lower, 1 digit" />
-        <span class="field-error" *ngIf="fieldError('password')">{{ fieldError('password') }}</span>
+  <div class="form-card" *ngIf="!loading">
+    <form [formGroup]="form" (ngSubmit)="submit()" novalidate>
+      <!-- Error -->
+      <div *ngIf="errorMessage" class="alert alert-error">
+        {{ errorMessage }}
       </div>
 
-      <div class="form-field">
-        <label for="confirmPassword">Confirm Password <span class="required">*</span></label>
-        <input id="confirmPassword" type="password" formControlName="confirmPassword"
-               [class.invalid]="(form.get('confirmPassword')?.invalid && form.get('confirmPassword')?.touched) || passwordMismatch"
-               placeholder="Repeat password" />
-        <span class="field-error" *ngIf="passwordMismatch">Passwords do not match</span>
-        <span class="field-error" *ngIf="!passwordMismatch && fieldError('confirmPassword')">{{ fieldError('confirmPassword') }}</span>
+      <!-- Username -->
+      <div class="form-group">
+        <label for="username">Username <span class="required">*</span></label>
+        <input
+          id="username"
+          type="text"
+          formControlName="username"
+          placeholder="e.g. john_doe"
+          [class.error]="
+            form.get('username')?.invalid && form.get('username')?.touched
+          "
+        />
+        <span class="error-message" *ngIf="fieldError('username')">{{
+          fieldError("username")
+        }}</span>
       </div>
-    </ng-container>
 
-    <!-- Role -->
-    <div class="form-field">
-      <label for="role">Role <span class="required">*</span></label>
-      <select id="role" formControlName="role"
-              [class.invalid]="form.get('role')?.invalid && form.get('role')?.touched">
-        <option *ngFor="let r of roles" [value]="r">{{ r }}</option>
-      </select>
-      <span class="field-error" *ngIf="fieldError('role')">{{ fieldError('role') }}</span>
-    </div>
+      <!-- Email -->
+      <div class="form-group">
+        <label for="email">Email <span class="required">*</span></label>
+        <input
+          id="email"
+          type="email"
+          formControlName="email"
+          placeholder="e.g. john@example.com"
+          [class.error]="
+            form.get('email')?.invalid && form.get('email')?.touched
+          "
+        />
+        <span class="error-message" *ngIf="fieldError('email')">{{
+          fieldError("email")
+        }}</span>
+      </div>
 
-    <div class="form-actions">
-      <button type="submit" class="btn btn--primary" [disabled]="submitting">
-        {{ submitting ? 'Saving…' : 'Save' }}
-      </button>
-      <button type="button" class="btn btn--secondary" (click)="cancel()">Cancel</button>
-    </div>
+      <!-- Password — create mode only -->
+      <ng-container *ngIf="!isEdit">
+        <div class="form-group">
+          <label for="password">Password <span class="required">*</span></label>
+          <input
+            id="password"
+            type="password"
+            formControlName="password"
+            placeholder="Min. 8 chars, 1 upper, 1 lower, 1 digit"
+            [class.error]="
+              form.get('password')?.invalid && form.get('password')?.touched
+            "
+          />
+          <span class="error-message" *ngIf="fieldError('password')">{{
+            fieldError("password")
+          }}</span>
+        </div>
 
-  </form>
+        <div class="form-group">
+          <label for="confirmPassword"
+            >Confirm Password <span class="required">*</span></label
+          >
+          <input
+            id="confirmPassword"
+            type="password"
+            formControlName="confirmPassword"
+            placeholder="Repeat password"
+            [class.error]="
+              (form.get('confirmPassword')?.invalid &&
+                form.get('confirmPassword')?.touched) ||
+              passwordMismatch
+            "
+          />
+          <span class="error-message" *ngIf="passwordMismatch"
+            >Passwords do not match</span
+          >
+          <span
+            class="error-message"
+            *ngIf="!passwordMismatch && fieldError('confirmPassword')"
+            >{{ fieldError("confirmPassword") }}</span
+          >
+        </div>
+      </ng-container>
+
+      <!-- Role -->
+      <div class="form-group">
+        <label for="role">Role <span class="required">*</span></label>
+        <select
+          id="role"
+          formControlName="role"
+          [class.error]="form.get('role')?.invalid && form.get('role')?.touched"
+        >
+          <option *ngFor="let r of roles" [value]="r">{{ r }}</option>
+        </select>
+        <span class="error-message" *ngIf="fieldError('role')">{{
+          fieldError("role")
+        }}</span>
+      </div>
+
+      <div class="form-actions">
+        <button type="button" class="btn btn-secondary" (click)="cancel()">
+          Cancel
+        </button>
+        <button type="submit" class="btn btn-primary" [disabled]="submitting">
+          {{
+            submitting ? "Saving..." : isEdit ? "Save Changes" : "Create User"
+          }}
+        </button>
+      </div>
+    </form>
+  </div>
 </div>

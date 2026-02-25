@@ -1,0 +1,167 @@
+@use "variables" as *;
+
+// ─── Form card (white wrapper with shadow) ────────────────────────────────────
+
+.form-card {
+  background: $color-bg-white;
+  padding: $spacing-xl;
+  border-radius: $border-radius-md;
+  box-shadow: $shadow-card;
+
+  @media (max-width: 768px) {
+    padding: $spacing-lg;
+  }
+}
+
+// ─── Form group (field + label + error) ──────────────────────────────────────
+
+.form-group {
+  margin-bottom: $spacing-lg;
+  display: flex;
+  flex-direction: column;
+
+  label {
+    display: block;
+    font-size: 0.875rem;
+    font-weight: 500;
+    color: $color-text;
+    margin-bottom: $spacing-sm;
+  }
+
+  input,
+  select,
+  textarea {
+    width: 100%;
+    padding: 0.75rem;
+    border: 1px solid #ddd;
+    border-radius: $border-radius-sm;
+    font-size: 1rem;
+    font-family: inherit;
+    transition: border-color 0.2s;
+    background: $color-bg-white;
+
+    &:focus {
+      outline: none;
+      border-color: $color-primary;
+      box-shadow: 0 0 0 2px rgba(0, 123, 255, 0.1);
+    }
+
+    &.error,
+    &.is-invalid {
+      border-color: $color-danger;
+      &:focus {
+        box-shadow: 0 0 0 2px rgba(220, 53, 69, 0.1);
+      }
+    }
+  }
+
+  .error-message,
+  .invalid-feedback,
+  .field-error {
+    color: $color-danger;
+    font-size: 0.8rem;
+    margin-top: $spacing-xs;
+  }
+
+  .help-text {
+    display: block;
+    color: $color-text-muted;
+    font-size: 0.875rem;
+    margin-top: $spacing-xs;
+  }
+}
+
+// ─── Required asterisk ────────────────────────────────────────────────────────
+
+.required {
+  color: $color-danger;
+}
+
+.optional {
+  color: $color-text-muted;
+  font-size: 0.8rem;
+}
+
+// ─── Form row (2-column grid) ─────────────────────────────────────────────────
+
+.form-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: $spacing-md;
+
+  &.form-row-3 {
+    grid-template-columns: 1fr 1fr 1fr;
+  }
+
+  @media (max-width: 768px) {
+    grid-template-columns: 1fr;
+
+    &.form-row-3 {
+      grid-template-columns: 1fr;
+    }
+  }
+}
+
+// ─── Form actions (Save / Cancel bar) ────────────────────────────────────────
+
+.form-actions {
+  display: flex;
+  gap: $spacing-md;
+  justify-content: flex-end;
+  margin-top: $spacing-xl;
+  padding-top: $spacing-lg;
+  border-top: 1px solid $color-border;
+
+  @media (max-width: 768px) {
+    flex-direction: column-reverse;
+
+    .btn {
+      width: 100%;
+    }
+  }
+}
+
+// ─── Form section (replaces Bootstrap fieldset pattern) ───────────────────────
+
+.form-section {
+  margin-bottom: $spacing-xl;
+
+  .form-section-title {
+    font-size: 0.95rem;
+    font-weight: 600;
+    color: $color-text-muted;
+    padding-bottom: $spacing-sm;
+    margin-bottom: $spacing-md;
+    border-bottom: 1px solid $color-border;
+  }
+}
+
+// ─── Sub-section (conditional blocks, e.g. terrace / garden) ─────────────────
+
+.sub-section {
+  background: #f8f9fa;
+  border-left: 3px solid $color-primary;
+  padding: $spacing-md;
+  margin-bottom: $spacing-md;
+  border-radius: 0 $border-radius-sm $border-radius-sm 0;
+}
+
+// ─── Section toggle (checkbox + label inline) ─────────────────────────────────
+
+.section-toggle {
+  margin-bottom: $spacing-sm;
+
+  label {
+    display: flex;
+    align-items: center;
+    gap: $spacing-sm;
+    font-weight: 500;
+    cursor: pointer;
+  }
+
+  input[type="checkbox"] {
+    width: 1rem;
+    height: 1rem;
+    cursor: pointer;
+  }
+}

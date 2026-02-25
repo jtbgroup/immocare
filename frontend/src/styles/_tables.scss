@@ -1,0 +1,147 @@
+@use "variables" as *;
+
+// ─── Filters bar ─────────────────────────────────────────────────────────────
+
+.filters {
+  display: flex;
+  gap: $spacing-md;
+  margin-bottom: $spacing-lg;
+  flex-wrap: wrap;
+  align-items: center;
+
+  input[type="text"],
+  input[type="search"],
+  select {
+    padding: $spacing-sm $spacing-md;
+    border: 1px solid #ddd;
+    border-radius: $border-radius-sm;
+    font-size: 1rem;
+    font-family: inherit;
+    background: white;
+
+    &:focus {
+      outline: none;
+      border-color: $color-primary;
+    }
+  }
+
+  .search-input {
+    width: 300px;
+  }
+}
+
+// ─── Data table ───────────────────────────────────────────────────────────────
+
+.data-table {
+  overflow-x: auto;
+  background: white;
+  border-radius: $border-radius-md;
+  box-shadow: $shadow-card;
+
+  table {
+    width: 100%;
+    border-collapse: collapse;
+
+    thead {
+      background-color: #f8f9fa;
+      border-bottom: 2px solid $color-border;
+
+      th {
+        padding: $spacing-md;
+        text-align: left;
+        font-weight: 600;
+        color: #495057;
+        white-space: nowrap;
+
+        &.sortable {
+          cursor: pointer;
+          user-select: none;
+
+          &:hover {
+            background-color: #e9ecef;
+          }
+
+          .sort-icon {
+            margin-left: 4px;
+            font-size: 0.75rem;
+            color: $color-text-light;
+            transition: color 0.15s;
+
+            &.active {
+              color: $color-primary;
+            }
+          }
+        }
+      }
+    }
+
+    tbody tr {
+      border-bottom: 1px solid $color-border;
+      transition: background-color 0.2s;
+
+      &.clickable {
+        cursor: pointer;
+        &:hover {
+          background-color: #f8f9fa;
+        }
+      }
+
+      td {
+        padding: $spacing-md;
+        color: #212529;
+        vertical-align: middle;
+      }
+    }
+  }
+}
+
+// ─── Empty state ──────────────────────────────────────────────────────────────
+
+.empty-state {
+  text-align: center;
+  padding: 3rem;
+  color: $color-text-muted;
+  font-size: 1.1rem;
+
+  .help-text {
+    color: $color-text-light;
+    font-size: 0.9rem;
+    margin-top: $spacing-sm;
+  }
+}
+
+// ─── Pagination ───────────────────────────────────────────────────────────────
+
+.pagination {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: $spacing-md;
+  margin-top: $spacing-xl;
+
+  .page-info {
+    color: $color-text-muted;
+    font-size: 0.9rem;
+  }
+}
+
+// ─── Responsive ───────────────────────────────────────────────────────────────
+
+@media (max-width: 768px) {
+  .filters {
+    flex-direction: column;
+
+    .search-input {
+      width: 100%;
+    }
+  }
+
+  .data-table table {
+    font-size: 0.9rem;
+
+    th,
+    td {
+      padding: $spacing-sm;
+    }
+  }
+}

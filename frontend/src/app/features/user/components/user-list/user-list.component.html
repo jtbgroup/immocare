@@ -1,63 +1,108 @@
-<div class="user-list">
-  <div class="user-list__header">
-    <h1>Users</h1>
-    <button class="btn btn--primary" (click)="create()">+ Create User</button>
+<div class="user-list-container">
+  <!-- Header -->
+  <div class="details-content">
+    <div class="header">
+      <h1>Users</h1>
+      <div class="actions">
+        <button class="btn btn-primary" (click)="create()">
+          + Create User
+        </button>
+      </div>
+    </div>
   </div>
 
-  <div *ngIf="errorMessage" class="alert alert--error">{{ errorMessage }}</div>
-  <div *ngIf="loading" class="loading">Loading…</div>
+  <!-- Error -->
+  <div *ngIf="errorMessage" class="alert alert-error">{{ errorMessage }}</div>
 
+  <!-- Loading -->
+  <div *ngIf="loading" class="loading">Loading...</div>
+
+  <!-- Empty state -->
   <ng-container *ngIf="!loading">
-    <table class="table" *ngIf="users.length > 0; else empty">
-      <thead>
-        <tr>
-          <th (click)="sort('username')" class="sortable">
-            Username <span>{{ sortIcon('username') }}</span>
-          </th>
-          <th (click)="sort('email')" class="sortable">
-            Email <span>{{ sortIcon('email') }}</span>
-          </th>
-          <th (click)="sort('role')" class="sortable">
-            Role <span>{{ sortIcon('role') }}</span>
-          </th>
-          <th (click)="sort('createdAt')" class="sortable">
-            Created At <span>{{ sortIcon('createdAt') }}</span>
-          </th>
-        </tr>
-      </thead>
-      <tbody>
-        <tr *ngFor="let user of pagedUsers"
-            class="table__row--clickable"
-            (click)="navigateTo(user)">
-          <td>{{ user.username }}</td>
-          <td>{{ user.email }}</td>
-          <td><span class="badge badge--role">{{ user.role }}</span></td>
-          <td>{{ user.createdAt | date:'yyyy-MM-dd HH:mm' }}</td>
-        </tr>
-      </tbody>
-    </table>
+    <div *ngIf="users.length === 0" class="empty-state">
+      <p>No users found.</p>
+    </div>
 
-    <ng-template #empty>
-      <p class="empty-state">No users found.</p>
-    </ng-template>
+    <!-- Table -->
+    <div *ngIf="users.length > 0" class="data-table">
+      <table>
+        <thead>
+          <tr>
+            <th class="sortable" (click)="sort('username')">
+              Username
+              <span class="sort-icon" [class.active]="sortField === 'username'">
+                {{ sortField | sortIcon: sortDir : "username" }}
+              </span>
+            </th>
+            <th class="sortable" (click)="sort('email')">
+              Email
+              <span class="sort-icon" [class.active]="sortField === 'email'">
+                {{ sortField | sortIcon: sortDir : "email" }}
+              </span>
+            </th>
+            <th class="sortable" (click)="sort('role')">
+              Role
+              <span class="sort-icon" [class.active]="sortField === 'role'">
+                {{ sortField | sortIcon: sortDir : "role" }}
+              </span>
+            </th>
+            <th class="sortable" (click)="sort('createdAt')">
+              Created At
+              <span
+                class="sort-icon"
+                [class.active]="sortField === 'createdAt'"
+              >
+                {{ sortField | sortIcon: sortDir : "createdAt" }}
+              </span>
+            </th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr
+            *ngFor="let user of pagedUsers"
+            class="clickable"
+            (click)="navigateTo(user)"
+          >
+            <td>{{ user.username }}</td>
+            <td>{{ user.email }}</td>
+            <td>
+              <span class="badge badge-role">{{ user.role }}</span>
+            </td>
+            <td>{{ user.createdAt | date: "yyyy-MM-dd HH:mm" }}</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
 
-    <div class="pagination" *ngIf="totalPages > 1">
-      <button class="btn btn--sm" [disabled]="currentPage === 1" (click)="goToPage(currentPage - 1)">
-        &laquo; Prev
+    <!-- Pagination -->
+    <div *ngIf="totalPages > 1" class="pagination">
+      <button
+        class="btn btn-secondary"
+        [disabled]="currentPage === 1"
+        (click)="goToPage(currentPage - 1)"
+      >
+        Previous
       </button>
-      <button *ngFor="let p of pages()"
-              class="btn btn--sm"
-              [class.btn--active]="p === currentPage"
-              (click)="goToPage(p)">
+      <button
+        *ngFor="let p of pages()"
+        class="btn btn-secondary"
+        [class.btn-active]="p === currentPage"
+        (click)="goToPage(p)"
+      >
         {{ p }}
       </button>
-      <button class="btn btn--sm" [disabled]="currentPage === totalPages" (click)="goToPage(currentPage + 1)">
-        Next &raquo;
+      <button
+        class="btn btn-secondary"
+        [disabled]="currentPage === totalPages"
+        (click)="goToPage(currentPage + 1)"
+      >
+        Next
       </button>
     </div>
 
-    <p class="pagination__info" *ngIf="users.length > 0">
-      Showing {{ (currentPage - 1) * pageSize + 1 }}–{{ endIndex }} of {{ users.length }} users
+    <p *ngIf="users.length > 0" class="page-info-bottom">
+      Showing {{ (currentPage - 1) * pageSize + 1 }}–{{ endIndex }} of
+      {{ users.length }} users
     </p>
   </ng-container>
 </div>

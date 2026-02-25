@@ -1,0 +1,117 @@
+@use "variables" as *;
+
+// ─── Page container ───────────────────────────────────────────────────────────
+
+.page-container,
+.building-details-container,
+.building-list-container,
+.building-form-container,
+.unit-details-container,
+.unit-form-container,
+.person-list-container,
+.person-form-container,
+.user-list-container,
+.user-form-container {
+  padding: $spacing-xl;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+// ─── Page header (title + actions) ───────────────────────────────────────────
+
+.page-header,
+.details-content .header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: $spacing-xl;
+
+  h1 {
+    margin: 0;
+    font-size: 2rem;
+    color: $color-text;
+  }
+
+  .actions {
+    display: flex;
+    gap: $spacing-sm;
+  }
+}
+
+// ─── Breadcrumb ───────────────────────────────────────────────────────────────
+
+.breadcrumb {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  font-size: 0.875rem;
+  margin-bottom: $spacing-lg;
+
+  a {
+    color: $color-primary;
+    text-decoration: none;
+    &:hover {
+      text-decoration: underline;
+    }
+  }
+
+  .breadcrumb-separator {
+    color: $color-text-light;
+  }
+
+  span:last-child {
+    color: $color-text-muted;
+  }
+}
+
+// ─── Loading / Error ──────────────────────────────────────────────────────────
+
+.loading {
+  text-align: center;
+  padding: 3rem;
+  color: $color-text-muted;
+  font-size: 1.1rem;
+}
+
+.error-container {
+  text-align: center;
+  padding: 3rem;
+
+  .error {
+    color: $color-danger;
+    font-size: 1.1rem;
+    margin-bottom: $spacing-lg;
+  }
+}
+
+// ─── Responsive ───────────────────────────────────────────────────────────────
+
+@media (max-width: 768px) {
+  .page-container,
+  .building-details-container,
+  .building-list-container,
+  .building-form-container,
+  .unit-details-container,
+  .unit-form-container,
+  .person-list-container,
+  .person-form-container,
+  .user-list-container,
+  .user-form-container {
+    padding: $spacing-md;
+  }
+
+  .page-header,
+  .details-content .header {
+    flex-direction: column;
+    gap: $spacing-md;
+    align-items: stretch;
+
+    .actions {
+      justify-content: stretch;
+
+      .btn {
+        flex: 1;
+      }
+    }
+  }
+}

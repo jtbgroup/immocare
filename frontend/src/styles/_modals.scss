@@ -1,0 +1,73 @@
+@use 'variables' as *;
+
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  background-color: rgba(0, 0, 0, 0.5);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+}
+
+.modal-content {
+  background: $color-bg-white;
+  border-radius: $border-radius-md;
+  max-width: 500px;
+  width: 90%;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.modal-header {
+  padding: $spacing-lg;
+  border-bottom: 1px solid $color-border;
+
+  h2 {
+    margin: 0;
+    font-size: 1.5rem;
+    color: $color-text;
+  }
+}
+
+.modal-body {
+  padding: $spacing-lg;
+
+  p {
+    margin: 0 0 $spacing-md 0;
+    color: $color-text;
+
+    &.warning {
+      color: $color-danger;
+      font-weight: 500;
+      margin-top: $spacing-md;
+    }
+  }
+
+  strong {
+    font-weight: 600;
+  }
+}
+
+.modal-actions {
+  padding: $spacing-md $spacing-lg;
+  border-top: 1px solid $color-border;
+  display: flex;
+  justify-content: flex-end;
+  gap: $spacing-sm;
+}
+
+// ─── Responsive ───────────────────────────────────────────────────────────────
+
+@media (max-width: 768px) {
+  .modal-content {
+    margin: $spacing-md;
+  }
+
+  .modal-actions {
+    flex-direction: column-reverse;
+
+    .btn {
+      width: 100%;
+    }
+  }
+}

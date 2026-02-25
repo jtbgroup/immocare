@@ -1,17 +1,16 @@
-// features/person/person-list/person-list.component.ts
 import { CommonModule } from "@angular/common";
 import { Component, OnInit } from "@angular/core";
 import { FormsModule } from "@angular/forms";
 import { RouterModule } from "@angular/router";
 import { debounceTime, distinctUntilChanged, Subject } from "rxjs";
-
 import { PersonService } from "../../../core/services/person.service";
 import { PersonSummary } from "../../../models/person.model";
+import { SortIconPipe } from "../../../shared/pipes/sort-icon.pipe";
 
 @Component({
   selector: "app-person-list",
   standalone: true,
-  imports: [CommonModule, RouterModule, FormsModule],
+  imports: [CommonModule, RouterModule, FormsModule, SortIconPipe],
   templateUrl: "./person-list.component.html",
   styleUrls: ["./person-list.component.scss"],
 })
@@ -23,7 +22,7 @@ export class PersonListComponent implements OnInit {
   pageSize = 20;
   sort = "lastName,asc";
   sortField = "lastName";
-  sortDirection = "asc";
+  sortDirection: "asc" | "desc" = "asc";
   searchTerm = "";
   isLoading = false;
   errorMessage = "";

@@ -1,57 +1,23 @@
-// ─── Cursor ───────────────────────────────────────────────────────────────────
-.cursor-pointer {
-  cursor: pointer;
-  user-select: none;
+// Shared styles (btn, data-table, filters, empty-state, pagination,
+// loading, alert, details-content .header, person-list-container)
+// come from global styles.scss partials.
 
-  &:hover {
-    color: #1976d2;
-  }
-}
+// ─── Role badges ─────────────────────────────────────────────────────────────
 
-// ─── Badges ──────────────────────────────────────────────────────────────────
 .badge {
-  font-size: 0.75rem;
-  padding: 0.3em 0.7em;
+  display: inline-block;
+  padding: 0.2em 0.6em;
   border-radius: 4px;
+  font-size: 0.75rem;
   font-weight: 600;
+  margin-right: 0.25rem;
 
-  &.bg-primary {
-    background-color: #1565c0 !important;
+  &.badge-owner {
+    background-color: #1565c0;
+    color: white;
   }
-  &.bg-success {
-    background-color: #2e7d32 !important;
-  }
-}
-
-// ─── Table ────────────────────────────────────────────────────────────────────
-.table {
-  th,
-  td {
-    vertical-align: middle;
-    font-size: 0.9rem;
-  }
-
-  thead th {
-    font-weight: 600;
-    color: #495057;
-    background: #f8f9fa;
-    border-bottom: 2px solid #dee2e6;
-  }
-
-  tbody tr:hover {
-    background: #f5f5f5;
-  }
-}
-
-// ─── Card ─────────────────────────────────────────────────────────────────────
-.card {
-  border: 1px solid #e0e0e0;
-  border-radius: 8px;
-  overflow: hidden;
-
-  .card-footer {
-    background: #fafafa;
-    border-top: 1px solid #e0e0e0;
-    padding: 0.5rem 1rem;
+  &.badge-tenant {
+    background-color: #2e7d32;
+    color: white;
   }
 }
