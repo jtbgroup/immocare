@@ -27,6 +27,9 @@ public class HousingUnitDTO {
   private BigDecimal currentMonthlyRent;
   private PebScore currentPebScore;
 
+  /** ID of the unit-specific owner Person (null if inherited from building). */
+  private Long ownerId;
+
   /**
    * Unit-specific owner name (may be null; use effectiveOwnerName for display).
    */
@@ -146,6 +149,14 @@ public class HousingUnitDTO {
 
   public void setGardenOrientation(String gardenOrientation) {
     this.gardenOrientation = gardenOrientation;
+  }
+
+  public Long getOwnerId() {
+    return ownerId;
+  }
+
+  public void setOwnerId(Long ownerId) {
+    this.ownerId = ownerId;
   }
 
   public String getOwnerName() {

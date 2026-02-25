@@ -1,4 +1,4 @@
-import { CommonModule } from "@angular/common";
+import { NgClass } from "@angular/common";
 import {
   Component,
   EventEmitter,
@@ -19,14 +19,13 @@ import {
 @Component({
   selector: "app-peb-history",
   standalone: true,
-  imports: [CommonModule],
+  imports: [NgClass],
   templateUrl: "./peb-history.component.html",
-  styleUrls: ["./peb-history.component.css"],
+  styleUrls: ["./peb-history.component.scss"],
 })
 export class PebHistoryComponent implements OnInit, OnDestroy {
   @Input() unitId!: number;
   @Output() close = new EventEmitter<void>();
-  // FIX #3 : nouveaux events pour edit et delete
   @Output() editRequest = new EventEmitter<PebScoreDTO>();
   @Output() deleteRequest = new EventEmitter<PebScoreDTO>();
 

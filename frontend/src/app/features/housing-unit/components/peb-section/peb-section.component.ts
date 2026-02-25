@@ -1,4 +1,4 @@
-import { CommonModule } from "@angular/common";
+import { NgClass } from "@angular/common";
 import { Component, Input, OnDestroy, OnInit } from "@angular/core";
 import {
   AbstractControl,
@@ -23,9 +23,9 @@ import { PebHistoryComponent } from "../peb-history/peb-history.component";
 @Component({
   selector: "app-peb-section",
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule, PebHistoryComponent],
+  imports: [NgClass, ReactiveFormsModule, PebHistoryComponent],
   templateUrl: "./peb-section.component.html",
-  styleUrls: ["./peb-section.component.css"],
+  styleUrls: ["./peb-section.component.scss"],
 })
 export class PebSectionComponent implements OnInit, OnDestroy {
   @Input() unitId!: number;
@@ -38,7 +38,6 @@ export class PebSectionComponent implements OnInit, OnDestroy {
   error: string | null = null;
   saveError: string | null = null;
 
-  /** ID du score en cours d'édition (null = ajout) */
   editingId: number | null = null;
 
   form!: FormGroup;
@@ -75,7 +74,6 @@ export class PebSectionComponent implements OnInit, OnDestroy {
     );
   }
 
-  /** Validateur cross-field : validUntil doit être > scoreDate */
   private validUntilAfterScoreDate(
     group: AbstractControl,
   ): ValidationErrors | null {
@@ -107,7 +105,6 @@ export class PebSectionComponent implements OnInit, OnDestroy {
       });
   }
 
-  // FIX #2 : toggle correct pour View/Hide History
   toggleHistory(): void {
     this.showHistory = !this.showHistory;
   }
@@ -125,7 +122,6 @@ export class PebSectionComponent implements OnInit, OnDestroy {
     this.editingId = null;
   }
 
-  // FIX #3 : callback edit depuis peb-history
   onEditPeb(score: PebScoreDTO): void {
     this.editingId = score.id;
     this.form.patchValue({
@@ -139,7 +135,6 @@ export class PebSectionComponent implements OnInit, OnDestroy {
     this.showHistory = false;
   }
 
-  // FIX #3 : callback delete depuis peb-history
   onDeletePeb(score: PebScoreDTO): void {
     if (
       !confirm(
@@ -153,7 +148,6 @@ export class PebSectionComponent implements OnInit, OnDestroy {
       .subscribe({
         next: () => {
           this.loadCurrentScore();
-          // Recharger l'historique si ouvert
           if (this.showHistory) {
             this.showHistory = false;
             setTimeout(() => (this.showHistory = true), 0);
@@ -180,7 +174,6 @@ export class PebSectionComponent implements OnInit, OnDestroy {
       validUntil: this.form.value.validUntil || null,
     };
 
-    // Si édition, on utilise updateScore, sinon addScore
     const op$ = this.editingId
       ? this.pebScoreService.updateScore(this.unitId, this.editingId, req)
       : this.pebScoreService.addScore(this.unitId, req);

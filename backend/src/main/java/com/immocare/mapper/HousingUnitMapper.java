@@ -18,11 +18,13 @@ public interface HousingUnitMapper {
 
   /**
    * Convert HousingUnit entity to HousingUnitDTO.
-   * ownerName is derived from the owner Person (firstName + lastName).
-   * effectiveOwnerName and roomCount are set manually in the service.
+   * ownerId and ownerName are derived from the owner Person.
+   * effectiveOwnerName, roomCount, currentMonthlyRent, currentPebScore
+   * are set manually in the service.
    */
   @Mapping(target = "buildingId", source = "building.id")
   @Mapping(target = "buildingName", source = "building.name")
+  @Mapping(target = "ownerId", source = "owner.id")
   @Mapping(target = "ownerName", expression = "java(unit.getOwner() == null ? null : (unit.getOwner().getFirstName() + \" \" + unit.getOwner().getLastName()).trim())")
   @Mapping(target = "effectiveOwnerName", ignore = true)
   @Mapping(target = "roomCount", ignore = true)

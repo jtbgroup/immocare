@@ -2,44 +2,182 @@
 
 .person-picker {
   position: relative;
+  width: 100%;
 }
+
+// ─── Label ────────────────────────────────────────────────────────────────────
+
+.picker-label {
+  display: block;
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: #333;
+  margin-bottom: 0.5rem;
+
+  .required {
+    color: #dc3545;
+    margin-left: 2px;
+  }
+}
+
+// ─── Search input ─────────────────────────────────────────────────────────────
+
+.picker-search-wrapper {
+  position: relative;
+}
+
+.picker-input {
+  width: 100%;
+  padding: 0.75rem;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  font-size: 1rem;
+  font-family: inherit;
+  background: #fff;
+  transition: border-color 0.2s;
+  box-sizing: border-box;
+
+  &:focus {
+    outline: none;
+    border-color: #007bff;
+    box-shadow: 0 0 0 2px rgba(0, 123, 255, 0.1);
+  }
+}
+
+// ─── Dropdown ─────────────────────────────────────────────────────────────────
 
 .picker-dropdown {
   position: absolute;
-  top: 100%;
+  top: calc(100% + 2px);
   left: 0;
   right: 0;
   z-index: 1050;
-  border-radius: 6px;
-  overflow: hidden;
+  background: #fff;
+  border: 1px solid #dee2e6;
+  border-radius: 4px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12);
   max-height: 280px;
   overflow-y: auto;
 }
 
+// ─── Dropdown items ───────────────────────────────────────────────────────────
+
 .picker-item {
   display: block;
+  width: 100%;
   padding: 0.5rem 0.75rem;
   border: none;
-  background: transparent;
-  text-decoration: none;
-  color: inherit;
-  cursor: pointer;
   border-bottom: 1px solid #f0f0f0;
-  transition: background-color 0.1s;
+  background: transparent;
+  text-align: left;
+  cursor: pointer;
+  font-family: inherit;
+  font-size: 0.9rem;
+  color: #333;
+  line-height: 1.5;
 
   &:last-child {
     border-bottom: none;
   }
+}
 
+.picker-hint {
+  color: #6c757d;
+  cursor: default;
+  font-style: italic;
+  font-size: 0.85rem;
+}
+
+.picker-result {
   &:hover,
   &:focus {
-    background-color: #f8f9fa;
+    background-color: #f0f7ff;
     outline: none;
   }
 }
 
+.result-name {
+  font-weight: 600;
+  color: #333;
+}
+
+.result-meta {
+  color: #6c757d;
+  font-size: 0.85rem;
+}
+
+.result-badge {
+  display: inline-block;
+  padding: 0.1em 0.5em;
+  border-radius: 3px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  margin-left: 0.4rem;
+  vertical-align: middle;
+
+  &--owner {
+    background: #e3f2fd;
+    color: #1565c0;
+  }
+
+  &--tenant {
+    background: #e8f5e9;
+    color: #2e7d32;
+  }
+}
+
+.picker-create {
+  margin-left: 0.5rem;
+  color: #007bff;
+  font-size: 0.85rem;
+  text-decoration: none;
+
+  &:hover {
+    text-decoration: underline;
+  }
+}
+
+// ─── Selected state ───────────────────────────────────────────────────────────
+
 .selected-person {
-  .badge {
-    cursor: default;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.selected-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  padding: 0.4rem 0.75rem;
+  background: #e3f2fd;
+  color: #1565c0;
+  border-radius: 4px;
+  font-size: 0.9rem;
+  font-weight: 500;
+}
+
+.selected-city {
+  color: #5a8abf;
+  font-weight: 400;
+}
+
+.btn-clear {
+  background: none;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  cursor: pointer;
+  color: #6c757d;
+  font-size: 0.85rem;
+  padding: 0.3rem 0.5rem;
+  line-height: 1;
+  transition:
+    background 0.15s,
+    color 0.15s;
+
+  &:hover {
+    background: #f8d7da;
+    color: #c62828;
+    border-color: #f5c6cb;
   }
 }

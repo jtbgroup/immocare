@@ -26,6 +26,7 @@ export interface HousingUnit {
   hasGarden: boolean;
   gardenSurface?: number;
   gardenOrientation?: Orientation;
+  ownerId?: number;
   ownerName?: string;
   roomCount?: number;
   currentMonthlyRent?: number;
@@ -46,7 +47,7 @@ export interface CreateHousingUnitRequest {
   hasGarden: boolean;
   gardenSurface?: number;
   gardenOrientation?: Orientation;
-  ownerName?: string;
+  ownerId?: number | null;
 }
 
 export interface UpdateHousingUnitRequest {
@@ -60,5 +61,5 @@ export interface UpdateHousingUnitRequest {
   hasGarden: boolean;
   gardenSurface?: number;
   gardenOrientation?: Orientation;
-  ownerName?: string;
+  ownerId?: number | null;
 }

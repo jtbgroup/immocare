@@ -41,7 +41,15 @@
       </div>
       <div class="info-item">
         <label>Owner</label>
-        <p>{{ unit.ownerName ?? "—" }}</p>
+        <p>
+          <a
+            *ngIf="unit.ownerId; else ownerText"
+            [routerLink]="['/persons', unit.ownerId]"
+          >
+            {{ unit.ownerName }}
+          </a>
+          <ng-template #ownerText>{{ unit.ownerName ?? "—" }}</ng-template>
+        </p>
       </div>
       <div class="info-item" *ngIf="unit.hasTerrace">
         <label>Terrace</label>

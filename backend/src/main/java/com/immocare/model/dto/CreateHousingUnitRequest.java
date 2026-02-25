@@ -12,7 +12,7 @@ import jakarta.validation.constraints.Size;
 
 /**
  * Request DTO for creating a new housing unit.
- * Terrace / garden conditional validation is enforced in the service layer.
+ * ownerId references a Person entity; owner is resolved in the service.
  */
 public class CreateHousingUnitRequest {
 
@@ -34,12 +34,15 @@ public class CreateHousingUnitRequest {
   @DecimalMin(value = "0.01", message = "Total surface must be greater than 0")
   private BigDecimal totalSurface;
 
+  /** Optional owner: references a Person by ID. Null = no unit-level owner. */
+  private Long ownerId;
+
   private Boolean hasTerrace = false;
 
   @DecimalMin(value = "0.01", message = "Terrace surface must be greater than 0")
   private BigDecimal terraceSurface;
 
-  @Pattern(regexp = "^(N|S|E|W|NE|NW|SE|SW)?$", message = "Terrace orientation must be N, S, E, W, NE, NW, SE or SW")
+  @Pattern(regexp = "^(N|S|E|W|NE|NW|SE|SW)$", message = "Terrace orientation must be N, S, E, W, NE, NW, SE or SW")
   private String terraceOrientation;
 
   private Boolean hasGarden = false;
@@ -47,11 +50,8 @@ public class CreateHousingUnitRequest {
   @DecimalMin(value = "0.01", message = "Garden surface must be greater than 0")
   private BigDecimal gardenSurface;
 
-  @Pattern(regexp = "^(N|S|E|W|NE|NW|SE|SW)?$", message = "Garden orientation must be N, S, E, W, NE, NW, SE or SW")
+  @Pattern(regexp = "^(N|S|E|W|NE|NW|SE|SW)$", message = "Garden orientation must be N, S, E, W, NE, NW, SE or SW")
   private String gardenOrientation;
-
-  @Size(max = 200, message = "Owner name must be 200 characters or less")
-  private String ownerName;
 
   // Getters and Setters
   public Long getBuildingId() {
@@ -94,12 +94,20 @@ public class CreateHousingUnitRequest {
     this.totalSurface = totalSurface;
   }
 
+  public Long getOwnerId() {
+    return ownerId;
+  }
+
+  public void setOwnerId(Long ownerId) {
+    this.ownerId = ownerId;
+  }
+
   public Boolean getHasTerrace() {
     return hasTerrace;
   }
 
   public void setHasTerrace(Boolean hasTerrace) {
-    this.hasTerrace = hasTerrace != null && hasTerrace;
+    this.hasTerrace = hasTerrace;
   }
 
   public BigDecimal getTerraceSurface() {
@@ -123,7 +131,7 @@ public class CreateHousingUnitRequest {
   }
 
   public void setHasGarden(Boolean hasGarden) {
-    this.hasGarden = hasGarden != null && hasGarden;
+    this.hasGarden = hasGarden;
   }
 
   public BigDecimal getGardenSurface() {
@@ -140,13 +148,5 @@ public class CreateHousingUnitRequest {
 
   public void setGardenOrientation(String gardenOrientation) {
     this.gardenOrientation = gardenOrientation;
-  }
-
-  public String getOwnerName() {
-    return ownerName;
-  }
-
-  public void setOwnerName(String ownerName) {
-    this.ownerName = ownerName;
   }
 }

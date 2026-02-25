@@ -10,15 +10,18 @@ import org.springframework.transaction.annotation.Transactional;
 import com.immocare.exception.BuildingNotFoundException;
 import com.immocare.exception.HousingUnitHasDataException;
 import com.immocare.exception.HousingUnitNotFoundException;
+import com.immocare.exception.PersonNotFoundException;
 import com.immocare.mapper.HousingUnitMapper;
 import com.immocare.model.dto.CreateHousingUnitRequest;
 import com.immocare.model.dto.HousingUnitDTO;
 import com.immocare.model.dto.UpdateHousingUnitRequest;
 import com.immocare.model.entity.Building;
 import com.immocare.model.entity.HousingUnit;
+import com.immocare.model.entity.Person;
 import com.immocare.repository.BuildingRepository;
 import com.immocare.repository.HousingUnitRepository;
 import com.immocare.repository.PebScoreRepository;
+import com.immocare.repository.PersonRepository;
 import com.immocare.repository.RentHistoryRepository;
 import com.immocare.repository.RoomRepository;
 
@@ -34,6 +37,7 @@ public class HousingUnitService {
 
   private final HousingUnitRepository housingUnitRepository;
   private final BuildingRepository buildingRepository;
+  private final PersonRepository personRepository;
   private final HousingUnitMapper housingUnitMapper;
   private final RoomRepository roomRepository;
   @Autowired
@@ -43,10 +47,12 @@ public class HousingUnitService {
 
   public HousingUnitService(HousingUnitRepository housingUnitRepository,
       BuildingRepository buildingRepository,
+      PersonRepository personRepository,
       HousingUnitMapper housingUnitMapper,
       RoomRepository roomRepository) {
     this.housingUnitRepository = housingUnitRepository;
     this.buildingRepository = buildingRepository;
+    this.personRepository = personRepository;
     this.housingUnitMapper = housingUnitMapper;
     this.roomRepository = roomRepository;
   }
@@ -98,6 +104,9 @@ public class HousingUnitService {
     HousingUnit unit = housingUnitMapper.toEntity(request);
     unit.setBuilding(building);
 
+    // Resolve owner from ownerId
+    unit.setOwner(resolveOwner(request.getOwnerId()));
+
     // BR-UC002-04 / 05: clear terrace/garden data when flags are false
     if (!Boolean.TRUE.equals(request.getHasTerrace())) {
       unit.setTerraceSurface(null);
@@ -129,6 +138,9 @@ public class HousingUnitService {
     }
 
     housingUnitMapper.updateEntityFromRequest(request, unit);
+
+    // Resolve owner from ownerId (null clears the unit-level owner)
+    unit.setOwner(resolveOwner(request.getOwnerId()));
 
     // BR-UC002-04 / 05: clear terrace/garden data when flags are false
     if (!Boolean.TRUE.equals(request.getHasTerrace())) {
@@ -171,13 +183,25 @@ public class HousingUnitService {
   }
 
   /**
+   * Resolve a Person entity from an ownerId.
+   * Returns null if ownerId is null (clears the owner).
+   * Throws PersonNotFoundException if the ID does not exist.
+   */
+  private Person resolveOwner(Long ownerId) {
+    if (ownerId == null) {
+      return null;
+    }
+    return personRepository.findById(ownerId)
+        .orElseThrow(() -> new PersonNotFoundException(ownerId));
+  }
+
+  /**
    * Map entity to DTO and enrich with computed fields.
    */
   private HousingUnitDTO toEnrichedDTO(HousingUnit unit) {
     HousingUnitDTO dto = housingUnitMapper.toDTO(unit);
 
-    // BR-UC002-09: effective owner = unit owner ?? building owner (Person → display
-    // name)
+    // BR-UC002-09: effective owner = unit owner ?? building owner
     String effective = resolveOwnerName(unit.getOwner());
     if (effective == null) {
       effective = resolveOwnerName(unit.getBuilding().getOwner());

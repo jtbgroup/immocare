@@ -1,4 +1,3 @@
-import { CommonModule } from "@angular/common";
 import { Component, OnDestroy, OnInit } from "@angular/core";
 import {
   FormBuilder,
@@ -14,11 +13,13 @@ import {
   ORIENTATIONS,
   Orientation,
 } from "../../../../models/housing-unit.model";
+import { PersonSummary } from "../../../../models/person.model";
+import { PersonPickerComponent } from "../../../../shared/components/person-picker/person-picker.component";
 
 @Component({
   selector: "app-housing-unit-form",
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule],
+  imports: [ReactiveFormsModule, PersonPickerComponent],
   templateUrl: "./housing-unit-form.component.html",
   styleUrls: ["./housing-unit-form.component.scss"],
 })
@@ -67,7 +68,8 @@ export class HousingUnitFormComponent implements OnInit, OnDestroy {
       ],
       landingNumber: [""],
       totalSurface: [null],
-      ownerName: [""],
+      // owner holds the full PersonSummary object (via ControlValueAccessor)
+      owner: [null],
       hasTerrace: [false],
       terraceSurface: [null],
       terraceOrientation: [""],
@@ -85,6 +87,16 @@ export class HousingUnitFormComponent implements OnInit, OnDestroy {
         next: (unit) => {
           this.form.patchValue(unit);
           this.buildingId = unit.buildingId;
+          // Restore picker state if unit already has an owner
+          if (unit.ownerId && unit.ownerName) {
+            const parts = unit.ownerName.trim().split(" ");
+            const ownerSummary: PersonSummary = {
+              id: unit.ownerId,
+              firstName: parts.slice(1).join(" ") ?? "",
+              lastName: parts[0] ?? unit.ownerName,
+            } as PersonSummary;
+            this.form.patchValue({ owner: ownerSummary });
+          }
         },
         error: () => {
           this.errorMessage = "Failed to load unit.";
@@ -103,7 +115,12 @@ export class HousingUnitFormComponent implements OnInit, OnDestroy {
       return;
     }
     this.saving = true;
-    const value = { ...this.form.value, buildingId: this.buildingId };
+    const { owner, ...rest } = this.form.value;
+    const value = {
+      ...rest,
+      buildingId: this.buildingId,
+      ownerId: (owner as PersonSummary | null)?.id ?? null,
+    };
     const obs =
       this.isEditMode && this.unitId
         ? this.housingUnitService.update(this.unitId, value)

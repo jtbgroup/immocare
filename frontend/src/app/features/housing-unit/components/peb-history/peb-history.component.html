@@ -1,97 +1,98 @@
-<!-- Div inline (remplace le modal-overlay) -->
 <div class="history-panel">
   <div class="history-header">
     <h4>PEB Score History</h4>
     <button class="btn-close" (click)="close.emit()">✕</button>
   </div>
 
-  <!-- US020 improvement summary -->
-  <div
-    *ngIf="improvement && improvement.history.length > 0"
-    class="improvement-summary"
-  >
-    <ng-container *ngIf="improvement.gradesImproved > 0">
-      <span class="improved"
-        >↑ Improved by {{ improvement.gradesImproved }} grade(s)</span
-      >
-      over {{ improvement.yearsCovered }} year(s) ({{
-        display[improvement.firstScore].label
-      }}
-      → {{ display[improvement.currentScore].label }})
-    </ng-container>
-    <ng-container *ngIf="improvement.gradesImproved < 0">
-      <span class="degraded"
-        >↓ Degraded by {{ improvement.gradesImproved * -1 }} grade(s)</span
-      >
-      over {{ improvement.yearsCovered }} year(s)
-    </ng-container>
-    <ng-container *ngIf="improvement.gradesImproved === 0">
-      <span class="unchanged"
-        >− No change over {{ improvement.yearsCovered }} year(s)</span
-      >
-    </ng-container>
-  </div>
+  <!-- Improvement summary -->
+  @if (improvement && improvement.history.length > 0) {
+    <div class="improvement-summary">
+      @if (improvement.gradesImproved > 0) {
+        <span class="improved"
+          >↑ Improved by {{ improvement.gradesImproved }} grade(s)</span
+        >
+        over {{ improvement.yearsCovered }} year(s) ({{
+          display[improvement.firstScore].label
+        }}
+        → {{ display[improvement.currentScore].label }})
+      } @else if (improvement.gradesImproved < 0) {
+        <span class="degraded"
+          >↓ Degraded by {{ improvement.gradesImproved * -1 }} grade(s)</span
+        >
+        over {{ improvement.yearsCovered }} year(s)
+      } @else {
+        <span class="unchanged"
+          >− No change over {{ improvement.yearsCovered }} year(s)</span
+        >
+      }
+    </div>
+  }
 
-  <div *ngIf="loading" class="loading">Loading…</div>
-  <p *ngIf="!loading && history.length === 0" class="no-data">
-    No PEB scores recorded yet.
-  </p>
+  @if (loading) {
+    <div class="loading">Loading…</div>
+  }
 
-  <table *ngIf="!loading && history.length > 0" class="history-table">
-    <thead>
-      <tr>
-        <th>Score</th>
-        <th>Score Date</th>
-        <th>Certificate</th>
-        <th>Valid Until</th>
-        <th>Status</th>
-        <th>Change</th>
-        <!-- FIX #3 : colonne actions -->
-        <th></th>
-      </tr>
-    </thead>
-    <tbody>
-      <tr *ngFor="let item of history">
-        <td>
-          <span
-            class="score-badge"
-            [style.background]="display[item.pebScore].color"
-            [style.color]="display[item.pebScore].textColor"
-          >
-            {{ display[item.pebScore].label }}
-          </span>
-        </td>
-        <td>{{ item.scoreDate }}</td>
-        <td>{{ item.certificateNumber ?? "—" }}</td>
-        <td>{{ item.validUntil ?? "—" }}</td>
-        <td>
-          <span class="status-badge" [ngClass]="statusClass(item.status)">
-            {{ item.status }}
-          </span>
-        </td>
-        <td>
-          <span [ngClass]="improvementClass(rowDirection(item))">
-            {{ improvementIcon(rowDirection(item)) }}
-          </span>
-        </td>
-        <!-- FIX #3 : icônes edit + delete -->
-        <td class="row-actions">
-          <button
-            class="icon-btn-sm"
-            title="Edit"
-            (click)="editRequest.emit(item)"
-          >
-            ✏️
-          </button>
-          <button
-            class="icon-btn-sm icon-btn-delete"
-            title="Delete"
-            (click)="deleteRequest.emit(item)"
-          >
-            🗑️
-          </button>
-        </td>
-      </tr>
-    </tbody>
-  </table>
+  @if (!loading && history.length === 0) {
+    <p class="no-data">No PEB scores recorded yet.</p>
+  }
+
+  @if (!loading && history.length > 0) {
+    <table class="history-table">
+      <thead>
+        <tr>
+          <th>Score</th>
+          <th>Score Date</th>
+          <th>Certificate</th>
+          <th>Valid Until</th>
+          <th>Status</th>
+          <th>Change</th>
+          <th></th>
+        </tr>
+      </thead>
+      <tbody>
+        @for (item of history; track item.id) {
+          <tr>
+            <td>
+              <span
+                class="score-badge"
+                [style.background]="display[item.pebScore].color"
+                [style.color]="display[item.pebScore].textColor"
+              >
+                {{ display[item.pebScore].label }}
+              </span>
+            </td>
+            <td>{{ item.scoreDate }}</td>
+            <td>{{ item.certificateNumber ?? "—" }}</td>
+            <td>{{ item.validUntil ?? "—" }}</td>
+            <td>
+              <span class="status-badge" [ngClass]="statusClass(item.status)">
+                {{ item.status }}
+              </span>
+            </td>
+            <td>
+              <span [ngClass]="improvementClass(rowDirection(item))">
+                {{ improvementIcon(rowDirection(item)) }}
+              </span>
+            </td>
+            <td class="row-actions">
+              <button
+                class="icon-btn-sm"
+                title="Edit"
+                (click)="editRequest.emit(item)"
+              >
+                ✏️
+              </button>
+              <button
+                class="icon-btn-sm icon-btn-delete"
+                title="Delete"
+                (click)="deleteRequest.emit(item)"
+              >
+                🗑️
+              </button>
+            </td>
+          </tr>
+        }
+      </tbody>
+    </table>
+  }
 </div>
