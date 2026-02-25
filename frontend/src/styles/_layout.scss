@@ -3,6 +3,10 @@
 // ─── Page container ───────────────────────────────────────────────────────────
 
 .page-container,
+.user-details-container,
+.lease-details-container,
+.lease-form-container,
+.person-details-container,
 .building-details-container,
 .building-list-container,
 .building-form-container,
@@ -88,6 +92,10 @@
 
 @media (max-width: 768px) {
   .page-container,
+  .person-details-container,
+  .lease-details-container,
+  .lease-form-container,
+  .user-details-container,
   .building-details-container,
   .building-list-container,
   .building-form-container,

@@ -1,0 +1,61 @@
+<!-- features/lease/tenant-section/tenant-section.component.html -->
+<div class="info-card">
+  <div class="info-card-title">
+    <h2>Tenants</h2>
+    <button
+      *ngIf="lease.status === 'DRAFT' || lease.status === 'ACTIVE'"
+      class="btn btn-primary btn-sm"
+      (click)="showPicker = !showPicker"
+    >
+      {{ showPicker ? "Cancel" : "+ Add Tenant" }}
+    </button>
+  </div>
+
+  <div *ngIf="errorMessage" class="alert alert-error">{{ errorMessage }}</div>
+
+  <!-- Tenant list -->
+  <ul class="tenant-list">
+    <li *ngFor="let t of lease.tenants" class="tenant-item">
+      <div class="tenant-info">
+        <strong>{{ t.lastName }} {{ t.firstName }}</strong>
+        <span class="badge" [ngClass]="roleClass(t.role)">{{ t.role }}</span>
+        <span *ngIf="t.email" class="tenant-contact">📧 {{ t.email }}</span>
+        <span *ngIf="t.gsm" class="tenant-contact">📱 {{ t.gsm }}</span>
+      </div>
+      <button
+        *ngIf="canRemove(t)"
+        class="btn btn-danger btn-sm"
+        (click)="remove(t.personId)"
+        [disabled]="isRemoving"
+      >
+        ✕
+      </button>
+    </li>
+    <li *ngIf="lease.tenants.length === 0" class="tenant-empty">No tenants.</li>
+  </ul>
+
+  <!-- Add picker -->
+  <div *ngIf="showPicker" class="picker-panel">
+    <app-person-picker
+      label="Select Person"
+      [required]="true"
+      (personSelected)="onPersonSelected($event)"
+    ></app-person-picker>
+    <div class="form-group">
+      <label>Role</label>
+      <select [(ngModel)]="newRole">
+        <option value="PRIMARY">Primary</option>
+        <option value="CO_TENANT">Co-Tenant</option>
+        <option value="GUARANTOR">Guarantor</option>
+      </select>
+    </div>
+    <button
+      *ngIf="selectedPerson"
+      class="btn btn-primary btn-sm"
+      (click)="confirmAdd()"
+      [disabled]="isAdding"
+    >
+      {{ isAdding ? "Adding…" : "Add Tenant" }}
+    </button>
+  </div>
+</div>

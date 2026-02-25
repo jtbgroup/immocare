@@ -22,7 +22,7 @@ bootstrapApplication(AppComponent, {
       {
         path: "login",
         loadComponent: () =>
-          import("./app/features/auth/login/login.component").then(
+          import("./app/features/auth/login/components/login.component").then(
             (m) => m.LoginComponent,
           ),
       },
@@ -31,7 +31,7 @@ bootstrapApplication(AppComponent, {
         path: "persons",
         canActivate: [AuthGuard],
         loadComponent: () =>
-          import("./app/features/person/person-list/person-list.component").then(
+          import("./app/features/person/components/person-list/person-list.component").then(
             (m) => m.PersonListComponent,
           ),
       },
@@ -39,7 +39,7 @@ bootstrapApplication(AppComponent, {
         path: "persons/new",
         canActivate: [AuthGuard],
         loadComponent: () =>
-          import("./app/features/person/person-form/person-form.component").then(
+          import("./app/features/person/components/person-form/person-form.component").then(
             (m) => m.PersonFormComponent,
           ),
       },
@@ -47,7 +47,7 @@ bootstrapApplication(AppComponent, {
         path: "persons/:id/edit",
         canActivate: [AuthGuard],
         loadComponent: () =>
-          import("./app/features/person/person-form/person-form.component").then(
+          import("./app/features/person/components/person-form/person-form.component").then(
             (m) => m.PersonFormComponent,
           ),
       },
@@ -55,7 +55,7 @@ bootstrapApplication(AppComponent, {
         path: "persons/:id",
         canActivate: [AuthGuard],
         loadComponent: () =>
-          import("./app/features/person/person-details/person-details.component").then(
+          import("./app/features/person/components/person-details/person-details.component").then(
             (m) => m.PersonDetailsComponent,
           ),
       },
@@ -122,7 +122,7 @@ bootstrapApplication(AppComponent, {
         path: "housing-units/:unitId/leases/new",
         canActivate: [AuthGuard],
         loadComponent: () =>
-          import("./app/features/features/lease/lease-form/lease-form.component").then(
+          import("./app/features/lease/components/lease-form/lease-form.component").then(
             (m) => m.LeaseFormComponent,
           ),
       },
@@ -130,7 +130,7 @@ bootstrapApplication(AppComponent, {
         path: "leases/alerts",
         canActivate: [AuthGuard],
         loadComponent: () =>
-          import("./app/features/features/lease/alerts/alerts.component").then(
+          import("./app/features/lease/alerts/alerts.component").then(
             (m) => m.AlertsComponent,
           ),
       },
@@ -138,7 +138,7 @@ bootstrapApplication(AppComponent, {
         path: "leases/:id/edit",
         canActivate: [AuthGuard],
         loadComponent: () =>
-          import("./app/features/features/lease/lease-form/lease-form.component").then(
+          import("./app/features/lease/components/lease-form/lease-form.component").then(
             (m) => m.LeaseFormComponent,
           ),
       },
@@ -146,7 +146,7 @@ bootstrapApplication(AppComponent, {
         path: "leases/:id",
         canActivate: [AuthGuard],
         loadComponent: () =>
-          import("./app/features/features/lease/lease-details/lease-details.component").then(
+          import("./app/features/lease/components/lease-details/lease-details.component").then(
             (m) => m.LeaseDetailsComponent,
           ),
       },

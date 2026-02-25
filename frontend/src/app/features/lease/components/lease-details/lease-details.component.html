@@ -1,0 +1,168 @@
+<!-- features/lease/lease-details/lease-details.component.html -->
+<div class="lease-details-container">
+  <!-- Loading -->
+  <div *ngIf="isLoading" class="loading">Loading…</div>
+
+  <!-- Error -->
+  <div *ngIf="errorMessage && !isLoading" class="error-container">
+    <p class="error">{{ errorMessage }}</p>
+  </div>
+
+  <!-- Content -->
+  <ng-container *ngIf="lease && !isLoading">
+    <!-- Breadcrumb -->
+    <nav class="breadcrumb" aria-label="breadcrumb">
+      <a [routerLink]="['/buildings', lease.buildingId]">{{
+        lease.buildingName
+      }}</a>
+      <span class="breadcrumb-separator">›</span>
+      <a [routerLink]="['/housing-units', lease.housingUnitId]"
+        >Unit {{ lease.housingUnitNumber }}</a
+      >
+      <span class="breadcrumb-separator">›</span>
+      <span>Lease #{{ lease.id }}</span>
+    </nav>
+
+    <!-- Header -->
+    <div class="details-content">
+      <div class="header">
+        <h1>
+          Lease #{{ lease.id }}
+          <span class="badge" [ngClass]="statusClass">{{ lease.status }}</span>
+          <span class="lease-type">{{
+            LEASE_TYPE_LABELS[lease.leaseType]
+          }}</span>
+        </h1>
+        <div class="actions">
+          <a
+            *ngIf="canEdit()"
+            [routerLink]="['/leases', lease.id, 'edit']"
+            class="btn btn-secondary"
+            >Edit</a
+          >
+          <button
+            *ngIf="canActivate()"
+            class="btn btn-primary"
+            (click)="doActivate()"
+            [disabled]="isTransitioning"
+          >
+            Activate
+          </button>
+          <button
+            *ngIf="canFinish()"
+            class="btn btn-secondary"
+            (click)="doFinish()"
+            [disabled]="isTransitioning"
+          >
+            Finish
+          </button>
+          <button
+            *ngIf="canCancel()"
+            class="btn btn-danger"
+            (click)="doCancel()"
+            [disabled]="isTransitioning"
+          >
+            Cancel
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Status error -->
+    <div *ngIf="statusError" class="alert alert-error">{{ statusError }}</div>
+
+    <!-- Alert banners -->
+    <div *ngIf="lease.indexationAlertActive" class="alert alert-warning">
+      🔔 Indexation due — anniversary
+      {{ lease.indexationAlertDate | date: "dd/MM/yyyy" }}
+    </div>
+    <div *ngIf="lease.endNoticeAlertActive" class="alert alert-warning">
+      ⚠ End notice deadline —
+      {{ lease.endNoticeAlertDate | date: "dd/MM/yyyy" }}
+    </div>
+
+    <!-- Dates & Duration -->
+    <div class="info-card">
+      <h2>Dates &amp; Duration</h2>
+      <div class="info-grid">
+        <div class="info-item">
+          <label>Signature</label>
+          <p>{{ lease.signatureDate | date: "dd/MM/yyyy" }}</p>
+        </div>
+        <div class="info-item">
+          <label>Start</label>
+          <p>{{ lease.startDate | date: "dd/MM/yyyy" }}</p>
+        </div>
+        <div class="info-item">
+          <label>End (planned)</label>
+          <p>{{ lease.endDate | date: "dd/MM/yyyy" }}</p>
+        </div>
+        <div class="info-item">
+          <label>Duration</label>
+          <p>{{ lease.durationMonths }} months</p>
+        </div>
+        <div class="info-item">
+          <label>Notice Period</label>
+          <p>{{ lease.noticePeriodMonths }} months</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Financial -->
+    <div class="info-card">
+      <h2>Financial</h2>
+      <div class="info-grid">
+        <div class="info-item">
+          <label>Monthly Rent</label>
+          <p>{{ lease.monthlyRent | currency: "EUR" : "symbol" : "1.2-2" }}</p>
+        </div>
+        <div class="info-item">
+          <label>Monthly Charges</label>
+          <p>
+            {{
+              lease.monthlyCharges | currency: "EUR" : "symbol" : "1.2-2"
+            }}
+            ({{ lease.chargesType }})
+          </p>
+        </div>
+        <div class="info-item" *ngIf="lease.chargesDescription">
+          <label>Charges Description</label>
+          <p>{{ lease.chargesDescription }}</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Tenants section (sub-component) -->
+    <app-tenant-section
+      [lease]="lease"
+      (leaseUpdated)="loadLease(lease.id)"
+    ></app-tenant-section>
+
+    <!-- Indexation section (sub-component) -->
+    <app-indexation-section
+      [lease]="lease"
+      (leaseUpdated)="loadLease(lease.id)"
+    ></app-indexation-section>
+
+    <!-- Deposit -->
+    <div class="info-card" *ngIf="lease.depositAmount">
+      <h2>Deposit</h2>
+      <div class="info-grid">
+        <div class="info-item">
+          <label>Amount</label>
+          <p>
+            {{ lease.depositAmount | currency: "EUR" : "symbol" : "1.2-2" }}
+          </p>
+        </div>
+        <div class="info-item">
+          <label>Type</label>
+          <p>{{ lease.depositType || "—" }}</p>
+        </div>
+        <div class="info-item">
+          <label>Reference</label>
+          <p>{{ lease.depositReference || "—" }}</p>
+        </div>
+      </div>
+    </div>
+  </ng-container>
+</div>

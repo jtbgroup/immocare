@@ -2,9 +2,9 @@
 import { NgModule } from "@angular/core";
 import { RouterModule, Routes } from "@angular/router";
 
-import { PersonDetailsComponent } from "./person-details/person-details.component";
-import { PersonFormComponent } from "./person-form/person-form.component";
-import { PersonListComponent } from "./person-list/person-list.component";
+import { PersonDetailsComponent } from "./components/person-details/person-details.component";
+import { PersonFormComponent } from "./components/person-form/person-form.component";
+import { PersonListComponent } from "./components/person-list/person-list.component";
 
 const routes: Routes = [
   { path: "", component: PersonListComponent },

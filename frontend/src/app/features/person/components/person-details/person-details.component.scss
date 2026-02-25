@@ -1,0 +1,63 @@
+// All shared styles (btn, info-card, info-grid, info-item, breadcrumb,
+// details-content .header, alert, loading, error-container,
+// person-details-container) come from global styles.scss partials.
+
+// ─── Badges (Owner / Tenant / Lease status) ───────────────────────────────────
+
+.badge {
+  display: inline-block;
+  padding: 0.2em 0.6em;
+  border-radius: 4px;
+  font-size: 0.75rem;
+  font-weight: 600;
+
+  &.badge-owner {
+    background-color: #1565c0;
+    color: #fff;
+  }
+  &.badge-tenant {
+    background-color: #2e7d32;
+    color: #fff;
+  }
+  &.bg-success {
+    background-color: #2e7d32;
+    color: #fff;
+  }
+  &.bg-secondary {
+    background-color: #616161;
+    color: #fff;
+  }
+  &.bg-info {
+    background-color: #0277bd;
+    color: #fff;
+  }
+  &.bg-danger {
+    background-color: #c62828;
+    color: #fff;
+  }
+}
+
+// ─── Related lists (buildings / units / leases) ───────────────────────────────
+
+.related-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.related-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.6rem 0;
+  border-bottom: 1px solid #f0f0f0;
+  &:last-child {
+    border-bottom: none;
+  }
+}
+
+.related-meta {
+  color: #6c757d;
+  font-size: 0.875rem;
+  margin-left: 0.75rem;
+}

@@ -1,4 +1,9 @@
-// ─── Meter Section ───────────────────────────────────────────────────────────
+// All shared styles (btn, btn-sm, btn-primary, btn-secondary, btn-danger,
+// btn-link, form-group, form-actions, required, optional, field-error,
+// alert, alert-success, alert-error, data-table, empty-state)
+// come from global styles.scss partials.
+
+// ─── Section layout ───────────────────────────────────────────────────────────
 
 .meter-section {
   margin-top: 1.5rem;
@@ -16,7 +21,7 @@
   margin: 0;
 }
 
-// ─── Type Blocks ─────────────────────────────────────────────────────────────
+// ─── Type blocks ──────────────────────────────────────────────────────────────
 
 .type-blocks {
   display: flex;
@@ -50,21 +55,13 @@
   }
 }
 
-// ─── Meter List ───────────────────────────────────────────────────────────────
+// ─── Meter list & cards ───────────────────────────────────────────────────────
 
 .meter-list {
   padding: 0.75rem 1rem;
   display: flex;
   flex-direction: column;
   gap: 0.5rem;
-}
-
-.empty-state {
-  color: #888;
-  font-style: italic;
-  font-size: 0.9rem;
-  margin: 0;
-  padding: 0.25rem 0;
 }
 
 .meter-card {
@@ -93,7 +90,14 @@
   font-weight: 600;
 }
 
-// ─── Label Badge ─────────────────────────────────────────────────────────────
+.meter-detail {
+  font-size: 0.85rem;
+  color: #555;
+
+  &.muted {
+    color: #999;
+  }
+}
 
 .meter-label-badge {
   display: inline-block;
@@ -105,22 +109,13 @@
   font-weight: 600;
 }
 
-.meter-detail {
-  font-size: 0.85rem;
-  color: #555;
-}
-
-.muted {
-  color: #999;
-}
-
 .meter-actions {
   display: flex;
   gap: 0.4rem;
   flex-shrink: 0;
 }
 
-// ─── Inline Forms ─────────────────────────────────────────────────────────────
+// ─── Inline forms ─────────────────────────────────────────────────────────────
 
 .inline-form {
   padding: 1rem;
@@ -144,45 +139,6 @@
   flex-wrap: wrap;
 }
 
-.form-group {
-  margin-bottom: 0.6rem;
-
-  label {
-    display: block;
-    font-size: 0.85rem;
-    font-weight: 500;
-    margin-bottom: 0.2rem;
-  }
-
-  input,
-  select {
-    width: 100%;
-    max-width: 360px;
-    padding: 0.4rem 0.6rem;
-    border: 1px solid #ccc;
-    border-radius: 4px;
-    font-size: 0.9rem;
-
-    &:focus { outline: 2px solid #1976d2; border-color: transparent; }
-  }
-}
-
-.required { color: #d32f2f; margin-left: 2px; }
-.optional { color: #888; font-weight: 400; font-size: 0.8rem; }
-
-.field-error {
-  display: block;
-  color: #d32f2f;
-  font-size: 0.8rem;
-  margin-top: 0.15rem;
-}
-
-.form-actions {
-  display: flex;
-  gap: 0.5rem;
-  margin-top: 0.75rem;
-}
-
 .remove-dialog {
   .warning-text {
     color: #e65100;
@@ -191,57 +147,7 @@
   }
 }
 
-// ─── Buttons — aligned with Rent / PEB sections ──────────────────────────────
-
-.btn {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.25rem;
-  padding: 0.45rem 1rem;
-  border: none;
-  border-radius: 4px;
-  font-size: 0.9rem;
-  cursor: pointer;
-  font-weight: 500;
-  transition: opacity 0.15s, background 0.15s;
-
-  &:disabled { opacity: 0.6; cursor: default; }
-  &:hover:not(:disabled) { opacity: 0.88; }
-}
-
-.btn-sm { padding: 0.3rem 0.7rem; font-size: 0.85rem; }
-
-.btn-primary {
-  background: #1976d2;
-  color: #fff;
-  &:hover:not(:disabled) { background: #1565c0; opacity: 1; }
-}
-
-.btn-secondary {
-  background: #e0e0e0;
-  color: #333;
-  &:hover:not(:disabled) { background: #bdbdbd; opacity: 1; }
-}
-
-.btn-danger {
-  background: #d32f2f;
-  color: #fff;
-  &:hover:not(:disabled) { background: #b71c1c; opacity: 1; }
-}
-
-.btn-link {
-  background: transparent;
-  border: none;
-  color: #1976d2;
-  padding: 0.2rem 0;
-  font-size: 0.9rem;
-  cursor: pointer;
-  &:hover { text-decoration: underline; }
-}
-
-.loading-placeholder { color: #999; padding: 1rem 0; font-style: italic; }
-
-// ─── Badges ──────────────────────────────────────────────────────────────────
+// ─── Badges ───────────────────────────────────────────────────────────────────
 
 .badge {
   display: inline-block;
@@ -252,25 +158,25 @@
   text-transform: uppercase;
 }
 
-.badge-green { background: #e8f5e9; color: #2e7d32; }
-.badge-gray  { background: #f5f5f5; color: #757575; }
-
-// ─── Alert Banners ───────────────────────────────────────────────────────────
-
-.alert {
-  padding: 0.6rem 1rem;
-  border-radius: 4px;
-  margin-bottom: 0.75rem;
-  font-size: 0.9rem;
+.badge-green {
+  background: #e8f5e9;
+  color: #2e7d32;
+}
+.badge-gray {
+  background: #f5f5f5;
+  color: #757575;
 }
 
-.alert-success { background: #e8f5e9; color: #2e7d32; border: 1px solid #a5d6a7; }
-.alert-error   { background: #ffebee; color: #c62828; border: 1px solid #ef9a9a; }
-
-// ─── History Panel ────────────────────────────────────────────────────────────
+// ─── History ──────────────────────────────────────────────────────────────────
 
 .history-toggle {
   margin-top: 0.75rem;
+}
+
+.loading-placeholder {
+  color: #999;
+  padding: 1rem 0;
+  font-style: italic;
 }
 
 .history-panel {
@@ -287,7 +193,11 @@
   align-items: center;
   margin-bottom: 1rem;
 
-  h4 { margin: 0; font-size: 1rem; font-weight: 600; }
+  h4 {
+    margin: 0;
+    font-size: 1rem;
+    font-weight: 600;
+  }
 }
 
 .btn-close {
@@ -296,24 +206,11 @@
   font-size: 1.1rem;
   cursor: pointer;
   color: #555;
-  &:hover { color: #000; }
+  &:hover {
+    color: #000;
+  }
 }
 
 .history-table-wrapper {
   overflow-x: auto;
-}
-
-.data-table {
-  width: 100%;
-  border-collapse: collapse;
-  font-size: 0.875rem;
-
-  th, td {
-    padding: 0.5rem 0.75rem;
-    text-align: left;
-    border-bottom: 1px solid #e0e0e0;
-  }
-
-  th { background: #f5f5f5; font-weight: 600; }
-  tbody tr:hover { background: #fafafa; }
 }

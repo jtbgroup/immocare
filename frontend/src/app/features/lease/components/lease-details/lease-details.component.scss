@@ -1,0 +1,36 @@
+// All shared styles (btn, info-card, info-grid, info-item, breadcrumb,
+// details-content .header, alert, loading, error-container,
+// lease-details-container) come from global styles.scss partials.
+
+// ─── Status badge ─────────────────────────────────────────────────────────────
+
+.badge {
+  display: inline-block;
+  padding: 0.2em 0.6em;
+  border-radius: 4px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: #fff;
+
+  &.bg-success {
+    background-color: #2e7d32;
+  }
+  &.bg-secondary {
+    background-color: #616161;
+  }
+  &.bg-info {
+    background-color: #0277bd;
+  }
+  &.bg-danger {
+    background-color: #c62828;
+  }
+}
+
+// ─── Lease type subtitle in h1 ────────────────────────────────────────────────
+
+.lease-type {
+  font-size: 1rem;
+  font-weight: 400;
+  color: #6c757d;
+  margin-left: 0.5rem;
+}

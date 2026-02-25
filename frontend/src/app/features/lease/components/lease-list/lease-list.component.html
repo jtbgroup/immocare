@@ -1,0 +1,45 @@
+<!-- features/lease/lease-list/lease-list.component.html -->
+<div class="info-card">
+  <h2>Lease History</h2>
+
+  <div *ngIf="isLoading" class="loading">Loading…</div>
+
+  <p *ngIf="!isLoading && leases.length === 0" class="empty-message">
+    No leases yet.
+  </p>
+
+  <div *ngIf="!isLoading && leases.length > 0" class="data-table">
+    <table>
+      <thead>
+        <tr>
+          <th>Status</th>
+          <th>Type</th>
+          <th>Start</th>
+          <th>End</th>
+          <th>Tenant(s)</th>
+          <th>Rent</th>
+          <th></th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let l of leases">
+          <td>
+            <span class="badge" [ngClass]="statusClass(l.status)">{{
+              l.status
+            }}</span>
+          </td>
+          <td>{{ LEASE_TYPE_LABELS[l.leaseType] }}</td>
+          <td>{{ l.startDate | date: "dd/MM/yyyy" }}</td>
+          <td>{{ l.endDate | date: "dd/MM/yyyy" }}</td>
+          <td>{{ l.tenantNames?.join(", ") || "—" }}</td>
+          <td>{{ l.monthlyRent | currency: "EUR" : "symbol" : "1.2-2" }}</td>
+          <td>
+            <a [routerLink]="['/leases', l.id]" class="btn btn-secondary btn-sm"
+              >View</a
+            >
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</div>

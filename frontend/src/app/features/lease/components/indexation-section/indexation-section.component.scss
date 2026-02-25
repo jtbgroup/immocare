@@ -1,0 +1,48 @@
+// All shared styles (info-card, data-table, form-row, form-row-3, form-group,
+// form-actions, required, alert, btn, empty-message)
+// come from global styles.scss partials.
+
+// ─── info-card title with action button ──────────────────────────────────────
+
+.info-card-title {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1rem;
+  padding-bottom: 0.5rem;
+  border-bottom: 2px solid #007bff;
+
+  h2 {
+    margin: 0;
+    border-bottom: none;
+    padding-bottom: 0;
+  }
+}
+
+// ─── Base index summary ───────────────────────────────────────────────────────
+
+.base-index-info {
+  display: flex;
+  gap: 2rem;
+  font-size: 0.875rem;
+  color: #6c757d;
+  margin-bottom: 1rem;
+}
+
+// ─── Record form panel ────────────────────────────────────────────────────────
+
+.picker-panel {
+  border: 1px solid #e0e0e0;
+  border-radius: 6px;
+  padding: 1rem;
+  background: #fafafa;
+  margin-bottom: 1rem;
+}
+
+// ─── Total change footer ──────────────────────────────────────────────────────
+
+.total-change {
+  margin-top: 0.5rem;
+  font-size: 0.8rem;
+  color: #6c757d;
+}

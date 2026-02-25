@@ -6,7 +6,7 @@ import { takeUntil } from "rxjs/operators";
 import { HousingUnitService } from "../../../../core/services/housing-unit.service";
 import { HousingUnit } from "../../../../models/housing-unit.model";
 import { MeterSectionComponent } from "../../../../shared/components/meter-section/meter-section.component";
-import { LeaseSectionComponent } from "../../../features/lease/lease-section/lease-section.component";
+import { LeaseSectionComponent } from "../../../lease/components/lease-section/lease-section.component";
 import { PebSectionComponent } from "../peb-section/peb-section.component";
 import { RentSectionComponent } from "../rent-section/rent-section.component";
 import { RoomSectionComponent } from "../room-section/room-section.component";

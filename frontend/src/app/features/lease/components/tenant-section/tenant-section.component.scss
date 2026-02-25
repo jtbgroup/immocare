@@ -1,0 +1,91 @@
+// All shared styles (info-card, btn, alert, form-group)
+// come from global styles.scss partials.
+
+// ─── info-card title with action button ──────────────────────────────────────
+// Overrides the default h2 block style to allow a button alongside the title.
+
+.info-card-title {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1rem;
+  padding-bottom: 0.5rem;
+  border-bottom: 2px solid #007bff;
+
+  h2 {
+    margin: 0;
+    border-bottom: none;
+    padding-bottom: 0;
+  }
+}
+
+// ─── Tenant list ──────────────────────────────────────────────────────────────
+
+.tenant-list {
+  list-style: none;
+  padding: 0;
+  margin: 0 0 1rem;
+}
+
+.tenant-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.6rem 0;
+  border-bottom: 1px solid #f0f0f0;
+
+  &:last-child {
+    border-bottom: none;
+  }
+}
+
+.tenant-info {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+}
+
+.tenant-contact {
+  font-size: 0.85rem;
+  color: #6c757d;
+}
+
+.tenant-empty {
+  color: #6c757d;
+  font-size: 0.875rem;
+  padding: 0.4rem 0;
+}
+
+// ─── Role badges ──────────────────────────────────────────────────────────────
+
+.badge {
+  display: inline-block;
+  padding: 0.2em 0.6em;
+  border-radius: 4px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: #fff;
+
+  &.bg-primary {
+    background-color: #1565c0;
+  }
+  &.bg-secondary {
+    background-color: #616161;
+  }
+  &.bg-warning {
+    background-color: #e65100;
+  }
+}
+
+// ─── Add picker panel ─────────────────────────────────────────────────────────
+
+.picker-panel {
+  border: 1px solid #e0e0e0;
+  border-radius: 6px;
+  padding: 1rem;
+  background: #fafafa;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
