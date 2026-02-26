@@ -1,29 +1,109 @@
-// All shared styles (btn, form-card, form-section-title, form-group, form-row,
-// form-row-3, form-actions, required, error-message, alert, loading,
-// details-content .header, lease-form-container) come from global styles.scss partials.
+// features/lease/lease-form/lease-form.component.scss
+// info-card, info-grid, info-item, btn, form-actions, alert, loading,
+// details-content .header, lease-form-container → global styles.scss partials.
 
-// ─── Checkbox group ───────────────────────────────────────────────────────────
+// ─── Inputs / selects inside info-item ───────────────────────────────────────
+// The info-item normally contains a <label> + <p>. In the form we replace <p>
+// with <input>/<select>, so we need to apply field styling within that context.
 
-.form-check-group {
+.info-item {
+  input:not([type="checkbox"]),
+  select {
+    display: block;
+    width: 100%;
+    padding: 0.55rem 0.75rem;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    font-size: 0.95rem;
+    font-family: inherit;
+    background: #fff;
+    color: #333;
+    transition: border-color 0.2s, box-shadow 0.2s;
+    box-sizing: border-box;
+
+    &:focus {
+      outline: none;
+      border-color: #007bff;
+      box-shadow: 0 0 0 2px rgba(0, 123, 255, 0.12);
+    }
+
+    &.field-error {
+      border-color: #dc3545;
+      &:focus { box-shadow: 0 0 0 2px rgba(220, 53, 69, 0.12); }
+    }
+
+    &.disabled-input,
+    &:disabled {
+      background: #f5f5f5;
+      color: #888;
+      cursor: default;
+    }
+  }
+
+  // Anniversary month and other computed read-only values
+  .computed-value {
+    margin: 0;
+    padding: 0.55rem 0;
+    font-size: 0.95rem;
+    color: #555;
+    font-style: italic;
+
+    &.muted { color: #999; }
+  }
+}
+
+// ─── Wide items that span full row ───────────────────────────────────────────
+
+.info-item-wide {
+  grid-column: 1 / -1;
+}
+
+// ─── Label helpers ────────────────────────────────────────────────────────────
+
+.required { color: #dc3545; font-size: 0.75rem; }
+.computed-tag { color: #888; font-weight: 400; font-size: 0.75rem; text-transform: none; letter-spacing: 0; }
+
+// ─── Field-level errors ───────────────────────────────────────────────────────
+
+.field-error-msg {
+  display: block;
+  color: #dc3545;
+  font-size: 0.8rem;
+  margin-top: 0.25rem;
+}
+
+// ─── Help text ───────────────────────────────────────────────────────────────
+
+.help-text {
+  display: block;
+  font-size: 0.8rem;
+  color: #6c757d;
+  margin-top: 0.3rem;
+  &.muted { color: #aaa; }
+}
+
+// ─── Checkbox inline ─────────────────────────────────────────────────────────
+
+.checkbox-label {
   display: flex;
   align-items: center;
   gap: 0.5rem;
-  margin-bottom: 1rem;
+  font-size: 0.9rem;
+  font-weight: 500;
+  color: #333;
+  cursor: pointer;
+  text-transform: none;
+  letter-spacing: 0;
 
   input[type="checkbox"] {
     width: 1rem;
     height: 1rem;
     cursor: pointer;
-  }
-
-  label {
-    font-size: 0.9rem;
-    cursor: pointer;
-    margin: 0;
+    flex-shrink: 0;
   }
 }
 
-// ─── Tenant list ──────────────────────────────────────────────────────────────
+// ─── Tenant list ─────────────────────────────────────────────────────────────
 
 .tenant-list {
   list-style: none;

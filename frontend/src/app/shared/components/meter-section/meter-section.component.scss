@@ -35,6 +35,11 @@
   overflow: hidden;
 }
 
+.type-block .empty-state {
+  padding: 0.25rem;
+  font-size: 0.95rem;
+}
+
 .type-block-header {
   display: flex;
   justify-content: space-between;

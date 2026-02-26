@@ -315,7 +315,9 @@ public class LeaseService {
         lease.setNoticePeriodMonths(req.getNoticePeriodMonths() > 0 ? req.getNoticePeriodMonths()
                 : DEFAULT_NOTICE.getOrDefault(req.getLeaseType(), 3));
         lease.setIndexationNoticeDays(req.getIndexationNoticeDays());
-        lease.setIndexationAnniversaryMonth(req.getIndexationAnniversaryMonth());
+        // Anniversary month derived from start date — never from client input
+        lease.setIndexationAnniversaryMonth(
+                req.getStartDate() != null ? req.getStartDate().getMonthValue() : null);
         lease.setMonthlyRent(req.getMonthlyRent());
         lease.setMonthlyCharges(req.getMonthlyCharges() != null ? req.getMonthlyCharges() : BigDecimal.ZERO);
         lease.setChargesType(
@@ -324,6 +326,7 @@ public class LeaseService {
         lease.setBaseIndexValue(req.getBaseIndexValue());
         lease.setBaseIndexMonth(req.getBaseIndexMonth());
         lease.setRegistrationSpf(req.getRegistrationSpf());
+        lease.setRegistrationInventorySpf(req.getRegistrationInventorySpf());
         lease.setRegistrationRegion(req.getRegistrationRegion());
         lease.setDepositAmount(req.getDepositAmount());
         lease.setDepositType(req.getDepositType() != null ? DepositType.valueOf(req.getDepositType()) : null);
@@ -341,7 +344,9 @@ public class LeaseService {
         lease.setNoticePeriodMonths(req.getNoticePeriodMonths() > 0 ? req.getNoticePeriodMonths()
                 : DEFAULT_NOTICE.getOrDefault(req.getLeaseType(), 3));
         lease.setIndexationNoticeDays(req.getIndexationNoticeDays());
-        lease.setIndexationAnniversaryMonth(req.getIndexationAnniversaryMonth());
+        // Anniversary month derived from start date — never from client input
+        lease.setIndexationAnniversaryMonth(
+                req.getStartDate() != null ? req.getStartDate().getMonthValue() : null);
         lease.setMonthlyRent(req.getMonthlyRent());
         lease.setMonthlyCharges(req.getMonthlyCharges() != null ? req.getMonthlyCharges() : BigDecimal.ZERO);
         lease.setChargesType(
@@ -350,6 +355,7 @@ public class LeaseService {
         lease.setBaseIndexValue(req.getBaseIndexValue());
         lease.setBaseIndexMonth(req.getBaseIndexMonth());
         lease.setRegistrationSpf(req.getRegistrationSpf());
+        lease.setRegistrationInventorySpf(req.getRegistrationInventorySpf());
         lease.setRegistrationRegion(req.getRegistrationRegion());
         lease.setDepositAmount(req.getDepositAmount());
         lease.setDepositType(req.getDepositType() != null ? DepositType.valueOf(req.getDepositType()) : null);
@@ -383,6 +389,7 @@ public class LeaseService {
         dto.setBaseIndexMonth(lease.getBaseIndexMonth());
         dto.setRegistrationSpf(lease.getRegistrationSpf());
         dto.setRegistrationRegion(lease.getRegistrationRegion());
+        dto.setRegistrationInventorySpf(lease.getRegistrationInventorySpf());
         dto.setDepositAmount(lease.getDepositAmount());
         dto.setDepositType(lease.getDepositType() != null ? lease.getDepositType().name() : null);
         dto.setDepositReference(lease.getDepositReference());

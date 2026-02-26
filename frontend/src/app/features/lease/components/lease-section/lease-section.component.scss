@@ -1,136 +1,249 @@
 // lease-section.component.scss
+// Mirrors the visual style of rent-section — no Bootstrap dependencies.
 
-.card {
-  border-radius: 8px;
-  border: 1px solid #e0e0e0;
+// ─── Layout ───────────────────────────────────────────────────────────────────
+
+.lease-section {
+  margin-top: 0;
 }
 
-.card-header {
-  background-color: #f5f5f5;
-  border-bottom: 1px solid #e0e0e0;
-  padding: 0.65rem 1rem;
+.section-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1rem;
 
-  .fw-semibold {
-    font-size: 1rem;
+  h3 {
+    margin: 0;
+    font-size: 1.05rem;
     font-weight: 600;
   }
 }
 
-.card-body {
-  padding: 1rem;
+.loading-placeholder,
+.no-data {
+  color: #888;
+  font-size: 0.9rem;
 }
 
-// Alert banners
-.alert {
-  font-size: 0.875rem;
+// ─── Alert banners ────────────────────────────────────────────────────────────
+
+.alert-banner {
   display: flex;
   align-items: center;
   gap: 0.5rem;
+  padding: 0.5rem 0.75rem;
   border-radius: 4px;
+  font-size: 0.85rem;
+  margin-bottom: 0.5rem;
 
-  &.alert-warning {
-    background: #fff8e1;
-    border-color: #ffe082;
-    color: #5d4037;
+  &.alert-banner-warning {
+    background: #e3f2fd;
+    border: 1px solid #90caf9;
+    color: #1565c0;
+  }
+
+  &.alert-banner-orange {
+    background: #fff3cd;
+    border: 1px solid #ffc107;
+    color: #7a4f00;
   }
 }
 
-// Status badge
-.badge {
-  font-size: 0.75rem;
-  padding: 0.25em 0.6em;
-  border-radius: 4px;
-  font-weight: 600;
+// ─── Lease card ───────────────────────────────────────────────────────────────
 
-  &.bg-success {
-    background-color: #2e7d32 !important;
-  }
-  &.bg-secondary {
-    background-color: #616161 !important;
-  }
-  &.bg-info {
-    background-color: #0277bd !important;
-  }
-  &.bg-danger {
-    background-color: #c62828 !important;
-  }
-}
+.lease-card {
+  border: 1px solid #e0e0e0;
+  border-radius: 6px;
+  background: #fafafa;
+  padding: 0.6rem 0.75rem;
 
-// Info rows
-.mb-1 {
-  margin-bottom: 0.3rem;
-
-  strong {
-    font-weight: 600;
-    color: #555;
-    font-size: 0.875rem;
-    display: inline-block;
-    min-width: 70px;
-  }
-
-  span {
+  &.lease-card-empty {
+    color: #888;
     font-size: 0.9rem;
+    text-align: center;
+    padding: 0.75rem;
   }
 }
 
-.text-muted {
-  color: #888 !important;
-  font-size: 0.85rem;
+.lease-card-body {
+  display: flex;
+  align-items: flex-start;
+  gap: 1rem;
+  flex-wrap: wrap;
 }
 
-// "View all leases" link
-a.small {
-  font-size: 0.82rem;
+// ─── Badge column ─────────────────────────────────────────────────────────────
+
+.lease-badge-col {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 0.35rem;
+  flex-shrink: 0;
+  min-width: 6rem;
 }
 
-// Spinner centering
-.text-center {
-  text-align: center;
-  padding: 1rem 0;
-}
-
-// Buttons
-.btn {
-  font-size: 0.85rem;
-  padding: 0.3rem 0.75rem;
+.lease-status-badge {
+  display: inline-block;
+  padding: 0.2em 0.6em;
   border-radius: 4px;
-  font-weight: 500;
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: #fff;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+
+  &.badge-active {
+    background-color: #2e7d32;
+  }
+  &.badge-draft {
+    background-color: #616161;
+  }
+  &.badge-finished {
+    background-color: #0277bd;
+  }
+  &.badge-cancelled {
+    background-color: #c62828;
+  }
+}
+
+.lease-type-label {
+  font-size: 0.8rem;
+  color: #555;
+}
+
+// ─── Details ──────────────────────────────────────────────────────────────────
+
+.lease-details {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  line-height: 1.6;
+}
+
+.lease-detail-row {
+  display: flex;
+  align-items: baseline;
+  flex-wrap: wrap;
+  gap: 0.25rem;
+  font-size: 0.9rem;
+}
+
+.lease-detail-label {
+  font-weight: 600;
+  flex-shrink: 0;
+}
+
+.muted {
+  color: #888;
+  font-size: 0.85rem;
+}
+
+// ─── Actions ──────────────────────────────────────────────────────────────────
+
+.lease-actions {
+  display: flex;
+  gap: 0.4rem;
+  flex-shrink: 0;
+  align-items: flex-start;
+}
+
+.btn-ghost {
+  padding: 0.25rem 0.6rem;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  background: none;
+  font-size: 0.875rem;
   cursor: pointer;
-  border: 1px solid transparent;
-  transition: opacity 0.15s;
+  color: #333;
+  text-decoration: none;
 
   &:hover {
-    opacity: 0.88;
+    background: #f0f0f0;
+    text-decoration: none;
   }
+}
 
-  &.btn-sm {
-    font-size: 0.8rem;
-    padding: 0.25rem 0.6rem;
+// ─── History panel ────────────────────────────────────────────────────────────
+
+.history-panel {
+  border: 1px solid #e0e0e0;
+  border-radius: 6px;
+  padding: 1rem;
+  margin-top: 0.75rem;
+  background: #fff;
+}
+
+.history-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 0.75rem;
+
+  h4 {
+    margin: 0;
+    font-size: 0.95rem;
+    font-weight: 600;
   }
+}
 
-  &.btn-primary {
-    background: #1976d2;
-    color: #fff;
-    border-color: #1976d2;
+.btn-close {
+  background: none;
+  border: none;
+  font-size: 1rem;
+  cursor: pointer;
+  color: #555;
+  padding: 0;
+  line-height: 1;
+
+  &:hover {
+    color: #000;
   }
+}
 
-  &.btn-outline-primary {
-    background: transparent;
-    color: #1976d2;
-    border-color: #1976d2;
-    &:hover {
-      background: #e3f2fd;
-      opacity: 1;
-    }
-  }
+.history-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.85rem;
 
-  &.btn-outline-secondary {
-    background: transparent;
+  th {
+    text-align: left;
+    padding: 0.4rem 0.6rem;
+    border-bottom: 2px solid #e0e0e0;
+    font-weight: 600;
     color: #555;
-    border-color: #bdbdbd;
-    &:hover {
-      background: #f5f5f5;
-      opacity: 1;
-    }
+    white-space: nowrap;
+  }
+
+  td {
+    padding: 0.45rem 0.6rem;
+    border-bottom: 1px solid #f0f0f0;
+    vertical-align: middle;
+  }
+
+  tr:last-child td {
+    border-bottom: none;
+  }
+}
+
+// ─── Footer link ─────────────────────────────────────────────────────────────
+
+.lease-footer {
+  margin-top: 0.5rem;
+}
+
+.btn-link {
+  background: none;
+  border: none;
+  color: #007bff;
+  cursor: pointer;
+  padding: 0;
+  font-size: 0.9rem;
+  text-decoration: none;
+
+  &:hover {
+    text-decoration: underline;
   }
 }

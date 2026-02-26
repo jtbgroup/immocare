@@ -16,7 +16,7 @@
         lease.buildingName
       }}</a>
       <span class="breadcrumb-separator">›</span>
-      <a [routerLink]="['/housing-units', lease.housingUnitId]"
+      <a [routerLink]="['/units', lease.housingUnitId]"
         >Unit {{ lease.housingUnitNumber }}</a
       >
       <span class="breadcrumb-separator">›</span>
@@ -26,13 +26,13 @@
     <!-- Header -->
     <div class="details-content">
       <div class="header">
-        <h1>
-          Lease #{{ lease.id }}
+        <div class="title-row">
+          <h1>Lease #{{ lease.id }}</h1>
           <span class="badge" [ngClass]="statusClass">{{ lease.status }}</span>
           <span class="lease-type">{{
             LEASE_TYPE_LABELS[lease.leaseType]
           }}</span>
-        </h1>
+        </div>
         <div class="actions">
           <a
             *ngIf="canEdit()"
@@ -40,30 +40,6 @@
             class="btn btn-secondary"
             >Edit</a
           >
-          <button
-            *ngIf="canActivate()"
-            class="btn btn-primary"
-            (click)="doActivate()"
-            [disabled]="isTransitioning"
-          >
-            Activate
-          </button>
-          <button
-            *ngIf="canFinish()"
-            class="btn btn-secondary"
-            (click)="doFinish()"
-            [disabled]="isTransitioning"
-          >
-            Finish
-          </button>
-          <button
-            *ngIf="canCancel()"
-            class="btn btn-danger"
-            (click)="doCancel()"
-            [disabled]="isTransitioning"
-          >
-            Cancel
-          </button>
         </div>
       </div>
     </div>
@@ -143,6 +119,32 @@
       [lease]="lease"
       (leaseUpdated)="loadLease(lease.id)"
     ></app-indexation-section>
+
+    <!-- Registration (affiché seulement si au moins un champ est renseigné) -->
+    <div
+      class="info-card"
+      *ngIf="
+        lease.registrationSpf ||
+        lease.registrationInventorySpf ||
+        lease.registrationRegion
+      "
+    >
+      <h2>Registration</h2>
+      <div class="info-grid">
+        <div class="info-item" *ngIf="lease.registrationSpf">
+          <label>Lease — SPF Finances</label>
+          <p>{{ lease.registrationSpf }}</p>
+        </div>
+        <div class="info-item" *ngIf="lease.registrationInventorySpf">
+          <label>Inventory — SPF Finances</label>
+          <p>{{ lease.registrationInventorySpf }}</p>
+        </div>
+        <div class="info-item" *ngIf="lease.registrationRegion">
+          <label>Lease — Region</label>
+          <p>{{ lease.registrationRegion }}</p>
+        </div>
+      </div>
+    </div>
 
     <!-- Deposit -->
     <div class="info-card" *ngIf="lease.depositAmount">

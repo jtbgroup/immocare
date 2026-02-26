@@ -2,6 +2,18 @@
 // details-content .header, alert, loading, error-container,
 // lease-details-container) come from global styles.scss partials.
 
+// ─── Title row (h1 + badge + lease-type inline) ───────────────────────────────
+
+.title-row {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+
+  h1 {
+    margin: 0;
+  }
+}
+
 // ─── Status badge ─────────────────────────────────────────────────────────────
 
 .badge {
@@ -26,11 +38,10 @@
   }
 }
 
-// ─── Lease type subtitle in h1 ────────────────────────────────────────────────
+// ─── Lease type subtitle ──────────────────────────────────────────────────────
 
 .lease-type {
   font-size: 1rem;
   font-weight: 400;
   color: #6c757d;
-  margin-left: 0.5rem;
 }

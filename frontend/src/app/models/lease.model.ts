@@ -71,7 +71,7 @@ export interface Lease {
   durationMonths: number;
   noticePeriodMonths: number;
   indexationNoticeDays: number;
-  indexationAnniversaryMonth?: number;
+  indexationAnniversaryMonth?: number;  // read-only, set server-side
   monthlyRent: number;
   monthlyCharges: number;
   chargesType: ChargesType;
@@ -79,6 +79,7 @@ export interface Lease {
   baseIndexValue?: number;
   baseIndexMonth?: string;
   registrationSpf?: string;
+  registrationInventorySpf?: string;
   registrationRegion?: string;
   depositAmount?: number;
   depositType?: DepositType;
@@ -130,7 +131,7 @@ export interface CreateLeaseRequest {
   durationMonths: number;
   noticePeriodMonths: number;
   indexationNoticeDays: number;
-  indexationAnniversaryMonth?: number;
+  // indexationAnniversaryMonth NOT included — computed server-side from startDate
   monthlyRent: number;
   monthlyCharges: number;
   chargesType: ChargesType;
@@ -138,6 +139,7 @@ export interface CreateLeaseRequest {
   baseIndexValue?: number;
   baseIndexMonth?: string;
   registrationSpf?: string;
+  registrationInventorySpf?: string;
   registrationRegion?: string;
   depositAmount?: number;
   depositType?: DepositType;

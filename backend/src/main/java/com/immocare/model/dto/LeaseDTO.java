@@ -11,13 +11,16 @@ public class LeaseDTO {
     private Integer indexationAnniversaryMonth;
     private BigDecimal monthlyRent; private BigDecimal monthlyCharges; private String chargesType; private String chargesDescription;
     private BigDecimal baseIndexValue; private LocalDate baseIndexMonth;
-    private String registrationSpf; private String registrationRegion;
+    private String registrationSpf;
+    private String registrationInventorySpf;
+    private String registrationRegion;
     private BigDecimal depositAmount; private String depositType; private String depositReference;
     private boolean tenantInsuranceConfirmed; private String tenantInsuranceReference; private LocalDate tenantInsuranceExpiry;
     private List<LeaseTenantDTO> tenants; private List<LeaseIndexationDTO> indexations;
     private boolean indexationAlertActive; private LocalDate indexationAlertDate;
     private boolean endNoticeAlertActive; private LocalDate endNoticeAlertDate;
     private LocalDateTime createdAt; private LocalDateTime updatedAt;
+
     public Long getId() { return id; } public void setId(Long id) { this.id = id; }
     public Long getHousingUnitId() { return housingUnitId; } public void setHousingUnitId(Long v) { this.housingUnitId = v; }
     public String getHousingUnitNumber() { return housingUnitNumber; } public void setHousingUnitNumber(String v) { this.housingUnitNumber = v; }
@@ -39,6 +42,7 @@ public class LeaseDTO {
     public BigDecimal getBaseIndexValue() { return baseIndexValue; } public void setBaseIndexValue(BigDecimal v) { this.baseIndexValue = v; }
     public LocalDate getBaseIndexMonth() { return baseIndexMonth; } public void setBaseIndexMonth(LocalDate v) { this.baseIndexMonth = v; }
     public String getRegistrationSpf() { return registrationSpf; } public void setRegistrationSpf(String v) { this.registrationSpf = v; }
+    public String getRegistrationInventorySpf() { return registrationInventorySpf; } public void setRegistrationInventorySpf(String v) { this.registrationInventorySpf = v; }
     public String getRegistrationRegion() { return registrationRegion; } public void setRegistrationRegion(String v) { this.registrationRegion = v; }
     public BigDecimal getDepositAmount() { return depositAmount; } public void setDepositAmount(BigDecimal v) { this.depositAmount = v; }
     public String getDepositType() { return depositType; } public void setDepositType(String v) { this.depositType = v; }

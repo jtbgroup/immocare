@@ -21,6 +21,7 @@ export class LeaseSectionComponent implements OnInit {
   leases: LeaseSummary[] = [];
   activeLease?: LeaseSummary;
   isLoading = false;
+  showHistory = false;
   readonly LEASE_TYPE_LABELS = LEASE_TYPE_LABELS;
 
   constructor(private leaseService: LeaseService) {}
@@ -45,19 +46,31 @@ export class LeaseSectionComponent implements OnInit {
     });
   }
 
-  get statusClass(): string {
+  get pastLeases(): LeaseSummary[] {
+    return this.leases.filter(
+      (l) => l.status !== "ACTIVE" && l.status !== "DRAFT",
+    );
+  }
+
+  statusClass(lease: LeaseSummary): string {
     const map: Record<string, string> = {
-      ACTIVE: "bg-success",
-      DRAFT: "bg-secondary",
-      FINISHED: "bg-info",
-      CANCELLED: "bg-danger",
+      ACTIVE: "badge-active",
+      DRAFT: "badge-draft",
+      FINISHED: "badge-finished",
+      CANCELLED: "badge-cancelled",
     };
-    return this.activeLease
-      ? map[this.activeLease.status] || "bg-secondary"
-      : "";
+    return map[lease.status] || "badge-draft";
+  }
+
+  get activeStatusClass(): string {
+    return this.activeLease ? this.statusClass(this.activeLease) : "";
   }
 
   get canCreateLease(): boolean {
     return !this.activeLease;
+  }
+
+  toggleHistory(): void {
+    this.showHistory = !this.showHistory;
   }
 }

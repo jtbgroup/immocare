@@ -1,5 +1,6 @@
 <!-- features/lease/lease-form/lease-form.component.html -->
 <div class="lease-form-container">
+
   <!-- Header -->
   <div class="details-content">
     <div class="header">
@@ -7,163 +8,155 @@
     </div>
   </div>
 
-  <!-- Loading -->
   <div *ngIf="isLoading" class="loading">Loading…</div>
-
-  <!-- Error -->
   <div *ngIf="errorMessage" class="alert alert-error">{{ errorMessage }}</div>
+  <div *ngIf="statusError" class="alert alert-error">{{ statusError }}</div>
 
   <form *ngIf="!isLoading" [formGroup]="form">
-    <!-- Section 1: General -->
-    <div class="form-card">
-      <div class="form-section-title">1 — General</div>
-      <div class="form-row form-row-3">
-        <div class="form-group">
+
+    <!-- ── Dates & Duration ──────────────────────────────────────────────── -->
+    <div class="info-card">
+      <h2>Dates &amp; Duration</h2>
+      <div class="info-grid">
+
+        <div class="info-item">
           <label>Signature Date <span class="required">*</span></label>
-          <input
-            type="date"
-            formControlName="signatureDate"
-            [class.error]="isInvalid('signatureDate')"
-          />
+          <input type="date" formControlName="signatureDate"
+                 [class.field-error]="isInvalid('signatureDate')" />
+          <span class="field-error-msg" *ngIf="isInvalid('signatureDate')">Required.</span>
         </div>
-        <div class="form-group">
+
+        <div class="info-item">
           <label>Start Date <span class="required">*</span></label>
-          <input
-            type="date"
-            formControlName="startDate"
-            [class.error]="isInvalid('startDate')"
-          />
+          <input type="date" formControlName="startDate"
+                 [class.field-error]="isInvalid('startDate')" />
+          <span class="field-error-msg" *ngIf="isInvalid('startDate')">Required.</span>
         </div>
-        <div class="form-group">
-          <label>End Date (computed)</label>
-          <input type="date" [value]="computedEndDate" readonly />
+
+        <div class="info-item">
+          <label>End Date <span class="computed-tag">(computed)</span></label>
+          <input type="date" [value]="computedEndDate" disabled class="disabled-input" />
         </div>
-      </div>
-      <div class="form-row form-row-3">
-        <div class="form-group">
+
+        <div class="info-item">
           <label>Lease Type <span class="required">*</span></label>
           <select formControlName="leaseType">
-            <option *ngFor="let t of LEASE_TYPES" [value]="t">
-              {{ LEASE_TYPE_LABELS[t] }}
-            </option>
+            <option *ngFor="let t of LEASE_TYPES" [value]="t">{{ LEASE_TYPE_LABELS[t] }}</option>
           </select>
         </div>
-        <div class="form-group">
+
+        <div class="info-item">
           <label>Duration (months) <span class="required">*</span></label>
-          <input
-            type="number"
-            formControlName="durationMonths"
-            min="1"
-            [class.error]="isInvalid('durationMonths')"
-          />
+          <input type="number" formControlName="durationMonths" min="1"
+                 [class.field-error]="isInvalid('durationMonths')" />
+          <span class="field-error-msg" *ngIf="isInvalid('durationMonths')">Required, min 1.</span>
         </div>
-        <div class="form-group">
-          <label>Notice Period (months) <span class="required">*</span></label>
+
+        <div class="info-item">
+          <label>Notice Period (months)</label>
           <input type="number" formControlName="noticePeriodMonths" min="1" />
         </div>
+
       </div>
     </div>
 
-    <!-- Section 2: Financial -->
-    <div class="form-card">
-      <div class="form-section-title">2 — Financial</div>
-      <div class="form-row form-row-3">
-        <div class="form-group">
+    <!-- ── Financial ────────────────────────────────────────────────────── -->
+    <div class="info-card">
+      <h2>Financial</h2>
+      <div class="info-grid">
+
+        <div class="info-item">
           <label>Monthly Rent (€) <span class="required">*</span></label>
-          <input
-            type="number"
-            formControlName="monthlyRent"
-            min="0.01"
-            step="0.01"
-            [class.error]="isInvalid('monthlyRent')"
-          />
+          <input type="number" formControlName="monthlyRent" min="0.01" step="0.01"
+                 [class.field-error]="isInvalid('monthlyRent')" />
+          <span class="field-error-msg" *ngIf="isInvalid('monthlyRent')">Required.</span>
         </div>
-        <div class="form-group">
+
+        <div class="info-item">
           <label>Monthly Charges (€)</label>
-          <input
-            type="number"
-            formControlName="monthlyCharges"
-            min="0"
-            step="0.01"
-          />
+          <input type="number" formControlName="monthlyCharges" min="0" step="0.01" />
         </div>
-        <div class="form-group">
+
+        <div class="info-item">
           <label>Charges Type</label>
           <select formControlName="chargesType">
             <option value="FORFAIT">Forfait</option>
             <option value="PROVISION">Provision</option>
           </select>
         </div>
-      </div>
-      <div class="form-group">
-        <label>Charges Description</label>
-        <input type="text" formControlName="chargesDescription" />
+
+        <div class="info-item info-item-wide">
+          <label>Charges Description</label>
+          <input type="text" formControlName="chargesDescription" />
+        </div>
+
       </div>
     </div>
 
-    <!-- Section 3: Indexation -->
-    <div class="form-card">
-      <div class="form-section-title">3 — Indexation</div>
-      <div class="form-row">
-        <div class="form-group">
+    <!-- ── Indexation ────────────────────────────────────────────────────── -->
+    <div class="info-card">
+      <h2>Indexation</h2>
+      <div class="info-grid">
+
+        <div class="info-item">
           <label>Base Index Value</label>
           <input type="number" formControlName="baseIndexValue" step="0.0001" />
         </div>
-        <div class="form-group">
+
+        <div class="info-item">
           <label>Base Index Month</label>
           <input type="month" formControlName="baseIndexMonth" />
         </div>
-      </div>
-      <div class="form-row">
-        <div class="form-group">
-          <label>Anniversary Month</label>
-          <select formControlName="indexationAnniversaryMonth">
-            <option [value]="null">—</option>
-            <option
-              *ngFor="let m of [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12]"
-              [value]="m"
-            >
-              {{ m }}
-            </option>
-          </select>
-        </div>
-        <div class="form-group">
+
+        <div class="info-item">
           <label>Notice (days)</label>
           <input type="number" formControlName="indexationNoticeDays" min="0" />
         </div>
+
+        <div class="info-item">
+          <label>Anniversary Month <span class="computed-tag">(auto)</span></label>
+          <p *ngIf="anniversaryMonthLabel" class="computed-value">{{ anniversaryMonthLabel }}</p>
+          <p *ngIf="!anniversaryMonthLabel" class="computed-value muted">Derived from start date</p>
+        </div>
+
       </div>
     </div>
 
-    <!-- Section 4: Registration -->
-    <div class="form-card">
-      <div class="form-section-title">4 — Registration</div>
-      <div class="form-row">
-        <div class="form-group">
-          <label>SPF Finances Number</label>
-          <input type="text" formControlName="registrationSpf" />
+    <!-- ── Registration ──────────────────────────────────────────────────── -->
+    <div class="info-card">
+      <h2>Registration</h2>
+      <div class="info-grid">
+
+        <div class="info-item">
+          <label>Lease — SPF Finances</label>
+          <input type="text" formControlName="registrationSpf" placeholder="e.g. 2026/01/12345" />
         </div>
-        <div class="form-group">
-          <label>Region Number</label>
-          <input type="text" formControlName="registrationRegion" />
+
+        <div class="info-item">
+          <label>Inventory — SPF Finances</label>
+          <input type="text" formControlName="registrationInventorySpf" placeholder="e.g. 2026/01/67890" />
         </div>
+
+        <div class="info-item">
+          <label>Lease — Region</label>
+          <input type="text" formControlName="registrationRegion" placeholder="e.g. REG-2026-12345" />
+        </div>
+
       </div>
     </div>
 
-    <!-- Section 5: Deposit -->
-    <div class="form-card">
-      <div class="form-section-title">5 — Guarantee / Deposit</div>
-      <div class="form-row form-row-3">
-        <div class="form-group">
-          <label>Deposit Amount (€)</label>
-          <input
-            type="number"
-            formControlName="depositAmount"
-            min="0"
-            step="0.01"
-          />
+    <!-- ── Guarantee / Deposit ───────────────────────────────────────────── -->
+    <div class="info-card">
+      <h2>Guarantee / Deposit</h2>
+      <div class="info-grid">
+
+        <div class="info-item">
+          <label>Amount (€)</label>
+          <input type="number" formControlName="depositAmount" min="0" step="0.01" />
         </div>
-        <div class="form-group">
-          <label>Deposit Type</label>
+
+        <div class="info-item">
+          <label>Type</label>
           <select formControlName="depositType">
             <option [value]="null">—</option>
             <option value="BLOCKED_ACCOUNT">Blocked Account</option>
@@ -172,107 +165,94 @@
             <option value="INSURANCE">Insurance</option>
           </select>
         </div>
-        <div class="form-group">
-          <label>Deposit Reference</label>
+
+        <div class="info-item">
+          <label>Reference</label>
           <input type="text" formControlName="depositReference" />
         </div>
+
       </div>
     </div>
 
-    <!-- Section 6: Insurance -->
-    <div class="form-card">
-      <div class="form-section-title">6 — Tenant Insurance</div>
-      <div class="form-check-group">
-        <input
-          type="checkbox"
-          formControlName="tenantInsuranceConfirmed"
-          id="insuranceCheck"
-        />
-        <label for="insuranceCheck">Insurance confirmed</label>
-      </div>
-      <div *ngIf="showInsuranceDetails" class="form-row">
-        <div class="form-group">
-          <label>Policy Reference</label>
-          <input type="text" formControlName="tenantInsuranceReference" />
+    <!-- ── Tenant Insurance ──────────────────────────────────────────────── -->
+    <div class="info-card">
+      <h2>Tenant Insurance</h2>
+      <div class="info-grid">
+
+        <div class="info-item info-item-wide">
+          <label class="checkbox-label">
+            <input type="checkbox" formControlName="tenantInsuranceConfirmed" />
+            Insurance confirmed
+          </label>
         </div>
-        <div class="form-group">
-          <label>Expiry Date</label>
-          <input type="date" formControlName="tenantInsuranceExpiry" />
-        </div>
+
+        <ng-container *ngIf="showInsuranceDetails">
+          <div class="info-item">
+            <label>Policy Reference</label>
+            <input type="text" formControlName="tenantInsuranceReference" />
+          </div>
+          <div class="info-item">
+            <label>Expiry Date</label>
+            <input type="date" formControlName="tenantInsuranceExpiry" />
+          </div>
+        </ng-container>
+
       </div>
     </div>
 
-    <!-- Section 7: Tenants -->
-    <div class="form-card">
-      <div class="form-section-title">7 — Tenants</div>
-
+    <!-- ── Tenants ───────────────────────────────────────────────────────── -->
+    <div class="info-card">
+      <h2>Tenants</h2>
       <ul class="tenant-list">
         <li *ngFor="let t of pendingTenants; let i = index">
-          <span class="tenant-name"
-            >{{ t.person.lastName }} {{ t.person.firstName }}</span
-          >
-          <select
-            class="tenant-role-select"
-            [value]="t.role"
-            (change)="updateTenantRole(i, $event)"
-          >
+          <span class="tenant-name">{{ t.person.lastName }} {{ t.person.firstName }}</span>
+          <select class="tenant-role-select" [value]="t.role" (change)="updateTenantRole(i, $event)">
             <option value="PRIMARY">Primary</option>
             <option value="CO_TENANT">Co-Tenant</option>
             <option value="GUARANTOR">Guarantor</option>
           </select>
-          <button
-            type="button"
-            class="btn btn-danger btn-sm"
-            (click)="removeTenantFromForm(i)"
-          >
-            ✕
-          </button>
+          <button type="button" class="btn btn-danger btn-sm" (click)="removeTenantFromForm(i)">✕</button>
         </li>
       </ul>
-
-      <p *ngIf="!hasPrimaryTenant()" class="error-message">
-        At least one PRIMARY tenant is required.
-      </p>
-
-      <app-person-picker
-        label="Add Tenant"
-        [required]="false"
-        (personSelected)="addTenantToForm($event)"
-      >
-      </app-person-picker>
+      <p *ngIf="!hasPrimaryTenant()" class="field-error-msg">At least one PRIMARY tenant is required.</p>
+      <app-person-picker label="Add Tenant" [required]="false" (personSelected)="addTenantToForm($event)"></app-person-picker>
     </div>
 
-    <!-- Actions -->
+    <!-- ── Status (edit only) ────────────────────────────────────────────── -->
+    <div class="info-card" *ngIf="isEditMode && filteredAvailableStatuses.length > 0">
+      <h2>Status</h2>
+      <div class="info-grid">
+        <div class="info-item">
+          <label>Change status to</label>
+          <select [(ngModel)]="selectedStatus" [ngModelOptions]="{standalone: true}">
+            <option [value]="null">— No change —</option>
+            <option *ngFor="let s of filteredAvailableStatuses" [value]="s.value">{{ s.label }}</option>
+          </select>
+          <span class="help-text" *ngIf="selectedStatus">The status will be changed when you save.</span>
+          <span class="help-text muted"
+                *ngIf="currentStatus === 'DRAFT' && !form.get('startDate')?.value">
+            "Activate" requires a start date.
+          </span>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── Actions ───────────────────────────────────────────────────────── -->
     <div class="form-actions">
-      <button type="button" class="btn btn-secondary" (click)="cancel()">
-        Cancel
-      </button>
-      <button
-        type="button"
-        class="btn btn-secondary"
-        (click)="saveAsDraft()"
-        [disabled]="isSaving"
-      >
+      <button type="button" class="btn btn-secondary" (click)="cancel()">Cancel</button>
+      <button *ngIf="!isEditMode" type="button" class="btn btn-secondary"
+              (click)="saveAsDraft()" [disabled]="isSaving">
         {{ isSaving ? "Saving…" : "Save as Draft" }}
       </button>
-      <button
-        *ngIf="!isEditMode"
-        type="button"
-        class="btn btn-primary"
-        (click)="saveAndActivate()"
-        [disabled]="isSaving"
-      >
+      <button *ngIf="!isEditMode" type="button" class="btn btn-primary"
+              (click)="saveAndActivate()" [disabled]="isSaving">
         Save &amp; Activate
       </button>
-      <button
-        *ngIf="isEditMode"
-        type="button"
-        class="btn btn-primary"
-        (click)="saveAsDraft()"
-        [disabled]="isSaving"
-      >
-        Save Changes
+      <button *ngIf="isEditMode" type="button" class="btn btn-primary"
+              (click)="saveChanges()" [disabled]="isSaving || isTransitioning">
+        {{ isSaving || isTransitioning ? "Saving…" : "Save Changes" }}
       </button>
     </div>
+
   </form>
 </div>
