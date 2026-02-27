@@ -3,7 +3,6 @@ package com.immocare.service;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.ArgumentMatchers.eq;
@@ -44,7 +43,6 @@ import com.immocare.model.enums.LeaseStatus;
 import com.immocare.model.enums.LeaseType;
 import com.immocare.model.enums.TenantRole;
 import com.immocare.repository.HousingUnitRepository;
-import com.immocare.repository.LeaseIndexationRepository;
 import com.immocare.repository.LeaseRepository;
 import com.immocare.repository.LeaseTenantRepository;
 import com.immocare.repository.PersonRepository;
@@ -56,8 +54,6 @@ class LeaseServiceTest {
     LeaseRepository leaseRepository;
     @Mock
     LeaseTenantRepository leaseTenantRepository;
-    @Mock
-    LeaseIndexationRepository indexationRepository;
     @Mock
     HousingUnitRepository housingUnitRepository;
     @Mock
@@ -110,7 +106,6 @@ class LeaseServiceTest {
     @DisplayName("getByUnit returns summary list for given unit")
     void getByUnit_returnsList() {
         when(leaseRepository.findByHousingUnitIdOrderByStartDateDesc(10L)).thenReturn(List.of(lease));
-        when(indexationRepository.existsByLeaseIdAndYear(any(), anyInt())).thenReturn(false);
         List<LeaseSummaryDTO> result = leaseService.getByUnit(10L);
         assertThat(result).hasSize(1);
         assertThat(result.get(0).getStatus()).isEqualTo("DRAFT");
@@ -130,7 +125,6 @@ class LeaseServiceTest {
             l.setId(99L);
             return l;
         });
-        when(indexationRepository.existsByLeaseIdAndYear(any(), anyInt())).thenReturn(false);
 
         LeaseDTO result = leaseService.create(req, false);
 
@@ -173,7 +167,6 @@ class LeaseServiceTest {
             l.setId(1L);
             return l;
         });
-        when(indexationRepository.existsByLeaseIdAndYear(any(), anyInt())).thenReturn(false);
 
         LeaseDTO result = leaseService.create(req, false);
         // start 2024-02-01 + 108 months = 2033-02-01
@@ -189,7 +182,6 @@ class LeaseServiceTest {
         when(leaseRepository.existsByHousingUnitIdAndStatusInAndIdNot(anyLong(), any(), eq(1L))).thenReturn(false);
         when(leaseTenantRepository.countByLeaseIdAndRole(1L, TenantRole.PRIMARY)).thenReturn(1L);
         when(leaseRepository.save(any())).thenReturn(lease);
-        when(indexationRepository.existsByLeaseIdAndYear(any(), anyInt())).thenReturn(false);
 
         ChangeLeaseStatusRequest req = new ChangeLeaseStatusRequest();
         req.setTargetStatus("ACTIVE");
@@ -205,7 +197,6 @@ class LeaseServiceTest {
         lease.setStatus(LeaseStatus.ACTIVE);
         when(leaseRepository.findById(1L)).thenReturn(Optional.of(lease));
         when(leaseRepository.save(any())).thenReturn(lease);
-        when(indexationRepository.existsByLeaseIdAndYear(any(), anyInt())).thenReturn(false);
 
         ChangeLeaseStatusRequest req = new ChangeLeaseStatusRequest();
         req.setTargetStatus("FINISHED");
@@ -235,7 +226,6 @@ class LeaseServiceTest {
         lease.setStatus(LeaseStatus.ACTIVE);
         when(leaseRepository.findById(1L)).thenReturn(Optional.of(lease));
         when(leaseRepository.save(any())).thenReturn(lease);
-        when(indexationRepository.existsByLeaseIdAndYear(any(), anyInt())).thenReturn(false);
 
         RecordIndexationRequest req = new RecordIndexationRequest();
         req.setApplicationDate(LocalDate.of(2025, 4, 1));
@@ -243,7 +233,6 @@ class LeaseServiceTest {
         req.setNewIndexMonth(LocalDate.of(2025, 1, 1));
         req.setAppliedRent(new BigDecimal("880.00"));
 
-        verify(indexationRepository).save(any());
         verify(leaseRepository).save(argThat(l -> l.getMonthlyRent().compareTo(new BigDecimal("880.00")) == 0));
     }
 
