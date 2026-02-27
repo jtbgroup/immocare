@@ -74,6 +74,9 @@
                   <option [value]="o">{{ o }}</option>
                 }
               </select>
+              @if (isOrientationRequired("terraceOrientation")) {
+                <span class="error-message">Orientation is required when a surface is set.</span>
+              }
             </div>
           </div>
         </div>
@@ -108,6 +111,9 @@
                   <option [value]="o">{{ o }}</option>
                 }
               </select>
+              @if (isOrientationRequired("gardenOrientation")) {
+                <span class="error-message">Orientation is required when a surface is set.</span>
+              }
             </div>
           </div>
         </div>

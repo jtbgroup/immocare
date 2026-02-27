@@ -18,11 +18,12 @@ import {
   LeaseType,
   TenantRole,
 } from "../../../../models/lease.model";
+import { PersonPickerComponent } from "../../../../shared/components/person-picker/person-picker.component";
 
 @Component({
   selector: "app-lease-form",
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule, FormsModule, RouterModule],
+  imports: [CommonModule, ReactiveFormsModule, FormsModule, RouterModule, PersonPickerComponent],
   templateUrl: "./lease-form.component.html",
   styleUrls: ["./lease-form.component.scss"],
 })
@@ -44,6 +45,11 @@ export class LeaseFormComponent implements OnInit {
     person: { id: number; lastName: string; firstName: string };
     role: string;
   }[] = [];
+
+  // Tenant picker state
+  showTenantPicker = false;
+  newTenantRole = "PRIMARY";
+  selectedTenantPerson: any = null;
 
   constructor(
     private fb: FormBuilder,
@@ -100,7 +106,7 @@ export class LeaseFormComponent implements OnInit {
             durationMonths: LEASE_DURATION_MONTHS[type as LeaseType] || 108,
           },
           { emitEvent: true },
-        ); // emitEvent true so endDate gets recomputed
+        );
       }
     });
   }
@@ -115,7 +121,6 @@ export class LeaseFormComponent implements OnInit {
     const durationCtrl = this.form.get("durationMonths")!;
     const endCtrl = this.form.get("endDate")!;
 
-    // startDate or durationMonths → endDate
     const recomputeEnd = () => {
       if (this._updatingDates) return;
       const start = startCtrl.value as string | null;
@@ -129,7 +134,6 @@ export class LeaseFormComponent implements OnInit {
       }
     };
 
-    // endDate → durationMonths (in whole months, rounded)
     const recomputeDuration = () => {
       if (this._updatingDates) return;
       const start = startCtrl.value as string | null;
@@ -206,6 +210,41 @@ export class LeaseFormComponent implements OnInit {
     return !!(c && c.invalid && (c.dirty || c.touched));
   }
 
+  // ── Tenant picker helpers ────────────────────────────────────────────────
+
+  onTenantPersonSelected(person: any): void {
+    this.selectedTenantPerson = person;
+  }
+
+  confirmAddTenant(): void {
+    if (!this.selectedTenantPerson) return;
+    // Prevent duplicate
+    if (this.pendingTenants.some((t) => t.person.id === this.selectedTenantPerson.id)) {
+      return;
+    }
+    this.pendingTenants.push({
+      person: {
+        id: this.selectedTenantPerson.id,
+        lastName: this.selectedTenantPerson.lastName,
+        firstName: this.selectedTenantPerson.firstName,
+      },
+      role: this.newTenantRole,
+    });
+    this.cancelAddTenant();
+  }
+
+  cancelAddTenant(): void {
+    this.showTenantPicker = false;
+    this.selectedTenantPerson = null;
+    this.newTenantRole = "PRIMARY";
+  }
+
+  removePendingTenant(index: number): void {
+    this.pendingTenants.splice(index, 1);
+  }
+
+  // ── Save ─────────────────────────────────────────────────────────────────
+
   save(): void {
     if (this.form.invalid) {
       this.form.markAllAsTouched();
@@ -258,10 +297,5 @@ export class LeaseFormComponent implements OnInit {
         },
       });
     }
-  }
-
-  // Tenant management helpers (unchanged)
-  removePendingTenant(index: number): void {
-    this.pendingTenants.splice(index, 1);
   }
 }

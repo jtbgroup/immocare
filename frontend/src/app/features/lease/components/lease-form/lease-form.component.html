@@ -10,8 +10,9 @@
   <div *ngIf="errorMessage" class="alert alert-error">{{ errorMessage }}</div>
 
   <form *ngIf="!isLoading" [formGroup]="form">
-    <!-- 1 — General -->
     <div class="form-card">
+
+      <!-- 1 — General -->
       <div class="form-section-title">1 — General</div>
       <div class="form-row form-row-3">
         <div class="form-group">
@@ -62,10 +63,10 @@
           <input type="number" formControlName="noticePeriodMonths" min="1" />
         </div>
       </div>
-    </div>
 
-    <!-- 2 — Financial -->
-    <div class="form-card">
+      <hr class="form-section-divider" />
+
+      <!-- 2 — Financial -->
       <div class="form-section-title">2 — Financial</div>
       <div class="form-row form-row-3">
         <div class="form-group">
@@ -99,13 +100,12 @@
         <label>Charges Description</label>
         <input type="text" formControlName="chargesDescription" />
       </div>
-    </div>
 
-    <!-- 3 — Registration -->
-    <div class="form-card">
+      <hr class="form-section-divider" />
+
+      <!-- 3 — Registration -->
       <div class="form-section-title">3 — Registration</div>
 
-      <!-- Lease deed -->
       <div class="form-subsection-label">Lease deed</div>
       <div class="form-row">
         <div class="form-group">
@@ -113,14 +113,11 @@
           <input type="text" formControlName="registrationSpf" />
         </div>
         <div class="form-group">
-          <label
-            >Region reference <span class="field-hint">(Brussels)</span></label
-          >
+          <label>Region reference <span class="field-hint">(Brussels)</span></label>
           <input type="text" formControlName="registrationRegion" />
         </div>
       </div>
 
-      <!-- Inventory (état des lieux) -->
       <div class="form-subsection-label">Inventory (état des lieux)</div>
       <div class="form-row">
         <div class="form-group">
@@ -128,16 +125,14 @@
           <input type="text" formControlName="registrationInventorySpf" />
         </div>
         <div class="form-group">
-          <label
-            >Region reference <span class="field-hint">(Brussels)</span></label
-          >
+          <label>Region reference <span class="field-hint">(Brussels)</span></label>
           <input type="text" formControlName="registrationInventoryRegion" />
         </div>
       </div>
-    </div>
 
-    <!-- 4 — Deposit -->
-    <div class="form-card">
+      <hr class="form-section-divider" />
+
+      <!-- 4 — Guarantee / Deposit -->
       <div class="form-section-title">4 — Guarantee / Deposit</div>
       <div class="form-row form-row-3">
         <div class="form-group">
@@ -164,10 +159,10 @@
           <input type="text" formControlName="depositReference" />
         </div>
       </div>
-    </div>
 
-    <!-- 5 — Tenant Insurance -->
-    <div class="form-card">
+      <hr class="form-section-divider" />
+
+      <!-- 5 — Tenant Insurance -->
       <div class="form-section-title">5 — Tenant Insurance</div>
       <div class="form-check-group">
         <input
@@ -187,42 +182,75 @@
           <input type="date" formControlName="tenantInsuranceExpiry" />
         </div>
       </div>
-    </div>
 
-    <!-- 6 — Tenants (create only) -->
-    <div class="form-card" *ngIf="!isEditMode">
-      <div class="form-section-title">6 — Tenants</div>
-      <ul *ngIf="pendingTenants.length" class="tenant-list">
-        <li *ngFor="let t of pendingTenants; let i = index">
-          <span class="tenant-name"
-            >{{ t.person.lastName }} {{ t.person.firstName }}</span
-          >
-          <select
-            class="tenant-role-select"
-            [(ngModel)]="t.role"
-            [ngModelOptions]="{ standalone: true }"
-          >
-            <option value="PRIMARY">Primary</option>
-            <option value="CO_TENANT">Co-tenant</option>
-            <option value="GUARANTOR">Guarantor</option>
-          </select>
-          <button
-            type="button"
-            class="btn btn-sm btn-danger"
-            (click)="removePendingTenant(i)"
-          >
-            ✕
+      <!-- 6 — Tenants (create only) -->
+      <ng-container *ngIf="!isEditMode">
+        <hr class="form-section-divider" />
+        <div class="form-section-title">6 — Tenants</div>
+
+        <ul *ngIf="pendingTenants.length" class="tenant-list">
+          <li *ngFor="let t of pendingTenants; let i = index">
+            <span class="tenant-name">{{ t.person.lastName }} {{ t.person.firstName }}</span>
+            <select
+              class="tenant-role-select"
+              [(ngModel)]="t.role"
+              [ngModelOptions]="{ standalone: true }"
+            >
+              <option value="PRIMARY">Primary</option>
+              <option value="CO_TENANT">Co-tenant</option>
+              <option value="GUARANTOR">Guarantor</option>
+            </select>
+            <button
+              type="button"
+              class="btn btn-sm btn-danger"
+              (click)="removePendingTenant(i)"
+            >✕</button>
+          </li>
+        </ul>
+
+        <div *ngIf="!showTenantPicker">
+          <button type="button" class="btn btn-secondary btn-sm" (click)="showTenantPicker = true">
+            + Add Tenant
           </button>
-        </li>
-      </ul>
-    </div>
+        </div>
+
+        <div *ngIf="showTenantPicker" class="picker-panel">
+          <app-person-picker
+            label="Select Person"
+            [required]="false"
+            (personSelected)="onTenantPersonSelected($event)"
+          ></app-person-picker>
+          <div class="form-group" style="margin-top: 0.75rem;">
+            <label>Role</label>
+            <select [(ngModel)]="newTenantRole" [ngModelOptions]="{ standalone: true }">
+              <option value="PRIMARY">Primary</option>
+              <option value="CO_TENANT">Co-tenant</option>
+              <option value="GUARANTOR">Guarantor</option>
+            </select>
+          </div>
+          <div class="picker-actions">
+            <button
+              type="button"
+              class="btn btn-primary btn-sm"
+              [disabled]="!selectedTenantPerson"
+              (click)="confirmAddTenant()"
+            >Add</button>
+            <button
+              type="button"
+              class="btn btn-secondary btn-sm"
+              (click)="cancelAddTenant()"
+            >Cancel</button>
+          </div>
+        </div>
+      </ng-container>
+
+    </div><!-- end form-card -->
 
     <div class="form-actions">
       <a
         [routerLink]="isEditMode ? ['/leases', leaseId] : ['/units', unitId]"
         class="btn btn-secondary"
-        >Cancel</a
-      >
+      >Cancel</a>
       <button type="button" class="btn btn-primary" (click)="save()">
         {{ isEditMode ? "Save" : "Create" }}
       </button>
