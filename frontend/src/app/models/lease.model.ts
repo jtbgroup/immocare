@@ -1,30 +1,49 @@
 // models/lease.model.ts
 
-export type LeaseStatus   = 'DRAFT' | 'ACTIVE' | 'FINISHED' | 'CANCELLED';
-export type LeaseType     = 'SHORT_TERM' | 'MAIN_RESIDENCE_3Y' | 'MAIN_RESIDENCE_6Y' | 'MAIN_RESIDENCE_9Y' | 'STUDENT' | 'GLIDING' | 'COMMERCIAL';
-export type ChargesType   = 'FORFAIT' | 'PROVISION';
-export type DepositType   = 'BLOCKED_ACCOUNT' | 'BANK_GUARANTEE' | 'CPAS' | 'INSURANCE';
-export type TenantRole    = 'PRIMARY' | 'CO_TENANT' | 'GUARANTOR';
-export type RentField     = 'RENT' | 'CHARGES';
+export type LeaseStatus = 'DRAFT' | 'ACTIVE' | 'FINISHED' | 'CANCELLED';
+export type LeaseType =
+  | 'SHORT_TERM'
+  | 'MAIN_RESIDENCE_3Y'
+  | 'MAIN_RESIDENCE_6Y'
+  | 'MAIN_RESIDENCE_9Y'
+  | 'STUDENT'
+  | 'GLIDING'
+  | 'COMMERCIAL';
+export type ChargesType = 'FORFAIT' | 'PROVISION';
+export type DepositType = 'BLOCKED_ACCOUNT' | 'BANK_GUARANTEE' | 'CPAS' | 'INSURANCE';
+export type TenantRole = 'PRIMARY' | 'CO_TENANT' | 'GUARANTOR';
+export type RentField = 'RENT' | 'CHARGES';
 
 export const LEASE_TYPE_LABELS: Record<LeaseType, string> = {
-  SHORT_TERM:        'Short Term',
-  MAIN_RESIDENCE_3Y: 'Main Residence (3 years)',
-  MAIN_RESIDENCE_6Y: 'Main Residence (6 years)',
-  MAIN_RESIDENCE_9Y: 'Main Residence (9 years)',
-  STUDENT:           'Student',
-  GLIDING:           'Gliding',
-  COMMERCIAL:        'Commercial',
+  SHORT_TERM:          'Short-term',
+  MAIN_RESIDENCE_3Y:   'Main residence (3y)',
+  MAIN_RESIDENCE_6Y:   'Main residence (6y)',
+  MAIN_RESIDENCE_9Y:   'Main residence (9y)',
+  STUDENT:             'Student',
+  GLIDING:             'Gliding',
+  COMMERCIAL:          'Commercial',
+};
+
+export const LEASE_TYPES: LeaseType[] = Object.keys(LEASE_TYPE_LABELS) as LeaseType[];
+
+export const LEASE_DURATION_MONTHS: Record<LeaseType, number> = {
+  SHORT_TERM:         3,
+  MAIN_RESIDENCE_3Y:  36,
+  MAIN_RESIDENCE_6Y:  72,
+  MAIN_RESIDENCE_9Y:  108,
+  STUDENT:            12,
+  GLIDING:            12,
+  COMMERCIAL:         108,
 };
 
 export const DEFAULT_NOTICE_MONTHS: Record<LeaseType, number> = {
-  SHORT_TERM: 1, MAIN_RESIDENCE_3Y: 3, MAIN_RESIDENCE_6Y: 3,
-  MAIN_RESIDENCE_9Y: 3, STUDENT: 1, GLIDING: 3, COMMERCIAL: 6,
-};
-
-export const LEASE_DURATION_MONTHS: Record<LeaseType, number> = {
-  SHORT_TERM: 6, MAIN_RESIDENCE_3Y: 36, MAIN_RESIDENCE_6Y: 72,
-  MAIN_RESIDENCE_9Y: 108, STUDENT: 12, GLIDING: 12, COMMERCIAL: 36,
+  SHORT_TERM:         1,
+  MAIN_RESIDENCE_3Y:  3,
+  MAIN_RESIDENCE_6Y:  3,
+  MAIN_RESIDENCE_9Y:  3,
+  STUDENT:            1,
+  GLIDING:            3,
+  COMMERCIAL:         6,
 };
 
 export interface LeaseTenant {
@@ -61,11 +80,15 @@ export interface Lease {
   noticePeriodMonths: number;
   monthlyRent: number;
   monthlyCharges: number;
-  totalRent: number;          // computed server-side: monthlyRent + monthlyCharges
+  totalRent: number;
   chargesType: ChargesType;
   chargesDescription?: string;
+  // Lease deed registration
   registrationSpf?: string;
   registrationRegion?: string;
+  // Inventory (état des lieux) registration
+  registrationInventorySpf?: string;
+  registrationInventoryRegion?: string;
   depositAmount?: number;
   depositType?: DepositType;
   depositReference?: string;
@@ -113,6 +136,7 @@ export interface CreateLeaseRequest {
   housingUnitId: number;
   signatureDate: string;
   startDate: string;
+  endDate: string;
   leaseType: LeaseType;
   durationMonths: number;
   noticePeriodMonths: number;
@@ -120,8 +144,12 @@ export interface CreateLeaseRequest {
   monthlyCharges: number;
   chargesType: ChargesType;
   chargesDescription?: string;
+  // Lease deed registration
   registrationSpf?: string;
   registrationRegion?: string;
+  // Inventory (état des lieux) registration
+  registrationInventorySpf?: string;
+  registrationInventoryRegion?: string;
   depositAmount?: number;
   depositType?: DepositType;
   depositReference?: string;

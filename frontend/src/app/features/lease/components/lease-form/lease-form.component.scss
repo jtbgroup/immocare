@@ -3,8 +3,6 @@
 // details-content .header, lease-form-container → global styles.scss partials.
 
 // ─── Inputs / selects inside info-item ───────────────────────────────────────
-// The info-item normally contains a <label> + <p>. In the form we replace <p>
-// with <input>/<select>, so we need to apply field styling within that context.
 
 .info-item {
   input:not([type="checkbox"]),
@@ -18,7 +16,9 @@
     font-family: inherit;
     background: #fff;
     color: #333;
-    transition: border-color 0.2s, box-shadow 0.2s;
+    transition:
+      border-color 0.2s,
+      box-shadow 0.2s;
     box-sizing: border-box;
 
     &:focus {
@@ -29,7 +29,9 @@
 
     &.field-error {
       border-color: #dc3545;
-      &:focus { box-shadow: 0 0 0 2px rgba(220, 53, 69, 0.12); }
+      &:focus {
+        box-shadow: 0 0 0 2px rgba(220, 53, 69, 0.12);
+      }
     }
 
     &.disabled-input,
@@ -40,7 +42,6 @@
     }
   }
 
-  // Anniversary month and other computed read-only values
   .computed-value {
     margin: 0;
     padding: 0.55rem 0;
@@ -48,7 +49,9 @@
     color: #555;
     font-style: italic;
 
-    &.muted { color: #999; }
+    &.muted {
+      color: #999;
+    }
   }
 }
 
@@ -60,8 +63,41 @@
 
 // ─── Label helpers ────────────────────────────────────────────────────────────
 
-.required { color: #dc3545; font-size: 0.75rem; }
-.computed-tag { color: #888; font-weight: 400; font-size: 0.75rem; text-transform: none; letter-spacing: 0; }
+.required {
+  color: #dc3545;
+  font-size: 0.75rem;
+}
+.computed-tag {
+  color: #888;
+  font-weight: 400;
+  font-size: 0.75rem;
+  text-transform: none;
+  letter-spacing: 0;
+}
+
+// ─── Subsection label (within a form-card) ────────────────────────────────────
+
+.form-subsection-label {
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: #6c757d;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  margin: 0.75rem 0 0.5rem;
+
+  &:first-child {
+    margin-top: 0;
+  }
+}
+
+// ─── Inline hint after label ──────────────────────────────────────────────────
+
+.field-hint {
+  font-size: 0.78rem;
+  font-weight: 400;
+  color: #9e9e9e;
+  margin-left: 0.25rem;
+}
 
 // ─── Field-level errors ───────────────────────────────────────────────────────
 
@@ -79,7 +115,9 @@
   font-size: 0.8rem;
   color: #6c757d;
   margin-top: 0.3rem;
-  &.muted { color: #aaa; }
+  &.muted {
+    color: #aaa;
+  }
 }
 
 // ─── Checkbox inline ─────────────────────────────────────────────────────────

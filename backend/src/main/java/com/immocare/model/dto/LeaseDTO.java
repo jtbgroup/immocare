@@ -12,9 +12,12 @@ public class LeaseDTO {
     private LocalDate signatureDate; private LocalDate startDate; private LocalDate endDate;
     private String leaseType; private int durationMonths; private int noticePeriodMonths;
     private BigDecimal monthlyRent; private BigDecimal monthlyCharges;
-    private BigDecimal totalRent;   // computed: monthlyRent + monthlyCharges
+    private BigDecimal totalRent;
     private String chargesType; private String chargesDescription;
+    // Lease deed registration
     private String registrationSpf; private String registrationRegion;
+    // Inventory (état des lieux) registration
+    private String registrationInventorySpf; private String registrationInventoryRegion;
     private BigDecimal depositAmount; private String depositType; private String depositReference;
     private boolean tenantInsuranceConfirmed; private String tenantInsuranceReference; private LocalDate tenantInsuranceExpiry;
     private List<LeaseTenantDTO> tenants;
@@ -42,6 +45,8 @@ public class LeaseDTO {
     public String getChargesDescription() { return chargesDescription; } public void setChargesDescription(String v) { this.chargesDescription = v; }
     public String getRegistrationSpf() { return registrationSpf; } public void setRegistrationSpf(String v) { this.registrationSpf = v; }
     public String getRegistrationRegion() { return registrationRegion; } public void setRegistrationRegion(String v) { this.registrationRegion = v; }
+    public String getRegistrationInventorySpf() { return registrationInventorySpf; } public void setRegistrationInventorySpf(String v) { this.registrationInventorySpf = v; }
+    public String getRegistrationInventoryRegion() { return registrationInventoryRegion; } public void setRegistrationInventoryRegion(String v) { this.registrationInventoryRegion = v; }
     public BigDecimal getDepositAmount() { return depositAmount; } public void setDepositAmount(BigDecimal v) { this.depositAmount = v; }
     public String getDepositType() { return depositType; } public void setDepositType(String v) { this.depositType = v; }
     public String getDepositReference() { return depositReference; } public void setDepositReference(String v) { this.depositReference = v; }

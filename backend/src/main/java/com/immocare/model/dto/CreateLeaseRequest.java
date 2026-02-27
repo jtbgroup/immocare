@@ -12,6 +12,8 @@ public class CreateLeaseRequest {
     @NotNull private Long housingUnitId;
     @NotNull private LocalDate signatureDate;
     @NotNull private LocalDate startDate;
+    /** Explicit end date; if provided it takes precedence over start+duration computation. */
+    @NotNull private LocalDate endDate;
     @NotBlank private String leaseType;
     @Positive private int durationMonths;
     @Positive private int noticePeriodMonths;
@@ -19,8 +21,12 @@ public class CreateLeaseRequest {
     private BigDecimal monthlyCharges = BigDecimal.ZERO;
     private String chargesType = "FORFAIT";
     private String chargesDescription;
+    // Lease deed registration
     private String registrationSpf;
     private String registrationRegion;
+    // Inventory (état des lieux) registration
+    private String registrationInventorySpf;
+    private String registrationInventoryRegion;
     private BigDecimal depositAmount;
     private String depositType;
     private String depositReference;
@@ -32,6 +38,7 @@ public class CreateLeaseRequest {
     public Long getHousingUnitId() { return housingUnitId; } public void setHousingUnitId(Long v) { this.housingUnitId = v; }
     public LocalDate getSignatureDate() { return signatureDate; } public void setSignatureDate(LocalDate v) { this.signatureDate = v; }
     public LocalDate getStartDate() { return startDate; } public void setStartDate(LocalDate v) { this.startDate = v; }
+    public LocalDate getEndDate() { return endDate; } public void setEndDate(LocalDate v) { this.endDate = v; }
     public String getLeaseType() { return leaseType; } public void setLeaseType(String v) { this.leaseType = v; }
     public int getDurationMonths() { return durationMonths; } public void setDurationMonths(int v) { this.durationMonths = v; }
     public int getNoticePeriodMonths() { return noticePeriodMonths; } public void setNoticePeriodMonths(int v) { this.noticePeriodMonths = v; }
@@ -41,6 +48,8 @@ public class CreateLeaseRequest {
     public String getChargesDescription() { return chargesDescription; } public void setChargesDescription(String v) { this.chargesDescription = v; }
     public String getRegistrationSpf() { return registrationSpf; } public void setRegistrationSpf(String v) { this.registrationSpf = v; }
     public String getRegistrationRegion() { return registrationRegion; } public void setRegistrationRegion(String v) { this.registrationRegion = v; }
+    public String getRegistrationInventorySpf() { return registrationInventorySpf; } public void setRegistrationInventorySpf(String v) { this.registrationInventorySpf = v; }
+    public String getRegistrationInventoryRegion() { return registrationInventoryRegion; } public void setRegistrationInventoryRegion(String v) { this.registrationInventoryRegion = v; }
     public BigDecimal getDepositAmount() { return depositAmount; } public void setDepositAmount(BigDecimal v) { this.depositAmount = v; }
     public String getDepositType() { return depositType; } public void setDepositType(String v) { this.depositType = v; }
     public String getDepositReference() { return depositReference; } public void setDepositReference(String v) { this.depositReference = v; }

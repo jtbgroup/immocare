@@ -24,18 +24,10 @@
   font-weight: 600;
   color: #fff;
 
-  &.bg-success {
-    background-color: #2e7d32;
-  }
-  &.bg-secondary {
-    background-color: #616161;
-  }
-  &.bg-info {
-    background-color: #0277bd;
-  }
-  &.bg-danger {
-    background-color: #c62828;
-  }
+  &.bg-success   { background-color: #2e7d32; }
+  &.bg-secondary { background-color: #616161; }
+  &.bg-info      { background-color: #0277bd; }
+  &.bg-danger    { background-color: #c62828; }
 }
 
 // ─── Lease type subtitle ──────────────────────────────────────────────────────
@@ -44,4 +36,15 @@
   font-size: 1rem;
   font-weight: 400;
   color: #6c757d;
+}
+
+// ─── Subsection label inside an info-card ─────────────────────────────────────
+
+.info-subsection-label {
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: #6c757d;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  margin-bottom: 0.5rem;
 }

@@ -52,7 +52,7 @@
           <p>{{ lease.startDate | date:'dd/MM/yyyy' }}</p>
         </div>
         <div class="info-item">
-          <label>End (planned)</label>
+          <label>End</label>
           <p>{{ lease.endDate | date:'dd/MM/yyyy' }}</p>
         </div>
         <div class="info-item">
@@ -80,16 +80,33 @@
 
     <!-- Registration -->
     <div class="info-card"
-         *ngIf="lease.registrationSpf || lease.registrationRegion">
+         *ngIf="lease.registrationSpf || lease.registrationRegion
+              || lease.registrationInventorySpf || lease.registrationInventoryRegion">
       <h2>Registration</h2>
+
+      <!-- Lease deed -->
+      <div class="info-subsection-label">Lease deed</div>
       <div class="info-grid">
-        <div class="info-item" *ngIf="lease.registrationSpf">
+        <div class="info-item">
           <label>SPF Finances</label>
-          <p>{{ lease.registrationSpf }}</p>
+          <p>{{ lease.registrationSpf || '—' }}</p>
         </div>
-        <div class="info-item" *ngIf="lease.registrationRegion">
-          <label>Region</label>
-          <p>{{ lease.registrationRegion }}</p>
+        <div class="info-item">
+          <label>Region (Brussels)</label>
+          <p>{{ lease.registrationRegion || '—' }}</p>
+        </div>
+      </div>
+
+      <!-- Inventory -->
+      <div class="info-subsection-label" style="margin-top:1rem;">Inventory (état des lieux)</div>
+      <div class="info-grid">
+        <div class="info-item">
+          <label>SPF Finances</label>
+          <p>{{ lease.registrationInventorySpf || '—' }}</p>
+        </div>
+        <div class="info-item">
+          <label>Region (Brussels)</label>
+          <p>{{ lease.registrationInventoryRegion || '—' }}</p>
         </div>
       </div>
     </div>

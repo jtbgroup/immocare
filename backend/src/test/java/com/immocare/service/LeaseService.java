@@ -353,7 +353,7 @@ public class LeaseService {
         dto.setEndNoticeAlertActive(!today.isBefore(noticeDeadline));
         dto.setEndNoticeAlertDate(noticeDeadline);
         setIndexationAlert(lease, today,
-                dto::setIndexationAlertActive, dto::setIndexationAlertDate);
+                v -> dto.setIndexationAlertActive(v), dto::setIndexationAlertDate);
     }
 
     private void computeAlerts(Lease lease, LeaseSummaryDTO dto) {
@@ -362,7 +362,7 @@ public class LeaseService {
         dto.setEndNoticeAlertActive(!today.isBefore(noticeDeadline));
         dto.setEndNoticeAlertDate(noticeDeadline);
         setIndexationAlert(lease, today,
-                dto::setIndexationAlertActive, dto::setIndexationAlertDate);
+                v -> dto.setIndexationAlertActive(v), dto::setIndexationAlertDate);
     }
 
     private void setIndexationAlert(Lease lease, LocalDate today,

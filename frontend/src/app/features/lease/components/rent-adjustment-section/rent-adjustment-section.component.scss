@@ -12,7 +12,11 @@
   padding-bottom: 0.5rem;
   border-bottom: 2px solid #1976d2;
 
-  h2 { margin: 0; border-bottom: none; padding-bottom: 0; }
+  h2 {
+    margin: 0;
+    border-bottom: none;
+    padding-bottom: 0;
+  }
 }
 
 // ─── Current amounts summary ──────────────────────────────────────────────────
@@ -45,7 +49,10 @@
   text-transform: uppercase;
   letter-spacing: 0.03em;
 
-  em { font-style: normal; font-size: 0.7rem; }
+  em {
+    font-style: normal;
+    font-size: 0.7rem;
+  }
 }
 
 .rent-value {
@@ -61,6 +68,44 @@
   }
 }
 
+// ─── Adjustment form panel ────────────────────────────────────────────────────
+
+.picker-panel {
+  border: 1px solid #e0e0e0;
+  border-radius: 6px;
+  padding: 1rem 1.25rem;
+  background: #fafafa;
+  margin-bottom: 1.5rem;
+}
+
+.picker-panel-actions {
+  display: flex;
+  gap: 0.5rem;
+  justify-content: flex-end;
+  padding-top: 0.75rem;
+  border-top: 1px solid #e9ecef;
+  margin-top: 0.25rem;
+}
+
+.current-value-readonly {
+  display: block;
+  width: 100%;
+  padding: 0.75rem;
+  border: 1px solid #e0e0e0;
+  border-radius: 4px;
+  background: #f8f8f8;
+  color: #888;
+  font-size: 1rem;
+  font-family: inherit;
+  cursor: default;
+  box-sizing: border-box;
+
+  &:focus {
+    outline: none;
+    box-shadow: none;
+  }
+}
+
 // ─── Field badges ─────────────────────────────────────────────────────────────
 
 .field-badge {
@@ -71,11 +116,23 @@
   font-weight: 600;
   letter-spacing: 0.03em;
 
-  &.field-rent    { background: #e3f2fd; color: #1565c0; }
-  &.field-charges { background: #f3e5f5; color: #6a1b9a; }
+  &.field-rent {
+    background: #e3f2fd;
+    color: #1565c0;
+  }
+  &.field-charges {
+    background: #f3e5f5;
+    color: #6a1b9a;
+  }
 }
 
 // ─── Delta colours ────────────────────────────────────────────────────────────
 
-.delta-up   { color: #2e7d32; font-weight: 500; }
-.delta-down { color: #c62828; font-weight: 500; }
+.delta-up {
+  color: #2e7d32;
+  font-weight: 500;
+}
+.delta-down {
+  color: #c62828;
+  font-weight: 500;
+}
