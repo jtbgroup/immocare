@@ -1,39 +1,30 @@
 // models/lease.model.ts
 
-export type LeaseStatus = 'DRAFT' | 'ACTIVE' | 'FINISHED' | 'CANCELLED';
-export type LeaseType = 'SHORT_TERM' | 'MAIN_RESIDENCE_3Y' | 'MAIN_RESIDENCE_6Y' | 'MAIN_RESIDENCE_9Y' | 'STUDENT' | 'GLIDING' | 'COMMERCIAL';
-export type ChargesType = 'FORFAIT' | 'PROVISION';
-export type DepositType = 'BLOCKED_ACCOUNT' | 'BANK_GUARANTEE' | 'CPAS' | 'INSURANCE';
-export type TenantRole = 'PRIMARY' | 'CO_TENANT' | 'GUARANTOR';
+export type LeaseStatus   = 'DRAFT' | 'ACTIVE' | 'FINISHED' | 'CANCELLED';
+export type LeaseType     = 'SHORT_TERM' | 'MAIN_RESIDENCE_3Y' | 'MAIN_RESIDENCE_6Y' | 'MAIN_RESIDENCE_9Y' | 'STUDENT' | 'GLIDING' | 'COMMERCIAL';
+export type ChargesType   = 'FORFAIT' | 'PROVISION';
+export type DepositType   = 'BLOCKED_ACCOUNT' | 'BANK_GUARANTEE' | 'CPAS' | 'INSURANCE';
+export type TenantRole    = 'PRIMARY' | 'CO_TENANT' | 'GUARANTOR';
+export type RentField     = 'RENT' | 'CHARGES';
 
 export const LEASE_TYPE_LABELS: Record<LeaseType, string> = {
-  SHORT_TERM:         'Short Term',
-  MAIN_RESIDENCE_3Y:  'Main Residence (3 years)',
-  MAIN_RESIDENCE_6Y:  'Main Residence (6 years)',
-  MAIN_RESIDENCE_9Y:  'Main Residence (9 years)',
-  STUDENT:            'Student',
-  GLIDING:            'Gliding',
-  COMMERCIAL:         'Commercial'
+  SHORT_TERM:        'Short Term',
+  MAIN_RESIDENCE_3Y: 'Main Residence (3 years)',
+  MAIN_RESIDENCE_6Y: 'Main Residence (6 years)',
+  MAIN_RESIDENCE_9Y: 'Main Residence (9 years)',
+  STUDENT:           'Student',
+  GLIDING:           'Gliding',
+  COMMERCIAL:        'Commercial',
 };
 
 export const DEFAULT_NOTICE_MONTHS: Record<LeaseType, number> = {
-  SHORT_TERM:         1,
-  MAIN_RESIDENCE_3Y:  3,
-  MAIN_RESIDENCE_6Y:  3,
-  MAIN_RESIDENCE_9Y:  3,
-  STUDENT:            1,
-  GLIDING:            3,
-  COMMERCIAL:         6
+  SHORT_TERM: 1, MAIN_RESIDENCE_3Y: 3, MAIN_RESIDENCE_6Y: 3,
+  MAIN_RESIDENCE_9Y: 3, STUDENT: 1, GLIDING: 3, COMMERCIAL: 6,
 };
 
 export const LEASE_DURATION_MONTHS: Record<LeaseType, number> = {
-  SHORT_TERM:         6,
-  MAIN_RESIDENCE_3Y:  36,
-  MAIN_RESIDENCE_6Y:  72,
-  MAIN_RESIDENCE_9Y:  108,
-  STUDENT:            12,
-  GLIDING:            12,
-  COMMERCIAL:         36
+  SHORT_TERM: 6, MAIN_RESIDENCE_3Y: 36, MAIN_RESIDENCE_6Y: 72,
+  MAIN_RESIDENCE_9Y: 108, STUDENT: 12, GLIDING: 12, COMMERCIAL: 36,
 };
 
 export interface LeaseTenant {
@@ -45,15 +36,13 @@ export interface LeaseTenant {
   role: TenantRole;
 }
 
-export interface LeaseIndexation {
+export interface LeaseRentAdjustment {
   id: number;
-  applicationDate: string;
-  oldRent: number;
-  newIndexValue: number;
-  newIndexMonth: string;
-  appliedRent: number;
-  notificationDate?: string;
-  notes?: string;
+  field: RentField;
+  oldValue: number;
+  newValue: number;
+  reason: string;
+  effectiveDate: string;
   createdAt: string;
 }
 
@@ -70,16 +59,12 @@ export interface Lease {
   leaseType: LeaseType;
   durationMonths: number;
   noticePeriodMonths: number;
-  indexationNoticeDays: number;
-  indexationAnniversaryMonth?: number;  // read-only, set server-side
   monthlyRent: number;
   monthlyCharges: number;
+  totalRent: number;          // computed server-side: monthlyRent + monthlyCharges
   chargesType: ChargesType;
   chargesDescription?: string;
-  baseIndexValue?: number;
-  baseIndexMonth?: string;
   registrationSpf?: string;
-  registrationInventorySpf?: string;
   registrationRegion?: string;
   depositAmount?: number;
   depositType?: DepositType;
@@ -88,7 +73,7 @@ export interface Lease {
   tenantInsuranceReference?: string;
   tenantInsuranceExpiry?: string;
   tenants: LeaseTenant[];
-  indexations: LeaseIndexation[];
+  rentAdjustments: LeaseRentAdjustment[];
   indexationAlertActive: boolean;
   indexationAlertDate?: string;
   endNoticeAlertActive: boolean;
@@ -105,6 +90,7 @@ export interface LeaseSummary {
   endDate: string;
   monthlyRent: number;
   monthlyCharges: number;
+  totalRent: number;
   chargesType: ChargesType;
   tenantNames: string[];
   indexationAlertActive: boolean;
@@ -130,16 +116,11 @@ export interface CreateLeaseRequest {
   leaseType: LeaseType;
   durationMonths: number;
   noticePeriodMonths: number;
-  indexationNoticeDays: number;
-  // indexationAnniversaryMonth NOT included — computed server-side from startDate
   monthlyRent: number;
   monthlyCharges: number;
   chargesType: ChargesType;
   chargesDescription?: string;
-  baseIndexValue?: number;
-  baseIndexMonth?: string;
   registrationSpf?: string;
-  registrationInventorySpf?: string;
   registrationRegion?: string;
   depositAmount?: number;
   depositType?: DepositType;
@@ -159,15 +140,11 @@ export interface AddTenantRequest {
 
 export interface ChangeLeaseStatusRequest {
   targetStatus: LeaseStatus;
-  effectiveDate?: string;
-  notes?: string;
 }
 
-export interface RecordIndexationRequest {
-  applicationDate: string;
-  newIndexValue: number;
-  newIndexMonth: string;
-  appliedRent: number;
-  notificationSentDate?: string;
-  notes?: string;
+export interface AdjustRentRequest {
+  field: RentField;
+  newValue: number;
+  reason: string;
+  effectiveDate: string;
 }

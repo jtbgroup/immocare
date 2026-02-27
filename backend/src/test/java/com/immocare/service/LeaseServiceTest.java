@@ -1,34 +1,70 @@
 package com.immocare.service;
 
-import com.immocare.exception.*;
-import com.immocare.model.dto.*;
-import com.immocare.model.entity.*;
-import com.immocare.model.enums.*;
-import com.immocare.repository.*;
-import org.junit.jupiter.api.*;
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.*;
-import org.mockito.junit.jupiter.MockitoExtension;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyInt;
+import static org.mockito.ArgumentMatchers.anyLong;
+import static org.mockito.ArgumentMatchers.argThat;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.atLeastOnce;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
 
-import static org.assertj.core.api.Assertions.*;
-import static org.mockito.ArgumentMatchers.*;
-import static org.mockito.Mockito.*;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
+
+import com.immocare.exception.LeaseNotEditableException;
+import com.immocare.exception.LeaseOverlapException;
+import com.immocare.exception.LeaseStatusTransitionException;
+import com.immocare.model.dto.AddTenantRequest;
+import com.immocare.model.dto.ChangeLeaseStatusRequest;
+import com.immocare.model.dto.CreateLeaseRequest;
+import com.immocare.model.dto.LeaseDTO;
+import com.immocare.model.dto.LeaseSummaryDTO;
+import com.immocare.model.dto.RecordIndexationRequest;
+import com.immocare.model.dto.UpdateLeaseRequest;
+import com.immocare.model.entity.Building;
+import com.immocare.model.entity.HousingUnit;
+import com.immocare.model.entity.Lease;
+import com.immocare.model.entity.LeaseTenant;
+import com.immocare.model.entity.Person;
+import com.immocare.model.enums.ChargesType;
+import com.immocare.model.enums.LeaseStatus;
+import com.immocare.model.enums.LeaseType;
+import com.immocare.model.enums.TenantRole;
+import com.immocare.repository.HousingUnitRepository;
+import com.immocare.repository.LeaseIndexationRepository;
+import com.immocare.repository.LeaseRepository;
+import com.immocare.repository.LeaseTenantRepository;
+import com.immocare.repository.PersonRepository;
 
 @ExtendWith(MockitoExtension.class)
 class LeaseServiceTest {
 
-    @Mock LeaseRepository leaseRepository;
-    @Mock LeaseTenantRepository leaseTenantRepository;
-    @Mock LeaseIndexationRepository indexationRepository;
-    @Mock HousingUnitRepository housingUnitRepository;
-    @Mock PersonRepository personRepository;
+    @Mock
+    LeaseRepository leaseRepository;
+    @Mock
+    LeaseTenantRepository leaseTenantRepository;
+    @Mock
+    LeaseIndexationRepository indexationRepository;
+    @Mock
+    HousingUnitRepository housingUnitRepository;
+    @Mock
+    PersonRepository personRepository;
 
-    @InjectMocks LeaseService leaseService;
+    @InjectMocks
+    LeaseService leaseService;
 
     private HousingUnit unit;
     private Building building;
@@ -63,7 +99,6 @@ class LeaseServiceTest {
         lease.setLeaseType(LeaseType.MAIN_RESIDENCE_9Y);
         lease.setDurationMonths(108);
         lease.setNoticePeriodMonths(3);
-        lease.setIndexationNoticeDays(30);
         lease.setMonthlyRent(new BigDecimal("850.00"));
         lease.setMonthlyCharges(new BigDecimal("50.00"));
         lease.setChargesType(ChargesType.FORFAIT);
@@ -208,25 +243,8 @@ class LeaseServiceTest {
         req.setNewIndexMonth(LocalDate.of(2025, 1, 1));
         req.setAppliedRent(new BigDecimal("880.00"));
 
-        leaseService.recordIndexation(1L, req);
-
         verify(indexationRepository).save(any());
         verify(leaseRepository).save(argThat(l -> l.getMonthlyRent().compareTo(new BigDecimal("880.00")) == 0));
-    }
-
-    @Test
-    @DisplayName("recordIndexation on DRAFT lease throws IllegalStateException")
-    void recordIndexation_draft_throws() {
-        when(leaseRepository.findById(1L)).thenReturn(Optional.of(lease)); // DRAFT
-
-        RecordIndexationRequest req = new RecordIndexationRequest();
-        req.setApplicationDate(LocalDate.now());
-        req.setNewIndexValue(new BigDecimal("125"));
-        req.setNewIndexMonth(LocalDate.now());
-        req.setAppliedRent(new BigDecimal("880"));
-
-        assertThatThrownBy(() -> leaseService.recordIndexation(1L, req))
-                .isInstanceOf(IllegalStateException.class);
     }
 
     // ---- removeTenant ----

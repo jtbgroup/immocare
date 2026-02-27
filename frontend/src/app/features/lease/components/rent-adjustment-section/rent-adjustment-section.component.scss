@@ -1,0 +1,81 @@
+// All shared styles (info-card, data-table, form-row, form-row-3, form-group,
+// form-actions, required, alert, btn, empty-message, picker-panel)
+// come from global styles.scss partials.
+
+// ─── info-card title with action ─────────────────────────────────────────────
+
+.info-card-title {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1rem;
+  padding-bottom: 0.5rem;
+  border-bottom: 2px solid #1976d2;
+
+  h2 { margin: 0; border-bottom: none; padding-bottom: 0; }
+}
+
+// ─── Current amounts summary ──────────────────────────────────────────────────
+
+.rent-summary {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: 0.75rem 1rem;
+  background: #f5f5f5;
+  border-radius: 6px;
+  margin-bottom: 1rem;
+}
+
+.rent-summary-item {
+  display: flex;
+  flex-direction: column;
+  gap: 0.1rem;
+}
+
+.rent-summary-sep {
+  font-size: 1.2rem;
+  color: #9e9e9e;
+  font-weight: 300;
+}
+
+.rent-label {
+  font-size: 0.75rem;
+  color: #6c757d;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+
+  em { font-style: normal; font-size: 0.7rem; }
+}
+
+.rent-value {
+  font-size: 1rem;
+  font-weight: 600;
+  color: #212121;
+}
+
+.rent-summary-total {
+  .rent-value {
+    font-size: 1.1rem;
+    color: #1565c0;
+  }
+}
+
+// ─── Field badges ─────────────────────────────────────────────────────────────
+
+.field-badge {
+  display: inline-block;
+  padding: 0.1em 0.5em;
+  border-radius: 3px;
+  font-size: 0.72rem;
+  font-weight: 600;
+  letter-spacing: 0.03em;
+
+  &.field-rent    { background: #e3f2fd; color: #1565c0; }
+  &.field-charges { background: #f3e5f5; color: #6a1b9a; }
+}
+
+// ─── Delta colours ────────────────────────────────────────────────────────────
+
+.delta-up   { color: #2e7d32; font-weight: 500; }
+.delta-down { color: #c62828; font-weight: 500; }

@@ -3,9 +3,9 @@ import { Injectable } from '@angular/core';
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import {
-  Lease, LeaseSummary, LeaseAlert, LeaseIndexation,
+  Lease, LeaseSummary, LeaseAlert,
   CreateLeaseRequest, UpdateLeaseRequest,
-  AddTenantRequest, ChangeLeaseStatusRequest, RecordIndexationRequest
+  AddTenantRequest, ChangeLeaseStatusRequest, AdjustRentRequest,
 } from '../../models/lease.model';
 
 @Injectable({ providedIn: 'root' })
@@ -43,12 +43,8 @@ export class LeaseService {
     return this.http.delete<Lease>(`${this.base}/leases/${leaseId}/tenants/${personId}`);
   }
 
-  recordIndexation(leaseId: number, req: RecordIndexationRequest): Observable<Lease> {
-    return this.http.post<Lease>(`${this.base}/leases/${leaseId}/indexations`, req);
-  }
-
-  getIndexations(leaseId: number): Observable<LeaseIndexation[]> {
-    return this.http.get<LeaseIndexation[]>(`${this.base}/leases/${leaseId}/indexations`);
+  adjustRent(leaseId: number, req: AdjustRentRequest): Observable<Lease> {
+    return this.http.post<Lease>(`${this.base}/leases/${leaseId}/rent-adjustments`, req);
   }
 
   getAlerts(): Observable<LeaseAlert[]> {

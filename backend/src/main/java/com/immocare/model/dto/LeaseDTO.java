@@ -1,27 +1,29 @@
 package com.immocare.model.dto;
+
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
+
 public class LeaseDTO {
     private Long id; private Long housingUnitId; private String housingUnitNumber;
     private Long buildingId; private String buildingName;
-    private String status; private LocalDate signatureDate; private LocalDate startDate; private LocalDate endDate;
-    private String leaseType; private int durationMonths; private int noticePeriodMonths; private int indexationNoticeDays;
-    private Integer indexationAnniversaryMonth;
-    private BigDecimal monthlyRent; private BigDecimal monthlyCharges; private String chargesType; private String chargesDescription;
-    private BigDecimal baseIndexValue; private LocalDate baseIndexMonth;
-    private String registrationSpf;
-    private String registrationInventorySpf;
-    private String registrationRegion;
+    private String status;
+    private LocalDate signatureDate; private LocalDate startDate; private LocalDate endDate;
+    private String leaseType; private int durationMonths; private int noticePeriodMonths;
+    private BigDecimal monthlyRent; private BigDecimal monthlyCharges;
+    private BigDecimal totalRent;   // computed: monthlyRent + monthlyCharges
+    private String chargesType; private String chargesDescription;
+    private String registrationSpf; private String registrationRegion;
     private BigDecimal depositAmount; private String depositType; private String depositReference;
     private boolean tenantInsuranceConfirmed; private String tenantInsuranceReference; private LocalDate tenantInsuranceExpiry;
-    private List<LeaseTenantDTO> tenants; private List<LeaseIndexationDTO> indexations;
+    private List<LeaseTenantDTO> tenants;
+    private List<LeaseRentAdjustmentDTO> rentAdjustments;
     private boolean indexationAlertActive; private LocalDate indexationAlertDate;
-    private boolean endNoticeAlertActive; private LocalDate endNoticeAlertDate;
+    private boolean endNoticeAlertActive;  private LocalDate endNoticeAlertDate;
     private LocalDateTime createdAt; private LocalDateTime updatedAt;
 
-    public Long getId() { return id; } public void setId(Long id) { this.id = id; }
+    public Long getId() { return id; } public void setId(Long v) { this.id = v; }
     public Long getHousingUnitId() { return housingUnitId; } public void setHousingUnitId(Long v) { this.housingUnitId = v; }
     public String getHousingUnitNumber() { return housingUnitNumber; } public void setHousingUnitNumber(String v) { this.housingUnitNumber = v; }
     public Long getBuildingId() { return buildingId; } public void setBuildingId(Long v) { this.buildingId = v; }
@@ -33,16 +35,12 @@ public class LeaseDTO {
     public String getLeaseType() { return leaseType; } public void setLeaseType(String v) { this.leaseType = v; }
     public int getDurationMonths() { return durationMonths; } public void setDurationMonths(int v) { this.durationMonths = v; }
     public int getNoticePeriodMonths() { return noticePeriodMonths; } public void setNoticePeriodMonths(int v) { this.noticePeriodMonths = v; }
-    public int getIndexationNoticeDays() { return indexationNoticeDays; } public void setIndexationNoticeDays(int v) { this.indexationNoticeDays = v; }
-    public Integer getIndexationAnniversaryMonth() { return indexationAnniversaryMonth; } public void setIndexationAnniversaryMonth(Integer v) { this.indexationAnniversaryMonth = v; }
     public BigDecimal getMonthlyRent() { return monthlyRent; } public void setMonthlyRent(BigDecimal v) { this.monthlyRent = v; }
     public BigDecimal getMonthlyCharges() { return monthlyCharges; } public void setMonthlyCharges(BigDecimal v) { this.monthlyCharges = v; }
+    public BigDecimal getTotalRent() { return totalRent; } public void setTotalRent(BigDecimal v) { this.totalRent = v; }
     public String getChargesType() { return chargesType; } public void setChargesType(String v) { this.chargesType = v; }
     public String getChargesDescription() { return chargesDescription; } public void setChargesDescription(String v) { this.chargesDescription = v; }
-    public BigDecimal getBaseIndexValue() { return baseIndexValue; } public void setBaseIndexValue(BigDecimal v) { this.baseIndexValue = v; }
-    public LocalDate getBaseIndexMonth() { return baseIndexMonth; } public void setBaseIndexMonth(LocalDate v) { this.baseIndexMonth = v; }
     public String getRegistrationSpf() { return registrationSpf; } public void setRegistrationSpf(String v) { this.registrationSpf = v; }
-    public String getRegistrationInventorySpf() { return registrationInventorySpf; } public void setRegistrationInventorySpf(String v) { this.registrationInventorySpf = v; }
     public String getRegistrationRegion() { return registrationRegion; } public void setRegistrationRegion(String v) { this.registrationRegion = v; }
     public BigDecimal getDepositAmount() { return depositAmount; } public void setDepositAmount(BigDecimal v) { this.depositAmount = v; }
     public String getDepositType() { return depositType; } public void setDepositType(String v) { this.depositType = v; }
@@ -51,7 +49,7 @@ public class LeaseDTO {
     public String getTenantInsuranceReference() { return tenantInsuranceReference; } public void setTenantInsuranceReference(String v) { this.tenantInsuranceReference = v; }
     public LocalDate getTenantInsuranceExpiry() { return tenantInsuranceExpiry; } public void setTenantInsuranceExpiry(LocalDate v) { this.tenantInsuranceExpiry = v; }
     public List<LeaseTenantDTO> getTenants() { return tenants; } public void setTenants(List<LeaseTenantDTO> v) { this.tenants = v; }
-    public List<LeaseIndexationDTO> getIndexations() { return indexations; } public void setIndexations(List<LeaseIndexationDTO> v) { this.indexations = v; }
+    public List<LeaseRentAdjustmentDTO> getRentAdjustments() { return rentAdjustments; } public void setRentAdjustments(List<LeaseRentAdjustmentDTO> v) { this.rentAdjustments = v; }
     public boolean isIndexationAlertActive() { return indexationAlertActive; } public void setIndexationAlertActive(boolean v) { this.indexationAlertActive = v; }
     public LocalDate getIndexationAlertDate() { return indexationAlertDate; } public void setIndexationAlertDate(LocalDate v) { this.indexationAlertDate = v; }
     public boolean isEndNoticeAlertActive() { return endNoticeAlertActive; } public void setEndNoticeAlertActive(boolean v) { this.endNoticeAlertActive = v; }
