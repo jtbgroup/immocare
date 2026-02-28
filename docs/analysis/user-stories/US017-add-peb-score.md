@@ -1,78 +1,25 @@
 # User Story US017: Add PEB Score
 
-## Story Information
-
 | Attribute | Value |
 |-----------|-------|
 | **Story ID** | US017 |
-| **Story Name** | Add PEB Score |
 | **Epic** | PEB Score Management |
-| **Related UC** | UC004 - Manage PEB Scores |
+| **Related UC** | UC004 |
 | **Priority** | MUST HAVE |
 | **Story Points** | 3 |
-| **Sprint** | Sprint 3 |
 
----
-
-## User Story
-
-**As an** ADMIN  
-**I want to** add a PEB (Energy Performance Certificate) score to a housing unit  
-**So that** I can track the energy efficiency of the property
-
----
+**As an** ADMIN **I want to** add a PEB score to a housing unit **so that** I can track its energy performance.
 
 ## Acceptance Criteria
 
-### AC1: Display Add PEB Form
-**Given** I am viewing a housing unit  
-**When** I click "Add PEB Score"  
-**Then** the PEB score form is displayed  
-**And** required fields are marked
+**AC1:** Click "Add PEB Score" → form shown with score dropdown, date, optional certificate number, optional valid until.
+**AC2:** Score dropdown shows color-coded options: A++ (dark green) → A+ → A → B → C → D → E → F → G (dark red).
+**AC3:** Unit has no score → add score B dated 2024-01-15 → score saved, unit details show B as current.
+**AC4:** Unit has score C (2023) → add score B (2024) → B becomes current, C becomes historical.
+**AC5:** Add with certificate "PEB-2024-123456" + valid until 2034-01-15 → all details stored.
+**AC6:** Leave date empty → error "Score date is required".
+**AC7:** Enter future date → error "Score date cannot be in the future".
 
-### AC2: PEB Score Dropdown
-**Given** I am on PEB form  
-**When** I click the score dropdown  
-**Then** I see all options with color coding:
-- A++ (dark green), A+ (green), A (light green)
-- B (yellow-green), C (yellow), D (orange)
-- E (light red), F (red), G (dark red)
+**Endpoint:** `POST /api/v1/housing-units/{unitId}/peb-scores` — append-only, HTTP 201.
 
-### AC3: Add First PEB Score
-**Given** a unit has no PEB score  
-**When** I add score B dated 2024-01-15  
-**And** I save  
-**Then** score is saved  
-**And** unit details show score B as current
-
-### AC4: Add Newer PEB Score
-**Given** unit has score C from 2023  
-**When** I add score B from 2024  
-**Then** B becomes current score  
-**And** C becomes historical
-
-### AC5: Add Certificate Details
-**Given** I am adding PEB score  
-**When** I enter:
-- Score: B
-- Date: 2024-01-15
-- Certificate: PEB-2024-123456
-- Valid until: 2034-01-15  
-
-**And** I save  
-**Then** all details are stored
-
-### AC6: Validation - Score Date Required
-**Given** I am adding PEB score  
-**When** I leave date empty  
-**Then** I see error "Score date is required"
-
-### AC7: Validation - Future Date
-**Given** I am adding PEB score  
-**When** I enter date in future  
-**Then** I see error "Score date cannot be in the future"
-
----
-
-**Last Updated**: 2024-01-15  
-**Status**: Ready for Development
+**Last Updated:** 2024-01-15 | **Status:** Ready for Development

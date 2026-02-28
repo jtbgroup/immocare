@@ -1,63 +1,25 @@
 # User Story US005: Search Buildings
 
-## Story Information
-
 | Attribute | Value |
 |-----------|-------|
 | **Story ID** | US005 |
-| **Story Name** | Search Buildings |
 | **Epic** | Building Management |
-| **Related UC** | UC001 - Manage Buildings |
+| **Related UC** | UC001 |
 | **Priority** | SHOULD HAVE |
 | **Story Points** | 2 |
-| **Sprint** | Sprint 1 |
 
----
-
-## User Story
-
-**As an** ADMIN  
-**I want to** search for buildings by name or address  
-**So that** I can quickly find a specific property in my portfolio
-
----
+**As an** ADMIN **I want to** search buildings **so that** I can quickly find a specific property.
 
 ## Acceptance Criteria
 
-### AC1: Search by Building Name
-**Given** buildings exist with names: "Résidence Soleil", "Appartements Luna", "Villa Aurora"  
-**When** I type "Luna" in the search box  
-**Then** only "Appartements Luna" is displayed  
-**And** other buildings are hidden
+**AC1:** Type "Soleil" → only buildings with "Soleil" in name shown.
+**AC2:** Type "Loi" → buildings with "Loi" in address shown.
+**AC3:** Case-insensitive: "SOLEIL" finds "Résidence Soleil".
+**AC4:** Partial match: "Aven" finds "Avenue Louise" and "Avenue Tervueren".
+**AC5:** Clear search field → all buildings shown again.
+**AC6:** No match for "XYZ" → "No buildings found matching 'XYZ'".
+**AC7:** City filter + search combined → intersection of both filters applied.
 
-### AC2: Search by Address
-**Given** a building has address "123 Rue de la Loi, Brussels"  
-**When** I type "Rue de la Loi" in the search box  
-**Then** the building is displayed in results
+**Endpoint:** `GET /api/v1/buildings?search={term}` — partial case-insensitive match on name + address. `GET /api/v1/buildings/cities` — distinct city list.
 
-### AC3: Case-Insensitive Search
-**Given** a building named "Résidence Soleil" exists  
-**When** I search for "soleil" (lowercase)  
-**Then** "Résidence Soleil" is found
-
-### AC4: Partial Match Search
-**Given** a building named "Résidence Soleil" exists  
-**When** I search for "Rési"  
-**Then** "Résidence Soleil" is found
-
-### AC5: Clear Search
-**Given** I have searched for "Luna"  
-**And** only filtered results are displayed  
-**When** I clear the search box  
-**Then** all buildings are displayed again
-
-### AC6: No Results Found
-**Given** no buildings match my search term  
-**When** I search for "XYZ123"  
-**Then** I see message "No buildings found"  
-**And** helpful text "Try a different search term"
-
----
-
-**Last Updated**: 2024-01-15  
-**Status**: Ready for Development
+**Last Updated:** 2024-01-15 | **Status:** Ready for Development

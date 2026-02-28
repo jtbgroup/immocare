@@ -1,130 +1,177 @@
-Je veux implémenter le Use Case UC001 - Manage Buildings pour ImmoCare.
+# ImmoCare — UC001 Manage Buildings — Implementation Prompt
 
-CONTEXTE:
-- Projet: ImmoCare (property management system)
-- Stack: Spring Boot 3.2 (backend) + Angular 17 (frontend) + PostgreSQL 15
-- Architecture: API-First, mono-repo
-- Database: Schéma déjà créé avec Flyway migrations
+I want to implement Use Case UC001 - Manage Buildings for ImmoCare.
 
-USER STORIES À IMPLÉMENTER:
-1. US001 - Create Building (Priority: MUST HAVE, 5 points)
-2. US002 - Edit Building (Priority: MUST HAVE, 3 points)
-3. US003 - Delete Building (Priority: MUST HAVE, 3 points)
-4. US004 - View Buildings List (Priority: MUST HAVE, 3 points)
-5. US005 - Search Buildings (Priority: SHOULD HAVE, 2 points)
+---
 
-DOCUMENTS DE RÉFÉRENCE:
-- docs/analysis/data-model.md : Entité Building avec tous les attributs
-- docs/analysis/data-dictionary.md : Contraintes et validations
-- docs/analysis/use-cases/UC001-manage-buildings.md : Flows détaillés
-- docs/analysis/user-stories/US001-005 : Critères d'acceptation
+## CONTEXT
 
-STRUCTURE PROJET:
-backend/
-├── src/main/java/com/immocare/
-│   ├── config/
-│   ├── controller/
-│   ├── service/
-│   ├── repository/
-│   ├── model/
-│   │   ├── entity/
-│   │   └── dto/
-│   ├── mapper/
-│   ├── exception/
-│   └── security/
-├── src/main/resources/
-│   └── db/migration/  (migrations déjà créées)
-└── pom.xml
+- **Project**: ImmoCare (property management system)
+- **Stack**: Spring Boot 4.x (backend) + Angular 19+ (frontend) + PostgreSQL 16
+- **Architecture**: API-First, mono-repo
+- **Auth**: Session-based, already implemented (ADMIN only)
+- **Branch**: `develop`
 
-frontend/
-├── src/app/
-│   ├── core/
-│   ├── shared/
-│   ├── features/
-│   │   └── building/
-│   └── models/
-└── package.json
+---
 
-BACKEND À CRÉER (dans backend/src/main/java/com/immocare/):
-1. model/entity/Building.java
-2. repository/BuildingRepository.java
-3. service/BuildingService.java
-4. controller/BuildingController.java
-5. model/dto/BuildingDTO.java
-6. model/dto/CreateBuildingRequest.java
-7. model/dto/UpdateBuildingRequest.java
-8. mapper/BuildingMapper.java (MapStruct)
-9. exception/BuildingNotFoundException.java
-10. Tests (dans src/test/):
-    - service/BuildingServiceTest.java
-    - controller/BuildingControllerTest.java
+## USER STORIES TO IMPLEMENT
 
-FRONTEND À CRÉER (dans frontend/src/app/):
-1. models/building.model.ts
-2. core/services/building.service.ts
-3. features/building/
-   ├── building.module.ts
-   ├── building-routing.module.ts
-   ├── components/
-   │   ├── building-list/
-   │   │   ├── building-list.component.ts
-   │   │   ├── building-list.component.html
-   │   │   └── building-list.component.scss
-   │   ├── building-form/
-   │   │   ├── building-form.component.ts
-   │   │   ├── building-form.component.html
-   │   │   └── building-form.component.scss
-   │   └── building-details/
-   │       ├── building-details.component.ts
-   │       ├── building-details.component.html
-   │       └── building-details.component.scss
+| Story | Title | Priority | Points |
+|-------|-------|----------|--------|
+| US001 | Create Building | MUST HAVE | 5 |
+| US002 | Edit Building | MUST HAVE | 3 |
+| US003 | Delete Building | MUST HAVE | 3 |
+| US004 | View Buildings List | MUST HAVE | 3 |
+| US005 | Search Buildings | SHOULD HAVE | 2 |
 
-API ENDPOINTS À IMPLÉMENTER:
-- GET    /api/v1/buildings?page=0&size=20&sort=name,asc&city=Brussels&search=text
-- GET    /api/v1/buildings/{id}
-- POST   /api/v1/buildings
-- PUT    /api/v1/buildings/{id}
-- DELETE /api/v1/buildings/{id}
+---
 
-ENTITY BUILDING (référence):
-- id: Long (PK, auto-generated)
-- name: String (max 100, required)
-- streetAddress: String (max 200, required)
-- postalCode: String (max 20, required)
-- city: String (max 100, required)
-- country: String (max 100, required, default "Belgium")
-- ownerName: String (max 200, optional)
-- createdBy: User (FK, set null on delete)
-- createdAt: LocalDateTime
-- updatedAt: LocalDateTime
+## REFERENCE DOCUMENTS
 
-BUSINESS RULES (docs/analysis/data-model.md):
-- BR-UC001-01: All required fields must be present
-- BR-UC001-02: Owner inheritance to housing units
-- BR-UC001-03: Cannot delete building with housing units
-- BR-UC001-04: Duplicate building names allowed
-- BR-UC001-05: No postal code format validation (international support)
+- `docs/analysis/use-cases/UC001-manage-buildings.md` — flows, business rules, test scenarios
+- `docs/analysis/user-stories/US001-005` — acceptance criteria per story
+- `docs/analysis/data-model.md` — Building entity definition
+- `docs/analysis/data-dictionary.md` — attribute constraints and validation rules
 
-EXIGENCES:
-- Suivre CONTRIBUTING.md (coding standards)
-- Validation côté backend (@Valid, @NotBlank, @Size)
-- Exception handling (GlobalExceptionHandler)
-- Tests unitaires (>80% coverage)
-- Respecter TOUS les acceptance criteria des US001-005
-- DTO pour API (pas d'exposition directe des entities)
-- MapStruct pour mapping Entity ↔ DTO
+---
 
-ORDRE D'IMPLÉMENTATION:
-1. Backend Entity (Building.java)
-2. Backend Repository (BuildingRepository.java)
-3. Backend DTOs (BuildingDTO, CreateBuildingRequest, UpdateBuildingRequest)
-4. Backend Mapper (BuildingMapper.java)
-5. Backend Service (BuildingService.java) + Tests
-6. Backend Controller (BuildingController.java) + Tests
-7. Frontend Model (building.model.ts)
-8. Frontend Service (building.service.ts)
-9. Frontend Components (list, form, details)
-10. Frontend Routing
+## BUILDING ENTITY
 
-Commence par créer les fichiers backend dans l'ordre ci-dessus.
-Pour chaque fichier, indique le chemin complet depuis la racine du projet.
+```
+building {
+  id             BIGINT PK AUTO_INCREMENT
+  name           VARCHAR(100) NOT NULL
+  street_address VARCHAR(200) NOT NULL
+  postal_code    VARCHAR(20)  NOT NULL
+  city           VARCHAR(100) NOT NULL
+  country        VARCHAR(100) NOT NULL DEFAULT 'Belgium'
+  owner_id       BIGINT       NULL  FK → person(id) ON DELETE SET NULL
+  created_at     TIMESTAMP    NOT NULL DEFAULT NOW()
+  updated_at     TIMESTAMP    NOT NULL DEFAULT NOW()
+}
+```
+
+> **Note**: `owner_id` is a FK to `person`. The old `owner_name` VARCHAR column has been removed (UC009 migration).
+
+---
+
+## PROJECT STRUCTURE
+
+```
+backend/src/main/java/com/immocare/
+├── controller/BuildingController.java
+├── service/BuildingService.java
+├── repository/BuildingRepository.java
+├── model/entity/Building.java
+├── model/dto/BuildingDTO.java
+├── model/dto/CreateBuildingRequest.java
+├── model/dto/UpdateBuildingRequest.java
+├── mapper/BuildingMapper.java
+└── exception/BuildingNotFoundException.java, BuildingHasUnitsException.java
+
+frontend/src/app/features/building/
+├── building-list/
+├── building-form/
+└── building-details/
+```
+
+---
+
+## BACKEND
+
+### `BuildingDTO` (response)
+```java
+record BuildingDTO(
+    Long id, String name, String streetAddress, String postalCode,
+    String city, String country,
+    Long ownerId, String ownerName,   // from person.firstName + person.lastName
+    int unitCount,                    // computed
+    LocalDateTime createdAt, LocalDateTime updatedAt
+) {}
+```
+
+### `CreateBuildingRequest`
+```java
+record CreateBuildingRequest(
+    @NotBlank @Size(max=100) String name,
+    @NotBlank @Size(max=200) String streetAddress,
+    @NotBlank @Size(max=20)  String postalCode,
+    @NotBlank @Size(max=100) String city,
+    @NotBlank @Size(max=100) String country,
+    Long ownerId   // optional
+) {}
+```
+
+### `UpdateBuildingRequest` — same fields as Create.
+
+### `BuildingRepository`
+```java
+Page<Building> findByNameContainingIgnoreCaseOrStreetAddressContainingIgnoreCase(
+    String name, String address, Pageable pageable);
+List<String> findDistinctCities();
+```
+
+### `BuildingService`
+- `getAllBuildings(String search, String city, Pageable)` → `Page<BuildingDTO>`
+- `getBuildingById(Long id)` → `BuildingDTO`
+- `createBuilding(CreateBuildingRequest)` → `BuildingDTO`
+- `updateBuilding(Long id, UpdateBuildingRequest)` → `BuildingDTO`
+- `deleteBuilding(Long id)` → void
+- Business rules:
+  - BR-UC001-01: name, streetAddress, postalCode, city, country required
+  - BR-UC001-03: cannot delete if housing units exist → `BuildingHasUnitsException`
+
+### `BuildingController`
+
+| Method | Endpoint | Story |
+|--------|----------|-------|
+| GET | /api/v1/buildings | US004, US005 |
+| GET | /api/v1/buildings/{id} | US004 |
+| POST | /api/v1/buildings | US001 |
+| PUT | /api/v1/buildings/{id} | US002 |
+| DELETE | /api/v1/buildings/{id} | US003 |
+| GET | /api/v1/buildings/cities | US004 |
+
+---
+
+## FRONTEND
+
+### `building.model.ts`
+```typescript
+interface Building { id, name, streetAddress, postalCode, city, country,
+                     ownerId, ownerName, unitCount, createdAt, updatedAt }
+interface CreateBuildingRequest { name, streetAddress, postalCode, city, country, ownerId? }
+interface UpdateBuildingRequest { name, streetAddress, postalCode, city, country, ownerId? }
+```
+
+### Components
+- `BuildingListComponent` — list with search bar, city filter dropdown, sort by name/city, pagination (US004, US005)
+- `BuildingFormComponent` — create/edit form, "Has Owner" toggle showing person picker, unsaved-changes guard (US001, US002)
+- `BuildingDetailsComponent` — view all fields, "Edit", "Delete" buttons, embedded `HousingUnitListComponent` (US003)
+
+---
+
+## ACCEPTANCE CRITERIA CHECKLIST
+
+- [ ] POST /api/v1/buildings creates building with correct owner link
+- [ ] DELETE /api/v1/buildings/{id} returns 409 with `unitCount` if units exist
+- [ ] City filter and search work independently and combined
+- [ ] owner_name resolved from person firstName + lastName
+- [ ] All US001–US005 acceptance criteria verified manually
+
+---
+
+## DEFINITION OF DONE
+
+- [ ] All backend classes implemented
+- [ ] Unit tests: BuildingService (>80% coverage)
+- [ ] Integration tests: BuildingController (all endpoints)
+- [ ] All frontend components implemented
+- [ ] No regression on other features
+- [ ] Code reviewed and merged to `develop`
+
+---
+
+**Last Updated**: 2026-02-27
+**Branch**: `develop`
+**Status**: ✅ Implemented

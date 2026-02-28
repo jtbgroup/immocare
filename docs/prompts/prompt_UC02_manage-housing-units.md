@@ -1,128 +1,133 @@
-# UC002 - Manage Housing Units
+# ImmoCare — UC002 Manage Housing Units — Implementation Prompt
+
+I want to implement Use Case UC002 - Manage Housing Units for ImmoCare.
+
+---
+
+## CONTEXT
+
+- **Project**: ImmoCare (property management system)
+- **Stack**: Spring Boot 4.x (backend) + Angular 19+ (frontend) + PostgreSQL 16
+- **Architecture**: API-First, mono-repo
+- **Auth**: Session-based, already implemented (ADMIN only)
+- **Branch**: `develop`
+- **Already implemented**: Buildings — follow the same patterns
+
+---
+
+## USER STORIES TO IMPLEMENT
+
+| Story | Title | Priority | Points |
+|-------|-------|----------|--------|
+| US006 | Create Housing Unit | MUST HAVE | 5 |
+| US007 | Edit Housing Unit | MUST HAVE | 3 |
+| US008 | Delete Housing Unit | MUST HAVE | 3 |
+| US009 | View Housing Unit Details | MUST HAVE | 3 |
+| US010 | Add Terrace to Housing Unit | SHOULD HAVE | 2 |
+| US011 | Add Garden to Housing Unit | SHOULD HAVE | 2 |
+
+---
+
+## REFERENCE DOCUMENTS
+
+- `docs/analysis/use-cases/UC002-manage-housing-units.md` — flows, business rules, test scenarios
+- `docs/analysis/user-stories/US006-011` — acceptance criteria per story
+- `docs/analysis/data-model.md` — HousingUnit entity definition
+- `docs/analysis/data-dictionary.md` — attribute constraints and validation rules
+
+---
+
+## HOUSING UNIT ENTITY (to create)
+
+```
+housing_unit {
+  id                   BIGINT PK AUTO_INCREMENT
+  building_id          BIGINT FK NOT NULL → building(id) ON DELETE CASCADE
+  unit_number          VARCHAR(20)   NOT NULL
+  floor                INTEGER       NULL   -- between -10 and 100
+  landing_number       VARCHAR(10)   NULL
+  total_surface        DECIMAL(6,2)  NULL   -- m², must be > 0 if provided
+  has_terrace          BOOLEAN       NOT NULL DEFAULT false
+  terrace_surface      DECIMAL(6,2)  NULL   -- only when has_terrace = true
+  terrace_orientation  VARCHAR(3)    NULL   -- N, S, E, W, NE, NW, SE, SW
+  has_garden           BOOLEAN       NOT NULL DEFAULT false
+  garden_surface       DECIMAL(6,2)  NULL   -- only when has_garden = true
+  garden_orientation   VARCHAR(3)    NULL
+  owner_id             BIGINT        NULL   FK → person(id) ON DELETE SET NULL
+  created_at           TIMESTAMP     NOT NULL DEFAULT NOW()
+  updated_at           TIMESTAMP     NOT NULL DEFAULT NOW()
+  UNIQUE (building_id, unit_number)
+}
+```
+
+**Key rules:**
+- When `has_terrace = false`: always clear `terrace_surface` and `terrace_orientation` before save
+- When `has_garden = false`: always clear `garden_surface` and `garden_orientation` before save
+- `owner_id` inherits from building's `owner_id` for display only — NOT stored on the unit (display logic in service)
+- Cannot delete if unit has rooms (throw `HousingUnitHasDataException` with `roomCount`)
+- PEB, rent history, and meters are NOT blocking deletion (cascade DELETE handles them)
+
+---
 
 ## BACKEND COMPONENTS
 
-1. **`model/entity/HousingUnit.java`** — JPA entity with all fields above
-
-2. **`model/dto/HousingUnitDTO.java`** — response DTO:
-   - `{ id, buildingId, buildingName, unitNumber, floor, landingNumber, totalSurface, hasTerrace, terraceSurface, terraceOrientation, hasGarden, gardenSurface, gardenOrientation, ownerName, roomCount, createdAt, updatedAt }`
-
-3. **`model/dto/CreateHousingUnitRequest.java`**:
-   - `{ buildingId, unitNumber, floor, landingNumber, totalSurface, hasTerrace, terraceSurface, terraceOrientation, hasGarden, gardenSurface, gardenOrientation, ownerName }`
-   - Validated with Bean Validation annotations
-
-4. **`model/dto/UpdateHousingUnitRequest.java`**:
-   - Same fields as Create except `buildingId` (not updatable)
-
-5. **`mapper/HousingUnitMapper.java`** (MapStruct) — entity ↔ DTO
-
-6. **`repository/HousingUnitRepository.java`**:
+1. `model/entity/HousingUnit.java` — JPA entity
+2. `model/dto/HousingUnitDTO.java`:
+   - `{ id, buildingId, buildingName, unitNumber, floor, landingNumber, totalSurface, hasTerrace, terraceSurface, terraceOrientation, hasGarden, gardenSurface, gardenOrientation, ownerId, ownerName, roomCount, createdAt, updatedAt }`
+3. `model/dto/CreateHousingUnitRequest.java` — validated
+4. `model/dto/UpdateHousingUnitRequest.java` — same except `buildingId` excluded
+5. `mapper/HousingUnitMapper.java` (MapStruct)
+6. `repository/HousingUnitRepository.java`:
    - `findByBuildingId(Long buildingId)`
-   - Existence check for duplicate unit number within building
+   - `existsByBuildingIdAndUnitNumberAndIdNot(buildingId, unitNumber, id)` — uniqueness check on edit
+7. `service/HousingUnitService.java` — enforce all business rules above
+8. `controller/HousingUnitController.java`:
 
-7. **`service/HousingUnitService.java`**:
-   - `getUnitsByBuilding(Long buildingId)` → List\<HousingUnitDTO\>
-   - `getUnitById(Long id)` → HousingUnitDTO
-   - `createUnit(CreateHousingUnitRequest)` → HousingUnitDTO
-   - `updateUnit(Long id, UpdateHousingUnitRequest)` → HousingUnitDTO
-   - `deleteUnit(Long id)` → void
-   - Business rules enforced:
-     - Unit number unique within building
-     - Floor between -10 and 100
-     - Surface > 0
-     - When `hasTerrace = false`: `terraceSurface` and `terraceOrientation` are always cleared before save
-     - When `hasGarden = false`: `gardenSurface` and `gardenOrientation` are always cleared before save
-     - Cannot delete if unit has rooms, PEB history, rent history, or water meter history
-     - `ownerName` inherits from building if null (display only, not stored)
+| Method | Endpoint | Story |
+|--------|----------|-------|
+| GET | /api/v1/buildings/{buildingId}/units | US009 |
+| GET | /api/v1/units/{id} | US009 |
+| POST | /api/v1/units | US006 |
+| PUT | /api/v1/units/{id} | US007, US010, US011 |
+| DELETE | /api/v1/units/{id} | US008 |
 
-8. **`controller/HousingUnitController.java`** — REST endpoints:
+9. `exception/HousingUnitNotFoundException.java`
+10. `exception/HousingUnitHasDataException.java` — with `roomCount` field
+11. Update `GlobalExceptionHandler`
 
-| Method | Endpoint | Description | Story |
-|--------|----------|-------------|-------|
-| GET | /api/v1/buildings/{buildingId}/units | List units in building | US009 |
-| GET | /api/v1/units/{id} | Get unit details | US009 |
-| POST | /api/v1/units | Create unit | US006 |
-| PUT | /api/v1/units/{id} | Update unit | US007 |
-| DELETE | /api/v1/units/{id} | Delete unit | US008 |
+---
 
-9. **`exception/HousingUnitNotFoundException.java`**
+## FRONTEND
 
-10. Update **`GlobalExceptionHandler`** for new exceptions
+12. `housing-unit.model.ts` — TypeScript interfaces
+13. `housing-unit.service.ts` — HTTP calls
+14. `HousingUnitListComponent` — embedded in `BuildingDetailsComponent`:
+    - Table: unit number, floor, surface, room count, owner name
+    - "Add Housing Unit" button; click row → navigate to unit details
+15. `HousingUnitFormComponent` — create/edit:
+    - "Has Terrace" checkbox → conditional terrace fields (surface + orientation dropdown)
+    - Uncheck → fields hidden AND cleared in form state
+    - "Has Garden" same pattern
+    - Owner person picker (US010, US011 are handled within this form)
+16. `HousingUnitDetailsComponent`:
+    - All fields display
+    - Sections: Rooms (placeholder), PEB (placeholder), Rent (placeholder), Meters (placeholder)
+    - "Edit", "Delete" buttons
+17. Module, routing, navigation link in sidebar
 
-### Frontend
+---
 
-11. **`housing-unit.model.ts`** — TypeScript interface matching HousingUnitDTO
+## ACCEPTANCE CRITERIA CHECKLIST
 
-12. **`housing-unit.service.ts`** — API calls for all endpoints
+- [ ] POST creates unit; 409 if unit number duplicated in same building
+- [ ] POST with hasTerrace=true and no surface/orientation → allowed (both optional)
+- [ ] PUT clears terrace/garden data when flag set to false
+- [ ] DELETE returns 409 with `roomCount` if rooms exist; succeeds if only PEB/rent/meter data
+- [ ] Owner name displayed from building's owner when unit has no owner
+- [ ] All US006–US011 acceptance criteria verified manually
 
-13. **`HousingUnitListComponent`** — embedded in building details page:
-    - Table: unit number, floor, surface, room count, owner
-    - "Add Housing Unit" button
-    - Click row → navigate to unit details
+---
 
-14. **`HousingUnitFormComponent`** — create/edit form:
-    - Required fields: unit number, floor
-    - Conditional terrace section (shown when `hasTerrace` checked): surface and orientation are optional
-    - Conditional garden section (shown when `hasGarden` checked): surface and orientation are optional
-    - When a checkbox is unchecked: surface and orientation fields are reset and not submitted
-    - Orientation dropdown options: N, S, E, W, NE, NW, SE, SW
-    - "Save" and "Cancel" buttons
-
-15. **`HousingUnitDetailsComponent`** — full detail view with sections:
-    - Unit info (all fields)
-    - Terrace row shown only if `hasTerrace = true`; displays surface and orientation if provided
-    - Garden row shown only if `hasGarden = true`; displays surface and orientation if provided
-    - Rooms section (placeholder "Add Room" button — UC003)
-    - PEB section (placeholder — UC004)
-    - Rent section (placeholder — UC005)
-    - Water Meter section (placeholder — UC006)
-    - "Edit" and "Delete" buttons
-
-16. Housing unit module, routing, and navigation links from building details
-
-## BUSINESS RULES
-
-| Rule | Description |
-|------|-------------|
-| BR-UC002-01 | Unit number must be unique within a building (not globally) |
-| BR-UC002-02 | Floor: integer, -10 to 100 (negative = underground) |
-| BR-UC002-03 | Surface > 0 m² |
-| BR-UC002-04 | When `hasTerrace = true`: terraceSurface and terraceOrientation are stored if provided (both optional). When `hasTerrace = false`: both fields are always cleared. |
-| BR-UC002-05 | When `hasGarden = true`: gardenSurface and gardenOrientation are stored if provided (both optional). When `hasGarden = false`: both fields are always cleared. |
-| BR-UC002-06 | Deletion blocked if unit has rooms, PEB, rent, or water meter data |
-| BR-UC002-07 | Error on delete must list what's blocking and the count |
-| BR-UC002-08 | On successful delete: redirect to parent building details page |
-| BR-UC002-09 | ownerName: display building owner as placeholder when unit field is null |
-
-## DELIVERABLES ORDER
-
-1. `HousingUnit.java` entity
-2. DTOs: `HousingUnitDTO`, `CreateHousingUnitRequest`, `UpdateHousingUnitRequest`
-3. `HousingUnitMapper.java`
-4. `HousingUnitRepository.java`
-5. `HousingUnitService.java` + `HousingUnitServiceTest.java`
-6. `HousingUnitNotFoundException.java` + GlobalExceptionHandler updates
-7. `HousingUnitController.java` + `HousingUnitControllerTest.java`
-8. `housing-unit.model.ts`
-9. `housing-unit.service.ts`
-10. `HousingUnitListComponent`
-11. `HousingUnitFormComponent`
-12. `HousingUnitDetailsComponent`
-13. Module, routing, and navigation links
-
-## ACCEPTANCE CRITERIA SUMMARY
-
-- [ ] GET /api/v1/buildings/{buildingId}/units returns list of units
-- [ ] POST /api/v1/units creates unit with required fields
-- [ ] POST /api/v1/units returns 409 if unit number already exists in building
-- [ ] POST /api/v1/units succeeds with hasTerrace=true even if surface and orientation are absent
-- [ ] POST /api/v1/units clears terrace/garden data when respective flag is false
-- [ ] PUT /api/v1/units/{id} updates unit information
-- [ ] DELETE /api/v1/units/{id} removes unit with no associated data
-- [ ] DELETE /api/v1/units/{id} returns 409 with detail message when unit has associated data
-- [ ] Angular unit list embedded in building details page
-- [ ] Angular form shows conditional terrace/garden sections; surface and orientation optional
-- [ ] Angular form resets terrace/garden fields when checkbox is unchecked
-- [ ] Angular details page shows terrace/garden row only when flag is true
-- [ ] Angular delete shows confirmation dialog before deletion
-- [ ] All acceptance criteria from US006 to US009 are met
+**Last Updated**: 2026-02-27
+**Branch**: `develop`
+**Status**: ✅ Implemented
