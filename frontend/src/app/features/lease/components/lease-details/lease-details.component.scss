@@ -1,8 +1,9 @@
-// All shared styles (btn, info-card, info-grid, info-item, breadcrumb,
+// features/lease/components/lease-details/lease-details.component.scss
+// Shared styles (btn, info-card, info-grid, info-item, breadcrumb,
 // details-content .header, alert, loading, error-container,
 // lease-details-container) come from global styles.scss partials.
 
-// ─── Title row (h1 + badge + lease-type inline) ───────────────────────────────
+// ─── Title row ────────────────────────────────────────────────────────────────
 
 .title-row {
   display: flex;
@@ -12,6 +13,12 @@
   h1 {
     margin: 0;
   }
+}
+
+.lease-type {
+  font-size: 1rem;
+  font-weight: 400;
+  color: #6c757d;
 }
 
 // ─── Status badge ─────────────────────────────────────────────────────────────
@@ -24,21 +31,44 @@
   font-weight: 600;
   color: #fff;
 
-  &.bg-success   { background-color: #2e7d32; }
-  &.bg-secondary { background-color: #616161; }
-  &.bg-info      { background-color: #0277bd; }
-  &.bg-danger    { background-color: #c62828; }
+  &.bg-success {
+    background-color: #2e7d32;
+  }
+  &.bg-secondary {
+    background-color: #616161;
+  }
+  &.bg-info {
+    background-color: #0277bd;
+  }
+  &.bg-danger {
+    background-color: #c62828;
+  }
 }
 
-// ─── Lease type subtitle ──────────────────────────────────────────────────────
+// ─── Status change row ────────────────────────────────────────────────────────
 
-.lease-type {
-  font-size: 1rem;
-  font-weight: 400;
-  color: #6c757d;
+.status-change-row {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
 }
 
-// ─── Subsection label inside an info-card ─────────────────────────────────────
+.status-select {
+  border: 1px solid #dee2e6;
+  border-radius: 5px;
+  padding: 0.35rem 0.6rem;
+  font-size: 0.875rem;
+  color: #333;
+  background: #fff;
+  cursor: pointer;
+
+  &:focus {
+    outline: none;
+    border-color: #80bdff;
+  }
+}
+
+// ─── Subsection label ─────────────────────────────────────────────────────────
 
 .info-subsection-label {
   font-size: 0.78rem;

@@ -134,6 +134,15 @@ bootstrapApplication(AppComponent, {
             (m) => m.AlertsComponent,
           ),
       },
+
+      {
+        path: "leases",
+        canActivate: [AuthGuard],
+        loadComponent: () =>
+          import("./app/features/lease/components/lease-global-list/lease-global-list.component").then(
+            (m) => m.LeaseGlobalListComponent,
+          ),
+      },
       {
         path: "leases/:id/edit",
         canActivate: [AuthGuard],

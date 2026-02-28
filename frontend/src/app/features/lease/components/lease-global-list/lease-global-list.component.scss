@@ -1,0 +1,193 @@
+// features/lease/components/lease-global-list/lease-global-list.component.scss
+// Shared base styles (btn, data-table, filters, empty-state, pagination,
+// loading, alert, details-content .header) come from global styles.scss.
+
+// ── Container ─────────────────────────────────────────────────────────────────
+
+.lease-global-list-container {
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: 1.5rem 2rem;
+}
+
+.total-count {
+  font-size: 0.9rem;
+  color: #6c757d;
+  font-weight: 400;
+  margin-left: 0.75rem;
+}
+
+// ── Filters panel ─────────────────────────────────────────────────────────────
+
+.filters-panel {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  gap: 1.25rem;
+  background: #fff;
+  border: 1px solid #e9ecef;
+  border-radius: 8px;
+  padding: 1rem 1.25rem;
+  margin-bottom: 1.5rem;
+}
+
+.filter-group {
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+  min-width: 0;
+}
+
+.filter-group--actions {
+  margin-left: auto;
+  align-self: flex-end;
+}
+
+.filter-label {
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: #6c757d;
+}
+
+.filters-panel select,
+.filters-panel input[type="date"],
+.filters-panel input[type="number"] {
+  border: 1px solid #dee2e6;
+  border-radius: 5px;
+  padding: 0.38rem 0.6rem;
+  font-size: 0.875rem;
+  color: #333;
+  background: #fafafa;
+  min-width: 0;
+
+  &:focus {
+    outline: none;
+    border-color: #80bdff;
+    background: #fff;
+  }
+}
+
+.filters-panel select {
+  min-width: 170px;
+}
+.filters-panel input[type="number"] {
+  width: 90px;
+}
+
+// ── Status toggle buttons ─────────────────────────────────────────────────────
+
+.status-toggles {
+  display: flex;
+  gap: 0.35rem;
+}
+
+.status-toggle {
+  padding: 0.3rem 0.75rem;
+  border-radius: 20px;
+  border: 1.5px solid #dee2e6;
+  background: #fff;
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: #6c757d;
+  cursor: pointer;
+  transition: all 0.15s;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+
+  &:hover {
+    border-color: #adb5bd;
+    color: #333;
+  }
+
+  &--active.active {
+    background: #d4edda;
+    border-color: #28a745;
+    color: #155724;
+  }
+  &--draft.active {
+    background: #d1ecf1;
+    border-color: #17a2b8;
+    color: #0c5460;
+  }
+  &--finished.active {
+    background: #e2e3e5;
+    border-color: #6c757d;
+    color: #383d41;
+  }
+  &--cancelled.active {
+    background: #f8d7da;
+    border-color: #dc3545;
+    color: #721c24;
+  }
+}
+
+// ── Date range ────────────────────────────────────────────────────────────────
+
+.date-range {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+}
+
+.range-sep {
+  color: #adb5bd;
+  font-size: 0.8rem;
+}
+
+// ── Table overrides ───────────────────────────────────────────────────────────
+
+.row--alert td:first-child {
+  border-left: 3px solid #ffc107;
+}
+
+.text-right {
+  text-align: right;
+}
+.text-muted {
+  color: #adb5bd;
+}
+
+.actions-cell {
+  white-space: nowrap;
+}
+
+.alert-icon {
+  font-size: 0.8rem;
+  margin-left: 0.3rem;
+  color: #dc3545;
+}
+
+.alert-icon--yellow {
+  color: #e0a800;
+}
+
+// ── Status badges ─────────────────────────────────────────────────────────────
+
+.badge {
+  display: inline-block;
+  padding: 0.2em 0.6em;
+  border-radius: 4px;
+  font-size: 0.72rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+
+  &.badge-active {
+    background: #d4edda;
+    color: #155724;
+  }
+  &.badge-draft {
+    background: #d1ecf1;
+    color: #0c5460;
+  }
+  &.badge-finished {
+    background: #e2e3e5;
+    color: #383d41;
+  }
+  &.badge-cancelled {
+    background: #f8d7da;
+    color: #721c24;
+  }
+}

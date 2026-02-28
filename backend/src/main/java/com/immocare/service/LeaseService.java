@@ -6,6 +6,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -18,6 +20,8 @@ import com.immocare.model.dto.ChangeLeaseStatusRequest;
 import com.immocare.model.dto.CreateLeaseRequest;
 import com.immocare.model.dto.LeaseAlertDTO;
 import com.immocare.model.dto.LeaseDTO;
+import com.immocare.model.dto.LeaseFilterParams;
+import com.immocare.model.dto.LeaseGlobalSummaryDTO;
 import com.immocare.model.dto.LeaseRentAdjustmentDTO;
 import com.immocare.model.dto.LeaseSummaryDTO;
 import com.immocare.model.dto.LeaseTenantDTO;
@@ -37,6 +41,7 @@ import com.immocare.repository.LeaseRentAdjustmentRepository;
 import com.immocare.repository.LeaseRepository;
 import com.immocare.repository.LeaseTenantRepository;
 import com.immocare.repository.PersonRepository;
+import com.immocare.repository.spec.LeaseSpecification;
 
 @Service
 public class LeaseService {
@@ -79,6 +84,83 @@ public class LeaseService {
 
     public LeaseDTO getById(Long id) {
         return toDTO(findLease(id));
+    }
+
+    /**
+     * Global paginated lease list, filtered by {@link LeaseFilterParams}.
+     * Defaults to ACTIVE-only when no status filter is provided.
+     */
+    public Page<LeaseGlobalSummaryDTO> getAll(LeaseFilterParams params, Pageable pageable) {
+        // Default to ACTIVE when caller sends no status filter
+        if (params.getStatuses() == null || params.getStatuses().isEmpty()) {
+            params.setStatuses(List.of(LeaseStatus.ACTIVE));
+        }
+
+        return leaseRepository
+                .findAll(LeaseSpecification.of(params), pageable)
+                .map(this::toGlobalSummary);
+    }
+
+    private LeaseGlobalSummaryDTO toGlobalSummary(Lease lease) {
+        LeaseGlobalSummaryDTO dto = new LeaseGlobalSummaryDTO();
+        dto.setId(lease.getId());
+        dto.setStatus(lease.getStatus().name());
+        dto.setLeaseType(lease.getLeaseType().name());
+
+        HousingUnit unit = lease.getHousingUnit();
+        dto.setHousingUnitId(unit.getId());
+        dto.setHousingUnitNumber(unit.getUnitNumber());
+        dto.setBuildingId(unit.getBuilding().getId());
+        dto.setBuildingName(unit.getBuilding().getName());
+
+        dto.setStartDate(lease.getStartDate());
+        dto.setEndDate(lease.getEndDate());
+        dto.setMonthlyRent(lease.getMonthlyRent());
+        dto.setMonthlyCharges(lease.getMonthlyCharges());
+        dto.setTotalRent(lease.getMonthlyRent().add(lease.getMonthlyCharges()));
+        dto.setChargesType(lease.getChargesType().name());
+
+        dto.setTenantNames(lease.getTenants().stream()
+                .filter(t -> t.getRole() == TenantRole.PRIMARY || t.getRole() == TenantRole.CO_TENANT)
+                .map(t -> t.getPerson().getLastName() + " " + t.getPerson().getFirstName())
+                .collect(Collectors.toList()));
+
+        // Reuse alert logic from existing toSummary()
+        computeAlerts(dto, lease);
+
+        return dto;
+    }
+
+    /**
+     * Computes indexation and end-notice alerts for a LeaseGlobalSummaryDTO.
+     * Mirror of the alert logic used in toSummary().
+     */
+    private void computeAlerts(LeaseGlobalSummaryDTO dto, Lease lease) {
+        if (lease.getStatus() != LeaseStatus.ACTIVE || lease.getStartDate() == null)
+            return;
+
+        LocalDate today = LocalDate.now();
+
+        // Indexation alert: anniversary within INDEXATION_NOTICE_DAYS and not yet
+        // indexed this year
+        LocalDate anniversary = lease.getStartDate().withYear(today.getYear());
+        if (anniversary.isBefore(today))
+            anniversary = anniversary.plusYears(1);
+        long daysToAnniversary = java.time.temporal.ChronoUnit.DAYS.between(today, anniversary);
+        boolean indexedThisYear = adjustmentRepository.existsRentAdjustmentForYear(lease.getId(), today.getYear());
+        if (daysToAnniversary <= INDEXATION_NOTICE_DAYS && !indexedThisYear) {
+            dto.setIndexationAlertActive(true);
+            dto.setIndexationAlertDate(anniversary);
+        }
+
+        // End-notice alert: end date within noticePeriodMonths
+        if (lease.getEndDate() != null) {
+            LocalDate noticeDeadline = lease.getEndDate().minusMonths(lease.getNoticePeriodMonths());
+            if (!today.isAfter(lease.getEndDate()) && !today.isBefore(noticeDeadline)) {
+                dto.setEndNoticeAlertActive(true);
+                dto.setEndNoticeAlertDate(noticeDeadline);
+            }
+        }
     }
 
     // ---- Create ----

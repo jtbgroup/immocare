@@ -1,0 +1,96 @@
+<div class="app-container">
+  <header class="app-header">
+    <!-- Brand -->
+    <a routerLink="/" class="brand">
+      <div class="brand-icon">🏢</div>
+      <span class="brand-name">ImmoCare</span>
+    </a>
+
+    <!-- Nav + right zone: visible only when logged in -->
+    <ng-container *ngIf="currentUser$ | async as user">
+      <div class="header-sep"></div>
+
+      <nav class="app-nav">
+        <a
+          routerLink="/persons"
+          routerLinkActive="app-nav__link--active"
+          class="app-nav__link"
+        >
+          👤 Persons
+        </a>
+        <a
+          routerLink="/buildings"
+          routerLinkActive="app-nav__link--active"
+          class="app-nav__link"
+        >
+          🏢 Buildings
+        </a>
+        <a
+          routerLink="/leases"
+          routerLinkActive="app-nav__link--active"
+          class="app-nav__link"
+        >
+          📄 Leases
+        </a>
+      </nav>
+
+      <!-- Right zone -->
+      <div class="right-zone">
+        <!-- Bell -->
+        <a
+          routerLink="/leases/alerts"
+          routerLinkActive="bell-btn--active"
+          class="bell-btn"
+          title="Alerts"
+        >
+          🔔
+          <span *ngIf="alertCount > 0" class="bell-badge">{{
+            alertCount
+          }}</span>
+        </a>
+
+        <!-- Avatar dropdown -->
+        <div class="avatar-wrapper" #avatarWrapper>
+          <button
+            class="avatar-btn"
+            [class.open]="dropdownOpen"
+            (click)="toggleDropdown()"
+          >
+            <div class="avatar">{{ userInitials(user.username) }}</div>
+            <span class="avatar-name">{{ user.username }}</span>
+            <span class="avatar-chevron">▼</span>
+          </button>
+
+          <div class="dropdown" [class.open]="dropdownOpen">
+            <div class="dropdown-header">
+              <div class="dropdown-username">{{ user.username }}</div>
+              <div class="dropdown-role">{{ user.role }}</div>
+            </div>
+            <a
+              routerLink="/users"
+              class="dropdown-item"
+              (click)="closeDropdown()"
+            >
+              <span class="di-icon">👥</span> Manage Users
+            </a>
+            <div class="dropdown-divider"></div>
+            <button
+              class="dropdown-item dropdown-item--logout"
+              (click)="logout()"
+            >
+              <span class="di-icon">↩</span> Logout
+            </button>
+          </div>
+        </div>
+      </div>
+    </ng-container>
+  </header>
+
+  <main class="app-content">
+    <router-outlet></router-outlet>
+  </main>
+
+  <footer class="app-footer">
+    <span>v{{ version }}</span>
+  </footer>
+</div>

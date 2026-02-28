@@ -1,49 +1,55 @@
 // models/lease.model.ts
 
-export type LeaseStatus = 'DRAFT' | 'ACTIVE' | 'FINISHED' | 'CANCELLED';
+export type LeaseStatus = "DRAFT" | "ACTIVE" | "FINISHED" | "CANCELLED";
 export type LeaseType =
-  | 'SHORT_TERM'
-  | 'MAIN_RESIDENCE_3Y'
-  | 'MAIN_RESIDENCE_6Y'
-  | 'MAIN_RESIDENCE_9Y'
-  | 'STUDENT'
-  | 'GLIDING'
-  | 'COMMERCIAL';
-export type ChargesType = 'FORFAIT' | 'PROVISION';
-export type DepositType = 'BLOCKED_ACCOUNT' | 'BANK_GUARANTEE' | 'CPAS' | 'INSURANCE';
-export type TenantRole = 'PRIMARY' | 'CO_TENANT' | 'GUARANTOR';
-export type RentField = 'RENT' | 'CHARGES';
+  | "SHORT_TERM"
+  | "MAIN_RESIDENCE_3Y"
+  | "MAIN_RESIDENCE_6Y"
+  | "MAIN_RESIDENCE_9Y"
+  | "STUDENT"
+  | "GLIDING"
+  | "COMMERCIAL";
+export type ChargesType = "FORFAIT" | "PROVISION";
+export type DepositType =
+  | "BLOCKED_ACCOUNT"
+  | "BANK_GUARANTEE"
+  | "CPAS"
+  | "INSURANCE";
+export type TenantRole = "PRIMARY" | "CO_TENANT" | "GUARANTOR";
+export type RentField = "RENT" | "CHARGES";
 
 export const LEASE_TYPE_LABELS: Record<LeaseType, string> = {
-  SHORT_TERM:          'Short-term',
-  MAIN_RESIDENCE_3Y:   'Main residence (3y)',
-  MAIN_RESIDENCE_6Y:   'Main residence (6y)',
-  MAIN_RESIDENCE_9Y:   'Main residence (9y)',
-  STUDENT:             'Student',
-  GLIDING:             'Gliding',
-  COMMERCIAL:          'Commercial',
+  SHORT_TERM: "Short-term",
+  MAIN_RESIDENCE_3Y: "Main residence (3y)",
+  MAIN_RESIDENCE_6Y: "Main residence (6y)",
+  MAIN_RESIDENCE_9Y: "Main residence (9y)",
+  STUDENT: "Student",
+  GLIDING: "Gliding",
+  COMMERCIAL: "Commercial",
 };
 
-export const LEASE_TYPES: LeaseType[] = Object.keys(LEASE_TYPE_LABELS) as LeaseType[];
+export const LEASE_TYPES: LeaseType[] = Object.keys(
+  LEASE_TYPE_LABELS,
+) as LeaseType[];
 
 export const LEASE_DURATION_MONTHS: Record<LeaseType, number> = {
-  SHORT_TERM:         3,
-  MAIN_RESIDENCE_3Y:  36,
-  MAIN_RESIDENCE_6Y:  72,
-  MAIN_RESIDENCE_9Y:  108,
-  STUDENT:            12,
-  GLIDING:            12,
-  COMMERCIAL:         108,
+  SHORT_TERM: 3,
+  MAIN_RESIDENCE_3Y: 36,
+  MAIN_RESIDENCE_6Y: 72,
+  MAIN_RESIDENCE_9Y: 108,
+  STUDENT: 12,
+  GLIDING: 12,
+  COMMERCIAL: 108,
 };
 
 export const DEFAULT_NOTICE_MONTHS: Record<LeaseType, number> = {
-  SHORT_TERM:         1,
-  MAIN_RESIDENCE_3Y:  3,
-  MAIN_RESIDENCE_6Y:  3,
-  MAIN_RESIDENCE_9Y:  3,
-  STUDENT:            1,
-  GLIDING:            3,
-  COMMERCIAL:         6,
+  SHORT_TERM: 1,
+  MAIN_RESIDENCE_3Y: 3,
+  MAIN_RESIDENCE_6Y: 3,
+  MAIN_RESIDENCE_9Y: 3,
+  STUDENT: 1,
+  GLIDING: 3,
+  COMMERCIAL: 6,
 };
 
 export interface LeaseTenant {
@@ -127,7 +133,7 @@ export interface LeaseAlert {
   housingUnitId: number;
   housingUnitNumber: string;
   buildingName: string;
-  alertType: 'INDEXATION' | 'END_NOTICE';
+  alertType: "INDEXATION" | "END_NOTICE";
   deadline: string;
   tenantNames: string[];
 }
@@ -159,7 +165,10 @@ export interface CreateLeaseRequest {
   tenants: AddTenantRequest[];
 }
 
-export type UpdateLeaseRequest = Omit<CreateLeaseRequest, 'housingUnitId' | 'tenants'>;
+export type UpdateLeaseRequest = Omit<
+  CreateLeaseRequest,
+  "housingUnitId" | "tenants"
+>;
 
 export interface AddTenantRequest {
   personId: number;
@@ -175,4 +184,36 @@ export interface AdjustRentRequest {
   newValue: number;
   reason: string;
   effectiveDate: string;
+}
+
+export interface LeaseGlobalSummary {
+  id: number;
+  status: LeaseStatus;
+  leaseType: LeaseType;
+  housingUnitId: number;
+  housingUnitNumber: string;
+  buildingId: number;
+  buildingName: string;
+  startDate: string;
+  endDate: string;
+  monthlyRent: number;
+  monthlyCharges: number;
+  totalRent: number;
+  chargesType: ChargesType;
+  tenantNames: string[];
+  indexationAlertActive: boolean;
+  indexationAlertDate?: string;
+  endNoticeAlertActive: boolean;
+  endNoticeAlertDate?: string;
+}
+
+export interface LeaseGlobalFilters {
+  statuses: LeaseStatus[];
+  leaseType: LeaseType | "";
+  startDateFrom: string;
+  startDateTo: string;
+  endDateFrom: string;
+  endDateTo: string;
+  rentMin: number | null;
+  rentMax: number | null;
 }

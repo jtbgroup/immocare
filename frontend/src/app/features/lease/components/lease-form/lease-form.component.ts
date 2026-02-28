@@ -23,7 +23,13 @@ import { PersonPickerComponent } from "../../../../shared/components/person-pick
 @Component({
   selector: "app-lease-form",
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule, FormsModule, RouterModule, PersonPickerComponent],
+  imports: [
+    CommonModule,
+    ReactiveFormsModule,
+    FormsModule,
+    RouterModule,
+    PersonPickerComponent,
+  ],
   templateUrl: "./lease-form.component.html",
   styleUrls: ["./lease-form.component.scss"],
 })
@@ -69,7 +75,7 @@ export class LeaseFormComponent implements OnInit {
       this.loadLease(this.leaseId);
     } else {
       this.unitId =
-        +(this.route.snapshot.queryParamMap.get("unitId") ?? 0) || undefined;
+        +(this.route.snapshot.paramMap.get("unitId") ?? 0) || undefined;
     }
   }
 
@@ -219,7 +225,11 @@ export class LeaseFormComponent implements OnInit {
   confirmAddTenant(): void {
     if (!this.selectedTenantPerson) return;
     // Prevent duplicate
-    if (this.pendingTenants.some((t) => t.person.id === this.selectedTenantPerson.id)) {
+    if (
+      this.pendingTenants.some(
+        (t) => t.person.id === this.selectedTenantPerson.id,
+      )
+    ) {
       return;
     }
     this.pendingTenants.push({

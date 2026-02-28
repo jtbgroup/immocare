@@ -1,18 +1,20 @@
-<!-- features/lease/lease-details/lease-details.component.html -->
+<!-- features/lease/components/lease-details/lease-details.component.html -->
 <div class="lease-details-container">
-
   <div *ngIf="isLoading" class="loading">Loading…</div>
   <div *ngIf="errorMessage && !isLoading" class="error-container">
     <p class="error">{{ errorMessage }}</p>
   </div>
 
   <ng-container *ngIf="lease && !isLoading">
-
     <!-- Breadcrumb -->
     <nav class="breadcrumb" aria-label="breadcrumb">
-      <a [routerLink]="['/buildings', lease.buildingId]">{{ lease.buildingName }}</a>
+      <a [routerLink]="['/buildings', lease.buildingId]">{{
+        lease.buildingName
+      }}</a>
       <span class="breadcrumb-separator">›</span>
-      <a [routerLink]="['/units', lease.housingUnitId]">Unit {{ lease.housingUnitNumber }}</a>
+      <a [routerLink]="['/units', lease.housingUnitId]"
+        >Unit {{ lease.housingUnitNumber }}</a
+      >
       <span class="breadcrumb-separator">›</span>
       <span>Lease #{{ lease.id }}</span>
     </nav>
@@ -23,20 +25,49 @@
         <div class="title-row">
           <h1>Lease #{{ lease.id }}</h1>
           <span class="badge" [ngClass]="statusClass">{{ lease.status }}</span>
-          <span class="lease-type">{{ LEASE_TYPE_LABELS[lease.leaseType] }}</span>
+          <span class="lease-type">{{
+            LEASE_TYPE_LABELS[lease.leaseType]
+          }}</span>
         </div>
         <div class="actions">
-          <a *ngIf="canEdit()" [routerLink]="['/leases', lease.id, 'edit']" class="btn btn-secondary">Edit</a>
+          <!-- Status change -->
+          <div *ngIf="canChangeStatus" class="status-change-row">
+            <select [(ngModel)]="selectedStatus" class="status-select">
+              <option value="">Change status…</option>
+              <option *ngFor="let s of eligibleStatuses" [value]="s">
+                {{ statusLabel(s) }}
+              </option>
+            </select>
+            <button
+              class="btn btn-primary btn-sm"
+              [disabled]="!selectedStatus || isChangingStatus"
+              (click)="applyStatusChange()"
+            >
+              {{ isChangingStatus ? "Saving…" : "Apply" }}
+            </button>
+          </div>
+
+          <a
+            *ngIf="canEdit()"
+            [routerLink]="['/leases', lease.id, 'edit']"
+            class="btn btn-secondary"
+            >Edit</a
+          >
         </div>
       </div>
     </div>
 
+    <!-- Status error -->
+    <div *ngIf="statusError" class="alert alert-error">{{ statusError }}</div>
+
     <!-- Alert banners -->
     <div *ngIf="lease.indexationAlertActive" class="alert alert-warning">
-      🔔 Indexation due — anniversary {{ lease.indexationAlertDate | date:'dd/MM/yyyy' }}
+      🔔 Indexation due — anniversary
+      {{ lease.indexationAlertDate | date: "dd/MM/yyyy" }}
     </div>
     <div *ngIf="lease.endNoticeAlertActive" class="alert alert-warning">
-      ⚠ End notice deadline — {{ lease.endNoticeAlertDate | date:'dd/MM/yyyy' }}
+      ⚠ End notice deadline —
+      {{ lease.endNoticeAlertDate | date: "dd/MM/yyyy" }}
     </div>
 
     <!-- Dates & Duration -->
@@ -45,15 +76,15 @@
       <div class="info-grid">
         <div class="info-item">
           <label>Signature</label>
-          <p>{{ lease.signatureDate | date:'dd/MM/yyyy' }}</p>
+          <p>{{ lease.signatureDate | date: "dd/MM/yyyy" }}</p>
         </div>
         <div class="info-item">
           <label>Start</label>
-          <p>{{ lease.startDate | date:'dd/MM/yyyy' }}</p>
+          <p>{{ lease.startDate | date: "dd/MM/yyyy" }}</p>
         </div>
         <div class="info-item">
           <label>End</label>
-          <p>{{ lease.endDate | date:'dd/MM/yyyy' }}</p>
+          <p>{{ lease.endDate | date: "dd/MM/yyyy" }}</p>
         </div>
         <div class="info-item">
           <label>Duration</label>
@@ -66,84 +97,92 @@
       </div>
     </div>
 
-    <!-- Rent (sub-component with history) -->
+    <!-- Rent (with adjustment history) -->
     <app-rent-adjustment-section
       [lease]="lease"
-      (leaseUpdated)="loadLease(lease.id)">
+      (leaseUpdated)="loadLease(lease.id)"
+    >
     </app-rent-adjustment-section>
 
-    <!-- Tenants (sub-component) -->
-    <app-tenant-section
-      [lease]="lease"
-      (leaseUpdated)="loadLease(lease.id)">
+    <!-- Tenants -->
+    <app-tenant-section [lease]="lease" (leaseUpdated)="loadLease(lease.id)">
     </app-tenant-section>
 
     <!-- Registration -->
-    <div class="info-card"
-         *ngIf="lease.registrationSpf || lease.registrationRegion
-              || lease.registrationInventorySpf || lease.registrationInventoryRegion">
+    <div
+      class="info-card"
+      *ngIf="
+        lease.registrationSpf ||
+        lease.registrationRegion ||
+        lease.registrationInventorySpf ||
+        lease.registrationInventoryRegion
+      "
+    >
       <h2>Registration</h2>
-
-      <!-- Lease deed -->
       <div class="info-subsection-label">Lease deed</div>
       <div class="info-grid">
         <div class="info-item">
           <label>SPF Finances</label>
-          <p>{{ lease.registrationSpf || '—' }}</p>
+          <p>{{ lease.registrationSpf || "—" }}</p>
         </div>
         <div class="info-item">
-          <label>Region (Brussels)</label>
-          <p>{{ lease.registrationRegion || '—' }}</p>
+          <label>Region</label>
+          <p>{{ lease.registrationRegion || "—" }}</p>
         </div>
       </div>
-
-      <!-- Inventory -->
-      <div class="info-subsection-label" style="margin-top:1rem;">Inventory (état des lieux)</div>
+      <div class="info-subsection-label" style="margin-top: 1rem">
+        Inventory
+      </div>
       <div class="info-grid">
         <div class="info-item">
           <label>SPF Finances</label>
-          <p>{{ lease.registrationInventorySpf || '—' }}</p>
+          <p>{{ lease.registrationInventorySpf || "—" }}</p>
         </div>
         <div class="info-item">
-          <label>Region (Brussels)</label>
-          <p>{{ lease.registrationInventoryRegion || '—' }}</p>
+          <label>Region</label>
+          <p>{{ lease.registrationInventoryRegion || "—" }}</p>
         </div>
       </div>
     </div>
 
     <!-- Deposit -->
-    <div class="info-card" *ngIf="lease.depositAmount">
+    <div class="info-card" *ngIf="lease.depositAmount || lease.depositType">
       <h2>Deposit</h2>
       <div class="info-grid">
         <div class="info-item">
           <label>Amount</label>
-          <p>{{ lease.depositAmount | currency:'EUR':'symbol':'1.2-2' }}</p>
+          <p>
+            {{ lease.depositAmount | currency: "EUR" : "symbol" : "1.2-2" }}
+          </p>
         </div>
         <div class="info-item">
           <label>Type</label>
-          <p>{{ lease.depositType || '—' }}</p>
+          <p>{{ lease.depositType || "—" }}</p>
         </div>
-        <div class="info-item">
+        <div class="info-item" *ngIf="lease.depositReference">
           <label>Reference</label>
-          <p>{{ lease.depositReference || '—' }}</p>
+          <p>{{ lease.depositReference }}</p>
         </div>
       </div>
     </div>
 
-    <!-- Tenant Insurance -->
+    <!-- Insurance -->
     <div class="info-card" *ngIf="lease.tenantInsuranceConfirmed">
-      <h2>Tenant Insurance</h2>
+      <h2>Insurance</h2>
       <div class="info-grid">
         <div class="info-item">
+          <label>Confirmed</label>
+          <p>Yes</p>
+        </div>
+        <div class="info-item" *ngIf="lease.tenantInsuranceReference">
           <label>Reference</label>
-          <p>{{ lease.tenantInsuranceReference || '—' }}</p>
+          <p>{{ lease.tenantInsuranceReference }}</p>
         </div>
         <div class="info-item" *ngIf="lease.tenantInsuranceExpiry">
           <label>Expiry</label>
-          <p>{{ lease.tenantInsuranceExpiry | date:'dd/MM/yyyy' }}</p>
+          <p>{{ lease.tenantInsuranceExpiry | date: "dd/MM/yyyy" }}</p>
         </div>
       </div>
     </div>
-
   </ng-container>
 </div>

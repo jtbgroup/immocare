@@ -1,0 +1,327 @@
+// ── Layout ────────────────────────────────────────────────────────────────────
+
+.app-container {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+.app-content {
+  flex: 1;
+  background: #f5f7fa;
+}
+
+.app-footer {
+  text-align: center;
+  padding: 0.4rem;
+  font-size: 0.7rem;
+  color: #bbb;
+  background: #f5f7fa;
+}
+
+// ── Header ────────────────────────────────────────────────────────────────────
+
+.app-header {
+  background: #1e1b4b;
+  color: white;
+  height: 58px;
+  padding: 0 1.75rem;
+  display: flex;
+  align-items: center;
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.3);
+  position: relative;
+  z-index: 100;
+}
+
+// ── Brand ─────────────────────────────────────────────────────────────────────
+
+.brand {
+  display: flex;
+  align-items: center;
+  gap: 0.55rem;
+  text-decoration: none;
+  flex-shrink: 0;
+
+  &:hover {
+    text-decoration: none;
+  }
+}
+
+.brand-icon {
+  width: 30px;
+  height: 30px;
+  background: linear-gradient(135deg, #6366f1, #8b5cf6);
+  border-radius: 7px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.95rem;
+}
+
+.brand-name {
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: white;
+  letter-spacing: -0.02em;
+}
+
+// ── Separator ─────────────────────────────────────────────────────────────────
+
+.header-sep {
+  width: 1px;
+  height: 22px;
+  background: rgba(255, 255, 255, 0.12);
+  margin: 0 1.25rem;
+  flex-shrink: 0;
+}
+
+// ── Nav ───────────────────────────────────────────────────────────────────────
+
+.app-nav {
+  display: flex;
+  align-items: center;
+  gap: 0.15rem;
+  flex: 1;
+}
+
+.app-nav__link {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  color: rgba(255, 255, 255, 0.55);
+  text-decoration: none;
+  padding: 0.42rem 0.85rem;
+  border-radius: 6px;
+  font-size: 0.855rem;
+  font-weight: 500;
+  transition:
+    background 0.16s,
+    color 0.16s;
+  white-space: nowrap;
+
+  &:hover {
+    background: rgba(255, 255, 255, 0.08);
+    color: rgba(255, 255, 255, 0.88);
+    text-decoration: none;
+  }
+
+  &--active {
+    background: rgba(99, 102, 241, 0.28);
+    color: white;
+  }
+}
+
+// ── Right zone ────────────────────────────────────────────────────────────────
+
+.right-zone {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  flex-shrink: 0;
+  margin-left: auto;
+}
+
+// ── Bell ──────────────────────────────────────────────────────────────────────
+
+.bell-btn {
+  position: relative;
+  background: none;
+  border: none;
+  color: rgba(255, 255, 255, 0.55);
+  width: 36px;
+  height: 36px;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.05rem;
+  cursor: pointer;
+  text-decoration: none;
+  transition:
+    background 0.16s,
+    color 0.16s;
+
+  &:hover,
+  &--active {
+    background: rgba(255, 255, 255, 0.08);
+    color: white;
+    text-decoration: none;
+  }
+}
+
+.bell-badge {
+  position: absolute;
+  top: 4px;
+  right: 3px;
+  background: #ef4444;
+  color: white;
+  font-size: 0.6rem;
+  font-weight: 700;
+  min-width: 15px;
+  height: 15px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0 3px;
+  border: 1.5px solid #1e1b4b;
+  line-height: 1;
+}
+
+// ── Avatar button ─────────────────────────────────────────────────────────────
+
+.avatar-wrapper {
+  position: relative;
+}
+
+.avatar-btn {
+  display: flex;
+  align-items: center;
+  gap: 0.45rem;
+  background: rgba(255, 255, 255, 0.07);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 8px;
+  padding: 0.32rem 0.65rem 0.32rem 0.4rem;
+  cursor: pointer;
+  color: white;
+  transition:
+    background 0.16s,
+    border-color 0.16s;
+
+  &:hover {
+    background: rgba(255, 255, 255, 0.12);
+    border-color: rgba(255, 255, 255, 0.22);
+  }
+
+  &.open {
+    background: rgba(99, 102, 241, 0.2);
+    border-color: rgba(99, 102, 241, 0.5);
+  }
+}
+
+.avatar {
+  width: 26px;
+  height: 26px;
+  background: linear-gradient(135deg, #6366f1, #8b5cf6);
+  border-radius: 6px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.68rem;
+  font-weight: 700;
+  color: white;
+  flex-shrink: 0;
+  text-transform: uppercase;
+}
+
+.avatar-name {
+  font-size: 0.83rem;
+  color: rgba(255, 255, 255, 0.82);
+  font-weight: 500;
+}
+
+.avatar-chevron {
+  font-size: 0.6rem;
+  color: rgba(255, 255, 255, 0.4);
+  transition: transform 0.2s;
+  margin-left: 0.1rem;
+
+  .avatar-btn.open & {
+    transform: rotate(180deg);
+  }
+}
+
+// ── Dropdown ──────────────────────────────────────────────────────────────────
+
+.dropdown {
+  display: none;
+  position: absolute;
+  top: calc(100% + 8px);
+  right: 0;
+  background: white;
+  border-radius: 10px;
+  box-shadow:
+    0 8px 32px rgba(0, 0, 0, 0.18),
+    0 2px 8px rgba(0, 0, 0, 0.1);
+  min-width: 200px;
+  overflow: hidden;
+  z-index: 200;
+  animation: dropIn 0.15s ease;
+
+  &.open {
+    display: block;
+  }
+}
+
+@keyframes dropIn {
+  from {
+    opacity: 0;
+    transform: translateY(-6px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.dropdown-header {
+  padding: 0.85rem 1rem 0.7rem;
+  border-bottom: 1px solid #f0f0f0;
+}
+
+.dropdown-username {
+  font-size: 0.88rem;
+  font-weight: 600;
+  color: #1e1b4b;
+}
+
+.dropdown-role {
+  font-size: 0.74rem;
+  color: #999;
+  margin-top: 0.1rem;
+  text-transform: capitalize;
+}
+
+.dropdown-item {
+  display: flex;
+  align-items: center;
+  gap: 0.65rem;
+  padding: 0.65rem 1rem;
+  font-size: 0.855rem;
+  color: #374151;
+  cursor: pointer;
+  transition: background 0.14s;
+  background: none;
+  border: none;
+  width: 100%;
+  text-align: left;
+  text-decoration: none;
+
+  &:hover {
+    background: #f5f5ff;
+    color: #4f46e5;
+    text-decoration: none;
+  }
+
+  &--logout {
+    color: #dc2626;
+
+    &:hover {
+      background: #fff5f5;
+      color: #dc2626;
+    }
+  }
+}
+
+.di-icon {
+  font-size: 0.9rem;
+  width: 18px;
+  text-align: center;
+  opacity: 0.7;
+}
+
+.dropdown-divider {
+  height: 1px;
+  background: #f0f0f0;
+  margin: 0.25rem 0;
+}

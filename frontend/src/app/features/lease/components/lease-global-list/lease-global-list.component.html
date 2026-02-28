@@ -1,0 +1,251 @@
+<!-- features/lease/components/lease-global-list/lease-global-list.component.html -->
+<div class="lease-global-list-container">
+  <!-- Header -->
+  <div class="details-content">
+    <div class="header">
+      <h1>Leases</h1>
+      <span class="total-count" *ngIf="!loading"
+        >{{ totalElements }} lease{{ totalElements !== 1 ? 's' : '' }}</span
+      >
+    </div>
+  </div>
+
+  <!-- Filters -->
+  <div class="filters-panel">
+    <!-- Status toggle buttons -->
+    <div class="filter-group">
+      <label class="filter-label">Status</label>
+      <div class="status-toggles">
+        <button
+          *ngFor="let s of allStatuses"
+          class="status-toggle"
+          [class]="'status-toggle--' + s.toLowerCase()"
+          [class.active]="isStatusSelected(s)"
+          (click)="toggleStatus(s)"
+          type="button"
+        >
+          {{ s }}
+        </button>
+      </div>
+    </div>
+
+    <!-- Lease type -->
+    <div class="filter-group">
+      <label class="filter-label">Type</label>
+      <select [(ngModel)]="filters.leaseType" (change)="onFilterChange()">
+        <option value="">All types</option>
+        <option *ngFor="let key of leaseTypeKeys" [value]="key">
+          {{ leaseTypeLabels[key] }}
+        </option>
+      </select>
+    </div>
+
+    <!-- Start date range -->
+    <div class="filter-group">
+      <label class="filter-label">Start date</label>
+      <div class="date-range">
+        <input
+          type="date"
+          [(ngModel)]="filters.startDateFrom"
+          (change)="onFilterChange()"
+          placeholder="From"
+        />
+        <span class="range-sep">→</span>
+        <input
+          type="date"
+          [(ngModel)]="filters.startDateTo"
+          (change)="onFilterChange()"
+          placeholder="To"
+        />
+      </div>
+    </div>
+
+    <!-- End date range -->
+    <div class="filter-group">
+      <label class="filter-label">End date</label>
+      <div class="date-range">
+        <input
+          type="date"
+          [(ngModel)]="filters.endDateFrom"
+          (change)="onFilterChange()"
+          placeholder="From"
+        />
+        <span class="range-sep">→</span>
+        <input
+          type="date"
+          [(ngModel)]="filters.endDateTo"
+          (change)="onFilterChange()"
+          placeholder="To"
+        />
+      </div>
+    </div>
+
+    <!-- Rent range -->
+    <div class="filter-group">
+      <label class="filter-label">Monthly rent (€)</label>
+      <div class="date-range">
+        <input
+          type="number"
+          [(ngModel)]="filters.rentMin"
+          (change)="onFilterChange()"
+          placeholder="Min"
+          min="0"
+        />
+        <span class="range-sep">→</span>
+        <input
+          type="number"
+          [(ngModel)]="filters.rentMax"
+          (change)="onFilterChange()"
+          placeholder="Max"
+          min="0"
+        />
+      </div>
+    </div>
+
+    <!-- Clear -->
+    <div class="filter-group filter-group--actions">
+      <button
+        class="btn btn-secondary btn-sm"
+        (click)="clearFilters()"
+        [disabled]="!hasActiveFilters()"
+      >
+        Reset filters
+      </button>
+    </div>
+  </div>
+
+  <!-- Loading -->
+  <div *ngIf="loading" class="loading">Loading leases…</div>
+
+  <!-- Error -->
+  <div *ngIf="error" class="alert alert-error">{{ error }}</div>
+
+  <!-- Empty -->
+  <div *ngIf="!loading && !error && leases.length === 0" class="empty-state">
+    <p>No leases match the current filters.</p>
+    <button
+      class="btn btn-secondary btn-sm"
+      (click)="clearFilters()"
+      *ngIf="hasActiveFilters()"
+    >
+      Clear filters
+    </button>
+  </div>
+
+  <!-- Table -->
+  <div *ngIf="!loading && !error && leases.length > 0" class="data-table">
+    <table>
+      <thead>
+        <tr>
+          <th>Tenant(s)</th>
+          <th
+            class="sortable"
+            (click)="onSortChange('housingUnit.building.name')"
+          >
+            Building
+            <span class="sort-icon"
+              >{{ sortIcon('housingUnit.building.name') }}</span
+            >
+          </th>
+          <th>Unit</th>
+          <th class="sortable" (click)="onSortChange('status')">
+            Status <span class="sort-icon">{{ sortIcon('status') }}</span>
+          </th>
+          <th class="sortable" (click)="onSortChange('startDate')">
+            Start <span class="sort-icon">{{ sortIcon('startDate') }}</span>
+          </th>
+          <th class="sortable" (click)="onSortChange('endDate')">
+            End <span class="sort-icon">{{ sortIcon('endDate') }}</span>
+          </th>
+          <th class="sortable text-right" (click)="onSortChange('monthlyRent')">
+            Rent <span class="sort-icon">{{ sortIcon('monthlyRent') }}</span>
+          </th>
+          <th></th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr
+          *ngFor="let lease of leases"
+          class="clickable"
+          (click)="viewLease(lease.id)"
+          [class.row--alert]="lease.indexationAlertActive || lease.endNoticeAlertActive"
+        >
+          <td>
+            <span *ngFor="let name of lease.tenantNames; let last = last">
+              {{ name }}<span *ngIf="!last">, </span>
+            </span>
+            <span *ngIf="!lease.tenantNames?.length" class="text-muted">—</span>
+          </td>
+          <td>
+            <a
+              [routerLink]="['/buildings', lease.buildingId]"
+              (click)="$event.stopPropagation()"
+            >
+              {{ lease.buildingName }}
+            </a>
+          </td>
+          <td>
+            <a
+              [routerLink]="['/units', lease.housingUnitId]"
+              (click)="$event.stopPropagation()"
+            >
+              {{ lease.housingUnitNumber }}
+            </a>
+          </td>
+          <td>
+            <span [class]="statusClass(lease.status)">{{ lease.status }}</span>
+          </td>
+          <td>{{ lease.startDate | date: 'dd/MM/yyyy' }}</td>
+          <td>
+            {{ lease.endDate | date: 'dd/MM/yyyy' }}
+            <span
+              *ngIf="lease.endNoticeAlertActive"
+              class="alert-icon"
+              title="End notice due"
+              >⚠</span
+            >
+          </td>
+          <td class="text-right">
+            {{ formatCurrency(lease.totalRent) }}
+            <span
+              *ngIf="lease.indexationAlertActive"
+              class="alert-icon alert-icon--yellow"
+              title="Indexation due"
+              >📋</span
+            >
+          </td>
+          <td class="actions-cell">
+            <button
+              class="btn btn-sm btn-link"
+              (click)="viewLease(lease.id); $event.stopPropagation()"
+            >
+              View
+            </button>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- Pagination -->
+  <div *ngIf="totalPages > 1" class="pagination">
+    <button
+      class="btn btn-secondary"
+      (click)="previousPage()"
+      [disabled]="currentPage === 0"
+    >
+      Previous
+    </button>
+    <span class="page-info"
+      >Page {{ currentPage + 1 }} of {{ totalPages }} ({{ totalElements }}
+      total)</span
+    >
+    <button
+      class="btn btn-secondary"
+      (click)="nextPage()"
+      [disabled]="currentPage >= totalPages - 1"
+    >
+      Next
+    </button>
+  </div>
+</div>
