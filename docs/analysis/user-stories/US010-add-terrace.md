@@ -13,10 +13,10 @@
 ## Acceptance Criteria
 
 **AC1:** Unit has no terrace → edit → check "Has Terrace" + surface 15.5m² + orientation S → save → terrace shown in unit details.
-**AC2:** Orientation dropdown options: N, S, E, W, NE, NW, SE, SW.
-**AC3:** Check "Has Terrace" but leave surface and orientation empty → save allowed (both optional).
+**AC2:** Orientation dropdown options: N, S, E, W, NE, NW, SE, SW. Orientation is optional; it can be set, changed, or cleared independently.
+**AC3:** Check "Has Terrace" but leave surface empty → save blocked; surface is required and must be greater than 0.
 **AC4:** Unit has terrace → edit → uncheck "Has Terrace" → save → hasTerrace=false, surface and orientation cleared from record.
 
 **Endpoint:** `PUT /api/v1/units/{id}` (part of unit edit)
 
-**Last Updated:** 2026-02-21 | **Status:** Ready for Development
+**Last Updated:** 2026-03-01 | **Status:** Implemented

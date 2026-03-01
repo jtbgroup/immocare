@@ -43,7 +43,7 @@ Allows an administrator to create, read, update, and delete housing units within
 - AC1: All fields from US006 can be updated except `buildingId`.
 - AC2: `unitNumber` uniqueness is enforced excluding the current unit.
 - AC3: `ownerId` can be set, changed, or cleared.
-- AC4: Terrace/garden rules (BR-UC002-04/05) apply on update.
+- AC4: Terrace/garden rules (BR-UC002-04/05/07/08) apply on update.
 - AC5: Returns HTTP 404 if the unit does not exist.
 
 **Endpoint:** `PUT /api/v1/units/{id}`
@@ -91,8 +91,8 @@ Allows an administrator to create, read, update, and delete housing units within
 
 **Acceptance Criteria:**
 - AC1: Via the edit form, checking "Has Terrace" and entering surface and orientation saves the terrace data; unit details show terrace information.
-- AC2: Orientation dropdown offers: N, S, E, W, NE, NW, SE, SW.
-- AC3: Checking "Has Terrace" with no surface or orientation is valid — unit is saved with `hasTerrace = true` and no surface/orientation displayed.
+- AC2: Orientation dropdown offers: N, S, E, W, NE, NW, SE, SW. Orientation is optional and can be cleared independently.
+- AC3: Checking "Has Terrace" with no surface → save blocked; surface is required and must be greater than 0.
 - AC4: Unchecking "Has Terrace" clears `terraceSurface` and `terraceOrientation`; the fields are no longer displayed in unit details.
 
 **Endpoint:** `PUT /api/v1/units/{id}`
@@ -105,9 +105,9 @@ Allows an administrator to create, read, update, and delete housing units within
 
 **Acceptance Criteria:**
 - AC1: Via the edit form, checking "Has Garden" and entering surface and orientation saves the garden data; unit details show garden information.
-- AC2: Orientation dropdown offers: N, S, E, W, NE, NW, SE, SW.
+- AC2: Orientation dropdown offers: N, S, E, W, NE, NW, SE, SW. Orientation is optional and can be cleared independently.
 - AC3: A unit can have both terrace and garden simultaneously; both are stored and displayed.
-- AC4: Leaving surface empty when "Has Garden" is checked shows error "Garden surface is required".
+- AC4: Checking "Has Garden" with no surface → save blocked; surface is required and must be greater than 0.
 
 **Endpoint:** `PUT /api/v1/units/{id}`
 
@@ -126,10 +126,10 @@ Allows an administrator to create, read, update, and delete housing units within
 | `landing_number` | VARCHAR(10) | nullable |
 | `total_surface` | DECIMAL(7,2) | nullable, CHECK > 0 |
 | `has_terrace` | BOOLEAN | NOT NULL, DEFAULT false |
-| `terrace_surface` | DECIMAL(7,2) | nullable, CHECK > 0 |
+| `terrace_surface` | DECIMAL(7,2) | required when has_terrace=true, CHECK > 0 |
 | `terrace_orientation` | VARCHAR(2) | nullable, CHECK IN (N,S,E,W,NE,NW,SE,SW) |
 | `has_garden` | BOOLEAN | NOT NULL, DEFAULT false |
-| `garden_surface` | DECIMAL(7,2) | nullable, CHECK > 0 |
+| `garden_surface` | DECIMAL(7,2) | required when has_garden=true, CHECK > 0 |
 | `garden_orientation` | VARCHAR(2) | nullable, CHECK IN (N,S,E,W,NE,NW,SE,SW) |
 | `owner_id` | BIGINT | FK → `person.id` ON DELETE SET NULL, nullable |
 | `created_by` | BIGINT | FK → `app_user.id` ON DELETE SET NULL, nullable |
@@ -155,18 +155,18 @@ createdAt, updatedAt
 
 ### `CreateHousingUnitRequest` (POST body)
 ```
-buildingId*       Long
-unitNumber*       VARCHAR(20)
-floor*            Integer  (-10..100)
-landingNumber     VARCHAR(10)
-totalSurface      Decimal
-hasTerrace        Boolean  default false
-terraceSurface    Decimal
-terraceOrientation VARCHAR(2)
-hasGarden         Boolean  default false
-gardenSurface     Decimal
-gardenOrientation VARCHAR(2)
-ownerId           Long  nullable
+buildingId*          Long
+unitNumber*          VARCHAR(20)
+floor*               Integer  (-10..100)
+landingNumber        VARCHAR(10)
+totalSurface         Decimal
+hasTerrace           Boolean  default false
+terraceSurface*      Decimal  required if hasTerrace=true, > 0
+terraceOrientation   VARCHAR(2)  optional, nullable
+hasGarden            Boolean  default false
+gardenSurface*       Decimal  required if hasGarden=true, > 0
+gardenOrientation    VARCHAR(2)  optional, nullable
+ownerId              Long  nullable
 ```
 
 ### `UpdateHousingUnitRequest` (PUT body)
@@ -184,6 +184,8 @@ Same as `CreateHousingUnitRequest` minus `buildingId`.
 | BR-UC002-04 | If `hasTerrace = false`, `terraceSurface` and `terraceOrientation` are cleared |
 | BR-UC002-05 | If `hasGarden = false`, `gardenSurface` and `gardenOrientation` are cleared |
 | BR-UC002-06 | Cannot delete a unit that has at least one room |
+| BR-UC002-07 | If `hasTerrace = true`, `terraceSurface` is required and must be > 0 |
+| BR-UC002-08 | If `hasGarden = true`, `gardenSurface` is required and must be > 0 |
 | BR-UC002-09 | `effectiveOwnerName` = unit.owner ?? building.owner |
 
 ---
@@ -197,6 +199,7 @@ Same as `CreateHousingUnitRequest` minus `buildingId`.
 | Duplicate unit number | 409 | `DUPLICATE` |
 | `buildingId` not found | 404 | `BuildingNotFoundException` |
 | `ownerId` not found | 409 | `PersonNotFoundException` |
+| Surface missing when flag=true | 400 | `Terrace/Garden surface is required and must be greater than 0` |
 
 ---
 
@@ -225,14 +228,34 @@ Frontend classes to generate:
 2. Service: `HousingUnitService` — getUnitsByBuilding(buildingId), getUnitById(id), createUnit(req), updateUnit(id, req), delete(id)
 3. Components (standalone):
    - `HousingUnitListComponent` — table inside building detail, shows unitNumber, floor, totalSurface, roomCount, currentMonthlyRent (€/mo), currentPebScore (colored badge). Navigates to unit detail on row click.
-   - `HousingUnitFormComponent` — reactive form for create/edit. Routed at `/units/new?buildingId=` and `/units/:id/edit`. Includes person picker for owner. Conditional terrace/garden fields.
+   - `HousingUnitFormComponent` — reactive form for create/edit. Routed at `/units/new?buildingId=` and `/units/:id/edit`. Includes person picker for owner. Conditional terrace/garden fields with surface required when flag checked.
    - `HousingUnitDetailsComponent` — shows all fields grouped in cards. Hosts sub-components: RoomSectionComponent (UC003), PebSectionComponent (UC004), RentSectionComponent (UC005), MeterSectionComponent (UC008), LeaseSectionComponent (UC010). Edit and delete buttons in header.
 
 Business rules to enforce:
 - BR-UC002-01: show duplicate unitNumber error from backend
-- BR-UC002-04/05: conditionally hide/clear terrace and garden sub-fields when toggle is false (US010, US011)
+- BR-UC002-04/05: conditionally hide/clear terrace and garden sub-fields when toggle is false
 - BR-UC002-06: show roomCount in delete error message
+- BR-UC002-07/08: surface field becomes required (and validated > 0) when hasTerrace/hasGarden is checked
 - BR-UC002-09: display effectiveOwnerName with tooltip indicating source (unit/building)
 
 Note: US010 (Add Terrace) and US011 (Add Garden) are implemented via the same edit form as US007. No dedicated endpoint — all handled by PUT /api/v1/units/{id}.
 ```
+
+---
+
+## ACCEPTANCE CRITERIA CHECKLIST
+
+- [ ] POST creates unit; 409 if unit number duplicated in same building
+- [ ] POST with hasTerrace=true and no surface → blocked; surface required and > 0
+- [ ] POST with hasTerrace=true and surface set but no orientation → allowed; orientation optional
+- [ ] PUT clears terrace/garden data when flag set to false
+- [ ] PUT allows clearing orientation independently (set to null) when flag remains true
+- [ ] DELETE returns 409 with `roomCount` if rooms exist; succeeds if only PEB/rent/meter data
+- [ ] Owner name displayed from building's owner when unit has no owner
+- [ ] All US006–US011 acceptance criteria verified manually
+
+---
+
+**Last Updated**: 2026-03-01
+**Branch**: `develop`
+**Status**: ✅ Implemented
