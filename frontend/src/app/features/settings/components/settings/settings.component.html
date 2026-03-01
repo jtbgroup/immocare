@@ -1,0 +1,93 @@
+<!-- settings.component.html — UC012 -->
+<div class="settings-page">
+  <div class="settings-header">
+    <h1>⚙️ Platform Settings</h1>
+    <p class="settings-subtitle">Configure global application parameters.</p>
+  </div>
+
+  <div *ngIf="loading" class="loading">Loading settings…</div>
+  <div *ngIf="error" class="error-banner">{{ error }}</div>
+  <div *ngIf="successMessage" class="success-banner">
+    ✅ {{ successMessage }}
+  </div>
+
+  <form *ngIf="!loading && form" [formGroup]="form" (ngSubmit)="save()">
+    <!-- Alert thresholds group -->
+    <div class="settings-group">
+      <h2 class="group-title">Alert Thresholds</h2>
+      <div class="settings-grid">
+        <ng-container *ngFor="let config of configs">
+          <div class="settings-row" *ngIf="isIntegerKey(config.configKey)">
+            <div class="settings-row__label">
+              <label [for]="config.configKey">{{
+                labelFor(config.configKey)
+              }}</label>
+              <span class="description" *ngIf="config.description">{{
+                config.description
+              }}</span>
+            </div>
+            <div class="settings-row__input">
+              <div class="input-with-unit">
+                <input
+                  [id]="config.configKey"
+                  type="number"
+                  min="1"
+                  [formControlName]="config.configKey"
+                  class="form-control"
+                />
+                <span class="unit">days</span>
+              </div>
+              <span class="field-error" *ngIf="fieldError(config.configKey)">
+                {{ fieldError(config.configKey) }}
+              </span>
+            </div>
+          </div>
+        </ng-container>
+      </div>
+    </div>
+
+    <!-- General settings group -->
+    <div class="settings-group">
+      <h2 class="group-title">General</h2>
+      <div class="settings-grid">
+        <ng-container *ngFor="let config of configs">
+          <div class="settings-row" *ngIf="!isIntegerKey(config.configKey)">
+            <div class="settings-row__label">
+              <label [for]="config.configKey">{{
+                labelFor(config.configKey)
+              }}</label>
+              <span class="description" *ngIf="config.description">{{
+                config.description
+              }}</span>
+            </div>
+            <div class="settings-row__input">
+              <input
+                [id]="config.configKey"
+                type="text"
+                [formControlName]="config.configKey"
+                class="form-control"
+                maxlength="200"
+              />
+              <span class="field-error" *ngIf="fieldError(config.configKey)">
+                {{ fieldError(config.configKey) }}
+              </span>
+            </div>
+          </div>
+        </ng-container>
+      </div>
+    </div>
+
+    <div class="form-actions">
+      <button
+        type="submit"
+        class="btn btn-primary"
+        [disabled]="saving || form.invalid"
+      >
+        {{ saving ? "Saving…" : "Save Settings" }}
+      </button>
+      <button type="button" class="btn btn-secondary" (click)="load()">
+        Reset
+      </button>
+    </div>
+  </form>
+</div>

@@ -192,4 +192,19 @@ public class GlobalExceptionHandler {
 
   public record ErrorResponse(int status, String error, String message, LocalDateTime timestamp) {
   }
+  // ─── UC011 - Boilers
+  // ──────────────────────────────────────────────────────────
+  // Add the following handlers to GlobalExceptionHandler.java
+
+  @ExceptionHandler(BoilerNotFoundException.class)
+  public ResponseEntity<ErrorResponse> handleBoilerNotFound(BoilerNotFoundException ex) {
+    return notFound("Boiler not found", ex.getMessage());
+  }
+
+  // ─── UC012 - Platform Configuration ──────────────────────────────────────────
+
+  @ExceptionHandler(PlatformConfigNotFoundException.class)
+  public ResponseEntity<ErrorResponse> handlePlatformConfigNotFound(PlatformConfigNotFoundException ex) {
+    return notFound("Platform configuration key not found", ex.getMessage());
+  }
 }

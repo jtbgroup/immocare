@@ -91,6 +91,11 @@
     ></app-meter-section>
   </div>
 
+  <!-- Meters — UC011 -->
+  <div class="info-card">
+    <app-boiler-section ownerType="HOUSING_UNIT" [ownerId]="unit.id" />
+  </div>
+
   <!-- Lease — UC010 -->
   <div class="info-card">
     <app-lease-section [unitId]="unit.id"></app-lease-section>

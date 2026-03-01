@@ -3,6 +3,7 @@ import { Component, OnDestroy, OnInit } from "@angular/core";
 import { ActivatedRoute, Router, RouterModule } from "@angular/router";
 import { Subject } from "rxjs";
 import { takeUntil } from "rxjs/operators";
+import { BoilerSectionComponent } from "src/app/features/housing-unit/components/boiler-section/boiler-section.component";
 import { BuildingService } from "../../../../core/services/building.service";
 import { Building } from "../../../../models/building.model";
 import { MeterSectionComponent } from "../../../../shared/components/meter-section/meter-section.component";
@@ -11,7 +12,13 @@ import { HousingUnitListComponent } from "../../../housing-unit/components/housi
 @Component({
   selector: "app-building-details",
   standalone: true,
-  imports: [CommonModule, RouterModule, HousingUnitListComponent, MeterSectionComponent],
+  imports: [
+    CommonModule,
+    RouterModule,
+    HousingUnitListComponent,
+    MeterSectionComponent,
+    BoilerSectionComponent,
+  ],
   templateUrl: "./building-details.component.html",
   styleUrls: ["./building-details.component.scss"],
 })

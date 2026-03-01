@@ -1,0 +1,152 @@
+// boiler-section.component.scss — UC011
+
+.boiler-section {
+  margin-top: 1.5rem;
+
+  .section-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1rem;
+
+    h3 { margin: 0; font-size: 1rem; font-weight: 600; }
+  }
+
+  .boiler-list {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+  }
+
+  .boiler-card {
+    border: 1px solid #dee2e6;
+    border-radius: 6px;
+    padding: 0.875rem 1rem;
+    background: #fff;
+    transition: border-color 0.2s;
+
+    &.alert-overdue { border-color: #dc3545; background: #fff5f5; }
+    &.alert-warning { border-color: #ffc107; background: #fffdf0; }
+
+    &__header {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      margin-bottom: 0.5rem;
+
+      .fuel-badge {
+        font-size: 0.75rem;
+        font-weight: 600;
+        padding: 2px 8px;
+        border-radius: 12px;
+        white-space: nowrap;
+
+        &.fuel-gas      { background: #fff3cd; color: #856404; }
+        &.fuel-oil      { background: #e2e3e5; color: #383d41; }
+        &.fuel-electric { background: #d1ecf1; color: #0c5460; }
+        &.fuel-heat_pump { background: #d4edda; color: #155724; }
+      }
+
+      .boiler-name {
+        flex: 1;
+        font-weight: 500;
+
+        .serial { color: #6c757d; font-size: 0.85em; margin-left: 0.25rem; }
+      }
+
+      &__actions {
+        display: flex;
+        gap: 0.5rem;
+      }
+    }
+
+    &__dates {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 1rem;
+      font-size: 0.875rem;
+      color: #495057;
+
+      .text-danger { color: #dc3545; }
+      .text-warning { color: #856404; }
+
+      .days-badge {
+        margin-left: 0.5rem;
+
+        .badge {
+          font-size: 0.75rem;
+          padding: 2px 8px;
+          border-radius: 10px;
+
+          &.badge-danger  { background: #dc3545; color: #fff; }
+          &.badge-warning { background: #ffc107; color: #212529; }
+        }
+      }
+    }
+
+    .boiler-notes {
+      margin: 0.5rem 0 0;
+      font-size: 0.875rem;
+      color: #6c757d;
+      font-style: italic;
+    }
+
+    .delete-confirm {
+      margin-top: 0.75rem;
+      padding-top: 0.75rem;
+      border-top: 1px solid #dee2e6;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      font-size: 0.875rem;
+    }
+  }
+
+  .boiler-form-panel {
+    margin-top: 1rem;
+    border: 1px solid #dee2e6;
+    border-radius: 6px;
+    padding: 1rem 1.25rem;
+    background: #f8f9fa;
+
+    h4 { margin: 0 0 1rem; font-size: 0.95rem; font-weight: 600; }
+  }
+
+  .form-row {
+    display: flex;
+    gap: 1rem;
+    flex-wrap: wrap;
+
+    .form-group { flex: 1; min-width: 180px; }
+  }
+
+  .form-group {
+    margin-bottom: 0.75rem;
+
+    label { display: block; font-size: 0.85rem; margin-bottom: 0.25rem; font-weight: 500; }
+    .required { color: #dc3545; }
+    .field-error { font-size: 0.78rem; color: #dc3545; }
+  }
+
+  .form-actions {
+    display: flex;
+    gap: 0.5rem;
+    justify-content: flex-end;
+    margin-top: 1rem;
+  }
+
+  .no-data { color: #6c757d; font-style: italic; font-size: 0.9rem; }
+  .loading { color: #6c757d; font-size: 0.9rem; }
+  .error-banner {
+    background: #f8d7da;
+    color: #721c24;
+    border: 1px solid #f5c6cb;
+    border-radius: 4px;
+    padding: 0.5rem 0.75rem;
+    font-size: 0.875rem;
+    margin-bottom: 0.75rem;
+  }
+
+  // Button sizes
+  .btn-xs { padding: 2px 8px; font-size: 0.8rem; }
+}

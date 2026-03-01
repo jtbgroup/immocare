@@ -93,6 +93,10 @@
       ></app-meter-section>
     </div>
 
+    <div class="info-card">
+      <app-boiler-section ownerType="BUILDING" [ownerId]="building.id" />
+    </div>
+
     <!-- Housing Units section -->
     <div class="info-card">
       <app-housing-unit-list [buildingId]="building.id"></app-housing-unit-list>

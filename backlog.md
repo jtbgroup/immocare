@@ -13,3 +13,5 @@
 - [ ] dépenses
 - [ ] view des alertes à revoir
 - [ ] alertes: est-ce qu'on veut pouvoir les ignorer (de manière individuelle?)
+- [ ] ajouter des documents : rapport PEB, entretien chaudière, ...
+- [ ] revoir les alertes pour les rendre transversales

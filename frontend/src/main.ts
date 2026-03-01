@@ -191,6 +191,14 @@ bootstrapApplication(AppComponent, {
           import("./app/features/user/components/user-form/user-form.component").then(
             (m) => m.UserFormComponent,
           ),
+      }, // ─── Settings ─────────────────────────────────────────────────────────────
+      {
+        path: "settings",
+        canActivate: [AuthGuard],
+        loadComponent: () =>
+          import("./app/features/settings/components/settings/settings.component").then(
+            (m) => m.SettingsComponent,
+          ),
       },
       // ─── Fallback ──────────────────────────────────────────────────────────
       {

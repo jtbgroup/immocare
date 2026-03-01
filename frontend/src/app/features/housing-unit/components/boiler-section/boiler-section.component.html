@@ -1,0 +1,133 @@
+<!-- boiler-section.component.html — UC011 -->
+<div class="boiler-section">
+  <div class="section-header">
+    <h3>🔥 Boilers</h3>
+    <button class="btn btn-sm btn-primary" (click)="openAddForm()" *ngIf="!showForm">
+      + Add Boiler
+    </button>
+  </div>
+
+  <div *ngIf="loading" class="loading">Loading boilers…</div>
+  <div *ngIf="error" class="error-banner">{{ error }}</div>
+
+  <!-- Boiler list -->
+  <div *ngIf="!loading && boilers.length === 0 && !showForm" class="no-data">
+    No boiler recorded for this {{ ownerType === 'HOUSING_UNIT' ? 'housing unit' : 'building' }}.
+  </div>
+
+  <div class="boiler-list" *ngIf="!loading && boilers.length > 0">
+    <div
+      class="boiler-card"
+      *ngFor="let boiler of boilers"
+      [class.alert-overdue]="boiler.daysUntilNextService !== null && boiler.daysUntilNextService < 0"
+      [class.alert-warning]="boiler.serviceAlert && boiler.daysUntilNextService !== null && boiler.daysUntilNextService >= 0"
+    >
+      <div class="boiler-card__header">
+        <span class="fuel-badge fuel-{{ boiler.fuelType | lowercase }}">
+          {{ FUEL_TYPE_LABELS[boiler.fuelType] }}
+        </span>
+        <span class="boiler-name">
+          {{ boiler.brand || '—' }} {{ boiler.model || '' }}
+          <span class="serial" *ngIf="boiler.serialNumber">#{{ boiler.serialNumber }}</span>
+        </span>
+        <div class="boiler-card__actions">
+          <button class="btn btn-xs btn-secondary" (click)="openEditForm(boiler)">Edit</button>
+          <button class="btn btn-xs btn-danger" (click)="confirmDelete(boiler.id)">Delete</button>
+        </div>
+      </div>
+
+      <div class="boiler-card__dates">
+        <span>Installed: <strong>{{ boiler.installationDate | date:'dd/MM/yyyy' }}</strong></span>
+        <span *ngIf="boiler.lastServiceDate">
+          Last service: <strong>{{ boiler.lastServiceDate | date:'dd/MM/yyyy' }}</strong>
+        </span>
+        <span *ngIf="boiler.nextServiceDate">
+          Next service:
+          <strong [class.text-danger]="boiler.daysUntilNextService !== null && boiler.daysUntilNextService < 0"
+                  [class.text-warning]="boiler.serviceAlert && boiler.daysUntilNextService !== null && boiler.daysUntilNextService >= 0">
+            {{ boiler.nextServiceDate | date:'dd/MM/yyyy' }}
+          </strong>
+          <span *ngIf="boiler.daysUntilNextService !== null" class="days-badge">
+            <span *ngIf="boiler.daysUntilNextService < 0" class="badge badge-danger">
+              Overdue by {{ -boiler.daysUntilNextService }} day(s)
+            </span>
+            <span *ngIf="boiler.daysUntilNextService >= 0 && boiler.serviceAlert" class="badge badge-warning">
+              Due in {{ boiler.daysUntilNextService }} day(s)
+            </span>
+          </span>
+        </span>
+      </div>
+
+      <p class="boiler-notes" *ngIf="boiler.notes">{{ boiler.notes }}</p>
+
+      <!-- Delete confirmation inline -->
+      <div class="delete-confirm" *ngIf="deleteConfirmId === boiler.id">
+        <span>Delete this boiler?</span>
+        <button class="btn btn-xs btn-danger" (click)="doDelete(boiler.id)">Yes, delete</button>
+        <button class="btn btn-xs btn-secondary" (click)="cancelDelete()">Cancel</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Add / Edit form -->
+  <div class="boiler-form-panel" *ngIf="showForm">
+    <h4>{{ editingId ? 'Edit Boiler' : 'Add Boiler' }}</h4>
+
+    <div *ngIf="saveError" class="error-banner">{{ saveError }}</div>
+
+    <form [formGroup]="form" (ngSubmit)="save()">
+      <div class="form-row">
+        <div class="form-group">
+          <label>Fuel Type <span class="required">*</span></label>
+          <select formControlName="fuelType" class="form-control">
+            <option *ngFor="let ft of FUEL_TYPES" [value]="ft">{{ FUEL_TYPE_LABELS[ft] }}</option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label>Installation Date <span class="required">*</span></label>
+          <input type="date" formControlName="installationDate" class="form-control" [max]="today" />
+          <span class="field-error" *ngIf="fieldError('installationDate')">Required</span>
+        </div>
+      </div>
+
+      <div class="form-row">
+        <div class="form-group">
+          <label>Brand</label>
+          <input type="text" formControlName="brand" class="form-control" maxlength="100" />
+        </div>
+        <div class="form-group">
+          <label>Model</label>
+          <input type="text" formControlName="model" class="form-control" maxlength="100" />
+        </div>
+        <div class="form-group">
+          <label>Serial Number</label>
+          <input type="text" formControlName="serialNumber" class="form-control" maxlength="100" />
+        </div>
+      </div>
+
+      <div class="form-row">
+        <div class="form-group">
+          <label>Last Service Date</label>
+          <input type="date" formControlName="lastServiceDate" class="form-control" [max]="today" />
+        </div>
+        <div class="form-group">
+          <label>Next Service Date</label>
+          <input type="date" formControlName="nextServiceDate" class="form-control" />
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label>Notes</label>
+        <textarea formControlName="notes" class="form-control" rows="2"></textarea>
+      </div>
+
+      <div class="form-actions">
+        <button type="submit" class="btn btn-primary" [disabled]="saving">
+          {{ saving ? 'Saving…' : (editingId ? 'Update' : 'Add Boiler') }}
+        </button>
+        <button type="button" class="btn btn-secondary" (click)="closeForm()">Cancel</button>
+      </div>
+    </form>
+  </div>
+</div>
