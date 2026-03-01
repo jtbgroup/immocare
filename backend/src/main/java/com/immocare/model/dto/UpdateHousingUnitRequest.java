@@ -12,9 +12,8 @@ import jakarta.validation.constraints.Size;
 
 /**
  * Request DTO for updating an existing housing unit.
- * buildingId is intentionally excluded — units cannot be moved between
- * buildings.
- * ownerId references a Person entity; null clears the unit-level owner.
+ * buildingId is excluded — a unit cannot be moved between buildings.
+ * ownerId references a Person by ID. Null = clear unit-level owner.
  */
 public class UpdateHousingUnitRequest {
 
@@ -33,7 +32,7 @@ public class UpdateHousingUnitRequest {
   @DecimalMin(value = "0.01", message = "Total surface must be greater than 0")
   private BigDecimal totalSurface;
 
-  /** Optional owner: references a Person by ID. Null = clear unit-level owner. */
+  /** Null = clear unit-level owner. */
   private Long ownerId;
 
   private Boolean hasTerrace = false;
@@ -41,7 +40,7 @@ public class UpdateHousingUnitRequest {
   @DecimalMin(value = "0.01", message = "Terrace surface must be greater than 0")
   private BigDecimal terraceSurface;
 
-  @Pattern(regexp = "^(N|S|E|W|NE|NW|SE|SW)$", message = "Terrace orientation must be N, S, E, W, NE, NW, SE or SW")
+  @Pattern(regexp = "^$|^(N|S|E|W|NE|NW|SE|SW)$", message = "Terrace orientation must be N, S, E, W, NE, NW, SE or SW")
   private String terraceOrientation;
 
   private Boolean hasGarden = false;
@@ -49,7 +48,7 @@ public class UpdateHousingUnitRequest {
   @DecimalMin(value = "0.01", message = "Garden surface must be greater than 0")
   private BigDecimal gardenSurface;
 
-  @Pattern(regexp = "^(N|S|E|W|NE|NW|SE|SW)$", message = "Garden orientation must be N, S, E, W, NE, NW, SE or SW")
+  @Pattern(regexp = "^$|^(N|S|E|W|NE|NW|SE|SW)$", message = "Garden orientation must be N, S, E, W, NE, NW, SE or SW")
   private String gardenOrientation;
 
   // Getters and Setters

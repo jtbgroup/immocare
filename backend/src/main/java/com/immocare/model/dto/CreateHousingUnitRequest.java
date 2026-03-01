@@ -42,7 +42,7 @@ public class CreateHousingUnitRequest {
   @DecimalMin(value = "0.01", message = "Terrace surface must be greater than 0")
   private BigDecimal terraceSurface;
 
-  @Pattern(regexp = "^(N|S|E|W|NE|NW|SE|SW)$", message = "Terrace orientation must be N, S, E, W, NE, NW, SE or SW")
+  @Pattern(regexp = "^$|^(N|S|E|W|NE|NW|SE|SW)$", message = "Terrace orientation must be N, S, E, W, NE, NW, SE or SW")
   private String terraceOrientation;
 
   private Boolean hasGarden = false;
@@ -50,7 +50,7 @@ public class CreateHousingUnitRequest {
   @DecimalMin(value = "0.01", message = "Garden surface must be greater than 0")
   private BigDecimal gardenSurface;
 
-  @Pattern(regexp = "^(N|S|E|W|NE|NW|SE|SW)$", message = "Garden orientation must be N, S, E, W, NE, NW, SE or SW")
+  @Pattern(regexp = "^$|^(N|S|E|W|NE|NW|SE|SW)$", message = "Garden orientation must be N, S, E, W, NE, NW, SE or SW")
   private String gardenOrientation;
 
   // Getters and Setters

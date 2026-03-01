@@ -28,8 +28,6 @@ import com.immocare.repository.RoomRepository;
 /**
  * Service layer for Housing Unit management.
  * Implements business logic for UC002 - Manage Housing Units.
- *
- * Updated for UC003: roomCount is now populated from the real RoomRepository.
  */
 @Service
 @Transactional(readOnly = true)
@@ -59,10 +57,6 @@ public class HousingUnitService {
 
   // ─── Queries ────────────────────────────────────────────────────────────────
 
-  /**
-   * Get all units belonging to a building.
-   * Implements US009 - View Housing Unit Details (list within building).
-   */
   public List<HousingUnitDTO> getUnitsByBuilding(Long buildingId) {
     if (!buildingRepository.existsById(buildingId)) {
       throw new BuildingNotFoundException(buildingId);
@@ -74,10 +68,6 @@ public class HousingUnitService {
         .collect(Collectors.toList());
   }
 
-  /**
-   * Get a single unit by ID.
-   * Implements US009 - View Housing Unit Details.
-   */
   public HousingUnitDTO getUnitById(Long id) {
     HousingUnit unit = findEntityById(id);
     return toEnrichedDTO(unit);
@@ -85,16 +75,11 @@ public class HousingUnitService {
 
   // ─── Commands ───────────────────────────────────────────────────────────────
 
-  /**
-   * Create a new housing unit.
-   * Implements US006 - Create Housing Unit.
-   */
   @Transactional
   public HousingUnitDTO createUnit(CreateHousingUnitRequest request) {
     Building building = buildingRepository.findById(request.getBuildingId())
         .orElseThrow(() -> new BuildingNotFoundException(request.getBuildingId()));
 
-    // BR-UC002-01: unit number unique within building
     if (housingUnitRepository.existsByBuildingIdAndUnitNumberIgnoreCase(
         building.getId(), request.getUnitNumber())) {
       throw new IllegalArgumentException(
@@ -103,28 +88,28 @@ public class HousingUnitService {
 
     HousingUnit unit = housingUnitMapper.toEntity(request);
     unit.setBuilding(building);
-
-    // Resolve owner from ownerId
     unit.setOwner(resolveOwner(request.getOwnerId()));
 
     // BR-UC002-04 / 05: clear terrace/garden data when flags are false
     if (!Boolean.TRUE.equals(request.getHasTerrace())) {
       unit.setTerraceSurface(null);
       unit.setTerraceOrientation(null);
+    } else if (request.getTerraceSurface() == null
+        || request.getTerraceSurface().compareTo(java.math.BigDecimal.ZERO) <= 0) {
+      throw new IllegalArgumentException("Terrace surface is required and must be greater than 0.");
     }
     if (!Boolean.TRUE.equals(request.getHasGarden())) {
       unit.setGardenSurface(null);
       unit.setGardenOrientation(null);
+    } else if (request.getGardenSurface() == null
+        || request.getGardenSurface().compareTo(java.math.BigDecimal.ZERO) <= 0) {
+      throw new IllegalArgumentException("Garden surface is required and must be greater than 0.");
     }
 
     HousingUnit saved = housingUnitRepository.save(unit);
     return toEnrichedDTO(saved);
   }
 
-  /**
-   * Update an existing housing unit.
-   * Implements US007 - Edit Housing Unit.
-   */
   @Transactional
   public HousingUnitDTO updateUnit(Long id, UpdateHousingUnitRequest request) {
     HousingUnit unit = findEntityById(id);
@@ -139,39 +124,41 @@ public class HousingUnitService {
 
     housingUnitMapper.updateEntityFromRequest(request, unit);
 
-    // Resolve owner from ownerId (null clears the unit-level owner)
     unit.setOwner(resolveOwner(request.getOwnerId()));
 
     // BR-UC002-04 / 05: clear terrace/garden data when flags are false
     if (!Boolean.TRUE.equals(request.getHasTerrace())) {
       unit.setTerraceSurface(null);
       unit.setTerraceOrientation(null);
+    } else {
+      if (request.getTerraceSurface() == null
+          || request.getTerraceSurface().compareTo(java.math.BigDecimal.ZERO) <= 0) {
+        throw new IllegalArgumentException("Terrace surface is required and must be greater than 0.");
+      }
+      unit.setTerraceOrientation(normalizeOrientation(request.getTerraceOrientation()));
     }
+
     if (!Boolean.TRUE.equals(request.getHasGarden())) {
       unit.setGardenSurface(null);
       unit.setGardenOrientation(null);
+    } else {
+      if (request.getGardenSurface() == null || request.getGardenSurface().compareTo(java.math.BigDecimal.ZERO) <= 0) {
+        throw new IllegalArgumentException("Garden surface is required and must be greater than 0.");
+      }
+      unit.setGardenOrientation(normalizeOrientation(request.getGardenOrientation()));
     }
 
     HousingUnit updated = housingUnitRepository.save(unit);
     return toEnrichedDTO(updated);
   }
 
-  /**
-   * Delete a housing unit.
-   * Implements US008 - Delete Housing Unit.
-   * BR-UC002-06: blocked when unit has rooms.
-   */
   @Transactional
   public void deleteUnit(Long id) {
     HousingUnit unit = findEntityById(id);
-
-    // UC003: check real room count
     long roomCount = roomRepository.countByHousingUnitId(id);
-
     if (roomCount > 0) {
       throw new HousingUnitHasDataException(id, roomCount);
     }
-
     housingUnitRepository.delete(unit);
   }
 
@@ -182,22 +169,23 @@ public class HousingUnitService {
         .orElseThrow(() -> new HousingUnitNotFoundException(id));
   }
 
-  /**
-   * Resolve a Person entity from an ownerId.
-   * Returns null if ownerId is null (clears the owner).
-   * Throws PersonNotFoundException if the ID does not exist.
-   */
   private Person resolveOwner(Long ownerId) {
-    if (ownerId == null) {
+    if (ownerId == null)
       return null;
-    }
     return personRepository.findById(ownerId)
         .orElseThrow(() -> new PersonNotFoundException(ownerId));
   }
 
   /**
-   * Map entity to DTO and enrich with computed fields.
+   * Converts an empty string orientation to null.
+   * Needed because the Angular select sends "" when "— Select —" is chosen,
+   * and NullValuePropertyMappingStrategy.IGNORE prevents the mapper from
+   * overwriting the existing entity value with null.
    */
+  private String normalizeOrientation(String orientation) {
+    return (orientation == null || orientation.isBlank()) ? null : orientation;
+  }
+
   private HousingUnitDTO toEnrichedDTO(HousingUnit unit) {
     HousingUnitDTO dto = housingUnitMapper.toDTO(unit);
 
@@ -208,15 +196,12 @@ public class HousingUnitService {
     }
     dto.setEffectiveOwnerName(effective);
 
-    // UC003: real room count from repository
     dto.setRoomCount(roomRepository.countByHousingUnitId(unit.getId()));
 
-    // Current rent
     rentHistoryRepository
         .findByHousingUnitIdAndEffectiveToIsNull(unit.getId())
         .ifPresent(r -> dto.setCurrentMonthlyRent(r.getMonthlyRent()));
 
-    // Current PEB score
     pebScoreRepository
         .findFirstByHousingUnitIdOrderByScoreDateDesc(unit.getId())
         .ifPresent(p -> dto.setCurrentPebScore(p.getPebScore()));
@@ -224,11 +209,7 @@ public class HousingUnitService {
     return dto;
   }
 
-  /**
-   * Build a display name from a Person entity.
-   * Returns null if the person is null.
-   */
-  private String resolveOwnerName(com.immocare.model.entity.Person person) {
+  private String resolveOwnerName(Person person) {
     if (person == null)
       return null;
     return (person.getFirstName() + " " + person.getLastName()).trim();

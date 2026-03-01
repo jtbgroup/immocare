@@ -7,3 +7,4 @@
 - [ ] user: lier à une personne
 - [x] vue qui regroupe tous les contrats
 - [ ] Person sans NISS ne va pas car NIS est une clé primaire
+- [ ] housing unit avec juste une terrasse donne une erreur si garden orientation n'est pas rempli
