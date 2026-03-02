@@ -9,6 +9,7 @@ import {
   LEASE_TYPE_LABELS,
   LeaseStatus,
 } from "../../../../models/lease.model";
+import { AppDatePipe } from "../../../../shared/pipes/app-date.pipe";
 import { RentAdjustmentSectionComponent } from "../rent-adjustment-section/rent-adjustment-section.component";
 import { TenantSectionComponent } from "../tenant-section/tenant-section.component";
 
@@ -29,6 +30,7 @@ const TRANSITIONS: Record<LeaseStatus, LeaseStatus[]> = {
     RouterModule,
     TenantSectionComponent,
     RentAdjustmentSectionComponent,
+    AppDatePipe,
   ],
   templateUrl: "./lease-details.component.html",
   styleUrls: ["./lease-details.component.scss"],
@@ -70,8 +72,6 @@ export class LeaseDetailsComponent implements OnInit {
     });
   }
 
-  // ── Status ──────────────────────────────────────────────────────────────────
-
   get eligibleStatuses(): LeaseStatus[] {
     if (!this.lease) return [];
     return TRANSITIONS[this.lease.status] ?? [];
@@ -97,28 +97,6 @@ export class LeaseDetailsComponent implements OnInit {
           this.isChangingStatus = false;
         },
       });
-  }
-
-  // ── Display helpers ─────────────────────────────────────────────────────────
-
-  get statusClass(): string {
-    const map: Record<string, string> = {
-      ACTIVE: "bg-success",
-      DRAFT: "bg-secondary",
-      FINISHED: "bg-info",
-      CANCELLED: "bg-danger",
-    };
-    return this.lease ? map[this.lease.status] || "bg-secondary" : "";
-  }
-
-  statusLabel(status: LeaseStatus): string {
-    const labels: Record<LeaseStatus, string> = {
-      ACTIVE: "Activate",
-      FINISHED: "Mark as Finished",
-      CANCELLED: "Cancel",
-      DRAFT: "Revert to Draft",
-    };
-    return labels[status] ?? status;
   }
 
   canEdit(): boolean {

@@ -17,4 +17,4 @@
 - [x] revoir les alertes pour les rendre transversales
 - [ ] rôles et sécurité
 - [x] bug avec les alertes qui ne s'affichent pas
-- [ ] 
+- [ ] bug dans dans le format des dates et les settings des dates (pas visible)

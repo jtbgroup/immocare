@@ -1,18 +1,20 @@
-<!-- boiler-section.component.html — UC011 -->
 <div class="boiler-section">
   <div class="section-header">
-    <h3>🔥 Boilers</h3>
-    <button class="btn btn-sm btn-primary" (click)="openAddForm()" *ngIf="!showForm">
+    <h3>🔥 Boiler — {{ ownerType === 'HOUSING_UNIT' ? 'housing unit' : 'building' }}</h3>
+    <button
+      class="btn btn-sm btn-primary"
+      *ngIf="!showForm"
+      (click)="openAddForm()"
+    >
       + Add Boiler
     </button>
   </div>
 
-  <div *ngIf="loading" class="loading">Loading boilers…</div>
+  <div *ngIf="loading" class="loading-placeholder">Loading…</div>
   <div *ngIf="error" class="error-banner">{{ error }}</div>
 
-  <!-- Boiler list -->
   <div *ngIf="!loading && boilers.length === 0 && !showForm" class="no-data">
-    No boiler recorded for this {{ ownerType === 'HOUSING_UNIT' ? 'housing unit' : 'building' }}.
+    No boiler registered for this {{ ownerType === 'HOUSING_UNIT' ? 'housing unit' : 'building' }}.
   </div>
 
   <div class="boiler-list" *ngIf="!loading && boilers.length > 0">
@@ -37,15 +39,17 @@
       </div>
 
       <div class="boiler-card__dates">
-        <span>Installed: <strong>{{ boiler.installationDate | date:'dd/MM/yyyy' }}</strong></span>
+        <span>Installed: <strong>{{ boiler.installationDate | appDate }}</strong></span>
         <span *ngIf="boiler.lastServiceDate">
-          Last service: <strong>{{ boiler.lastServiceDate | date:'dd/MM/yyyy' }}</strong>
+          Last service: <strong>{{ boiler.lastServiceDate | appDate }}</strong>
         </span>
         <span *ngIf="boiler.nextServiceDate">
           Next service:
-          <strong [class.text-danger]="boiler.daysUntilNextService !== null && boiler.daysUntilNextService < 0"
-                  [class.text-warning]="boiler.serviceAlert && boiler.daysUntilNextService !== null && boiler.daysUntilNextService >= 0">
-            {{ boiler.nextServiceDate | date:'dd/MM/yyyy' }}
+          <strong
+            [class.text-danger]="boiler.daysUntilNextService !== null && boiler.daysUntilNextService < 0"
+            [class.text-warning]="boiler.serviceAlert && boiler.daysUntilNextService !== null && boiler.daysUntilNextService >= 0"
+          >
+            {{ boiler.nextServiceDate | appDate }}
           </strong>
           <span *ngIf="boiler.daysUntilNextService !== null" class="days-badge">
             <span *ngIf="boiler.daysUntilNextService < 0" class="badge badge-danger">

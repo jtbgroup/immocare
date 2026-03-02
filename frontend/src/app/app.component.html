@@ -37,7 +37,7 @@
 
       <!-- Right zone -->
       <div class="right-zone">
-        <!-- Bell — points to /alerts (cross-cutting, not lease-specific) -->
+        <!-- Bell -->
         <a
           routerLink="/alerts"
           routerLinkActive="bell-btn--active"
@@ -45,9 +45,7 @@
           title="Alerts"
         >
           🔔
-          <span *ngIf="alertCount > 0" class="bell-badge">{{
-            alertCount
-          }}</span>
+          <span *ngIf="alertCount > 0" class="bell-badge">{{ alertCount }}</span>
         </a>
 
         <!-- Avatar dropdown -->
@@ -67,6 +65,7 @@
               <div class="dropdown-username">{{ user.username }}</div>
               <div class="dropdown-role">{{ user.role }}</div>
             </div>
+
             <a
               routerLink="/users"
               class="dropdown-item"
@@ -77,9 +76,8 @@
             <div class="dropdown-divider"></div>
             <a
               routerLink="/settings"
-              routerLinkActive="app-nav__link--active"
-              class="app-nav__link settings-link"
-              title="Settings"
+              class="dropdown-item"
+              (click)="closeDropdown()"
             >
               <span class="di-icon">⚙️</span> Settings
             </a>

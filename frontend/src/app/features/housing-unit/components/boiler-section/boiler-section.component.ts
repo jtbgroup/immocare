@@ -16,14 +16,12 @@ import {
   FUEL_TYPE_LABELS,
   SaveBoilerRequest,
 } from "../../../../models/boiler.model";
-
-// Re-export constant for template binding
-const BOILEROWNER_HOUSING_UNIT_CONST = "HOUSING_UNIT";
+import { AppDatePipe } from "../../../../shared/pipes/app-date.pipe";
 
 @Component({
   selector: "app-boiler-section",
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule],
+  imports: [CommonModule, ReactiveFormsModule, AppDatePipe],
   templateUrl: "./boiler-section.component.html",
   styleUrls: ["./boiler-section.component.scss"],
 })
@@ -89,7 +87,7 @@ export class BoilerSectionComponent implements OnInit, OnDestroy {
 
   // ─── Form ─────────────────────────────────────────────────────────────────
 
-  buildForm(): void {
+  private buildForm(): void {
     this.form = this.fb.group({
       fuelType: ["GAS", Validators.required],
       installationDate: ["", Validators.required],
@@ -104,13 +102,14 @@ export class BoilerSectionComponent implements OnInit, OnDestroy {
 
   openAddForm(): void {
     this.editingId = null;
+    this.saveError = null;
     this.form.reset({ fuelType: "GAS" });
     this.showForm = true;
-    this.saveError = null;
   }
 
   openEditForm(boiler: BoilerDTO): void {
     this.editingId = boiler.id;
+    this.saveError = null;
     this.form.patchValue({
       fuelType: boiler.fuelType,
       installationDate: boiler.installationDate,
@@ -122,7 +121,6 @@ export class BoilerSectionComponent implements OnInit, OnDestroy {
       notes: boiler.notes ?? "",
     });
     this.showForm = true;
-    this.saveError = null;
   }
 
   closeForm(): void {
@@ -139,16 +137,15 @@ export class BoilerSectionComponent implements OnInit, OnDestroy {
     this.saving = true;
     this.saveError = null;
 
-    const raw = this.form.value;
     const req: SaveBoilerRequest = {
-      fuelType: raw.fuelType,
-      installationDate: raw.installationDate,
-      brand: raw.brand || null,
-      model: raw.model || null,
-      serialNumber: raw.serialNumber || null,
-      lastServiceDate: raw.lastServiceDate || null,
-      nextServiceDate: raw.nextServiceDate || null,
-      notes: raw.notes || null,
+      fuelType: this.form.value.fuelType,
+      installationDate: this.form.value.installationDate,
+      brand: this.form.value.brand || null,
+      model: this.form.value.model || null,
+      serialNumber: this.form.value.serialNumber || null,
+      lastServiceDate: this.form.value.lastServiceDate || null,
+      nextServiceDate: this.form.value.nextServiceDate || null,
+      notes: this.form.value.notes || null,
     };
 
     const obs$ =
@@ -171,12 +168,9 @@ export class BoilerSectionComponent implements OnInit, OnDestroy {
     });
   }
 
-  // ─── Delete ───────────────────────────────────────────────────────────────
-
   confirmDelete(id: number): void {
     this.deleteConfirmId = id;
   }
-
   cancelDelete(): void {
     this.deleteConfirmId = null;
   }
@@ -190,25 +184,15 @@ export class BoilerSectionComponent implements OnInit, OnDestroy {
           this.deleteConfirmId = null;
           this.loadBoilers();
         },
-        error: () => {
+        error: (err) => {
+          this.error = err?.error?.message ?? "Failed to delete boiler.";
           this.deleteConfirmId = null;
-          this.error = "Failed to delete boiler.";
         },
       });
   }
 
-  // ─── Helpers ──────────────────────────────────────────────────────────────
-
-  serviceAlertClass(boiler: BoilerDTO): string {
-    if (!boiler.nextServiceDate) return "";
-    if (boiler.daysUntilNextService !== null && boiler.daysUntilNextService < 0)
-      return "alert-overdue";
-    if (boiler.serviceAlert) return "alert-warning";
-    return "";
-  }
-
   fieldError(name: string): boolean {
     const ctrl = this.form.get(name);
-    return !!(ctrl && ctrl.invalid && ctrl.touched);
+    return !!ctrl && ctrl.invalid && ctrl.touched;
   }
 }

@@ -12,7 +12,7 @@
   </div>
 
   <form *ngIf="!loading && form" [formGroup]="form" (ngSubmit)="save()">
-    <!-- Alert thresholds group -->
+    <!-- ── Alert Thresholds ──────────────────────────────────────────────────── -->
     <div class="settings-group">
       <h2 class="group-title">Alert Thresholds</h2>
       <div class="settings-grid">
@@ -46,12 +46,64 @@
       </div>
     </div>
 
-    <!-- General settings group -->
+    <!-- ── General ──────────────────────────────────────────────────────────── -->
     <div class="settings-group">
       <h2 class="group-title">General</h2>
       <div class="settings-grid">
         <ng-container *ngFor="let config of configs">
-          <div class="settings-row" *ngIf="!isIntegerKey(config.configKey)">
+          <!-- Date format — preset select + optional custom text input -->
+          <div class="settings-row" *ngIf="isDateFormatKey(config.configKey)">
+            <div class="settings-row__label">
+              <label [for]="config.configKey">{{
+                labelFor(config.configKey)
+              }}</label>
+              <span class="description" *ngIf="config.description">{{
+                config.description
+              }}</span>
+            </div>
+            <div class="settings-row__input settings-row__input--wide">
+              <select
+                [id]="config.configKey"
+                class="form-control"
+                [value]="presetOrCustom(config.configKey)"
+                (change)="onDateFormatSelectChange(config.configKey, $event)"
+              >
+                <option *ngFor="let p of DATE_FORMAT_PRESETS" [value]="p.value">
+                  {{ p.label }}
+                </option>
+                <option value="__custom__">Custom format…</option>
+              </select>
+
+              <div
+                *ngIf="presetOrCustom(config.configKey) === '__custom__'"
+                class="custom-format-row"
+              >
+                <input
+                  type="text"
+                  [formControlName]="config.configKey"
+                  class="form-control"
+                  placeholder="e.g. d MMM yyyy"
+                  maxlength="30"
+                />
+                <span class="help-text"
+                  >Any valid Angular date format string.</span
+                >
+              </div>
+
+              <span class="field-error" *ngIf="fieldError(config.configKey)">
+                {{ fieldError(config.configKey) }}
+              </span>
+            </div>
+          </div>
+
+          <!-- All other non-integer string keys -->
+          <div
+            class="settings-row"
+            *ngIf="
+              !isIntegerKey(config.configKey) &&
+              !isDateFormatKey(config.configKey)
+            "
+          >
             <div class="settings-row__label">
               <label [for]="config.configKey">{{
                 labelFor(config.configKey)
