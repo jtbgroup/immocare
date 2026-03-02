@@ -1,3 +1,4 @@
+<!-- app.component.html -->
 <div class="app-container">
   <header class="app-header">
     <!-- Brand -->
@@ -36,9 +37,9 @@
 
       <!-- Right zone -->
       <div class="right-zone">
-        <!-- Bell -->
+        <!-- Bell — points to /alerts (cross-cutting, not lease-specific) -->
         <a
-          routerLink="/leases/alerts"
+          routerLink="/alerts"
           routerLinkActive="bell-btn--active"
           class="bell-btn"
           title="Alerts"
@@ -74,7 +75,6 @@
               <span class="di-icon">👥</span> Manage Users
             </a>
             <div class="dropdown-divider"></div>
-            <!-- Settings gear icon — UC012 -->
             <a
               routerLink="/settings"
               routerLinkActive="app-nav__link--active"

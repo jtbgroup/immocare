@@ -1,0 +1,106 @@
+<!-- features/alerts/alerts.component.html -->
+<div class="page-container">
+
+  <!-- Header -->
+  <div class="page-header">
+    <h1>
+      🔔 Alerts
+      <span *ngIf="alerts.length > 0" class="badge badge-warning ms-2">
+        {{ alerts.length }}
+      </span>
+    </h1>
+  </div>
+
+  <!-- Loading -->
+  <div *ngIf="isLoading" class="loading">Loading alerts…</div>
+
+  <!-- Error -->
+  <div *ngIf="error && !isLoading" class="alert alert-error">{{ error }}</div>
+
+  <!-- Empty state -->
+  <div *ngIf="!isLoading && !error && alerts.length === 0" class="info-card">
+    <div class="empty-state">
+      <div class="empty-icon">✅</div>
+      <p>No pending alerts.</p>
+    </div>
+  </div>
+
+  <!-- Lease alerts -->
+  <div *ngIf="!isLoading && leaseAlerts.length > 0" class="info-card">
+    <h2>
+      <span class="alerts-section-title">📄 Lease Alerts</span>
+    </h2>
+    <div class="table-responsive">
+      <table class="data-table">
+        <thead>
+          <tr>
+            <th>Type</th>
+            <th>Description</th>
+            <th>Deadline</th>
+            <th>Detail</th>
+            <th></th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let a of leaseAlerts">
+            <td>
+              <span class="badge"
+                [class.badge-warning]="a.severity === 'WARNING'"
+                [class.badge-danger]="a.severity === 'DANGER'">
+                {{ a.type === 'INDEXATION' ? '🔔 Indexation' : '⚠ End Notice' }}
+              </span>
+            </td>
+            <td>{{ a.label }}</td>
+            <td class="fw-semibold">{{ a.deadline | date: 'dd/MM/yyyy' }}</td>
+            <td class="alert-detail">{{ a.detail || '—' }}</td>
+            <td>
+              <a [routerLink]="[a.actionUrl]" class="btn btn-sm btn-secondary">
+                View Lease
+              </a>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- Boiler alerts -->
+  <div *ngIf="!isLoading && boilerAlerts.length > 0" class="info-card">
+    <h2>
+      <span class="alerts-section-title">🔥 Boiler Service Alerts</span>
+    </h2>
+    <div class="table-responsive">
+      <table class="data-table">
+        <thead>
+          <tr>
+            <th>Type</th>
+            <th>Description</th>
+            <th>Due Date</th>
+            <th>Status</th>
+            <th></th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let a of boilerAlerts">
+            <td>
+              <span class="badge"
+                [class.badge-warning]="a.severity === 'WARNING'"
+                [class.badge-danger]="a.severity === 'DANGER'">
+                {{ a.type === 'SERVICE_OVERDUE' ? '🚨 Overdue' : '⏰ Due Soon' }}
+              </span>
+            </td>
+            <td>{{ a.label }}</td>
+            <td class="fw-semibold">{{ a.deadline | date: 'dd/MM/yyyy' }}</td>
+            <td class="alert-detail">{{ a.detail || '—' }}</td>
+            <td>
+              <a [routerLink]="[a.actionUrl]" class="btn btn-sm btn-secondary">
+                View
+              </a>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+</div>

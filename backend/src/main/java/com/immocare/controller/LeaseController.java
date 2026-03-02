@@ -94,14 +94,17 @@ public class LeaseController {
         return ResponseEntity.ok(leaseService.removeTenant(id, personId));
     }
 
-    /** POST /api/v1/leases/{id}/rent-adjustments — Adjust rent or charges */
+    /** POST /api/v1/leases/{id}/rent-adjustments */
     @PostMapping("/api/v1/leases/{id}/rent-adjustments")
     public ResponseEntity<LeaseDTO> adjustRent(@PathVariable Long id,
             @Valid @RequestBody AdjustRentRequest req) {
         return ResponseEntity.ok(leaseService.adjustRent(id, req));
     }
 
-    /** GET /api/v1/leases/alerts */
+    /**
+     * GET /api/v1/leases/alerts — contextual lease alerts (used by inline banners).
+     * Global alerts page uses GET /api/v1/alerts instead.
+     */
     @GetMapping("/api/v1/leases/alerts")
     public ResponseEntity<List<LeaseAlertDTO>> getAlerts() {
         return ResponseEntity.ok(leaseService.getAlerts());
@@ -112,20 +115,6 @@ public class LeaseController {
      *
      * Global paginated lease list. All parameters are optional.
      * Defaults to status=ACTIVE, page=0, size=20, sorted by startDate DESC.
-     *
-     * Supported filters (extensible — add new @RequestParam + LeaseFilterParams
-     * field):
-     * ?status=ACTIVE,DRAFT — comma-separated LeaseStatus values
-     * ?leaseType=MAIN_RESIDENCE_9Y — single LeaseType value
-     * ?buildingId=3 — filter by building
-     * ?housingUnitId=12 — filter by unit
-     * ?startDateFrom=2023-01-01 — start date range (ISO-8601)
-     * ?startDateTo=2024-12-31
-     * ?endDateFrom=2024-01-01 — end date range
-     * ?endDateTo=2025-12-31
-     * ?rentMin=500 — rent range
-     * ?rentMax=1500
-     * ?page=0&size=20&sort=startDate,desc
      */
     @GetMapping("/api/v1/leases")
     public ResponseEntity<Page<LeaseGlobalSummaryDTO>> getAll(
@@ -142,15 +131,14 @@ public class LeaseController {
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "20") int size,
             @RequestParam(defaultValue = "startDate,desc") String sort) {
-        LeaseFilterParams params = new LeaseFilterParams();
 
+        LeaseFilterParams params = new LeaseFilterParams();
         if (status != null && !status.isEmpty()) {
             params.setStatuses(status.stream()
                     .map(LeaseStatus::valueOf)
                     .collect(Collectors.toList()));
         }
-        if (leaseType != null)
-            params.setLeaseType(LeaseType.valueOf(leaseType));
+        if (leaseType != null) params.setLeaseType(LeaseType.valueOf(leaseType));
         params.setBuildingId(buildingId);
         params.setHousingUnitId(housingUnitId);
         params.setStartDateFrom(startDateFrom);
@@ -162,8 +150,7 @@ public class LeaseController {
 
         String[] sortParts = sort.split(",");
         Sort.Direction direction = sortParts.length > 1 && sortParts[1].equalsIgnoreCase("desc")
-                ? Sort.Direction.DESC
-                : Sort.Direction.ASC;
+                ? Sort.Direction.DESC : Sort.Direction.ASC;
         Pageable pageable = PageRequest.of(page, size, Sort.by(direction, sortParts[0]));
 
         return ResponseEntity.ok(leaseService.getAll(params, pageable));

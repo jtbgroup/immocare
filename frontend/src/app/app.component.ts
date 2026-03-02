@@ -1,49 +1,49 @@
-import { CommonModule } from "@angular/common";
+// app.component.ts
+import { CommonModule } from '@angular/common';
 import {
   Component,
   ElementRef,
   HostListener,
   OnInit,
   ViewChild,
-} from "@angular/core";
-import { RouterLink, RouterLinkActive, RouterOutlet } from "@angular/router";
-import { AuthService } from "./core/auth/auth.service";
-import { LeaseService } from "./core/services/lease.service";
-import { VersionService } from "./core/services/version.service";
+} from '@angular/core';
+import { RouterLink, RouterLinkActive, RouterOutlet } from '@angular/router';
+import { AlertService } from './core/services/alert.service';
+import { AuthService } from './core/auth/auth.service';
+import { VersionService } from './core/services/version.service';
 
 @Component({
-  selector: "app-root",
+  selector: 'app-root',
   standalone: true,
   imports: [CommonModule, RouterOutlet, RouterLink, RouterLinkActive],
-  templateUrl: "./app.component.html",
-  styleUrls: ["./app.component.scss"],
+  templateUrl: './app.component.html',
+  styleUrls: ['./app.component.scss'],
 })
 export class AppComponent implements OnInit {
-  version = "…";
+  version = '…';
   alertCount = 0;
   dropdownOpen = false;
 
   currentUser$ = this.authService.currentUser$;
 
-  @ViewChild("avatarWrapper") avatarWrapper!: ElementRef;
+  @ViewChild('avatarWrapper') avatarWrapper!: ElementRef;
 
   constructor(
     private authService: AuthService,
     private versionService: VersionService,
-    private leaseService: LeaseService,
+    private alertService: AlertService,
   ) {}
 
   ngOnInit(): void {
     this.versionService.getVersion().subscribe((v) => (this.version = v));
 
-    // Initialise the currentUser$ stream on app load
     this.authService.getCurrentUser().subscribe();
 
-    // Load alert count whenever the logged-in user changes
+    // Reload badge count whenever the logged-in user changes
     this.currentUser$.subscribe((user) => {
       if (user) {
-        this.leaseService.getAlerts().subscribe({
-          next: (alerts) => (this.alertCount = alerts.length),
+        this.alertService.getCount().subscribe({
+          next: (count) => (this.alertCount = count),
           error: () => (this.alertCount = 0),
         });
       } else {
@@ -53,7 +53,7 @@ export class AppComponent implements OnInit {
   }
 
   userInitials(username: string): string {
-    if (!username) return "?";
+    if (!username) return '?';
     return username.slice(0, 2).toUpperCase();
   }
 
@@ -65,7 +65,7 @@ export class AppComponent implements OnInit {
     this.dropdownOpen = false;
   }
 
-  @HostListener("document:click", ["$event"])
+  @HostListener('document:click', ['$event'])
   onDocumentClick(event: MouseEvent): void {
     if (
       this.dropdownOpen &&

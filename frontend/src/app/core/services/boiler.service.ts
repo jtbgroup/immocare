@@ -43,6 +43,10 @@ export class BoilerService {
     return this.http.delete<void>(`/api/v1/boilers/${id}`);
   }
 
+  /**
+   * Returns boilers with service due soon — used by inline boiler cards.
+   * The global alerts page uses AlertService.getAlerts() instead.
+   */
   getServiceAlerts(): Observable<BoilerDTO[]> {
     return this.http.get<BoilerDTO[]>('/api/v1/boilers/alerts');
   }

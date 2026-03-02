@@ -1,0 +1,64 @@
+// All shared styles (page-container, page-header, info-card, data-table,
+// btn, badge, loading, alert) come from global styles.scss partials.
+// Only alerts-specific styles belong here.
+
+// ─── Category header ─────────────────────────────────────────────────────────
+
+.alerts-section-title {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 1rem;
+  font-weight: 600;
+  color: #555;
+  margin-bottom: 0;
+  padding-bottom: 0;
+  border-bottom: none;
+}
+
+// ─── Alert type badges ────────────────────────────────────────────────────────
+
+.badge {
+  display: inline-block;
+  padding: 0.2em 0.6em;
+  border-radius: 4px;
+  font-size: 0.75rem;
+  font-weight: 600;
+
+  &.badge-warning {
+    background-color: #fff3cd;
+    color: #856404;
+    border: 1px solid #ffc107;
+  }
+
+  &.badge-danger {
+    background-color: #f8d7da;
+    color: #721c24;
+    border: 1px solid #dc3545;
+  }
+}
+
+// ─── Detail cell ─────────────────────────────────────────────────────────────
+
+.alert-detail {
+  color: #6c757d;
+  font-size: 0.85rem;
+}
+
+// ─── Empty state ─────────────────────────────────────────────────────────────
+
+.empty-state {
+  text-align: center;
+  padding: 3rem 1rem;
+  color: #6c757d;
+
+  .empty-icon {
+    font-size: 2.5rem;
+    margin-bottom: 0.75rem;
+  }
+
+  p {
+    margin: 0;
+    font-size: 1rem;
+  }
+}

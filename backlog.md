@@ -9,9 +9,12 @@
 - [x] Person sans NISS ne va pas car NIS est une clé primaire
 - [x] housing unit avec juste une terrasse donne une erreur si garden orientation n'est pas rempli
 - [ ] extincteurs
-- [ ] suivi des chaudières
+- [x] suivi des chaudières
 - [ ] dépenses
-- [ ] view des alertes à revoir
+- [x] view des alertes à revoir
 - [ ] alertes: est-ce qu'on veut pouvoir les ignorer (de manière individuelle?)
 - [ ] ajouter des documents : rapport PEB, entretien chaudière, ...
-- [ ] revoir les alertes pour les rendre transversales
+- [x] revoir les alertes pour les rendre transversales
+- [ ] rôles et sécurité
+- [x] bug avec les alertes qui ne s'affichent pas
+- [ ] 

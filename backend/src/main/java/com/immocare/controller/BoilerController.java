@@ -28,6 +28,10 @@ import lombok.RequiredArgsConstructor;
  *   <li>{@code /api/v1/housing-units/{unitId}/boilers}</li>
  *   <li>{@code /api/v1/buildings/{buildingId}/boilers}</li>
  * </ul>
+ *
+ * <p>The {@code /api/v1/boilers/alerts} endpoint is kept for contextual use
+ * (e.g. validity badges on boiler cards). The global alerts page uses
+ * {@code GET /api/v1/alerts} via {@code AlertController} instead.
  */
 @RestController
 @RequiredArgsConstructor
@@ -40,10 +44,10 @@ public class BoilerController {
     private final BoilerService boilerService;
 
     // ═════════════════════════════════════════════════════════════════════════
-    // ALERTS (cross-owner — used by /alerts page)
+    // CONTEXTUAL ALERTS (used by boiler cards / inline banners)
     // ═════════════════════════════════════════════════════════════════════════
 
-    /** GET /api/v1/boilers/alerts → all boilers with service due soon */
+    /** GET /api/v1/boilers/alerts → boilers with service due soon (contextual use) */
     @GetMapping("/api/v1/boilers/alerts")
     public ResponseEntity<List<BoilerDTO>> getServiceAlerts() {
         return ResponseEntity.ok(boilerService.getServiceAlerts());
@@ -55,16 +59,16 @@ public class BoilerController {
 
     /** GET /api/v1/housing-units/{unitId}/boilers */
     @GetMapping("/api/v1/housing-units/{unitId}/boilers")
-    public ResponseEntity<List<BoilerDTO>> getUnitBoilers(@PathVariable Long unitId) {
+    public ResponseEntity<List<BoilerDTO>> getByUnit(@PathVariable Long unitId) {
         return ResponseEntity.ok(boilerService.getBoilers(HOUSING_UNIT, unitId));
     }
 
-    /** POST /api/v1/housing-units/{unitId}/boilers → 201 */
+    /** POST /api/v1/housing-units/{unitId}/boilers */
     @PostMapping("/api/v1/housing-units/{unitId}/boilers")
-    public ResponseEntity<BoilerDTO> createUnitBoiler(
-            @PathVariable Long unitId,
+    public ResponseEntity<BoilerDTO> createForUnit(@PathVariable Long unitId,
             @Valid @RequestBody SaveBoilerRequest req) {
-        return ResponseEntity.status(HttpStatus.CREATED).body(boilerService.create(HOUSING_UNIT, unitId, req));
+        return ResponseEntity.status(HttpStatus.CREATED)
+                .body(boilerService.create(HOUSING_UNIT, unitId, req));
     }
 
     // ═════════════════════════════════════════════════════════════════════════
@@ -73,20 +77,20 @@ public class BoilerController {
 
     /** GET /api/v1/buildings/{buildingId}/boilers */
     @GetMapping("/api/v1/buildings/{buildingId}/boilers")
-    public ResponseEntity<List<BoilerDTO>> getBuildingBoilers(@PathVariable Long buildingId) {
+    public ResponseEntity<List<BoilerDTO>> getByBuilding(@PathVariable Long buildingId) {
         return ResponseEntity.ok(boilerService.getBoilers(BUILDING, buildingId));
     }
 
-    /** POST /api/v1/buildings/{buildingId}/boilers → 201 */
+    /** POST /api/v1/buildings/{buildingId}/boilers */
     @PostMapping("/api/v1/buildings/{buildingId}/boilers")
-    public ResponseEntity<BoilerDTO> createBuildingBoiler(
-            @PathVariable Long buildingId,
+    public ResponseEntity<BoilerDTO> createForBuilding(@PathVariable Long buildingId,
             @Valid @RequestBody SaveBoilerRequest req) {
-        return ResponseEntity.status(HttpStatus.CREATED).body(boilerService.create(BUILDING, buildingId, req));
+        return ResponseEntity.status(HttpStatus.CREATED)
+                .body(boilerService.create(BUILDING, buildingId, req));
     }
 
     // ═════════════════════════════════════════════════════════════════════════
-    // SHARED (by boiler id — owner-agnostic)
+    // OWNER-AGNOSTIC (by boiler id)
     // ═════════════════════════════════════════════════════════════════════════
 
     /** GET /api/v1/boilers/{id} */
@@ -97,13 +101,12 @@ public class BoilerController {
 
     /** PUT /api/v1/boilers/{id} */
     @PutMapping("/api/v1/boilers/{id}")
-    public ResponseEntity<BoilerDTO> update(
-            @PathVariable Long id,
+    public ResponseEntity<BoilerDTO> update(@PathVariable Long id,
             @Valid @RequestBody SaveBoilerRequest req) {
         return ResponseEntity.ok(boilerService.update(id, req));
     }
 
-    /** DELETE /api/v1/boilers/{id} → 204 */
+    /** DELETE /api/v1/boilers/{id} */
     @DeleteMapping("/api/v1/boilers/{id}")
     public ResponseEntity<Void> delete(@PathVariable Long id) {
         boilerService.delete(id);

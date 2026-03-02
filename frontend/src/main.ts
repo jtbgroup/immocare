@@ -126,14 +126,6 @@ bootstrapApplication(AppComponent, {
             (m) => m.LeaseFormComponent,
           ),
       },
-      {
-        path: "leases/alerts",
-        canActivate: [AuthGuard],
-        loadComponent: () =>
-          import("./app/features/lease/alerts/alerts.component").then(
-            (m) => m.AlertsComponent,
-          ),
-      },
 
       {
         path: "leases",
@@ -198,6 +190,15 @@ bootstrapApplication(AppComponent, {
         loadComponent: () =>
           import("./app/features/settings/components/settings/settings.component").then(
             (m) => m.SettingsComponent,
+          ),
+      },
+      // ─── Alerts ──────────────────────────────────────────────────────────
+      {
+        path: "alerts",
+        canActivate: [AuthGuard],
+        loadComponent: () =>
+          import("./app/features/alerts/components/alerts/alerts.component").then(
+            (m) => m.AlertsComponent,
           ),
       },
       // ─── Fallback ──────────────────────────────────────────────────────────
