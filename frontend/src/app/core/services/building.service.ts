@@ -1,15 +1,20 @@
-import { Injectable } from '@angular/core';
-import { HttpClient, HttpParams } from '@angular/common/http';
-import { Observable } from 'rxjs';
-import { Building, CreateBuildingRequest, UpdateBuildingRequest, Page } from '../../models/building.model';
-import { environment } from '../../../environments/environment';
+import { HttpClient, HttpParams } from "@angular/common/http";
+import { Injectable } from "@angular/core";
+import { Observable } from "rxjs";
+import { environment } from "../../../environments/environment";
+import {
+  Building,
+  CreateBuildingRequest,
+  Page,
+  UpdateBuildingRequest,
+} from "../../models/building.model";
 
 /**
  * Service for Building API operations.
  * Handles all HTTP requests to the building endpoints.
  */
 @Injectable({
-  providedIn: 'root'
+  providedIn: "root",
 })
 export class BuildingService {
   private readonly apiUrl = `${environment.apiUrl}/buildings`;
@@ -30,21 +35,21 @@ export class BuildingService {
   getAllBuildings(
     page: number = 0,
     size: number = 20,
-    sort: string = 'name,asc',
+    sort: string = "name,asc",
     city?: string,
-    search?: string
+    search?: string,
   ): Observable<Page<Building>> {
     let params = new HttpParams()
-      .set('page', page.toString())
-      .set('size', size.toString())
-      .set('sort', sort);
+      .set("page", page.toString())
+      .set("size", size.toString())
+      .set("sort", sort);
 
     if (city) {
-      params = params.set('city', city);
+      params = params.set("city", city);
     }
 
     if (search) {
-      params = params.set('search', search);
+      params = params.set("search", search);
     }
 
     return this.http.get<Page<Building>>(this.apiUrl, { params });
@@ -79,7 +84,10 @@ export class BuildingService {
    * @param request the building update request
    * @returns observable of the updated building
    */
-  updateBuilding(id: number, request: UpdateBuildingRequest): Observable<Building> {
+  updateBuilding(
+    id: number,
+    request: UpdateBuildingRequest,
+  ): Observable<Building> {
     return this.http.put<Building>(`${this.apiUrl}/${id}`, request);
   }
 
