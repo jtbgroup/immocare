@@ -246,7 +246,7 @@ CREATE TABLE lease (
     CONSTRAINT chk_lease_status     CHECK (status     IN ('DRAFT','ACTIVE','FINISHED','CANCELLED')),
     CONSTRAINT chk_lease_type       CHECK (lease_type IN ('SHORT_TERM','MAIN_RESIDENCE_3Y','MAIN_RESIDENCE_6Y','MAIN_RESIDENCE_9Y','STUDENT','GLIDING','COMMERCIAL')),
     CONSTRAINT chk_charges_type     CHECK (charges_type IN ('FORFAIT','PROVISION')),
-    CONSTRAINT chk_deposit_type     CHECK (deposit_type IN ('BLOCKED_ACCOUNT','BANK_GUARANTEE','CPAS','INSURANCE') OR deposit_type IS NULL),
+    CONSTRAINT chk_deposit_type     CHECK (deposit_type IN ('BLOCKED_ACCOUNT','BANK_GUARANTEE','CPAS','INSURANCE', 'HAND_TO_HAND') OR deposit_type IS NULL),
     CONSTRAINT chk_end_after_start  CHECK (end_date >= start_date)
 );
 

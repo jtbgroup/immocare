@@ -11,7 +11,6 @@
 
   <form *ngIf="!isLoading" [formGroup]="form">
     <div class="form-card">
-
       <!-- 1 — General -->
       <div class="form-section-title">1 — General</div>
       <div class="form-row form-row-3">
@@ -113,7 +112,9 @@
           <input type="text" formControlName="registrationSpf" />
         </div>
         <div class="form-group">
-          <label>Region reference <span class="field-hint">(Brussels)</span></label>
+          <label
+            >Region reference <span class="field-hint">(Brussels)</span></label
+          >
           <input type="text" formControlName="registrationRegion" />
         </div>
       </div>
@@ -125,7 +126,9 @@
           <input type="text" formControlName="registrationInventorySpf" />
         </div>
         <div class="form-group">
-          <label>Region reference <span class="field-hint">(Brussels)</span></label>
+          <label
+            >Region reference <span class="field-hint">(Brussels)</span></label
+          >
           <input type="text" formControlName="registrationInventoryRegion" />
         </div>
       </div>
@@ -152,6 +155,7 @@
             <option value="BANK_GUARANTEE">Bank Guarantee</option>
             <option value="CPAS">CPAS</option>
             <option value="INSURANCE">Insurance</option>
+            <option value="HAND_TO_HAND">Hand To Hand</option>
           </select>
         </div>
         <div class="form-group">
@@ -190,7 +194,9 @@
 
         <ul *ngIf="pendingTenants.length" class="tenant-list">
           <li *ngFor="let t of pendingTenants; let i = index">
-            <span class="tenant-name">{{ t.person.lastName }} {{ t.person.firstName }}</span>
+            <span class="tenant-name"
+              >{{ t.person.lastName }} {{ t.person.firstName }}</span
+            >
             <select
               class="tenant-role-select"
               [(ngModel)]="t.role"
@@ -204,12 +210,18 @@
               type="button"
               class="btn btn-sm btn-danger"
               (click)="removePendingTenant(i)"
-            >✕</button>
+            >
+              ✕
+            </button>
           </li>
         </ul>
 
         <div *ngIf="!showTenantPicker">
-          <button type="button" class="btn btn-secondary btn-sm" (click)="showTenantPicker = true">
+          <button
+            type="button"
+            class="btn btn-secondary btn-sm"
+            (click)="showTenantPicker = true"
+          >
             + Add Tenant
           </button>
         </div>
@@ -220,9 +232,12 @@
             [required]="false"
             (personSelected)="onTenantPersonSelected($event)"
           ></app-person-picker>
-          <div class="form-group" style="margin-top: 0.75rem;">
+          <div class="form-group" style="margin-top: 0.75rem">
             <label>Role</label>
-            <select [(ngModel)]="newTenantRole" [ngModelOptions]="{ standalone: true }">
+            <select
+              [(ngModel)]="newTenantRole"
+              [ngModelOptions]="{ standalone: true }"
+            >
               <option value="PRIMARY">Primary</option>
               <option value="CO_TENANT">Co-tenant</option>
               <option value="GUARANTOR">Guarantor</option>
@@ -234,23 +249,28 @@
               class="btn btn-primary btn-sm"
               [disabled]="!selectedTenantPerson"
               (click)="confirmAddTenant()"
-            >Add</button>
+            >
+              Add
+            </button>
             <button
               type="button"
               class="btn btn-secondary btn-sm"
               (click)="cancelAddTenant()"
-            >Cancel</button>
+            >
+              Cancel
+            </button>
           </div>
         </div>
       </ng-container>
-
-    </div><!-- end form-card -->
+    </div>
+    <!-- end form-card -->
 
     <div class="form-actions">
       <a
         [routerLink]="isEditMode ? ['/leases', leaseId] : ['/units', unitId]"
         class="btn btn-secondary"
-      >Cancel</a>
+        >Cancel</a
+      >
       <button type="button" class="btn btn-primary" (click)="save()">
         {{ isEditMode ? "Save" : "Create" }}
       </button>
