@@ -1,6 +1,5 @@
 <!-- features/alerts/alerts.component.html -->
 <div class="page-container">
-
   <!-- Header -->
   <div class="page-header">
     <h1>
@@ -44,15 +43,17 @@
         <tbody>
           <tr *ngFor="let a of leaseAlerts">
             <td>
-              <span class="badge"
+              <span
+                class="badge"
                 [class.badge-warning]="a.severity === 'WARNING'"
-                [class.badge-danger]="a.severity === 'DANGER'">
-                {{ a.type === 'INDEXATION' ? '🔔 Indexation' : '⚠ End Notice' }}
+                [class.badge-danger]="a.severity === 'DANGER'"
+              >
+                {{ a.type === "INDEXATION" ? "🔔 Indexation" : "⚠ End Notice" }}
               </span>
             </td>
             <td>{{ a.label }}</td>
-            <td class="fw-semibold">{{ a.deadline | date: 'dd/MM/yyyy' }}</td>
-            <td class="alert-detail">{{ a.detail || '—' }}</td>
+            <td class="fw-semibold">{{ a.deadline | appDate }}</td>
+            <td class="alert-detail">{{ a.detail || "—" }}</td>
             <td>
               <a [routerLink]="[a.actionUrl]" class="btn btn-sm btn-secondary">
                 View Lease
@@ -83,18 +84,20 @@
         <tbody>
           <tr *ngFor="let a of boilerAlerts">
             <td>
-              <span class="badge"
+              <span
+                class="badge"
                 [class.badge-warning]="a.severity === 'WARNING'"
-                [class.badge-danger]="a.severity === 'DANGER'">
-                {{ a.type === 'SERVICE_OVERDUE' ? '🚨 Overdue' : '⏰ Due Soon' }}
+                [class.badge-danger]="a.severity === 'DANGER'"
+              >
+                {{ a.type === "SERVICE_OVERDUE" ? "🔴 Overdue" : "⚠ Due Soon" }}
               </span>
             </td>
             <td>{{ a.label }}</td>
-            <td class="fw-semibold">{{ a.deadline | date: 'dd/MM/yyyy' }}</td>
-            <td class="alert-detail">{{ a.detail || '—' }}</td>
+            <td class="fw-semibold">{{ a.deadline | appDate }}</td>
+            <td>{{ a.detail || "—" }}</td>
             <td>
               <a [routerLink]="[a.actionUrl]" class="btn btn-sm btn-secondary">
-                View
+                View Unit
               </a>
             </td>
           </tr>
@@ -102,5 +105,4 @@
       </table>
     </div>
   </div>
-
 </div>

@@ -200,7 +200,7 @@
                             · Install #: {{ meter.installationNumber }}</span
                           >
                         }
-                        · since {{ meter.startDate }}
+                        · since {{ meter.startDate | appDate }}
                       </div>
 
                       <form
@@ -387,7 +387,7 @@
                           >
                         }
                         <span class="meter-detail muted"
-                          >Since {{ meter.startDate }}</span
+                          >Since {{ meter.startDate | appDate }}</span
                         >
                         <span class="meter-detail muted"
                           >{{
@@ -468,8 +468,8 @@
                   <td>{{ h.customerNumber || "—" }}</td>
                 }
                 <td>{{ h.eanCode || h.installationNumber || "—" }}</td>
-                <td>{{ h.startDate }}</td>
-                <td>{{ h.endDate || "—" }}</td>
+                <td>{{ h.startDate | appDate }}</td>
+                <td>{{ h.endDate ? (h.endDate | appDate) : "—" }}</td>
                 <td>{{ meterDurationMonths(h.startDate, h.endDate) }} mo</td>
                 <td>
                   <span

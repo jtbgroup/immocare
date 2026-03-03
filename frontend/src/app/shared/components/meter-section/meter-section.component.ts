@@ -29,6 +29,7 @@ import {
   ReplaceMeterRequest,
   meterDurationMonths,
 } from "../../../models/meter.model";
+import { AppDatePipe } from "../../pipes/app-date.pipe";
 
 type PanelState = "idle" | "add" | "replace" | "remove";
 
@@ -42,7 +43,7 @@ interface TypeBlock {
 @Component({
   selector: "app-meter-section",
   standalone: true,
-  imports: [ReactiveFormsModule, LowerCasePipe, NgClass],
+  imports: [ReactiveFormsModule, LowerCasePipe, NgClass, AppDatePipe],
   templateUrl: "./meter-section.component.html",
   styleUrls: ["./meter-section.component.scss"],
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -73,7 +74,6 @@ export class MeterSectionComponent implements OnInit {
   replaceForm!: FormGroup;
   removeForm!: FormGroup;
 
-  // ─── Exposed constants for template ─────────────────────────────────────
   readonly ALL_METER_TYPES = ALL_METER_TYPES;
   readonly ALL_REPLACEMENT_REASONS = ALL_REPLACEMENT_REASONS;
   readonly METER_TYPE_LABELS = METER_TYPE_LABELS;
@@ -82,47 +82,23 @@ export class MeterSectionComponent implements OnInit {
   readonly meterDurationMonths = meterDurationMonths;
 
   constructor(
-    private readonly meterService: MeterService,
-    private readonly fb: FormBuilder,
-    private readonly cdr: ChangeDetectorRef,
+    private meterService: MeterService,
+    private fb: FormBuilder,
+    private cdr: ChangeDetectorRef,
   ) {}
 
   ngOnInit(): void {
-    this.initForms();
+    this.buildForms();
     this.loadActiveMeters();
   }
 
-  // ─── Initialization ───────────────────────────────────────────────────────
-
-  private initForms(): void {
-    this.addForm = this.fb.group({
-      type: ["", Validators.required],
-      meterNumber: ["", [Validators.required, Validators.maxLength(50)]],
-      label: ["", Validators.maxLength(100)],
-      eanCode: [""],
-      installationNumber: [""],
-      customerNumber: [""],
-      startDate: [this.today(), Validators.required],
-    });
-
-    this.replaceForm = this.fb.group({
-      newMeterNumber: ["", [Validators.required, Validators.maxLength(50)]],
-      newLabel: ["", Validators.maxLength(100)],
-      newEanCode: [""],
-      newInstallationNumber: [""],
-      newCustomerNumber: [""],
-      newStartDate: [this.today(), Validators.required],
-      reason: [null],
-    });
-
-    this.removeForm = this.fb.group({
-      endDate: [this.today(), Validators.required],
-    });
+  today(): string {
+    return new Date().toISOString().split("T")[0];
   }
 
-  // ─── Data loading ─────────────────────────────────────────────────────────
+  // ─── Load ─────────────────────────────────────────────────────────────────
 
-  private loadActiveMeters(): void {
+  loadActiveMeters(): void {
     this.loading = true;
     const obs$ =
       this.ownerType === "HOUSING_UNIT"
@@ -130,7 +106,7 @@ export class MeterSectionComponent implements OnInit {
         : this.meterService.getBuildingActiveMeters(this.ownerId);
 
     obs$.subscribe({
-      next: (meters) => {
+      next: (meters: MeterDTO[]) => {
         this.buildBlocks(meters);
         this.loading = false;
         this.cdr.markForCheck();
@@ -230,9 +206,11 @@ export class MeterSectionComponent implements OnInit {
         this.showSuccess("Meter added successfully.");
         this.closeAllPanels();
         this.loadActiveMeters();
-        if (this.showHistory) this.loadHistory();
       },
-      error: (err) => this.showError(err),
+      error: (err) => {
+        this.errorMessage = err?.error?.message ?? "Failed to add meter.";
+        this.cdr.markForCheck();
+      },
     });
   }
 
@@ -241,11 +219,9 @@ export class MeterSectionComponent implements OnInit {
   openReplaceForm(meter: MeterDTO): void {
     this.closeAllPanels();
     this.activeMeter = meter;
+    this.activeMeterType = meter.type;
     this.panelState[meter.type] = "replace";
-    this.replaceForm.reset({
-      newStartDate: this.today(),
-      newLabel: meter.label || "",
-    });
+    this.replaceForm.reset({ newStartDate: this.today() });
   }
 
   isReplaceOpen(type: MeterType): boolean {
@@ -265,7 +241,7 @@ export class MeterSectionComponent implements OnInit {
       newInstallationNumber: v.newInstallationNumber || null,
       newCustomerNumber: v.newCustomerNumber || null,
       newStartDate: v.newStartDate,
-      reason: v.reason || null,
+      reason: v.reason || undefined,
     };
     const obs$ =
       this.ownerType === "HOUSING_UNIT"
@@ -284,9 +260,11 @@ export class MeterSectionComponent implements OnInit {
         this.showSuccess("Meter replaced successfully.");
         this.closeAllPanels();
         this.loadActiveMeters();
-        this.loadHistory();
       },
-      error: (err) => this.showError(err),
+      error: (err) => {
+        this.errorMessage = err?.error?.message ?? "Failed to replace meter.";
+        this.cdr.markForCheck();
+      },
     });
   }
 
@@ -295,6 +273,7 @@ export class MeterSectionComponent implements OnInit {
   openRemoveDialog(meter: MeterDTO): void {
     this.closeAllPanels();
     this.activeMeter = meter;
+    this.activeMeterType = meter.type;
     this.panelState[meter.type] = "remove";
     this.removeForm.reset({ endDate: this.today() });
   }
@@ -326,24 +305,40 @@ export class MeterSectionComponent implements OnInit {
         this.showSuccess("Meter removed successfully.");
         this.closeAllPanels();
         this.loadActiveMeters();
-        if (this.showHistory) this.loadHistory();
       },
-      error: (err) => this.showError(err),
+      error: (err) => {
+        this.errorMessage = err?.error?.message ?? "Failed to remove meter.";
+        this.cdr.markForCheck();
+      },
     });
   }
 
-  // ─── Helpers ──────────────────────────────────────────────────────────────
+  // ─── Panel helpers ────────────────────────────────────────────────────────
 
   closeAllPanels(): void {
-    this.panelState = { WATER: "idle", GAS: "idle", ELECTRICITY: "idle" };
+    ALL_METER_TYPES.forEach((t) => (this.panelState[t] = "idle"));
     this.activeMeter = null;
     this.activeMeterType = null;
     this.errorMessage = null;
   }
 
+  cancelPanel(type: MeterType): void {
+    this.panelState[type] = "idle";
+    this.activeMeter = null;
+    this.activeMeterType = null;
+    this.errorMessage = null;
+    this.cdr.markForCheck();
+  }
+
+  fieldError(form: FormGroup, field: string): string | null {
+    const ctrl = form.get(field);
+    if (!ctrl || !ctrl.invalid || !ctrl.touched) return null;
+    if (ctrl.hasError("required")) return "Required.";
+    return "Invalid.";
+  }
+
   private showSuccess(msg: string): void {
     this.successMessage = msg;
-    this.errorMessage = null;
     this.cdr.markForCheck();
     setTimeout(() => {
       this.successMessage = null;
@@ -351,21 +346,29 @@ export class MeterSectionComponent implements OnInit {
     }, 3000);
   }
 
-  private showError(err: any): void {
-    this.errorMessage = err?.error?.message ?? "An error occurred.";
-    this.cdr.markForCheck();
-  }
+  private buildForms(): void {
+    this.addForm = this.fb.group({
+      type: ["", Validators.required],
+      meterNumber: ["", Validators.required],
+      label: [""],
+      eanCode: [""],
+      installationNumber: [""],
+      customerNumber: [""],
+      startDate: ["", Validators.required],
+    });
 
-  fieldError(form: FormGroup, field: string): string {
-    const ctrl = form.get(field);
-    if (!ctrl || !ctrl.touched || !ctrl.errors) return "";
-    if (ctrl.errors["required"]) return "This field is required.";
-    if (ctrl.errors["maxlength"])
-      return `Max ${ctrl.errors["maxlength"].requiredLength} characters.`;
-    return "";
-  }
+    this.replaceForm = this.fb.group({
+      newMeterNumber: ["", Validators.required],
+      newLabel: [""],
+      newEanCode: [""],
+      newInstallationNumber: [""],
+      newCustomerNumber: [""],
+      newStartDate: ["", Validators.required],
+      reason: [null],
+    });
 
-  today(): string {
-    return new Date().toISOString().split("T")[0];
+    this.removeForm = this.fb.group({
+      endDate: ["", Validators.required],
+    });
   }
 }

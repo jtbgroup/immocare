@@ -78,3 +78,38 @@
   letter-spacing: 0.05em;
   margin-bottom: 0.5rem;
 }
+
+// ─── Details header  ───────────────────────────────────────────────────────────
+.details-header {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  margin-bottom: 1.5rem;
+
+  .header-left {
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+    flex: 1;
+    min-width: 0;
+
+    h1 {
+      margin: 0;
+    }
+  }
+
+  .header-actions {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    flex-wrap: wrap;
+    flex-shrink: 0;
+  }
+
+  .status-change-bar {
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+  }
+}

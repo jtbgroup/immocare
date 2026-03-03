@@ -4,11 +4,12 @@ import { Component, OnInit } from "@angular/core";
 import { RouterModule } from "@angular/router";
 import { AlertService } from "../../../../core/services/alert.service";
 import { AlertDTO } from "../../../../models/alert.model";
+import { AppDatePipe } from "../../../../shared/pipes/app-date.pipe";
 
 @Component({
   selector: "app-alerts",
   standalone: true,
-  imports: [CommonModule, RouterModule],
+  imports: [CommonModule, RouterModule, AppDatePipe],
   templateUrl: "./alerts.component.html",
   styleUrls: ["./alerts.component.scss"],
 })
