@@ -1,0 +1,79 @@
+<div class="unit-list-container">
+  <div class="unit-list-header">
+    <h3>Housing Units</h3>
+    <button class="btn btn-sm btn-primary" (click)="addUnit()">
+      + Add Housing Unit
+    </button>
+  </div>
+
+  @if (loading) {
+    <div class="loading-placeholder">Loading units…</div>
+  }
+
+  @if (!loading && units.length === 0) {
+    <div class="no-data">
+      No units yet. Click "+ Add Housing Unit" to get started.
+    </div>
+  }
+
+  @if (!loading && units.length > 0) {
+    <table class="unit-table">
+      <thead>
+        <tr>
+          <th>Unit #</th>
+          <th>Floor</th>
+          <th>Surface (m²)</th>
+          <th>Rooms</th>
+          <th>Rent</th>
+          <th>PEB</th>
+          <th>Lease</th>
+          <th>Owner</th>
+        </tr>
+      </thead>
+      <tbody>
+        @for (unit of units; track unit.id) {
+          <tr class="unit-row" (click)="viewUnit(unit.id)">
+            <td>{{ unit.unitNumber }}</td>
+            <td>{{ unit.floor }}</td>
+            <td>{{ unit.totalSurface ?? "—" }}</td>
+            <td>{{ unit.roomCount }}</td>
+            <td>
+              {{
+                unit.currentMonthlyRent
+                  ? "€" + unit.currentMonthlyRent + "/mo"
+                  : "—"
+              }}
+            </td>
+            <td>
+              @if (unit.currentPebScore) {
+                <span
+                  class="peb-badge"
+                  [style.background]="pebDisplay[unit.currentPebScore].color"
+                  [style.color]="pebDisplay[unit.currentPebScore].textColor"
+                >
+                  {{ pebDisplay[unit.currentPebScore].label }}
+                </span>
+              } @else {
+                <span>—</span>
+              }
+            </td>
+            <td>
+              @if (unit.activeLeaseStatus) {
+                <span
+                  class="lease-status-badge lease-status-badge--{{
+                    unit.activeLeaseStatus | lowercase
+                  }}"
+                >
+                  {{ unit.activeLeaseStatus }}
+                </span>
+              } @else {
+                <span class="text-muted">—</span>
+              }
+            </td>
+            <td>{{ unit.effectiveOwnerName ?? "—" }}</td>
+          </tr>
+        }
+      </tbody>
+    </table>
+  }
+</div>

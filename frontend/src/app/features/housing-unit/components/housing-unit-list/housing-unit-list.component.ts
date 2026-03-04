@@ -1,4 +1,4 @@
-import { CommonModule } from "@angular/common";
+import { LowerCasePipe } from "@angular/common";
 import { Component, Input, OnDestroy, OnInit } from "@angular/core";
 import { Router } from "@angular/router";
 import { Subject } from "rxjs";
@@ -10,126 +10,9 @@ import { PEB_SCORE_DISPLAY } from "../../../../models/peb-score.model";
 @Component({
   selector: "app-housing-unit-list",
   standalone: true,
-  imports: [CommonModule],
-  template: `
-    <div class="unit-list-container">
-      <div class="unit-list-header">
-        <h3>Housing Units</h3>
-        <button class="btn btn-sm btn-primary" (click)="addUnit()">
-          + Add Housing Unit
-        </button>
-      </div>
-      <div *ngIf="loading" class="loading">Loading units…</div>
-      <div *ngIf="!loading && units.length === 0" class="empty-state">
-        <p>No units yet. Click "+ Add Housing Unit" to get started.</p>
-      </div>
-      <table *ngIf="!loading && units.length > 0" class="unit-table">
-        <thead>
-          <tr>
-            <th>Unit #</th>
-            <th>Floor</th>
-            <th>Surface (m²)</th>
-            <th>Rooms</th>
-            <th>Rent</th>
-            <th>PEB</th>
-            <th>Lease</th>
-            <th>Owner</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr
-            *ngFor="let unit of units"
-            class="unit-row"
-            (click)="viewUnit(unit.id)"
-          >
-            <td>{{ unit.unitNumber }}</td>
-            <td>{{ unit.floor }}</td>
-            <td>{{ unit.totalSurface ?? "—" }}</td>
-            <td>{{ unit.roomCount }}</td>
-            <td>
-              {{
-                unit.currentMonthlyRent
-                  ? "€" + unit.currentMonthlyRent + "/mo"
-                  : "—"
-              }}
-            </td>
-            <td>
-              <span
-                *ngIf="unit.currentPebScore"
-                class="peb-badge"
-                [style.background]="pebDisplay[unit.currentPebScore].color"
-                [style.color]="pebDisplay[unit.currentPebScore].textColor"
-              >
-                {{ pebDisplay[unit.currentPebScore].label }}
-              </span>
-              <span *ngIf="!unit.currentPebScore">—</span>
-            </td>
-            <td>
-              <span
-                *ngIf="unit.activeLeaseStatus"
-                class="lease-status-badge lease-status-badge--{{
-                  unit.activeLeaseStatus | lowercase
-                }}"
-              >
-                {{ unit.activeLeaseStatus }}
-              </span>
-              <span *ngIf="!unit.activeLeaseStatus" class="text-muted">—</span>
-            </td>
-            <td>{{ unit.effectiveOwnerName ?? "—" }}</td>
-          </tr>
-        </tbody>
-      </table>
-    </div>
-  `,
-  styles: [
-    `
-      .unit-list-container {
-        margin-top: 1.5rem;
-      }
-      .unit-list-header {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        margin-bottom: 1rem;
-      }
-      .unit-table {
-        width: 100%;
-        border-collapse: collapse;
-      }
-      .unit-table th,
-      .unit-table td {
-        padding: 0.6rem 1rem;
-        border-bottom: 1px solid #e0e0e0;
-        text-align: left;
-      }
-      .unit-row {
-        cursor: pointer;
-      }
-      .unit-row:hover {
-        background: #f5f5f5;
-      }
-      .empty-state {
-        color: #888;
-        padding: 1rem 0;
-      }
-      .loading {
-        padding: 1rem 0;
-      }
-      .peb-badge {
-        display: inline-block;
-        padding: 2px 8px;
-        border-radius: 4px;
-        font-weight: 700;
-        font-size: 0.85rem;
-        min-width: 32px;
-        text-align: center;
-      }
-      .text-muted {
-        color: #aaa;
-        font-size: 0.85rem;
-      }
-    `,
-  ],
+  imports: [LowerCasePipe],
+  templateUrl: "./housing-unit-list.component.html",
+  styleUrls: ["./housing-unit-list.component.scss"],
 })
 export class HousingUnitListComponent implements OnInit, OnDestroy {
   @Input() buildingId!: number;
