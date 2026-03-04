@@ -1,5 +1,5 @@
 export const environment = {
   production: true,
   apiUrl: "/api/v1",
-  actuatorUrl: "",
+  appVersion: "0.0.0",
 };

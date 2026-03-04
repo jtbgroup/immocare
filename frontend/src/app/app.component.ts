@@ -1,32 +1,31 @@
-// app.component.ts
-import { CommonModule } from '@angular/common';
+import { CommonModule } from "@angular/common";
 import {
   Component,
   ElementRef,
   HostListener,
   OnInit,
   ViewChild,
-} from '@angular/core';
-import { RouterLink, RouterLinkActive, RouterOutlet } from '@angular/router';
-import { AlertService } from './core/services/alert.service';
-import { AuthService } from './core/auth/auth.service';
-import { VersionService } from './core/services/version.service';
+} from "@angular/core";
+import { RouterLink, RouterLinkActive, RouterOutlet } from "@angular/router";
+import { AuthService } from "./core/auth/auth.service";
+import { AlertService } from "./core/services/alert.service";
+import { VersionService } from "./core/services/version.service";
 
 @Component({
-  selector: 'app-root',
+  selector: "app-root",
   standalone: true,
   imports: [CommonModule, RouterOutlet, RouterLink, RouterLinkActive],
-  templateUrl: './app.component.html',
-  styleUrls: ['./app.component.scss'],
+  templateUrl: "./app.component.html",
+  styleUrls: ["./app.component.scss"],
 })
 export class AppComponent implements OnInit {
-  version = '…';
+  version = this.versionService.getVersion();
   alertCount = 0;
   dropdownOpen = false;
 
   currentUser$ = this.authService.currentUser$;
 
-  @ViewChild('avatarWrapper') avatarWrapper!: ElementRef;
+  @ViewChild("avatarWrapper") avatarWrapper!: ElementRef;
 
   constructor(
     private authService: AuthService,
@@ -35,11 +34,8 @@ export class AppComponent implements OnInit {
   ) {}
 
   ngOnInit(): void {
-    this.versionService.getVersion().subscribe((v) => (this.version = v));
-
     this.authService.getCurrentUser().subscribe();
 
-    // Reload badge count whenever the logged-in user changes
     this.currentUser$.subscribe((user) => {
       if (user) {
         this.alertService.getCount().subscribe({
@@ -53,7 +49,7 @@ export class AppComponent implements OnInit {
   }
 
   userInitials(username: string): string {
-    if (!username) return '?';
+    if (!username) return "?";
     return username.slice(0, 2).toUpperCase();
   }
 
@@ -65,7 +61,7 @@ export class AppComponent implements OnInit {
     this.dropdownOpen = false;
   }
 
-  @HostListener('document:click', ['$event'])
+  @HostListener("document:click", ["$event"])
   onDocumentClick(event: MouseEvent): void {
     if (
       this.dropdownOpen &&
