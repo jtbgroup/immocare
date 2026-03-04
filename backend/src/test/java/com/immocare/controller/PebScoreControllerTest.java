@@ -3,6 +3,7 @@ package com.immocare.controller;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.when;
+import static org.springframework.security.test.web.servlet.setup.SecurityMockMvcConfigurers.springSecurity;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
@@ -25,7 +26,6 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.web.context.WebApplicationContext;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.SerializationFeature;
 import com.immocare.exception.HousingUnitNotFoundException;
 import com.immocare.exception.InvalidPebScoreDateException;
 import com.immocare.exception.InvalidValidityPeriodException;
@@ -42,18 +42,19 @@ class PebScoreControllerTest {
         @Autowired
         private WebApplicationContext webApplicationContext;
 
+        @Autowired
+        private ObjectMapper objectMapper;
+
         @MockitoBean
         PebScoreService pebScoreService;
 
         private MockMvc mockMvc;
-        private ObjectMapper objectMapper;
 
         @BeforeEach
         void setUp() {
-                mockMvc = webAppContextSetup(webApplicationContext).build();
-                objectMapper = new ObjectMapper();
-                objectMapper.disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS);
-                objectMapper.findAndRegisterModules();
+                mockMvc = webAppContextSetup(webApplicationContext)
+                                .apply(springSecurity())
+                                .build();
         }
 
         // ─── POST /peb-scores ─────────────────────────────────────────────────────
