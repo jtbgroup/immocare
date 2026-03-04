@@ -175,7 +175,6 @@ $RECYCLE.BIN/
 # Test results
 test-results/
 junit/
-*.xml
 
 #################
 # Documentation
