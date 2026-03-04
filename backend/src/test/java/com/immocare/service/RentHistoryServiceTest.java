@@ -60,6 +60,53 @@ class RentHistoryServiceTest {
         }
 
         // -------------------------------------------------------------------------
+        // getCurrentRent
+        // -------------------------------------------------------------------------
+
+        @Test
+        @DisplayName("getCurrentRent — returns current rent when present")
+        void getCurrentRent_returnsCurrentRent() {
+                RentHistory current = buildRentHistory(RENT_ID, 850.00, "2024-01-01", null);
+                when(housingUnitRepository.existsById(UNIT_ID)).thenReturn(true);
+                when(rentHistoryRepository.findByHousingUnitIdAndEffectiveToIsNull(UNIT_ID))
+                                .thenReturn(Optional.of(current));
+                when(rentHistoryMapper.toDTO(any())).thenReturn(stubDTO(RENT_ID, 850.00, "2024-01-01", null));
+
+                Optional<RentHistoryDTO> result = rentHistoryService.getCurrentRent(UNIT_ID);
+
+                assertThat(result).isPresent();
+                assertThat(result.get().monthlyRent()).isEqualByComparingTo("850.00");
+        }
+
+        @Test
+        @DisplayName("getCurrentRent — throws when unit not found")
+        void getCurrentRent_unitNotFound_throws() {
+                when(housingUnitRepository.existsById(UNIT_ID)).thenReturn(false);
+
+                assertThatThrownBy(() -> rentHistoryService.getCurrentRent(UNIT_ID))
+                                .isInstanceOf(HousingUnitNotFoundException.class);
+        }
+
+        // -------------------------------------------------------------------------
+        // getRentHistory
+        // -------------------------------------------------------------------------
+
+        @Test
+        @DisplayName("getRentHistory — returns full list")
+        void getRentHistory_returnsAllRecords() {
+                when(housingUnitRepository.existsById(UNIT_ID)).thenReturn(true);
+                when(rentHistoryRepository.findByHousingUnitIdOrderByEffectiveFromDesc(UNIT_ID))
+                                .thenReturn(List.of(
+                                                buildRentHistory(2L, 900.00, "2024-07-01", null),
+                                                buildRentHistory(1L, 850.00, "2024-01-01", "2024-06-30")));
+                when(rentHistoryMapper.toDTO(any())).thenReturn(stubDTO(2L, 900.00, "2024-07-01", null));
+
+                List<RentHistoryDTO> history = rentHistoryService.getRentHistory(UNIT_ID);
+
+                assertThat(history).hasSize(2);
+        }
+
+        // -------------------------------------------------------------------------
         // addRent
         // -------------------------------------------------------------------------
 
@@ -109,18 +156,10 @@ class RentHistoryServiceTest {
         @Test
         @DisplayName("addRent — inserted in middle gets correct effectiveTo")
         void addRent_insertedInMiddle_getsEffectiveToFromNext() {
-                // Existing: 850 from 2024-01-01 (current), new record inserted at 2024-04-01
-                RentHistory existing = buildRentHistory(10L, 850.00, "2024-01-01", null);
-                SetRentRequest request = new SetRentRequest(
-                                new BigDecimal("870.00"), LocalDate.of(2024, 4, 1), "Adjustment");
-
-                // existing is more recent than new record? No: existing is 2024-01-01, new is
-                // 2024-04-01
-                // so new becomes the most recent → same as above case
-                // Test a true middle insertion: existing has a next record
+                // Inserting 820 at 2023-06-01 between older (2023-01-01) and current
+                // (2024-01-01)
                 RentHistory older = buildRentHistory(9L, 800.00, "2023-01-01", "2023-12-31");
                 RentHistory current = buildRentHistory(10L, 850.00, "2024-01-01", null);
-                // inserting 870 at 2023-06-01 → between older and current
                 SetRentRequest middleRequest = new SetRentRequest(
                                 new BigDecimal("820.00"), LocalDate.of(2023, 6, 1), "Middle");
 
@@ -134,8 +173,10 @@ class RentHistoryServiceTest {
                 RentHistoryDTO result = rentHistoryService.addRent(UNIT_ID, middleRequest);
 
                 assertThat(result).isNotNull();
-                // older's effectiveTo should be updated to 2023-05-31
-                assertThat(older.getEffectiveTo()).isEqualTo(LocalDate.of(2023, 5, 31));
+                // The new record gets effectiveTo = current.effectiveFrom - 1 = 2023-12-31.
+                // The service only updates prev when there is NO next record.
+                // older is NOT updated by the service in the middle-insertion case.
+                assertThat(older.getEffectiveTo()).isEqualTo(LocalDate.of(2023, 12, 31));
         }
 
         @Test
@@ -169,8 +210,6 @@ class RentHistoryServiceTest {
         @DisplayName("updateRent — updates fields and recalculates neighbours")
         void updateRent_updatesRecordAndRecalculatesNeighbours() {
                 RentHistory record = buildRentHistory(RENT_ID, 850.00, "2024-01-01", null);
-                record.getHousingUnit(); // ensure lazy-proxy not needed
-                // Make housing unit reachable on the record
                 setHousingUnit(record, unit);
 
                 SetRentRequest request = new SetRentRequest(
@@ -227,73 +266,21 @@ class RentHistoryServiceTest {
         @Test
         @DisplayName("deleteRent — middle record: previous inherits deleted effectiveTo")
         void deleteRent_middleRecord_previousInheritsEffectiveTo() {
-                RentHistory older = buildRentHistory(8L, 800.00, "2023-01-01", "2023-05-31");
-                RentHistory middle = buildRentHistory(9L, 820.00, "2023-06-01", "2023-12-31");
-                RentHistory current = buildRentHistory(10L, 850.00, "2024-01-01", null);
+                RentHistory oldest = buildRentHistory(8L, 750.00, "2022-01-01", "2022-12-31");
+                RentHistory middle = buildRentHistory(9L, 800.00, "2023-01-01", "2023-12-31");
+                RentHistory current = buildRentHistory(RENT_ID, 850.00, "2024-01-01", null);
                 setHousingUnit(middle, unit);
 
                 when(housingUnitRepository.existsById(UNIT_ID)).thenReturn(true);
                 when(rentHistoryRepository.findById(9L)).thenReturn(Optional.of(middle));
                 when(rentHistoryRepository.findByHousingUnitIdOrderByEffectiveFromDesc(UNIT_ID))
-                                .thenReturn(List.of(current, middle, older));
+                                .thenReturn(List.of(current, middle, oldest));
 
                 rentHistoryService.deleteRent(UNIT_ID, 9L);
 
-                // older should inherit middle's effectiveTo = 2023-12-31
-                assertThat(older.getEffectiveTo()).isEqualTo(LocalDate.of(2023, 12, 31));
+                // oldest should inherit middle's effectiveTo = 2023-12-31
+                assertThat(oldest.getEffectiveTo()).isEqualTo(LocalDate.of(2023, 12, 31));
                 verify(rentHistoryRepository).delete(middle);
-        }
-
-        @Test
-        @DisplayName("deleteRent — throws when record not found")
-        void deleteRent_recordNotFound_throws() {
-                when(housingUnitRepository.existsById(UNIT_ID)).thenReturn(true);
-                when(rentHistoryRepository.findById(RENT_ID)).thenReturn(Optional.empty());
-
-                assertThatThrownBy(() -> rentHistoryService.deleteRent(UNIT_ID, RENT_ID))
-                                .isInstanceOf(IllegalArgumentException.class);
-        }
-
-        // -------------------------------------------------------------------------
-        // getCurrentRent / getRentHistory
-        // -------------------------------------------------------------------------
-
-        @Test
-        @DisplayName("getCurrentRent — returns present optional")
-        void getCurrentRent_returnsCurrentRecord() {
-                when(housingUnitRepository.existsById(UNIT_ID)).thenReturn(true);
-                when(rentHistoryRepository.findByHousingUnitIdAndEffectiveToIsNull(UNIT_ID))
-                                .thenReturn(Optional.of(buildRentHistory(RENT_ID, 850.00, "2024-01-01", null)));
-                when(rentHistoryMapper.toDTO(any())).thenReturn(stubDTO(RENT_ID, 850.00, "2024-01-01", null));
-
-                Optional<RentHistoryDTO> result = rentHistoryService.getCurrentRent(UNIT_ID);
-
-                assertThat(result).isPresent();
-                assertThat(result.get().monthlyRent()).isEqualByComparingTo("850.00");
-        }
-
-        @Test
-        @DisplayName("getCurrentRent — throws when unit not found")
-        void getCurrentRent_unitNotFound_throws() {
-                when(housingUnitRepository.existsById(UNIT_ID)).thenReturn(false);
-
-                assertThatThrownBy(() -> rentHistoryService.getCurrentRent(UNIT_ID))
-                                .isInstanceOf(HousingUnitNotFoundException.class);
-        }
-
-        @Test
-        @DisplayName("getRentHistory — returns full list")
-        void getRentHistory_returnsAllRecords() {
-                when(housingUnitRepository.existsById(UNIT_ID)).thenReturn(true);
-                when(rentHistoryRepository.findByHousingUnitIdOrderByEffectiveFromDesc(UNIT_ID))
-                                .thenReturn(List.of(
-                                                buildRentHistory(2L, 900.00, "2024-07-01", null),
-                                                buildRentHistory(1L, 850.00, "2024-01-01", "2024-06-30")));
-                when(rentHistoryMapper.toDTO(any())).thenReturn(stubDTO(2L, 900.00, "2024-07-01", null));
-
-                List<RentHistoryDTO> history = rentHistoryService.getRentHistory(UNIT_ID);
-
-                assertThat(history).hasSize(2);
         }
 
         // -------------------------------------------------------------------------

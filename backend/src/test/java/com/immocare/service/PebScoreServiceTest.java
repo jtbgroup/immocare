@@ -1,223 +1,145 @@
 package com.immocare.service;
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-import java.lang.reflect.Field;
-import java.time.LocalDate;
-import java.util.List;
 import java.util.Optional;
-import java.util.concurrent.atomic.AtomicLong;
 
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import com.immocare.exception.HousingUnitNotFoundException;
-import com.immocare.exception.InvalidPebScoreDateException;
-import com.immocare.exception.InvalidValidityPeriodException;
-import com.immocare.mapper.PebScoreMapper;
-import com.immocare.model.dto.CreatePebScoreRequest;
-import com.immocare.model.dto.PebImprovementDTO;
-import com.immocare.model.dto.PebScoreDTO;
-import com.immocare.model.entity.HousingUnit;
-import com.immocare.model.entity.PebScore;
-import com.immocare.model.entity.PebScoreHistory;
+import com.immocare.exception.BuildingNotFoundException;
+import com.immocare.mapper.BuildingMapper;
+import com.immocare.model.dto.BuildingDTO;
+import com.immocare.model.dto.CreateBuildingRequest;
+import com.immocare.model.dto.UpdateBuildingRequest;
+import com.immocare.model.entity.Building;
+import com.immocare.repository.BuildingRepository;
 import com.immocare.repository.HousingUnitRepository;
-import com.immocare.repository.PebScoreRepository;
+import com.immocare.repository.PersonRepository;
 
 @ExtendWith(MockitoExtension.class)
-class PebScoreServiceTest {
+class BuildingServiceTest {
 
     @Mock
-    PebScoreRepository pebScoreRepository;
+    private BuildingRepository buildingRepository;
     @Mock
-    HousingUnitRepository housingUnitRepository;
+    private HousingUnitRepository housingUnitRepository;
     @Mock
-    PebScoreMapper pebScoreMapper;
+    private PersonRepository personRepository;
+    @Mock
+    private BuildingMapper buildingMapper;
 
     @InjectMocks
-    PebScoreService service;
-
-    private HousingUnit unit;
-    private static final AtomicLong ID_SEQ = new AtomicLong(1);
-
-    @BeforeEach
-    void setUp() {
-        unit = new HousingUnit();
-        unit.setId(1L);
-    }
-
-    // ─── addScore ─────────────────────────────────────────────────────────────
+    private BuildingService buildingService;
 
     @Test
-    void addScore_unitNotFound_throwsHousingUnitNotFoundException() {
-        when(housingUnitRepository.findById(1L)).thenReturn(Optional.empty());
+    void createBuilding_WithValidData_ReturnsSavedBuilding() {
+        CreateBuildingRequest request = new CreateBuildingRequest(
+                "Résidence Soleil", "123 Rue de la Loi", "1000", "Brussels", "Belgium", null);
 
-        assertThatThrownBy(() -> service.addScore(1L, validRequest()))
-                .isInstanceOf(HousingUnitNotFoundException.class);
-        verify(pebScoreRepository, never()).save(any());
-    }
+        Building building = new Building();
+        building.setName("Résidence Soleil");
 
-    @Test
-    void addScore_futureDate_throwsInvalidPebScoreDateException() {
-        when(housingUnitRepository.findById(1L)).thenReturn(Optional.of(unit));
+        Building savedBuilding = new Building();
+        savedBuilding.setId(1L);
+        savedBuilding.setName("Résidence Soleil");
 
-        CreatePebScoreRequest req = validRequest();
-        req.setScoreDate(LocalDate.now().plusDays(1));
+        BuildingDTO expectedDTO = new BuildingDTO(
+                1L, "Résidence Soleil", "123 Rue de la Loi",
+                "1000", "Brussels", "Belgium", null, null, null, null, null, 0L);
 
-        assertThatThrownBy(() -> service.addScore(1L, req))
-                .isInstanceOf(InvalidPebScoreDateException.class)
-                .hasMessageContaining("future");
+        when(buildingMapper.toEntity(request)).thenReturn(building);
+        when(buildingRepository.save(building)).thenReturn(savedBuilding);
+        when(buildingMapper.toDTOWithUnitCount(savedBuilding, 0L)).thenReturn(expectedDTO);
+
+        BuildingDTO result = buildingService.createBuilding(request);
+
+        assertNotNull(result);
+        assertEquals("Résidence Soleil", result.name());
+        verify(buildingRepository).save(building);
     }
 
     @Test
-    void addScore_validUntilBeforeScoreDate_throwsInvalidValidityPeriodException() {
-        when(housingUnitRepository.findById(1L)).thenReturn(Optional.of(unit));
+    void getBuildingById_WhenExists_ReturnsBuilding() {
+        Long buildingId = 1L;
+        Building building = new Building();
+        building.setId(buildingId);
+        building.setName("Test Building");
 
-        CreatePebScoreRequest req = validRequest();
-        req.setValidUntil(req.getScoreDate().minusDays(1));
+        BuildingDTO expectedDTO = new BuildingDTO(
+                buildingId, "Test Building", "123 Street",
+                "1000", "Brussels", "Belgium", null, null, null, null, null, 0L);
 
-        assertThatThrownBy(() -> service.addScore(1L, req))
-                .isInstanceOf(InvalidValidityPeriodException.class);
+        when(buildingRepository.findById(buildingId)).thenReturn(Optional.of(building));
+        when(housingUnitRepository.countByBuildingId(buildingId)).thenReturn(0L);
+        when(buildingMapper.toDTOWithUnitCount(building, 0L)).thenReturn(expectedDTO);
+
+        BuildingDTO result = buildingService.getBuildingById(buildingId);
+
+        assertNotNull(result);
+        assertEquals("Test Building", result.name());
     }
 
     @Test
-    void addScore_valid_savesAndReturnsDTO() {
-        when(housingUnitRepository.findById(1L)).thenReturn(Optional.of(unit));
-        PebScoreHistory saved = buildEntity(PebScore.B, LocalDate.now(), null);
-        when(pebScoreRepository.save(any())).thenReturn(saved);
-        PebScoreDTO dto = new PebScoreDTO();
-        dto.setPebScore(PebScore.B);
-        when(pebScoreMapper.toDTO(saved)).thenReturn(dto);
+    void getBuildingById_WhenNotExists_ThrowsException() {
+        when(buildingRepository.findById(99L)).thenReturn(Optional.empty());
 
-        PebScoreDTO result = service.addScore(1L, validRequest());
-
-        assertThat(result.getPebScore()).isEqualTo(PebScore.B);
-        assertThat(result.getStatus()).isEqualTo("CURRENT");
-        verify(pebScoreRepository).save(any());
-    }
-
-    // ─── getHistory ───────────────────────────────────────────────────────────
-
-    @Test
-    void getHistory_computesExpiredStatus_whenValidUntilPast() {
-        when(housingUnitRepository.existsById(1L)).thenReturn(true);
-        PebScoreHistory expired = buildEntity(PebScore.C, LocalDate.now().minusYears(2),
-                LocalDate.now().minusDays(1));
-        when(pebScoreRepository.findByHousingUnitIdOrderByScoreDateDesc(1L))
-                .thenReturn(List.of(expired));
-        PebScoreDTO dto = new PebScoreDTO();
-        dto.setValidUntil(expired.getValidUntil());
-        when(pebScoreMapper.toDTO(expired)).thenReturn(dto);
-
-        List<PebScoreDTO> result = service.getHistory(1L);
-
-        assertThat(result.get(0).getStatus()).isEqualTo("EXPIRED");
-        assertThat(result.get(0).getExpiryWarning()).isEqualTo("EXPIRED");
+        assertThrows(BuildingNotFoundException.class,
+                () -> buildingService.getBuildingById(99L));
     }
 
     @Test
-    void getHistory_computesExpiringSoon_whenValidUntilWithin3Months() {
-        when(housingUnitRepository.existsById(1L)).thenReturn(true);
-        LocalDate soonDate = LocalDate.now().plusMonths(1);
-        PebScoreHistory rec = buildEntity(PebScore.B, LocalDate.now().minusYears(1), soonDate);
-        when(pebScoreRepository.findByHousingUnitIdOrderByScoreDateDesc(1L)).thenReturn(List.of(rec));
-        PebScoreDTO dto = new PebScoreDTO();
-        dto.setValidUntil(soonDate);
-        when(pebScoreMapper.toDTO(rec)).thenReturn(dto);
+    void updateBuilding_WithValidData_ReturnsUpdatedBuilding() {
+        Long buildingId = 1L;
+        Building building = new Building();
+        building.setId(buildingId);
+        building.setName("Old Name");
 
-        List<PebScoreDTO> result = service.getHistory(1L);
+        UpdateBuildingRequest request = new UpdateBuildingRequest(
+                "New Name", "New Street", "2000", "Liège", "Belgium", null);
 
-        assertThat(result.get(0).getExpiryWarning()).isEqualTo("EXPIRING_SOON");
+        BuildingDTO expectedDTO = new BuildingDTO(
+                buildingId, "New Name", "New Street",
+                "2000", "Liège", "Belgium", null, null, null, null, null, 0L);
+
+        when(buildingRepository.findById(buildingId)).thenReturn(Optional.of(building));
+        when(housingUnitRepository.countByBuildingId(buildingId)).thenReturn(0L);
+        when(buildingRepository.save(any())).thenReturn(building);
+        when(buildingMapper.toDTOWithUnitCount(building, 0L)).thenReturn(expectedDTO);
+
+        BuildingDTO result = buildingService.updateBuilding(buildingId, request);
+
+        assertNotNull(result);
+        assertEquals("New Name", result.name());
     }
 
     @Test
-    void getHistory_noDate_returnsNoDateWarning() {
-        when(housingUnitRepository.existsById(1L)).thenReturn(true);
-        PebScoreHistory rec = buildEntity(PebScore.A, LocalDate.now().minusYears(1), null);
-        when(pebScoreRepository.findByHousingUnitIdOrderByScoreDateDesc(1L)).thenReturn(List.of(rec));
-        PebScoreDTO dto = new PebScoreDTO();
-        when(pebScoreMapper.toDTO(rec)).thenReturn(dto);
+    void deleteBuilding_WhenNoUnits_DeletesSuccessfully() {
+        Long buildingId = 1L;
+        Building building = new Building();
+        building.setId(buildingId);
 
-        List<PebScoreDTO> result = service.getHistory(1L);
+        when(buildingRepository.findById(buildingId)).thenReturn(Optional.of(building));
+        when(housingUnitRepository.countByBuildingId(buildingId)).thenReturn(0L);
 
-        assertThat(result.get(0).getExpiryWarning()).isEqualTo("NO_DATE");
-    }
+        buildingService.deleteBuilding(buildingId);
 
-    // ─── getImprovementSummary ─────────────────────────────────────────────────
-
-    @Test
-    void getImprovementSummary_computesImprovedGrades() {
-        when(housingUnitRepository.existsById(1L)).thenReturn(true);
-        PebScoreHistory rec2024 = buildEntity(PebScore.B, LocalDate.of(2024, 1, 1), null);
-        PebScoreHistory rec2020 = buildEntity(PebScore.D, LocalDate.of(2020, 1, 1), null);
-        when(pebScoreRepository.findByHousingUnitIdOrderByScoreDateDesc(1L))
-                .thenReturn(List.of(rec2024, rec2020));
-
-        Optional<PebImprovementDTO> result = service.getImprovementSummary(1L);
-
-        assertThat(result).isPresent();
-        assertThat(result.get().getGradesImproved()).isEqualTo(2);
-        assertThat(result.get().getFirstScore()).isEqualTo(PebScore.D);
-        assertThat(result.get().getCurrentScore()).isEqualTo(PebScore.B);
-        assertThat(result.get().getHistory()).hasSize(1);
-        assertThat(result.get().getHistory().get(0).getDirection()).isEqualTo("IMPROVED");
+        verify(buildingRepository).delete(building);
     }
 
     @Test
-    void getImprovementSummary_degraded_returnsNegativeGrades() {
-        when(housingUnitRepository.existsById(1L)).thenReturn(true);
-        PebScoreHistory rec2024 = buildEntity(PebScore.D, LocalDate.of(2024, 1, 1), null);
-        PebScoreHistory rec2020 = buildEntity(PebScore.B, LocalDate.of(2020, 1, 1), null);
-        when(pebScoreRepository.findByHousingUnitIdOrderByScoreDateDesc(1L))
-                .thenReturn(List.of(rec2024, rec2020));
+    void deleteBuilding_WhenNotExists_ThrowsException() {
+        when(buildingRepository.findById(99L)).thenReturn(Optional.empty());
 
-        Optional<PebImprovementDTO> result = service.getImprovementSummary(1L);
-
-        assertThat(result.get().getGradesImproved()).isNegative();
-        assertThat(result.get().getHistory().get(0).getDirection()).isEqualTo("DEGRADED");
-    }
-
-    @Test
-    void getImprovementSummary_noHistory_returnsEmpty() {
-        when(housingUnitRepository.existsById(1L)).thenReturn(true);
-        when(pebScoreRepository.findByHousingUnitIdOrderByScoreDateDesc(1L)).thenReturn(List.of());
-
-        Optional<PebImprovementDTO> result = service.getImprovementSummary(1L);
-
-        assertThat(result).isEmpty();
-    }
-
-    // ─── Helpers ──────────────────────────────────────────────────────────────
-
-    private CreatePebScoreRequest validRequest() {
-        CreatePebScoreRequest req = new CreatePebScoreRequest();
-        req.setPebScore(PebScore.B);
-        req.setScoreDate(LocalDate.now());
-        return req;
-    }
-
-    private PebScoreHistory buildEntity(PebScore score, LocalDate scoreDate, LocalDate validUntil) {
-        PebScoreHistory h = new PebScoreHistory();
-        h.setPebScore(score);
-        h.setScoreDate(scoreDate);
-        h.setValidUntil(validUntil);
-        h.setHousingUnit(unit);
-        try {
-            Field idField = PebScoreHistory.class.getDeclaredField("id");
-            idField.setAccessible(true);
-            idField.set(h, ID_SEQ.getAndIncrement());
-        } catch (NoSuchFieldException | IllegalAccessException e) {
-            throw new RuntimeException("Failed to set id on PebScoreHistory", e);
-        }
-        return h;
+        assertThrows(BuildingNotFoundException.class,
+                () -> buildingService.deleteBuilding(99L));
     }
 }

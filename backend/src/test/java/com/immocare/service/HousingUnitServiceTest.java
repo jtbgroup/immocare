@@ -16,6 +16,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.test.util.ReflectionTestUtils;
 
 import com.immocare.exception.BuildingNotFoundException;
 import com.immocare.exception.HousingUnitNotFoundException;
@@ -62,6 +63,9 @@ class HousingUnitServiceTest {
 
   @BeforeEach
   void setUp() {
+    ReflectionTestUtils.setField(service, "rentHistoryRepository", rentHistoryRepository);
+    ReflectionTestUtils.setField(service, "pebScoreRepository", pebScoreRepository);
+
     Person owner = new Person();
     owner.setId(1L);
     owner.setFirstName("Jean");
