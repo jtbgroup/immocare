@@ -7,6 +7,7 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+import static org.springframework.test.web.servlet.setup.MockMvcBuilders.webAppContextSetup;
 
 import java.time.LocalDate;
 import java.util.List;
@@ -19,7 +20,9 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.context.TestPropertySource;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.web.context.WebApplicationContext;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
@@ -32,19 +35,22 @@ import com.immocare.model.dto.PebScoreDTO;
 import com.immocare.model.entity.PebScore;
 import com.immocare.service.PebScoreService;
 
-@SpringBootTest
+@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.MOCK)
 @TestPropertySource(locations = "classpath:application-test.properties")
 class PebScoreControllerTest {
 
         @Autowired
-        MockMvc mockMvc;
-        @Autowired
+        private WebApplicationContext webApplicationContext;
+
+        @MockitoBean
         PebScoreService pebScoreService;
 
+        private MockMvc mockMvc;
         private ObjectMapper objectMapper;
 
         @BeforeEach
         void setUp() {
+                mockMvc = webAppContextSetup(webApplicationContext).build();
                 objectMapper = new ObjectMapper();
                 objectMapper.disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS);
                 objectMapper.findAndRegisterModules();
@@ -78,7 +84,6 @@ class PebScoreControllerTest {
         void addScore_missingScore_returns400() throws Exception {
                 CreatePebScoreRequest req = new CreatePebScoreRequest();
                 req.setScoreDate(LocalDate.now());
-                // pebScore is null → @NotNull should trigger
 
                 mockMvc.perform(post("/api/v1/housing-units/1/peb-scores")
                                 .contentType(MediaType.APPLICATION_JSON)

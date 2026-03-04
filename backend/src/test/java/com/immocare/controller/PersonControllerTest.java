@@ -12,9 +12,11 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+import static org.springframework.test.web.servlet.setup.MockMvcBuilders.webAppContextSetup;
 
 import java.util.List;
 
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -23,7 +25,9 @@ import org.springframework.data.domain.PageImpl;
 import org.springframework.http.MediaType;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.context.TestPropertySource;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.web.context.WebApplicationContext;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.immocare.exception.PersonNotFoundException;
@@ -34,17 +38,26 @@ import com.immocare.model.dto.PersonSummaryDTO;
 import com.immocare.model.dto.UpdatePersonRequest;
 import com.immocare.service.PersonService;
 
-@SpringBootTest
+@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.MOCK)
 @TestPropertySource(locations = "classpath:application-test.properties")
 @WithMockUser(roles = "ADMIN")
 class PersonControllerTest {
 
     @Autowired
-    MockMvc mockMvc;
+    private WebApplicationContext webApplicationContext;
+
     @Autowired
     ObjectMapper objectMapper;
-    @Autowired
+
+    @MockitoBean
     PersonService personService;
+
+    private MockMvc mockMvc;
+
+    @BeforeEach
+    void setUp() {
+        mockMvc = webAppContextSetup(webApplicationContext).build();
+    }
 
     // ---- GET /api/v1/persons ----
 
@@ -125,7 +138,6 @@ class PersonControllerTest {
     void create_missingLastName_returns400() throws Exception {
         CreatePersonRequest request = new CreatePersonRequest();
         request.setFirstName("Marie");
-        // lastName is missing → @NotBlank
 
         mockMvc.perform(post("/api/v1/persons")
                 .with(csrf())

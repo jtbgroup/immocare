@@ -13,6 +13,7 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+import static org.springframework.test.web.servlet.setup.MockMvcBuilders.webAppContextSetup;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -25,6 +26,7 @@ import org.springframework.http.MediaType;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.web.context.WebApplicationContext;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.immocare.exception.CannotDeleteLastAdminException;
@@ -39,21 +41,24 @@ import com.immocare.model.dto.UserDTO;
 import com.immocare.model.entity.AppUser;
 import com.immocare.service.UserService;
 
-@SpringBootTest
+@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.MOCK)
 class UserControllerTest {
 
         @Autowired
-        MockMvc mockMvc;
+        private WebApplicationContext webApplicationContext;
+
         @Autowired
         ObjectMapper objectMapper;
 
         @MockitoBean
         UserService userService;
 
+        private MockMvc mockMvc;
         private UserDTO sampleDTO;
 
         @BeforeEach
         void setUp() {
+                mockMvc = webAppContextSetup(webApplicationContext).build();
                 sampleDTO = new UserDTO(1L, "admin", "admin@example.com", "ADMIN",
                                 LocalDateTime.now(), LocalDateTime.now());
         }
