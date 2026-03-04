@@ -8,7 +8,7 @@
 - [x] vue qui regroupe tous les contrats
 - [x] Person sans NISS ne va pas car NIS est une clé primaire
 - [x] housing unit avec juste une terrasse donne une erreur si garden orientation n'est pas rempli
-- [ ] extincteurs
+- [x] extincteurs
 - [x] suivi des chaudières
 - [ ] dépenses
 - [x] view des alertes à revoir
