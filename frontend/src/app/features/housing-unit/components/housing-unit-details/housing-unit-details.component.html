@@ -97,7 +97,7 @@
   </div>
 
   <!-- Lease — UC010 -->
-  <div class="info-card">
+  <div class="info-card" *ngIf="unit">
     <app-lease-section [unitId]="unit.id"></app-lease-section>
   </div>
 </div>

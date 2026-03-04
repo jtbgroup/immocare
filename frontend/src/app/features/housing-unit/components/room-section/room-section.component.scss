@@ -3,24 +3,6 @@
 // alert, alert-error, alert-success)
 // come from global styles.scss partials.
 
-// ─── Section layout ───────────────────────────────────────────────────────────
-
-.section-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 0.75rem;
-
-  h3 {
-    margin: 0;
-  }
-}
-
-.header-actions {
-  display: flex;
-  gap: 0.5rem;
-}
-
 // ─── Room table ───────────────────────────────────────────────────────────────
 
 .table-wrapper {

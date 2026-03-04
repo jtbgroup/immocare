@@ -1,6 +1,11 @@
 <section class="lease-section">
   <div class="section-header">
-    <h3>📄 Lease</h3>
+    <h3 class="section-heading">
+      <span class="material-icons section-title-icon" style="color: #1565c0"
+        >description</span
+      >
+      Lease
+    </h3>
     <a
       *ngIf="canCreateLease"
       [routerLink]="['/leases/new']"
@@ -13,17 +18,27 @@
 
   <div *ngIf="isLoading" class="loading-placeholder">Loading…</div>
 
-  <div *ngIf="!isLoading && !activeLease && pastLeases.length === 0" class="no-data">
+  <div
+    *ngIf="!isLoading && !activeLease && pastLeases.length === 0"
+    class="no-data"
+  >
     No lease registered for this unit.
   </div>
 
   <!-- Active lease card -->
   <div *ngIf="!isLoading && activeLease" class="lease-card">
     <!-- Alert banners -->
-    <div *ngIf="activeLease.indexationAlertActive" class="alert-banner alert-banner-warning">
-      🔔 Indexation due — anniversary {{ activeLease.indexationAlertDate | appDate }}
+    <div
+      *ngIf="activeLease.indexationAlertActive"
+      class="alert-banner alert-banner-warning"
+    >
+      🔔 Indexation due — anniversary
+      {{ activeLease.indexationAlertDate | appDate }}
     </div>
-    <div *ngIf="activeLease.endNoticeAlertActive" class="alert-banner alert-banner-orange">
+    <div
+      *ngIf="activeLease.endNoticeAlertActive"
+      class="alert-banner alert-banner-orange"
+    >
       ⚠ End notice deadline — {{ activeLease.endNoticeAlertDate | appDate }}
     </div>
 
@@ -34,35 +49,51 @@
         <span class="lease-status-badge" [ngClass]="activeStatusClass">
           {{ activeLease.status }}
         </span>
-        <span class="lease-type-label">{{ LEASE_TYPE_LABELS[activeLease.leaseType] }}</span>
+        <span class="lease-type-label">{{
+          LEASE_TYPE_LABELS[activeLease.leaseType]
+        }}</span>
       </div>
 
       <!-- Right: details -->
       <div class="lease-details">
         <div class="lease-detail-row">
           <span class="lease-detail-label">Tenants:</span>
-          <span>{{ activeLease.tenantNames.join(', ') || '—' }}</span>
+          <span>{{ activeLease.tenantNames.join(", ") || "—" }}</span>
         </div>
         <div class="lease-detail-row">
           <span class="lease-detail-label">Rent:</span>
-          <span>{{ activeLease.monthlyRent | currency:'EUR':'symbol':'1.2-2' }}</span>
+          <span>{{
+            activeLease.monthlyRent | currency: "EUR" : "symbol" : "1.2-2"
+          }}</span>
           <span *ngIf="activeLease.monthlyCharges > 0" class="muted">
-            &nbsp;+ {{ activeLease.monthlyCharges | currency:'EUR':'symbol':'1.2-2' }}
+            &nbsp;+
+            {{
+              activeLease.monthlyCharges | currency: "EUR" : "symbol" : "1.2-2"
+            }}
             charges ({{ activeLease.chargesType }})
           </span>
         </div>
         <div class="lease-detail-row">
           <span class="lease-detail-label">Period:</span>
           <span>
-            {{ activeLease.startDate | appDate }} → {{ activeLease.endDate | appDate }}
+            {{ activeLease.startDate | appDate }} →
+            {{ activeLease.endDate | appDate }}
           </span>
         </div>
       </div>
 
       <!-- Actions -->
       <div class="lease-actions">
-        <a [routerLink]="['/leases', activeLease.id]" class="btn btn-sm btn-secondary">View</a>
-        <a [routerLink]="['/leases', activeLease.id, 'edit']" class="btn btn-sm btn-ghost">Edit</a>
+        <a
+          [routerLink]="['/leases', activeLease.id]"
+          class="btn btn-sm btn-secondary"
+          >View</a
+        >
+        <a
+          [routerLink]="['/leases', activeLease.id, 'edit']"
+          class="btn btn-sm btn-ghost"
+          >Edit</a
+        >
       </div>
     </div>
   </div>
@@ -70,7 +101,7 @@
   <!-- View History toggle -->
   <div *ngIf="!isLoading && pastLeases.length > 0" class="lease-footer">
     <button class="btn-link" (click)="toggleHistory()">
-      {{ showHistory ? 'Hide History' : 'View History' }}
+      {{ showHistory ? "Hide History" : "View History" }}
     </button>
   </div>
 
@@ -94,11 +125,15 @@
       <tbody>
         <tr *ngFor="let lease of pastLeases">
           <td>
-            <span class="lease-status-badge" [ngClass]="statusClass(lease)">{{ lease.status }}</span>
+            <span class="lease-status-badge" [ngClass]="statusClass(lease)">{{
+              lease.status
+            }}</span>
           </td>
           <td class="muted">{{ LEASE_TYPE_LABELS[lease.leaseType] }}</td>
-          <td>{{ lease.tenantNames.join(', ') || '—' }}</td>
-          <td>{{ lease.monthlyRent | currency:'EUR':'symbol':'1.0-0' }}</td>
+          <td>{{ lease.tenantNames.join(", ") || "—" }}</td>
+          <td>
+            {{ lease.monthlyRent | currency: "EUR" : "symbol" : "1.0-0" }}
+          </td>
           <td class="muted">
             {{ lease.startDate | appDate }} → {{ lease.endDate | appDate }}
           </td>

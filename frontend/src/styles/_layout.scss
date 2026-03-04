@@ -123,3 +123,26 @@
     }
   }
 }
+
+// ─── Section title icons ──────────────────────────────────────────────────────
+.section-heading {
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+  margin: 0;
+  font-size: 1.05rem;
+  font-weight: 600;
+
+  .section-title-icon {
+    font-size: 1.2rem;
+    line-height: 1;
+    flex-shrink: 0;
+  }
+}
+
+.section-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1rem;
+}

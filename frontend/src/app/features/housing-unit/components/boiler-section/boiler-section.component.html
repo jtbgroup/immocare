@@ -1,7 +1,11 @@
 <section class="boiler-section">
+  <!-- Section header -->
   <div class="section-header">
-    <h3>
-      Boiler — {{ ownerType === "HOUSING_UNIT" ? "housing unit" : "building" }}
+    <h3 class="section-heading">
+      <span class="material-icons section-title-icon"
+        >local_fire_department</span
+      >
+      Boiler
     </h3>
     <button
       class="btn btn-sm btn-primary"
@@ -16,35 +20,45 @@
   <div *ngIf="error" class="error-banner">{{ error }}</div>
 
   <div *ngIf="!loading && boilers.length === 0 && !showForm" class="no-data">
-    No boiler registered for this
-    {{ ownerType === "HOUSING_UNIT" ? "housing unit" : "building" }}.
+    No boiler registered.
   </div>
 
+  <!-- Boiler list -->
   <div class="boiler-list" *ngIf="!loading && boilers.length > 0">
     <div
       class="boiler-card"
       *ngFor="let boiler of boilers"
-      [class.alert-overdue]="
+      [class.boiler-card--overdue]="
         boiler.daysUntilNextService !== null && boiler.daysUntilNextService < 0
       "
-      [class.alert-warning]="
+      [class.boiler-card--warning]="
         boiler.serviceAlert &&
         boiler.daysUntilNextService !== null &&
         boiler.daysUntilNextService >= 0
       "
     >
-      <!-- Header -->
+      <!-- ── Card header: identity + actions ── -->
       <div class="boiler-card__header">
-        <span class="fuel-badge fuel-{{ boiler.fuelType | lowercase }}">{{
-          FUEL_TYPE_LABELS[boiler.fuelType]
-        }}</span>
-        <span class="boiler-name">
-          {{ boiler.brand || "—" }} {{ boiler.model || "" }}
-          <span class="serial" *ngIf="boiler.serialNumber"
-            >#{{ boiler.serialNumber }}</span
-          >
-        </span>
+        <div class="boiler-card__identity">
+          <span class="fuel-badge fuel-{{ boiler.fuelType | lowercase }}">
+            {{ FUEL_TYPE_LABELS[boiler.fuelType] }}
+          </span>
+          <span class="boiler-name">
+            {{ boiler.brand || "—" }} {{ boiler.model || "" }}
+            <span class="serial" *ngIf="boiler.serialNumber"
+              >#{{ boiler.serialNumber }}</span
+            >
+          </span>
+        </div>
+
         <div class="boiler-card__actions">
+          <button
+            class="btn btn-xs btn-primary"
+            *ngIf="serviceFormOpenId !== boiler.id"
+            (click)="openServiceForm(boiler.id)"
+          >
+            + Add Service
+          </button>
           <button
             class="btn btn-xs btn-secondary"
             (click)="openEditForm(boiler)"
@@ -60,49 +74,58 @@
         </div>
       </div>
 
-      <!-- Dates -->
-      <div class="boiler-card__dates">
-        <span
-          >Installed:
-          <strong>{{ boiler.installationDate | appDate }}</strong></span
-        >
-        <span *ngIf="boiler.lastServiceDate"
-          >Last service:
-          <strong>{{ boiler.lastServiceDate | appDate }}</strong></span
-        >
-        <span *ngIf="boiler.nextServiceDate">
-          Next service:
-          <strong
-            [class.text-danger]="
-              boiler.daysUntilNextService !== null &&
-              boiler.daysUntilNextService < 0
-            "
-            [class.text-warning]="
-              boiler.serviceAlert &&
-              boiler.daysUntilNextService !== null &&
-              boiler.daysUntilNextService >= 0
-            "
-          >
-            {{ boiler.nextServiceDate | appDate }}
-          </strong>
-          <span *ngIf="boiler.daysUntilNextService !== null">
-            <span
-              *ngIf="boiler.daysUntilNextService < 0"
-              class="badge badge-danger"
-              >Overdue by {{ -boiler.daysUntilNextService }} day(s)</span
-            >
-            <span
-              *ngIf="boiler.daysUntilNextService >= 0 && boiler.serviceAlert"
-              class="badge badge-warning"
-              >Due in {{ boiler.daysUntilNextService }} day(s)</span
-            >
+      <!-- ── Card body: boiler data ── -->
+      <div class="boiler-card__body">
+        <div class="boiler-meta">
+          <span class="meta-item">
+            <span class="meta-label">Installed</span>
+            <strong>{{ boiler.installationDate | appDate }}</strong>
           </span>
-        </span>
+          <span class="meta-item" *ngIf="boiler.lastServiceDate">
+            <span class="meta-label">Last service</span>
+            <strong>{{ boiler.lastServiceDate | appDate }}</strong>
+          </span>
+          <span class="meta-item" *ngIf="boiler.nextServiceDate">
+            <span class="meta-label">Next service</span>
+            <strong
+              [class.text-danger]="
+                boiler.daysUntilNextService !== null &&
+                boiler.daysUntilNextService < 0
+              "
+              [class.text-warning]="
+                boiler.serviceAlert &&
+                boiler.daysUntilNextService !== null &&
+                boiler.daysUntilNextService >= 0
+              "
+            >
+              {{ boiler.nextServiceDate | appDate }}
+            </strong>
+            <span
+              class="badge badge-danger"
+              *ngIf="
+                boiler.daysUntilNextService !== null &&
+                boiler.daysUntilNextService < 0
+              "
+            >
+              Overdue by {{ -boiler.daysUntilNextService }} day(s)
+            </span>
+            <span
+              class="badge badge-warning"
+              *ngIf="
+                boiler.daysUntilNextService !== null &&
+                boiler.daysUntilNextService >= 0 &&
+                boiler.serviceAlert
+              "
+            >
+              Due in {{ boiler.daysUntilNextService }} day(s)
+            </span>
+          </span>
+        </div>
+
+        <p class="boiler-notes" *ngIf="boiler.notes">{{ boiler.notes }}</p>
       </div>
 
-      <p class="boiler-notes" *ngIf="boiler.notes">{{ boiler.notes }}</p>
-
-      <!-- Delete confirmation -->
+      <!-- ── Delete confirmation ── -->
       <div class="delete-confirm" *ngIf="deleteConfirmId === boiler.id">
         <span>Delete this boiler?</span>
         <button class="btn btn-xs btn-danger" (click)="doDelete(boiler.id)">
@@ -113,28 +136,7 @@
         </button>
       </div>
 
-      <!-- Service history controls -->
-      <div class="service-history-toggle">
-        <button
-          class="btn btn-xs btn-outline"
-          (click)="toggleServiceHistory(boiler.id)"
-        >
-          {{
-            serviceHistoryOpen[boiler.id]
-              ? "▲ Hide service history"
-              : "▼ Service history"
-          }}
-        </button>
-        <button
-          class="btn btn-xs btn-primary"
-          *ngIf="serviceFormOpenId !== boiler.id"
-          (click)="openServiceForm(boiler.id)"
-        >
-          + Add Service
-        </button>
-      </div>
-
-      <!-- Add service inline form -->
+      <!-- ── Add service inline form ── -->
       <div class="service-form-panel" *ngIf="serviceFormOpenId === boiler.id">
         <h5>New Service Record</h5>
         <form [formGroup]="serviceForm">
@@ -184,8 +186,25 @@
         </form>
       </div>
 
-      <!-- Service history table -->
+      <!-- ── Service history toggle link ── -->
+      <div class="boiler-card__footer">
+        <button class="btn-link" (click)="toggleServiceHistory(boiler.id)">
+          {{
+            serviceHistoryOpen[boiler.id]
+              ? "Hide service history"
+              : "View service history"
+          }}
+        </button>
+      </div>
+
+      <!-- ── Service history panel ── -->
       <div class="service-history-panel" *ngIf="serviceHistoryOpen[boiler.id]">
+        <div class="history-header">
+          <h4>Service History</h4>
+          <button class="btn-close" (click)="toggleServiceHistory(boiler.id)">
+            ✕
+          </button>
+        </div>
         <div
           *ngIf="serviceHistoryLoading[boiler.id]"
           class="loading-placeholder"
@@ -197,7 +216,7 @@
             No service recorded.
           </div>
           <table
-            class="data-table"
+            class="history-table"
             *ngIf="serviceHistoryMap[boiler.id]?.length"
           >
             <thead>
@@ -234,7 +253,24 @@
     <h4>{{ editingId ? "Edit Boiler" : "Add Boiler" }}</h4>
     <form [formGroup]="form">
       <div class="form-row">
-        <label>Fuel type <span class="required">*</span></label>
+        <label>Brand <span class="required">*</span></label>
+        <input type="text" formControlName="brand" />
+        <span
+          class="field-error"
+          *ngIf="form.get('brand')?.invalid && form.get('brand')?.touched"
+          >Brand is required.</span
+        >
+      </div>
+      <div class="form-row">
+        <label>Model</label>
+        <input type="text" formControlName="model" />
+      </div>
+      <div class="form-row">
+        <label>Serial number</label>
+        <input type="text" formControlName="serialNumber" />
+      </div>
+      <div class="form-row">
+        <label>Fuel type</label>
         <select formControlName="fuelType">
           <option *ngFor="let ft of FUEL_TYPES" [value]="ft">
             {{ FUEL_TYPE_LABELS[ft] }}
@@ -244,28 +280,18 @@
       <div class="form-row">
         <label>Installation date <span class="required">*</span></label>
         <input type="date" formControlName="installationDate" />
+        <span
+          class="field-error"
+          *ngIf="
+            form.get('installationDate')?.invalid &&
+            form.get('installationDate')?.touched
+          "
+          >Installation date is required.</span
+        >
       </div>
       <div class="form-row">
-        <label>Brand</label><input type="text" formControlName="brand" />
-      </div>
-      <div class="form-row">
-        <label>Model</label><input type="text" formControlName="model" />
-      </div>
-      <div class="form-row">
-        <label>Serial number</label
-        ><input type="text" formControlName="serialNumber" />
-      </div>
-      <div class="form-row">
-        <label>Last service date</label
-        ><input type="date" formControlName="lastServiceDate" />
-      </div>
-      <div class="form-row">
-        <label>Next service date</label
-        ><input type="date" formControlName="nextServiceDate" />
-      </div>
-      <div class="form-row">
-        <label>Notes</label
-        ><textarea formControlName="notes" rows="3"></textarea>
+        <label>Notes</label>
+        <textarea formControlName="notes" rows="2"></textarea>
       </div>
       <div *ngIf="saveError" class="error-banner">{{ saveError }}</div>
       <div class="form-actions">
