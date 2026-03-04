@@ -7,6 +7,19 @@ import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import java.lang.reflect.Field;
+import java.time.LocalDate;
+import java.util.List;
+import java.util.Optional;
+import java.util.concurrent.atomic.AtomicLong;
+
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
+
 import com.immocare.exception.HousingUnitNotFoundException;
 import com.immocare.exception.InvalidPebScoreDateException;
 import com.immocare.exception.InvalidValidityPeriodException;
@@ -19,43 +32,37 @@ import com.immocare.model.entity.PebScore;
 import com.immocare.model.entity.PebScoreHistory;
 import com.immocare.repository.HousingUnitRepository;
 import com.immocare.repository.PebScoreRepository;
-import java.time.LocalDate;
-import java.util.List;
-import java.util.Optional;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
-import org.mockito.junit.jupiter.MockitoExtension;
 
 @ExtendWith(MockitoExtension.class)
 class PebScoreServiceTest {
 
-    @Mock private PebScoreRepository pebScoreRepository;
-    @Mock private HousingUnitRepository housingUnitRepository;
-    @Mock private PebScoreMapper pebScoreMapper;
+    @Mock
+    PebScoreRepository pebScoreRepository;
+    @Mock
+    HousingUnitRepository housingUnitRepository;
+    @Mock
+    PebScoreMapper pebScoreMapper;
 
-    @InjectMocks private PebScoreService service;
+    @InjectMocks
+    PebScoreService service;
 
     private HousingUnit unit;
+    private static final AtomicLong ID_SEQ = new AtomicLong(1);
 
     @BeforeEach
     void setUp() {
         unit = new HousingUnit();
-        // set id via reflection-free approach: use a real entity or a spy
+        unit.setId(1L);
     }
 
     // ─── addScore ─────────────────────────────────────────────────────────────
 
     @Test
     void addScore_unitNotFound_throwsHousingUnitNotFoundException() {
-        when(housingUnitRepository.findById(99L)).thenReturn(Optional.empty());
+        when(housingUnitRepository.findById(1L)).thenReturn(Optional.empty());
 
-        CreatePebScoreRequest req = validRequest();
-        assertThatThrownBy(() -> service.addScore(99L, req))
+        assertThatThrownBy(() -> service.addScore(1L, validRequest()))
                 .isInstanceOf(HousingUnitNotFoundException.class);
-
         verify(pebScoreRepository, never()).save(any());
     }
 
@@ -98,7 +105,7 @@ class PebScoreServiceTest {
         verify(pebScoreRepository).save(any());
     }
 
-    // ─── Status computation ───────────────────────────────────────────────────
+    // ─── getHistory ───────────────────────────────────────────────────────────
 
     @Test
     void getHistory_computesExpiredStatus_whenValidUntilPast() {
@@ -150,7 +157,6 @@ class PebScoreServiceTest {
     @Test
     void getImprovementSummary_computesImprovedGrades() {
         when(housingUnitRepository.existsById(1L)).thenReturn(true);
-        // D (2020) → B (2024): improvement of 2 grades
         PebScoreHistory rec2024 = buildEntity(PebScore.B, LocalDate.of(2024, 1, 1), null);
         PebScoreHistory rec2020 = buildEntity(PebScore.D, LocalDate.of(2020, 1, 1), null);
         when(pebScoreRepository.findByHousingUnitIdOrderByScoreDateDesc(1L))
@@ -205,6 +211,13 @@ class PebScoreServiceTest {
         h.setScoreDate(scoreDate);
         h.setValidUntil(validUntil);
         h.setHousingUnit(unit);
+        try {
+            Field idField = PebScoreHistory.class.getDeclaredField("id");
+            idField.setAccessible(true);
+            idField.set(h, ID_SEQ.getAndIncrement());
+        } catch (NoSuchFieldException | IllegalAccessException e) {
+            throw new RuntimeException("Failed to set id on PebScoreHistory", e);
+        }
         return h;
     }
 }

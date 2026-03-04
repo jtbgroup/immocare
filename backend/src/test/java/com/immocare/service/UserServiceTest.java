@@ -1,10 +1,16 @@
 package com.immocare.service;
 
-import com.immocare.exception.*;
-import com.immocare.mapper.UserMapper;
-import com.immocare.model.dto.*;
-import com.immocare.model.entity.AppUser;
-import com.immocare.repository.UserRepository;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatNoException;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
+
+import java.time.LocalDateTime;
+import java.util.List;
+import java.util.Optional;
+
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -13,22 +19,32 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
-import java.time.LocalDateTime;
-import java.util.List;
-import java.util.Optional;
-
-import static org.assertj.core.api.Assertions.*;
-import static org.mockito.ArgumentMatchers.*;
-import static org.mockito.Mockito.*;
+import com.immocare.exception.CannotDeleteLastAdminException;
+import com.immocare.exception.CannotDeleteSelfException;
+import com.immocare.exception.EmailTakenException;
+import com.immocare.exception.PasswordMismatchException;
+import com.immocare.exception.UserNotFoundException;
+import com.immocare.exception.UsernameTakenException;
+import com.immocare.mapper.UserMapper;
+import com.immocare.model.dto.ChangePasswordRequest;
+import com.immocare.model.dto.CreateUserRequest;
+import com.immocare.model.dto.UpdateUserRequest;
+import com.immocare.model.dto.UserDTO;
+import com.immocare.model.entity.AppUser;
+import com.immocare.repository.UserRepository;
 
 @ExtendWith(MockitoExtension.class)
 class UserServiceTest {
 
-    @Mock UserRepository userRepository;
-    @Mock UserMapper userMapper;
-    @Mock PasswordEncoder passwordEncoder;
+    @Mock
+    UserRepository userRepository;
+    @Mock
+    UserMapper userMapper;
+    @Mock
+    PasswordEncoder passwordEncoder;
 
-    @InjectMocks UserService userService;
+    @InjectMocks
+    UserService userService;
 
     private AppUser adminUser;
     private UserDTO adminDTO;
@@ -173,10 +189,10 @@ class UserServiceTest {
 
     @Test
     void updateUser_sameUsernameAllowed() {
+        // Same username as current user — service skips the uniqueness check
         UpdateUserRequest req = new UpdateUserRequest("admin", "admin@example.com", "ADMIN");
 
         when(userRepository.findById(1L)).thenReturn(Optional.of(adminUser));
-        when(userRepository.existsByEmailIgnoreCase("admin@example.com")).thenReturn(false);
         when(userRepository.save(adminUser)).thenReturn(adminUser);
         when(userMapper.toDTO(adminUser)).thenReturn(adminDTO);
 
