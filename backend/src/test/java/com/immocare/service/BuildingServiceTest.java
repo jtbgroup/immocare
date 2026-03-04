@@ -43,7 +43,7 @@ class BuildingServiceTest {
   @Test
   void createBuilding_WithValidData_ReturnsSavedBuilding() {
     CreateBuildingRequest request = new CreateBuildingRequest(
-        "Résidence Soleil", "123 Rue de la Loi", "1000", "Brussels", "Belgium", 0L);
+        "Résidence Soleil", "123 Rue de la Loi", "1000", "Brussels", "Belgium", null);
 
     Building building = new Building();
     building.setName("Résidence Soleil");
@@ -58,7 +58,7 @@ class BuildingServiceTest {
 
     when(buildingMapper.toEntity(request)).thenReturn(building);
     when(buildingRepository.save(building)).thenReturn(savedBuilding);
-    when(buildingMapper.toDTO(savedBuilding)).thenReturn(expectedDTO);
+    when(buildingMapper.toDTOWithUnitCount(savedBuilding, 0L)).thenReturn(expectedDTO);
 
     BuildingDTO result = buildingService.createBuilding(request);
 
@@ -80,7 +80,7 @@ class BuildingServiceTest {
 
     when(buildingRepository.findById(buildingId)).thenReturn(Optional.of(building));
     when(housingUnitRepository.countByBuildingId(buildingId)).thenReturn(0L);
-    when(buildingMapper.toDTO(building)).thenReturn(expectedDTO);
+    when(buildingMapper.toDTOWithUnitCount(building, 0L)).thenReturn(expectedDTO);
 
     BuildingDTO result = buildingService.getBuildingById(buildingId);
 
@@ -113,7 +113,7 @@ class BuildingServiceTest {
     when(buildingRepository.findById(buildingId)).thenReturn(Optional.of(building));
     when(housingUnitRepository.countByBuildingId(buildingId)).thenReturn(0L);
     when(buildingRepository.save(any())).thenReturn(building);
-    when(buildingMapper.toDTO(building)).thenReturn(expectedDTO);
+    when(buildingMapper.toDTOWithUnitCount(building, 0L)).thenReturn(expectedDTO);
 
     BuildingDTO result = buildingService.updateBuilding(buildingId, request);
 
