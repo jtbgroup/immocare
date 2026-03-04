@@ -74,8 +74,8 @@ export class LeaseFormComponent implements OnInit {
       this.leaseId = +idParam;
       this.loadLease(this.leaseId);
     } else {
-      this.unitId =
-        +(this.route.snapshot.paramMap.get("unitId") ?? 0) || undefined;
+      const unitIdParam = this.route.snapshot.paramMap.get("unitId");
+      this.unitId = unitIdParam ? +unitIdParam : undefined;
     }
   }
 
@@ -306,6 +306,14 @@ export class LeaseFormComponent implements OnInit {
           this.errorMessage = err.error?.message || "Save failed.";
         },
       });
+    }
+  }
+
+  cancel(): void {
+    if (this.isEditMode && this.leaseId) {
+      this.router.navigate(["/leases", this.leaseId]);
+    } else {
+      this.router.navigate(["/housing-units", this.unitId]);
     }
   }
 }

@@ -18,8 +18,10 @@ import com.immocare.model.dto.UpdateHousingUnitRequest;
 import com.immocare.model.entity.Building;
 import com.immocare.model.entity.HousingUnit;
 import com.immocare.model.entity.Person;
+import com.immocare.model.enums.LeaseStatus;
 import com.immocare.repository.BuildingRepository;
 import com.immocare.repository.HousingUnitRepository;
+import com.immocare.repository.LeaseRepository;
 import com.immocare.repository.PebScoreRepository;
 import com.immocare.repository.PersonRepository;
 import com.immocare.repository.RentHistoryRepository;
@@ -38,6 +40,7 @@ public class HousingUnitService {
   private final PersonRepository personRepository;
   private final HousingUnitMapper housingUnitMapper;
   private final RoomRepository roomRepository;
+  private final LeaseRepository leaseRepository;
   @Autowired
   private RentHistoryRepository rentHistoryRepository;
   @Autowired
@@ -47,12 +50,13 @@ public class HousingUnitService {
       BuildingRepository buildingRepository,
       PersonRepository personRepository,
       HousingUnitMapper housingUnitMapper,
-      RoomRepository roomRepository) {
+      RoomRepository roomRepository, LeaseRepository leaseRepository) {
     this.housingUnitRepository = housingUnitRepository;
     this.buildingRepository = buildingRepository;
     this.personRepository = personRepository;
     this.housingUnitMapper = housingUnitMapper;
     this.roomRepository = roomRepository;
+    this.leaseRepository = leaseRepository;
   }
 
   // ─── Queries ────────────────────────────────────────────────────────────────
@@ -205,6 +209,15 @@ public class HousingUnitService {
     pebScoreRepository
         .findFirstByHousingUnitIdOrderByScoreDateDesc(unit.getId())
         .ifPresent(p -> dto.setCurrentPebScore(p.getPebScore()));
+
+    // Active lease status badge
+    leaseRepository
+        .findFirstByHousingUnitIdAndStatus(unit.getId(), LeaseStatus.ACTIVE)
+        .ifPresentOrElse(
+            l -> dto.setActiveLeaseStatus("ACTIVE"),
+            () -> leaseRepository
+                .findFirstByHousingUnitIdAndStatus(unit.getId(), LeaseStatus.DRAFT)
+                .ifPresent(l -> dto.setActiveLeaseStatus("DRAFT")));
 
     return dto;
   }

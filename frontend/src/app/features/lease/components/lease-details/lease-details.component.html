@@ -1,30 +1,42 @@
 <div class="lease-details-container" *ngIf="lease; else loading">
-
   <!-- Header -->
   <div class="details-header">
     <div class="header-left">
       <h1>Lease #{{ lease.id }}</h1>
-      <span class="status-badge status-{{ lease.status | lowercase }}">
+      <span
+        class="lease-status-badge lease-status-badge--{{
+          lease.status | lowercase
+        }}"
+      >
         {{ lease.status }}
       </span>
     </div>
     <div class="header-actions">
       <!-- Status change -->
       <div class="status-change-bar" *ngIf="canChangeStatus">
-        <select [(ngModel)]="selectedStatus" class="form-control form-control-sm">
+        <select
+          [(ngModel)]="selectedStatus"
+          class="form-control form-control-sm"
+        >
           <option value="">Change status…</option>
-          <option *ngFor="let s of eligibleStatuses" [value]="s">{{ s }}</option>
+          <option *ngFor="let s of eligibleStatuses" [value]="s">
+            {{ s }}
+          </option>
         </select>
         <button
           class="btn btn-sm btn-warning"
           [disabled]="!selectedStatus || isChangingStatus"
           (click)="applyStatusChange()"
         >
-          {{ isChangingStatus ? 'Saving…' : 'Apply' }}
+          {{ isChangingStatus ? "Saving…" : "Apply" }}
         </button>
       </div>
 
-      <a *ngIf="canEdit()" [routerLink]="['/leases', lease.id, 'edit']" class="btn btn-secondary">
+      <a
+        *ngIf="canEdit()"
+        [routerLink]="['/leases', lease.id, 'edit']"
+        class="btn btn-secondary"
+      >
         Edit
       </a>
     </div>
@@ -48,7 +60,7 @@
       <div class="info-item">
         <label>Unit</label>
         <p>
-          <a [routerLink]="['/housing-units', lease.housingUnitId]">
+          <a [routerLink]="['/units', lease.housingUnitId]">
             {{ lease.housingUnitNumber }}
           </a>
         </p>
@@ -101,24 +113,31 @@
     <div class="info-grid">
       <div class="info-item">
         <label>Monthly Rent</label>
-        <p>{{ lease.monthlyRent | currency:'EUR':'symbol':'1.2-2' }}</p>
+        <p>{{ lease.monthlyRent | currency: "EUR" : "symbol" : "1.2-2" }}</p>
       </div>
       <div class="info-item">
         <label>Charges</label>
         <p>
-          {{ lease.monthlyCharges | currency:'EUR':'symbol':'1.2-2' }}
+          {{ lease.monthlyCharges | currency: "EUR" : "symbol" : "1.2-2" }}
           <span class="muted">({{ lease.chargesType }})</span>
         </p>
       </div>
       <div class="info-item">
         <label>Total</label>
-        <p><strong>{{ lease.totalRent | currency:'EUR':'symbol':'1.2-2' }}</strong></p>
+        <p>
+          <strong>{{
+            lease.totalRent | currency: "EUR" : "symbol" : "1.2-2"
+          }}</strong>
+        </p>
       </div>
     </div>
   </div>
 
   <!-- Rent adjustment section -->
-  <app-rent-adjustment-section [lease]="lease" (leaseUpdated)="loadLease(lease.id)">
+  <app-rent-adjustment-section
+    [lease]="lease"
+    (leaseUpdated)="loadLease(lease.id)"
+  >
   </app-rent-adjustment-section>
 
   <!-- Tenants -->
@@ -128,29 +147,34 @@
   <!-- Registration -->
   <div
     class="info-card"
-    *ngIf="lease.registrationSpf || lease.registrationRegion || lease.registrationInventorySpf || lease.registrationInventoryRegion"
+    *ngIf="
+      lease.registrationSpf ||
+      lease.registrationRegion ||
+      lease.registrationInventorySpf ||
+      lease.registrationInventoryRegion
+    "
   >
     <h2>Registration</h2>
     <div class="info-subsection-label">Lease deed</div>
     <div class="info-grid">
       <div class="info-item">
         <label>SPF Finances</label>
-        <p>{{ lease.registrationSpf || '—' }}</p>
+        <p>{{ lease.registrationSpf || "—" }}</p>
       </div>
       <div class="info-item">
         <label>Region</label>
-        <p>{{ lease.registrationRegion || '—' }}</p>
+        <p>{{ lease.registrationRegion || "—" }}</p>
       </div>
     </div>
-    <div class="info-subsection-label" style="margin-top: 1rem">Inventory</div>
+    <div class="info-subsection-label">Inventory</div>
     <div class="info-grid">
       <div class="info-item">
         <label>SPF Finances</label>
-        <p>{{ lease.registrationInventorySpf || '—' }}</p>
+        <p>{{ lease.registrationInventorySpf || "—" }}</p>
       </div>
       <div class="info-item">
         <label>Region</label>
-        <p>{{ lease.registrationInventoryRegion || '—' }}</p>
+        <p>{{ lease.registrationInventoryRegion || "—" }}</p>
       </div>
     </div>
   </div>
@@ -161,11 +185,11 @@
     <div class="info-grid">
       <div class="info-item">
         <label>Amount</label>
-        <p>{{ lease.depositAmount | currency:'EUR':'symbol':'1.2-2' }}</p>
+        <p>{{ lease.depositAmount | currency: "EUR" : "symbol" : "1.2-2" }}</p>
       </div>
       <div class="info-item">
         <label>Type</label>
-        <p>{{ lease.depositType || '—' }}</p>
+        <p>{{ lease.depositType || "—" }}</p>
       </div>
       <div class="info-item" *ngIf="lease.depositReference">
         <label>Reference</label>
@@ -180,7 +204,7 @@
     <div class="info-grid">
       <div class="info-item">
         <label>Confirmed</label>
-        <p>Yes</p>
+        <p>✅ Yes</p>
       </div>
       <div class="info-item" *ngIf="lease.tenantInsuranceReference">
         <label>Reference</label>
@@ -192,7 +216,6 @@
       </div>
     </div>
   </div>
-
 </div>
 
 <ng-template #loading>

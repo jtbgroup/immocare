@@ -8,8 +8,7 @@
     </h3>
     <a
       *ngIf="canCreateLease"
-      [routerLink]="['/leases/new']"
-      [queryParams]="{ unitId: unitId }"
+      [routerLink]="['/housing-units', unitId, 'leases', 'new']"
       class="btn btn-sm btn-primary"
     >
       + New Lease

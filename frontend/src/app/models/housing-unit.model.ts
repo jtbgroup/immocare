@@ -28,9 +28,12 @@ export interface HousingUnit {
   gardenOrientation?: Orientation;
   ownerId?: number;
   ownerName?: string;
+  effectiveOwnerName?: string;
   roomCount?: number;
   currentMonthlyRent?: number;
   currentPebScore?: PebScore;
+  /** ACTIVE, DRAFT, or undefined if no current lease */
+  activeLeaseStatus?: string;
   createdAt?: string;
   updatedAt?: string;
 }

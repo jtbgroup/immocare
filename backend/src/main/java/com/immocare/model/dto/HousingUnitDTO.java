@@ -5,10 +5,6 @@ import java.time.LocalDateTime;
 
 import com.immocare.model.entity.PebScore;
 
-/**
- * DTO for housing unit responses.
- * Includes computed fields: effectiveOwnerName, roomCount.
- */
 public class HousingUnitDTO {
 
   private Long id;
@@ -27,26 +23,19 @@ public class HousingUnitDTO {
   private BigDecimal currentMonthlyRent;
   private PebScore currentPebScore;
 
-  /** ID of the unit-specific owner Person (null if inherited from building). */
+  /** ACTIVE, DRAFT, or null if no current lease */
+  private String activeLeaseStatus;
+
   private Long ownerId;
-
-  /**
-   * Unit-specific owner name (may be null; use effectiveOwnerName for display).
-   */
   private String ownerName;
-
-  /** Resolved owner: unit-specific if set, otherwise inherited from building. */
   private String effectiveOwnerName;
-
   private Long roomCount;
   private LocalDateTime createdAt;
   private LocalDateTime updatedAt;
 
-  // Constructors
   public HousingUnitDTO() {
   }
 
-  // Getters and Setters
   public Long getId() {
     return id;
   }
@@ -151,6 +140,30 @@ public class HousingUnitDTO {
     this.gardenOrientation = gardenOrientation;
   }
 
+  public BigDecimal getCurrentMonthlyRent() {
+    return currentMonthlyRent;
+  }
+
+  public void setCurrentMonthlyRent(BigDecimal currentMonthlyRent) {
+    this.currentMonthlyRent = currentMonthlyRent;
+  }
+
+  public PebScore getCurrentPebScore() {
+    return currentPebScore;
+  }
+
+  public void setCurrentPebScore(PebScore currentPebScore) {
+    this.currentPebScore = currentPebScore;
+  }
+
+  public String getActiveLeaseStatus() {
+    return activeLeaseStatus;
+  }
+
+  public void setActiveLeaseStatus(String activeLeaseStatus) {
+    this.activeLeaseStatus = activeLeaseStatus;
+  }
+
   public Long getOwnerId() {
     return ownerId;
   }
@@ -181,22 +194,6 @@ public class HousingUnitDTO {
 
   public void setRoomCount(Long roomCount) {
     this.roomCount = roomCount;
-  }
-
-  public BigDecimal getCurrentMonthlyRent() {
-    return currentMonthlyRent;
-  }
-
-  public void setCurrentMonthlyRent(BigDecimal currentMonthlyRent) {
-    this.currentMonthlyRent = currentMonthlyRent;
-  }
-
-  public PebScore getCurrentPebScore() {
-    return currentPebScore;
-  }
-
-  public void setCurrentPebScore(PebScore currentPebScore) {
-    this.currentPebScore = currentPebScore;
   }
 
   public LocalDateTime getCreatedAt() {

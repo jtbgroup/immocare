@@ -32,6 +32,7 @@ import { PEB_SCORE_DISPLAY } from "../../../../models/peb-score.model";
             <th>Rooms</th>
             <th>Rent</th>
             <th>PEB</th>
+            <th>Lease</th>
             <th>Owner</th>
           </tr>
         </thead>
@@ -63,7 +64,18 @@ import { PEB_SCORE_DISPLAY } from "../../../../models/peb-score.model";
               </span>
               <span *ngIf="!unit.currentPebScore">—</span>
             </td>
-            <td>{{ unit.ownerName ?? "—" }}</td>
+            <td>
+              <span
+                *ngIf="unit.activeLeaseStatus"
+                class="lease-status-badge lease-status-badge--{{
+                  unit.activeLeaseStatus | lowercase
+                }}"
+              >
+                {{ unit.activeLeaseStatus }}
+              </span>
+              <span *ngIf="!unit.activeLeaseStatus" class="text-muted">—</span>
+            </td>
+            <td>{{ unit.effectiveOwnerName ?? "—" }}</td>
           </tr>
         </tbody>
       </table>
@@ -111,7 +123,7 @@ import { PEB_SCORE_DISPLAY } from "../../../../models/peb-score.model";
       }
       .btn-primary {
         background: #007bff;
-        color: white;
+        color: #fff;
       }
       .btn-primary:hover {
         background: #0056b3;
@@ -125,15 +137,21 @@ import { PEB_SCORE_DISPLAY } from "../../../../models/peb-score.model";
         min-width: 32px;
         text-align: center;
       }
+      .text-muted {
+        color: #aaa;
+        font-size: 0.85rem;
+      }
     `,
   ],
 })
 export class HousingUnitListComponent implements OnInit, OnDestroy {
   @Input() buildingId!: number;
+
   units: HousingUnit[] = [];
   loading = false;
-  private destroy$ = new Subject<void>();
   readonly pebDisplay = PEB_SCORE_DISPLAY;
+
+  private destroy$ = new Subject<void>();
 
   constructor(
     private housingUnitService: HousingUnitService,
@@ -141,15 +159,6 @@ export class HousingUnitListComponent implements OnInit, OnDestroy {
   ) {}
 
   ngOnInit(): void {
-    this.loadUnits();
-  }
-  ngOnDestroy(): void {
-    this.destroy$.next();
-    this.destroy$.complete();
-  }
-
-  loadUnits(): void {
-    if (!this.buildingId) return;
     this.loading = true;
     this.housingUnitService
       .getUnitsByBuilding(this.buildingId)
@@ -165,9 +174,15 @@ export class HousingUnitListComponent implements OnInit, OnDestroy {
       });
   }
 
+  ngOnDestroy(): void {
+    this.destroy$.next();
+    this.destroy$.complete();
+  }
+
   viewUnit(id: number): void {
     this.router.navigate(["/units", id]);
   }
+
   addUnit(): void {
     this.router.navigate(["/units/new"], {
       queryParams: { buildingId: this.buildingId },
