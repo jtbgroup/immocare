@@ -2,69 +2,39 @@ name: Release
 
 on:
   push:
-    branches:
-      - main
-      - develop
+    tags:
+      - "v[0-9]*.[0-9]*.[0-9]*"
+      - "v[0-9]*.[0-9]*.[0-9]*-SNAPSHOT"
 
 jobs:
-  # ── Detect release intent from commit message ─────────────────────────────
-  detect:
-    runs-on: ubuntu-latest
-    outputs:
-      version: ${{ steps.parse.outputs.version }}
-      is_snapshot: ${{ steps.parse.outputs.is_snapshot }}
-      should_run: ${{ steps.parse.outputs.should_run }}
-
-    steps:
-      - name: Parse commit message
-        id: parse
-        env:
-          MSG: ${{ github.event.head_commit.message }}
-          BRANCH: ${{ github.ref_name }}
-        run: |
-          # Extract version from "release: x.y.z" or "release: x.y.z-SNAPSHOT"
-          if [[ "${MSG}" =~ ^release:\ ([0-9]+\.[0-9]+\.[0-9]+(-SNAPSHOT)?)([[:space:]]|$) ]]; then
-            VERSION="${BASH_REMATCH[1]}"
-            echo "version=${VERSION}" >> "$GITHUB_OUTPUT"
-
-            if [[ "${VERSION}" == *-SNAPSHOT ]]; then
-              IS_SNAPSHOT=true
-            else
-              IS_SNAPSHOT=false
-            fi
-            echo "is_snapshot=${IS_SNAPSHOT}" >> "$GITHUB_OUTPUT"
-
-            # SNAPSHOT allowed on both branches, release only on main
-            if [[ "${IS_SNAPSHOT}" == "true" ]] || [[ "${BRANCH}" == "main" ]]; then
-              echo "should_run=true" >> "$GITHUB_OUTPUT"
-            else
-              echo "Release tags are only processed on main — ignoring."
-              echo "should_run=false" >> "$GITHUB_OUTPUT"
-            fi
-          else
-            echo "No release intent detected in commit message."
-            echo "should_run=false" >> "$GITHUB_OUTPUT"
-          fi
-
   # ── Shared: version bump + tests ──────────────────────────────────────────
   prepare:
-    needs: detect
-    if: needs.detect.outputs.should_run == 'true'
     runs-on: ubuntu-latest
     permissions:
       contents: write
 
     outputs:
-      is_snapshot: ${{ needs.detect.outputs.is_snapshot }}
-      version: ${{ needs.detect.outputs.version }}
+      version: ${{ steps.version.outputs.value }}
+      is_snapshot: ${{ steps.version.outputs.is_snapshot }}
 
     steps:
-      - name: Checkout source branch
+      - name: Checkout tagged commit
         uses: actions/checkout@v4
         with:
-          ref: ${{ github.ref_name }}
+          ref: ${{ github.sha }}
           fetch-depth: 0
           token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Extract version
+        id: version
+        run: |
+          TAG="${GITHUB_REF_NAME#v}"
+          echo "value=${TAG}" >> "$GITHUB_OUTPUT"
+          if [[ "${TAG}" == *-SNAPSHOT ]]; then
+            echo "is_snapshot=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "is_snapshot=false" >> "$GITHUB_OUTPUT"
+          fi
 
       # ── Backend ─────────────────────────────────────────────────────────
       - name: Set up Java
@@ -76,7 +46,7 @@ jobs:
 
       - name: Bump backend version
         working-directory: backend
-        run: mvn -B versions:set -DnewVersion=${{ needs.detect.outputs.version }} -DgenerateBackupPoms=false
+        run: mvn -B versions:set -DnewVersion=${{ steps.version.outputs.value }} -DgenerateBackupPoms=false
 
       - name: Run backend tests
         working-directory: backend
@@ -92,11 +62,11 @@ jobs:
 
       - name: Bump frontend version
         working-directory: frontend
-        run: npm version ${{ needs.detect.outputs.version }} --no-git-tag-version
+        run: npm version ${{ steps.version.outputs.value }} --no-git-tag-version
 
       - name: Inject appVersion into environment files
         env:
-          VERSION: ${{ needs.detect.outputs.version }}
+          VERSION: ${{ steps.version.outputs.value }}
         run: |
           sed -i "s/appVersion: '[^']*'/appVersion: '${VERSION}'/" \
             frontend/src/environments/environment.ts \
@@ -110,7 +80,7 @@ jobs:
         working-directory: frontend
         run: npm test -- --watch=false --browsers=ChromeHeadless
 
-      # ── Commit bumped files + create tag on bumped commit ────────────────
+      # ── Commit bumped files ──────────────────────────────────────────────
       - name: Commit version bumps
         run: |
           git config user.name "github-actions[bot]"
@@ -118,23 +88,33 @@ jobs:
           git add backend/pom.xml frontend/package.json \
                   frontend/src/environments/environment.ts \
                   frontend/src/environments/environment.prod.ts
-          git commit -m "chore: bump version to ${{ needs.detect.outputs.version }} [skip ci]"
-          git push origin ${{ github.ref_name }}
+          git commit -m "chore: bump version to ${{ steps.version.outputs.value }} [skip ci]"
 
-      - name: Create and push tag
+      - name: Push to source branch
         run: |
-          git tag "v${{ needs.detect.outputs.version }}"
-          git push origin "v${{ needs.detect.outputs.version }}"
+          SOURCE_BRANCH=$(git branch -r --contains "${{ github.sha }}" \
+            | grep -v HEAD \
+            | sed 's|origin/||' \
+            | head -n1 \
+            | tr -d ' ')
+          echo "Pushing version bump to ${SOURCE_BRANCH}"
+          git push origin HEAD:"${SOURCE_BRANCH}"
+
+      # ── Move tag to bumped commit ────────────────────────────────────────
+      - name: Move tag to bumped commit
+        run: |
+          git tag -f "${{ github.ref_name }}"
+          git push origin -f "refs/tags/${{ github.ref_name }}"
 
       # ── Release tags only: fast-forward main ─────────────────────────────
       - name: Merge to main
-        if: needs.detect.outputs.is_snapshot == 'false' && github.ref_name != 'main'
+        if: steps.version.outputs.is_snapshot == 'false'
         run: |
           git fetch origin main
           git checkout main
           git merge --ff-only HEAD@{1} \
             || git merge --no-ff \
-                 -m "chore: merge v${{ needs.detect.outputs.version }} into main [skip ci]" \
+                 -m "chore: merge ${{ github.ref_name }} into main [skip ci]" \
                  HEAD@{1}
           git push origin main
 
@@ -180,4 +160,4 @@ jobs:
         uses: softprops/action-gh-release@v2
         with:
           generate_release_notes: true
-          tag_name: v${{ needs.prepare.outputs.version }}
+          tag_name: ${{ github.ref_name }}
