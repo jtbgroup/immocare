@@ -224,5 +224,35 @@ public class GlobalExceptionHandler {
 
   public record ErrorResponse(int status, String error, String message, LocalDateTime timestamp) {
   }
+  // ─── UC0XX - Users ────────────────────────────────────────────────────────
+
+  @ExceptionHandler(UserNotFoundException.class)
+  public ResponseEntity<ErrorResponse> handleUserNotFound(UserNotFoundException ex) {
+    return notFound("User not found", ex.getMessage());
+  }
+
+  @ExceptionHandler(EmailTakenException.class)
+  public ResponseEntity<ErrorResponse> handleEmailTaken(EmailTakenException ex) {
+    return ResponseEntity.status(HttpStatus.CONFLICT)
+        .body(new ErrorResponse(409, "EMAIL_TAKEN", ex.getMessage(), LocalDateTime.now()));
+  }
+
+  @ExceptionHandler(UsernameTakenException.class)
+  public ResponseEntity<ErrorResponse> handleUsernameTaken(UsernameTakenException ex) {
+    return ResponseEntity.status(HttpStatus.CONFLICT)
+        .body(new ErrorResponse(409, "USERNAME_TAKEN", ex.getMessage(), LocalDateTime.now()));
+  }
+
+  @ExceptionHandler(CannotDeleteLastAdminException.class)
+  public ResponseEntity<ErrorResponse> handleCannotDeleteLastAdmin(CannotDeleteLastAdminException ex) {
+    return ResponseEntity.status(HttpStatus.CONFLICT)
+        .body(new ErrorResponse(409, "LAST_ADMIN", ex.getMessage(), LocalDateTime.now()));
+  }
+
+  @ExceptionHandler(CannotDeleteSelfException.class)
+  public ResponseEntity<ErrorResponse> handleCannotDeleteSelf(CannotDeleteSelfException ex) {
+    return ResponseEntity.status(HttpStatus.FORBIDDEN)
+        .body(new ErrorResponse(403, "CANNOT_DELETE_SELF", ex.getMessage(), LocalDateTime.now()));
+  }
 
 }

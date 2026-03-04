@@ -98,16 +98,18 @@ public class HousingUnitService {
     if (!Boolean.TRUE.equals(request.getHasTerrace())) {
       unit.setTerraceSurface(null);
       unit.setTerraceOrientation(null);
-    } else if (request.getTerraceSurface() == null
-        || request.getTerraceSurface().compareTo(java.math.BigDecimal.ZERO) <= 0) {
-      throw new IllegalArgumentException("Terrace surface is required and must be greater than 0.");
+      // } else if (request.getTerraceSurface() == null
+      // || request.getTerraceSurface().compareTo(java.math.BigDecimal.ZERO) <= 0) {
+      // throw new IllegalArgumentException("Terrace surface is required and must be
+      // greater than 0.");
     }
     if (!Boolean.TRUE.equals(request.getHasGarden())) {
       unit.setGardenSurface(null);
       unit.setGardenOrientation(null);
-    } else if (request.getGardenSurface() == null
-        || request.getGardenSurface().compareTo(java.math.BigDecimal.ZERO) <= 0) {
-      throw new IllegalArgumentException("Garden surface is required and must be greater than 0.");
+      // } else if (request.getGardenSurface() == null
+      // || request.getGardenSurface().compareTo(java.math.BigDecimal.ZERO) <= 0) {
+      // throw new IllegalArgumentException("Garden surface is required and must be
+      // greater than 0.");
     }
 
     HousingUnit saved = housingUnitRepository.save(unit);

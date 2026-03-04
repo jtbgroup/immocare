@@ -18,6 +18,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.context.annotation.Import;
 import org.springframework.http.MediaType;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.context.TestPropertySource;
@@ -26,6 +27,7 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.web.context.WebApplicationContext;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.immocare.config.TestConfig;
 import com.immocare.exception.HousingUnitNotFoundException;
 import com.immocare.exception.InvalidPebScoreDateException;
 import com.immocare.exception.InvalidValidityPeriodException;
@@ -37,6 +39,7 @@ import com.immocare.service.PebScoreService;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.MOCK)
 @TestPropertySource(locations = "classpath:application-test.properties")
+@Import(TestConfig.class)
 class PebScoreControllerTest {
 
         @Autowired

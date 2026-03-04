@@ -13,23 +13,20 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
-import static org.springframework.test.web.servlet.setup.MockMvcBuilders.webAppContextSetup;
 
-import java.time.LocalDateTime;
 import java.util.List;
 
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.webmvc.test.autoconfigure.WebMvcTest;
+import org.springframework.context.annotation.Import;
 import org.springframework.http.MediaType;
 import org.springframework.security.test.context.support.WithMockUser;
-import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
-import org.springframework.web.context.WebApplicationContext;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.immocare.config.TestConfig;
 import com.immocare.exception.CannotDeleteLastAdminException;
 import com.immocare.exception.CannotDeleteSelfException;
 import com.immocare.exception.EmailTakenException;
@@ -42,28 +39,20 @@ import com.immocare.model.dto.UserDTO;
 import com.immocare.model.entity.AppUser;
 import com.immocare.service.UserService;
 
-@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.MOCK)
-@TestPropertySource(locations = "classpath:application-test.properties")
+@WebMvcTest(UserController.class)
+@Import(TestConfig.class)
 class UserControllerTest {
 
         @Autowired
-        private WebApplicationContext webApplicationContext;
+        private MockMvc mockMvc;
 
         @Autowired
-        ObjectMapper objectMapper;
+        private ObjectMapper objectMapper;
 
         @MockitoBean
-        UserService userService;
+        private UserService userService;
 
-        private MockMvc mockMvc;
-        private UserDTO sampleDTO;
-
-        @BeforeEach
-        void setUp() {
-                mockMvc = webAppContextSetup(webApplicationContext).build();
-                sampleDTO = new UserDTO(1L, "admin", "admin@example.com", "ADMIN",
-                                LocalDateTime.now(), LocalDateTime.now());
-        }
+        private UserDTO sampleDTO = new UserDTO(1L, "admin", "admin@example.com", "ADMIN", null, null);
 
         @Test
         @WithMockUser(roles = "ADMIN")

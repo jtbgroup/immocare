@@ -21,28 +21,32 @@ import java.util.Optional;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.webmvc.test.autoconfigure.WebMvcTest;
+import org.springframework.context.annotation.Import;
 import org.springframework.http.MediaType;
 import org.springframework.security.test.context.support.WithMockUser;
-import org.springframework.test.context.TestPropertySource;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.immocare.config.TestConfig;
 import com.immocare.exception.HousingUnitNotFoundException;
 import com.immocare.model.dto.RentHistoryDTO;
 import com.immocare.model.dto.SetRentRequest;
 import com.immocare.service.RentHistoryService;
 
-@SpringBootTest
-@TestPropertySource(locations = "classpath:application-test.properties")
+@WebMvcTest(RentHistoryController.class)
+@Import(TestConfig.class)
 @WithMockUser(roles = "ADMIN")
 class RentHistoryControllerTest {
 
         @Autowired
         private MockMvc mockMvc;
+
         @Autowired
         private ObjectMapper objectMapper;
-        @Autowired
+
+        @MockitoBean
         private RentHistoryService rentHistoryService;
 
         private static final Long UNIT_ID = 1L;

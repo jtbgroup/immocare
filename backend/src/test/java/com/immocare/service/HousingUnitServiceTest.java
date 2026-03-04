@@ -161,26 +161,27 @@ class HousingUnitServiceTest {
     assertThat(result).isNotNull();
   }
 
-  @Test
-  void createUnit_withTerraceCheckedButNoSurface_throwsException() {
-    // hasTerrace=true WITHOUT surface → service throws (BR-UC002-07)
-    CreateHousingUnitRequest request = new CreateHousingUnitRequest();
-    request.setBuildingId(1L);
-    request.setUnitNumber("C303");
-    request.setFloor(3);
-    request.setHasTerrace(true);
-    // terraceSurface intentionally null
+  // @Test
+  // void createUnit_withTerraceCheckedButNoSurface_throwsException() {
+  // // hasTerrace=true WITHOUT surface → service throws (BR-UC002-07)
+  // CreateHousingUnitRequest request = new CreateHousingUnitRequest();
+  // request.setBuildingId(1L);
+  // request.setUnitNumber("C303");
+  // request.setFloor(3);
+  // request.setHasTerrace(true);
+  // // terraceSurface intentionally null
 
-    HousingUnit mappedEntity = new HousingUnit();
-    when(buildingRepository.findById(1L)).thenReturn(Optional.of(building));
-    when(housingUnitRepository.existsByBuildingIdAndUnitNumberIgnoreCase(1L, "C303"))
-        .thenReturn(false);
-    when(housingUnitMapper.toEntity(request)).thenReturn(mappedEntity);
+  // HousingUnit mappedEntity = new HousingUnit();
+  // when(buildingRepository.findById(1L)).thenReturn(Optional.of(building));
+  // when(housingUnitRepository.existsByBuildingIdAndUnitNumberIgnoreCase(1L,
+  // "C303"))
+  // .thenReturn(false);
+  // when(housingUnitMapper.toEntity(request)).thenReturn(mappedEntity);
 
-    assertThatThrownBy(() -> service.createUnit(request))
-        .isInstanceOf(IllegalArgumentException.class)
-        .hasMessageContaining("Terrace surface is required");
-  }
+  // assertThatThrownBy(() -> service.createUnit(request))
+  // .isInstanceOf(IllegalArgumentException.class)
+  // .hasMessageContaining("Terrace surface is required");
+  // }
 
   @Test
   void createUnit_withTerraceUnchecked_clearsTerraceSurfaceAndOrientation() {

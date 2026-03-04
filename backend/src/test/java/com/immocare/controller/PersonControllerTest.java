@@ -21,6 +21,7 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.context.annotation.Import;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.http.MediaType;
 import org.springframework.security.test.context.support.WithMockUser;
@@ -30,6 +31,7 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.web.context.WebApplicationContext;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.immocare.config.TestConfig;
 import com.immocare.exception.PersonNotFoundException;
 import com.immocare.exception.PersonReferencedException;
 import com.immocare.model.dto.CreatePersonRequest;
@@ -40,6 +42,7 @@ import com.immocare.service.PersonService;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.MOCK)
 @TestPropertySource(locations = "classpath:application-test.properties")
+@Import(TestConfig.class)
 @WithMockUser(roles = "ADMIN")
 class PersonControllerTest {
 
