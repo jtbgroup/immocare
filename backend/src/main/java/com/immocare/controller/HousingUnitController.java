@@ -93,4 +93,13 @@ public class HousingUnitController {
     housingUnitService.deleteUnit(id);
     return ResponseEntity.ok(Map.of("message", "Housing unit deleted successfully"));
   }
+
+  /**
+   * Get all housing units across all buildings.
+   * Supports global Units list page.
+   */
+  @GetMapping("/api/v1/units")
+  public ResponseEntity<List<HousingUnitDTO>> getAllUnits() {
+    return ResponseEntity.ok(housingUnitService.getAllUnits());
+  }
 }

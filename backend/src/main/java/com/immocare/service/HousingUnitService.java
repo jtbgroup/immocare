@@ -227,4 +227,11 @@ public class HousingUnitService {
       return null;
     return (person.getFirstName() + " " + person.getLastName()).trim();
   }
+
+  public List<HousingUnitDTO> getAllUnits() {
+    return housingUnitRepository.findAllByOrderByBuildingIdAscFloorAscUnitNumberAsc()
+        .stream()
+        .map(this::toEnrichedDTO)
+        .collect(Collectors.toList());
+  }
 }

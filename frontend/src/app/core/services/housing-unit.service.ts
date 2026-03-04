@@ -25,6 +25,14 @@ export class HousingUnitService {
   }
 
   /**
+   * Get all housing units across all buildings.
+   * GET /api/v1/units
+   */
+  getAllUnits(): Observable<HousingUnit[]> {
+    return this.http.get<HousingUnit[]>(`${this.baseUrl}/units`);
+  }
+
+  /**
    * Get a single unit by ID.
    * GET /api/v1/units/{id}
    */

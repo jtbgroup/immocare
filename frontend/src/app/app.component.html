@@ -27,6 +27,13 @@
           🏢 Buildings
         </a>
         <a
+          routerLink="/units"
+          routerLinkActive="app-nav__link--active"
+          class="app-nav__link"
+        >
+          🏠 Units
+        </a>
+        <a
           routerLink="/leases"
           routerLinkActive="app-nav__link--active"
           class="app-nav__link"
@@ -45,7 +52,9 @@
           title="Alerts"
         >
           🔔
-          <span *ngIf="alertCount > 0" class="bell-badge">{{ alertCount }}</span>
+          <span *ngIf="alertCount > 0" class="bell-badge">{{
+            alertCount
+          }}</span>
         </a>
 
         <!-- Avatar dropdown -->

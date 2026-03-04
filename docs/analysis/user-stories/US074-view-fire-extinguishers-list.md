@@ -1,0 +1,22 @@
+# User Story US074: View Fire Extinguishers List
+
+| Attribute | Value |
+|-----------|-------|
+| **Story ID** | US074 |
+| **Epic** | Fire Safety Management |
+| **Related UC** | UC013 |
+| **Priority** | MUST HAVE |
+| **Story Points** | 2 |
+
+**As an** ADMIN **I want to** view all fire extinguishers of a building **so that** I can quickly assess the fire safety equipment on site.
+
+## Acceptance Criteria
+
+**AC1:** Building has 3 extinguishers → section lists all 3, ordered by identification number ASC.
+**AC2:** Each card shows: identification number (bold), linked unit number (or "—"), notes (truncated to 1 line), revision count badge, latest revision date (or "Never inspected" in italic).
+**AC3:** No extinguishers → "No fire extinguishers registered." + "Add" button.
+**AC4:** Section header shows total count: "🧯 Fire Extinguishers (3)".
+
+**Endpoint:** `GET /api/v1/buildings/{buildingId}/fire-extinguishers` — returns list with embedded revisions ordered by revisionDate DESC.
+
+**Last Updated:** 2026-03-04 | **Status:** Ready for Development

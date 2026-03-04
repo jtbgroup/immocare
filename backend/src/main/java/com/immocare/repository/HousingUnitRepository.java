@@ -70,4 +70,6 @@ public interface HousingUnitRepository extends JpaRepository<HousingUnit, Long> 
 
   /** True if a building has any housing units (used for delete check). */
   boolean existsByBuildingId(Long buildingId);
+
+  List<HousingUnit> findAllByOrderByBuildingIdAscFloorAscUnitNumberAsc();
 }
