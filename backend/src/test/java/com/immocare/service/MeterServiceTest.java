@@ -20,6 +20,8 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.mockito.junit.jupiter.MockitoSettings;
+import org.mockito.quality.Strictness;
 
 import com.immocare.exception.MeterBusinessRuleException;
 import com.immocare.exception.MeterNotFoundException;
@@ -33,6 +35,7 @@ import com.immocare.repository.HousingUnitRepository;
 import com.immocare.repository.MeterRepository;
 
 @ExtendWith(MockitoExtension.class)
+@MockitoSettings(strictness = Strictness.LENIENT)
 @DisplayName("MeterService")
 class MeterServiceTest {
 
@@ -54,6 +57,12 @@ class MeterServiceTest {
     private static final String HU = "HOUSING_UNIT";
     private static final String BLD = "BUILDING";
 
+    @BeforeEach
+    void stubOwnerExists() {
+        when(housingUnitRepository.existsById(UNIT_ID)).thenReturn(true);
+        when(buildingRepository.existsById(BUILDING_ID)).thenReturn(true);
+    }
+
     // ─────────────────────────────────────────────────────────────────────────
     // ADD METER
     // ─────────────────────────────────────────────────────────────────────────
@@ -61,12 +70,6 @@ class MeterServiceTest {
     @Nested
     @DisplayName("addMeter")
     class AddMeter {
-
-        @BeforeEach
-        void stubOwnerExists() {
-            when(housingUnitRepository.existsById(UNIT_ID)).thenReturn(true);
-            when(buildingRepository.existsById(BUILDING_ID)).thenReturn(true);
-        }
 
         @Test
         @DisplayName("TS-UC008-01 — GAS without eanCode → MeterBusinessRuleException")
@@ -225,7 +228,6 @@ class MeterServiceTest {
         @Test
         @DisplayName("TS-UC008-08 — returns all records sorted by startDate DESC")
         void getMeterHistory_returnsSortedList() {
-            when(housingUnitRepository.existsById(UNIT_ID)).thenReturn(true);
             Meter m1 = buildMeter("WATER", HU, UNIT_ID, LocalDate.of(2022, 1, 1), LocalDate.of(2023, 1, 1));
             Meter m2 = buildMeter("WATER", HU, UNIT_ID, LocalDate.of(2023, 1, 1), LocalDate.of(2024, 1, 1));
             Meter m3 = buildMeter("WATER", HU, UNIT_ID, LocalDate.of(2024, 1, 1), null);

@@ -28,6 +28,11 @@ import com.immocare.model.entity.HousingUnit;
 import com.immocare.model.entity.Person;
 import com.immocare.repository.BuildingRepository;
 import com.immocare.repository.HousingUnitRepository;
+import com.immocare.repository.LeaseRepository;
+import com.immocare.repository.PebScoreRepository;
+import com.immocare.repository.PersonRepository;
+import com.immocare.repository.RentHistoryRepository;
+import com.immocare.repository.RoomRepository;
 
 @ExtendWith(MockitoExtension.class)
 class HousingUnitServiceTest {
@@ -37,7 +42,17 @@ class HousingUnitServiceTest {
   @Mock
   private BuildingRepository buildingRepository;
   @Mock
+  private PersonRepository personRepository;
+  @Mock
   private HousingUnitMapper housingUnitMapper;
+  @Mock
+  private RoomRepository roomRepository;
+  @Mock
+  private LeaseRepository leaseRepository;
+  @Mock
+  private RentHistoryRepository rentHistoryRepository;
+  @Mock
+  private PebScoreRepository pebScoreRepository;
 
   @InjectMocks
   private HousingUnitService service;
@@ -78,8 +93,7 @@ class HousingUnitServiceTest {
         .thenReturn(false);
     when(housingUnitMapper.toEntity(request)).thenReturn(new HousingUnit());
     when(housingUnitRepository.save(any())).thenReturn(unit);
-    HousingUnitDTO dto = new HousingUnitDTO();
-    when(housingUnitMapper.toDTO(unit)).thenReturn(dto);
+    when(housingUnitMapper.toDTO(unit)).thenReturn(new HousingUnitDTO());
 
     HousingUnitDTO result = service.createUnit(request);
 
@@ -121,12 +135,14 @@ class HousingUnitServiceTest {
   }
 
   @Test
-  void createUnit_withTerraceCheckedButNoSurfaceOrOrientationSucceeds() {
+  void createUnit_withTerraceCheckedAndSurface_succeeds() {
+    // hasTerrace=true WITH a valid surface → should succeed (BR-UC002-07)
     CreateHousingUnitRequest request = new CreateHousingUnitRequest();
     request.setBuildingId(1L);
     request.setUnitNumber("C303");
     request.setFloor(3);
     request.setHasTerrace(true);
+    request.setTerraceSurface(new BigDecimal("12.50"));
 
     HousingUnit mappedEntity = new HousingUnit();
     when(buildingRepository.findById(1L)).thenReturn(Optional.of(building));
@@ -136,10 +152,30 @@ class HousingUnitServiceTest {
     when(housingUnitRepository.save(any())).thenReturn(unit);
     when(housingUnitMapper.toDTO(unit)).thenReturn(new HousingUnitDTO());
 
-    service.createUnit(request);
+    HousingUnitDTO result = service.createUnit(request);
 
-    assertThat(mappedEntity.getTerraceSurface()).isNull();
-    assertThat(mappedEntity.getTerraceOrientation()).isNull();
+    assertThat(result).isNotNull();
+  }
+
+  @Test
+  void createUnit_withTerraceCheckedButNoSurface_throwsException() {
+    // hasTerrace=true WITHOUT surface → service throws (BR-UC002-07)
+    CreateHousingUnitRequest request = new CreateHousingUnitRequest();
+    request.setBuildingId(1L);
+    request.setUnitNumber("C303");
+    request.setFloor(3);
+    request.setHasTerrace(true);
+    // terraceSurface intentionally null
+
+    HousingUnit mappedEntity = new HousingUnit();
+    when(buildingRepository.findById(1L)).thenReturn(Optional.of(building));
+    when(housingUnitRepository.existsByBuildingIdAndUnitNumberIgnoreCase(1L, "C303"))
+        .thenReturn(false);
+    when(housingUnitMapper.toEntity(request)).thenReturn(mappedEntity);
+
+    assertThatThrownBy(() -> service.createUnit(request))
+        .isInstanceOf(IllegalArgumentException.class)
+        .hasMessageContaining("Terrace surface is required");
   }
 
   @Test
@@ -201,6 +237,7 @@ class HousingUnitServiceTest {
   @Test
   void deleteUnit_successWhenNoAssociatedData() {
     when(housingUnitRepository.findById(10L)).thenReturn(Optional.of(unit));
+    when(roomRepository.countByHousingUnitId(10L)).thenReturn(0L);
 
     service.deleteUnit(10L);
 
