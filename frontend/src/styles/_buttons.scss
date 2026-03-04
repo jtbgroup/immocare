@@ -1,4 +1,4 @@
-@use 'variables' as *;
+@use "variables" as *;
 
 .btn {
   padding: $spacing-sm $spacing-md;
@@ -17,19 +17,25 @@
   &.btn-primary {
     background-color: $color-primary;
     color: white;
-    &:hover:not(:disabled) { background-color: $color-primary-dark; }
+    &:hover:not(:disabled) {
+      background-color: $color-primary-dark;
+    }
   }
 
   &.btn-secondary {
     background-color: $color-secondary;
     color: white;
-    &:hover:not(:disabled) { background-color: $color-secondary-dark; }
+    &:hover:not(:disabled) {
+      background-color: $color-secondary-dark;
+    }
   }
 
   &.btn-danger {
     background-color: $color-danger;
     color: white;
-    &:hover:not(:disabled) { background-color: $color-danger-dark; }
+    &:hover:not(:disabled) {
+      background-color: $color-danger-dark;
+    }
   }
 
   &.btn-link {
@@ -37,11 +43,20 @@
     color: $color-primary;
     padding: 0;
     text-decoration: none;
-    &:hover { text-decoration: underline; }
+    &:hover {
+      text-decoration: underline;
+    }
   }
+
+  // ─── Size modifiers ──────────────────────────────────────────────────────
 
   &.btn-sm {
     padding: $spacing-xs $spacing-sm;
     font-size: 0.875rem;
+  }
+
+  &.btn-xs {
+    padding: 2px 8px;
+    font-size: 0.8rem;
   }
 }

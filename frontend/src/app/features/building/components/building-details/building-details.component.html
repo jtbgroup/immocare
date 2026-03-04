@@ -1,18 +1,6 @@
 <div class="building-details-container">
-  <!-- Loading -->
-  <div *ngIf="loading" class="loading">Loading...</div>
-
-  <!-- Error -->
-  <div *ngIf="error && !loading" class="error-container">
-    <p class="error">{{ error }}</p>
-    <button class="btn btn-primary" (click)="goBack()">
-      Back to Buildings
-    </button>
-  </div>
-
-  <!-- Content -->
-  <ng-container *ngIf="building && !loading">
-    <!-- Breadcrumb -->
+  <ng-container *ngIf="building">
+    <!-- Breadcrumb / nav -->
     <nav class="breadcrumb" aria-label="breadcrumb">
       <a routerLink="/buildings">Buildings</a>
       <span class="breadcrumb-separator">›</span>
@@ -24,37 +12,26 @@
       <div class="header">
         <h1>{{ building.name }}</h1>
         <div class="actions">
-          <button class="btn btn-secondary" (click)="goBack()">Back</button>
-          <button class="btn btn-primary" (click)="editBuilding()">Edit</button>
-          <button class="btn btn-danger" (click)="confirmDelete()">
-            Delete
-          </button>
+          <button class="btn btn-secondary" (click)="editBuilding()">Edit</button>
+          <button class="btn btn-danger" (click)="confirmDelete()">Delete</button>
         </div>
       </div>
     </div>
 
-    <!-- Delete error -->
+    <!-- Error banner -->
     <div *ngIf="deleteError" class="alert alert-error">{{ deleteError }}</div>
 
-    <!-- Building Information -->
+    <!-- Info card -->
     <div class="info-card">
-      <h2>Building Information</h2>
+      <h2>Information</h2>
       <div class="info-grid">
         <div class="info-item">
-          <label>Building Name</label>
-          <p>{{ building.name }}</p>
-        </div>
-        <div class="info-item">
-          <label>Street Address</label>
+          <label>Address</label>
           <p>{{ building.streetAddress }}</p>
         </div>
         <div class="info-item">
-          <label>Postal Code</label>
-          <p>{{ building.postalCode }}</p>
-        </div>
-        <div class="info-item">
           <label>City</label>
-          <p>{{ building.city }}</p>
+          <p>{{ building.postalCode }} {{ building.city }}</p>
         </div>
         <div class="info-item">
           <label>Country</label>
@@ -64,13 +41,12 @@
           <label>Owner</label>
           <p>
             <a
-              *ngIf="building.ownerId"
+              *ngIf="building.ownerId; else ownerText"
               [routerLink]="['/persons', building.ownerId]"
-              >{{ building.ownerName }}</a
             >
-            <span *ngIf="!building.ownerId" class="empty-message"
-              >Not specified</span
-            >
+              {{ building.ownerName }}
+            </a>
+            <ng-template #ownerText>{{ building.ownerName ?? "—" }}</ng-template>
           </p>
         </div>
         <div class="info-item">
@@ -93,8 +69,17 @@
       ></app-meter-section>
     </div>
 
+    <!-- Boiler section -->
     <div class="info-card">
       <app-boiler-section ownerType="BUILDING" [ownerId]="building.id" />
+    </div>
+
+    <!-- Fire Extinguishers section -->
+    <div class="info-card">
+      <app-fire-extinguisher-section
+        [buildingId]="building.id"
+        [buildingUnits]="buildingUnits"
+      ></app-fire-extinguisher-section>
     </div>
 
     <!-- Housing Units section -->
@@ -111,8 +96,7 @@
       </div>
       <div class="modal-body">
         <p>
-          Are you sure you want to delete <strong>{{ building?.name }}</strong
-          >?
+          Are you sure you want to delete <strong>{{ building?.name }}</strong>?
         </p>
         <p class="warning">This action cannot be undone.</p>
       </div>

@@ -15,13 +15,13 @@ import { PEB_SCORE_DISPLAY } from "../../../../models/peb-score.model";
     <div class="unit-list-container">
       <div class="unit-list-header">
         <h3>Housing Units</h3>
-        <button class="btn btn-primary" (click)="addUnit()">
-          Add Housing Unit
+        <button class="btn btn-sm btn-primary" (click)="addUnit()">
+          + Add Housing Unit
         </button>
       </div>
       <div *ngIf="loading" class="loading">Loading units…</div>
       <div *ngIf="!loading && units.length === 0" class="empty-state">
-        <p>No units yet. Click "Add Housing Unit" to get started.</p>
+        <p>No units yet. Click "+ Add Housing Unit" to get started.</p>
       </div>
       <table *ngIf="!loading && units.length > 0" class="unit-table">
         <thead>
@@ -114,19 +114,6 @@ import { PEB_SCORE_DISPLAY } from "../../../../models/peb-score.model";
       }
       .loading {
         padding: 1rem 0;
-      }
-      .btn {
-        padding: 0.5rem 1rem;
-        border: none;
-        border-radius: 4px;
-        cursor: pointer;
-      }
-      .btn-primary {
-        background: #007bff;
-        color: #fff;
-      }
-      .btn-primary:hover {
-        background: #0056b3;
       }
       .peb-badge {
         display: inline-block;

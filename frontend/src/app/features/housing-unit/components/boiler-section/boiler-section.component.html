@@ -51,22 +51,22 @@
           </span>
         </div>
 
-        <div class="boiler-card__actions">
+        <div class="ext-card__actions">
           <button
-            class="btn btn-xs btn-primary"
+            class="btn btn-sm btn-primary"
             *ngIf="serviceFormOpenId !== boiler.id"
             (click)="openServiceForm(boiler.id)"
           >
             + Add Service
           </button>
           <button
-            class="btn btn-xs btn-secondary"
+            class="btn btn-sm btn-secondary"
             (click)="openEditForm(boiler)"
           >
             Edit
           </button>
           <button
-            class="btn btn-xs btn-danger"
+            class="btn btn-sm btn-danger"
             (click)="confirmDelete(boiler.id)"
           >
             Delete

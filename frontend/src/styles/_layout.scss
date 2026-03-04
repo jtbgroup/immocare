@@ -146,3 +146,10 @@
   align-items: center;
   margin-bottom: 1rem;
 }
+
+.ext-card__actions {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  flex-shrink: 0;
+}

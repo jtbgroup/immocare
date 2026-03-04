@@ -87,13 +87,6 @@
   font-size: 0.85rem;
 }
 
-.boiler-card__actions {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-  flex-shrink: 0;
-}
-
 // ── Body: metadata ────────────────────────────────────────────────────────────
 
 .boiler-card__body {
@@ -357,11 +350,4 @@
   gap: 0.5rem;
   justify-content: flex-end;
   margin-top: 1rem;
-}
-
-// ─── Button sizes ─────────────────────────────────────────────────────────────
-
-.btn-xs {
-  padding: 2px 8px;
-  font-size: 0.8rem;
 }

@@ -140,6 +140,38 @@ public class GlobalExceptionHandler {
     return mapError(422, "INVALID_STATUS_TRANSITION", ex.getMessage());
   }
 
+  // ─── UC011 - Boilers ─────────────────────────────────────────────────────
+
+  @ExceptionHandler(BoilerNotFoundException.class)
+  public ResponseEntity<ErrorResponse> handleBoilerNotFound(BoilerNotFoundException ex) {
+    return notFound("Boiler not found", ex.getMessage());
+  }
+
+  // ─── UC012 - Platform Configuration ──────────────────────────────────────────
+
+  @ExceptionHandler(PlatformConfigNotFoundException.class)
+  public ResponseEntity<ErrorResponse> handlePlatformConfigNotFound(PlatformConfigNotFoundException ex) {
+    return notFound("Platform configuration key not found", ex.getMessage());
+  }
+  // ─── UC013 - Fire Extinguishers ───────────────────────────────────────────
+
+  @ExceptionHandler(FireExtinguisherNotFoundException.class)
+  public ResponseEntity<ErrorResponse> handleFireExtinguisherNotFound(FireExtinguisherNotFoundException ex) {
+    return notFound("Fire extinguisher not found", ex.getMessage());
+  }
+
+  @ExceptionHandler(FireExtinguisherRevisionNotFoundException.class)
+  public ResponseEntity<ErrorResponse> handleFireExtinguisherRevisionNotFound(
+      FireExtinguisherRevisionNotFoundException ex) {
+    return notFound("Revision record not found", ex.getMessage());
+  }
+
+  @ExceptionHandler(FireExtinguisherDuplicateNumberException.class)
+  public ResponseEntity<ErrorResponse> handleFireExtinguisherDuplicate(FireExtinguisherDuplicateNumberException ex) {
+    return ResponseEntity.status(HttpStatus.CONFLICT)
+        .body(new ErrorResponse(409, "DUPLICATE", ex.getMessage(), LocalDateTime.now()));
+  }
+
   // ─── Generic ──────────────────────────────────────────────────────────────
 
   @ExceptionHandler(IllegalArgumentException.class)
@@ -192,19 +224,5 @@ public class GlobalExceptionHandler {
 
   public record ErrorResponse(int status, String error, String message, LocalDateTime timestamp) {
   }
-  // ─── UC011 - Boilers
-  // ──────────────────────────────────────────────────────────
-  // Add the following handlers to GlobalExceptionHandler.java
 
-  @ExceptionHandler(BoilerNotFoundException.class)
-  public ResponseEntity<ErrorResponse> handleBoilerNotFound(BoilerNotFoundException ex) {
-    return notFound("Boiler not found", ex.getMessage());
-  }
-
-  // ─── UC012 - Platform Configuration ──────────────────────────────────────────
-
-  @ExceptionHandler(PlatformConfigNotFoundException.class)
-  public ResponseEntity<ErrorResponse> handlePlatformConfigNotFound(PlatformConfigNotFoundException ex) {
-    return notFound("Platform configuration key not found", ex.getMessage());
-  }
 }

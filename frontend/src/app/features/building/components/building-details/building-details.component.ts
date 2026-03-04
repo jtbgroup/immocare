@@ -5,9 +5,11 @@ import { Subject } from "rxjs";
 import { takeUntil } from "rxjs/operators";
 import { BoilerSectionComponent } from "src/app/features/housing-unit/components/boiler-section/boiler-section.component";
 import { BuildingService } from "../../../../core/services/building.service";
+import { HousingUnitService } from "../../../../core/services/housing-unit.service";
 import { Building } from "../../../../models/building.model";
 import { MeterSectionComponent } from "../../../../shared/components/meter-section/meter-section.component";
 import { HousingUnitListComponent } from "../../../housing-unit/components/housing-unit-list/housing-unit-list.component";
+import { FireExtinguisherSectionComponent } from "../fire-extinguisher-section/fire-extinguisher-section.component";
 
 @Component({
   selector: "app-building-details",
@@ -18,6 +20,7 @@ import { HousingUnitListComponent } from "../../../housing-unit/components/housi
     HousingUnitListComponent,
     MeterSectionComponent,
     BoilerSectionComponent,
+    FireExtinguisherSectionComponent,
   ],
   templateUrl: "./building-details.component.html",
   styleUrls: ["./building-details.component.scss"],
@@ -29,10 +32,13 @@ export class BuildingDetailsComponent implements OnInit, OnDestroy {
   showDeleteConfirm = false;
   deleteError: string | null = null;
 
+  buildingUnits: { id: number; unitNumber: string }[] = [];
+
   private destroy$ = new Subject<void>();
 
   constructor(
     private buildingService: BuildingService,
+    private housingUnitService: HousingUnitService,
     private route: ActivatedRoute,
     private router: Router,
   ) {}
@@ -42,6 +48,20 @@ export class BuildingDetailsComponent implements OnInit, OnDestroy {
       const id = +params["id"];
       if (id) {
         this.loadBuilding(id);
+        this.housingUnitService
+          .getUnitsByBuilding(id)
+          .pipe(takeUntil(this.destroy$))
+          .subscribe({
+            next: (units) => {
+              this.buildingUnits = units.map((u) => ({
+                id: u.id,
+                unitNumber: u.unitNumber,
+              }));
+            },
+            error: () => {
+              // non-blocking — extinguisher form will just show no units
+            },
+          });
       }
     });
   }
