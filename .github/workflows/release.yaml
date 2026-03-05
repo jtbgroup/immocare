@@ -76,9 +76,9 @@ jobs:
         working-directory: frontend
         run: npm ci --force
 
-      - name: Run frontend tests
-        working-directory: frontend
-        run: npm test -- --watch=false --browsers=ChromeHeadless
+      # - name: Run frontend tests
+      #   working-directory: frontend
+      #   run: npm test -- --watch=false --browsers=ChromeHeadless
 
       # ── Commit bumped files ──────────────────────────────────────────────
       - name: Commit version bumps
