@@ -15,6 +15,8 @@ import org.springframework.web.bind.annotation.RestController;
 import com.immocare.model.dto.AddRevisionRequest;
 import com.immocare.model.dto.FireExtinguisherDTO.FireExtinguisherResponse;
 import com.immocare.model.dto.SaveFireExtinguisherRequest;
+import com.immocare.model.enums.AssetType;
+import com.immocare.repository.TransactionAssetLinkRepository;
 import com.immocare.service.FireExtinguisherService;
 
 import jakarta.validation.Valid;
@@ -23,9 +25,12 @@ import jakarta.validation.Valid;
 public class FireExtinguisherController {
 
     private final FireExtinguisherService service;
+    private final TransactionAssetLinkRepository transactionAssetLinkRepository;
 
-    public FireExtinguisherController(FireExtinguisherService service) {
-        this.service = service;
+    public FireExtinguisherController(FireExtinguisherService fireExtinguisherService,
+            TransactionAssetLinkRepository transactionAssetLinkRepository) {
+        this.service = fireExtinguisherService;
+        this.transactionAssetLinkRepository = transactionAssetLinkRepository;
     }
 
     @GetMapping("/api/v1/buildings/{buildingId}/fire-extinguishers")
@@ -40,17 +45,15 @@ public class FireExtinguisherController {
 
     @PostMapping("/api/v1/buildings/{buildingId}/fire-extinguishers")
     public ResponseEntity<FireExtinguisherResponse> create(
-        @PathVariable Long buildingId,
-        @Valid @RequestBody SaveFireExtinguisherRequest req
-    ) {
+            @PathVariable Long buildingId,
+            @Valid @RequestBody SaveFireExtinguisherRequest req) {
         return ResponseEntity.status(HttpStatus.CREATED).body(service.create(buildingId, req));
     }
 
     @PutMapping("/api/v1/fire-extinguishers/{id}")
     public ResponseEntity<FireExtinguisherResponse> update(
-        @PathVariable Long id,
-        @Valid @RequestBody SaveFireExtinguisherRequest req
-    ) {
+            @PathVariable Long id,
+            @Valid @RequestBody SaveFireExtinguisherRequest req) {
         return ResponseEntity.ok(service.update(id, req));
     }
 
@@ -62,18 +65,22 @@ public class FireExtinguisherController {
 
     @PostMapping("/api/v1/fire-extinguishers/{id}/revisions")
     public ResponseEntity<FireExtinguisherResponse> addRevision(
-        @PathVariable Long id,
-        @Valid @RequestBody AddRevisionRequest req
-    ) {
+            @PathVariable Long id,
+            @Valid @RequestBody AddRevisionRequest req) {
         return ResponseEntity.status(HttpStatus.CREATED).body(service.addRevision(id, req));
     }
 
     @DeleteMapping("/api/v1/fire-extinguishers/{extId}/revisions/{revId}")
     public ResponseEntity<Void> deleteRevision(
-        @PathVariable Long extId,
-        @PathVariable Long revId
-    ) {
+            @PathVariable Long extId,
+            @PathVariable Long revId) {
         service.deleteRevision(extId, revId);
         return ResponseEntity.noContent().build();
     }
+
+    @GetMapping("/api/v1/fire-extinguishers/{id}/transaction-count")
+    public long getTransactionCount(@PathVariable Long id) {
+        return transactionAssetLinkRepository.countByAssetTypeAndAssetId(AssetType.FIRE_EXTINGUISHER, id);
+    }
+
 }

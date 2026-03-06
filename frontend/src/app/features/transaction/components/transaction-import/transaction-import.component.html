@@ -1,0 +1,61 @@
+<div class="transaction-import">
+  <h2>Import Transactions</h2>
+
+  <div
+    class="drop-zone"
+    [class.dragging]="isDragging"
+    (dragover)="onDragOver($event)"
+    (dragleave)="onDragLeave()"
+    (drop)="onDrop($event)">
+    <div class="drop-zone-content">
+      <div class="drop-icon">📂</div>
+      <p>Drag & drop a CSV file here, or</p>
+      <label class="btn btn-secondary file-label">
+        Browse
+        <input type="file" accept=".csv" (change)="onFileChange($event)" hidden />
+      </label>
+    </div>
+  </div>
+
+  <div class="selected-file" *ngIf="selectedFile">
+    <span>📄 {{ selectedFile.name }} ({{ (selectedFile.size / 1024).toFixed(1) }} KB)</span>
+    <button class="btn btn-primary" (click)="import()" [disabled]="importing">
+      {{ importing ? 'Processing…' : 'Process Import' }}
+    </button>
+  </div>
+
+  <div class="alert alert-error" *ngIf="error">{{ error }}</div>
+
+  <div class="import-result" *ngIf="result">
+    <div class="result-banner">
+      <h3>Import complete</h3>
+      <div class="result-stats">
+        <span class="stat">Total rows: <strong>{{ result.totalRows }}</strong></span>
+        <span class="stat success">Imported: <strong>{{ result.importedCount }}</strong></span>
+        <span class="stat warning">Duplicates: <strong>{{ result.duplicateCount }}</strong></span>
+        <span class="stat error">Errors: <strong>{{ result.errorCount }}</strong></span>
+      </div>
+      <button class="btn btn-primary" (click)="reviewBatch()">
+        Review imported transactions →
+      </button>
+    </div>
+
+    <div class="import-errors" *ngIf="result.errors.length">
+      <h4>Row errors</h4>
+      <table class="data-table">
+        <thead>
+          <tr>
+            <th>Row</th><th>Raw content</th><th>Error</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let e of result.errors">
+            <td>{{ e.rowNumber }}</td>
+            <td class="monospace small">{{ e.rawLine }}</td>
+            <td class="error-msg">{{ e.errorMessage }}</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>

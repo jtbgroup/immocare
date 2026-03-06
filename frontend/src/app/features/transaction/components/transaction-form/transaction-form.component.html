@@ -1,0 +1,126 @@
+<div class="transaction-form">
+  <h2>{{ isEdit ? 'Edit Transaction' : 'New Transaction' }}</h2>
+  <p class="reference" *ngIf="existing">{{ existing.reference }}</p>
+
+  <div class="alert alert-error" *ngIf="error">{{ error }}</div>
+
+  <form [formGroup]="form" (ngSubmit)="onSubmit()">
+
+    <!-- 1. General -->
+    <fieldset>
+      <legend>General</legend>
+
+      <div class="form-row">
+        <label>Direction *</label>
+        <div class="radio-group">
+          <label><input type="radio" formControlName="direction" value="INCOME" /> Income</label>
+          <label><input type="radio" formControlName="direction" value="EXPENSE" /> Expense</label>
+        </div>
+      </div>
+
+      <div class="form-row">
+        <label>Transaction date *</label>
+        <input type="date" formControlName="transactionDate" />
+      </div>
+
+      <div class="form-row">
+        <label>Accounting month *</label>
+        <input type="month" formControlName="accountingMonth" />
+      </div>
+
+      <div class="form-row">
+        <label>Amount (€) *</label>
+        <input type="number" formControlName="amount" step="0.01" min="0.01" />
+      </div>
+
+      <div class="form-row">
+        <label>Description</label>
+        <textarea formControlName="description" rows="2"></textarea>
+      </div>
+    </fieldset>
+
+    <!-- 2. Counterparty -->
+    <fieldset>
+      <legend>Counterparty</legend>
+
+      <div class="form-row">
+        <label>Counterparty name</label>
+        <input type="text" formControlName="counterpartyName" />
+      </div>
+
+      <div class="form-row">
+        <label>Counterparty IBAN</label>
+        <input type="text" formControlName="counterpartyAccount" maxlength="50" />
+      </div>
+
+      <div class="form-row">
+        <label>Value date</label>
+        <input type="date" formControlName="valueDate" />
+      </div>
+
+      <div class="form-row">
+        <label>Bank account</label>
+        <select formControlName="bankAccountId">
+          <option [ngValue]="null">— Select —</option>
+          <option *ngFor="let b of bankAccounts" [value]="b.id">{{ b.label }}</option>
+        </select>
+      </div>
+    </fieldset>
+
+    <!-- 3. Classification -->
+    <fieldset>
+      <legend>Classification</legend>
+
+      <div class="form-row">
+        <label>Category</label>
+        <select formControlName="categoryId">
+          <option [ngValue]="null">— Select —</option>
+          <option *ngFor="let c of categories" [value]="c.id">{{ c.name }}</option>
+        </select>
+      </div>
+
+      <div class="form-row">
+        <label>Subcategory</label>
+        <select formControlName="subcategoryId" [attr.disabled]="!form.get('categoryId')?.value ? '' : null">
+          <option [ngValue]="null">— Select —</option>
+          <option *ngFor="let s of subcategories" [value]="s.id">{{ s.name }}</option>
+        </select>
+      </div>
+    </fieldset>
+
+    <!-- 4. Links -->
+    <fieldset>
+      <legend>Links</legend>
+
+      <div class="form-row">
+        <label>Building</label>
+        <input type="number" formControlName="buildingId" placeholder="Building ID" />
+      </div>
+
+      <div class="form-row">
+        <label>Housing unit</label>
+        <input type="number" formControlName="housingUnitId" placeholder="Unit ID" />
+      </div>
+
+      <div class="form-row" *ngIf="isIncomeDirection">
+        <label>Lease</label>
+        <input type="number" formControlName="leaseId" placeholder="Lease ID" />
+      </div>
+    </fieldset>
+
+    <!-- 5. Assets (expense only) -->
+    <fieldset *ngIf="!isIncomeDirection">
+      <legend>Related Assets</legend>
+      <app-asset-link-editor
+        [buildingId]="form.get('buildingId')?.value"
+        [unitId]="form.get('housingUnitId')?.value"
+        [links]="assetLinks"
+        (linksChanged)="assetLinks = $event" />
+    </fieldset>
+
+    <div class="form-actions">
+      <button type="button" class="btn btn-secondary" (click)="cancel()">Cancel</button>
+      <button type="submit" class="btn btn-primary" [disabled]="form.invalid">Save</button>
+    </div>
+  </form>
+</div>

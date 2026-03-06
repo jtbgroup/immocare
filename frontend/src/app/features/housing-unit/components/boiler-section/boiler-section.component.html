@@ -122,6 +122,15 @@
           </span>
         </div>
 
+        <span
+          class="transaction-count-badge"
+          *ngIf="boilerTransactionCounts[boiler.id] > 0"
+          (click)="navigateToBoilerTransactions(boiler.id)"
+          title="View related transactions"
+        >
+          💶 {{ boilerTransactionCounts[boiler.id] }} expense(s)
+        </span>
+
         <p class="boiler-notes" *ngIf="boiler.notes">{{ boiler.notes }}</p>
       </div>
 

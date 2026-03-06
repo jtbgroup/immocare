@@ -130,3 +130,29 @@
     </div>
   </div>
 </div>
+
+<div class="collapsible-section" *ngIf="unit">
+  <div class="collapsible-header" (click)="showFinancial = !showFinancial">
+    <h3>Financial</h3>
+    <span>{{ showFinancial ? "▲" : "▼" }}</span>
+  </div>
+  <div class="collapsible-body" *ngIf="showFinancial && unitStats">
+    <div class="financial-summary">
+      <span class="income"
+        >Income: +{{ unitStats.totalIncome.toFixed(2) }} €</span
+      >
+      <span class="expense"
+        >Expenses: -{{ unitStats.totalExpenses.toFixed(2) }} €</span
+      >
+      <span
+        [class.income]="unitStats.netBalance >= 0"
+        [class.expense]="unitStats.netBalance < 0"
+      >
+        Balance: {{ unitStats.netBalance.toFixed(2) }} €
+      </span>
+    </div>
+    <a (click)="viewUnitTransactions(unit!.id)" class="link"
+      >View all transactions →</a
+    >
+  </div>
+</div>

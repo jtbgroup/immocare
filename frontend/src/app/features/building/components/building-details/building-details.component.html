@@ -12,8 +12,12 @@
       <div class="header">
         <h1>{{ building.name }}</h1>
         <div class="actions">
-          <button class="btn btn-secondary" (click)="editBuilding()">Edit</button>
-          <button class="btn btn-danger" (click)="confirmDelete()">Delete</button>
+          <button class="btn btn-secondary" (click)="editBuilding()">
+            Edit
+          </button>
+          <button class="btn btn-danger" (click)="confirmDelete()">
+            Delete
+          </button>
         </div>
       </div>
     </div>
@@ -46,7 +50,9 @@
             >
               {{ building.ownerName }}
             </a>
-            <ng-template #ownerText>{{ building.ownerName ?? "—" }}</ng-template>
+            <ng-template #ownerText>{{
+              building.ownerName ?? "—"
+            }}</ng-template>
           </p>
         </div>
         <div class="info-item">
@@ -82,6 +88,32 @@
       ></app-fire-extinguisher-section>
     </div>
 
+    <div class="collapsible-section">
+      <div class="collapsible-header" (click)="showFinancial = !showFinancial">
+        <h3>Financial</h3>
+        <span>{{ showFinancial ? "▲" : "▼" }}</span>
+      </div>
+      <div class="collapsible-body" *ngIf="showFinancial && buildingStats">
+        <div class="financial-summary">
+          <span class="income"
+            >Income: +{{ buildingStats.totalIncome.toFixed(2) }} €</span
+          >
+          <span class="expense"
+            >Expenses: -{{ buildingStats.totalExpenses.toFixed(2) }} €</span
+          >
+          <span
+            [class.income]="buildingStats.netBalance >= 0"
+            [class.expense]="buildingStats.netBalance < 0"
+          >
+            Balance: {{ buildingStats.netBalance.toFixed(2) }} €
+          </span>
+        </div>
+        <a (click)="viewBuildingTransactions(building.id)" class="link"
+          >View all transactions →</a
+        >
+      </div>
+    </div>
+
     <!-- Housing Units section -->
     <div class="info-card">
       <app-housing-unit-list [buildingId]="building.id"></app-housing-unit-list>
@@ -96,7 +128,8 @@
       </div>
       <div class="modal-body">
         <p>
-          Are you sure you want to delete <strong>{{ building?.name }}</strong>?
+          Are you sure you want to delete <strong>{{ building?.name }}</strong
+          >?
         </p>
         <p class="warning">This action cannot be undone.</p>
       </div>

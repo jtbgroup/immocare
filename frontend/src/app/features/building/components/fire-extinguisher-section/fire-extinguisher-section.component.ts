@@ -1,4 +1,5 @@
 import { CommonModule } from "@angular/common";
+import { HttpClient } from "@angular/common/http";
 import { Component, Input, OnDestroy, OnInit } from "@angular/core";
 import {
   FormBuilder,
@@ -6,7 +7,7 @@ import {
   ReactiveFormsModule,
   Validators,
 } from "@angular/forms";
-import { RouterModule } from "@angular/router";
+import { Router, RouterModule } from "@angular/router";
 import { Subject } from "rxjs";
 import { takeUntil } from "rxjs/operators";
 
@@ -59,15 +60,21 @@ export class FireExtinguisherSectionComponent implements OnInit, OnDestroy {
   today = new Date().toISOString().split("T")[0];
 
   private destroy$ = new Subject<void>();
+  extinguisherTransactionCounts: Record<number, number> = {};
 
   constructor(
     private service: FireExtinguisherService,
     private fb: FormBuilder,
+    private http: HttpClient,
+    private router: Router,
   ) {}
 
   ngOnInit(): void {
     this.form = this.fb.group({
-      identificationNumber: ["", [Validators.required, Validators.maxLength(50)]],
+      identificationNumber: [
+        "",
+        [Validators.required, Validators.maxLength(50)],
+      ],
       unitId: [null],
       notes: ["", Validators.maxLength(2000)],
     });
@@ -95,6 +102,7 @@ export class FireExtinguisherSectionComponent implements OnInit, OnDestroy {
         next: (data) => {
           this.extinguishers = data;
           this.loading = false;
+          data.forEach((e) => this.loadExtinguisherTransactionCount(e.id));
         },
         error: () => {
           this.error = "Failed to load fire extinguishers.";
@@ -263,5 +271,29 @@ export class FireExtinguisherSectionComponent implements OnInit, OnDestroy {
 
   latestRevisionDate(ext: FireExtinguisher): string | null {
     return ext.revisions[0]?.revisionDate ?? null;
+  }
+
+  // ─── Transaction count ────────────────────────────────────────────────────
+
+  loadExtinguisherTransactionCount(extinguisherId: number): void {
+    this.http
+      .get<number>(
+        `/api/v1/fire-extinguishers/${extinguisherId}/transaction-count`,
+      )
+      .pipe(takeUntil(this.destroy$))
+      .subscribe(
+        (count: number) =>
+          (this.extinguisherTransactionCounts[extinguisherId] = count),
+      );
+  }
+
+  navigateToExtinguisherTransactions(extinguisherId: number): void {
+    this.router.navigate(["/transactions"], {
+      queryParams: {
+        tab: "list",
+        assetType: "FIRE_EXTINGUISHER",
+        assetId: extinguisherId,
+      },
+    });
   }
 }

@@ -3,7 +3,9 @@ import { Component, OnDestroy, OnInit } from "@angular/core";
 import { ActivatedRoute, Router, RouterModule } from "@angular/router";
 import { Subject } from "rxjs";
 import { takeUntil } from "rxjs/operators";
+import { TransactionService } from "src/app/core/services/transaction.service";
 import { BoilerSectionComponent } from "src/app/features/housing-unit/components/boiler-section/boiler-section.component";
+import { TransactionStatistics } from "src/app/models/transaction.model";
 import { BuildingService } from "../../../../core/services/building.service";
 import { HousingUnitService } from "../../../../core/services/housing-unit.service";
 import { Building } from "../../../../models/building.model";
@@ -35,11 +37,14 @@ export class BuildingDetailsComponent implements OnInit, OnDestroy {
   buildingUnits: { id: number; unitNumber: string }[] = [];
 
   private destroy$ = new Subject<void>();
+  buildingStats: TransactionStatistics | null = null;
+  showFinancial = false;
 
   constructor(
     private buildingService: BuildingService,
     private housingUnitService: HousingUnitService,
     private route: ActivatedRoute,
+    private transactionService: TransactionService,
     private router: Router,
   ) {}
 
@@ -80,6 +85,7 @@ export class BuildingDetailsComponent implements OnInit, OnDestroy {
         next: (building) => {
           this.building = building;
           this.loading = false;
+          this.loadBuildingStats(building.id);
         },
         error: () => {
           this.error = "Building not found";
@@ -128,5 +134,18 @@ export class BuildingDetailsComponent implements OnInit, OnDestroy {
           }
         },
       });
+  }
+
+  loadBuildingStats(buildingId: number): void {
+    this.transactionService
+      .getStatistics({ buildingId })
+      .pipe(takeUntil(this.destroy$))
+      .subscribe((s) => (this.buildingStats = s));
+  }
+
+  viewBuildingTransactions(buildingId: number): void {
+    this.router.navigate(["/transactions"], {
+      queryParams: { tab: "list", buildingId },
+    });
   }
 }

@@ -1,4 +1,5 @@
 import { CommonModule } from "@angular/common";
+import { HttpClient } from "@angular/common/http";
 import { Component, Input, OnDestroy, OnInit } from "@angular/core";
 import {
   FormBuilder,
@@ -6,6 +7,7 @@ import {
   ReactiveFormsModule,
   Validators,
 } from "@angular/forms";
+import { Router } from "@angular/router";
 import { Subject } from "rxjs";
 import { takeUntil } from "rxjs/operators";
 import { BoilerService } from "../../../../core/services/boiler.service";
@@ -65,10 +67,13 @@ export class BoilerSectionComponent implements OnInit, OnDestroy {
   readonly SERVICE_STATUS_CSS = SERVICE_STATUS_CSS;
 
   private destroy$ = new Subject<void>();
+  boilerTransactionCounts: Record<number, number> = {};
 
   constructor(
     private boilerService: BoilerService,
     private fb: FormBuilder,
+    private http: HttpClient,
+    private router: Router,
   ) {}
 
   ngOnInit(): void {
@@ -95,6 +100,7 @@ export class BoilerSectionComponent implements OnInit, OnDestroy {
       next: (data) => {
         this.boilers = data;
         this.loading = false;
+        data.forEach((b) => this.loadBoilerTransactionCount(b.id));
       },
       error: () => {
         this.error = "Failed to load boilers.";
@@ -280,5 +286,20 @@ export class BoilerSectionComponent implements OnInit, OnDestroy {
             err?.error?.message ?? "Failed to save service record.";
         },
       });
+  }
+
+  // ─── Transaction count ────────────────────────────────────────────────────
+
+  loadBoilerTransactionCount(boilerId: number): void {
+    this.http
+      .get<number>(`/api/v1/boilers/${boilerId}/transaction-count`)
+      .pipe(takeUntil(this.destroy$))
+      .subscribe((count) => (this.boilerTransactionCounts[boilerId] = count));
+  }
+
+  navigateToBoilerTransactions(boilerId: number): void {
+    this.router.navigate(["/transactions"], {
+      queryParams: { tab: "list", assetType: "BOILER", assetId: boilerId },
+    });
   }
 }

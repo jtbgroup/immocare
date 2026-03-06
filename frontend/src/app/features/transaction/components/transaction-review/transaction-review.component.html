@@ -1,0 +1,78 @@
+<div class="transaction-review">
+  <div class="review-header">
+    <h2>Review Imported Transactions</h2>
+    <div class="review-progress">
+      {{ confirmedCount }} / {{ response?.totalElements }} confirmed
+    </div>
+    <button
+      class="btn btn-primary"
+      (click)="confirmAll()"
+      [disabled]="confirmingAll || draftCount === 0"
+    >
+      {{ confirmingAll ? "Confirming…" : "Confirm All (" + draftCount + ")" }}
+    </button>
+  </div>
+
+  <div class="loading" *ngIf="loading">Loading…</div>
+
+  <table class="data-table" *ngIf="response && !loading">
+    <thead>
+      <tr>
+        <th>Date</th>
+        <th>Acc. Month</th>
+        <th>Direction</th>
+        <th>Amount</th>
+        <th>Counterparty</th>
+        <th>Subcategory</th>
+        <th>Status</th>
+        <th>Actions</th>
+      </tr>
+    </thead>
+    <tbody>
+      <ng-container *ngFor="let tx of response.content">
+        <tr [class.confirmed-row]="tx.status === 'CONFIRMED'">
+          <td>{{ tx.transactionDate }}</td>
+          <td>{{ tx.accountingMonth.substring(0, 7) }}</td>
+          <td>
+            <span
+              class="badge"
+              [class.badge--income]="tx.direction === 'INCOME'"
+              [class.badge--expense]="tx.direction === 'EXPENSE'"
+            >
+              {{ DIRECTION_LABELS[tx.direction] }}
+            </span>
+          </td>
+          <td
+            class="amount"
+            [class.income]="tx.direction === 'INCOME'"
+            [class.expense]="tx.direction === 'EXPENSE'"
+          >
+            {{ tx.direction === "INCOME" ? "+" : "-"
+            }}{{ tx.amount.toFixed(2) }} €
+          </td>
+          <td>{{ tx.counterpartyName }}</td>
+          <td>
+            <span *ngIf="tx.subcategoryName" class="suggestion-badge">
+              ✨ {{ tx.categoryName }} / {{ tx.subcategoryName }}
+            </span>
+            <span *ngIf="!tx.subcategoryName" class="no-suggestion">—</span>
+          </td>
+          <td>
+            <span class="badge badge--status-{{ tx.status.toLowerCase() }}">{{
+              STATUS_LABELS[tx.status]
+            }}</span>
+          </td>
+          <td class="actions">
+            <button
+              *ngIf="tx.status === 'DRAFT'"
+              class="btn btn-sm btn-primary"
+              (click)="confirmRow(tx)"
+            >
+              Confirm
+            </button>
+          </td>
+        </tr>
+      </ng-container>
+    </tbody>
+  </table>
+</div>

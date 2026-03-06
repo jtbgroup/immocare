@@ -1,0 +1,29 @@
+<div class="asset-link-editor">
+  <div class="no-context-hint" *ngIf="!hasContext">
+    Select a building or unit to link assets.
+  </div>
+
+  <div *ngFor="let link of localLinks; let i = index" class="link-row">
+    <select [(ngModel)]="link.assetType" (change)="onLinkChange()" [disabled]="!hasContext">
+      <option *ngFor="let t of assetTypes" [value]="t">{{ t }}</option>
+    </select>
+    <input
+      type="number"
+      [(ngModel)]="link.assetId"
+      (change)="onLinkChange()"
+      placeholder="Asset ID"
+      [disabled]="!hasContext"
+      min="1" />
+    <input
+      type="text"
+      [(ngModel)]="link.notes"
+      (change)="onLinkChange()"
+      placeholder="Notes (optional)"
+      [disabled]="!hasContext" />
+    <button class="icon-btn remove-btn" type="button" (click)="removeLink(i)" title="Remove">✕</button>
+  </div>
+
+  <button class="btn btn-sm btn-secondary" type="button" (click)="addLink()" [disabled]="!hasContext">
+    + Add asset link
+  </button>
+</div>

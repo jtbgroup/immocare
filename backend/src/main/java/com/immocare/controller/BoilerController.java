@@ -15,6 +15,8 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.immocare.model.dto.BoilerDTO;
 import com.immocare.model.dto.SaveBoilerRequest;
+import com.immocare.model.enums.AssetType;
+import com.immocare.repository.TransactionAssetLinkRepository;
 import com.immocare.service.BoilerService;
 
 import jakarta.validation.Valid;
@@ -23,13 +25,15 @@ import lombok.RequiredArgsConstructor;
 /**
  * REST controller for UC011 — Manage Boilers.
  *
- * <p>Two sets of endpoints sharing the same service:
+ * <p>
+ * Two sets of endpoints sharing the same service:
  * <ul>
- *   <li>{@code /api/v1/housing-units/{unitId}/boilers}</li>
- *   <li>{@code /api/v1/buildings/{buildingId}/boilers}</li>
+ * <li>{@code /api/v1/housing-units/{unitId}/boilers}</li>
+ * <li>{@code /api/v1/buildings/{buildingId}/boilers}</li>
  * </ul>
  *
- * <p>The {@code /api/v1/boilers/alerts} endpoint is kept for contextual use
+ * <p>
+ * The {@code /api/v1/boilers/alerts} endpoint is kept for contextual use
  * (e.g. validity badges on boiler cards). The global alerts page uses
  * {@code GET /api/v1/alerts} via {@code AlertController} instead.
  */
@@ -39,15 +43,18 @@ import lombok.RequiredArgsConstructor;
 public class BoilerController {
 
     private static final String HOUSING_UNIT = "HOUSING_UNIT";
-    private static final String BUILDING     = "BUILDING";
+    private static final String BUILDING = "BUILDING";
 
     private final BoilerService boilerService;
+    private final TransactionAssetLinkRepository transactionAssetLinkRepository;
 
     // ═════════════════════════════════════════════════════════════════════════
     // CONTEXTUAL ALERTS (used by boiler cards / inline banners)
     // ═════════════════════════════════════════════════════════════════════════
 
-    /** GET /api/v1/boilers/alerts → boilers with service due soon (contextual use) */
+    /**
+     * GET /api/v1/boilers/alerts → boilers with service due soon (contextual use)
+     */
     @GetMapping("/api/v1/boilers/alerts")
     public ResponseEntity<List<BoilerDTO>> getServiceAlerts() {
         return ResponseEntity.ok(boilerService.getServiceAlerts());
@@ -111,5 +118,10 @@ public class BoilerController {
     public ResponseEntity<Void> delete(@PathVariable Long id) {
         boilerService.delete(id);
         return ResponseEntity.noContent().build();
+    }
+
+    @GetMapping("/api/v1/boilers/{boilerId}/transaction-count")
+    public long getTransactionCount(@PathVariable Long boilerId) {
+        return transactionAssetLinkRepository.countByAssetTypeAndAssetId(AssetType.BOILER, boilerId);
     }
 }

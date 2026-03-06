@@ -1,0 +1,121 @@
+<div class="transaction-settings">
+  <div class="settings-columns">
+
+    <!-- Categories & Subcategories -->
+    <div class="settings-col">
+      <h3>Categories & Subcategories</h3>
+
+      <!-- Categories table -->
+      <div class="sub-section">
+        <div class="sub-header">
+          <h4>Categories</h4>
+          <button class="btn btn-sm btn-secondary" (click)="showNewCategory = !showNewCategory">+ Add</button>
+        </div>
+
+        <div class="alert alert-error" *ngIf="categoryError">{{ categoryError }}</div>
+
+        <div class="inline-form" *ngIf="showNewCategory || editingCategory">
+          <input type="text" [(ngModel)]="newCategory.name" placeholder="Name *" />
+          <input type="text" [(ngModel)]="newCategory.description" placeholder="Description" />
+          <button class="btn btn-sm btn-primary" (click)="saveCategory()">Save</button>
+          <button class="btn btn-sm btn-link" (click)="editingCategory = undefined; showNewCategory = false">Cancel</button>
+        </div>
+
+        <table class="data-table">
+          <thead><tr><th>Name</th><th>Description</th><th>Subcategories</th><th></th></tr></thead>
+          <tbody>
+            <tr *ngFor="let cat of categories">
+              <td>{{ cat.name }}</td>
+              <td>{{ cat.description || '—' }}</td>
+              <td>{{ cat.subcategoryCount }}</td>
+              <td class="actions">
+                <button class="icon-btn" (click)="editCategory(cat)">✏️</button>
+                <button class="icon-btn" (click)="deleteCategory(cat)">🗑️</button>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- Subcategories table -->
+      <div class="sub-section">
+        <div class="sub-header">
+          <h4>Subcategories</h4>
+          <button class="btn btn-sm btn-secondary" (click)="showNewSubcategory = !showNewSubcategory">+ Add</button>
+        </div>
+
+        <div class="alert alert-error" *ngIf="subcategoryError">{{ subcategoryError }}</div>
+
+        <div class="inline-form" *ngIf="showNewSubcategory || editingSubcategory">
+          <select [(ngModel)]="newSubcategory.categoryId">
+            <option [ngValue]="0">— Category —</option>
+            <option *ngFor="let c of categories" [value]="c.id">{{ c.name }}</option>
+          </select>
+          <input type="text" [(ngModel)]="newSubcategory.name" placeholder="Name *" />
+          <select [(ngModel)]="newSubcategory.direction">
+            <option *ngFor="let d of directions" [value]="d">{{ d }}</option>
+          </select>
+          <input type="text" [(ngModel)]="newSubcategory.description" placeholder="Description" />
+          <button class="btn btn-sm btn-primary" (click)="saveSubcategory()">Save</button>
+          <button class="btn btn-sm btn-link" (click)="editingSubcategory = undefined; showNewSubcategory = false">Cancel</button>
+        </div>
+
+        <table class="data-table">
+          <thead><tr><th>Name</th><th>Category</th><th>Direction</th><th>In use</th><th></th></tr></thead>
+          <tbody>
+            <tr *ngFor="let sub of subcategories">
+              <td>{{ sub.name }}</td>
+              <td><span class="badge">{{ sub.categoryName }}</span></td>
+              <td><span class="badge badge--dir-{{ sub.direction.toLowerCase() }}">{{ sub.direction }}</span></td>
+              <td>{{ sub.usageCount }}</td>
+              <td class="actions">
+                <button class="icon-btn" (click)="editSubcategory(sub)">✏️</button>
+                <button class="icon-btn" (click)="deleteSubcategory(sub)" [disabled]="sub.usageCount > 0">🗑️</button>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- Bank Accounts -->
+    <div class="settings-col">
+      <h3>Bank Accounts</h3>
+
+      <div class="sub-header">
+        <button class="btn btn-sm btn-secondary" (click)="showNewBankAccount = !showNewBankAccount">+ Add</button>
+      </div>
+
+      <div class="alert alert-error" *ngIf="bankAccountError">{{ bankAccountError }}</div>
+
+      <div class="inline-form" *ngIf="showNewBankAccount || editingBankAccount">
+        <input type="text" [(ngModel)]="newBankAccount.label" placeholder="Label *" />
+        <input type="text" [(ngModel)]="newBankAccount.accountNumber" placeholder="IBAN *" />
+        <select [(ngModel)]="newBankAccount.type">
+          <option *ngFor="let t of bankAccountTypes" [value]="t">{{ t }}</option>
+        </select>
+        <label>
+          <input type="checkbox" [(ngModel)]="newBankAccount.isActive" /> Active
+        </label>
+        <button class="btn btn-sm btn-primary" (click)="saveBankAccount()">Save</button>
+        <button class="btn btn-sm btn-link" (click)="editingBankAccount = undefined; showNewBankAccount = false">Cancel</button>
+      </div>
+
+      <table class="data-table">
+        <thead><tr><th>Label</th><th>IBAN</th><th>Type</th><th>Active</th><th></th></tr></thead>
+        <tbody>
+          <tr *ngFor="let ba of bankAccounts">
+            <td>{{ ba.label }}</td>
+            <td class="monospace small">{{ ba.accountNumber }}</td>
+            <td>{{ ba.type }}</td>
+            <td>{{ ba.isActive ? '✓' : '✗' }}</td>
+            <td class="actions">
+              <button class="icon-btn" (click)="editBankAccount(ba)">✏️</button>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+  </div>
+</div>

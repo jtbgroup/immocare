@@ -1,0 +1,29 @@
+# User Story US081: Delete Transaction
+
+| Attribute | Value |
+|-----------|-------|
+| **Story ID** | US081 |
+| **Epic** | Financial Management |
+| **Related UC** | UC014 |
+| **Priority** | MUST HAVE |
+| **Story Points** | 2 |
+
+**As an** ADMIN **I want to** delete a transaction **so that** I can remove erroneous or duplicate entries.
+
+## Acceptance Criteria
+
+**AC1:** "Delete" button visible on the transaction detail view for DRAFT and CONFIRMED transactions.
+
+**AC2:** RECONCILED transaction → "Delete" button absent. Banner reads "This transaction has been reconciled and cannot be deleted."
+
+**AC3:** Click "Delete" → confirmation dialog: "Delete transaction [reference]? This action cannot be undone."
+
+**AC4:** Confirm → transaction deleted along with all its associated asset links. Redirect to transaction list with success message "Transaction [reference] deleted."
+
+**AC5:** Cancel → dialog closes, transaction unchanged.
+
+**AC6:** Transaction deleted via API by another session while the detail view is open → on confirm attempt, API returns 404 → error message "This transaction no longer exists." Redirect to list.
+
+**Endpoint:** `DELETE /api/v1/transactions/{id}` — HTTP 204.
+
+**Last Updated:** 2026-03-05 | **Status:** Ready for Development

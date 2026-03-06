@@ -167,6 +167,47 @@ bootstrapApplication(AppComponent, {
             (m) => m.LeaseDetailsComponent,
           ),
       },
+      // ─── Transactions (UC014) ────────────────────────────────────────────────
+      {
+        path: "transactions",
+        canActivate: [AuthGuard],
+        loadComponent: () =>
+          import("./app/features/transaction/components/transactions-page/transactions-page.component").then(
+            (m) => m.TransactionsPageComponent,
+          ),
+      },
+      {
+        path: "transactions/new",
+        canActivate: [AuthGuard],
+        loadComponent: () =>
+          import("./app/features/transaction/components/transaction-form/transaction-form.component").then(
+            (m) => m.TransactionFormComponent,
+          ),
+      },
+      {
+        path: "transactions/import/:batchId",
+        canActivate: [AuthGuard],
+        loadComponent: () =>
+          import("./app/features/transaction/components/transaction-review/transaction-review.component").then(
+            (m) => m.TransactionReviewComponent,
+          ),
+      },
+      {
+        path: "transactions/:id/edit",
+        canActivate: [AuthGuard],
+        loadComponent: () =>
+          import("./app/features/transaction/components/transaction-form/transaction-form.component").then(
+            (m) => m.TransactionFormComponent,
+          ),
+      },
+      {
+        path: "transactions/:id",
+        canActivate: [AuthGuard],
+        loadComponent: () =>
+          import("./app/features/transaction/components/transaction-detail/transaction-detail.component").then(
+            (m) => m.TransactionDetailComponent,
+          ),
+      },
       // ─── Users ──────────────────────────────────────────────────────────────
       {
         path: "users",

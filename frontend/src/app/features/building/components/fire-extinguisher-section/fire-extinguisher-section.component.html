@@ -64,6 +64,15 @@
         </div>
       </div>
 
+      <span
+        class="transaction-count-badge"
+        *ngIf="extinguisherTransactionCounts[ext.id] > 0"
+        (click)="navigateToExtinguisherTransactions(ext.id)"
+        title="View related transactions"
+      >
+        💶 {{ extinguisherTransactionCounts[ext.id] }} expense(s)
+      </span>
+
       <!-- Delete confirmation -->
       <div class="delete-confirm" *ngIf="deleteConfirmId === ext.id">
         <span>Delete this extinguisher and all its revisions?</span>

@@ -3,6 +3,8 @@ import { Component, OnDestroy, OnInit } from "@angular/core";
 import { ActivatedRoute, Router, RouterLink } from "@angular/router";
 import { Subject } from "rxjs";
 import { takeUntil } from "rxjs/operators";
+import { TransactionService } from "src/app/core/services/transaction.service";
+import { TransactionStatistics } from "src/app/models/transaction.model";
 import { HousingUnitService } from "../../../../core/services/housing-unit.service";
 import { HousingUnit } from "../../../../models/housing-unit.model";
 import { MeterSectionComponent } from "../../../../shared/components/meter-section/meter-section.component";
@@ -22,7 +24,7 @@ import { RoomSectionComponent } from "../room-section/room-section.component";
     PebSectionComponent,
     RentSectionComponent,
     MeterSectionComponent,
-    LeaseSectionComponent, // UC010
+    LeaseSectionComponent,
     BoilerSectionComponent,
   ],
   templateUrl: "./housing-unit-details.component.html",
@@ -34,13 +36,15 @@ export class HousingUnitDetailsComponent implements OnInit, OnDestroy {
   showDeleteConfirm = false;
   deleting = false;
   deleteError = "";
-
   private destroy$ = new Subject<void>();
+  unitStats: TransactionStatistics | null = null;
+  showFinancial = false;
 
   constructor(
     private route: ActivatedRoute,
     private router: Router,
     private housingUnitService: HousingUnitService,
+    private transactionService: TransactionService,
   ) {}
 
   ngOnInit(): void {
@@ -54,6 +58,7 @@ export class HousingUnitDetailsComponent implements OnInit, OnDestroy {
           next: (u) => {
             this.unit = u;
             this.loading = false;
+            this.loadUnitStats(u.id);
           },
           error: () => {
             this.loading = false;
@@ -92,5 +97,18 @@ export class HousingUnitDetailsComponent implements OnInit, OnDestroy {
           this.deleteError = err.error?.message ?? "Failed to delete unit.";
         },
       });
+  }
+
+  loadUnitStats(unitId: number): void {
+    this.transactionService
+      .getStatistics({ unitId })
+      .pipe(takeUntil(this.destroy$))
+      .subscribe((s) => (this.unitStats = s));
+  }
+
+  viewUnitTransactions(unitId: number): void {
+    this.router.navigate(["/transactions"], {
+      queryParams: { tab: "list", unitId },
+    });
   }
 }

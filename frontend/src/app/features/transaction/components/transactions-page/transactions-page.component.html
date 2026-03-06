@@ -1,0 +1,22 @@
+<div class="transactions-page">
+  <div class="page-header">
+    <h1>Financial Transactions</h1>
+  </div>
+
+  <nav class="tab-nav">
+    <button
+      *ngFor="let tab of tabs"
+      class="tab-btn"
+      [class.active]="activeTab === tab.id"
+      (click)="selectTab(tab.id)">
+      {{ tab.label }}
+    </button>
+  </nav>
+
+  <div class="tab-content">
+    <app-transaction-list *ngIf="activeTab === 'list'" />
+    <app-transaction-import *ngIf="activeTab === 'import'" />
+    <app-transaction-dashboard *ngIf="activeTab === 'dashboard'" />
+    <app-transaction-settings *ngIf="activeTab === 'settings'" />
+  </div>
+</div>

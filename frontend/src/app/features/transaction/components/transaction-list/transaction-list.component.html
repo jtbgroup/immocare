@@ -1,0 +1,159 @@
+<div class="transaction-list">
+  <!-- Toolbar -->
+  <div class="toolbar">
+    <button class="btn btn-primary" (click)="navigateToNew()">+ New Transaction</button>
+    <button class="btn btn-secondary" (click)="showFilters = !showFilters">
+      Filters <span *ngIf="activeFilterCount > 0">({{ activeFilterCount }})</span>
+    </button>
+    <button class="btn btn-secondary" (click)="exportCsv()">Export CSV</button>
+  </div>
+
+  <!-- Filter panel -->
+  <div class="filter-panel" *ngIf="showFilters">
+    <div class="filter-grid">
+      <div class="filter-field">
+        <label>Direction</label>
+        <select [(ngModel)]="filter.direction" (change)="load()">
+          <option value="">All</option>
+          <option *ngFor="let d of directions" [value]="d">{{ DIRECTION_LABELS[d] }}</option>
+        </select>
+      </div>
+
+      <div class="filter-field">
+        <label>Date from</label>
+        <input type="date" [(ngModel)]="filter.from" (change)="load()" />
+      </div>
+
+      <div class="filter-field">
+        <label>Date to</label>
+        <input type="date" [(ngModel)]="filter.to" (change)="load()" />
+      </div>
+
+      <div class="filter-field">
+        <label>Accounting from</label>
+        <input type="date" [(ngModel)]="filter.accountingFrom" (change)="load()" />
+      </div>
+
+      <div class="filter-field">
+        <label>Accounting to</label>
+        <input type="date" [(ngModel)]="filter.accountingTo" (change)="load()" />
+      </div>
+
+      <div class="filter-field">
+        <label>Category</label>
+        <select [(ngModel)]="filter.categoryId" (change)="onCategoryChange(); load()">
+          <option [ngValue]="undefined">All</option>
+          <option *ngFor="let c of categories" [value]="c.id">{{ c.name }}</option>
+        </select>
+      </div>
+
+      <div class="filter-field">
+        <label>Subcategory</label>
+        <select [(ngModel)]="filter.subcategoryId" (change)="load()" [disabled]="!filter.categoryId">
+          <option [ngValue]="undefined">All</option>
+          <option *ngFor="let s of subcategories" [value]="s.id">{{ s.name }}</option>
+        </select>
+      </div>
+
+      <div class="filter-field">
+        <label>Bank account</label>
+        <select [(ngModel)]="filter.bankAccountId" (change)="load()">
+          <option [ngValue]="undefined">All</option>
+          <option *ngFor="let b of bankAccounts" [value]="b.id">{{ b.label }}</option>
+        </select>
+      </div>
+
+      <div class="filter-field">
+        <label>Status</label>
+        <select [(ngModel)]="filter.status" (change)="load()">
+          <option value="">All</option>
+          <option *ngFor="let s of statuses" [value]="s">{{ STATUS_LABELS[s] }}</option>
+        </select>
+      </div>
+
+      <div class="filter-field filter-field--wide">
+        <label>Search</label>
+        <input type="text" [(ngModel)]="filter.search" (keyup.enter)="load()" placeholder="Reference, counterparty, description…" />
+      </div>
+    </div>
+
+    <button class="btn btn-link" (click)="clearFilters()">Clear all filters</button>
+  </div>
+
+  <!-- Summary bar -->
+  <div class="summary-bar" *ngIf="response">
+    <div class="summary-item income">
+      <span class="label">Total Income</span>
+      <span class="value">+{{ response.totalIncome.toFixed(2) }} €</span>
+    </div>
+    <div class="summary-item expense">
+      <span class="label">Total Expenses</span>
+      <span class="value">-{{ response.totalExpenses.toFixed(2) }} €</span>
+    </div>
+    <div class="summary-item balance" [class.positive]="response.netBalance >= 0" [class.negative]="response.netBalance < 0">
+      <span class="label">Net Balance</span>
+      <span class="value">{{ response.netBalance.toFixed(2) }} €</span>
+    </div>
+  </div>
+
+  <!-- Loading -->
+  <div class="loading" *ngIf="loading">Loading…</div>
+
+  <!-- Table -->
+  <div class="table-wrapper" *ngIf="response && !loading">
+    <table class="data-table">
+      <thead>
+        <tr>
+          <th>Reference</th>
+          <th>Date</th>
+          <th>Month</th>
+          <th>Direction</th>
+          <th>Amount</th>
+          <th>Counterparty</th>
+          <th>Category / Subcategory</th>
+          <th>Bank Account</th>
+          <th>Status</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let tx of response.content" (click)="navigateToDetail(tx)" class="clickable">
+          <td class="monospace">{{ tx.reference }}</td>
+          <td>{{ tx.transactionDate }}</td>
+          <td>{{ formatMonth(tx.accountingMonth) }}</td>
+          <td>
+            <span class="badge" [class.badge--income]="tx.direction === 'INCOME'" [class.badge--expense]="tx.direction === 'EXPENSE'">
+              {{ DIRECTION_LABELS[tx.direction] }}
+            </span>
+          </td>
+          <td class="amount" [class.income]="tx.direction === 'INCOME'" [class.expense]="tx.direction === 'EXPENSE'">
+            {{ formatAmount(tx) }}
+          </td>
+          <td>{{ tx.counterpartyName }}</td>
+          <td>
+            <span *ngIf="tx.categoryName">{{ tx.categoryName }}</span>
+            <span *ngIf="tx.subcategoryName"> / {{ tx.subcategoryName }}</span>
+          </td>
+          <td>{{ tx.bankAccountLabel }}</td>
+          <td>
+            <span class="badge badge--status-{{ tx.status.toLowerCase() }}">{{ STATUS_LABELS[tx.status] }}</span>
+          </td>
+          <td class="actions" (click)="$event.stopPropagation()">
+            <button class="icon-btn" title="Edit" (click)="navigateToEdit(tx, $event)">✏️</button>
+            <button class="icon-btn" title="Delete" (click)="deleteTransaction(tx, $event)">🗑️</button>
+          </td>
+        </tr>
+        <tr *ngIf="response.content.length === 0">
+          <td colspan="10" class="empty-state">No transactions found.</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <!-- Pagination -->
+    <div class="pagination" *ngIf="response.totalPages > 1">
+      <button (click)="goToPage(response.page - 1)" [disabled]="response.page === 0">Previous</button>
+      <span>Page {{ response.page + 1 }} / {{ response.totalPages }} — {{ response.totalElements }} total</span>
+      <button (click)="goToPage(response.page + 1)" [disabled]="response.page >= response.totalPages - 1">Next</button>
+    </div>
+  </div>
+</div>

@@ -255,4 +255,74 @@ public class GlobalExceptionHandler {
         .body(new ErrorResponse(403, "CANNOT_DELETE_SELF", ex.getMessage(), LocalDateTime.now()));
   }
 
+  @ExceptionHandler(TransactionNotFoundException.class)
+  public ResponseEntity<ErrorResponse> handleTransactionNotFound(TransactionNotFoundException ex) {
+    return notFound("Transaction not found", ex.getMessage());
+  }
+
+  @ExceptionHandler(TransactionNotEditableException.class)
+  public ResponseEntity<ErrorResponse> handleTransactionNotEditable(TransactionNotEditableException ex) {
+    return ResponseEntity.status(HttpStatus.UNPROCESSABLE_ENTITY)
+        .body(new ErrorResponse(422, "TRANSACTION_NOT_EDITABLE", ex.getMessage(), LocalDateTime.now()));
+  }
+
+  @ExceptionHandler(TransactionValidationException.class)
+  public ResponseEntity<ErrorResponse> handleTransactionValidation(TransactionValidationException ex) {
+    return badRequest("Transaction validation error", ex.getMessage());
+  }
+
+  @ExceptionHandler(SubcategoryDirectionMismatchException.class)
+  public ResponseEntity<ErrorResponse> handleSubcategoryDirectionMismatch(SubcategoryDirectionMismatchException ex) {
+    return badRequest("Subcategory direction mismatch", ex.getMessage());
+  }
+
+  @ExceptionHandler(SubcategoryInUseException.class)
+  public ResponseEntity<ErrorResponse> handleSubcategoryInUse(SubcategoryInUseException ex) {
+    return ResponseEntity.status(HttpStatus.CONFLICT)
+        .body(new ErrorResponse(409, "SUBCATEGORY_IN_USE", ex.getMessage(), LocalDateTime.now()));
+  }
+
+  @ExceptionHandler(SubcategoryNotFoundException.class)
+  public ResponseEntity<ErrorResponse> handleSubcategoryNotFound(SubcategoryNotFoundException ex) {
+    return notFound("Subcategory not found", ex.getMessage());
+  }
+
+  @ExceptionHandler(CategoryNotFoundException.class)
+  public ResponseEntity<ErrorResponse> handleCategoryNotFound(CategoryNotFoundException ex) {
+    return notFound("Category not found", ex.getMessage());
+  }
+
+  @ExceptionHandler(CategoryHasSubcategoriesException.class)
+  public ResponseEntity<ErrorResponse> handleCategoryHasSubcategories(CategoryHasSubcategoriesException ex) {
+    return ResponseEntity.status(HttpStatus.CONFLICT)
+        .body(new ErrorResponse(409, "CATEGORY_HAS_SUBCATEGORIES", ex.getMessage(), LocalDateTime.now()));
+  }
+
+  @ExceptionHandler(BankAccountNotFoundException.class)
+  public ResponseEntity<ErrorResponse> handleBankAccountNotFound(BankAccountNotFoundException ex) {
+    return notFound("Bank account not found", ex.getMessage());
+  }
+
+  @ExceptionHandler(BankAccountDuplicateLabelException.class)
+  public ResponseEntity<ErrorResponse> handleBankAccountDuplicateLabel(BankAccountDuplicateLabelException ex) {
+    return ResponseEntity.status(HttpStatus.CONFLICT)
+        .body(new ErrorResponse(409, "DUPLICATE_LABEL", ex.getMessage(), LocalDateTime.now()));
+  }
+
+  @ExceptionHandler(BankAccountDuplicateNumberException.class)
+  public ResponseEntity<ErrorResponse> handleBankAccountDuplicateNumber(BankAccountDuplicateNumberException ex) {
+    return ResponseEntity.status(HttpStatus.CONFLICT)
+        .body(new ErrorResponse(409, "DUPLICATE_IBAN", ex.getMessage(), LocalDateTime.now()));
+  }
+
+  @ExceptionHandler(ImportBatchNotFoundException.class)
+  public ResponseEntity<ErrorResponse> handleImportBatchNotFound(ImportBatchNotFoundException ex) {
+    return notFound("Import batch not found", ex.getMessage());
+  }
+
+  @ExceptionHandler(AssetLinkValidationException.class)
+  public ResponseEntity<ErrorResponse> handleAssetLinkValidation(AssetLinkValidationException ex) {
+    return badRequest("Asset link validation error", ex.getMessage());
+  }
+
 }
