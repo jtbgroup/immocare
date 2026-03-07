@@ -1,7 +1,7 @@
 import { CommonModule } from "@angular/common";
 import { Component, OnInit } from "@angular/core";
 import { FormsModule } from "@angular/forms";
-import { Router } from "@angular/router";
+import { Router, RouterModule } from "@angular/router";
 import { BankAccountService } from "../../../../core/services/bank-account.service";
 import { TagCategoryService } from "../../../../core/services/tag-category.service";
 import { TagSubcategoryService } from "../../../../core/services/tag-subcategory.service";
@@ -15,17 +15,28 @@ import {
   TransactionFilter,
   TransactionStatus,
 } from "../../../../models/transaction.model";
+import { BelgianCurrencyPipe } from "../../../../shared/pipes/belgian-currency.pipe";
+import { SortIconPipe } from "../../../../shared/pipes/sort-icon.pipe";
 
 @Component({
   selector: "app-transaction-list",
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [
+    CommonModule,
+    FormsModule,
+    RouterModule,
+    SortIconPipe,
+    BelgianCurrencyPipe,
+  ],
   templateUrl: "./transaction-list.component.html",
-  // styleUrls: ["./transaction-list.component.scss"],
+  styleUrls: ["./transaction-list.component.scss"],
 })
 export class TransactionListComponent implements OnInit {
   response: PagedTransactionResponse | null = null;
   loading = false;
+
+  sortField = "transactionDate";
+  sortDirection: "asc" | "desc" = "desc";
 
   filter: TransactionFilter = {
     page: 0,
@@ -83,6 +94,23 @@ export class TransactionListComponent implements OnInit {
 
   clearFilters(): void {
     this.filter = { page: 0, size: 20, sort: "transactionDate,desc" };
+    this.sortField = "transactionDate";
+    this.sortDirection = "desc";
+    this.load();
+  }
+
+  sortBy(field: string): void {
+    if (this.sortField === field) {
+      this.sortDirection = this.sortDirection === "asc" ? "desc" : "asc";
+    } else {
+      this.sortField = field;
+      this.sortDirection = "asc";
+    }
+    this.filter = {
+      ...this.filter,
+      page: 0,
+      sort: `${this.sortField},${this.sortDirection}`,
+    };
     this.load();
   }
 
@@ -119,11 +147,6 @@ export class TransactionListComponent implements OnInit {
       a.click();
       URL.revokeObjectURL(url);
     });
-  }
-
-  formatAmount(tx: FinancialTransactionSummary): string {
-    const sign = tx.direction === "INCOME" ? "+" : "-";
-    return sign + tx.amount.toFixed(2) + " €";
   }
 
   formatMonth(date: string): string {

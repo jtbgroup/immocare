@@ -1,50 +1,62 @@
 package com.immocare.controller;
 
-import java.util.List;
-
-import org.springframework.data.domain.PageRequest;
-import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
-import com.immocare.model.dto.ImportBatchResultDTO;
-import com.immocare.model.dto.PagedTransactionResponse;
-import com.immocare.model.dto.ParsedCsvRow;
-import com.immocare.model.dto.TransactionFilter;
-import com.immocare.model.entity.AppUser;
-import com.immocare.service.CsvImportService;
-import com.immocare.service.FinancialTransactionService;
 
+import com.immocare.model.dto.ImportBatchResultDTO;
+import com.immocare.model.entity.AppUser;
+import com.immocare.service.TransactionImportService;
+
+import lombok.RequiredArgsConstructor;
+
+/**
+ * POST /api/v1/transactions/import
+ *
+ * Replaces the old CSV-only import. Now accepts any file type
+ * and dispatches to the appropriate parser based on parserCode.
+ *
+ * Multipart fields:
+ * file — the CSV or PDF file
+ * parserCode — e.g. "keytrade-csv-20260102"
+ * bankAccountId — (optional) own bank account id to link
+ */
 @RestController
+@RequestMapping("/api/v1/transactions")
+@RequiredArgsConstructor
 public class TransactionImportController {
 
-    private final CsvImportService csvImportService;
-    private final FinancialTransactionService transactionService;
+    private final TransactionImportService importService;
+    private final AuthService authService;
 
-    public TransactionImportController(CsvImportService csvImportService,
-            FinancialTransactionService transactionService) {
-        this.csvImportService = csvImportService;
-        this.transactionService = transactionService;
-    }
+    @PostMapping(value = "/import", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public ResponseEntity<ImportBatchResultDTO> importFile(
+            @RequestPart("file") MultipartFile file,
+            @RequestPart("parserCode") String parserCode,
+            @RequestPart(value = "bankAccountId", required = false) String bankAccountIdStr) {
 
-    @PostMapping("/api/v1/transactions/import")
-    public ImportBatchResultDTO importCsv(@RequestParam("file") MultipartFile file,
-            @AuthenticationPrincipal AppUser currentUser) {
-        var config = csvImportService.loadMappingConfig();
-        List<ParsedCsvRow> rows = csvImportService.parsePreview(file, config);
-        return csvImportService.importBatch(rows, currentUser);
-    }
+        Long bankAccountId = (bankAccountIdStr != null && !bankAccountIdStr.isBlank())
+                ? Long.parseLong(bankAccountIdStr)
+                : null;
 
-    @GetMapping("/api/v1/transactions/import/{batchId}")
-    public PagedTransactionResponse getBatch(@PathVariable Long batchId,
-            @RequestParam(defaultValue = "0") int page,
-            @RequestParam(defaultValue = "20") int size) {
-        TransactionFilter filter = new TransactionFilter(null, null, null, null, null, null, null,
-                null, null, null, null, null, batchId, null, null);
-        return transactionService.getAll(filter, PageRequest.of(page, size));
+        AppUser currentUser = authService.getCurrentUser();
+
+        try {
+            ImportBatchResultDTO result = importService.importFile(
+                    file, parserCode.trim(), bankAccountId, currentUser);
+            return ResponseEntity.ok(result);
+
+        } catch (ParseException e) {
+            return ResponseEntity.badRequest()
+                    .body(ImportBatchResultDTO.error(e.getMessage()));
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.badRequest()
+                    .body(ImportBatchResultDTO.error(e.getMessage()));
+        }
     }
 }

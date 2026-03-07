@@ -24,7 +24,7 @@ import { AssetLinkEditorComponent } from "../asset-link-editor/asset-link-editor
   standalone: true,
   imports: [CommonModule, ReactiveFormsModule, AssetLinkEditorComponent],
   templateUrl: "./transaction-form.component.html",
-  // styleUrls: ["./transaction-form.component.scss"],
+  styleUrls: ["./transaction-form.component.scss"],
 })
 export class TransactionFormComponent implements OnInit {
   form!: FormGroup;
@@ -140,11 +140,7 @@ export class TransactionFormComponent implements OnInit {
       this.form.markAllAsTouched();
       return;
     }
-    const value = this.form.value;
-    const req = {
-      ...value,
-      assetLinks: this.assetLinks,
-    };
+    const req = { ...this.form.value, assetLinks: this.assetLinks };
 
     const obs = this.isEdit
       ? this.transactionService.update(this.transactionId!, req)

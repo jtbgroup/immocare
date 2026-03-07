@@ -6,7 +6,7 @@ import {
   OnInit,
   ViewChild,
 } from "@angular/core";
-import { RouterLink, RouterLinkActive, RouterOutlet } from "@angular/router";
+import { Router, RouterLink, RouterLinkActive, RouterOutlet } from "@angular/router";
 import { AuthService } from "./core/auth/auth.service";
 import { AlertService } from "./core/services/alert.service";
 import { VersionService } from "./core/services/version.service";
@@ -22,15 +22,18 @@ export class AppComponent implements OnInit {
   version = this.versionService.getVersion();
   alertCount = 0;
   dropdownOpen = false;
+  managementOpen = false;
 
   currentUser$ = this.authService.currentUser$;
 
   @ViewChild("avatarWrapper") avatarWrapper!: ElementRef;
+  @ViewChild("managementWrapper") managementWrapper!: ElementRef;
 
   constructor(
     private authService: AuthService,
     private versionService: VersionService,
     private alertService: AlertService,
+    private router: Router,
   ) {}
 
   ngOnInit(): void {
@@ -61,6 +64,19 @@ export class AppComponent implements OnInit {
     this.dropdownOpen = false;
   }
 
+  toggleManagement(): void {
+    this.managementOpen = !this.managementOpen;
+  }
+
+  closeManagement(): void {
+    this.managementOpen = false;
+  }
+
+  isManagementActive(): boolean {
+    const url = this.router.url;
+    return url.startsWith("/persons") || url.startsWith("/bank-accounts");
+  }
+
   @HostListener("document:click", ["$event"])
   onDocumentClick(event: MouseEvent): void {
     if (
@@ -69,6 +85,13 @@ export class AppComponent implements OnInit {
       !this.avatarWrapper.nativeElement.contains(event.target)
     ) {
       this.dropdownOpen = false;
+    }
+    if (
+      this.managementOpen &&
+      this.managementWrapper &&
+      !this.managementWrapper.nativeElement.contains(event.target)
+    ) {
+      this.managementOpen = false;
     }
   }
 

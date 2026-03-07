@@ -216,6 +216,46 @@
       </div>
     </div>
   </div>
+
+  <!-- Transaction Statistics -->
+  <div class="info-card">
+    <div class="section-header">
+      <h2>Transaction Statistics</h2>
+      <button class="btn btn-ghost btn-sm" (click)="viewLeaseTransactions()">
+        View all transactions →
+      </button>
+    </div>
+    <div *ngIf="leaseStats; else financialLoading">
+      <div class="financial-stats-grid">
+        <div class="financial-stat financial-stat--income">
+          <span class="financial-stat__label">Income</span>
+          <span class="financial-stat__value"
+            >+{{ leaseStats.totalIncome.toFixed(2) }} €</span
+          >
+        </div>
+        <div class="financial-stat financial-stat--expense">
+          <span class="financial-stat__label">Expenses</span>
+          <span class="financial-stat__value"
+            >-{{ leaseStats.totalExpenses.toFixed(2) }} €</span
+          >
+        </div>
+        <div
+          class="financial-stat"
+          [class.financial-stat--positive]="leaseStats.netBalance >= 0"
+          [class.financial-stat--negative]="leaseStats.netBalance < 0"
+        >
+          <span class="financial-stat__label">Net Balance</span>
+          <span class="financial-stat__value"
+            >{{ leaseStats.netBalance >= 0 ? "+" : ""
+            }}{{ leaseStats.netBalance.toFixed(2) }} €</span
+          >
+        </div>
+      </div>
+    </div>
+    <ng-template #financialLoading>
+      <p class="loading-placeholder">Loading financial data…</p>
+    </ng-template>
+  </div>
 </div>
 
 <ng-template #loading>

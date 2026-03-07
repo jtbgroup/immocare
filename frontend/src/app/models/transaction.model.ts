@@ -1,9 +1,23 @@
 export type TransactionDirection = "INCOME" | "EXPENSE";
 export type TransactionStatus = "DRAFT" | "CONFIRMED" | "RECONCILED";
-export type TransactionSource = "MANUAL" | "CSV_IMPORT";
+export type TransactionSource = "MANUAL" | "IMPORT";
 export type AssetType = "BOILER" | "FIRE_EXTINGUISHER" | "METER";
 export type SubcategoryDirection = "INCOME" | "EXPENSE" | "BOTH";
 export type BankAccountType = "CURRENT" | "SAVINGS";
+
+// ─── Import Parser ────────────────────────────────────────────────────────────
+
+export interface ImportParser {
+  id: number;
+  code: string;
+  label: string;
+  description: string;
+  format: "CSV" | "PDF";
+  bankHint?: string;
+  active: boolean;
+}
+
+// ─── Bank Account ─────────────────────────────────────────────────────────────
 
 export interface BankAccount {
   id: number;
@@ -11,7 +25,10 @@ export interface BankAccount {
   accountNumber: string;
   type: BankAccountType;
   isActive: boolean;
+  ownerUserId?: number;
 }
+
+// ─── Tags ─────────────────────────────────────────────────────────────────────
 
 export interface TagCategory {
   id: number;
@@ -29,6 +46,8 @@ export interface TagSubcategory {
   description?: string;
   usageCount: number;
 }
+
+// ─── Transaction ──────────────────────────────────────────────────────────────
 
 export interface TransactionAssetLink {
   id?: number;
@@ -69,6 +88,7 @@ export interface FinancialTransaction extends FinancialTransactionSummary {
   housingUnitId?: number;
   buildingId?: number;
   importBatchId?: number;
+  parserCode?: string;
   assetLinks: TransactionAssetLink[];
   editable: boolean;
   createdAt: string;
@@ -85,6 +105,8 @@ export interface PagedTransactionResponse {
   totalExpenses: number;
   netBalance: number;
 }
+
+// ─── Statistics ───────────────────────────────────────────────────────────────
 
 export interface TransactionStatistics {
   totalIncome: number;
@@ -146,8 +168,10 @@ export interface MonthlyTrend {
   expenses: number;
 }
 
+// ─── Import ───────────────────────────────────────────────────────────────────
+
 export interface ImportBatchResult {
-  batchId: number;
+  batchId: number | null;
   totalRows: number;
   importedCount: number;
   duplicateCount: number;
@@ -162,6 +186,8 @@ export interface SubcategorySuggestion {
   categoryName: string;
   confidence: number;
 }
+
+// ─── Filters ──────────────────────────────────────────────────────────────────
 
 export interface TransactionFilter {
   direction?: TransactionDirection;
@@ -192,6 +218,8 @@ export interface StatisticsFilter {
   bankAccountId?: number;
   direction?: TransactionDirection;
 }
+
+// ─── Requests ─────────────────────────────────────────────────────────────────
 
 export interface CreateTransactionRequest {
   direction: TransactionDirection;
@@ -236,6 +264,8 @@ export interface SaveBankAccountRequest {
   type: BankAccountType;
   isActive: boolean;
 }
+
+// ─── Labels ───────────────────────────────────────────────────────────────────
 
 export const DIRECTION_LABELS: Record<TransactionDirection, string> = {
   INCOME: "Income",

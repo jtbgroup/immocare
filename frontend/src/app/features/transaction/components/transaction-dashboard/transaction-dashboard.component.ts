@@ -6,11 +6,12 @@ import {
   StatisticsFilter,
   TransactionStatistics,
 } from "../../../../models/transaction.model";
+import { BelgianCurrencyPipe } from "../../../../shared/pipes/belgian-currency.pipe";
 
 @Component({
   selector: "app-transaction-dashboard",
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule, BelgianCurrencyPipe],
   templateUrl: "./transaction-dashboard.component.html",
   // styleUrls: ["./transaction-dashboard.component.scss"],
 })
@@ -37,10 +38,6 @@ export class TransactionDashboardComponent implements OnInit {
         this.loading = false;
       },
     });
-  }
-
-  formatAmount(amount: number): string {
-    return amount.toFixed(2) + " €";
   }
 
   get maxCategoryTotal(): number {

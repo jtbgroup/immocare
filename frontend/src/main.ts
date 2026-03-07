@@ -241,6 +241,16 @@ bootstrapApplication(AppComponent, {
             (m) => m.UserFormComponent,
           ),
       },
+      // ─── Management: Bank Accounts ──────────────────────────────────────
+      {
+        path: "bank-accounts",
+        canActivate: [AuthGuard],
+        loadComponent: () =>
+          import("./app/features/management/components/bank-accounts/bank-accounts.component").then(
+            (m) => m.BankAccountsComponent,
+          ),
+      },
+
       // ─── Settings ───────────────────────────────────────────────────────────
       {
         path: "settings",

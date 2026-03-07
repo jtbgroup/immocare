@@ -1,6 +1,8 @@
 <div class="unit-details-container" *ngIf="unit">
   <!-- Breadcrumb -->
   <nav class="breadcrumb" aria-label="breadcrumb">
+    <a routerLink="/buildings">Buildings</a>
+    <span class="breadcrumb-separator">›</span>
     <a [routerLink]="['/buildings', unit.buildingId]">{{
       unit.buildingName
     }}</a>
@@ -19,13 +21,17 @@
     </div>
   </div>
 
-  <!-- Information -->
+  <!-- Info card -->
   <div class="info-card">
     <h2>Information</h2>
     <div class="info-grid">
       <div class="info-item">
-        <label>Unit Number</label>
-        <p>{{ unit.unitNumber }}</p>
+        <label>Building</label>
+        <p>
+          <a [routerLink]="['/buildings', unit.buildingId]">{{
+            unit.buildingName
+          }}</a>
+        </p>
       </div>
       <div class="info-item">
         <label>Floor</label>
@@ -36,7 +42,7 @@
         <p>{{ unit.landingNumber }}</p>
       </div>
       <div class="info-item" *ngIf="unit.totalSurface">
-        <label>Total Surface</label>
+        <label>Surface</label>
         <p>{{ unit.totalSurface }} m²</p>
       </div>
       <div class="info-item">
@@ -91,14 +97,57 @@
     ></app-meter-section>
   </div>
 
-  <!-- Meters — UC011 -->
+  <!-- Boilers — UC011 -->
   <div class="info-card">
     <app-boiler-section ownerType="HOUSING_UNIT" [ownerId]="unit.id" />
   </div>
 
   <!-- Lease — UC010 -->
-  <div class="info-card" *ngIf="unit">
+  <div class="info-card">
     <app-lease-section [unitId]="unit.id"></app-lease-section>
+  </div>
+
+  <!-- Financial -->
+  <div class="info-card">
+    <div class="section-header">
+      <h2>Financial</h2>
+      <button
+        class="btn btn-ghost btn-sm"
+        (click)="viewUnitTransactions(unit.id)"
+      >
+        View all transactions →
+      </button>
+    </div>
+    <div *ngIf="unitStats; else financialLoading">
+      <div class="financial-stats-grid">
+        <div class="financial-stat financial-stat--income">
+          <span class="financial-stat__label">Income</span>
+          <span class="financial-stat__value"
+            >+{{ unitStats.totalIncome.toFixed(2) }} €</span
+          >
+        </div>
+        <div class="financial-stat financial-stat--expense">
+          <span class="financial-stat__label">Expenses</span>
+          <span class="financial-stat__value"
+            >-{{ unitStats.totalExpenses.toFixed(2) }} €</span
+          >
+        </div>
+        <div
+          class="financial-stat"
+          [class.financial-stat--positive]="unitStats.netBalance >= 0"
+          [class.financial-stat--negative]="unitStats.netBalance < 0"
+        >
+          <span class="financial-stat__label">Net Balance</span>
+          <span class="financial-stat__value"
+            >{{ unitStats.netBalance >= 0 ? "+" : ""
+            }}{{ unitStats.netBalance.toFixed(2) }} €</span
+          >
+        </div>
+      </div>
+    </div>
+    <ng-template #financialLoading>
+      <p class="loading-placeholder">Loading financial data…</p>
+    </ng-template>
   </div>
 </div>
 
@@ -128,31 +177,5 @@
         {{ deleting ? "Deleting..." : "Delete" }}
       </button>
     </div>
-  </div>
-</div>
-
-<div class="collapsible-section" *ngIf="unit">
-  <div class="collapsible-header" (click)="showFinancial = !showFinancial">
-    <h3>Financial</h3>
-    <span>{{ showFinancial ? "▲" : "▼" }}</span>
-  </div>
-  <div class="collapsible-body" *ngIf="showFinancial && unitStats">
-    <div class="financial-summary">
-      <span class="income"
-        >Income: +{{ unitStats.totalIncome.toFixed(2) }} €</span
-      >
-      <span class="expense"
-        >Expenses: -{{ unitStats.totalExpenses.toFixed(2) }} €</span
-      >
-      <span
-        [class.income]="unitStats.netBalance >= 0"
-        [class.expense]="unitStats.netBalance < 0"
-      >
-        Balance: {{ unitStats.netBalance.toFixed(2) }} €
-      </span>
-    </div>
-    <a (click)="viewUnitTransactions(unit!.id)" class="link"
-      >View all transactions →</a
-    >
   </div>
 </div>

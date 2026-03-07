@@ -1,14 +1,18 @@
 // features/lease/components/lease-details/lease-details.component.ts
 import { CommonModule } from "@angular/common";
-import { Component, OnInit } from "@angular/core";
+import { Component, OnDestroy, OnInit } from "@angular/core";
 import { FormsModule } from "@angular/forms";
-import { ActivatedRoute, RouterModule } from "@angular/router";
+import { ActivatedRoute, Router, RouterModule } from "@angular/router";
+import { Subject } from "rxjs";
+import { takeUntil } from "rxjs/operators";
 import { LeaseService } from "../../../../core/services/lease.service";
+import { TransactionService } from "../../../../core/services/transaction.service";
 import {
   Lease,
   LEASE_TYPE_LABELS,
   LeaseStatus,
 } from "../../../../models/lease.model";
+import { TransactionStatistics } from "../../../../models/transaction.model";
 import { AppDatePipe } from "../../../../shared/pipes/app-date.pipe";
 import { RentAdjustmentSectionComponent } from "../rent-adjustment-section/rent-adjustment-section.component";
 import { TenantSectionComponent } from "../tenant-section/tenant-section.component";
@@ -35,7 +39,7 @@ const TRANSITIONS: Record<LeaseStatus, LeaseStatus[]> = {
   templateUrl: "./lease-details.component.html",
   styleUrls: ["./lease-details.component.scss"],
 })
-export class LeaseDetailsComponent implements OnInit {
+export class LeaseDetailsComponent implements OnInit, OnDestroy {
   lease?: Lease;
   isLoading = false;
   errorMessage = "";
@@ -46,14 +50,26 @@ export class LeaseDetailsComponent implements OnInit {
   isChangingStatus = false;
   statusError = "";
 
+  // Financial
+  leaseStats: TransactionStatistics | null = null;
+
+  private destroy$ = new Subject<void>();
+
   constructor(
     private route: ActivatedRoute,
+    private router: Router,
     private leaseService: LeaseService,
+    private transactionService: TransactionService,
   ) {}
 
   ngOnInit(): void {
     const id = this.route.snapshot.paramMap.get("id");
     if (id) this.loadLease(+id);
+  }
+
+  ngOnDestroy(): void {
+    this.destroy$.next();
+    this.destroy$.complete();
   }
 
   loadLease(id: number): void {
@@ -64,11 +80,27 @@ export class LeaseDetailsComponent implements OnInit {
         this.selectedStatus = "";
         this.statusError = "";
         this.isLoading = false;
+        this.loadLeaseStats(lease);
       },
       error: () => {
         this.errorMessage = "Lease not found.";
         this.isLoading = false;
       },
+    });
+  }
+
+  loadLeaseStats(lease: Lease): void {
+    // Filter by unitId scoped to the lease period
+    this.transactionService
+      .getStatistics({ unitId: lease.housingUnitId })
+      .pipe(takeUntil(this.destroy$))
+      .subscribe((s) => (this.leaseStats = s));
+  }
+
+  viewLeaseTransactions(): void {
+    if (!this.lease) return;
+    this.router.navigate(["/transactions"], {
+      queryParams: { tab: "list", unitId: this.lease.housingUnitId },
     });
   }
 

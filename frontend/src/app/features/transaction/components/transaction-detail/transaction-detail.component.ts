@@ -1,6 +1,6 @@
 import { CommonModule } from "@angular/common";
 import { Component, OnInit } from "@angular/core";
-import { ActivatedRoute, Router } from "@angular/router";
+import { ActivatedRoute, Router, RouterModule } from "@angular/router";
 import { TransactionService } from "../../../../core/services/transaction.service";
 import {
   DIRECTION_LABELS,
@@ -11,9 +11,9 @@ import {
 @Component({
   selector: "app-transaction-detail",
   standalone: true,
-  imports: [CommonModule],
+  imports: [CommonModule, RouterModule],
   templateUrl: "./transaction-detail.component.html",
-  // styleUrls: ["./transaction-detail.component.scss"],
+  styleUrls: ["./transaction-detail.component.scss"],
 })
 export class TransactionDetailComponent implements OnInit {
   transaction?: FinancialTransaction;

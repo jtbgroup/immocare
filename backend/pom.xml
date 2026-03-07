@@ -85,6 +85,13 @@
       <optional>true</optional>
     </dependency>
 
+    <!-- pdf -->
+    <dependency>
+      <groupId>org.apache.pdfbox</groupId>
+      <artifactId>pdfbox</artifactId>
+      <version>3.0.2</version>
+    </dependency>
+
     <!-- Testing -->
     <dependency>
       <groupId>org.springframework.boot</groupId>

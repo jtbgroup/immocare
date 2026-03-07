@@ -43,9 +43,7 @@
   text-decoration: none;
   flex-shrink: 0;
 
-  &:hover {
-    text-decoration: none;
-  }
+  &:hover { text-decoration: none; }
 }
 
 .brand-icon {
@@ -95,10 +93,12 @@
   border-radius: 6px;
   font-size: 0.855rem;
   font-weight: 500;
-  transition:
-    background 0.16s,
-    color 0.16s;
+  transition: background 0.16s, color 0.16s;
   white-space: nowrap;
+  border: none;
+  background: none;
+  cursor: pointer;
+  font-family: inherit;
 
   &:hover {
     background: rgba(255, 255, 255, 0.08);
@@ -106,9 +106,56 @@
     text-decoration: none;
   }
 
-  &--active {
-    background: rgba(99, 102, 241, 0.28);
+  &--active, &.app-nav__link--active {
+    background: rgba(255, 255, 255, 0.14);
     color: white;
+  }
+
+  &--dropdown {
+    .nav-chevron {
+      font-size: 0.65rem;
+      opacity: 0.6;
+      margin-left: 0.1rem;
+    }
+  }
+}
+
+// ── Management dropdown ───────────────────────────────────────────────────────
+
+.nav-dropdown-wrapper {
+  position: relative;
+}
+
+.nav-dropdown {
+  display: none;
+  position: absolute;
+  top: calc(100% + 6px);
+  left: 0;
+  background: white;
+  border-radius: 8px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.18), 0 2px 6px rgba(0, 0, 0, 0.1);
+  min-width: 180px;
+  overflow: hidden;
+  z-index: 200;
+  animation: dropIn 0.15s ease;
+
+  &.open { display: block; }
+}
+
+.nav-dropdown__item {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  padding: 0.65rem 1rem;
+  font-size: 0.855rem;
+  color: #374151;
+  text-decoration: none;
+  transition: background 0.14s;
+
+  &:hover {
+    background: #f0f0ff;
+    color: #4f46e5;
+    text-decoration: none;
   }
 }
 
@@ -118,7 +165,6 @@
   display: flex;
   align-items: center;
   gap: 0.5rem;
-  flex-shrink: 0;
   margin-left: auto;
 }
 
@@ -126,24 +172,18 @@
 
 .bell-btn {
   position: relative;
-  background: none;
-  border: none;
-  color: rgba(255, 255, 255, 0.55);
   width: 36px;
   height: 36px;
-  border-radius: 8px;
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 1.05rem;
-  cursor: pointer;
+  border-radius: 8px;
+  color: rgba(255, 255, 255, 0.55);
   text-decoration: none;
-  transition:
-    background 0.16s,
-    color 0.16s;
+  font-size: 1.1rem;
+  transition: background 0.16s, color 0.16s;
 
-  &:hover,
-  &--active {
+  &:hover, &--active {
     background: rgba(255, 255, 255, 0.08);
     color: white;
     text-decoration: none;
@@ -152,24 +192,22 @@
 
 .bell-badge {
   position: absolute;
-  top: 4px;
+  top: 3px;
   right: 3px;
+  min-width: 16px;
+  height: 16px;
   background: #ef4444;
-  color: white;
-  font-size: 0.6rem;
+  border-radius: 8px;
+  font-size: 0.62rem;
   font-weight: 700;
-  min-width: 15px;
-  height: 15px;
-  border-radius: 50%;
   display: flex;
   align-items: center;
   justify-content: center;
+  color: white;
   padding: 0 3px;
-  border: 1.5px solid #1e1b4b;
-  line-height: 1;
 }
 
-// ── Avatar button ─────────────────────────────────────────────────────────────
+// ── Avatar ────────────────────────────────────────────────────────────────────
 
 .avatar-wrapper {
   position: relative;
@@ -178,25 +216,16 @@
 .avatar-btn {
   display: flex;
   align-items: center;
-  gap: 0.45rem;
-  background: rgba(255, 255, 255, 0.07);
+  gap: 0.5rem;
+  background: rgba(255, 255, 255, 0.08);
   border: 1px solid rgba(255, 255, 255, 0.12);
   border-radius: 8px;
-  padding: 0.32rem 0.65rem 0.32rem 0.4rem;
+  padding: 0.3rem 0.65rem 0.3rem 0.4rem;
   cursor: pointer;
-  color: white;
-  transition:
-    background 0.16s,
-    border-color 0.16s;
+  transition: background 0.16s;
 
-  &:hover {
-    background: rgba(255, 255, 255, 0.12);
-    border-color: rgba(255, 255, 255, 0.22);
-  }
-
-  &.open {
-    background: rgba(99, 102, 241, 0.2);
-    border-color: rgba(99, 102, 241, 0.5);
+  &:hover, &.open {
+    background: rgba(255, 255, 255, 0.14);
   }
 }
 
@@ -227,12 +256,10 @@
   transition: transform 0.2s;
   margin-left: 0.1rem;
 
-  .avatar-btn.open & {
-    transform: rotate(180deg);
-  }
+  .avatar-btn.open & { transform: rotate(180deg); }
 }
 
-// ── Dropdown ──────────────────────────────────────────────────────────────────
+// ── Avatar Dropdown ───────────────────────────────────────────────────────────
 
 .dropdown {
   display: none;
@@ -241,28 +268,18 @@
   right: 0;
   background: white;
   border-radius: 10px;
-  box-shadow:
-    0 8px 32px rgba(0, 0, 0, 0.18),
-    0 2px 8px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.18), 0 2px 8px rgba(0, 0, 0, 0.1);
   min-width: 200px;
   overflow: hidden;
   z-index: 200;
   animation: dropIn 0.15s ease;
 
-  &.open {
-    display: block;
-  }
+  &.open { display: block; }
 }
 
 @keyframes dropIn {
-  from {
-    opacity: 0;
-    transform: translateY(-6px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
+  from { opacity: 0; transform: translateY(-6px); }
+  to   { opacity: 1; transform: translateY(0); }
 }
 
 .dropdown-header {
@@ -306,11 +323,7 @@
 
   &--logout {
     color: #dc2626;
-
-    &:hover {
-      background: #fff5f5;
-      color: #dc2626;
-    }
+    &:hover { background: #fff5f5; color: #dc2626; }
   }
 }
 

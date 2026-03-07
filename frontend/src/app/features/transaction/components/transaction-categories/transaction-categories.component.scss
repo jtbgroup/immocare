@@ -1,0 +1,55 @@
+// All shared styles come from global partials.
+// (info-card, section-header, data-table, btn, icon-btn, badge, inline-form, alert, empty-state)
+
+.transaction-categories-page {
+  // max-width handled by global _layout.scss
+}
+
+.categories-layout {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+// ─── Inline add/edit form ─────────────────────────────────────────────────────
+
+.inline-form {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  align-items: center;
+  padding: 0.75rem;
+  background: #f5f7fa;
+  border-radius: 6px;
+  margin-bottom: 1rem;
+
+  input, select {
+    padding: 0.4rem 0.6rem;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    font-size: 0.9rem;
+    font-family: inherit;
+    min-width: 140px;
+  }
+}
+
+// ─── Actions cell ─────────────────────────────────────────────────────────────
+
+.actions-cell {
+  white-space: nowrap;
+  text-align: right;
+}
+
+.icon-btn {
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-size: 1rem;
+  padding: 0.1rem 0.3rem;
+  border-radius: 4px;
+  opacity: 0.75;
+  transition: opacity 0.15s;
+
+  &:hover { opacity: 1; }
+  &:disabled { opacity: 0.3; cursor: not-allowed; }
+}

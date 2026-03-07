@@ -1,61 +1,157 @@
 <div class="transaction-import">
-  <h2>Import Transactions</h2>
 
-  <div
-    class="drop-zone"
-    [class.dragging]="isDragging"
-    (dragover)="onDragOver($event)"
-    (dragleave)="onDragLeave()"
-    (drop)="onDrop($event)">
-    <div class="drop-zone-content">
-      <div class="drop-icon">📂</div>
-      <p>Drag & drop a CSV file here, or</p>
-      <label class="btn btn-secondary file-label">
-        Browse
-        <input type="file" accept=".csv" (change)="onFileChange($event)" hidden />
-      </label>
+  <div class="details-content">
+    <div class="header">
+      <h1>Importer des transactions</h1>
     </div>
   </div>
 
-  <div class="selected-file" *ngIf="selectedFile">
-    <span>📄 {{ selectedFile.name }} ({{ (selectedFile.size / 1024).toFixed(1) }} KB)</span>
-    <button class="btn btn-primary" (click)="import()" [disabled]="importing">
-      {{ importing ? 'Processing…' : 'Process Import' }}
-    </button>
-  </div>
+  <!-- ── Configuration ──────────────────────────────────────────────────────── -->
+  <div class="info-card import-config">
 
-  <div class="alert alert-error" *ngIf="error">{{ error }}</div>
+    <div class="form-section">
+      <div class="form-row">
 
-  <div class="import-result" *ngIf="result">
-    <div class="result-banner">
-      <h3>Import complete</h3>
-      <div class="result-stats">
-        <span class="stat">Total rows: <strong>{{ result.totalRows }}</strong></span>
-        <span class="stat success">Imported: <strong>{{ result.importedCount }}</strong></span>
-        <span class="stat warning">Duplicates: <strong>{{ result.duplicateCount }}</strong></span>
-        <span class="stat error">Errors: <strong>{{ result.errorCount }}</strong></span>
+        <!-- Parseur -->
+        <div class="form-group">
+          <label>Format d'import <span class="required">*</span></label>
+          <select [(ngModel)]="selectedParserCode" (ngModelChange)="clearFile()">
+            <option value="">— Choisir un format —</option>
+            <option *ngFor="let p of parsers" [value]="p.code">
+              {{ p.label }}
+            </option>
+          </select>
+          <div class="field-hint" *ngIf="selectedParser">
+            <span class="format-badge format-badge--{{ selectedParser.format.toLowerCase() }}">
+              {{ selectedParser.format }}
+            </span>
+            {{ selectedParser.description }}
+          </div>
+        </div>
+
+        <!-- Compte bancaire -->
+        <div class="form-group">
+          <label>Mon compte bancaire</label>
+          <select [(ngModel)]="selectedBankAccountId">
+            <option [ngValue]="null">— Aucun / à définir —</option>
+            <option *ngFor="let ba of bankAccounts" [ngValue]="ba.id">
+              {{ ba.label }} — {{ ba.accountNumber }}
+            </option>
+          </select>
+          <div class="field-hint" *ngIf="bankAccounts.length === 0">
+            <a routerLink="/bank-accounts">+ Ajouter un compte bancaire</a>
+          </div>
+        </div>
+
       </div>
-      <button class="btn btn-primary" (click)="reviewBatch()">
-        Review imported transactions →
+    </div>
+
+    <!-- ── Drop zone ─────────────────────────────────────────────────────────── -->
+    <div class="drop-zone"
+         [class.drop-zone--active]="isDragging"
+         [class.drop-zone--filled]="selectedFile"
+         [class.drop-zone--disabled]="!selectedParserCode"
+         (dragover)="onDragOver($event)"
+         (dragleave)="onDragLeave()"
+         (drop)="onDrop($event)">
+
+      <ng-container *ngIf="!selectedFile">
+        <div class="drop-icon">
+          {{ selectedParser?.format === 'PDF' ? '📄' : '📊' }}
+        </div>
+        <p class="drop-text">
+          Glissez un fichier
+          <strong *ngIf="selectedParser">{{ selectedParser.format }}</strong>
+          ici, ou
+        </p>
+        <label class="btn btn-secondary file-label"
+               [class.btn--disabled]="!selectedParserCode">
+          Parcourir
+          <input type="file"
+                 [accept]="acceptedFileTypes"
+                 [disabled]="!selectedParserCode"
+                 (change)="onFileChange($event)"
+                 hidden />
+        </label>
+        <p class="drop-hint" *ngIf="!selectedParserCode">
+          Sélectionnez d'abord un format d'import
+        </p>
+      </ng-container>
+
+      <ng-container *ngIf="selectedFile">
+        <div class="drop-icon">✅</div>
+        <p class="drop-text"><strong>{{ selectedFile.name }}</strong></p>
+        <p class="drop-hint">{{ (selectedFile.size / 1024).toFixed(1) }} Ko</p>
+        <button class="btn btn-link" (click)="clearFile()">Changer de fichier</button>
+      </ng-container>
+
+    </div>
+
+    <!-- ── Actions ───────────────────────────────────────────────────────────── -->
+    <div class="import-actions">
+      <button class="btn btn-primary btn-lg"
+              [disabled]="!canImport || importing"
+              (click)="import()">
+        {{ importing ? '⏳ Traitement…' : '⬆️ Importer' }}
       </button>
     </div>
 
-    <div class="import-errors" *ngIf="result.errors.length">
-      <h4>Row errors</h4>
-      <table class="data-table">
-        <thead>
-          <tr>
-            <th>Row</th><th>Raw content</th><th>Error</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr *ngFor="let e of result.errors">
-            <td>{{ e.rowNumber }}</td>
-            <td class="monospace small">{{ e.rawLine }}</td>
-            <td class="error-msg">{{ e.errorMessage }}</td>
-          </tr>
-        </tbody>
-      </table>
+  </div>
+
+  <!-- ── Error ──────────────────────────────────────────────────────────────── -->
+  <div class="alert alert-error" *ngIf="error">{{ error }}</div>
+
+  <!-- ── Result ─────────────────────────────────────────────────────────────── -->
+  <div class="info-card import-result" *ngIf="result">
+    <h2>Import terminé</h2>
+
+    <div class="result-stats">
+      <div class="result-stat">
+        <span class="result-stat__value">{{ result.totalRows }}</span>
+        <span class="result-stat__label">Lignes lues</span>
+      </div>
+      <div class="result-stat result-stat--success">
+        <span class="result-stat__value">{{ result.importedCount }}</span>
+        <span class="result-stat__label">Importées</span>
+      </div>
+      <div class="result-stat result-stat--warning" *ngIf="result.duplicateCount > 0">
+        <span class="result-stat__value">{{ result.duplicateCount }}</span>
+        <span class="result-stat__label">Doublons ignorés</span>
+      </div>
+      <div class="result-stat result-stat--error" *ngIf="result.errorCount > 0">
+        <span class="result-stat__value">{{ result.errorCount }}</span>
+        <span class="result-stat__label">Erreurs</span>
+      </div>
+    </div>
+
+    <div class="import-actions" *ngIf="result.batchId">
+      <button class="btn btn-primary" (click)="reviewBatch()">
+        Réviser les transactions importées →
+      </button>
+    </div>
+
+    <!-- Row errors -->
+    <div class="row-errors" *ngIf="result.errors.length > 0">
+      <h3>Détail des erreurs</h3>
+      <div class="data-table">
+        <table>
+          <thead>
+            <tr>
+              <th style="width: 60px">Ligne</th>
+              <th>Contenu brut</th>
+              <th>Erreur</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let e of result.errors">
+              <td>{{ e.rowNumber }}</td>
+              <td class="monospace small">{{ e.rawLine }}</td>
+              <td class="text-danger">{{ e.errorMessage }}</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
     </div>
   </div>
+
 </div>

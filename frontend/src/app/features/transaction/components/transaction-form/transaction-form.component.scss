@@ -1,0 +1,36 @@
+// transaction-form.component.scss
+// Shared styles (btn, form-card, form-section, form-section-title,
+// form-group, form-row, form-actions, required, error-message,
+// alert, loading, details-content .header)
+// come from global styles.scss partials.
+// Only component-specific overrides belong here.
+
+// ─── Reference subtitle ───────────────────────────────────────────────────────
+
+.reference {
+  font-size: 0.875rem;
+  margin: 0;
+}
+
+// ─── Radio group (direction toggle) ──────────────────────────────────────────
+
+.radio-group {
+  display: flex;
+  gap: 1.5rem;
+  padding: 0.75rem 0;
+}
+
+.radio-label {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  font-size: 1rem;
+  font-weight: 400;
+  cursor: pointer;
+
+  input[type="radio"] {
+    width: auto;
+    margin: 0;
+    cursor: pointer;
+  }
+}

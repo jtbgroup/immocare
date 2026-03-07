@@ -6,17 +6,18 @@
   <nav class="tab-nav">
     <button
       *ngFor="let tab of tabs"
-      class="tab-btn"
-      [class.active]="activeTab === tab.id"
+      class="btn btn-sm"
+      [class.btn-primary]="activeTab === tab.id"
+      [class.btn-secondary]="activeTab !== tab.id"
       (click)="selectTab(tab.id)">
       {{ tab.label }}
     </button>
   </nav>
 
   <div class="tab-content">
-    <app-transaction-list *ngIf="activeTab === 'list'" />
-    <app-transaction-import *ngIf="activeTab === 'import'" />
-    <app-transaction-dashboard *ngIf="activeTab === 'dashboard'" />
-    <app-transaction-settings *ngIf="activeTab === 'settings'" />
+    <app-transaction-list       *ngIf="activeTab === 'list'" />
+    <app-transaction-import     *ngIf="activeTab === 'import'" />
+    <app-transaction-dashboard  *ngIf="activeTab === 'dashboard'" />
+    <app-transaction-categories *ngIf="activeTab === 'categories'" />
   </div>
 </div>

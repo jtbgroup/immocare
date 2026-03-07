@@ -1,119 +1,191 @@
-<div class="transaction-detail" *ngIf="transaction">
-  <div class="detail-header">
-    <button class="btn btn-link" (click)="back()">← Back</button>
-    <div class="header-actions">
-      <button
-        *ngIf="transaction.editable"
-        class="btn btn-secondary"
-        (click)="edit()"
-      >
-        Edit
-      </button>
-      <button
-        *ngIf="transaction.editable"
-        class="btn btn-danger"
-        (click)="delete()"
-      >
-        Delete
-      </button>
+<div class="transaction-detail-container" *ngIf="transaction">
+  <!-- Breadcrumb -->
+  <nav class="breadcrumb" aria-label="breadcrumb">
+    <a routerLink="/transactions">Transactions</a>
+    <span class="breadcrumb-separator">›</span>
+    <span>{{ transaction.reference }}</span>
+  </nav>
+
+  <!-- Header -->
+  <div class="details-content">
+    <div class="header">
+      <div class="header-title">
+        <h1>{{ transaction.reference }}</h1>
+        <span
+          class="badge badge--direction-{{
+            transaction.direction.toLowerCase()
+          }}"
+        >
+          {{ DIRECTION_LABELS[transaction.direction] }}
+        </span>
+        <span
+          class="badge badge--status-{{ transaction.status.toLowerCase() }}"
+        >
+          {{ STATUS_LABELS[transaction.status] }}
+        </span>
+      </div>
+      <div class="actions" *ngIf="transaction.editable">
+        <button class="btn btn-secondary" (click)="edit()">Edit</button>
+        <button class="btn btn-danger" (click)="delete()">Delete</button>
+      </div>
     </div>
   </div>
 
-  <div class="detail-title">
-    <h2>{{ transaction.reference }}</h2>
-    <span
-      class="badge badge--direction-{{ transaction.direction.toLowerCase() }}"
+  <!-- Amount hero -->
+  <div class="info-card">
+    <div
+      class="amount-hero"
+      [class.amount-hero--income]="transaction.direction === 'INCOME'"
+      [class.amount-hero--expense]="transaction.direction === 'EXPENSE'"
     >
-      {{ DIRECTION_LABELS[transaction.direction] }}
-    </span>
-    <span class="badge badge--status-{{ transaction.status.toLowerCase() }}">
-      {{ STATUS_LABELS[transaction.status] }}
-    </span>
+      <span class="amount-hero__sign">{{
+        transaction.direction === "INCOME" ? "+" : "-"
+      }}</span>
+      <span class="amount-hero__value"
+        >{{ transaction.amount.toFixed(2) }} €</span
+      >
+    </div>
   </div>
 
-  <div class="detail-sections">
-    <section class="detail-section">
-      <h3>General</h3>
-      <dl>
-        <dt>Amount</dt>
-        <dd
-          class="amount"
-          [class.income]="transaction.direction === 'INCOME'"
-          [class.expense]="transaction.direction === 'EXPENSE'"
-        >
-          {{ transaction.direction === "INCOME" ? "+" : "-"
-          }}{{ transaction.amount.toFixed(2) }} €
-        </dd>
-        <dt>Transaction date</dt>
-        <dd>{{ transaction.transactionDate }}</dd>
-        <dt>Accounting month</dt>
-        <dd>{{ transaction.accountingMonth.substring(0, 7) }}</dd>
-        <dt>Value date</dt>
-        <dd>{{ transaction.valueDate || "—" }}</dd>
-        <dt>Source</dt>
-        <dd>{{ transaction.source }}</dd>
-        <dt>Description</dt>
-        <dd>{{ transaction.description || "—" }}</dd>
-      </dl>
-    </section>
+  <!-- General -->
+  <div class="info-card">
+    <h2>General</h2>
+    <div class="info-grid">
+      <div class="info-item">
+        <label>Transaction Date</label>
+        <p>{{ transaction.transactionDate }}</p>
+      </div>
+      <div class="info-item">
+        <label>Accounting Month</label>
+        <p>{{ transaction.accountingMonth.substring(0, 7) }}</p>
+      </div>
+      <div class="info-item" *ngIf="transaction.valueDate">
+        <label>Value Date</label>
+        <p>{{ transaction.valueDate }}</p>
+      </div>
+      <div class="info-item">
+        <label>Source</label>
+        <p>{{ transaction.source }}</p>
+      </div>
+      <div class="info-item" *ngIf="transaction.description">
+        <label>Description</label>
+        <p>{{ transaction.description }}</p>
+      </div>
+    </div>
+  </div>
 
-    <section class="detail-section">
-      <h3>Counterparty</h3>
-      <dl>
-        <dt>Name</dt>
-        <dd>{{ transaction.counterpartyName || "—" }}</dd>
-        <dt>IBAN</dt>
-        <dd>{{ transaction.counterpartyAccount || "—" }}</dd>
-        <dt>Bank account</dt>
-        <dd>{{ transaction.bankAccountLabel || "—" }}</dd>
-        <dt>External ref.</dt>
-        <dd>{{ transaction.externalReference || "—" }}</dd>
-      </dl>
-    </section>
+  <!-- Counterparty -->
+  <div class="info-card">
+    <h2>Counterparty</h2>
+    <div class="info-grid">
+      <div class="info-item">
+        <label>Name</label>
+        <p>{{ transaction.counterpartyName || "—" }}</p>
+      </div>
+      <div class="info-item" *ngIf="transaction.counterpartyAccount">
+        <label>IBAN</label>
+        <p class="monospace">{{ transaction.counterpartyAccount }}</p>
+      </div>
+      <div class="info-item">
+        <label>Bank Account</label>
+        <p>{{ transaction.bankAccountLabel || "—" }}</p>
+      </div>
+      <div class="info-item" *ngIf="transaction.externalReference">
+        <label>External Ref.</label>
+        <p class="monospace">{{ transaction.externalReference }}</p>
+      </div>
+    </div>
+  </div>
 
-    <section class="detail-section">
-      <h3>Classification</h3>
-      <dl>
-        <dt>Category</dt>
-        <dd>{{ transaction.categoryName || "—" }}</dd>
-        <dt>Subcategory</dt>
-        <dd>{{ transaction.subcategoryName || "—" }}</dd>
-      </dl>
-    </section>
+  <!-- Classification -->
+  <div class="info-card">
+    <h2>Classification</h2>
+    <div class="info-grid">
+      <div class="info-item">
+        <label>Category</label>
+        <p>{{ transaction.categoryName || "—" }}</p>
+      </div>
+      <div class="info-item">
+        <label>Subcategory</label>
+        <p>{{ transaction.subcategoryName || "—" }}</p>
+      </div>
+    </div>
+  </div>
 
-    <section class="detail-section">
-      <h3>Links</h3>
-      <dl>
-        <dt>Building</dt>
-        <dd>{{ transaction.buildingName || "—" }}</dd>
-        <dt>Unit</dt>
-        <dd>{{ transaction.unitNumber || "—" }}</dd>
-        <dt>Lease</dt>
-        <dd>{{ transaction.leaseId || "—" }}</dd>
-        <dt>Suggested lease</dt>
-        <dd>{{ transaction.suggestedLeaseId || "—" }}</dd>
-      </dl>
-    </section>
+  <!-- Links -->
+  <div
+    class="info-card"
+    *ngIf="
+      transaction.buildingId ||
+      transaction.housingUnitId ||
+      transaction.leaseId ||
+      transaction.suggestedLeaseId
+    "
+  >
+    <h2>Links</h2>
+    <div class="info-grid">
+      <div class="info-item" *ngIf="transaction.buildingId">
+        <label>Building</label>
+        <p>
+          <a [routerLink]="['/buildings', transaction.buildingId]">
+            {{
+              transaction.buildingName || "Building #" + transaction.buildingId
+            }}
+          </a>
+        </p>
+      </div>
+      <div class="info-item" *ngIf="transaction.housingUnitId">
+        <label>Unit</label>
+        <p>
+          <a [routerLink]="['/units', transaction.housingUnitId]">
+            {{ transaction.unitNumber || "Unit #" + transaction.housingUnitId }}
+          </a>
+        </p>
+      </div>
+      <div class="info-item" *ngIf="transaction.leaseId">
+        <label>Lease</label>
+        <p>
+          <a [routerLink]="['/leases', transaction.leaseId]">
+            Lease #{{ transaction.leaseId }}
+          </a>
+        </p>
+      </div>
+      <div class="info-item" *ngIf="transaction.suggestedLeaseId">
+        <label>Suggested Lease</label>
+        <p>
+          <a [routerLink]="['/leases', transaction.suggestedLeaseId]">
+            Lease #{{ transaction.suggestedLeaseId }}
+          </a>
+          <span class="badge badge--suggestion">Suggestion</span>
+        </p>
+      </div>
+    </div>
+  </div>
 
-    <section class="detail-section" *ngIf="transaction.assetLinks?.length">
-      <h3>Related Assets</h3>
-      <ul class="asset-list">
-        <li *ngFor="let link of transaction.assetLinks">
-          <span class="badge">{{ link.assetType }}</span>
-          {{ link.assetLabel }}
-          <span *ngIf="link.notes" class="notes">— {{ link.notes }}</span>
-        </li>
-      </ul>
-    </section>
+  <!-- Related Assets -->
+  <div class="info-card" *ngIf="transaction.assetLinks?.length">
+    <h2>Related Assets</h2>
+    <ul class="asset-list">
+      <li *ngFor="let link of transaction.assetLinks" class="asset-item">
+        <span class="badge badge--asset">{{ link.assetType }}</span>
+        <span>{{ link.assetLabel }}</span>
+        <span *ngIf="link.notes" class="asset-notes">— {{ link.notes }}</span>
+      </li>
+    </ul>
+  </div>
 
-    <section class="detail-section metadata">
-      <dl>
-        <dt>Created</dt>
-        <dd>{{ transaction.createdAt }}</dd>
-        <dt>Updated</dt>
-        <dd>{{ transaction.updatedAt }}</dd>
-      </dl>
-    </section>
+  <!-- Metadata -->
+  <div class="info-card info-card--meta">
+    <div class="info-grid">
+      <div class="info-item">
+        <label>Created</label>
+        <p class="text-muted">{{ transaction.createdAt }}</p>
+      </div>
+      <div class="info-item">
+        <label>Updated</label>
+        <p class="text-muted">{{ transaction.updatedAt }}</p>
+      </div>
+    </div>
   </div>
 </div>
 

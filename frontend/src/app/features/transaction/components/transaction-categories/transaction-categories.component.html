@@ -1,0 +1,119 @@
+<div class="transaction-categories-page">
+
+  <div class="details-content">
+    <div class="header">
+      <h1>Transaction Categories</h1>
+    </div>
+  </div>
+
+  <div class="categories-layout">
+
+    <!-- ── Categories ──────────────────────────────────────────────────── -->
+    <div class="info-card">
+      <div class="section-header">
+        <h2>Categories</h2>
+        <button class="btn btn-sm btn-primary"
+          (click)="showNewCategory = !showNewCategory; editingCategory = undefined; newCategory = {name:''}">
+          + Add
+        </button>
+      </div>
+
+      <div class="alert alert-error" *ngIf="categoryError">{{ categoryError }}</div>
+
+      <div class="inline-form" *ngIf="showNewCategory || editingCategory">
+        <input type="text" [(ngModel)]="newCategory.name" placeholder="Name *" />
+        <input type="text" [(ngModel)]="newCategory.description" placeholder="Description" />
+        <button class="btn btn-sm btn-primary" (click)="saveCategory()">Save</button>
+        <button class="btn btn-sm btn-link" (click)="editingCategory = undefined; showNewCategory = false; newCategory = {name: ''}">Cancel</button>
+      </div>
+
+      <div class="data-table">
+        <table>
+          <thead>
+            <tr>
+              <th>Name</th>
+              <th>Description</th>
+              <th class="text-center">Subcategories</th>
+              <th></th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let cat of categories">
+              <td>{{ cat.name }}</td>
+              <td>{{ cat.description || '—' }}</td>
+              <td class="text-center">{{ cat.subcategoryCount }}</td>
+              <td class="actions-cell">
+                <button class="icon-btn" title="Edit" (click)="editCategory(cat)">✏️</button>
+                <button class="icon-btn" title="Delete" (click)="deleteCategory(cat)">🗑️</button>
+              </td>
+            </tr>
+            <tr *ngIf="categories.length === 0">
+              <td colspan="4" class="empty-state">No categories yet.</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- ── Subcategories ───────────────────────────────────────────────── -->
+    <div class="info-card">
+      <div class="section-header">
+        <h2>Subcategories</h2>
+        <button class="btn btn-sm btn-primary"
+          (click)="showNewSubcategory = !showNewSubcategory; editingSubcategory = undefined; resetSubForm()">
+          + Add
+        </button>
+      </div>
+
+      <div class="alert alert-error" *ngIf="subcategoryError">{{ subcategoryError }}</div>
+
+      <div class="inline-form" *ngIf="showNewSubcategory || editingSubcategory">
+        <select [(ngModel)]="newSubcategory.categoryId">
+          <option [ngValue]="0">— Category * —</option>
+          <option *ngFor="let c of categories" [value]="c.id">{{ c.name }}</option>
+        </select>
+        <input type="text" [(ngModel)]="newSubcategory.name" placeholder="Name *" />
+        <select [(ngModel)]="newSubcategory.direction">
+          <option *ngFor="let d of directions" [value]="d">{{ d }}</option>
+        </select>
+        <button class="btn btn-sm btn-primary" (click)="saveSubcategory()">Save</button>
+        <button class="btn btn-sm btn-link" (click)="editingSubcategory = undefined; showNewSubcategory = false">Cancel</button>
+      </div>
+
+      <div class="data-table">
+        <table>
+          <thead>
+            <tr>
+              <th>Category</th>
+              <th>Name</th>
+              <th>Direction</th>
+              <th class="text-center">Usage</th>
+              <th></th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let sub of subcategories">
+              <td>{{ sub.categoryName }}</td>
+              <td>{{ sub.name }}</td>
+              <td>
+                <span class="badge badge--dir-{{ sub.direction.toLowerCase() }}">{{ sub.direction }}</span>
+              </td>
+              <td class="text-center">{{ sub.usageCount }}</td>
+              <td class="actions-cell">
+                <button class="icon-btn" title="Edit" (click)="editSubcategory(sub)">✏️</button>
+                <button class="icon-btn"
+                  [title]="sub.usageCount > 0 ? 'In use — cannot delete' : 'Delete'"
+                  [disabled]="sub.usageCount > 0"
+                  (click)="deleteSubcategory(sub)">🗑️</button>
+              </td>
+            </tr>
+            <tr *ngIf="subcategories.length === 0">
+              <td colspan="5" class="empty-state">No subcategories yet.</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+  </div>
+</div>

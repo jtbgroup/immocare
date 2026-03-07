@@ -1,126 +1,208 @@
-<div class="transaction-form">
-  <h2>{{ isEdit ? 'Edit Transaction' : 'New Transaction' }}</h2>
-  <p class="reference" *ngIf="existing">{{ existing.reference }}</p>
+<div class="transaction-form-container">
+  <!-- Header -->
+  <div class="details-content">
+    <div class="header">
+      <h1>{{ isEdit ? "Edit Transaction" : "New Transaction" }}</h1>
+      <p class="reference text-muted" *ngIf="existing">
+        {{ existing.reference }}
+      </p>
+    </div>
+  </div>
 
   <div class="alert alert-error" *ngIf="error">{{ error }}</div>
+  <div class="loading" *ngIf="loading">Loading…</div>
 
-  <form [formGroup]="form" (ngSubmit)="onSubmit()">
-
+  <form [formGroup]="form" (ngSubmit)="onSubmit()" *ngIf="!loading">
     <!-- 1. General -->
-    <fieldset>
-      <legend>General</legend>
+    <div class="form-card">
+      <div class="form-section">
+        <div class="form-section-title">General</div>
 
-      <div class="form-row">
-        <label>Direction *</label>
-        <div class="radio-group">
-          <label><input type="radio" formControlName="direction" value="INCOME" /> Income</label>
-          <label><input type="radio" formControlName="direction" value="EXPENSE" /> Expense</label>
+        <div class="form-row">
+          <div class="form-group">
+            <label>Direction <span class="required">*</span></label>
+            <div class="radio-group">
+              <label class="radio-label">
+                <input
+                  type="radio"
+                  formControlName="direction"
+                  value="INCOME"
+                />
+                Income
+              </label>
+              <label class="radio-label">
+                <input
+                  type="radio"
+                  formControlName="direction"
+                  value="EXPENSE"
+                />
+                Expense
+              </label>
+            </div>
+          </div>
+          <div class="form-group">
+            <label>Amount (€) <span class="required">*</span></label>
+            <input
+              type="number"
+              formControlName="amount"
+              step="0.01"
+              min="0.01"
+            />
+            <span
+              class="error-message"
+              *ngIf="form.get('amount')?.invalid && form.get('amount')?.touched"
+            >
+              A positive amount is required.
+            </span>
+          </div>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label>Transaction Date <span class="required">*</span></label>
+            <input type="date" formControlName="transactionDate" />
+          </div>
+          <div class="form-group">
+            <label>Accounting Month <span class="required">*</span></label>
+            <input type="month" formControlName="accountingMonth" />
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label>Description</label>
+          <textarea formControlName="description" rows="2"></textarea>
         </div>
       </div>
-
-      <div class="form-row">
-        <label>Transaction date *</label>
-        <input type="date" formControlName="transactionDate" />
-      </div>
-
-      <div class="form-row">
-        <label>Accounting month *</label>
-        <input type="month" formControlName="accountingMonth" />
-      </div>
-
-      <div class="form-row">
-        <label>Amount (€) *</label>
-        <input type="number" formControlName="amount" step="0.01" min="0.01" />
-      </div>
-
-      <div class="form-row">
-        <label>Description</label>
-        <textarea formControlName="description" rows="2"></textarea>
-      </div>
-    </fieldset>
+    </div>
 
     <!-- 2. Counterparty -->
-    <fieldset>
-      <legend>Counterparty</legend>
+    <div class="form-card">
+      <div class="form-section">
+        <div class="form-section-title">Counterparty</div>
 
-      <div class="form-row">
-        <label>Counterparty name</label>
-        <input type="text" formControlName="counterpartyName" />
-      </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label>Name</label>
+            <input type="text" formControlName="counterpartyName" />
+          </div>
+          <div class="form-group">
+            <label>IBAN</label>
+            <input
+              type="text"
+              formControlName="counterpartyAccount"
+              maxlength="50"
+            />
+          </div>
+        </div>
 
-      <div class="form-row">
-        <label>Counterparty IBAN</label>
-        <input type="text" formControlName="counterpartyAccount" maxlength="50" />
+        <div class="form-row">
+          <div class="form-group">
+            <label>Value Date</label>
+            <input type="date" formControlName="valueDate" />
+          </div>
+          <div class="form-group">
+            <label>Bank Account</label>
+            <select formControlName="bankAccountId">
+              <option [ngValue]="null">— Select —</option>
+              <option *ngFor="let b of bankAccounts" [value]="b.id">
+                {{ b.label }}
+              </option>
+            </select>
+          </div>
+        </div>
       </div>
-
-      <div class="form-row">
-        <label>Value date</label>
-        <input type="date" formControlName="valueDate" />
-      </div>
-
-      <div class="form-row">
-        <label>Bank account</label>
-        <select formControlName="bankAccountId">
-          <option [ngValue]="null">— Select —</option>
-          <option *ngFor="let b of bankAccounts" [value]="b.id">{{ b.label }}</option>
-        </select>
-      </div>
-    </fieldset>
+    </div>
 
     <!-- 3. Classification -->
-    <fieldset>
-      <legend>Classification</legend>
+    <div class="form-card">
+      <div class="form-section">
+        <div class="form-section-title">Classification</div>
 
-      <div class="form-row">
-        <label>Category</label>
-        <select formControlName="categoryId">
-          <option [ngValue]="null">— Select —</option>
-          <option *ngFor="let c of categories" [value]="c.id">{{ c.name }}</option>
-        </select>
+        <div class="form-row">
+          <div class="form-group">
+            <label>Category</label>
+            <select formControlName="categoryId">
+              <option [ngValue]="null">— Select —</option>
+              <option *ngFor="let c of categories" [value]="c.id">
+                {{ c.name }}
+              </option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>Subcategory</label>
+            <select
+              formControlName="subcategoryId"
+              [attr.disabled]="!form.get('categoryId')?.value ? '' : null"
+            >
+              <option [ngValue]="null">— Select —</option>
+              <option *ngFor="let s of subcategories" [value]="s.id">
+                {{ s.name }}
+              </option>
+            </select>
+          </div>
+        </div>
       </div>
-
-      <div class="form-row">
-        <label>Subcategory</label>
-        <select formControlName="subcategoryId" [attr.disabled]="!form.get('categoryId')?.value ? '' : null">
-          <option [ngValue]="null">— Select —</option>
-          <option *ngFor="let s of subcategories" [value]="s.id">{{ s.name }}</option>
-        </select>
-      </div>
-    </fieldset>
+    </div>
 
     <!-- 4. Links -->
-    <fieldset>
-      <legend>Links</legend>
+    <div class="form-card">
+      <div class="form-section">
+        <div class="form-section-title">Links</div>
 
-      <div class="form-row">
-        <label>Building</label>
-        <input type="number" formControlName="buildingId" placeholder="Building ID" />
+        <div class="form-row">
+          <div class="form-group">
+            <label>Building ID</label>
+            <input
+              type="number"
+              formControlName="buildingId"
+              placeholder="e.g. 12"
+            />
+          </div>
+          <div class="form-group">
+            <label>Housing Unit ID</label>
+            <input
+              type="number"
+              formControlName="housingUnitId"
+              placeholder="e.g. 34"
+            />
+          </div>
+        </div>
+
+        <div class="form-row" *ngIf="isIncomeDirection">
+          <div class="form-group">
+            <label>Lease ID</label>
+            <input
+              type="number"
+              formControlName="leaseId"
+              placeholder="e.g. 56"
+            />
+          </div>
+          <div class="form-group"><!-- spacer --></div>
+        </div>
       </div>
+    </div>
 
-      <div class="form-row">
-        <label>Housing unit</label>
-        <input type="number" formControlName="housingUnitId" placeholder="Unit ID" />
+    <!-- 5. Related Assets (expense only) -->
+    <div class="form-card" *ngIf="!isIncomeDirection">
+      <div class="form-section">
+        <div class="form-section-title">Related Assets</div>
+        <app-asset-link-editor
+          [buildingId]="form.get('buildingId')?.value"
+          [unitId]="form.get('housingUnitId')?.value"
+          [links]="assetLinks"
+          (linksChanged)="assetLinks = $event"
+        />
       </div>
+    </div>
 
-      <div class="form-row" *ngIf="isIncomeDirection">
-        <label>Lease</label>
-        <input type="number" formControlName="leaseId" placeholder="Lease ID" />
-      </div>
-    </fieldset>
-
-    <!-- 5. Assets (expense only) -->
-    <fieldset *ngIf="!isIncomeDirection">
-      <legend>Related Assets</legend>
-      <app-asset-link-editor
-        [buildingId]="form.get('buildingId')?.value"
-        [unitId]="form.get('housingUnitId')?.value"
-        [links]="assetLinks"
-        (linksChanged)="assetLinks = $event" />
-    </fieldset>
-
+    <!-- Actions -->
     <div class="form-actions">
-      <button type="button" class="btn btn-secondary" (click)="cancel()">Cancel</button>
-      <button type="submit" class="btn btn-primary" [disabled]="form.invalid">Save</button>
+      <button type="button" class="btn btn-secondary" (click)="cancel()">
+        Cancel
+      </button>
+      <button type="submit" class="btn btn-primary" [disabled]="form.invalid">
+        {{ isEdit ? "Save Changes" : "Create Transaction" }}
+      </button>
     </div>
   </form>
 </div>

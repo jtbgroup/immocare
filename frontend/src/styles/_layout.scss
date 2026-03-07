@@ -15,7 +15,10 @@
 .person-list-container,
 .person-form-container,
 .user-list-container,
-.user-form-container {
+.user-form-container,
+.transactions-page,
+.transaction-form-container,
+.transaction-detail-container {
   padding: $spacing-xl;
   max-width: 1200px;
   margin: 0 auto;
@@ -104,7 +107,10 @@
   .person-list-container,
   .person-form-container,
   .user-list-container,
-  .user-form-container {
+  .user-form-container,
+  .transactions-page,
+  .transaction-form-container,
+  .transaction-detail-container {
     padding: $spacing-md;
   }
 
@@ -125,6 +131,7 @@
 }
 
 // ─── Section title icons ──────────────────────────────────────────────────────
+
 .section-heading {
   display: flex;
   align-items: center;

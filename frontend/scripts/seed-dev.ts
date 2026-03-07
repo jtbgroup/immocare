@@ -14,6 +14,7 @@
 import {
   adjustRent,
   changeLeaseStatus,
+  createBankAccount,
   createBuilding,
   createBuildingBoiler,
   createBuildingMeter,
@@ -21,19 +22,24 @@ import {
   createLease,
   createPerson,
   createRooms,
+  createTransaction,
   createUnitBoiler,
   createUnitMeter,
+  fetchSubcategories,
   login,
 } from "../e2e/shared/api-client";
 
 import {
+  BANK_ACCOUNTS_SEED,
   BUILDINGS,
   LEASE_TEMPLATES,
   PERSONS,
+  PUNCTUAL_TRANSACTIONS,
   RENT_ADJUSTMENT_REASONS,
   addMonths,
   generateBoiler,
   generateBuildingMeters,
+  generateRentTransactions,
   generateRooms,
   generateUnitMeters,
   generateUnits,
@@ -47,6 +53,14 @@ const DRY_RUN = process.argv.includes("--dry-run");
 
 function log(emoji: string, msg: string) {
   console.log(`${emoji}  ${msg}`);
+}
+
+// ─── Tenant IBAN registry ─────────────────────────────────────────────────────
+// Stable fake IBANs derived from tenant index — used for rent counterparty.
+
+function tenantIban(tenantIndex: number): string {
+  const n = (tenantIndex + 1).toString().padStart(4, "0");
+  return `BE${n}001234${n}${n}`;
 }
 
 // ─── Main ─────────────────────────────────────────────────────────────────────
@@ -80,7 +94,7 @@ async function main() {
   const ownerIds = personIds.slice(0, 5); // first 5 are building owners
   const tenantIds = personIds.slice(5); // rest are tenants
 
-  // ── 2. Create buildings + units + rooms ────────────────────────────────────
+  // ── 2. Create buildings + units + rooms ───────────────────────────────────
   log("\n🏢", `Creating ${BUILDINGS.length} buildings...`);
 
   const buildingIds: number[] = [];
@@ -107,7 +121,6 @@ async function main() {
     buildingIds.push(building.id);
     log("  ✓", `${b.name} (${b.city}) → id ${building.id}`);
 
-    // Units
     const units = generateUnits(bi);
     const unitIds: number[] = [];
 
@@ -117,19 +130,16 @@ async function main() {
       unitIds.push(unit.id);
       log("    ✓", `Unit ${u.unitNumber} floor ${u.floor} — id ${unit.id}`);
 
-      // Rooms
       const rooms = generateRooms(u.totalSurface);
       await createRooms(unit.id, rooms);
       log("      ✓", `${rooms.length} rooms created`);
 
-      // Meters
       const meters = generateUnitMeters(unit.id, ui);
       for (const m of meters) {
         await createUnitMeter(unit.id, m);
         log("      ✓", `Meter ${m.type} — ${m.meterNumber}`);
       }
 
-      // Boiler on some units (every 3rd unit)
       if (ui % 3 === 0) {
         const boiler = generateBoiler(ui, 2018 + (ui % 4));
         await createUnitBoiler(unit.id, boiler);
@@ -138,14 +148,12 @@ async function main() {
     }
     allUnitIds.push(unitIds);
 
-    // Building-level water meter
     const bMeters = generateBuildingMeters(building.id);
     for (const m of bMeters) {
       await createBuildingMeter(building.id, m);
       log("    ✓", `Building meter ${m.type} — ${m.meterNumber}`);
     }
 
-    // Building-level boiler (shared heating on buildings 0 and 4)
     if (bi === 0 || bi === 4) {
       const boiler = generateBoiler(bi + 10, 2016);
       await createBuildingBoiler(building.id, boiler);
@@ -156,75 +164,72 @@ async function main() {
   // ── 3. Create leases ───────────────────────────────────────────────────────
   log("\n📄", `Creating ${LEASE_TEMPLATES.length} leases across all units...`);
 
-  // Flatten all unit IDs and cycle through them for lease assignment.
-  // Units with ACTIVE/DRAFT leases can only have one at a time — the
-  // script assigns at most one active/draft lease per unit.
-  const flatUnits = allUnitIds.flat();
-  const activeAssigned = new Set<number>(); // unitIds already having active/draft lease
-  let tenantCursor = 0;
+  const flatUnitIds = allUnitIds.flat();
   let leaseCount = 0;
+
+  // Track (buildingIndex, unitIndex, tenantName, tenantIban, rent, charges,
+  //        startDate, endDate) for active/finished leases → used later for
+  // rent transaction generation.
+  interface LeaseInfo {
+    leaseId: number;
+    buildingIndex: number;
+    unitIndex: number;
+    tenantName: string;
+    tenantIban: string;
+    monthlyRent: number;
+    monthlyCharges: number;
+    startDate: Date;
+    endDate: Date;
+    active: boolean; // false = finished/cancelled/draft
+  }
+  const leaseInfos: LeaseInfo[] = [];
 
   for (let li = 0; li < LEASE_TEMPLATES.length; li++) {
     const tpl = LEASE_TEMPLATES[li];
+    const unitId = flatUnitIds[li % flatUnitIds.length];
+    const tenantIndex = li % tenantIds.length;
+    const tenant = PERSONS[5 + tenantIndex];
 
-    // Pick a unit — for active/draft, skip already-assigned units
-    let unitId: number | undefined;
-    for (let attempt = 0; attempt < flatUnits.length; attempt++) {
-      const candidate = flatUnits[(li + attempt) % flatUnits.length];
-      const needsAvailable =
-        tpl.scenario === "active" ||
-        tpl.scenario === "active-with-adjustments" ||
-        tpl.scenario === "draft" ||
-        tpl.scenario === "cancelled";
-      if (!needsAvailable || !activeAssigned.has(candidate)) {
-        unitId = candidate;
-        if (needsAvailable) activeAssigned.add(candidate);
-        break;
+    // Derive building/unit indices from unitId position in allUnitIds
+    let buildingIndex = 0;
+    let unitIndex = 0;
+    outer: for (let bi = 0; bi < allUnitIds.length; bi++) {
+      for (let ui = 0; ui < allUnitIds[bi].length; ui++) {
+        if (allUnitIds[bi][ui] === unitId) {
+          buildingIndex = bi;
+          unitIndex = ui;
+          break outer;
+        }
       }
     }
-    if (!unitId) {
-      log(
-        "  ⚠️",
-        `No available unit for lease ${li + 1} (${tpl.scenario}) — skipping`,
-      );
-      continue;
-    }
 
-    // Dates
     const startDate = yearsAgo(tpl.yearsAgo);
-    startDate.setDate(1);
-    const signatureDate = new Date(startDate);
-    signatureDate.setMonth(signatureDate.getMonth() - 1);
     const endDate = addMonths(startDate, tpl.durationMonths);
-
-    // Pick 1 or 2 tenants (cycle through tenant pool)
-    const primaryId = tenantIds[tenantCursor % tenantIds.length];
-    tenantCursor++;
-    const tenants: Array<{
-      personId: number;
-      role: "PRIMARY" | "CO_TENANT" | "GUARANTOR";
-    }> = [{ personId: primaryId, role: "PRIMARY" }];
-    // Add a co-tenant on every other lease
-    if (li % 2 === 0) {
-      const coId = tenantIds[tenantCursor % tenantIds.length];
-      tenantCursor++;
-      if (coId !== primaryId) {
-        tenants.push({ personId: coId, role: "CO_TENANT" });
-      }
-    }
-
-    if (DRY_RUN) {
-      log(
-        "  →",
-        `Lease [${tpl.scenario}] unit ${unitId} — ${isoDate(startDate)} to ${isoDate(endDate)} — €${tpl.baseRent}/mo`,
-      );
-      leaseCount++;
-      continue;
-    }
+    const signatureDate = addMonths(startDate, -1);
 
     try {
-      const shouldActivate =
-        tpl.scenario === "active" || tpl.scenario === "active-with-adjustments";
+      if (DRY_RUN) {
+        log(
+          "  →",
+          `Lease [${tpl.scenario}] unit ${unitId} — ${tenant.firstName} ${tenant.lastName} — ${tpl.baseRent}€/mo`,
+        );
+        leaseInfos.push({
+          leaseId: li + 1,
+          buildingIndex,
+          unitIndex,
+          tenantName: `${tenant.firstName} ${tenant.lastName}`,
+          tenantIban: tenantIban(tenantIndex),
+          monthlyRent: tpl.baseRent,
+          monthlyCharges: tpl.charges,
+          startDate,
+          endDate,
+          active:
+            tpl.scenario === "active" ||
+            tpl.scenario === "active-with-adjustments",
+        });
+        leaseCount++;
+        continue;
+      }
 
       const lease = await createLease(
         {
@@ -240,15 +245,14 @@ async function main() {
           chargesType: tpl.chargesType,
           depositAmount: tpl.baseRent * tpl.depositMultiplier,
           depositType: "BANK_GUARANTEE",
-          tenantInsuranceConfirmed: tpl.scenario !== "draft",
-          tenants,
+          tenantInsuranceConfirmed: true,
+          tenants: [{ personId: tenantIds[tenantIndex], role: "PRIMARY" }],
         },
-        shouldActivate,
+        false,
       );
-
       log(
         "  ✓",
-        `Lease #${lease.id} [${tpl.scenario}] unit ${unitId} → ${isoDate(startDate)}`,
+        `Lease ${lease.id} [${tpl.scenario}] unit ${unitId} — ${tenant.firstName} ${tenant.lastName}`,
       );
 
       // Rent adjustments
@@ -259,7 +263,7 @@ async function main() {
         const adj1Date = addMonths(startDate, 12);
         const reason1 =
           RENT_ADJUSTMENT_REASONS[li % RENT_ADJUSTMENT_REASONS.length];
-        const newRent1 = Math.round(tpl.baseRent * 1.027); // ~2.7% index
+        const newRent1 = Math.round(tpl.baseRent * 1.028);
         await adjustRent(
           lease.id,
           "RENT",
@@ -276,7 +280,7 @@ async function main() {
           const adj2Date = addMonths(startDate, 24);
           const reason2 =
             RENT_ADJUSTMENT_REASONS[(li + 2) % RENT_ADJUSTMENT_REASONS.length];
-          const newRent2 = Math.round(newRent1 * 1.031); // ~3.1% index
+          const newRent2 = Math.round(newRent1 * 1.031);
           await adjustRent(
             lease.id,
             "RENT",
@@ -300,25 +304,190 @@ async function main() {
         await changeLeaseStatus(lease.id, "FINISHED");
         log("    ✓", `Status → ACTIVE → FINISHED`);
       }
-
       if (tpl.scenario === "cancelled") {
         await changeLeaseStatus(lease.id, "CANCELLED");
         log("    ✓", `Status → CANCELLED`);
       }
 
+      leaseInfos.push({
+        leaseId: lease.id,
+        buildingIndex,
+        unitIndex,
+        tenantName: `${tenant.firstName} ${tenant.lastName}`,
+        tenantIban: tenantIban(tenantIndex),
+        monthlyRent: tpl.baseRent,
+        monthlyCharges: tpl.charges,
+        startDate,
+        endDate,
+        active:
+          tpl.scenario === "active" ||
+          tpl.scenario === "active-with-adjustments" ||
+          tpl.scenario === "finished" ||
+          tpl.scenario === "finished-with-adjustments",
+      });
       leaseCount++;
     } catch (err) {
       log("  ❌", `Lease ${li + 1} failed: ${(err as Error).message}`);
     }
   }
 
+  // ── 4. Create bank accounts ────────────────────────────────────────────────
+  log("\n🏦", `Creating ${BANK_ACCOUNTS_SEED.length} bank accounts...`);
+  const bankAccountIds: number[] = [];
+
+  for (const ba of BANK_ACCOUNTS_SEED) {
+    if (DRY_RUN) {
+      log("  →", `Bank account: ${ba.label} (${ba.accountNumber})`);
+      bankAccountIds.push(bankAccountIds.length + 1);
+      continue;
+    }
+    try {
+      const created = await createBankAccount(ba);
+      bankAccountIds.push(created.id);
+      log("  ✓", `${ba.label} → id ${created.id}`);
+    } catch (err) {
+      // Ignore duplicate IBAN errors on re-runs
+      log("  ⚠", `${ba.label} skipped: ${(err as Error).message}`);
+      bankAccountIds.push(0);
+    }
+  }
+
+  // Primary current account used for most transactions (first CURRENT account)
+  const primaryBankAccountId = bankAccountIds[0] || undefined;
+
+  // ── 5. Build subcategory name → id map ────────────────────────────────────
+  log("\n🏷️ ", "Loading subcategory catalogue...");
+  const subcategoryMap = new Map<string, number>();
+
+  if (!DRY_RUN) {
+    const subcats = await fetchSubcategories();
+    for (const sc of subcats) {
+      subcategoryMap.set(sc.name, sc.id);
+    }
+    log("  ✓", `${subcategoryMap.size} subcategories loaded`);
+  }
+
+  // ── 6. Create transactions ─────────────────────────────────────────────────
+
+  // ── 6a. Rent transactions (one per occupied month per active/finished lease)
+  log("\n💶", "Generating rent transactions...");
+  let rentTxCount = 0;
+
+  for (const info of leaseInfos) {
+    if (!info.active) continue;
+
+    const rentTxs = generateRentTransactions({
+      tenantName: info.tenantName,
+      tenantIban: info.tenantIban,
+      monthlyRent: info.monthlyRent,
+      monthlyCharges: info.monthlyCharges,
+      leaseStartDate: info.startDate,
+      leaseEndDate: info.endDate,
+      buildingIndex: info.buildingIndex,
+      unitIndex: info.unitIndex,
+    });
+
+    for (const tx of rentTxs) {
+      if (DRY_RUN) {
+        log(
+          "  →",
+          `Rent ${tx.transactionDate} — ${tx.counterpartyName} — ${tx.amount}€`,
+        );
+        rentTxCount++;
+        continue;
+      }
+      try {
+        const buildingId = buildingIds[tx.buildingIndex] ?? undefined;
+        const unitId =
+          allUnitIds[tx.buildingIndex]?.[tx.unitIndex] ?? undefined;
+        const subcategoryId = subcategoryMap.get(tx.subcategoryName);
+
+        await createTransaction({
+          direction: tx.direction,
+          transactionDate: tx.transactionDate,
+          accountingMonth: tx.accountingMonth,
+          amount: tx.amount,
+          description: tx.description,
+          counterpartyName: tx.counterpartyName,
+          counterpartyAccount: tx.counterpartyAccount,
+          bankAccountId: primaryBankAccountId,
+          subcategoryId,
+          leaseId: info.leaseId,
+          housingUnitId: unitId,
+          buildingId,
+        });
+        rentTxCount++;
+      } catch (err) {
+        log(
+          "  ❌",
+          `Rent tx ${tx.transactionDate} failed: ${(err as Error).message}`,
+        );
+      }
+    }
+  }
+  log("  ✓", `${rentTxCount} rent transactions created`);
+
+  // ── 6b. Punctual transactions (water, gas, maintenance, rente, etc.) ───────
+  log(
+    "\n💳",
+    `Creating ${PUNCTUAL_TRANSACTIONS.length} punctual transactions...`,
+  );
+  let punctualTxCount = 0;
+
+  for (const tx of PUNCTUAL_TRANSACTIONS) {
+    if (DRY_RUN) {
+      log(
+        "  →",
+        `[${tx.direction}] ${tx.transactionDate} — ${tx.counterpartyName} — ${tx.amount}€ (${tx.subcategoryName})`,
+      );
+      punctualTxCount++;
+      continue;
+    }
+    try {
+      const buildingId =
+        tx.buildingIndex !== undefined
+          ? (buildingIds[tx.buildingIndex] ?? undefined)
+          : undefined;
+      const unitId =
+        tx.buildingIndex !== undefined && tx.unitIndex !== undefined
+          ? (allUnitIds[tx.buildingIndex]?.[tx.unitIndex] ?? undefined)
+          : undefined;
+      const subcategoryId = subcategoryMap.get(tx.subcategoryName);
+
+      await createTransaction({
+        direction: tx.direction,
+        transactionDate: tx.transactionDate,
+        accountingMonth: tx.accountingMonth,
+        amount: tx.amount,
+        description: tx.description,
+        counterpartyName: tx.counterpartyName,
+        counterpartyAccount: tx.counterpartyAccount,
+        bankAccountId: primaryBankAccountId,
+        subcategoryId,
+        buildingId,
+        housingUnitId: unitId,
+      });
+      punctualTxCount++;
+    } catch (err) {
+      log(
+        "  ❌",
+        `Tx ${tx.transactionDate} ${tx.counterpartyName} failed: ${(err as Error).message}`,
+      );
+    }
+  }
+  log("  ✓", `${punctualTxCount} punctual transactions created`);
+
   // ── Summary ────────────────────────────────────────────────────────────────
   console.log("\n================================");
   log("🎉", `Seed complete!`);
-  log("📊", `Persons  : ${PERSONS.length}`);
-  log("🏢", `Buildings: ${BUILDINGS.length}`);
-  log("🚪", `Units    : ${allUnitIds.flat().length}`);
-  log("📄", `Leases   : ${leaseCount}`);
+  log("📊", `Persons      : ${PERSONS.length}`);
+  log("🏢", `Buildings    : ${BUILDINGS.length}`);
+  log("🚪", `Units        : ${allUnitIds.flat().length}`);
+  log("📄", `Leases       : ${leaseCount}`);
+  log("🏦", `Bank accounts: ${BANK_ACCOUNTS_SEED.length}`);
+  log("💶", `Rent txs     : ${rentTxCount}`);
+  log("💳", `Other txs    : ${punctualTxCount}`);
+  log("📈", `Total txs    : ${rentTxCount + punctualTxCount}`);
   if (DRY_RUN) log("⚠️", "DRY RUN — nothing was actually created");
   console.log("================================\n");
 }

@@ -13,7 +13,6 @@ export async function login(
   username = "admin",
   password = "admin123",
 ): Promise<string> {
-  // Spring Security form login — must be x-www-form-urlencoded
   const body = new URLSearchParams();
   body.set("username", username);
   body.set("password", password);
@@ -25,11 +24,10 @@ export async function login(
   });
   if (!res.ok) throw new Error(`Login failed: ${res.status}`);
 
-  // Extract JSESSIONID from Set-Cookie header
   const cookie = res.headers.get("set-cookie");
   if (!cookie)
     throw new Error("No session cookie returned — is the backend running?");
-  _sessionCookie = cookie.split(";")[0]; // keeps only "JSESSIONID=xxx"
+  _sessionCookie = cookie.split(";")[0];
   return _sessionCookie;
 }
 
@@ -247,4 +245,63 @@ export async function createBuildingBoiler(
   data: BoilerPayload,
 ): Promise<{ id: number }> {
   return post(`/buildings/${buildingId}/boilers`, data);
+}
+
+// ─── Bank accounts ────────────────────────────────────────────────────────────
+
+export interface BankAccountPayload {
+  label: string;
+  accountNumber: string;
+  type: "CURRENT" | "SAVINGS";
+  isActive: boolean;
+}
+
+export async function createBankAccount(
+  data: BankAccountPayload,
+): Promise<{ id: number }> {
+  return post("/bank-accounts", data);
+}
+
+// ─── Tag subcategories (read) ─────────────────────────────────────────────────
+
+export interface SubcategoryDTO {
+  id: number;
+  name: string;
+  categoryName: string;
+  direction: string;
+}
+
+export async function fetchSubcategories(): Promise<SubcategoryDTO[]> {
+  const res = await fetch(`${BASE_URL}/tag-subcategories`, {
+    headers: headers(),
+  });
+  if (!res.ok) {
+    const text = await res.text();
+    throw new Error(`GET /tag-subcategories failed [${res.status}]: ${text}`);
+  }
+  return res.json();
+}
+
+// ─── Transactions ─────────────────────────────────────────────────────────────
+
+export interface TransactionPayload {
+  direction: "INCOME" | "EXPENSE";
+  transactionDate: string;
+  valueDate?: string;
+  accountingMonth: string;
+  amount: number;
+  description?: string;
+  counterpartyName?: string;
+  counterpartyAccount?: string;
+  bankAccountId?: number;
+  subcategoryId?: number;
+  leaseId?: number;
+  housingUnitId?: number;
+  buildingId?: number;
+}
+
+export async function createTransaction(
+  data: TransactionPayload,
+): Promise<{ id: number; reference: string }> {
+  return post("/transactions", data);
 }
