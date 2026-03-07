@@ -2,13 +2,14 @@ package com.immocare.controller;
 
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
-
+import com.immocare.exception.ParseException;
 import com.immocare.model.dto.ImportBatchResultDTO;
 import com.immocare.model.entity.AppUser;
 import com.immocare.service.TransactionImportService;
@@ -32,19 +33,17 @@ import lombok.RequiredArgsConstructor;
 public class TransactionImportController {
 
     private final TransactionImportService importService;
-    private final AuthService authService;
 
     @PostMapping(value = "/import", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<ImportBatchResultDTO> importFile(
             @RequestPart("file") MultipartFile file,
             @RequestPart("parserCode") String parserCode,
-            @RequestPart(value = "bankAccountId", required = false) String bankAccountIdStr) {
+            @RequestPart(value = "bankAccountId", required = false) String bankAccountIdStr,
+            @AuthenticationPrincipal AppUser currentUser) {
 
         Long bankAccountId = (bankAccountIdStr != null && !bankAccountIdStr.isBlank())
                 ? Long.parseLong(bankAccountIdStr)
                 : null;
-
-        AppUser currentUser = authService.getCurrentUser();
 
         try {
             ImportBatchResultDTO result = importService.importFile(

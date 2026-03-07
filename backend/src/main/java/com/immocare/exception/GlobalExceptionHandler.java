@@ -6,6 +6,7 @@ import java.util.Map;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.transaction.UnexpectedRollbackException;
 import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -79,13 +80,11 @@ public class GlobalExceptionHandler {
 
   // ─── UC004 - PEB Scores ───────────────────────────────────────────────────
 
-  /** BR-UC004-03: score_date cannot be in the future. */
   @ExceptionHandler(InvalidPebScoreDateException.class)
   public ResponseEntity<ErrorResponse> handleInvalidPebScoreDate(InvalidPebScoreDateException ex) {
     return badRequest("Invalid PEB score date", ex.getMessage());
   }
 
-  /** BR-UC004-04: valid_until must be after score_date. */
   @ExceptionHandler(InvalidValidityPeriodException.class)
   public ResponseEntity<ErrorResponse> handleInvalidValidityPeriod(InvalidValidityPeriodException ex) {
     return badRequest("Invalid validity period", ex.getMessage());
@@ -98,11 +97,6 @@ public class GlobalExceptionHandler {
 
   // ─── UC008 - Meters ───────────────────────────────────────────────────────
 
-  /**
-   * Meter not found or already closed → 409 Conflict.
-   * Using 409 instead of 404 to signal a state conflict (meter exists but is
-   * closed).
-   */
   @ExceptionHandler(MeterNotFoundException.class)
   public ResponseEntity<ErrorResponse> handleMeterNotFound(MeterNotFoundException ex) {
     ErrorResponse error = new ErrorResponse(
@@ -110,7 +104,6 @@ public class GlobalExceptionHandler {
     return ResponseEntity.status(HttpStatus.CONFLICT).body(error);
   }
 
-  /** Meter business rule violation → 409 Conflict. */
   @ExceptionHandler(MeterBusinessRuleException.class)
   public ResponseEntity<ErrorResponse> handleMeterBusinessRule(MeterBusinessRuleException ex) {
     ErrorResponse error = new ErrorResponse(
@@ -147,12 +140,13 @@ public class GlobalExceptionHandler {
     return notFound("Boiler not found", ex.getMessage());
   }
 
-  // ─── UC012 - Platform Configuration ──────────────────────────────────────────
+  // ─── UC012 - Platform Configuration ──────────────────────────────────────
 
   @ExceptionHandler(PlatformConfigNotFoundException.class)
   public ResponseEntity<ErrorResponse> handlePlatformConfigNotFound(PlatformConfigNotFoundException ex) {
     return notFound("Platform configuration key not found", ex.getMessage());
   }
+
   // ─── UC013 - Fire Extinguishers ───────────────────────────────────────────
 
   @ExceptionHandler(FireExtinguisherNotFoundException.class)
@@ -172,88 +166,7 @@ public class GlobalExceptionHandler {
         .body(new ErrorResponse(409, "DUPLICATE", ex.getMessage(), LocalDateTime.now()));
   }
 
-  // ─── Generic ──────────────────────────────────────────────────────────────
-
-  @ExceptionHandler(IllegalArgumentException.class)
-  public ResponseEntity<Map<String, Object>> handleIllegalArgument(IllegalArgumentException ex) {
-    return mapError(409, "DUPLICATE", ex.getMessage());
-  }
-
-  @ExceptionHandler(MethodArgumentNotValidException.class)
-  public ResponseEntity<Map<String, Object>> handleValidationErrors(MethodArgumentNotValidException ex) {
-    Map<String, String> fieldErrors = new HashMap<>();
-    ex.getBindingResult().getAllErrors().forEach(error -> {
-      String fieldName = ((FieldError) error).getField();
-      fieldErrors.put(fieldName, error.getDefaultMessage());
-    });
-    Map<String, Object> body = new HashMap<>();
-    body.put("error", "Validation failed");
-    body.put("message", "Invalid input data");
-    body.put("fieldErrors", fieldErrors);
-    body.put("timestamp", LocalDateTime.now());
-    return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(body);
-  }
-
-  @ExceptionHandler(Exception.class)
-  public ResponseEntity<ErrorResponse> handleGenericException(Exception ex) {
-    ErrorResponse error = new ErrorResponse(
-        HttpStatus.INTERNAL_SERVER_ERROR.value(), "Internal server error", ex.getMessage(), LocalDateTime.now());
-    return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(error);
-  }
-
-  // ─── Helpers ──────────────────────────────────────────────────────────────
-
-  private ResponseEntity<ErrorResponse> notFound(String error, String message) {
-    return ResponseEntity.status(HttpStatus.NOT_FOUND)
-        .body(new ErrorResponse(HttpStatus.NOT_FOUND.value(), error, message, LocalDateTime.now()));
-  }
-
-  private ResponseEntity<ErrorResponse> badRequest(String error, String message) {
-    return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-        .body(new ErrorResponse(HttpStatus.BAD_REQUEST.value(), error, message, LocalDateTime.now()));
-  }
-
-  private ResponseEntity<Map<String, Object>> mapError(int status, String code, String message) {
-    Map<String, Object> body = new HashMap<>();
-    body.put("timestamp", LocalDateTime.now());
-    body.put("status", status);
-    body.put("error", code);
-    body.put("message", message);
-    return ResponseEntity.status(status).body(body);
-  }
-
-  public record ErrorResponse(int status, String error, String message, LocalDateTime timestamp) {
-  }
-  // ─── UC0XX - Users ────────────────────────────────────────────────────────
-
-  @ExceptionHandler(UserNotFoundException.class)
-  public ResponseEntity<ErrorResponse> handleUserNotFound(UserNotFoundException ex) {
-    return notFound("User not found", ex.getMessage());
-  }
-
-  @ExceptionHandler(EmailTakenException.class)
-  public ResponseEntity<ErrorResponse> handleEmailTaken(EmailTakenException ex) {
-    return ResponseEntity.status(HttpStatus.CONFLICT)
-        .body(new ErrorResponse(409, "EMAIL_TAKEN", ex.getMessage(), LocalDateTime.now()));
-  }
-
-  @ExceptionHandler(UsernameTakenException.class)
-  public ResponseEntity<ErrorResponse> handleUsernameTaken(UsernameTakenException ex) {
-    return ResponseEntity.status(HttpStatus.CONFLICT)
-        .body(new ErrorResponse(409, "USERNAME_TAKEN", ex.getMessage(), LocalDateTime.now()));
-  }
-
-  @ExceptionHandler(CannotDeleteLastAdminException.class)
-  public ResponseEntity<ErrorResponse> handleCannotDeleteLastAdmin(CannotDeleteLastAdminException ex) {
-    return ResponseEntity.status(HttpStatus.CONFLICT)
-        .body(new ErrorResponse(409, "LAST_ADMIN", ex.getMessage(), LocalDateTime.now()));
-  }
-
-  @ExceptionHandler(CannotDeleteSelfException.class)
-  public ResponseEntity<ErrorResponse> handleCannotDeleteSelf(CannotDeleteSelfException ex) {
-    return ResponseEntity.status(HttpStatus.FORBIDDEN)
-        .body(new ErrorResponse(403, "CANNOT_DELETE_SELF", ex.getMessage(), LocalDateTime.now()));
-  }
+  // ─── UC014 - Financial Transactions ──────────────────────────────────────
 
   @ExceptionHandler(TransactionNotFoundException.class)
   public ResponseEntity<ErrorResponse> handleTransactionNotFound(TransactionNotFoundException ex) {
@@ -325,4 +238,107 @@ public class GlobalExceptionHandler {
     return badRequest("Asset link validation error", ex.getMessage());
   }
 
+  // ─── UC0XX - Users ────────────────────────────────────────────────────────
+
+  @ExceptionHandler(UserNotFoundException.class)
+  public ResponseEntity<ErrorResponse> handleUserNotFound(UserNotFoundException ex) {
+    return notFound("User not found", ex.getMessage());
+  }
+
+  @ExceptionHandler(EmailTakenException.class)
+  public ResponseEntity<ErrorResponse> handleEmailTaken(EmailTakenException ex) {
+    return ResponseEntity.status(HttpStatus.CONFLICT)
+        .body(new ErrorResponse(409, "EMAIL_TAKEN", ex.getMessage(), LocalDateTime.now()));
+  }
+
+  @ExceptionHandler(UsernameTakenException.class)
+  public ResponseEntity<ErrorResponse> handleUsernameTaken(UsernameTakenException ex) {
+    return ResponseEntity.status(HttpStatus.CONFLICT)
+        .body(new ErrorResponse(409, "USERNAME_TAKEN", ex.getMessage(), LocalDateTime.now()));
+  }
+
+  @ExceptionHandler(CannotDeleteLastAdminException.class)
+  public ResponseEntity<ErrorResponse> handleCannotDeleteLastAdmin(CannotDeleteLastAdminException ex) {
+    return ResponseEntity.status(HttpStatus.CONFLICT)
+        .body(new ErrorResponse(409, "LAST_ADMIN", ex.getMessage(), LocalDateTime.now()));
+  }
+
+  @ExceptionHandler(CannotDeleteSelfException.class)
+  public ResponseEntity<ErrorResponse> handleCannotDeleteSelf(CannotDeleteSelfException ex) {
+    return ResponseEntity.status(HttpStatus.FORBIDDEN)
+        .body(new ErrorResponse(403, "CANNOT_DELETE_SELF", ex.getMessage(), LocalDateTime.now()));
+  }
+
+  // ─── Generic ──────────────────────────────────────────────────────────────
+
+  @ExceptionHandler(IllegalArgumentException.class)
+  public ResponseEntity<Map<String, Object>> handleIllegalArgument(IllegalArgumentException ex) {
+    return mapError(409, "DUPLICATE", ex.getMessage());
+  }
+
+  @ExceptionHandler(MethodArgumentNotValidException.class)
+  public ResponseEntity<Map<String, Object>> handleValidationErrors(MethodArgumentNotValidException ex) {
+    Map<String, String> fieldErrors = new HashMap<>();
+    ex.getBindingResult().getAllErrors().forEach(error -> {
+      String fieldName = ((FieldError) error).getField();
+      fieldErrors.put(fieldName, error.getDefaultMessage());
+    });
+    Map<String, Object> body = new HashMap<>();
+    body.put("error", "Validation failed");
+    body.put("message", "Invalid input data");
+    body.put("fieldErrors", fieldErrors);
+    body.put("timestamp", LocalDateTime.now());
+    return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(body);
+  }
+
+  /**
+   * Catches Spring's UnexpectedRollbackException and unwraps the root cause
+   * so the user receives a meaningful error message instead of
+   * "Transaction silently rolled back because it has been marked as
+   * rollback-only".
+   */
+  @ExceptionHandler(UnexpectedRollbackException.class)
+  public ResponseEntity<ErrorResponse> handleUnexpectedRollback(UnexpectedRollbackException ex) {
+    Throwable rootCause = ex;
+    while (rootCause.getCause() != null) {
+      rootCause = rootCause.getCause();
+    }
+    ErrorResponse error = new ErrorResponse(
+        HttpStatus.INTERNAL_SERVER_ERROR.value(),
+        "Import failed",
+        rootCause.getMessage(),
+        LocalDateTime.now());
+    return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(error);
+  }
+
+  @ExceptionHandler(Exception.class)
+  public ResponseEntity<ErrorResponse> handleGenericException(Exception ex) {
+    ErrorResponse error = new ErrorResponse(
+        HttpStatus.INTERNAL_SERVER_ERROR.value(), "Internal server error", ex.getMessage(), LocalDateTime.now());
+    return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(error);
+  }
+
+  // ─── Helpers ──────────────────────────────────────────────────────────────
+
+  private ResponseEntity<ErrorResponse> notFound(String error, String message) {
+    return ResponseEntity.status(HttpStatus.NOT_FOUND)
+        .body(new ErrorResponse(HttpStatus.NOT_FOUND.value(), error, message, LocalDateTime.now()));
+  }
+
+  private ResponseEntity<ErrorResponse> badRequest(String error, String message) {
+    return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+        .body(new ErrorResponse(HttpStatus.BAD_REQUEST.value(), error, message, LocalDateTime.now()));
+  }
+
+  private ResponseEntity<Map<String, Object>> mapError(int status, String code, String message) {
+    Map<String, Object> body = new HashMap<>();
+    body.put("timestamp", LocalDateTime.now());
+    body.put("status", status);
+    body.put("error", code);
+    body.put("message", message);
+    return ResponseEntity.status(status).body(body);
+  }
+
+  public record ErrorResponse(int status, String error, String message, LocalDateTime timestamp) {
+  }
 }

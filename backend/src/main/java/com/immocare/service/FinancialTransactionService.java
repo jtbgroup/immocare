@@ -143,8 +143,7 @@ public class FinancialTransactionService {
 
         // Generate reference
         String year = String.valueOf(req.transactionDate().getYear());
-        String prefix = "TXN-" + year + "-%";
-        int seq = transactionRepository.nextSequenceForYear(prefix);
+        long seq = transactionRepository.nextRefSequence();
         tx.setReference("TXN-" + year + "-" + String.format("%05d", seq));
 
         // Asset links
