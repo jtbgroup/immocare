@@ -1,6 +1,5 @@
 package com.immocare.service;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -14,12 +13,15 @@ import com.immocare.exception.PersonNotFoundException;
 import com.immocare.exception.PersonReferencedException;
 import com.immocare.mapper.PersonMapper;
 import com.immocare.model.dto.CreatePersonRequest;
+import com.immocare.model.dto.PersonBankAccountDTO;
 import com.immocare.model.dto.PersonDTO;
 import com.immocare.model.dto.PersonSummaryDTO;
 import com.immocare.model.dto.UpdatePersonRequest;
 import com.immocare.model.entity.Person;
 import com.immocare.repository.BuildingRepository;
 import com.immocare.repository.HousingUnitRepository;
+import com.immocare.repository.LeaseTenantRepository;
+import com.immocare.repository.PersonBankAccountRepository;
 import com.immocare.repository.PersonRepository;
 
 @Service
@@ -30,15 +32,21 @@ public class PersonService {
     private final PersonMapper personMapper;
     private final BuildingRepository buildingRepository;
     private final HousingUnitRepository housingUnitRepository;
+    private final LeaseTenantRepository leaseTenantRepository;
+    private final PersonBankAccountRepository personBankAccountRepository;
 
     public PersonService(PersonRepository personRepository,
             PersonMapper personMapper,
             BuildingRepository buildingRepository,
-            HousingUnitRepository housingUnitRepository) {
+            HousingUnitRepository housingUnitRepository,
+            LeaseTenantRepository leaseTenantRepository,
+            PersonBankAccountRepository personBankAccountRepository) {
         this.personRepository = personRepository;
         this.personMapper = personMapper;
         this.buildingRepository = buildingRepository;
         this.housingUnitRepository = housingUnitRepository;
+        this.leaseTenantRepository = leaseTenantRepository;
+        this.personBankAccountRepository = personBankAccountRepository;
     }
 
     @Transactional(readOnly = true)
@@ -114,17 +122,21 @@ public class PersonService {
     private PersonDTO buildFullDTO(Person person) {
         PersonDTO dto = personMapper.toDTO(person);
 
+        // Owner / tenant flags
         boolean isOwner = buildingRepository.existsByOwnerId(person.getId())
                 || housingUnitRepository.existsByOwnerId(person.getId());
+        boolean isTenant = leaseTenantRepository.existsByPersonId(person.getId());
         dto.setOwner(isOwner);
-        dto.setTenant(false); // Will be updated when UC010 is implemented
+        dto.setTenant(isTenant);
 
+        // Owned buildings
         List<PersonDTO.OwnedBuildingDTO> buildings = buildingRepository.findByOwnerId(person.getId())
                 .stream()
                 .map(b -> new PersonDTO.OwnedBuildingDTO(b.getId(), b.getName(), b.getCity()))
                 .collect(Collectors.toList());
         dto.setOwnedBuildings(buildings);
 
+        // Owned units
         List<PersonDTO.OwnedUnitDTO> units = housingUnitRepository.findByOwnerId(person.getId())
                 .stream()
                 .map(u -> new PersonDTO.OwnedUnitDTO(
@@ -133,7 +145,30 @@ public class PersonService {
                 .collect(Collectors.toList());
         dto.setOwnedUnits(units);
 
-        dto.setLeases(new ArrayList<>());
+        // Leases as tenant
+        List<PersonDTO.TenantLeaseDTO> leases = leaseTenantRepository
+                .findByPersonId(person.getId())
+                .stream()
+                .map(lt -> {
+                    var lease = lt.getLease();
+                    var unit = lease.getHousingUnit();
+                    return new PersonDTO.TenantLeaseDTO(
+                            lease.getId(), unit.getId(), unit.getUnitNumber(),
+                            unit.getBuilding().getName(), lease.getStatus().name());
+                })
+                .collect(Collectors.toList());
+        dto.setLeases(leases);
+
+        // Bank accounts (for transaction reconciliation)
+        List<PersonBankAccountDTO> bankAccounts = personBankAccountRepository
+                .findByPersonIdOrderByPrimaryDescCreatedAtAsc(person.getId())
+                .stream()
+                .map(pba -> new PersonBankAccountDTO(
+                        pba.getId(), pba.getPerson().getId(),
+                        pba.getIban(), pba.getLabel(),
+                        pba.isPrimary(), pba.getCreatedAt()))
+                .collect(Collectors.toList());
+        dto.setBankAccounts(bankAccounts);
 
         return dto;
     }
@@ -141,8 +176,9 @@ public class PersonService {
     private void enrichSummaryFlags(PersonSummaryDTO dto, Long personId) {
         boolean isOwner = buildingRepository.existsByOwnerId(personId)
                 || housingUnitRepository.existsByOwnerId(personId);
+        boolean isTenant = leaseTenantRepository.existsByPersonId(personId);
         dto.setOwner(isOwner);
-        dto.setTenant(false); // Will be updated when UC010 is implemented
+        dto.setTenant(isTenant);
     }
 
     /**

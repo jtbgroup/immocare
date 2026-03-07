@@ -27,6 +27,8 @@ import com.immocare.model.enums.TransactionStatus;
 import com.immocare.repository.BankAccountRepository;
 import com.immocare.repository.FinancialTransactionRepository;
 import com.immocare.repository.ImportBatchRepository;
+import com.immocare.repository.LeaseRepository;
+import com.immocare.repository.PersonBankAccountRepository;
 
 @Service
 public class CsvImportService {
@@ -36,17 +38,22 @@ public class CsvImportService {
     private final BankAccountRepository bankAccountRepository;
     private final LearningService learningService;
     private final PlatformConfigService platformConfigService;
+    private final PersonBankAccountRepository personBankAccountRepository;
+    private final LeaseRepository leaseRepository;
 
     public CsvImportService(FinancialTransactionRepository transactionRepository,
             ImportBatchRepository importBatchRepository,
             BankAccountRepository bankAccountRepository,
             LearningService learningService,
-            PlatformConfigService platformConfigService) {
+            PlatformConfigService platformConfigService, LeaseRepository leaseRepository,
+            PersonBankAccountRepository personBankAccountRepository) {
         this.transactionRepository = transactionRepository;
         this.importBatchRepository = importBatchRepository;
         this.bankAccountRepository = bankAccountRepository;
         this.learningService = learningService;
         this.platformConfigService = platformConfigService;
+        this.leaseRepository = leaseRepository;
+        this.personBankAccountRepository = personBankAccountRepository;
     }
 
     public CsvMappingConfig loadMappingConfig() {
@@ -192,6 +199,7 @@ public class CsvImportService {
                 tx.setReference("TXN-" + year + "-" + String.format("%05d", seq));
 
                 transactionRepository.save(tx);
+                suggestLeaseFromCounterpartyIban(tx);
                 importedCount++;
             } catch (Exception e) {
                 errorCount++;
@@ -218,5 +226,42 @@ public class CsvImportService {
 
     private String safeGet(String[] cols, int index) {
         return (index >= 0 && index < cols.length) ? cols[index].trim() : "";
+    }
+
+    /**
+     * If the transaction's counterparty_account matches a known person IBAN,
+     * find that person's active lease and set it as the suggested lease.
+     * Only applied to INCOME transactions (rent payments arrive from tenants).
+     * The transaction must already be persisted before calling this method.
+     */
+    private void suggestLeaseFromCounterpartyIban(
+            com.immocare.model.entity.FinancialTransaction tx) {
+
+        if (tx.getCounterpartyAccount() == null || tx.getCounterpartyAccount().isBlank())
+            return;
+        if (tx.getDirection() != com.immocare.model.enums.TransactionDirection.INCOME)
+            return;
+        if (tx.getSuggestedLease() != null)
+            return; // already suggested
+
+        personBankAccountRepository.findByIban(tx.getCounterpartyAccount()).ifPresent(pba -> {
+            Long personId = pba.getPerson().getId();
+            // Find the active lease where this person is a tenant
+            leaseRepository.findAllActiveWithTenants().stream()
+                    .filter(lease -> lease.getTenants().stream()
+                            .anyMatch(lt -> lt.getPerson().getId().equals(personId)))
+                    .findFirst()
+                    .ifPresent(lease -> {
+                        tx.setSuggestedLease(lease);
+                        // Also propagate unit and building for easier review
+                        if (tx.getHousingUnit() == null) {
+                            tx.setHousingUnit(lease.getHousingUnit());
+                        }
+                        if (tx.getBuilding() == null && lease.getHousingUnit() != null) {
+                            tx.setBuilding(lease.getHousingUnit().getBuilding());
+                        }
+                        transactionRepository.save(tx);
+                    });
+        });
     }
 }

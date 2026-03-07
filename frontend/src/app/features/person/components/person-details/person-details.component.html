@@ -3,7 +3,6 @@
   <div *ngIf="errorMessage" class="alert alert-error">{{ errorMessage }}</div>
 
   <ng-container *ngIf="person && !isLoading">
-
     <!-- Breadcrumb -->
     <nav class="breadcrumb" aria-label="breadcrumb">
       <a routerLink="/persons">Persons</a>
@@ -16,12 +15,18 @@
       <div class="header">
         <div class="title-row">
           <h1>{{ person.firstName }} {{ person.lastName }}</h1>
-          <span *ngIf="person.isOwner"  class="badge badge-owner">Owner</span>
+          <span *ngIf="person.isOwner" class="badge badge-owner">Owner</span>
           <span *ngIf="person.isTenant" class="badge badge-tenant">Tenant</span>
         </div>
         <div class="actions">
-          <a [routerLink]="['/persons', person.id, 'edit']" class="btn btn-secondary">Edit</a>
-          <button class="btn btn-danger" (click)="confirmDelete()">Delete</button>
+          <a
+            [routerLink]="['/persons', person.id, 'edit']"
+            class="btn btn-secondary"
+            >Edit</a
+          >
+          <button class="btn btn-danger" (click)="confirmDelete()">
+            Delete
+          </button>
         </div>
       </div>
     </div>
@@ -30,21 +35,33 @@
     <div *ngIf="deleteError" class="alert alert-error">
       {{ deleteError }}
       <ul *ngIf="deleteErrorDetails">
-        <li *ngFor="let b of deleteErrorDetails.ownedBuildings">Building: {{ b }}</li>
+        <li *ngFor="let b of deleteErrorDetails.ownedBuildings">
+          Building: {{ b }}
+        </li>
         <li *ngFor="let u of deleteErrorDetails.ownedUnits">Unit: {{ u }}</li>
-        <li *ngFor="let l of deleteErrorDetails.activeLeases">Lease: {{ l }}</li>
+        <li *ngFor="let l of deleteErrorDetails.activeLeases">
+          Lease: {{ l }}
+        </li>
       </ul>
     </div>
 
     <!-- Delete confirmation -->
     <div *ngIf="showDeleteConfirm" class="confirm-panel">
-      <span>Are you sure you want to delete {{ person.firstName }} {{ person.lastName }}?
-        This cannot be undone.</span>
+      <span
+        >Are you sure you want to delete {{ person.firstName }}
+        {{ person.lastName }}? This cannot be undone.</span
+      >
       <div class="actions">
-        <button class="btn btn-danger" (click)="doDelete()" [disabled]="isDeleting">
-          {{ isDeleting ? 'Deleting...' : 'Confirm Delete' }}
+        <button
+          class="btn btn-danger"
+          (click)="doDelete()"
+          [disabled]="isDeleting"
+        >
+          {{ isDeleting ? "Deleting..." : "Confirm Delete" }}
         </button>
-        <button class="btn btn-secondary" (click)="cancelDelete()">Cancel</button>
+        <button class="btn btn-secondary" (click)="cancelDelete()">
+          Cancel
+        </button>
       </div>
     </div>
 
@@ -62,45 +79,53 @@
         </div>
         <div class="info-item">
           <label>Date of Birth</label>
-          <p>{{ (person.birthDate | appDate) || '—' }}</p>
+          <p>{{ (person.birthDate | appDate) || "—" }}</p>
         </div>
         <div class="info-item">
           <label>Place of Birth</label>
-          <p>{{ person.birthPlace || '—' }}</p>
+          <p>{{ person.birthPlace || "—" }}</p>
         </div>
         <div class="info-item">
           <label>National ID</label>
-          <p>{{ person.nationalId || '—' }}</p>
+          <p>{{ person.nationalId || "—" }}</p>
         </div>
         <div class="info-item">
           <label>GSM</label>
-          <p>{{ person.gsm || '—' }}</p>
+          <p>{{ person.gsm || "—" }}</p>
         </div>
         <div class="info-item">
           <label>Email</label>
           <p>
-            <a *ngIf="person.email" [href]="'mailto:' + person.email">{{ person.email }}</a>
+            <a *ngIf="person.email" [href]="'mailto:' + person.email">{{
+              person.email
+            }}</a>
             <span *ngIf="!person.email">—</span>
           </p>
         </div>
         <div class="info-item">
           <label>Address</label>
           <p>
-            <span *ngIf="person.streetAddress || person.postalCode || person.city">
-              {{ person.streetAddress }}, {{ person.postalCode }} {{ person.city }}, {{ person.country }}
+            <span
+              *ngIf="person.streetAddress || person.postalCode || person.city"
+            >
+              {{ person.streetAddress }}, {{ person.postalCode }}
+              {{ person.city }}, {{ person.country }}
             </span>
             <span *ngIf="!person.streetAddress && !person.city">—</span>
           </p>
         </div>
       </div>
       <div class="card-footer">
-        Created {{ person.createdAt | appDate : 'HH:mm' }} ·
-        Updated {{ person.updatedAt | appDate : 'HH:mm' }}
+        Created {{ person.createdAt | appDate: "HH:mm" }} · Updated
+        {{ person.updatedAt | appDate: "HH:mm" }}
       </div>
     </div>
 
     <!-- As Owner: Buildings -->
-    <div class="info-card" *ngIf="person.ownedBuildings && person.ownedBuildings.length > 0">
+    <div
+      class="info-card"
+      *ngIf="person.ownedBuildings && person.ownedBuildings.length > 0"
+    >
       <h2>As Owner — Buildings</h2>
       <ul class="related-list">
         <li *ngFor="let b of person.ownedBuildings" class="related-item">
@@ -111,7 +136,10 @@
     </div>
 
     <!-- As Owner: Units -->
-    <div class="info-card" *ngIf="person.ownedUnits && person.ownedUnits.length > 0">
+    <div
+      class="info-card"
+      *ngIf="person.ownedUnits && person.ownedUnits.length > 0"
+    >
       <h2>As Owner — Housing Units</h2>
       <ul class="related-list">
         <li *ngFor="let u of person.ownedUnits" class="related-item">
@@ -128,12 +156,112 @@
         <li *ngFor="let l of person.leases" class="related-item">
           <div>
             <a [routerLink]="['/leases', l.leaseId]">Lease #{{ l.leaseId }}</a>
-            <span class="related-meta">{{ l.buildingName }} — Unit {{ l.unitNumber }}</span>
+            <span class="related-meta"
+              >{{ l.buildingName }} — Unit {{ l.unitNumber }}</span
+            >
           </div>
-          <span class="badge" [ngClass]="getStatusClass(l.status)">{{ l.status }}</span>
+          <span class="badge" [ngClass]="getStatusClass(l.status)">{{
+            l.status
+          }}</span>
         </li>
       </ul>
     </div>
 
+    <!-- Bank Accounts -->
+    <div class="info-card">
+      <div class="card-header-row">
+        <h2>🏦 Bank Accounts (IBAN)</h2>
+        <button
+          class="btn btn-sm btn-secondary"
+          (click)="
+            showIbanForm = !showIbanForm;
+            editingIban = undefined;
+            resetIbanForm()
+          "
+        >
+          + Add IBAN
+        </button>
+      </div>
+
+      <div class="alert alert-error" *ngIf="ibanError">{{ ibanError }}</div>
+      <div class="alert alert-success" *ngIf="ibanSuccess">
+        ✅ {{ ibanSuccess }}
+      </div>
+
+      <!-- Add / Edit form -->
+      <div class="inline-iban-form" *ngIf="showIbanForm || editingIban">
+        <input
+          type="text"
+          [(ngModel)]="ibanForm.iban"
+          placeholder="BE32 3100 7656 3402"
+          class="monospace"
+        />
+        <input
+          type="text"
+          [(ngModel)]="ibanForm.label"
+          placeholder="Label (optional)"
+        />
+        <label class="checkbox-label">
+          <input type="checkbox" [(ngModel)]="ibanForm.primary" />
+          Primary
+        </label>
+        <button class="btn btn-sm btn-primary" (click)="saveIban()">
+          {{ editingIban ? "Update" : "Save" }}
+        </button>
+        <button
+          class="btn btn-sm btn-link"
+          (click)="showIbanForm = false; editingIban = undefined"
+        >
+          Cancel
+        </button>
+      </div>
+
+      <!-- IBAN list -->
+      <div
+        *ngIf="
+          person.bankAccounts && person.bankAccounts.length > 0;
+          else noIbans
+        "
+      >
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th>IBAN</th>
+              <th>Label</th>
+              <th class="text-center">Primary</th>
+              <th></th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let ba of person.bankAccounts">
+              <td class="monospace">{{ ba.iban }}</td>
+              <td>{{ ba.label || "—" }}</td>
+              <td class="text-center">
+                <span *ngIf="ba.primary" class="badge badge--active"
+                  >★ Primary</span
+                >
+              </td>
+              <td class="actions-cell">
+                <button class="icon-btn" title="Edit" (click)="editIban(ba)">
+                  ✏️
+                </button>
+                <button
+                  class="icon-btn"
+                  title="Delete"
+                  (click)="deleteIban(ba.id)"
+                >
+                  🗑️
+                </button>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+      <ng-template #noIbans>
+        <p class="text-muted" style="margin-top: 0.5rem">
+          No IBAN registered yet.
+        </p>
+      </ng-template>
+    </div>
   </ng-container>
 </div>

@@ -20,6 +20,8 @@ import com.immocare.model.enums.TransactionStatus;
 import com.immocare.repository.BankAccountRepository;
 import com.immocare.repository.FinancialTransactionRepository;
 import com.immocare.repository.ImportBatchRepository;
+import com.immocare.repository.LeaseRepository;
+import com.immocare.repository.PersonBankAccountRepository;
 import com.immocare.repository.TransactionParserRegistry;
 
 import lombok.RequiredArgsConstructor;
@@ -34,6 +36,8 @@ public class TransactionImportService {
     private final ImportBatchRepository importBatchRepo;
     private final FinancialTransactionRepository transactionRepo;
     private final BankAccountRepository bankAccountRepo;
+    private final LeaseRepository leaseRepo;
+    private final PersonBankAccountRepository personBankAccountRepo;
 
     /**
      * Parse and persist a file using the specified parser strategy.
@@ -92,7 +96,6 @@ public class TransactionImportService {
                 }
             }
 
-            // Log full details before save so any crash is traceable
             log.debug("Saving row {}: date={} amount={} direction={} counterparty={}",
                     p.getRowNumber(), p.getTransactionDate(), p.getAmount(),
                     p.getDirection(), p.getCounterpartyName());
@@ -119,6 +122,10 @@ public class TransactionImportService {
                     : TransactionDirection.EXPENSE);
 
             transactionRepo.save(tx);
+
+            // ── 4b. IBAN reconciliation — suggest lease from counterparty ─
+            suggestLeaseFromCounterpartyIban(tx);
+
             imported++;
         }
 
@@ -128,9 +135,48 @@ public class TransactionImportService {
         batch.setErrorCount(0);
         importBatchRepo.save(batch);
 
-        log.info("Import complete: batchId={} imported={} duplicates={}", batch.getId(), imported, duplicates);
+        log.info("Import complete: batchId={} imported={} duplicates={}",
+                batch.getId(), imported, duplicates);
 
         return new ImportBatchResultDTO(
                 batch.getId(), parsed.size(), imported, duplicates, 0, List.of());
+    }
+
+    // ── Private helpers ───────────────────────────────────────────────────────
+
+    /**
+     * If the transaction's counterparty_account matches a known person IBAN,
+     * find that person's active lease and set it as the suggested lease.
+     * Only applied to INCOME transactions (rent payments arrive from tenants).
+     * The transaction must already be persisted before calling this method.
+     */
+    private void suggestLeaseFromCounterpartyIban(FinancialTransaction tx) {
+        if (tx.getCounterpartyAccount() == null || tx.getCounterpartyAccount().isBlank())
+            return;
+        if (tx.getDirection() != TransactionDirection.INCOME)
+            return;
+        if (tx.getSuggestedLease() != null)
+            return; // already suggested
+
+        personBankAccountRepo.findByIban(tx.getCounterpartyAccount()).ifPresent(pba -> {
+            Long personId = pba.getPerson().getId();
+
+            leaseRepo.findAllActiveWithTenants().stream()
+                    .filter(lease -> lease.getTenants().stream()
+                            .anyMatch(lt -> lt.getPerson().getId().equals(personId)))
+                    .findFirst()
+                    .ifPresent(lease -> {
+                        tx.setSuggestedLease(lease);
+                        if (tx.getHousingUnit() == null) {
+                            tx.setHousingUnit(lease.getHousingUnit());
+                        }
+                        if (tx.getBuilding() == null && lease.getHousingUnit() != null) {
+                            tx.setBuilding(lease.getHousingUnit().getBuilding());
+                        }
+                        transactionRepo.save(tx);
+                        log.debug("Lease suggested via IBAN: txRef={} iban={} leaseId={}",
+                                tx.getReference(), tx.getCounterpartyAccount(), lease.getId());
+                    });
+        });
     }
 }

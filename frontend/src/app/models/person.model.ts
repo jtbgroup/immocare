@@ -6,7 +6,7 @@ export interface Person {
   id: number;
   lastName: string;
   firstName: string;
-  birthDate?: string;         // ISO date string
+  birthDate?: string;
   birthPlace?: string;
   nationalId?: string;
   gsm?: string;
@@ -20,6 +20,7 @@ export interface Person {
   ownedBuildings?: OwnedBuilding[];
   ownedUnits?: OwnedUnit[];
   leases?: TenantLease[];
+  bankAccounts?: PersonBankAccount[];
   createdAt: string;
   updatedAt: string;
 }
@@ -53,6 +54,21 @@ export interface TenantLease {
   unitNumber: string;
   buildingName: string;
   status: string;
+}
+
+export interface PersonBankAccount {
+  id: number;
+  personId: number;
+  iban: string;
+  label?: string;
+  primary: boolean;
+  createdAt: string;
+}
+
+export interface SavePersonBankAccountRequest {
+  iban: string;
+  label?: string;
+  primary: boolean;
 }
 
 export interface CreatePersonRequest {

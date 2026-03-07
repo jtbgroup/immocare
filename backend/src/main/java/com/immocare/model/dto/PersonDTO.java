@@ -2,6 +2,7 @@ package com.immocare.model.dto;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.List;
 
 public class PersonDTO {
 
@@ -23,14 +24,17 @@ public class PersonDTO {
     private boolean isTenant;
 
     // Related data (loaded by service)
-    private java.util.List<OwnedBuildingDTO> ownedBuildings;
-    private java.util.List<OwnedUnitDTO> ownedUnits;
-    private java.util.List<TenantLeaseDTO> leases;
+    private List<OwnedBuildingDTO> ownedBuildings;
+    private List<OwnedUnitDTO> ownedUnits;
+    private List<TenantLeaseDTO> leases;
+
+    /** IBANs registered for this person, used for transaction reconciliation. */
+    private List<PersonBankAccountDTO> bankAccounts;
 
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
 
-    // ---- Nested lightweight DTOs for relations ----
+    // ── Nested lightweight DTOs ───────────────────────────────────────────────
 
     public static class OwnedBuildingDTO {
         private Long id;
@@ -50,18 +54,18 @@ public class PersonDTO {
     }
 
     public static class OwnedUnitDTO {
-        private Long id;
+        private Long unitId;
         private String unitNumber;
         private Long buildingId;
         private String buildingName;
 
         public OwnedUnitDTO() {}
-        public OwnedUnitDTO(Long id, String unitNumber, Long buildingId, String buildingName) {
-            this.id = id; this.unitNumber = unitNumber;
+        public OwnedUnitDTO(Long unitId, String unitNumber, Long buildingId, String buildingName) {
+            this.unitId = unitId; this.unitNumber = unitNumber;
             this.buildingId = buildingId; this.buildingName = buildingName;
         }
-        public Long getId() { return id; }
-        public void setId(Long id) { this.id = id; }
+        public Long getUnitId() { return unitId; }
+        public void setUnitId(Long unitId) { this.unitId = unitId; }
         public String getUnitNumber() { return unitNumber; }
         public void setUnitNumber(String unitNumber) { this.unitNumber = unitNumber; }
         public Long getBuildingId() { return buildingId; }
@@ -94,7 +98,7 @@ public class PersonDTO {
         public void setStatus(String status) { this.status = status; }
     }
 
-    // ---- Main getters & setters ----
+    // ── Main getters & setters ────────────────────────────────────────────────
 
     public Long getId() { return id; }
     public void setId(Long id) { this.id = id; }
@@ -138,14 +142,17 @@ public class PersonDTO {
     public boolean isTenant() { return isTenant; }
     public void setTenant(boolean tenant) { isTenant = tenant; }
 
-    public java.util.List<OwnedBuildingDTO> getOwnedBuildings() { return ownedBuildings; }
-    public void setOwnedBuildings(java.util.List<OwnedBuildingDTO> ownedBuildings) { this.ownedBuildings = ownedBuildings; }
+    public List<OwnedBuildingDTO> getOwnedBuildings() { return ownedBuildings; }
+    public void setOwnedBuildings(List<OwnedBuildingDTO> ownedBuildings) { this.ownedBuildings = ownedBuildings; }
 
-    public java.util.List<OwnedUnitDTO> getOwnedUnits() { return ownedUnits; }
-    public void setOwnedUnits(java.util.List<OwnedUnitDTO> ownedUnits) { this.ownedUnits = ownedUnits; }
+    public List<OwnedUnitDTO> getOwnedUnits() { return ownedUnits; }
+    public void setOwnedUnits(List<OwnedUnitDTO> ownedUnits) { this.ownedUnits = ownedUnits; }
 
-    public java.util.List<TenantLeaseDTO> getLeases() { return leases; }
-    public void setLeases(java.util.List<TenantLeaseDTO> leases) { this.leases = leases; }
+    public List<TenantLeaseDTO> getLeases() { return leases; }
+    public void setLeases(List<TenantLeaseDTO> leases) { this.leases = leases; }
+
+    public List<PersonBankAccountDTO> getBankAccounts() { return bankAccounts; }
+    public void setBankAccounts(List<PersonBankAccountDTO> bankAccounts) { this.bankAccounts = bankAccounts; }
 
     public LocalDateTime getCreatedAt() { return createdAt; }
     public void setCreatedAt(LocalDateTime createdAt) { this.createdAt = createdAt; }
