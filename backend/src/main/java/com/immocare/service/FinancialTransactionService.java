@@ -50,6 +50,7 @@ import com.immocare.repository.BuildingRepository;
 import com.immocare.repository.FinancialTransactionRepository;
 import com.immocare.repository.FireExtinguisherRepository;
 import com.immocare.repository.HousingUnitRepository;
+import com.immocare.repository.LeaseRepository;
 import com.immocare.repository.MeterRepository;
 import com.immocare.repository.TagSubcategoryRepository;
 import com.immocare.repository.TransactionAssetLinkRepository;
@@ -73,6 +74,7 @@ public class FinancialTransactionService {
     private final MeterRepository meterRepository;
     private final HousingUnitRepository housingUnitRepository;
     private final BuildingRepository buildingRepository;
+    private final LeaseRepository leaseRepository;
 
     public FinancialTransactionService(FinancialTransactionRepository transactionRepository,
             TagSubcategoryRepository tagSubcategoryRepository,
@@ -83,7 +85,7 @@ public class FinancialTransactionService {
             FireExtinguisherRepository fireExtinguisherRepository,
             MeterRepository meterRepository,
             HousingUnitRepository housingUnitRepository,
-            BuildingRepository buildingRepository) {
+            BuildingRepository buildingRepository, LeaseRepository leaseRepository) {
         this.transactionRepository = transactionRepository;
         this.tagSubcategoryRepository = tagSubcategoryRepository;
         this.bankAccountRepository = bankAccountRepository;
@@ -94,6 +96,7 @@ public class FinancialTransactionService {
         this.meterRepository = meterRepository;
         this.housingUnitRepository = housingUnitRepository;
         this.buildingRepository = buildingRepository;
+        this.leaseRepository = leaseRepository;
     }
 
     public PagedTransactionResponse getAll(TransactionFilter filter, Pageable pageable) {
@@ -471,6 +474,7 @@ public class FinancialTransactionService {
             Long leaseId, Long housingUnitId, Long buildingId) {
         tx.setBankAccount(bankAccountId != null ? bankAccountRepository.getReferenceById(bankAccountId) : null);
         tx.setSubcategory(subcategoryId != null ? tagSubcategoryRepository.getReferenceById(subcategoryId) : null);
+        tx.setLease(leaseId != null ? leaseRepository.getReferenceById(leaseId) : null); // ← manquant
         tx.setHousingUnit(housingUnitId != null ? housingUnitRepository.getReferenceById(housingUnitId) : null);
         tx.setBuilding(buildingId != null ? buildingRepository.getReferenceById(buildingId) : null);
     }

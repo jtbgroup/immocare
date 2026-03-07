@@ -31,6 +31,10 @@ import lombok.extern.slf4j.Slf4j;
  *
  * Amount line: "- 1 234,56 EUR" or "+ 1 234,56 EUR" or "- 2500 EUR"
  * Spaces may appear in amounts (thousands separator): "1 234,56" → 1234.56
+ *
+ * NOTE: Keytrade PDFs embed a font with a broken Unicode mapping for accented
+ * characters. PDFBox extracts them as mojibake (e.g. "é" → "Ã©", "à" → "Ã ").
+ * fixEncoding() repairs these sequences before parsing.
  */
 @Slf4j
 @Component
@@ -44,9 +48,6 @@ public class KeytradePdfParser implements TransactionParser {
     private static final Pattern DATE_LINE = Pattern.compile("^(\\d{2}/\\d{2}/\\d{4})\\s+(.+)$");
 
     // Counterparty line: "vers : NAME IBAN" or "de : NAME IBAN"
-    // group(1) = direction (vers|de)
-    // group(2) = counterparty name
-    // group(3) = IBAN (optional)
     private static final Pattern COUNTERPARTY_LINE = Pattern.compile(
             "^(vers|de)\\s*:\\s*(.+?)\\s+(BE\\d{2}[\\dA-Z]{12,})\\s*$",
             Pattern.CASE_INSENSITIVE);
@@ -80,6 +81,9 @@ public class KeytradePdfParser implements TransactionParser {
         } catch (Exception e) {
             throw new ParseException("Failed to read PDF: " + e.getMessage(), e);
         }
+
+        // Fix broken Unicode from Keytrade's font mapping
+        text = fixEncoding(text);
 
         String[] lines = text.split("\\r?\\n");
         log.debug("PDF extracted {} lines", lines.length);
@@ -204,5 +208,34 @@ public class KeytradePdfParser implements TransactionParser {
         }
 
         return results;
+    }
+
+    /**
+     * Keytrade PDFs use a font with a broken Unicode mapping that causes PDFBox
+     * to extract accented characters as UTF-8 mojibake sequences.
+     *
+     * Root cause: the PDF font encodes characters in Windows-1252 (cp1252) but
+     * lacks a proper ToUnicode map, so PDFBox interprets each byte as a Latin-1
+     * code point and emits the corresponding UTF-8 multibyte sequence. The result
+     * is that é (0xE9) becomes the two-char sequence Ã© (0xC3 0xA9 in UTF-8).
+     *
+     * Fix: re-encode the String back to bytes using ISO-8859-1 (which reverses
+     * the Latin-1 → char step), then decode as Windows-1252. This reliably
+     * recovers the original accented characters.
+     */
+    private static String fixEncoding(String text) {
+        try {
+            // PDFBox produced a String by treating each cp1252 byte as a Latin-1
+            // code point. Reversing with ISO-8859-1 gives back the original bytes.
+            byte[] originalBytes = text.getBytes(java.nio.charset.StandardCharsets.ISO_8859_1);
+            // Re-read those bytes as Windows-1252 (superset of ISO-8859-1 for 0x80–0x9F)
+            String fixed = new String(originalBytes, java.nio.charset.Charset.forName("Windows-1252"));
+            log.debug("fixEncoding applied ({} chars → {} chars)", text.length(), fixed.length());
+            return fixed;
+        } catch (Exception e) {
+            // If re-encoding fails for any reason, return the original text unchanged
+            log.warn("fixEncoding failed, using raw text: {}", e.getMessage());
+            return text;
+        }
     }
 }

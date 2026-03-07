@@ -149,33 +149,50 @@
       <div class="form-section">
         <div class="form-section-title">Links</div>
 
+        <!-- Row 1: Building -->
         <div class="form-row">
           <div class="form-group">
-            <label>Building ID</label>
-            <input
-              type="number"
-              formControlName="buildingId"
-              placeholder="e.g. 12"
-            />
+            <label>Building</label>
+            <select formControlName="buildingId">
+              <option [ngValue]="null">— None —</option>
+              <option *ngFor="let b of buildings" [value]="b.id">
+                {{ b.name }}
+              </option>
+            </select>
           </div>
-          <div class="form-group">
-            <label>Housing Unit ID</label>
-            <input
-              type="number"
-              formControlName="housingUnitId"
-              placeholder="e.g. 34"
-            />
-          </div>
+          <div class="form-group"><!-- spacer --></div>
         </div>
 
-        <div class="form-row" *ngIf="isIncomeDirection">
+        <!-- Row 2: Unit (only if building selected) -->
+        <div class="form-row" *ngIf="form.get('buildingId')?.value">
           <div class="form-group">
-            <label>Lease ID</label>
-            <input
-              type="number"
-              formControlName="leaseId"
-              placeholder="e.g. 56"
-            />
+            <label>Housing Unit</label>
+            <select formControlName="housingUnitId">
+              <option [ngValue]="null">— None —</option>
+              <option *ngFor="let u of units" [value]="u.id">
+                {{ unitLabel(u) }}
+              </option>
+            </select>
+            <span class="hint" *ngIf="units.length === 0"
+              >No units in this building.</span
+            >
+          </div>
+          <div class="form-group"><!-- spacer --></div>
+        </div>
+
+        <!-- Row 3: Lease (unit must be selected) -->
+        <div class="form-row" *ngIf="form.get('housingUnitId')?.value">
+          <div class="form-group">
+            <label>Lease</label>
+            <select formControlName="leaseId">
+              <option [ngValue]="null">— None —</option>
+              <option *ngFor="let l of leases" [ngValue]="l.id">
+                {{ leaseLabel(l) }}
+              </option>
+            </select>
+            <span class="hint" *ngIf="leases.length === 0"
+              >No leases for this unit.</span
+            >
           </div>
           <div class="form-group"><!-- spacer --></div>
         </div>

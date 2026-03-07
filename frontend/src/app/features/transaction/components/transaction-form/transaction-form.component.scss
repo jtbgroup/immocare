@@ -34,3 +34,12 @@
     cursor: pointer;
   }
 }
+
+// ─── Hint text below selects ──────────────────────────────────────────────────
+
+.hint {
+  display: block;
+  font-size: 0.8rem;
+  color: #6c757d;
+  margin-top: 0.25rem;
+}
