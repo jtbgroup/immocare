@@ -16,8 +16,9 @@
     "test:e2e": "playwright test",
     "test:e2e:ui": "playwright test --ui",
     "test:e2e:debug": "playwright test --debug",
-    "seed:dev": "tsx --env-file=.env scripts/seed-dev.ts",
-    "seed:dev:dry": "tsx scripts/seed-dev.ts --dry-run"
+    "seed:dev": "tsx scripts/seed-dev.ts",
+    "seed:real": "tsx scripts/seed-dev.ts --dataset=real",
+    "seed:demo": "tsx scripts/seed-dev.ts --dataset=demo"
   },
   "private": true,
   "dependencies": {

@@ -1,14 +1,23 @@
-import { Component, Input, Output, EventEmitter, OnChanges } from '@angular/core';
-import { CommonModule } from '@angular/common';
-import { FormsModule } from '@angular/forms';
-import { TransactionAssetLink, AssetType } from '../../../../models/transaction.model';
+import { CommonModule } from "@angular/common";
+import {
+  Component,
+  EventEmitter,
+  Input,
+  OnChanges,
+  Output,
+} from "@angular/core";
+import { FormsModule } from "@angular/forms";
+import {
+  AssetType,
+  TransactionAssetLink,
+} from "../../../../models/transaction.model";
 
 @Component({
-  selector: 'app-asset-link-editor',
+  selector: "app-asset-link-editor",
   standalone: true,
   imports: [CommonModule, FormsModule],
-  templateUrl: './asset-link-editor.component.html',
-  styleUrls: ['./asset-link-editor.component.scss']
+  templateUrl: "./asset-link-editor.component.html",
+  styleUrls: ["./asset-link-editor.component.scss"],
 })
 export class AssetLinkEditorComponent implements OnChanges {
   @Input() buildingId: number | null = null;
@@ -17,14 +26,14 @@ export class AssetLinkEditorComponent implements OnChanges {
   @Output() linksChanged = new EventEmitter<TransactionAssetLink[]>();
 
   localLinks: TransactionAssetLink[] = [];
-  readonly assetTypes: AssetType[] = ['BOILER', 'FIRE_EXTINGUISHER', 'METER'];
+  readonly assetTypes: AssetType[] = ["BOILER", "FIRE_EXTINGUISHER", "METER"];
 
   ngOnChanges(): void {
     this.localLinks = [...(this.links || [])];
   }
 
   addLink(): void {
-    this.localLinks = [...this.localLinks, { assetType: 'BOILER', assetId: 0 }];
+    this.localLinks = [...this.localLinks, { assetType: "BOILER", assetId: 0 }];
     this.emit();
   }
 
