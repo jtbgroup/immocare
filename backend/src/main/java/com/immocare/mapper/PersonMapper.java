@@ -23,6 +23,7 @@ public interface PersonMapper {
     @Mapping(target = "ownedBuildings", ignore = true)
     @Mapping(target = "ownedUnits", ignore = true)
     @Mapping(target = "leases", ignore = true)
+    @Mapping(target = "bankAccounts", ignore = true)
     PersonDTO toDTO(Person person);
 
     /**

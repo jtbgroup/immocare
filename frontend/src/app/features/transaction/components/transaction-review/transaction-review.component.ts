@@ -1,7 +1,7 @@
-import { CommonModule } from "@angular/common";
+import { CommonModule, DecimalPipe } from "@angular/common";
 import { Component, OnInit } from "@angular/core";
 import { FormsModule } from "@angular/forms";
-import { ActivatedRoute } from "@angular/router";
+import { ActivatedRoute, RouterModule } from "@angular/router";
 import { TagSubcategoryService } from "../../../../core/services/tag-subcategory.service";
 import { TransactionService } from "../../../../core/services/transaction.service";
 import {
@@ -14,14 +14,13 @@ import {
 @Component({
   selector: "app-transaction-review",
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule, RouterModule, DecimalPipe],
   templateUrl: "./transaction-review.component.html",
-  // styleUrls: ["./transaction-review.component.scss"],
+  styleUrls: ["./transaction-review.component.scss"],
 })
 export class TransactionReviewComponent implements OnInit {
   batchId!: number;
   response: PagedTransactionResponse | null = null;
-  subcategories: any[] = [];
   loading = false;
   confirmingAll = false;
 
@@ -37,9 +36,6 @@ export class TransactionReviewComponent implements OnInit {
   ngOnInit(): void {
     this.batchId = Number(this.route.snapshot.paramMap.get("batchId"));
     this.load();
-    this.tagSubcategoryService
-      .getAll()
-      .subscribe((s) => (this.subcategories = s));
   }
 
   load(): void {
@@ -55,14 +51,8 @@ export class TransactionReviewComponent implements OnInit {
     });
   }
 
-  confirmRow(
-    tx: FinancialTransactionSummary,
-    subcategoryId?: number,
-    accountingMonth?: string,
-  ): void {
-    this.transactionService
-      .confirm(tx.id, { subcategoryId, accountingMonth })
-      .subscribe(() => this.load());
+  confirmRow(tx: FinancialTransactionSummary): void {
+    this.transactionService.confirm(tx.id, {}).subscribe(() => this.load());
   }
 
   confirmAll(): void {

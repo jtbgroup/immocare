@@ -1,78 +1,133 @@
-<div class="transaction-review">
-  <div class="review-header">
-    <h2>Review Imported Transactions</h2>
-    <div class="review-progress">
-      {{ confirmedCount }} / {{ response?.totalElements }} confirmed
+<div class="transaction-review-container">
+  <!-- Breadcrumb -->
+  <nav class="breadcrumb" aria-label="breadcrumb">
+    <a routerLink="/transactions">Transactions</a>
+    <span class="breadcrumb-separator">›</span>
+    <span>Import #{{ batchId }}</span>
+  </nav>
+
+  <!-- Header -->
+  <div class="details-content">
+    <div class="header">
+      <div class="header-title">
+        <h1>Review Imported Transactions</h1>
+        <span class="badge badge--batch">Batch #{{ batchId }}</span>
+      </div>
+      <div class="actions">
+        <button
+          class="btn btn-primary"
+          (click)="confirmAll()"
+          [disabled]="confirmingAll || draftCount === 0"
+        >
+          {{
+            confirmingAll
+              ? "Confirming…"
+              : "Confirm all drafts (" + draftCount + ")"
+          }}
+        </button>
+        <a routerLink="/transactions" class="btn btn-secondary">← Back</a>
+      </div>
     </div>
-    <button
-      class="btn btn-primary"
-      (click)="confirmAll()"
-      [disabled]="confirmingAll || draftCount === 0"
-    >
-      {{ confirmingAll ? "Confirming…" : "Confirm All (" + draftCount + ")" }}
-    </button>
+  </div>
+
+  <!-- Summary cards -->
+  <div class="review-summary" *ngIf="response && !loading">
+    <div class="review-summary__card">
+      <span class="review-summary__value">{{ response.totalElements }}</span>
+      <span class="review-summary__label">Total</span>
+    </div>
+    <div class="review-summary__card review-summary__card--confirmed">
+      <span class="review-summary__value">{{ confirmedCount }}</span>
+      <span class="review-summary__label">Confirmed</span>
+    </div>
+    <div class="review-summary__card review-summary__card--draft">
+      <span class="review-summary__value">{{ draftCount }}</span>
+      <span class="review-summary__label">Draft</span>
+    </div>
   </div>
 
   <div class="loading" *ngIf="loading">Loading…</div>
 
-  <table class="data-table" *ngIf="response && !loading">
-    <thead>
-      <tr>
-        <th>Date</th>
-        <th>Acc. Month</th>
-        <th>Direction</th>
-        <th>Amount</th>
-        <th>Counterparty</th>
-        <th>Subcategory</th>
-        <th>Status</th>
-        <th>Actions</th>
-      </tr>
-    </thead>
-    <tbody>
-      <ng-container *ngFor="let tx of response.content">
-        <tr [class.confirmed-row]="tx.status === 'CONFIRMED'">
-          <td>{{ tx.transactionDate }}</td>
-          <td>{{ tx.accountingMonth.substring(0, 7) }}</td>
-          <td>
-            <span
-              class="badge"
-              [class.badge--income]="tx.direction === 'INCOME'"
-              [class.badge--expense]="tx.direction === 'EXPENSE'"
-            >
-              {{ DIRECTION_LABELS[tx.direction] }}
-            </span>
-          </td>
-          <td
-            class="amount"
-            [class.income]="tx.direction === 'INCOME'"
-            [class.expense]="tx.direction === 'EXPENSE'"
+  <!-- Transactions table -->
+  <div class="info-card" *ngIf="response && !loading">
+    <div class="section-header">
+      <h2>Transactions</h2>
+    </div>
+
+    <div class="data-table">
+      <table>
+        <thead>
+          <tr>
+            <th>Date</th>
+            <th>Acc. Month</th>
+            <th>Direction</th>
+            <th class="text-right">Amount</th>
+            <th>Counterparty</th>
+            <th>Category / Subcategory</th>
+            <th>Status</th>
+            <th></th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr
+            *ngFor="let tx of response.content"
+            [class.row-confirmed]="tx.status === 'CONFIRMED'"
           >
-            {{ tx.direction === "INCOME" ? "+" : "-"
-            }}{{ tx.amount.toFixed(2) }} €
-          </td>
-          <td>{{ tx.counterpartyName }}</td>
-          <td>
-            <span *ngIf="tx.subcategoryName" class="suggestion-badge">
-              ✨ {{ tx.categoryName }} / {{ tx.subcategoryName }}
-            </span>
-            <span *ngIf="!tx.subcategoryName" class="no-suggestion">—</span>
-          </td>
-          <td>
-            <span class="badge badge--status-{{ tx.status.toLowerCase() }}">{{
-              STATUS_LABELS[tx.status]
-            }}</span>
-          </td>
-          <td class="actions">
-            <button
-              *ngIf="tx.status === 'DRAFT'"
-              class="btn btn-sm btn-primary"
-              (click)="confirmRow(tx)"
+            <td class="nowrap">{{ tx.transactionDate }}</td>
+            <td class="nowrap">{{ tx.accountingMonth?.substring(0, 7) }}</td>
+            <td>
+              <span
+                class="badge"
+                [class.badge--income]="tx.direction === 'INCOME'"
+                [class.badge--expense]="tx.direction === 'EXPENSE'"
+              >
+                {{ DIRECTION_LABELS[tx.direction] }}
+              </span>
+            </td>
+            <td
+              class="text-right nowrap"
+              [class.amount--income]="tx.direction === 'INCOME'"
+              [class.amount--expense]="tx.direction === 'EXPENSE'"
             >
-              Confirm
-            </button>
-          </td>
-        </tr>
-      </ng-container>
-    </tbody>
-  </table>
+              {{ tx.direction === "INCOME" ? "+" : "-"
+              }}{{ tx.amount | number: "1.2-2" }} €
+            </td>
+            <td>{{ tx.counterpartyName || "—" }}</td>
+            <td>
+              <span *ngIf="tx.subcategoryName" class="text-muted">
+                {{ tx.categoryName }} /
+                <strong>{{ tx.subcategoryName }}</strong>
+              </span>
+              <span *ngIf="!tx.subcategoryName" class="text-muted">—</span>
+            </td>
+            <td>
+              <span class="badge badge--status-{{ tx.status.toLowerCase() }}">
+                {{ STATUS_LABELS[tx.status] }}
+              </span>
+            </td>
+            <td class="actions-cell">
+              <button
+                *ngIf="tx.status === 'DRAFT'"
+                class="btn btn-sm btn-primary"
+                (click)="confirmRow(tx)"
+              >
+                Confirm
+              </button>
+              <a
+                [routerLink]="['/transactions', tx.id, 'edit']"
+                class="icon-btn"
+                title="Edit"
+                >✏️</a
+              >
+            </td>
+          </tr>
+          <tr *ngIf="response.content.length === 0">
+            <td colspan="8" class="empty-state">
+              No transactions found for this batch.
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
 </div>

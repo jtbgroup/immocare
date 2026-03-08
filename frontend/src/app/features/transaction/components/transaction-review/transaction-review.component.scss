@@ -1,0 +1,111 @@
+// transaction-review.component.scss
+// Shared: breadcrumb, details-content .header, info-card, section-header,
+// data-table, badge, btn, btn-sm, icon-btn, loading, empty-state, text-muted,
+// amount--income/expense, nowrap — all from global partials.
+
+// ─── Summary cards ────────────────────────────────────────────────────────────
+
+.review-summary {
+  display: flex;
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+
+  &__card {
+    flex: 1;
+    background: #f5f7fa;
+    border: 1px solid #e5e7eb;
+    border-radius: 8px;
+    padding: 1rem 1.25rem;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.25rem;
+
+    &--confirmed {
+      background: #f0fdf4;
+      border-color: #bbf7d0;
+      .review-summary__value {
+        color: #16a34a;
+      }
+    }
+
+    &--draft {
+      background: #fffbeb;
+      border-color: #fde68a;
+      .review-summary__value {
+        color: #d97706;
+      }
+    }
+  }
+
+  &__value {
+    font-size: 2rem;
+    font-weight: 700;
+    line-height: 1;
+    color: #374151;
+  }
+
+  &__label {
+    font-size: 0.75rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: #6b7280;
+  }
+}
+
+// ─── Table tweaks ─────────────────────────────────────────────────────────────
+
+.row-confirmed {
+  opacity: 0.65;
+}
+
+.text-right {
+  text-align: right;
+}
+
+.nowrap {
+  white-space: nowrap;
+}
+
+.amount--income {
+  color: #2e7d32;
+  font-weight: 600;
+}
+
+.amount--expense {
+  color: #c62828;
+  font-weight: 600;
+}
+
+.actions-cell {
+  white-space: nowrap;
+  text-align: right;
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  justify-content: flex-end;
+}
+
+// ─── Batch badge ──────────────────────────────────────────────────────────────
+
+.badge--batch {
+  background: #e0e7ff;
+  color: #3730a3;
+  font-size: 0.8rem;
+  padding: 0.2em 0.65em;
+  border-radius: 20px;
+  font-weight: 600;
+}
+
+// ─── Header title ─────────────────────────────────────────────────────────────
+
+.header-title {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+
+  h1 {
+    margin: 0;
+  }
+}

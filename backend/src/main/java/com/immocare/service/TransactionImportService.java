@@ -3,6 +3,7 @@ package com.immocare.service;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
@@ -85,6 +86,9 @@ public class TransactionImportService {
             // ── Duplicate check ───────────────────────────────────────────
             boolean duplicate = p.getFingerprint() != null
                     && transactionRepo.existsByImportFingerprint(p.getFingerprint());
+            Long duplicateId = duplicate
+                    ? transactionRepo.findIdByImportFingerprint(p.getFingerprint())
+                    : null;
 
             // ── Subcategory suggestion (only if direction is known) ────────
             SubcategorySuggestionDTO subSuggestion = null;
@@ -145,6 +149,7 @@ public class TransactionImportService {
                     p.getCounterpartyAccount(),
                     p.getFingerprint(),
                     duplicate,
+                    duplicateId,
                     subSuggestion,
                     leaseSuggestion,
                     null));
@@ -180,6 +185,7 @@ public class TransactionImportService {
             String parserCode,
             Long bankAccountId,
             List<ImportRowEnrichmentDTO> enrichments,
+            Set<String> selectedFingerprints,
             AppUser currentUser) throws ParseException {
 
         TransactionParser parser = parserRegistry.getOrThrow(parserCode);
@@ -211,9 +217,22 @@ public class TransactionImportService {
         batch.setCreatedBy(currentUser);
         importBatchRepo.save(batch);
 
+        // When the frontend sends an explicit selection, restrict to those fingerprints
+        // only.
+        // Rows whose fingerprint is not in the set are silently skipped (not counted as
+        // duplicate).
+        final boolean hasSelection = selectedFingerprints != null && !selectedFingerprints.isEmpty();
+
         int imported = 0, duplicates = 0;
 
         for (ParsedTransaction p : parsed) {
+
+            // ── Selection filter — skip rows the user did not check ────────
+            if (hasSelection && (p.getFingerprint() == null
+                    || !selectedFingerprints.contains(p.getFingerprint()))) {
+                log.debug("Skipped (not selected): row {}", p.getRowNumber());
+                continue;
+            }
 
             // ── Duplicate check ───────────────────────────────────────────
             if (p.getFingerprint() != null

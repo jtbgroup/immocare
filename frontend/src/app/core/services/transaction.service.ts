@@ -6,8 +6,8 @@ import {
   CreateTransactionRequest,
   FinancialTransaction,
   ImportBatchResult,
-  ImportRowEnrichment,
   ImportPreviewRow,
+  ImportRowEnrichment,
   PagedTransactionResponse,
   StatisticsFilter,
   TransactionFilter,
@@ -20,8 +20,12 @@ const BASE = "/api/v1/transactions";
 export class TransactionService {
   constructor(private http: HttpClient) {}
 
-  getTransactions(filter: TransactionFilter): Observable<PagedTransactionResponse> {
-    return this.http.get<PagedTransactionResponse>(BASE, { params: this.buildParams(filter) });
+  getTransactions(
+    filter: TransactionFilter,
+  ): Observable<PagedTransactionResponse> {
+    return this.http.get<PagedTransactionResponse>(BASE, {
+      params: this.buildParams(filter),
+    });
   }
 
   getById(id: number): Observable<FinancialTransaction> {
@@ -32,7 +36,10 @@ export class TransactionService {
     return this.http.post<FinancialTransaction>(BASE, req);
   }
 
-  update(id: number, req: CreateTransactionRequest): Observable<FinancialTransaction> {
+  update(
+    id: number,
+    req: CreateTransactionRequest,
+  ): Observable<FinancialTransaction> {
     return this.http.put<FinancialTransaction>(`${BASE}/${id}`, req);
   }
 
@@ -40,12 +47,17 @@ export class TransactionService {
     return this.http.delete<void>(`${BASE}/${id}`);
   }
 
-  confirm(id: number, req: ConfirmTransactionRequest): Observable<FinancialTransaction> {
+  confirm(
+    id: number,
+    req: ConfirmTransactionRequest,
+  ): Observable<FinancialTransaction> {
     return this.http.patch<FinancialTransaction>(`${BASE}/${id}/confirm`, req);
   }
 
   confirmBatch(batchId: number): Observable<{ confirmedCount: number }> {
-    return this.http.post<{ confirmedCount: number }>(`${BASE}/confirm-batch`, { batchId });
+    return this.http.post<{ confirmedCount: number }>(`${BASE}/confirm-batch`, {
+      batchId,
+    });
   }
 
   getStatistics(filter: StatisticsFilter): Observable<TransactionStatistics> {
@@ -80,22 +92,37 @@ export class TransactionService {
     parserCode: string,
     bankAccountId: number | null,
     enrichments: ImportRowEnrichment[] = [],
+    selectedFingerprints: string[] = [],
   ): Observable<ImportBatchResult> {
     const formData = new FormData();
-    formData.append('file', file);
-    formData.append('parserCode', parserCode);
+    formData.append("file", file);
+    formData.append("parserCode", parserCode);
     if (bankAccountId != null) {
-      formData.append('bankAccountId', String(bankAccountId));
+      formData.append("bankAccountId", String(bankAccountId));
     }
     if (enrichments.length > 0) {
-      formData.append('enrichments', JSON.stringify(enrichments));
+      formData.append("enrichments", JSON.stringify(enrichments));
+    }
+    if (selectedFingerprints.length > 0) {
+      formData.append(
+        "selectedFingerprints",
+        JSON.stringify(selectedFingerprints),
+      );
     }
     return this.http.post<ImportBatchResult>(`${BASE}/import`, formData);
   }
 
-  getBatch(batchId: number, page = 0, size = 20): Observable<PagedTransactionResponse> {
-    return this.http.get<PagedTransactionResponse>(`${BASE}/import/${batchId}`, {
-      params: new HttpParams().set("page", page).set("size", size),
+  getBatch(
+    batchId: number,
+    page = 0,
+    size = 200,
+  ): Observable<PagedTransactionResponse> {
+    return this.http.get<PagedTransactionResponse>(BASE, {
+      params: new HttpParams()
+        .set("importBatchId", batchId)
+        .set("page", page)
+        .set("size", size)
+        .set("sort", "transactionDate,asc"),
     });
   }
 

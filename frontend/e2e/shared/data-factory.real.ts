@@ -28,7 +28,7 @@ export const PERSONS = [
   {
     firstName: "Veerle",
     lastName: "Bloemen",
-    email: "veerle.bloemen@gmail.com",
+    email: "veerle_bloemen@hotmail.com",
     city: "Bruxelles",
     postalCode: "1060",
     country: "Belgium",
@@ -37,7 +37,7 @@ export const PERSONS = [
   {
     firstName: "Arne",
     lastName: "Sonck",
-    email: "arne.sonck@gmail.com",
+    email: "sonckarne@outlook.be",
     city: "Bruxelles",
     postalCode: "1060",
     country: "Belgium",
@@ -55,7 +55,16 @@ export const PERSONS = [
   {
     firstName: "Johan",
     lastName: "Janssen",
-    email: "johan.janssen@gmail.com",
+    email: "johanjjanssens@gmail.com",
+    city: "Bruxelles",
+    postalCode: "1060",
+    country: "Belgium",
+  },
+  // index 5 — tenant App 1
+  {
+    firstName: "Tina",
+    lastName: "Rubbrecht",
+    email: "rubbrechtt@outlook.com",
     city: "Bruxelles",
     postalCode: "1060",
     country: "Belgium",
@@ -224,9 +233,9 @@ export const REAL_LEASES: RealLease[] = [
     leaseType: "MAIN_RESIDENCE_9Y",
     durationMonths: 108,
     noticePeriodMonths: 3,
-    startDate: "2018-06-01",
-    endDate: "2025-04-30",
-    signatureDate: "2018-05-01",
+    startDate: "2018-05-01",
+    endDate: "2022-04-30",
+    signatureDate: "2018-02-26",
     baseRent: 900,
     charges: 0,
     chargesType: "FORFAIT",
@@ -292,6 +301,23 @@ export const REAL_LEASES: RealLease[] = [
     charges: 8.5,
     chargesType: "FORFAIT",
     depositMultiplier: 2,
+  },
+  // ── App 2 — Tina Rubbrecht (06Sep2024 → 06Oct2025) ─────────────────────
+  {
+    buildingIndex: 0,
+    unitIndex: 1,
+    tenantPersonIndex: 5, // Tina Rubbrecht
+    scenario: "finished-with-adjustments",
+    leaseType: "MAIN_RESIDENCE_9Y",
+    durationMonths: 108,
+    noticePeriodMonths: 3,
+    startDate: "2024-09-06",
+    endDate: "2025-10-06",
+    signatureDate: "2024-08-26",
+    baseRent: 1200,
+    charges: 8.5,
+    chargesType: "FORFAIT",
+    depositMultiplier: 1,
   },
 ];
 

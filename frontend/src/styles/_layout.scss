@@ -18,7 +18,7 @@
 .user-form-container,
 .transactions-page,
 .transaction-form-container,
-.transaction-detail-container,
+.transaction-review-container,
 .bank-accounts-page {
   padding: $spacing-xl;
   max-width: 1200px;
@@ -111,6 +111,7 @@
   .user-form-container,
   .transactions-page,
   .transaction-form-container,
+  .transaction-review-container,
   .transaction-detail-container {
     padding: $spacing-md;
   }

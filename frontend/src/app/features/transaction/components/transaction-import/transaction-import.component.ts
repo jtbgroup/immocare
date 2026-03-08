@@ -1,7 +1,7 @@
 import { CommonModule } from "@angular/common";
 import { Component, OnInit } from "@angular/core";
 import { FormsModule } from "@angular/forms";
-import { Router } from "@angular/router";
+import { Router, RouterModule } from "@angular/router";
 
 import { BankAccountService } from "../../../../core/services/bank-account.service";
 import { ImportParserService } from "../../../../core/services/import-parser.service";
@@ -20,7 +20,12 @@ type Step = "form" | "preview" | "result";
 @Component({
   selector: "app-transaction-import",
   standalone: true,
-  imports: [CommonModule, FormsModule, ImportRowDetailPanelComponent],
+  imports: [
+    CommonModule,
+    FormsModule,
+    RouterModule,
+    ImportRowDetailPanelComponent,
+  ],
   templateUrl: "./transaction-import.component.html",
   styleUrls: ["./transaction-import.component.scss"],
 })
@@ -232,12 +237,18 @@ export class TransactionImportComponent implements OnInit {
         directionOverride: r.direction ?? undefined,
       }));
 
+    // Fingerprints of rows the user actually selected — backend will ignore all others
+    const selectedFingerprints: string[] = this.selectedRows
+      .filter((r) => r.fingerprint)
+      .map((r) => r.fingerprint!);
+
     this.transactionService
       .importFile(
         this.selectedFile!,
         this.selectedParserCode,
         this.selectedBankAccountId,
         enrichments,
+        selectedFingerprints,
       )
       .subscribe({
         next: (r) => {

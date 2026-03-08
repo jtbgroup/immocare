@@ -207,6 +207,7 @@ export interface ImportPreviewRow {
   counterpartyAccount: string | null;
   fingerprint: string | null;
   duplicateInDb: boolean;
+  duplicateTransactionId?: number;
   suggestedSubcategory: SubcategorySuggestion | null;
   suggestedLease: ImportPreviewSuggestedLease | null;
   parseError: string | null;
