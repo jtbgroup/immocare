@@ -17,10 +17,11 @@ public interface FinancialTransactionRepository
     boolean existsByExternalReferenceAndTransactionDateAndAmount(
             String externalReference, LocalDate transactionDate, BigDecimal amount);
 
+    /** Duplicate detection via SHA-256 fingerprint stored at import time. */
+    boolean existsByImportFingerprint(String importFingerprint);
+
     /**
      * Returns the next unique sequence value from a dedicated PostgreSQL sequence.
-     * Safe within a single Hibernate session because nextval() is evaluated
-     * immediately in the DB, independently of any pending flushes.
      */
     @Query(value = "SELECT NEXTVAL('financial_transaction_ref_seq')", nativeQuery = true)
     long nextRefSequence();

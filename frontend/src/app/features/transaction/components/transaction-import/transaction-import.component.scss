@@ -1,46 +1,5 @@
-// All shared: info-card, form-section, form-row, form-group, btn, alert, data-table
-
-.transaction-import {
-  // max-width from global _layout.scss
-}
-
-// ─── Config card ─────────────────────────────────────────────────────────────
-
-.import-config {
-  margin-bottom: 1.5rem;
-}
-
-.field-hint {
-  font-size: 0.8rem;
-  color: #6b7280;
-  margin-top: 0.35rem;
-  line-height: 1.4;
-  display: flex;
-  align-items: flex-start;
-  gap: 0.4rem;
-  flex-wrap: wrap;
-}
-
-// ─── Format badge ─────────────────────────────────────────────────────────────
-
-.format-badge {
-  display: inline-block;
-  padding: 0.1em 0.5em;
-  border-radius: 4px;
-  font-size: 0.72rem;
-  font-weight: 700;
-  text-transform: uppercase;
-  flex-shrink: 0;
-
-  &--csv {
-    background: #e0f2fe;
-    color: #0369a1;
-  }
-  &--pdf {
-    background: #fce7f3;
-    color: #9d174d;
-  }
-}
+// transaction-import.component.scss
+// Shared global styles: info-card, form-group, form-control, btn, alert, data-table
 
 // ─── Drop zone ────────────────────────────────────────────────────────────────
 
@@ -49,69 +8,155 @@
   border-radius: 10px;
   padding: 2.5rem;
   text-align: center;
-  transition: all 0.2s;
   background: #fafafa;
   margin: 1.25rem 0;
+  transition: border-color 0.2s, background 0.2s;
 
-  &--active {
-    border-color: #6366f1;
-    background: #f0f0ff;
-  }
+  &.dragging    { border-color: #6366f1; background: #f0f0ff; }
+  &.has-file    { border-color: #22c55e; background: #f0fdf4; border-style: solid; }
 
-  &--filled {
-    border-color: #22c55e;
-    background: #f0fdf4;
-    border-style: solid;
-  }
-
-  &--disabled {
-    opacity: 0.5;
-    pointer-events: none;
-  }
+  &__icon       { font-size: 2.5rem; margin-bottom: 0.5rem; }
+  &__text       { color: #374151; margin: 0 0 0.75rem; }
+  &__filename   { font-weight: 600; color: #111; margin: 0 0 0.5rem; }
+  &__hint       { font-size: 0.8rem; color: #9ca3af; }
 }
 
-.drop-icon {
-  font-size: 2.5rem;
-  margin-bottom: 0.75rem;
-}
+// ─── Summary bar ─────────────────────────────────────────────────────────────
 
-.drop-text {
-  font-size: 0.95rem;
-  color: #374151;
-  margin: 0 0 0.75rem;
-}
-
-.drop-hint {
-  font-size: 0.8rem;
-  color: #9ca3af;
-  margin: 0.25rem 0 0.75rem;
-}
-
-.file-label {
-  cursor: pointer;
-  &.btn--disabled { opacity: 0.5; pointer-events: none; }
-}
-
-// ─── Actions ─────────────────────────────────────────────────────────────────
-
-.import-actions {
+.preview-summary {
   display: flex;
-  justify-content: flex-end;
-  margin-top: 1rem;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+  margin-bottom: 0.75rem;
+
+  &__item {
+    padding: 0.3rem 0.75rem;
+    border-radius: 20px;
+    font-size: 0.82rem;
+    font-weight: 600;
+    background: #f3f4f6;
+    color: #374151;
+    border: 1px solid #e5e7eb;
+
+    &--dup      { background: #fffbeb; border-color: #fcd34d; color: #92400e; }
+    &--err      { background: #fef2f2; border-color: #fca5a5; color: #991b1b; }
+    &--enriched { background: #f0fdf4; border-color: #86efac; color: #166534; }
+    &--sel      { background: #eff6ff; border-color: #93c5fd; color: #1d4ed8; }
+  }
 }
 
-.btn-lg {
-  padding: 0.65rem 1.75rem;
-  font-size: 1rem;
+// ─── Split layout ─────────────────────────────────────────────────────────────
+
+.preview-layout {
+  display: flex;
+  gap: 0;
+  align-items: flex-start;
+  min-height: 400px;
+
+  .preview-table-wrap {
+    flex: 1;
+    min-width: 0;
+    overflow-x: auto;
+  }
+
+  &.panel-open .preview-table-wrap {
+    // table shrinks gracefully when panel is open
+  }
+
+  app-import-row-detail-panel {
+    flex: 0 0 360px;
+    position: sticky;
+    top: 1rem;
+    max-height: calc(100vh - 120px);
+    overflow: hidden;
+    border-radius: 8px;
+    box-shadow: 0 4px 16px rgba(0,0,0,0.1);
+    margin-left: 1rem;
+  }
 }
 
-// ─── Result stats ─────────────────────────────────────────────────────────────
+// ─── Table row states ─────────────────────────────────────────────────────────
 
-.import-result {
-  margin-top: 1.5rem;
+.row-duplicate td  { color: #9ca3af; background: #fffbeb; }
+.row-error td      { color: #dc2626; background: #fef2f2; }
+.row-active td     { background: #eff6ff !important; }
 
-  h2 { margin-bottom: 1.25rem; }
+.col-check { width: 36px; text-align: center; }
+
+// ─── Badges ───────────────────────────────────────────────────────────────────
+
+.suggestion-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  padding: 0.2em 0.5em;
+  background: #fffbeb;
+  border: 1px solid #fcd34d;
+  border-radius: 4px;
+  font-size: 0.75rem;
+  color: #92400e;
+  white-space: nowrap;
+
+  &--lease {
+    background: #f0fdf4;
+    border-color: #86efac;
+    color: #166534;
+  }
 }
+
+.enriched-badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.2em 0.5em;
+  background: #eff6ff;
+  border: 1px solid #93c5fd;
+  border-radius: 4px;
+  font-size: 0.75rem;
+  color: #1d4ed8;
+  white-space: nowrap;
+
+  &--lease {
+    background: #f0fdf4;
+    border-color: #6ee7b7;
+    color: #065f46;
+  }
+}
+
+.no-suggestion { color: #9ca3af; font-size: 0.8rem; }
+
+.badge {
+  display: inline-block;
+  padding: 0.2em 0.5em;
+  border-radius: 4px;
+  font-size: 0.72rem;
+  font-weight: 700;
+
+  &--income  { background: #dcfce7; color: #16a34a; }
+  &--expense { background: #fee2e2; color: #dc2626; }
+  &--neutral { background: #f3f4f6; color: #6b7280; }
+  &--ok      { background: #dcfce7; color: #166534; }
+  &--warning { background: #fef3c7; color: #92400e; }
+  &--error   { background: #fee2e2; color: #991b1b; }
+}
+
+// ─── Edit button ──────────────────────────────────────────────────────────────
+
+.btn-ghost {
+  background: none;
+  border: 1px solid transparent;
+  border-radius: 4px;
+  padding: 0.2rem 0.4rem;
+  cursor: pointer;
+  font-size: 0.85rem;
+  color: #6b7280;
+
+  &:hover        { background: #f3f4f6; border-color: #d1d5db; }
+  &--active      { background: #eff6ff; border-color: #93c5fd; color: #1d4ed8; }
+}
+
+// ─── Import result ────────────────────────────────────────────────────────────
+
+.import-result { margin-top: 1.5rem; }
 
 .result-stats {
   display: flex;
@@ -146,24 +191,22 @@
     letter-spacing: 0.04em;
   }
 
-  &--success { border-color: #bbf7d0; background: #f0fdf4;
-    .result-stat__value { color: #16a34a; }
-  }
-  &--warning { border-color: #fde68a; background: #fffbeb;
-    .result-stat__value { color: #d97706; }
-  }
-  &--error { border-color: #fecaca; background: #fef2f2;
-    .result-stat__value { color: #dc2626; }
-  }
+  &--success { border-color: #bbf7d0; background: #f0fdf4; .result-stat__value { color: #16a34a; } }
+  &--warning { border-color: #fde68a; background: #fffbeb; .result-stat__value { color: #d97706; } }
+  &--error   { border-color: #fecaca; background: #fef2f2; .result-stat__value { color: #dc2626; } }
 }
 
-// ─── Row errors ───────────────────────────────────────────────────────────────
-
-.row-errors {
-  margin-top: 1.5rem;
-  h3 { margin-bottom: 0.75rem; color: #dc2626; }
+.import-actions {
+  display: flex;
+  gap: 0.75rem;
+  margin-top: 1rem;
 }
 
-.monospace { font-family: monospace; }
-.small { font-size: 0.8rem; }
-.text-danger { color: #dc2626; }
+// ─── Misc ─────────────────────────────────────────────────────────────────────
+
+.monospace { font-family: monospace; font-size: 0.8rem; }
+.text-muted { color: #9ca3af; }
+.amount { font-weight: 600; white-space: nowrap; }
+.income { color: #16a34a; }
+.expense { color: #dc2626; }
+.form-hint { font-size: 0.8rem; color: #6b7280; display: block; margin-top: 0.25rem; }

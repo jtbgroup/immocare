@@ -1,5 +1,7 @@
 package com.immocare.controller;
 
+import java.util.List;
+
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -9,53 +11,106 @@ import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.immocare.exception.ParseException;
 import com.immocare.model.dto.ImportBatchResultDTO;
+import com.immocare.model.dto.ImportPreviewRowDTO;
+import com.immocare.model.dto.ImportRowEnrichmentDTO;
 import com.immocare.model.entity.AppUser;
 import com.immocare.service.TransactionImportService;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
 /**
- * POST /api/v1/transactions/import
+ * Endpoints for the 3-step transaction import flow.
  *
- * Replaces the old CSV-only import. Now accepts any file type
- * and dispatches to the appropriate parser based on parserCode.
- *
- * Multipart fields:
- * file — the CSV or PDF file
- * parserCode — e.g. "keytrade-csv-20260102"
- * bankAccountId — (optional) own bank account id to link
+ * POST /api/v1/transactions/preview — parse only, no persistence, returns rows
+ * with suggestions
+ * POST /api/v1/transactions/import — parse + apply enrichments + persist as
+ * DRAFT or CONFIRMED
  */
+@Slf4j
 @RestController
 @RequestMapping("/api/v1/transactions")
 @RequiredArgsConstructor
 public class TransactionImportController {
 
     private final TransactionImportService importService;
+    private static final ObjectMapper MAPPER = new ObjectMapper();
 
+    // ─── Preview ──────────────────────────────────────────────────────────────
+
+    /**
+     * POST /api/v1/transactions/preview
+     * Parse the file and return enriched rows without persisting anything.
+     *
+     * Multipart parts:
+     * file — CSV or PDF
+     * parserCode — e.g. "keytrade-csv-20260102"
+     */
+    @PostMapping(value = "/preview", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public ResponseEntity<?> previewFile(
+            @RequestPart("file") MultipartFile file,
+            @RequestPart("parserCode") String parserCode) {
+        try {
+            List<ImportPreviewRowDTO> rows = importService.previewFile(file, parserCode.trim());
+            return ResponseEntity.ok(rows);
+        } catch (ParseException e) {
+            return ResponseEntity.badRequest().body(ImportBatchResultDTO.error(e.getMessage()));
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.badRequest().body(ImportBatchResultDTO.error(e.getMessage()));
+        }
+    }
+
+    // ─── Import ───────────────────────────────────────────────────────────────
+
+    /**
+     * POST /api/v1/transactions/import
+     * Parse + apply per-row enrichments + persist.
+     * Rows matched by fingerprint to an enrichment are saved as CONFIRMED;
+     * unmatched rows are saved as DRAFT.
+     *
+     * Multipart parts:
+     * file — CSV or PDF
+     * parserCode — e.g. "keytrade-csv-20260102"
+     * bankAccountId — (optional) own bank account id
+     * enrichments — (optional) JSON array of ImportRowEnrichmentDTO
+     */
     @PostMapping(value = "/import", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<ImportBatchResultDTO> importFile(
             @RequestPart("file") MultipartFile file,
             @RequestPart("parserCode") String parserCode,
             @RequestPart(value = "bankAccountId", required = false) String bankAccountIdStr,
+            @RequestPart(value = "enrichments", required = false) String enrichmentsJson,
             @AuthenticationPrincipal AppUser currentUser) {
 
-        Long bankAccountId = (bankAccountIdStr != null && !bankAccountIdStr.isBlank())
-                ? Long.parseLong(bankAccountIdStr)
-                : null;
+        Long bankAccountId = parseId(bankAccountIdStr);
+
+        List<ImportRowEnrichmentDTO> enrichments = List.of();
+        if (enrichmentsJson != null && !enrichmentsJson.isBlank()) {
+            try {
+                enrichments = MAPPER.readValue(
+                        enrichmentsJson, new TypeReference<List<ImportRowEnrichmentDTO>>() {
+                        });
+            } catch (Exception e) {
+                log.warn("Could not deserialize enrichments JSON: {}", e.getMessage());
+            }
+        }
 
         try {
             ImportBatchResultDTO result = importService.importFile(
-                    file, parserCode.trim(), bankAccountId, currentUser);
+                    file, parserCode.trim(), bankAccountId, enrichments, currentUser);
             return ResponseEntity.ok(result);
-
         } catch (ParseException e) {
-            return ResponseEntity.badRequest()
-                    .body(ImportBatchResultDTO.error(e.getMessage()));
+            return ResponseEntity.badRequest().body(ImportBatchResultDTO.error(e.getMessage()));
         } catch (IllegalArgumentException e) {
-            return ResponseEntity.badRequest()
-                    .body(ImportBatchResultDTO.error(e.getMessage()));
+            return ResponseEntity.badRequest().body(ImportBatchResultDTO.error(e.getMessage()));
         }
+    }
+
+    private Long parseId(String str) {
+        return (str != null && !str.isBlank()) ? Long.parseLong(str.trim()) : null;
     }
 }

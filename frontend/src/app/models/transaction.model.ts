@@ -187,6 +187,54 @@ export interface SubcategorySuggestion {
   confidence: number;
 }
 
+export interface ImportPreviewSuggestedLease {
+  leaseId: number;
+  unitId: number;
+  unitNumber: string;
+  buildingName: string;
+  personId: number;
+  personFullName: string;
+}
+
+export interface ImportPreviewRow {
+  rowNumber: number;
+  rawLine: string;
+  transactionDate: string | null;
+  amount: number | null;
+  direction: TransactionDirection | null;
+  description: string | null;
+  counterpartyName: string | null;
+  counterpartyAccount: string | null;
+  fingerprint: string | null;
+  duplicateInDb: boolean;
+  suggestedSubcategory: SubcategorySuggestion | null;
+  suggestedLease: ImportPreviewSuggestedLease | null;
+  parseError: string | null;
+  /** Client-side only — whether the row is checked for import. */
+  selected: boolean;
+
+  // ── Client-side enrichment (set via detail panel) ─────────────────────────
+  enrichedSubcategoryId?: number;
+  enrichedSubcategoryName?: string;
+  enrichedLeaseId?: number;
+  enrichedUnitId?: number;
+  enrichedUnitNumber?: string;
+  enrichedBuildingId?: number;
+  enrichedBuildingName?: string;
+}
+
+// ─── Enrichment payload sent to /import ──────────────────────────────────────
+
+/** Mirrors ImportRowEnrichmentDTO on the backend. */
+export interface ImportRowEnrichment {
+  fingerprint: string;
+  subcategoryId?: number;
+  leaseId?: number;
+  housingUnitId?: number;
+  buildingId?: number;
+  directionOverride?: string;
+}
+
 // ─── Filters ──────────────────────────────────────────────────────────────────
 
 export interface TransactionFilter {

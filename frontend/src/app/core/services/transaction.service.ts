@@ -6,6 +6,8 @@ import {
   CreateTransactionRequest,
   FinancialTransaction,
   ImportBatchResult,
+  ImportRowEnrichment,
+  ImportPreviewRow,
   PagedTransactionResponse,
   StatisticsFilter,
   TransactionFilter,
@@ -60,22 +62,33 @@ export class TransactionService {
   }
 
   /**
-   * Import a file (CSV or PDF) using a named parser strategy.
-   *
-   * @param file          File selected by the user
-   * @param parserCode    Parser code (e.g. "keytrade-csv-20260102")
-   * @param bankAccountId Own bank account to link transactions to
+   * Step 1 — Preview: parse without persisting.
+   * Returns rows enriched with duplicate flag, subcategory and lease suggestions.
+   */
+  previewFile(file: File, parserCode: string): Observable<ImportPreviewRow[]> {
+    const formData = new FormData();
+    formData.append("file", file);
+    formData.append("parserCode", parserCode);
+    return this.http.post<ImportPreviewRow[]>(`${BASE}/preview`, formData);
+  }
+
+  /**
+   * Step 2 — Import: parse + apply enrichments + persist as DRAFT or CONFIRMED.
    */
   importFile(
     file: File,
     parserCode: string,
     bankAccountId: number | null,
+    enrichments: ImportRowEnrichment[] = [],
   ): Observable<ImportBatchResult> {
     const formData = new FormData();
-    formData.append("file", file);
-    formData.append("parserCode", parserCode);
+    formData.append('file', file);
+    formData.append('parserCode', parserCode);
     if (bankAccountId != null) {
-      formData.append("bankAccountId", String(bankAccountId));
+      formData.append('bankAccountId', String(bankAccountId));
+    }
+    if (enrichments.length > 0) {
+      formData.append('enrichments', JSON.stringify(enrichments));
     }
     return this.http.post<ImportBatchResult>(`${BASE}/import`, formData);
   }

@@ -1,0 +1,68 @@
+<!-- ── Bank Accounts section — insert in person-details.component.html ────────
+     Place after the "As Tenant — Leases" card and before the closing *ngIf. -->
+
+<!-- Bank Accounts -->
+<div class="info-card">
+  <div class="card-header-row">
+    <h2>🏦 Bank Accounts (IBAN)</h2>
+    <button class="btn btn-sm btn-secondary"
+            (click)="showIbanForm = !showIbanForm; editingIban = undefined; resetIbanForm()">
+      + Add IBAN
+    </button>
+  </div>
+
+  <div class="alert alert-error" *ngIf="ibanError">{{ ibanError }}</div>
+  <div class="alert alert-success" *ngIf="ibanSuccess">✅ {{ ibanSuccess }}</div>
+
+  <!-- Add / Edit form -->
+  <div class="inline-iban-form" *ngIf="showIbanForm || editingIban">
+    <input type="text"
+           [(ngModel)]="ibanForm.iban"
+           placeholder="BE32 3100 7656 3402"
+           class="monospace" />
+    <input type="text"
+           [(ngModel)]="ibanForm.label"
+           placeholder="Label (optional)" />
+    <label class="checkbox-label">
+      <input type="checkbox" [(ngModel)]="ibanForm.primary" />
+      Primary
+    </label>
+    <button class="btn btn-sm btn-primary" (click)="saveIban()">
+      {{ editingIban ? 'Update' : 'Save' }}
+    </button>
+    <button class="btn btn-sm btn-link"
+            (click)="showIbanForm = false; editingIban = undefined">
+      Cancel
+    </button>
+  </div>
+
+  <!-- IBAN list -->
+  <div *ngIf="person.bankAccounts && person.bankAccounts.length > 0; else noIbans">
+    <table class="data-table">
+      <thead>
+        <tr>
+          <th>IBAN</th>
+          <th>Label</th>
+          <th class="text-center">Primary</th>
+          <th></th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let ba of person.bankAccounts">
+          <td class="monospace">{{ ba.iban }}</td>
+          <td>{{ ba.label || '—' }}</td>
+          <td class="text-center">
+            <span *ngIf="ba.primary" class="badge badge--active">★ Primary</span>
+          </td>
+          <td class="actions-cell">
+            <button class="icon-btn" title="Edit" (click)="editIban(ba)">✏️</button>
+            <button class="icon-btn" title="Delete" (click)="deleteIban(ba.id)">🗑️</button>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+  <ng-template #noIbans>
+    <p class="text-muted" style="margin-top: 0.5rem;">No IBAN registered yet.</p>
+  </ng-template>
+</div>

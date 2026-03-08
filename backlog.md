@@ -21,21 +21,14 @@
 
 
 
-1. dans le formulaire d'édition de la transaction, les buildings, units et lease doivent être des listes liées entre elles et je ne dois pas introduire des id mais sélectionner les valeurs en language compéhensible. 
 
-revoit aussi le layout pour qu'il soit plus en ligne avec les aurtes formulaires
-
-le formulaire et les listes des bank accounts est trop large. il doit prendre la CSS globale pour la largeur
-
-Les Transaction Categories doivent venir dans les settings (menu supplémentaire). Il faut retirer le bouton de l'écran financial transactions. l'écran existant pour la gestion de catalogues est ok mais doit être intégré dans les settings dans un menu de gestion des catalogues
-----DONE----
 
 
 2. Rassemble les flyway 13-15
 
 3. Vérifie la documentation des UC de transaction par rapport au code
 
-4. dans les people, il faut ajouter des bank accounts. cela doit permettre de faire la réconciliation ensuite avec les transactions financières car c'est le seul lien que j'ai.
+
 
 5. quand j'importe des transactions, je veux pouvoir revoir avant l'import. Je veux pouvoir ne sélectionner que certains imports éventuellement, je veux pouvoir valider directement, je veux directement faire le lien avec un unit ou building ou people. je veux voir les doublons potentiels et les écarter. Il faut aussi que sur base soit d'apprentissage, soit de donnéesconnues (ex bank account des personnes), le lien soit directement fait (ex: vers un lease et donc le unit et le building, un compteur d'eau)
 
@@ -54,3 +47,15 @@ Les Transaction Categories doivent venir dans les settings (menu supplémentaire
 11. Le financial dashboard ne fonctionne pas
 12.  
 
+
+# DONE
+
+1. dans les people, il faut ajouter des bank accounts. cela doit permettre de faire la réconciliation ensuite avec les transactions financières car c'est le seul lien que j'ai.
+2. dans le formulaire d'édition de la transaction, les buildings, units et lease doivent être des listes liées entre elles et je ne dois pas introduire des id mais sélectionner les valeurs en language compéhensible. 
+
+revoit aussi le layout pour qu'il soit plus en ligne avec les aurtes formulaires
+
+le formulaire et les listes des bank accounts est trop large. il doit prendre la CSS globale pour la largeur
+
+Les Transaction Categories doivent venir dans les settings (menu supplémentaire). Il faut retirer le bouton de l'écran financial transactions. l'écran existant pour la gestion de catalogues est ok mais doit être intégré dans les settings dans un menu de gestion des catalogues
+ 

@@ -1,157 +1,252 @@
-<div class="transaction-import">
+<div class="import-container">
 
-  <div class="details-content">
-    <div class="header">
-      <h1>Importer des transactions</h1>
+  <!-- ══════════════════════════════════════════════════════ STEP: FORM -->
+  <ng-container *ngIf="step === 'form'">
+
+    <div class="details-content">
+      <div class="header">
+        <h1>Import Transactions</h1>
+      </div>
     </div>
-  </div>
 
-  <!-- ── Configuration ──────────────────────────────────────────────────────── -->
-  <div class="info-card import-config">
+    <div class="info-card">
 
-    <div class="form-section">
-      <div class="form-row">
+      <div class="form-group">
+        <label class="form-label">Parser</label>
+        <select class="form-control" [(ngModel)]="selectedParserCode">
+          <option value="">— Select a parser —</option>
+          <option *ngFor="let p of parsers" [value]="p.code">{{ p.label }}</option>
+        </select>
+        <small *ngIf="selectedParser" class="form-hint">{{ selectedParser.description }}</small>
+      </div>
 
-        <!-- Parseur -->
-        <div class="form-group">
-          <label>Format d'import <span class="required">*</span></label>
-          <select [(ngModel)]="selectedParserCode" (ngModelChange)="clearFile()">
-            <option value="">— Choisir un format —</option>
-            <option *ngFor="let p of parsers" [value]="p.code">
-              {{ p.label }}
-            </option>
-          </select>
-          <div class="field-hint" *ngIf="selectedParser">
-            <span class="format-badge format-badge--{{ selectedParser.format.toLowerCase() }}">
-              {{ selectedParser.format }}
-            </span>
-            {{ selectedParser.description }}
-          </div>
+      <div class="form-group" *ngIf="bankAccounts.length > 0">
+        <label class="form-label">Own bank account (optional)</label>
+        <select class="form-control" [(ngModel)]="selectedBankAccountId">
+          <option [ngValue]="null">— None —</option>
+          <option *ngFor="let a of bankAccounts" [ngValue]="a.id">{{ a.label }}</option>
+        </select>
+      </div>
+
+      <div
+        class="drop-zone"
+        [class.dragging]="isDragging"
+        [class.has-file]="!!selectedFile"
+        (dragover)="onDragOver($event)"
+        (dragleave)="onDragLeave()"
+        (drop)="onDrop($event)"
+      >
+        <ng-container *ngIf="!selectedFile">
+          <div class="drop-zone__icon">📂</div>
+          <p class="drop-zone__text">Drag & drop your file here, or</p>
+          <label class="btn btn-secondary">
+            Browse
+            <input type="file" hidden [accept]="acceptedFileTypes" (change)="onFileChange($event)" />
+          </label>
+          <p class="drop-zone__hint">Accepted: {{ acceptedFileTypes }}</p>
+        </ng-container>
+        <ng-container *ngIf="selectedFile">
+          <div class="drop-zone__icon">📄</div>
+          <p class="drop-zone__filename">{{ selectedFile.name }}</p>
+          <button class="btn btn-sm btn-secondary" (click)="clearFile()">Remove</button>
+        </ng-container>
+      </div>
+
+      <div class="alert alert-error" *ngIf="error">{{ error }}</div>
+
+      <div class="form-actions">
+        <button class="btn btn-primary" [disabled]="!canPreview || loading" (click)="preview()">
+          {{ loading ? '⏳ Analysing…' : '🔍 Preview' }}
+        </button>
+      </div>
+
+    </div>
+  </ng-container>
+
+  <!-- ══════════════════════════════════════════════════ STEP: PREVIEW -->
+  <ng-container *ngIf="step === 'preview'">
+
+    <div class="details-content">
+      <div class="header">
+        <h1>Preview — {{ previewRows.length }} rows</h1>
+        <div class="actions">
+          <button class="btn btn-secondary" (click)="backToForm()">← Back</button>
+          <button
+            class="btn btn-primary"
+            [disabled]="selectedRows.length === 0 || loading"
+            (click)="import()"
+          >
+            {{ loading ? '⏳ Importing…' : '⬆️ Import selected (' + selectedRows.length + ')' }}
+          </button>
         </div>
-
-        <!-- Compte bancaire -->
-        <div class="form-group">
-          <label>Mon compte bancaire</label>
-          <select [(ngModel)]="selectedBankAccountId">
-            <option [ngValue]="null">— Aucun / à définir —</option>
-            <option *ngFor="let ba of bankAccounts" [ngValue]="ba.id">
-              {{ ba.label }} — {{ ba.accountNumber }}
-            </option>
-          </select>
-          <div class="field-hint" *ngIf="bankAccounts.length === 0">
-            <a routerLink="/bank-accounts">+ Ajouter un compte bancaire</a>
-          </div>
-        </div>
-
       </div>
     </div>
 
-    <!-- ── Drop zone ─────────────────────────────────────────────────────────── -->
-    <div class="drop-zone"
-         [class.drop-zone--active]="isDragging"
-         [class.drop-zone--filled]="selectedFile"
-         [class.drop-zone--disabled]="!selectedParserCode"
-         (dragover)="onDragOver($event)"
-         (dragleave)="onDragLeave()"
-         (drop)="onDrop($event)">
-
-      <ng-container *ngIf="!selectedFile">
-        <div class="drop-icon">
-          {{ selectedParser?.format === 'PDF' ? '📄' : '📊' }}
-        </div>
-        <p class="drop-text">
-          Glissez un fichier
-          <strong *ngIf="selectedParser">{{ selectedParser.format }}</strong>
-          ici, ou
-        </p>
-        <label class="btn btn-secondary file-label"
-               [class.btn--disabled]="!selectedParserCode">
-          Parcourir
-          <input type="file"
-                 [accept]="acceptedFileTypes"
-                 [disabled]="!selectedParserCode"
-                 (change)="onFileChange($event)"
-                 hidden />
-        </label>
-        <p class="drop-hint" *ngIf="!selectedParserCode">
-          Sélectionnez d'abord un format d'import
-        </p>
-      </ng-container>
-
-      <ng-container *ngIf="selectedFile">
-        <div class="drop-icon">✅</div>
-        <p class="drop-text"><strong>{{ selectedFile.name }}</strong></p>
-        <p class="drop-hint">{{ (selectedFile.size / 1024).toFixed(1) }} Ko</p>
-        <button class="btn btn-link" (click)="clearFile()">Changer de fichier</button>
-      </ng-container>
-
+    <!-- Summary bar -->
+    <div class="preview-summary">
+      <span class="preview-summary__item">{{ validRows.length }} valid</span>
+      <span class="preview-summary__item preview-summary__item--dup" *ngIf="duplicateCount > 0">
+        ⚠️ {{ duplicateCount }} already in DB
+      </span>
+      <span class="preview-summary__item preview-summary__item--err"
+            *ngIf="previewRows.length - validRows.length > 0">
+        ❌ {{ previewRows.length - validRows.length }} errors
+      </span>
+      <span class="preview-summary__item preview-summary__item--enriched" *ngIf="enrichedCount > 0">
+        ✏️ {{ enrichedCount }} enriched
+      </span>
+      <span class="preview-summary__item preview-summary__item--sel">
+        ✅ {{ selectedRows.length }} selected
+      </span>
     </div>
 
-    <!-- ── Actions ───────────────────────────────────────────────────────────── -->
-    <div class="import-actions">
-      <button class="btn btn-primary btn-lg"
-              [disabled]="!canImport || importing"
-              (click)="import()">
-        {{ importing ? '⏳ Traitement…' : '⬆️ Importer' }}
-      </button>
-    </div>
+    <div class="alert alert-error" *ngIf="error">{{ error }}</div>
 
-  </div>
+    <!-- Split layout: table + optional detail panel -->
+    <div class="preview-layout" [class.panel-open]="!!selectedRow">
 
-  <!-- ── Error ──────────────────────────────────────────────────────────────── -->
-  <div class="alert alert-error" *ngIf="error">{{ error }}</div>
-
-  <!-- ── Result ─────────────────────────────────────────────────────────────── -->
-  <div class="info-card import-result" *ngIf="result">
-    <h2>Import terminé</h2>
-
-    <div class="result-stats">
-      <div class="result-stat">
-        <span class="result-stat__value">{{ result.totalRows }}</span>
-        <span class="result-stat__label">Lignes lues</span>
-      </div>
-      <div class="result-stat result-stat--success">
-        <span class="result-stat__value">{{ result.importedCount }}</span>
-        <span class="result-stat__label">Importées</span>
-      </div>
-      <div class="result-stat result-stat--warning" *ngIf="result.duplicateCount > 0">
-        <span class="result-stat__value">{{ result.duplicateCount }}</span>
-        <span class="result-stat__label">Doublons ignorés</span>
-      </div>
-      <div class="result-stat result-stat--error" *ngIf="result.errorCount > 0">
-        <span class="result-stat__value">{{ result.errorCount }}</span>
-        <span class="result-stat__label">Erreurs</span>
-      </div>
-    </div>
-
-    <div class="import-actions" *ngIf="result.batchId">
-      <button class="btn btn-primary" (click)="reviewBatch()">
-        Réviser les transactions importées →
-      </button>
-    </div>
-
-    <!-- Row errors -->
-    <div class="row-errors" *ngIf="result.errors.length > 0">
-      <h3>Détail des erreurs</h3>
-      <div class="data-table">
-        <table>
+      <!-- Table -->
+      <div class="preview-table-wrap">
+        <table class="data-table">
           <thead>
             <tr>
-              <th style="width: 60px">Ligne</th>
-              <th>Contenu brut</th>
-              <th>Erreur</th>
+              <th class="col-check">
+                <input type="checkbox" [checked]="allSelected" (change)="toggleAll($any($event.target).checked)" />
+              </th>
+              <th>Date</th>
+              <th>Amount</th>
+              <th>Dir.</th>
+              <th>Counterparty</th>
+              <th>Subcategory</th>
+              <th>Lease / Unit</th>
+              <th>Status</th>
+              <th></th>
             </tr>
           </thead>
           <tbody>
-            <tr *ngFor="let e of result.errors">
-              <td>{{ e.rowNumber }}</td>
-              <td class="monospace small">{{ e.rawLine }}</td>
-              <td class="text-danger">{{ e.errorMessage }}</td>
+            <tr
+              *ngFor="let row of previewRows"
+              [class.row-duplicate]="row.duplicateInDb"
+              [class.row-error]="!!row.parseError"
+              [class.row-selected]="row.selected"
+              [class.row-active]="selectedRow?.rowNumber === row.rowNumber"
+            >
+              <td class="col-check">
+                <input type="checkbox" [(ngModel)]="row.selected"
+                       [disabled]="row.duplicateInDb || !!row.parseError" />
+              </td>
+
+              <td>{{ row.transactionDate ?? '—' }}</td>
+
+              <td class="amount"
+                  [class.income]="row.direction === 'INCOME'"
+                  [class.expense]="row.direction === 'EXPENSE'">
+                <ng-container *ngIf="row.amount !== null">
+                  {{ row.direction === 'INCOME' ? '+' : row.direction === 'EXPENSE' ? '-' : '' }}{{ row.amount?.toFixed(2) }} €
+                </ng-container>
+                <ng-container *ngIf="row.amount === null">—</ng-container>
+              </td>
+
+              <td>
+                <span *ngIf="row.direction" class="badge"
+                  [class.badge--income]="row.direction === 'INCOME'"
+                  [class.badge--expense]="row.direction === 'EXPENSE'">
+                  {{ row.direction === 'INCOME' ? '↑' : '↓' }}
+                </span>
+                <span *ngIf="!row.direction" class="badge badge--neutral">?</span>
+              </td>
+
+              <td>
+                <div>{{ row.counterpartyName ?? '—' }}</div>
+                <small *ngIf="row.counterpartyAccount" class="text-muted monospace">{{ row.counterpartyAccount }}</small>
+              </td>
+
+              <td>
+                <!-- Enriched value takes precedence over suggestion -->
+                <span *ngIf="row.enrichedSubcategoryName" class="enriched-badge">
+                  ✏️ {{ row.enrichedSubcategoryName }}
+                </span>
+                <span *ngIf="!row.enrichedSubcategoryName && row.suggestedSubcategory" class="suggestion-badge">
+                  ✨ {{ row.suggestedSubcategory.categoryName }} / {{ row.suggestedSubcategory.subcategoryName }}
+                </span>
+                <span *ngIf="!row.enrichedSubcategoryName && !row.suggestedSubcategory" class="no-suggestion">—</span>
+              </td>
+
+              <td>
+                <span *ngIf="row.enrichedUnitNumber" class="enriched-badge enriched-badge--lease">
+                  ✏️ {{ row.enrichedUnitNumber }} · {{ row.enrichedBuildingName }}
+                </span>
+                <span *ngIf="!row.enrichedUnitNumber && row.suggestedLease" class="suggestion-badge suggestion-badge--lease">
+                  🏠 {{ row.suggestedLease.unitNumber }} · {{ row.suggestedLease.buildingName }}
+                </span>
+                <span *ngIf="!row.enrichedUnitNumber && !row.suggestedLease" class="no-suggestion">—</span>
+              </td>
+
+              <td>
+                <span *ngIf="row.parseError" class="badge badge--error" [title]="row.parseError">❌ Error</span>
+                <span *ngIf="!row.parseError && row.duplicateInDb" class="badge badge--warning">⚠️ Dup.</span>
+                <span *ngIf="!row.parseError && !row.duplicateInDb" class="badge badge--ok">✓ New</span>
+              </td>
+
+              <td>
+                <button
+                  *ngIf="!row.parseError"
+                  class="btn btn-sm btn-ghost"
+                  [class.btn-ghost--active]="selectedRow?.rowNumber === row.rowNumber"
+                  (click)="selectedRow?.rowNumber === row.rowNumber ? closePanel() : openPanel(row)"
+                  title="Edit enrichment">
+                  ✏️
+                </button>
+              </td>
             </tr>
           </tbody>
         </table>
       </div>
+
+      <!-- Detail panel -->
+      <app-import-row-detail-panel
+        *ngIf="selectedRow"
+        [row]="selectedRow"
+        (close)="closePanel()"
+        (rowChanged)="onRowChanged($event)"
+      ></app-import-row-detail-panel>
+
     </div>
-  </div>
+
+  </ng-container>
+
+  <!-- ══════════════════════════════════════════════════ STEP: RESULT -->
+  <ng-container *ngIf="step === 'result' && result">
+
+    <div class="details-content">
+      <div class="header"><h1>Import complete</h1></div>
+    </div>
+
+    <div class="info-card import-result">
+      <div class="result-stats">
+        <div class="result-stat">
+          <span class="result-stat__value">{{ result.totalRows }}</span>
+          <span class="result-stat__label">Rows read</span>
+        </div>
+        <div class="result-stat result-stat--success">
+          <span class="result-stat__value">{{ result.importedCount }}</span>
+          <span class="result-stat__label">Imported</span>
+        </div>
+        <div class="result-stat result-stat--warning" *ngIf="result.duplicateCount > 0">
+          <span class="result-stat__value">{{ result.duplicateCount }}</span>
+          <span class="result-stat__label">Duplicates skipped</span>
+        </div>
+        <div class="result-stat result-stat--error" *ngIf="result.errorCount > 0">
+          <span class="result-stat__value">{{ result.errorCount }}</span>
+          <span class="result-stat__label">Errors</span>
+        </div>
+      </div>
+      <div class="import-actions" *ngIf="result.batchId">
+        <button class="btn btn-primary" (click)="reviewBatch()">Review imported transactions →</button>
+        <button class="btn btn-secondary" (click)="clearFile()">Import another file</button>
+      </div>
+    </div>
+
+  </ng-container>
 
 </div>
