@@ -19,6 +19,8 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.immocare.model.dto.BulkPatchTransactionRequest;
+import com.immocare.model.dto.BulkPatchTransactionResult;
 import com.immocare.model.dto.ConfirmBatchRequest;
 import com.immocare.model.dto.ConfirmTransactionRequest;
 import com.immocare.model.dto.CreateTransactionRequest;
@@ -115,6 +117,19 @@ public class TransactionController {
     public Map<String, Integer> confirmBatch(@Valid @RequestBody ConfirmBatchRequest req) {
         int count = transactionService.confirmBatch(req.batchId());
         return Map.of("confirmedCount", count);
+    }
+
+    /**
+     * PATCH /api/v1/transactions/bulk
+     *
+     * Apply a partial update (status and/or subcategory) to multiple transactions
+     * at once.
+     * RECONCILED transactions and direction-mismatched subcategories are silently
+     * skipped.
+     */
+    @PatchMapping("/api/v1/transactions/bulk")
+    public BulkPatchTransactionResult bulkPatch(@Valid @RequestBody BulkPatchTransactionRequest req) {
+        return transactionService.bulkPatch(req);
     }
 
     @GetMapping("/api/v1/transactions/statistics")

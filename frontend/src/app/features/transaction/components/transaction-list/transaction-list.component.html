@@ -1,5 +1,5 @@
-<div class="transaction-list">
-  <!-- Toolbar -->
+<div class="transactions-page">
+  <!-- Header -->
   <div class="details-content">
     <div class="header">
       <h1>Transactions</h1>
@@ -111,6 +111,58 @@
     </button>
   </div>
 
+  <!-- ── Bulk action bar — visible when rows are selected ────────────────────── -->
+  <div class="bulk-bar" *ngIf="someSelected">
+    <div class="bulk-bar__info">
+      <strong>{{ selectedIds.size }}</strong> selected
+      <button class="btn btn-link btn-sm" (click)="clearBulkSelection()">
+        Clear
+      </button>
+    </div>
+
+    <div class="bulk-bar__actions">
+      <!-- Status picker -->
+      <div class="bulk-field">
+        <label>Set status</label>
+        <select [(ngModel)]="bulkStatus">
+          <option value="">— no change —</option>
+          <option *ngFor="let s of statuses" [value]="s">
+            {{ STATUS_LABELS[s] }}
+          </option>
+        </select>
+      </div>
+
+      <!-- Subcategory picker -->
+      <div class="bulk-field">
+        <label>Set subcategory</label>
+        <select [(ngModel)]="bulkSubcategoryId">
+          <option value="">— no change —</option>
+          <option [ngValue]="0">✕ Clear subcategory</option>
+          <option *ngFor="let s of allSubcategories" [value]="s.id">
+            {{ s.categoryName }} / {{ s.name }}
+          </option>
+        </select>
+      </div>
+
+      <button
+        class="btn btn-primary"
+        [disabled]="bulkApplying || (!bulkStatus && bulkSubcategoryId === '')"
+        (click)="applyBulk()"
+      >
+        {{ bulkApplying ? "Applying…" : "Apply" }}
+      </button>
+    </div>
+
+    <!-- Result feedback -->
+    <div class="bulk-bar__result" *ngIf="bulkResult">
+      <span class="text-success">✓ {{ bulkResult.updatedCount }} updated</span>
+      <span class="text-muted" *ngIf="bulkResult.skippedCount > 0">
+        · {{ bulkResult.skippedCount }} skipped (reconciled or direction
+        mismatch)
+      </span>
+    </div>
+  </div>
+
   <!-- Summary bar -->
   <div class="summary-bar" *ngIf="response">
     <div class="summary-item summary-item--income">
@@ -141,7 +193,6 @@
     >
   </div>
 
-  <!-- Loading -->
   <div class="loading" *ngIf="loading">Loading…</div>
 
   <!-- Table -->
@@ -149,6 +200,15 @@
     <table>
       <thead>
         <tr>
+          <!-- Select-all checkbox -->
+          <th class="col-check">
+            <input
+              type="checkbox"
+              [checked]="allSelected"
+              [indeterminate]="someSelected && !allSelected"
+              (change)="toggleAll($any($event.target).checked)"
+            />
+          </th>
           <th class="sortable" (click)="sortBy('reference')">
             Reference
             <span
@@ -206,8 +266,17 @@
         <tr
           *ngFor="let tx of response.content"
           (click)="navigateToDetail(tx)"
-          class="clickable"
+          [class.clickable]="!someSelected"
+          [class.row-selected]="isSelected(tx)"
         >
+          <td class="col-check" (click)="toggleRow(tx, $event)">
+            <input
+              type="checkbox"
+              [checked]="isSelected(tx)"
+              (click)="$event.stopPropagation()"
+              (change)="toggleRow(tx, $event)"
+            />
+          </td>
           <td class="monospace">{{ tx.reference }}</td>
           <td class="nowrap">{{ tx.transactionDate }}</td>
           <td>
@@ -289,7 +358,7 @@
           </td>
         </tr>
         <tr *ngIf="response.content.length === 0">
-          <td colspan="9" class="empty-state">No transactions found.</td>
+          <td colspan="10" class="empty-state">No transactions found.</td>
         </tr>
       </tbody>
     </table>

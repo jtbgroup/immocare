@@ -264,3 +264,9 @@ deploy-local.sh
 
 # Keep SQL migrations
 !**/db/migration/**/*.sql
+
+###################
+# Real data
+###################
+
+frontend/e2e/shared/data-factory.real.ts

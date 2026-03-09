@@ -10,11 +10,12 @@ import {
   PagedTransactionResponse,
   STATUS_LABELS,
 } from "../../../../models/transaction.model";
+import { SortIconPipe } from "../../../../shared/pipes/sort-icon.pipe";
 
 @Component({
   selector: "app-transaction-review",
   standalone: true,
-  imports: [CommonModule, FormsModule, RouterModule, DecimalPipe],
+  imports: [CommonModule, FormsModule, RouterModule, DecimalPipe, SortIconPipe],
   templateUrl: "./transaction-review.component.html",
   styleUrls: ["./transaction-review.component.scss"],
 })
@@ -33,6 +34,19 @@ export class TransactionReviewComponent implements OnInit {
     private tagSubcategoryService: TagSubcategoryService,
   ) {}
 
+  sortField = "transactionDate";
+  sortDirection: "asc" | "desc" = "asc";
+
+  sortBy(field: string): void {
+    if (this.sortField === field) {
+      this.sortDirection = this.sortDirection === "asc" ? "desc" : "asc";
+    } else {
+      this.sortField = field;
+      this.sortDirection = "asc";
+    }
+    this.load();
+  }
+
   ngOnInit(): void {
     this.batchId = Number(this.route.snapshot.paramMap.get("batchId"));
     this.load();
@@ -40,15 +54,17 @@ export class TransactionReviewComponent implements OnInit {
 
   load(): void {
     this.loading = true;
-    this.transactionService.getBatch(this.batchId).subscribe({
-      next: (r) => {
-        this.response = r;
-        this.loading = false;
-      },
-      error: () => {
-        this.loading = false;
-      },
-    });
+    this.transactionService
+      .getBatch(this.batchId, 0, 200, `${this.sortField},${this.sortDirection}`)
+      .subscribe({
+        next: (r) => {
+          this.response = r;
+          this.loading = false;
+        },
+        error: () => {
+          this.loading = false;
+        },
+      });
   }
 
   confirmRow(tx: FinancialTransactionSummary): void {

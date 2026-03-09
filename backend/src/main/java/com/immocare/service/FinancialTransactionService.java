@@ -20,6 +20,8 @@ import com.immocare.exception.SubcategoryNotFoundException;
 import com.immocare.exception.TransactionNotEditableException;
 import com.immocare.exception.TransactionNotFoundException;
 import com.immocare.exception.TransactionValidationException;
+import com.immocare.model.dto.BulkPatchTransactionRequest;
+import com.immocare.model.dto.BulkPatchTransactionResult;
 import com.immocare.model.dto.ConfirmTransactionRequest;
 import com.immocare.model.dto.CreateTransactionRequest;
 import com.immocare.model.dto.FinancialTransactionDTO;
@@ -269,6 +271,84 @@ public class FinancialTransactionService {
             }
         }
         return count;
+    }
+
+    /**
+     * Bulk patch: apply status and/or subcategory to a list of transactions.
+     *
+     * Rules:
+     * - RECONCILED transactions are always skipped.
+     * - subcategoryId == 0 means "clear subcategory".
+     * - subcategory direction must be compatible with transaction direction
+     * (BR-UC014-06).
+     * On mismatch the row is skipped (not an error — silently ignored).
+     */
+    @Transactional
+    public BulkPatchTransactionResult bulkPatch(BulkPatchTransactionRequest req) {
+        if (req.status() == null && req.subcategoryId() == null) {
+            throw new IllegalArgumentException("At least one patch field (status or subcategoryId) must be provided");
+        }
+
+        // Pre-load subcategory once if needed
+        TagSubcategory subcategory = null;
+        if (req.subcategoryId() != null && req.subcategoryId() != 0) {
+            subcategory = tagSubcategoryRepository.findById(req.subcategoryId())
+                    .orElseThrow(() -> new SubcategoryNotFoundException(
+                            "Subcategory not found: " + req.subcategoryId()));
+        }
+        final TagSubcategory resolvedSub = subcategory;
+
+        List<FinancialTransaction> transactions = transactionRepository.findAllById(req.ids());
+
+        int updated = 0, skipped = 0;
+
+        for (FinancialTransaction tx : transactions) {
+            if (tx.getStatus() == TransactionStatus.RECONCILED) {
+                skipped++;
+                continue;
+            }
+
+            boolean changed = false;
+
+            // Apply status
+            if (req.status() != null && tx.getStatus() != req.status()) {
+                tx.setStatus(req.status());
+                changed = true;
+            }
+
+            // Apply subcategory
+            if (req.subcategoryId() != null) {
+                if (req.subcategoryId() == 0) {
+                    // Explicit clear
+                    tx.setSubcategory(null);
+                    changed = true;
+                } else {
+                    // Direction compatibility check (BR-UC014-06)
+                    boolean compatible = resolvedSub.getDirection() == null
+                            || (resolvedSub.getDirection() == SubcategoryDirection.INCOME
+                                    && tx.getDirection() == TransactionDirection.INCOME)
+                            || (resolvedSub.getDirection() == SubcategoryDirection.EXPENSE
+                                    && tx.getDirection() == TransactionDirection.EXPENSE);
+                    if (compatible) {
+                        tx.setSubcategory(resolvedSub);
+                        changed = true;
+                    } else {
+                        skipped++;
+                        continue;
+                    }
+                }
+            }
+
+            if (changed) {
+                transactionRepository.save(tx);
+                if (req.status() == TransactionStatus.CONFIRMED) {
+                    reinforceLearning(tx);
+                }
+                updated++;
+            }
+        }
+
+        return new BulkPatchTransactionResult(updated, skipped);
     }
 
     public TransactionStatisticsDTO getStatistics(StatisticsFilter filter) {

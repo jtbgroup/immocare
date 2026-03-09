@@ -1,7 +1,101 @@
 // transaction-list.component.scss
-// Shared styles (btn, btn-sm, btn-primary, btn-secondary, btn-danger,
-// btn-link, data-table, loading, empty-state, pagination, details-content,
-// page-header, text-muted) come from global styles.scss partials.
+// Shared: btn, data-table, loading, empty-state, pagination, details-content,
+// summary-bar, filter-panel, filter-grid, filter-field, badge, text-muted,
+// amount--income/expense, link-chip, actions-cell, icon-btn — from global partials.
+
+// ─── Checkbox column ──────────────────────────────────────────────────────────
+
+.col-check {
+  width: 36px;
+  padding-right: 0 !important;
+  text-align: center;
+
+  input[type="checkbox"] {
+    cursor: pointer;
+    width: 15px;
+    height: 15px;
+    accent-color: #4f46e5;
+  }
+}
+
+// ─── Selected row ─────────────────────────────────────────────────────────────
+
+.row-selected {
+  background: #eef2ff !important;
+}
+
+// ─── Bulk action bar ──────────────────────────────────────────────────────────
+
+.bulk-bar {
+  display: flex;
+  align-items: center;
+  gap: 1.25rem;
+  flex-wrap: wrap;
+  padding: 0.75rem 1.25rem;
+  margin-bottom: 0.75rem;
+  background: #eef2ff;
+  border: 1px solid #c7d2fe;
+  border-radius: 8px;
+  font-size: 0.9rem;
+
+  &__info {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    white-space: nowrap;
+    font-weight: 600;
+    color: #3730a3;
+  }
+
+  &__actions {
+    display: flex;
+    align-items: flex-end;
+    gap: 0.75rem;
+    flex-wrap: wrap;
+  }
+
+  &__result {
+    margin-left: auto;
+    font-size: 0.85rem;
+    display: flex;
+    gap: 0.5rem;
+    align-items: center;
+  }
+}
+
+.bulk-field {
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+
+  label {
+    font-size: 0.72rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    color: #4338ca;
+  }
+
+  select {
+    padding: 0.38rem 0.6rem;
+    border: 1px solid #a5b4fc;
+    border-radius: 4px;
+    font-size: 0.875rem;
+    font-family: inherit;
+    background: #fff;
+    min-width: 180px;
+
+    &:focus {
+      outline: none;
+      border-color: #4f46e5;
+    }
+  }
+}
+
+.text-success {
+  color: #16a34a;
+  font-weight: 600;
+}
 
 // ─── Filter panel ─────────────────────────────────────────────────────────────
 
@@ -41,7 +135,6 @@
     font-size: 0.875rem;
     font-family: inherit;
     background: #fff;
-
     &:focus {
       outline: none;
       border-color: #80bdff;
@@ -71,7 +164,6 @@
   display: flex;
   flex-direction: column;
   gap: 0.1rem;
-
   &--income .summary-value {
     color: #2e7d32;
     font-weight: 700;
@@ -89,7 +181,6 @@
     font-weight: 700;
   }
 }
-
 .summary-label {
   font-size: 0.72rem;
   font-weight: 600;
@@ -97,26 +188,23 @@
   letter-spacing: 0.04em;
   color: #6c757d;
 }
-
 .summary-value {
   font-size: 1rem;
   font-weight: 600;
   color: #333;
 }
-
 .summary-total {
   margin-left: auto;
   font-size: 0.85rem;
   color: #6c757d;
 }
 
-// ─── Table-specific overrides ─────────────────────────────────────────────────
+// ─── Table tweaks ─────────────────────────────────────────────────────────────
 
 .monospace {
   font-family: "Courier New", Courier, monospace;
   font-size: 0.85rem;
 }
-
 .nowrap {
   white-space: nowrap;
 }
@@ -124,7 +212,6 @@
 .amount {
   font-weight: 600;
   white-space: nowrap;
-
   &--income {
     color: #2e7d32;
   }
@@ -132,8 +219,6 @@
     color: #c62828;
   }
 }
-
-// ─── Direction / Status badges ────────────────────────────────────────────────
 
 .badge {
   display: inline-block;
@@ -150,7 +235,6 @@
   &--expense {
     background: #c62828;
   }
-
   &--status-draft {
     background: #616161;
   }
@@ -161,8 +245,6 @@
     background: #2e7d32;
   }
 }
-
-// ─── Linked-to chips ──────────────────────────────────────────────────────────
 
 .linked-cell {
   display: flex;
@@ -179,7 +261,6 @@
   border-radius: 4px;
   white-space: nowrap;
   text-decoration: none;
-
   &--building {
     background: #e3f2fd;
     color: #1565c0;
@@ -191,21 +272,16 @@
   &--lease {
     background: #e8f5e9;
     color: #2e7d32;
-
     &:hover {
       text-decoration: underline;
     }
   }
 }
 
-// ─── Actions cell ─────────────────────────────────────────────────────────────
-
 .actions-cell {
   white-space: nowrap;
   text-align: right;
 }
-
-// ─── Icon buttons (same style as other tables in the app) ──────────────────────
 
 .icon-btn {
   background: none;
@@ -216,11 +292,9 @@
   border-radius: 4px;
   opacity: 0.75;
   transition: opacity 0.15s;
-
   &:hover {
     opacity: 1;
   }
-
   &:disabled {
     opacity: 0.3;
     cursor: not-allowed;

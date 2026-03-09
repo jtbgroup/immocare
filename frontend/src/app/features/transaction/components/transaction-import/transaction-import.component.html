@@ -164,7 +164,7 @@
                 <input
                   type="checkbox"
                   [(ngModel)]="row.selected"
-                  [disabled]="row.duplicateInDb || !!row.parseError"
+                  [disabled]="!!row.parseError"
                 />
               </td>
 
@@ -266,9 +266,16 @@
                   >❌ Error</span
                 >
                 <span
-                  *ngIf="!row.parseError && row.duplicateInDb"
+                  *ngIf="!row.parseError && row.duplicateInDb && !row.selected"
                   class="badge badge--warning"
+                  title="Already in DB"
                   >⚠️ Dup.</span
+                >
+                <span
+                  *ngIf="!row.parseError && row.duplicateInDb && row.selected"
+                  class="badge badge--override"
+                  title="Duplicate — will be imported anyway"
+                  >⚠️ Override</span
                 >
                 <span
                   *ngIf="!row.parseError && !row.duplicateInDb"
@@ -277,23 +284,20 @@
                 >
               </td>
 
-              <td>
-                <!-- Duplicate: link to the existing transaction in DB -->
+              <td class="col-actions">
+                <!-- Duplicate: discrete link to existing transaction, opens in new tab -->
                 <a
                   *ngIf="
                     !row.parseError &&
                     row.duplicateInDb &&
                     row.duplicateTransactionId
                   "
-                  class="btn btn-sm btn-ghost"
-                  [routerLink]="[
-                    '/transactions',
-                    row.duplicateTransactionId,
-                    'edit',
-                  ]"
-                  title="Edit existing transaction"
+                  class="dup-link"
+                  [routerLink]="['/transactions', row.duplicateTransactionId]"
+                  target="_blank"
+                  title="View existing transaction"
                 >
-                  ✏️
+                  voir →
                 </a>
                 <!-- New row: open enrichment panel -->
                 <button

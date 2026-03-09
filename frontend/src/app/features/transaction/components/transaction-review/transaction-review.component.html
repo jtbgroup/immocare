@@ -58,13 +58,57 @@
       <table>
         <thead>
           <tr>
-            <th>Date</th>
-            <th>Acc. Month</th>
-            <th>Direction</th>
-            <th class="text-right">Amount</th>
-            <th>Counterparty</th>
+            <th class="sortable" (click)="sortBy('transactionDate')">
+              Date
+              <span
+                class="sort-icon"
+                [class.active]="sortField === 'transactionDate'"
+                >{{
+                  sortField | sortIcon: sortDirection : "transactionDate"
+                }}</span
+              >
+            </th>
+            <th class="sortable" (click)="sortBy('accountingMonth')">
+              Acc. Month
+              <span
+                class="sort-icon"
+                [class.active]="sortField === 'accountingMonth'"
+                >{{
+                  sortField | sortIcon: sortDirection : "accountingMonth"
+                }}</span
+              >
+            </th>
+            <th class="sortable" (click)="sortBy('direction')">
+              Direction
+              <span
+                class="sort-icon"
+                [class.active]="sortField === 'direction'"
+                >{{ sortField | sortIcon: sortDirection : "direction" }}</span
+              >
+            </th>
+            <th class="sortable text-right" (click)="sortBy('amount')">
+              Amount
+              <span class="sort-icon" [class.active]="sortField === 'amount'">{{
+                sortField | sortIcon: sortDirection : "amount"
+              }}</span>
+            </th>
+            <th class="sortable" (click)="sortBy('counterpartyName')">
+              Counterparty
+              <span
+                class="sort-icon"
+                [class.active]="sortField === 'counterpartyName'"
+                >{{
+                  sortField | sortIcon: sortDirection : "counterpartyName"
+                }}</span
+              >
+            </th>
             <th>Category / Subcategory</th>
-            <th>Status</th>
+            <th class="sortable" (click)="sortBy('status')">
+              Status
+              <span class="sort-icon" [class.active]="sortField === 'status'">{{
+                sortField | sortIcon: sortDirection : "status"
+              }}</span>
+            </th>
             <th></th>
           </tr>
         </thead>

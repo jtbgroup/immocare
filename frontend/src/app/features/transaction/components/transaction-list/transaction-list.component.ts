@@ -48,11 +48,22 @@ export class TransactionListComponent implements OnInit {
   categories: any[] = [];
   subcategories: any[] = [];
   bankAccounts: any[] = [];
+  allSubcategories: any[] = []; // for bulk picker (no direction filter)
 
   readonly DIRECTION_LABELS = DIRECTION_LABELS;
   readonly STATUS_LABELS = STATUS_LABELS;
   readonly statuses: TransactionStatus[] = ["DRAFT", "CONFIRMED", "RECONCILED"];
   readonly directions: TransactionDirection[] = ["INCOME", "EXPENSE"];
+
+  // ── Selection state ──────────────────────────────────────────────────────────
+  selectedIds = new Set<number>();
+  showBulkPanel = false;
+
+  // Bulk edit fields
+  bulkStatus: TransactionStatus | "" = "";
+  bulkSubcategoryId: number | "" = "";
+  bulkApplying = false;
+  bulkResult: { updatedCount: number; skippedCount: number } | null = null;
 
   constructor(
     private transactionService: TransactionService,
@@ -66,10 +77,15 @@ export class TransactionListComponent implements OnInit {
     this.load();
     this.tagCategoryService.getAll().subscribe((c) => (this.categories = c));
     this.bankAccountService.getAll().subscribe((b) => (this.bankAccounts = b));
+    this.tagSubcategoryService
+      .getAll()
+      .subscribe((s) => (this.allSubcategories = s));
   }
 
   load(): void {
     this.loading = true;
+    this.selectedIds.clear();
+    this.bulkResult = null;
     this.transactionService.getTransactions(this.filter).subscribe({
       next: (r) => {
         this.response = r;
@@ -119,11 +135,83 @@ export class TransactionListComponent implements OnInit {
     this.load();
   }
 
+  // ── Selection ────────────────────────────────────────────────────────────────
+
+  toggleRow(tx: FinancialTransactionSummary, event: Event): void {
+    event.stopPropagation();
+    if (this.selectedIds.has(tx.id)) {
+      this.selectedIds.delete(tx.id);
+    } else {
+      this.selectedIds.add(tx.id);
+    }
+    this.bulkResult = null;
+  }
+
+  toggleAll(checked: boolean): void {
+    this.response?.content.forEach((tx) => {
+      if (checked) this.selectedIds.add(tx.id);
+      else this.selectedIds.delete(tx.id);
+    });
+    this.bulkResult = null;
+  }
+
+  isSelected(tx: FinancialTransactionSummary): boolean {
+    return this.selectedIds.has(tx.id);
+  }
+
+  get allSelected(): boolean {
+    return (
+      !!this.response?.content.length &&
+      this.response.content.every((tx) => this.selectedIds.has(tx.id))
+    );
+  }
+
+  get someSelected(): boolean {
+    return this.selectedIds.size > 0;
+  }
+
+  // ── Bulk apply ───────────────────────────────────────────────────────────────
+
+  applyBulk(): void {
+    if (!this.someSelected) return;
+    if (!this.bulkStatus && this.bulkSubcategoryId === "") return;
+
+    const req: any = { ids: Array.from(this.selectedIds) };
+    if (this.bulkStatus) req.status = this.bulkStatus;
+    if (this.bulkSubcategoryId !== "")
+      req.subcategoryId = this.bulkSubcategoryId;
+
+    this.bulkApplying = true;
+    this.bulkResult = null;
+    this.transactionService.bulkPatch(req).subscribe({
+      next: (r) => {
+        this.bulkResult = r;
+        this.bulkApplying = false;
+        this.bulkStatus = "";
+        this.bulkSubcategoryId = "";
+        this.load();
+      },
+      error: () => {
+        this.bulkApplying = false;
+      },
+    });
+  }
+
+  clearBulkSelection(): void {
+    this.selectedIds.clear();
+    this.bulkStatus = "";
+    this.bulkSubcategoryId = "";
+    this.bulkResult = null;
+  }
+
+  // ── Navigation ───────────────────────────────────────────────────────────────
+
   navigateToNew(): void {
     this.router.navigate(["/transactions/new"]);
   }
 
   navigateToDetail(tx: FinancialTransactionSummary): void {
+    if (this.someSelected) return; // don't navigate when in selection mode
     this.router.navigate(["/transactions", tx.id]);
   }
 
@@ -147,10 +235,6 @@ export class TransactionListComponent implements OnInit {
       a.click();
       URL.revokeObjectURL(url);
     });
-  }
-
-  formatMonth(date: string): string {
-    return date ? date.substring(0, 7) : "";
   }
 
   get activeFilterCount(): number {

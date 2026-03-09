@@ -60,6 +60,17 @@ export class TransactionService {
     });
   }
 
+  bulkPatch(req: {
+    ids: number[];
+    status?: string;
+    subcategoryId?: number;
+  }): Observable<{ updatedCount: number; skippedCount: number }> {
+    return this.http.patch<{ updatedCount: number; skippedCount: number }>(
+      `${BASE}/bulk`,
+      req,
+    );
+  }
+
   getStatistics(filter: StatisticsFilter): Observable<TransactionStatistics> {
     return this.http.get<TransactionStatistics>(`${BASE}/statistics`, {
       params: this.buildParams(filter as any),
@@ -116,13 +127,14 @@ export class TransactionService {
     batchId: number,
     page = 0,
     size = 200,
+    sort = "transactionDate,asc",
   ): Observable<PagedTransactionResponse> {
     return this.http.get<PagedTransactionResponse>(BASE, {
       params: new HttpParams()
         .set("importBatchId", batchId)
         .set("page", page)
         .set("size", size)
-        .set("sort", "transactionDate,asc"),
+        .set("sort", sort),
     });
   }
 

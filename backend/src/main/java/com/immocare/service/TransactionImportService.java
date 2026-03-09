@@ -235,8 +235,15 @@ public class TransactionImportService {
             }
 
             // ── Duplicate check ───────────────────────────────────────────
-            if (p.getFingerprint() != null
-                    && transactionRepo.existsByImportFingerprint(p.getFingerprint())) {
+            // If the user explicitly selected this fingerprint, allow override (import
+            // anyway).
+            // Otherwise skip it and count as duplicate.
+            boolean isDuplicate = p.getFingerprint() != null
+                    && transactionRepo.existsByImportFingerprint(p.getFingerprint());
+            boolean overrideAllowed = hasSelection
+                    && p.getFingerprint() != null
+                    && selectedFingerprints.contains(p.getFingerprint());
+            if (isDuplicate && !overrideAllowed) {
                 log.debug("Duplicate skipped: fingerprint={}", p.getFingerprint());
                 duplicates++;
                 continue;
@@ -277,16 +284,13 @@ public class TransactionImportService {
                     ? enrichmentMap.get(p.getFingerprint())
                     : null;
 
+            // Always DRAFT at import — user confirms explicitly during review
+            tx.setStatus(TransactionStatus.DRAFT);
             if (enrichment != null) {
                 applyEnrichment(tx, enrichment);
-                tx.setStatus(TransactionStatus.CONFIRMED);
-                transactionRepo.save(tx);
-                reinforceLearning(tx);
-            } else {
-                tx.setStatus(TransactionStatus.DRAFT);
-                transactionRepo.save(tx);
-                suggestLeaseFromCounterpartyIban(tx);
             }
+            transactionRepo.save(tx);
+            suggestLeaseFromCounterpartyIban(tx);
 
             imported++;
         }
