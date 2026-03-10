@@ -1,3 +1,3 @@
-# v1.0.9
+# v1.0.11
 
-* first full build realeased
+* first full build realeased.

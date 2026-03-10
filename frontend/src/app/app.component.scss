@@ -1,17 +1,3 @@
-// ── CSS custom properties ─────────────────────────────────────────────────────
-
-:host {
-  --c-header-bg: #1e1b4b;
-  --c-white-55: rgba(255, 255, 255, 0.55);
-  --c-white-88: rgba(255, 255, 255, 0.82);
-  --c-white-hover: rgba(255, 255, 255, 0.08);
-  --c-white-active: rgba(255, 255, 255, 0.14);
-  --c-white-border: rgba(255, 255, 255, 0.12);
-  --c-indigo: #6366f1;
-  --c-violet: #8b5cf6;
-  --c-text: #374151;
-}
-
 // ── Layout ────────────────────────────────────────────────────────────────────
 
 .app-container {
@@ -36,7 +22,7 @@
 // ── Header ────────────────────────────────────────────────────────────────────
 
 .app-header {
-  background: var(--c-header-bg);
+  background: #1e1b4b;
   color: white;
   height: 58px;
   padding: 0 1.75rem;
@@ -56,12 +42,16 @@
   gap: 0.55rem;
   text-decoration: none;
   flex-shrink: 0;
+
+  &:hover {
+    text-decoration: none;
+  }
 }
 
 .brand-icon {
   width: 30px;
   height: 30px;
-  background: linear-gradient(135deg, var(--c-indigo), var(--c-violet));
+  background: linear-gradient(135deg, #6366f1, #8b5cf6);
   border-radius: 7px;
   display: flex;
   align-items: center;
@@ -76,10 +66,12 @@
   letter-spacing: -0.02em;
 }
 
+// ── Separator ─────────────────────────────────────────────────────────────────
+
 .header-sep {
   width: 1px;
   height: 22px;
-  background: var(--c-white-border);
+  background: rgba(255, 255, 255, 0.12);
   margin: 0 1.25rem;
   flex-shrink: 0;
 }
@@ -97,7 +89,7 @@
   display: flex;
   align-items: center;
   gap: 0.4rem;
-  color: var(--c-white-55);
+  color: rgba(255, 255, 255, 0.55);
   text-decoration: none;
   padding: 0.42rem 0.85rem;
   border-radius: 6px;
@@ -113,21 +105,23 @@
   font-family: inherit;
 
   &:hover {
-    background: var(--c-white-hover);
+    background: rgba(255, 255, 255, 0.08);
     color: rgba(255, 255, 255, 0.88);
     text-decoration: none;
   }
 
   &--active,
   &.app-nav__link--active {
-    background: var(--c-white-active);
+    background: rgba(255, 255, 255, 0.14);
     color: white;
   }
 
-  &--dropdown .nav-chevron {
-    font-size: 0.65rem;
-    opacity: 0.6;
-    margin-left: 0.1rem;
+  &--dropdown {
+    .nav-chevron {
+      font-size: 0.65rem;
+      opacity: 0.6;
+      margin-left: 0.1rem;
+    }
   }
 }
 
@@ -163,7 +157,7 @@
   gap: 0.6rem;
   padding: 0.65rem 1rem;
   font-size: 0.855rem;
-  color: var(--c-text);
+  color: #374151;
   text-decoration: none;
   transition: background 0.14s;
 
@@ -183,7 +177,7 @@
   margin-left: auto;
 }
 
-// ── Bell ─────────────────────────────────────────────────────────────────────
+// ── Bell ──────────────────────────────────────────────────────────────────────
 
 .bell-btn {
   position: relative;
@@ -193,7 +187,7 @@
   align-items: center;
   justify-content: center;
   border-radius: 8px;
-  color: var(--c-white-55);
+  color: rgba(255, 255, 255, 0.55);
   text-decoration: none;
   font-size: 1.1rem;
   transition:
@@ -202,7 +196,7 @@
 
   &:hover,
   &--active {
-    background: var(--c-white-hover);
+    background: rgba(255, 255, 255, 0.08);
     color: white;
     text-decoration: none;
   }
@@ -235,8 +229,8 @@
   display: flex;
   align-items: center;
   gap: 0.5rem;
-  background: var(--c-white-hover);
-  border: 1px solid var(--c-white-border);
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.12);
   border-radius: 8px;
   padding: 0.3rem 0.65rem 0.3rem 0.4rem;
   cursor: pointer;
@@ -244,14 +238,14 @@
 
   &:hover,
   &.open {
-    background: var(--c-white-active);
+    background: rgba(255, 255, 255, 0.14);
   }
 }
 
 .avatar {
   width: 26px;
   height: 26px;
-  background: linear-gradient(135deg, var(--c-indigo), var(--c-violet));
+  background: linear-gradient(135deg, #6366f1, #8b5cf6);
   border-radius: 6px;
   display: flex;
   align-items: center;
@@ -265,7 +259,7 @@
 
 .avatar-name {
   font-size: 0.83rem;
-  color: var(--c-white-88);
+  color: rgba(255, 255, 255, 0.82);
   font-weight: 500;
 }
 
@@ -278,4 +272,98 @@
   .avatar-btn.open & {
     transform: rotate(180deg);
   }
+}
+
+// ── Avatar Dropdown ───────────────────────────────────────────────────────────
+
+.dropdown {
+  display: none;
+  position: absolute;
+  top: calc(100% + 8px);
+  right: 0;
+  background: white;
+  border-radius: 10px;
+  box-shadow:
+    0 8px 32px rgba(0, 0, 0, 0.18),
+    0 2px 8px rgba(0, 0, 0, 0.1);
+  min-width: 200px;
+  overflow: hidden;
+  z-index: 200;
+  animation: dropIn 0.15s ease;
+
+  &.open {
+    display: block;
+  }
+}
+
+@keyframes dropIn {
+  from {
+    opacity: 0;
+    transform: translateY(-6px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.dropdown-header {
+  padding: 0.85rem 1rem 0.7rem;
+  border-bottom: 1px solid #f0f0f0;
+}
+
+.dropdown-username {
+  font-size: 0.88rem;
+  font-weight: 600;
+  color: #1e1b4b;
+}
+
+.dropdown-role {
+  font-size: 0.74rem;
+  color: #999;
+  margin-top: 0.1rem;
+  text-transform: capitalize;
+}
+
+.dropdown-item {
+  display: flex;
+  align-items: center;
+  gap: 0.65rem;
+  padding: 0.65rem 1rem;
+  font-size: 0.855rem;
+  color: #374151;
+  cursor: pointer;
+  transition: background 0.14s;
+  background: none;
+  border: none;
+  width: 100%;
+  text-align: left;
+  text-decoration: none;
+
+  &:hover {
+    background: #f5f5ff;
+    color: #4f46e5;
+    text-decoration: none;
+  }
+
+  &--logout {
+    color: #dc2626;
+    &:hover {
+      background: #fff5f5;
+      color: #dc2626;
+    }
+  }
+}
+
+.di-icon {
+  font-size: 0.9rem;
+  width: 18px;
+  text-align: center;
+  opacity: 0.7;
+}
+
+.dropdown-divider {
+  height: 1px;
+  background: #f0f0f0;
+  margin: 0.25rem 0;
 }
