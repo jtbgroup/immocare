@@ -72,6 +72,7 @@ export interface PersonPayload {
   lastName: string;
   email?: string;
   gsm?: string;
+  phone?: string;
   birthDate?: string;
   birthPlace?: string;
   nationalId?: string;
@@ -85,6 +86,21 @@ export async function createPerson(
   data: PersonPayload,
 ): Promise<{ id: number }> {
   return post("/persons", { country: "Belgium", ...data });
+}
+
+// ─── Person bank accounts ─────────────────────────────────────────────────────
+
+export interface PersonBankAccountPayload {
+  iban: string;
+  label?: string;
+  primary?: boolean;
+}
+
+export async function createPersonBankAccount(
+  personId: number,
+  data: PersonBankAccountPayload,
+): Promise<{ id: number }> {
+  return post(`/persons/${personId}/bank-accounts`, { primary: false, ...data });
 }
 
 // ─── Buildings ────────────────────────────────────────────────────────────────
@@ -118,6 +134,7 @@ export interface HousingUnitPayload {
   gardenSurface?: number;
   gardenOrientation?: string;
   ownerId?: number;
+  notes?: string;
 }
 
 export async function createHousingUnit(
@@ -260,6 +277,24 @@ export async function createBankAccount(
   data: BankAccountPayload,
 ): Promise<{ id: number }> {
   return post("/bank-accounts", data);
+}
+
+// ─── Tag categories & subcategories ──────────────────────────────────────────
+
+export async function createTagCategory(
+  name: string,
+  description?: string,
+): Promise<{ id: number }> {
+  return post("/tag-categories", { name, description });
+}
+
+export async function createTagSubcategory(
+  categoryId: number,
+  name: string,
+  direction: "INCOME" | "EXPENSE" | "BOTH",
+  description?: string,
+): Promise<{ id: number }> {
+  return post("/tag-subcategories", { categoryId, name, direction, description });
 }
 
 // ─── Tag subcategories (read) ─────────────────────────────────────────────────

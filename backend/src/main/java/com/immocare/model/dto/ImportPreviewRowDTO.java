@@ -71,6 +71,7 @@ public record ImportPreviewRowDTO(
                         Long leaseId,
                         Long unitId,
                         String unitNumber,
+                        Long buildingId,
                         String buildingName,
                         Long personId,
                         String personFullName) {

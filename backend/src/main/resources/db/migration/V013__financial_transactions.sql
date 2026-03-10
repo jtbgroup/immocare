@@ -30,8 +30,8 @@ CREATE TABLE tag_category (
 -- ─── tag_subcategory ─────────────────────────────────────────────────────────
 
 CREATE TABLE tag_subcategory (
-    id          BIGSERIAL   PRIMARY KEY,
-    category_id BIGINT      NOT NULL REFERENCES tag_category (id) ON DELETE RESTRICT,
+    id          BIGSERIAL    PRIMARY KEY,
+    category_id BIGINT       NOT NULL REFERENCES tag_category (id) ON DELETE RESTRICT,
     name        VARCHAR(100) NOT NULL,
     direction   VARCHAR(10)  NOT NULL CHECK (direction IN ('INCOME','EXPENSE','BOTH')),
     description TEXT,
@@ -45,14 +45,14 @@ CREATE INDEX idx_tag_subcategory_category ON tag_subcategory (category_id);
 -- ─── import_batch ────────────────────────────────────────────────────────────
 
 CREATE TABLE import_batch (
-    id              BIGSERIAL   PRIMARY KEY,
-    imported_at     TIMESTAMP   NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    id              BIGSERIAL    PRIMARY KEY,
+    imported_at     TIMESTAMP    NOT NULL DEFAULT CURRENT_TIMESTAMP,
     filename        VARCHAR(255),
-    total_rows      INTEGER     NOT NULL DEFAULT 0,
-    imported_count  INTEGER     NOT NULL DEFAULT 0,
-    duplicate_count INTEGER     NOT NULL DEFAULT 0,
-    error_count     INTEGER     NOT NULL DEFAULT 0,
-    created_by      BIGINT      REFERENCES app_user (id) ON DELETE SET NULL
+    total_rows      INTEGER      NOT NULL DEFAULT 0,
+    imported_count  INTEGER      NOT NULL DEFAULT 0,
+    duplicate_count INTEGER      NOT NULL DEFAULT 0,
+    error_count     INTEGER      NOT NULL DEFAULT 0,
+    created_by      BIGINT       REFERENCES app_user (id) ON DELETE SET NULL
 );
 
 -- ─── financial_transaction ───────────────────────────────────────────────────
@@ -71,7 +71,7 @@ CREATE TABLE financial_transaction (
     counterparty_account VARCHAR(50),
     status               VARCHAR(20)   NOT NULL DEFAULT 'DRAFT'
                                        CHECK (status IN ('DRAFT','CONFIRMED','RECONCILED')),
-    source               VARCHAR(20)   NOT NULL CHECK (source IN ('MANUAL','CSV_IMPORT')),
+    source               VARCHAR(20)   NOT NULL CHECK (source IN ('MANUAL','IMPORT')),
     bank_account_id      BIGINT        REFERENCES bank_account (id) ON DELETE SET NULL,
     subcategory_id       BIGINT        REFERENCES tag_subcategory (id) ON DELETE SET NULL,
     lease_id             BIGINT        REFERENCES lease (id) ON DELETE SET NULL,
@@ -83,6 +83,11 @@ CREATE TABLE financial_transaction (
     updated_at           TIMESTAMP     NOT NULL DEFAULT CURRENT_TIMESTAMP,
     CONSTRAINT uq_financial_transaction_reference UNIQUE (reference)
 );
+
+CREATE SEQUENCE IF NOT EXISTS financial_transaction_ref_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO CYCLE;
 
 CREATE INDEX idx_ft_transaction_date ON financial_transaction (transaction_date DESC);
 CREATE INDEX idx_ft_accounting_month ON financial_transaction (accounting_month DESC);
@@ -139,43 +144,11 @@ CREATE TABLE accounting_month_rule (
 
 CREATE INDEX idx_amr_subcategory ON accounting_month_rule (subcategory_id);
 
--- ─── platform_config additions for CSV import ────────────────────────────────
+-- ─── platform_config: import settings ────────────────────────────────────────
 
 INSERT INTO platform_config (config_key, config_value, value_type, description) VALUES
-    ('csv.import.delimiter',                       ';',          'STRING',  'CSV column delimiter'),
-    ('csv.import.date_format',                     'dd/MM/yyyy', 'STRING',  'Date format in CSV'),
-    ('csv.import.skip_header_rows',                '1',          'INTEGER', 'Number of header rows to skip'),
-    ('csv.import.col.date',                        '0',          'INTEGER', 'Column index for transaction date'),
-    ('csv.import.col.amount',                      '1',          'INTEGER', 'Column index for amount (negative = EXPENSE)'),
-    ('csv.import.col.description',                 '2',          'INTEGER', 'Column index for description / communication'),
-    ('csv.import.col.counterparty_name',           '3',          'INTEGER', 'Column index for counterparty name'),
-    ('csv.import.col.counterparty_account',        '4',          'INTEGER', 'Column index for counterparty IBAN'),
-    ('csv.import.col.external_reference',          '5',          'INTEGER', 'Column index for bank transaction reference'),
-    ('csv.import.col.bank_account',                '6',          'INTEGER', 'Column index for own bank account IBAN'),
-    ('csv.import.col.value_date',                  '-1',         'INTEGER', 'Column index for value date (-1 = absent)'),
-    ('csv.import.suggestion.confidence.threshold', '3',          'INTEGER', 'Min confidence to show tag suggestion')
+    ('csv.import.suggestion.confidence.threshold', '3', 'INTEGER',
+        'Min confidence score to display a tag suggestion on import'),
+    ('import.on_duplicate', 'WARN', 'STRING',
+        'Behaviour on duplicate detected: WARN, SKIP or IMPORT')
 ON CONFLICT (config_key) DO NOTHING;
-
--- ─── seed: tag categories ────────────────────────────────────────────────────
-
-INSERT INTO tag_category (name) VALUES
-    ('Administration'), ('Consommables'), ('Dépôt'), ('Location'),
-    ('Maintenance'), ('Prime'), ('Rente'), ('Taxes'), ('Travaux');
-
--- ─── seed: tag subcategories ─────────────────────────────────────────────────
-
-INSERT INTO tag_subcategory (category_id, name, direction) VALUES
-    ((SELECT id FROM tag_category WHERE name = 'Administration'), 'Assurance habitation', 'EXPENSE'),
-    ((SELECT id FROM tag_category WHERE name = 'Administration'), 'PEB',                  'EXPENSE'),
-    ((SELECT id FROM tag_category WHERE name = 'Administration'), 'Petits frais',         'BOTH'),
-    ((SELECT id FROM tag_category WHERE name = 'Consommables'),   'Adoucisseur',          'EXPENSE'),
-    ((SELECT id FROM tag_category WHERE name = 'Consommables'),   'Eau',                  'EXPENSE'),
-    ((SELECT id FROM tag_category WHERE name = 'Dépôt'),         'Dépôt de garantie',    'INCOME'),
-    ((SELECT id FROM tag_category WHERE name = 'Location'),       'Loyer',                'INCOME'),
-    ((SELECT id FROM tag_category WHERE name = 'Location'),       'Charges',              'INCOME'),
-    ((SELECT id FROM tag_category WHERE name = 'Maintenance'),    'Chaudière',            'EXPENSE'),
-    ((SELECT id FROM tag_category WHERE name = 'Maintenance'),    'Extincteur',           'EXPENSE'),
-    ((SELECT id FROM tag_category WHERE name = 'Maintenance'),    'Divers',               'EXPENSE'),
-    ((SELECT id FROM tag_category WHERE name = 'Taxes'),          'Précompte immobilier', 'EXPENSE'),
-    ((SELECT id FROM tag_category WHERE name = 'Travaux'),        'Rénovation',           'EXPENSE'),
-    ((SELECT id FROM tag_category WHERE name = 'Travaux'),        'Entretien',            'EXPENSE');

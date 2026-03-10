@@ -635,14 +635,25 @@ public class FinancialTransactionService {
 
     private FinancialTransactionSummaryDTO toSummaryDTO(FinancialTransaction tx) {
         return new FinancialTransactionSummaryDTO(
-                tx.getId(), tx.getReference(), tx.getTransactionDate(), tx.getAccountingMonth(),
-                tx.getDirection(), tx.getAmount(), tx.getCounterpartyName(), tx.getStatus(), tx.getSource(),
+                tx.getId(),
+                tx.getReference(),
+                tx.getTransactionDate(),
+                tx.getAccountingMonth(),
+                tx.getDirection(),
+                tx.getAmount(),
+                tx.getCounterpartyName(),
+                tx.getStatus(),
+                tx.getSource(),
                 tx.getBankAccount() != null ? tx.getBankAccount().getLabel() : null,
                 tx.getSubcategory() != null ? tx.getSubcategory().getCategory().getName() : null,
                 tx.getSubcategory() != null ? tx.getSubcategory().getName() : null,
                 tx.getBuilding() != null ? tx.getBuilding().getName() : null,
                 tx.getHousingUnit() != null ? tx.getHousingUnit().getUnitNumber() : null,
-                tx.getLease() != null ? tx.getLease().getId() : null);
+                tx.getLease() != null ? tx.getLease().getId() : null,
+                // suggestion fields
+                tx.getSuggestedLease() != null ? tx.getSuggestedLease().getId() : null,
+                tx.getBuilding() != null ? tx.getBuilding().getId() : null,
+                tx.getHousingUnit() != null ? tx.getHousingUnit().getId() : null);
     }
 
     private FinancialTransactionDTO toDTO(FinancialTransaction tx) {

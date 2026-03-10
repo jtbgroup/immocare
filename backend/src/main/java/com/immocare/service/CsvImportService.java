@@ -6,7 +6,9 @@ import java.math.BigDecimal;
 import java.nio.charset.StandardCharsets;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
+import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 
 import org.springframework.stereotype.Service;
@@ -21,6 +23,8 @@ import com.immocare.model.dto.SubcategorySuggestionDTO;
 import com.immocare.model.entity.AppUser;
 import com.immocare.model.entity.FinancialTransaction;
 import com.immocare.model.entity.ImportBatch;
+import com.immocare.model.entity.Lease;
+import com.immocare.model.enums.LeaseStatus;
 import com.immocare.model.enums.TransactionDirection;
 import com.immocare.model.enums.TransactionSource;
 import com.immocare.model.enums.TransactionStatus;
@@ -45,7 +49,8 @@ public class CsvImportService {
             ImportBatchRepository importBatchRepository,
             BankAccountRepository bankAccountRepository,
             LearningService learningService,
-            PlatformConfigService platformConfigService, LeaseRepository leaseRepository,
+            PlatformConfigService platformConfigService,
+            LeaseRepository leaseRepository,
             PersonBankAccountRepository personBankAccountRepository) {
         this.transactionRepository = transactionRepository;
         this.importBatchRepository = importBatchRepository;
@@ -194,12 +199,13 @@ public class CsvImportService {
 
                 // Generate reference
                 String year = String.valueOf(row.transactionDate().getYear());
-                String prefix = "TXN-" + year + "-%";
                 long seq = transactionRepository.nextRefSequence();
                 tx.setReference("TXN-" + year + "-" + String.format("%05d", seq));
 
+                // Suggest lease via counterparty IBAN (all statuses, historical-aware)
+                suggestLease(tx, row.counterpartyAccount(), row.transactionDate());
+
                 transactionRepository.save(tx);
-                suggestLeaseFromCounterpartyIban(tx);
                 importedCount++;
             } catch (Exception e) {
                 errorCount++;
@@ -216,6 +222,69 @@ public class CsvImportService {
                 duplicateCount, errorCount, errors);
     }
 
+    // ─── Private helpers ──────────────────────────────────────────────────────
+
+    /**
+     * Attempts to resolve a lease suggestion from the counterparty IBAN.
+     *
+     * Algorithm:
+     * 1. Look up the IBAN in person_bank_account.
+     * 2. Find all leases where that person is a tenant (any role, any status).
+     * 3. Among those leases:
+     * a. If exactly one covers the transaction date → perfect match.
+     * b. If several cover it → prefer ACTIVE, then most recent start.
+     * c. If none covers it → pick the lease whose endDate is closest
+     * to the transaction date (historical import scenario).
+     * 4. Store in suggested_lease_id only — user confirms during review.
+     * Also pre-populate housing_unit and building for convenience.
+     */
+    private void suggestLease(FinancialTransaction tx,
+            String counterpartyIban,
+            LocalDate transactionDate) {
+        if (counterpartyIban == null || counterpartyIban.isBlank())
+            return;
+
+        personBankAccountRepository.findByIban(counterpartyIban).ifPresent(pba -> {
+            List<Lease> leases = leaseRepository
+                    .findAllByTenantPersonIdOrderByStartDateDesc(pba.getPerson().getId());
+
+            if (leases.isEmpty())
+                return;
+
+            // Leases whose period covers the transaction date
+            List<Lease> covering = leases.stream()
+                    .filter(l -> !transactionDate.isBefore(l.getStartDate())
+                            && !transactionDate.isAfter(l.getEndDate()))
+                    .toList();
+
+            Lease best;
+            if (covering.size() == 1) {
+                best = covering.get(0);
+            } else if (covering.size() > 1) {
+                // Prefer ACTIVE, then most recent startDate
+                best = covering.stream()
+                        .filter(l -> l.getStatus() == LeaseStatus.ACTIVE)
+                        .findFirst()
+                        .orElse(covering.get(0));
+            } else {
+                // No covering lease — closest endDate (typical for historical imports)
+                best = leases.stream()
+                        .min(Comparator.comparingLong(
+                                l -> Math.abs(ChronoUnit.DAYS.between(
+                                        l.getEndDate(), transactionDate))))
+                        .orElse(leases.get(0));
+            }
+
+            tx.setSuggestedLease(best);
+            if (tx.getHousingUnit() == null) {
+                tx.setHousingUnit(best.getHousingUnit());
+            }
+            if (tx.getBuilding() == null && best.getHousingUnit() != null) {
+                tx.setBuilding(best.getHousingUnit().getBuilding());
+            }
+        });
+    }
+
     private LocalDate parseDate(String[] cols, int index, DateTimeFormatter fmt) {
         return LocalDate.parse(safeGet(cols, index).trim(), fmt);
     }
@@ -226,42 +295,5 @@ public class CsvImportService {
 
     private String safeGet(String[] cols, int index) {
         return (index >= 0 && index < cols.length) ? cols[index].trim() : "";
-    }
-
-    /**
-     * If the transaction's counterparty_account matches a known person IBAN,
-     * find that person's active lease and set it as the suggested lease.
-     * Only applied to INCOME transactions (rent payments arrive from tenants).
-     * The transaction must already be persisted before calling this method.
-     */
-    private void suggestLeaseFromCounterpartyIban(
-            com.immocare.model.entity.FinancialTransaction tx) {
-
-        if (tx.getCounterpartyAccount() == null || tx.getCounterpartyAccount().isBlank())
-            return;
-        if (tx.getDirection() != com.immocare.model.enums.TransactionDirection.INCOME)
-            return;
-        if (tx.getSuggestedLease() != null)
-            return; // already suggested
-
-        personBankAccountRepository.findByIban(tx.getCounterpartyAccount()).ifPresent(pba -> {
-            Long personId = pba.getPerson().getId();
-            // Find the active lease where this person is a tenant
-            leaseRepository.findAllActiveWithTenants().stream()
-                    .filter(lease -> lease.getTenants().stream()
-                            .anyMatch(lt -> lt.getPerson().getId().equals(personId)))
-                    .findFirst()
-                    .ifPresent(lease -> {
-                        tx.setSuggestedLease(lease);
-                        // Also propagate unit and building for easier review
-                        if (tx.getHousingUnit() == null) {
-                            tx.setHousingUnit(lease.getHousingUnit());
-                        }
-                        if (tx.getBuilding() == null && lease.getHousingUnit() != null) {
-                            tx.setBuilding(lease.getHousingUnit().getBuilding());
-                        }
-                        transactionRepository.save(tx);
-                    });
-        });
     }
 }

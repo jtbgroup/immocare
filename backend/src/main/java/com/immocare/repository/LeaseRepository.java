@@ -8,6 +8,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 
 import com.immocare.model.entity.Lease;
 import com.immocare.model.enums.LeaseStatus;
@@ -35,4 +36,18 @@ public interface LeaseRepository extends JpaRepository<Lease, Long>, JpaSpecific
      * Usage: leaseRepository.findAll(LeaseSpecification.of(params), pageable)
      */
     Page<Lease> findAll(org.springframework.data.jpa.domain.Specification<Lease> spec, Pageable pageable);
+
+    /**
+     * Returns all leases where the given person is a tenant (any role, any status).
+     * Ordered by start_date DESC so the most recent lease comes first.
+     * Used by the import lease suggestion logic to match historical transactions.
+     */
+    @Query("""
+            SELECT l FROM Lease l
+            JOIN l.tenants t
+            WHERE t.person.id = :personId
+            ORDER BY l.startDate DESC
+            """)
+    List<Lease> findAllByTenantPersonIdOrderByStartDateDesc(@Param("personId") Long personId);
+
 }

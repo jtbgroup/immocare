@@ -1,6 +1,8 @@
 package com.immocare.service;
 
-import java.util.ArrayList;
+import java.time.LocalDate;
+import java.time.temporal.ChronoUnit;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -20,19 +22,18 @@ import com.immocare.model.entity.AppUser;
 import com.immocare.model.entity.BankAccount;
 import com.immocare.model.entity.FinancialTransaction;
 import com.immocare.model.entity.ImportBatch;
+import com.immocare.model.entity.Lease;
 import com.immocare.model.entity.ParsedTransaction;
 import com.immocare.model.entity.TransactionParser;
+import com.immocare.model.enums.LeaseStatus;
 import com.immocare.model.enums.TransactionDirection;
 import com.immocare.model.enums.TransactionSource;
 import com.immocare.model.enums.TransactionStatus;
 import com.immocare.repository.BankAccountRepository;
-import com.immocare.repository.BuildingRepository;
 import com.immocare.repository.FinancialTransactionRepository;
-import com.immocare.repository.HousingUnitRepository;
 import com.immocare.repository.ImportBatchRepository;
 import com.immocare.repository.LeaseRepository;
 import com.immocare.repository.PersonBankAccountRepository;
-import com.immocare.repository.TagSubcategoryRepository;
 import com.immocare.repository.TransactionParserRegistry;
 
 import lombok.RequiredArgsConstructor;
@@ -47,23 +48,24 @@ public class TransactionImportService {
     private final ImportBatchRepository importBatchRepo;
     private final FinancialTransactionRepository transactionRepo;
     private final BankAccountRepository bankAccountRepo;
-    private final LeaseRepository leaseRepo;
     private final PersonBankAccountRepository personBankAccountRepo;
-    private final TagSubcategoryRepository tagSubcategoryRepo;
-    private final HousingUnitRepository housingUnitRepo;
-    private final BuildingRepository buildingRepo;
+    private final LeaseRepository leaseRepo;
     private final LearningService learningService;
+    private final com.immocare.repository.TagSubcategoryRepository subcategoryRepo;
+    private final com.immocare.repository.HousingUnitRepository housingUnitRepo;
+    private final com.immocare.repository.BuildingRepository buildingRepo;
 
-    // ── Preview ───────────────────────────────────────────────────────────────
+    // ─── Preview ──────────────────────────────────────────────────────────────
 
     /**
-     * Parse a file and return enriched preview rows WITHOUT persisting anything.
-     * Each row carries: duplicate flag, subcategory suggestion, lease suggestion.
+     * Parse the file and return enriched preview rows — nothing is persisted.
+     * Each row carries:
+     * - duplicate flag (fingerprint already in DB)
+     * - suggested subcategory (from learning rules)
+     * - suggested lease (from counterparty IBAN → person → lease)
      */
-    @Transactional(readOnly = true)
-    public List<ImportPreviewRowDTO> previewFile(
-            MultipartFile file,
-            String parserCode) throws ParseException {
+    public List<ImportPreviewRowDTO> previewFile(MultipartFile file, String parserCode)
+            throws ParseException {
 
         TransactionParser parser = parserRegistry.getOrThrow(parserCode);
 
@@ -76,108 +78,58 @@ public class TransactionImportService {
             throw new ParseException("File parsing failed: " + e.getMessage(), e);
         }
 
-        // Pre-load active leases once for the whole batch
-        var activeLeases = leaseRepo.findAllActiveWithTenants();
+        return parsed.stream().map(p -> {
+            if (p.getFingerprint() == null) {
+                return new ImportPreviewRowDTO(
+                        p.getRowNumber(), p.getRawLine(), null, null, null,
+                        null, null, null, null, false, null, null, null,
+                        "Parse error: missing fingerprint");
+            }
 
-        List<ImportPreviewRowDTO> rows = new ArrayList<>(parsed.size());
-
-        for (ParsedTransaction p : parsed) {
-
-            // ── Duplicate check ───────────────────────────────────────────
-            boolean duplicate = p.getFingerprint() != null
-                    && transactionRepo.existsByImportFingerprint(p.getFingerprint());
-            Long duplicateId = duplicate
+            // Duplicate check
+            boolean duplicate = transactionRepo.existsByImportFingerprint(p.getFingerprint());
+            Long duplicateTxId = duplicate
                     ? transactionRepo.findIdByImportFingerprint(p.getFingerprint())
                     : null;
 
-            // ── Subcategory suggestion (only if direction is known) ────────
-            SubcategorySuggestionDTO subSuggestion = null;
-            if (p.getDirection() != null) {
-                TransactionDirection dir = p.getDirection() == ParsedTransaction.Direction.INCOME
-                        ? TransactionDirection.INCOME
-                        : TransactionDirection.EXPENSE;
-                List<SubcategorySuggestionDTO> suggestions = learningService.suggestSubcategory(
-                        p.getCounterpartyAccount(), p.getCounterpartyName(),
-                        p.getDescription(), dir, 1);
-                if (!suggestions.isEmpty()) {
-                    subSuggestion = suggestions.get(0);
-                }
-            }
+            // Subcategory suggestion
+            TransactionDirection dir = toDirection(p.getDirection());
+            List<SubcategorySuggestionDTO> suggestions = learningService.suggestSubcategory(
+                    p.getCounterpartyAccount(), p.getCounterpartyName(),
+                    p.getDescription(), dir, 1);
+            SubcategorySuggestionDTO subcatSuggestion = suggestions.isEmpty() ? null : suggestions.get(0);
 
-            // ── Lease suggestion via person IBAN ──────────────────────────
-            ImportPreviewRowDTO.SuggestedLeaseDTO leaseSuggestion = null;
-            if (p.getCounterpartyAccount() != null && !p.getCounterpartyAccount().isBlank()
-                    && p.getDirection() == ParsedTransaction.Direction.INCOME) {
+            // Lease suggestion
+            ImportPreviewRowDTO.SuggestedLeaseDTO leaseSuggestion = suggestLeaseForPreview(p.getCounterpartyAccount(),
+                    p.getTransactionDate());
 
-                var pbaOpt = personBankAccountRepo.findByIban(p.getCounterpartyAccount());
-                if (pbaOpt.isPresent()) {
-                    Long personId = pbaOpt.get().getPerson().getId();
-                    var person = pbaOpt.get().getPerson();
-
-                    var matchedLease = activeLeases.stream()
-                            .filter(l -> l.getTenants().stream()
-                                    .anyMatch(t -> t.getPerson().getId().equals(personId)))
-                            .findFirst();
-
-                    if (matchedLease.isPresent()) {
-                        var lease = matchedLease.get();
-                        var unit = lease.getHousingUnit();
-                        leaseSuggestion = new ImportPreviewRowDTO.SuggestedLeaseDTO(
-                                lease.getId(),
-                                unit.getId(),
-                                unit.getUnitNumber(),
-                                unit.getBuilding().getName(),
-                                personId,
-                                person.getFirstName() + " " + person.getLastName());
-                    }
-                }
-            }
-
-            TransactionDirection direction = p.getDirection() == null ? null
-                    : p.getDirection() == ParsedTransaction.Direction.INCOME
-                            ? TransactionDirection.INCOME
-                            : TransactionDirection.EXPENSE;
-
-            rows.add(new ImportPreviewRowDTO(
+            return new ImportPreviewRowDTO(
                     p.getRowNumber(),
                     p.getRawLine(),
                     p.getTransactionDate(),
                     p.getAmount(),
-                    direction,
+                    dir,
                     p.getDescription(),
                     p.getCounterpartyName(),
                     p.getCounterpartyAccount(),
                     p.getFingerprint(),
                     duplicate,
-                    duplicateId,
-                    subSuggestion,
+                    duplicateTxId,
+                    subcatSuggestion,
                     leaseSuggestion,
-                    null));
-        }
-
-        return rows;
+                    null);
+        }).collect(Collectors.toList());
     }
 
-    // ── Import ────────────────────────────────────────────────────────────────
+    // ─── Import ───────────────────────────────────────────────────────────────
 
     /**
-     * Parse and persist a file, applying per-row enrichments from the frontend.
+     * Parse + apply per-row enrichments + persist.
      *
-     * <p>
-     * Logic per row:
-     * <ol>
-     * <li>Skip if duplicate (fingerprint already in DB)</li>
-     * <li>Build FinancialTransaction from parsed data</li>
-     * <li>Look up enrichment by fingerprint — apply subcategory, lease, unit,
-     * building,
-     * direction override</li>
-     * <li>If enrichment found → status = CONFIRMED + reinforce learning; else
-     * DRAFT</li>
-     * <li>If no enrichment → fall back to suggestLeaseFromCounterpartyIban
-     * (suggestedLease only)</li>
-     * </ol>
-     *
-     * @param enrichments per-row enrichments keyed by fingerprint; may be empty
+     * Rows whose fingerprint is in {@code selectedFingerprints} are imported.
+     * If an enrichment exists for a fingerprint, it is applied (subcategory,
+     * lease, unit, building, direction override).
+     * Rows with enrichments are saved as CONFIRMED; others as DRAFT.
      */
     @Transactional
     public ImportBatchResultDTO importFile(
@@ -203,13 +155,15 @@ public class TransactionImportService {
             throw new ParseException("File parsing failed: " + e.getMessage(), e);
         }
 
-        // Build fingerprint → enrichment lookup map
-        Map<String, ImportRowEnrichmentDTO> enrichmentMap = enrichments.stream()
-                .filter(e -> e.fingerprint() != null && !e.fingerprint().isBlank())
-                .collect(Collectors.toMap(
-                        ImportRowEnrichmentDTO::fingerprint,
-                        Function.identity(),
-                        (a, b) -> a)); // keep first on collision
+        // Index enrichments by fingerprint for O(1) lookup
+        Map<String, ImportRowEnrichmentDTO> enrichmentMap = enrichments == null
+                ? Map.of()
+                : enrichments.stream()
+                        .filter(e -> e.fingerprint() != null)
+                        .collect(Collectors.toMap(
+                                ImportRowEnrichmentDTO::fingerprint,
+                                Function.identity(),
+                                (a, b) -> a));
 
         ImportBatch batch = new ImportBatch();
         batch.setFilename(file.getOriginalFilename());
@@ -217,33 +171,19 @@ public class TransactionImportService {
         batch.setCreatedBy(currentUser);
         importBatchRepo.save(batch);
 
-        // When the frontend sends an explicit selection, restrict to those fingerprints
-        // only.
-        // Rows whose fingerprint is not in the set are silently skipped (not counted as
-        // duplicate).
-        final boolean hasSelection = selectedFingerprints != null && !selectedFingerprints.isEmpty();
-
         int imported = 0, duplicates = 0;
 
         for (ParsedTransaction p : parsed) {
 
-            // ── Selection filter — skip rows the user did not check ────────
-            if (hasSelection && (p.getFingerprint() == null
-                    || !selectedFingerprints.contains(p.getFingerprint()))) {
-                log.debug("Skipped (not selected): row {}", p.getRowNumber());
+            // Skip rows not selected by user (when selection is non-empty)
+            if (selectedFingerprints != null && !selectedFingerprints.isEmpty()
+                    && !selectedFingerprints.contains(p.getFingerprint())) {
                 continue;
             }
 
-            // ── Duplicate check ───────────────────────────────────────────
-            // If the user explicitly selected this fingerprint, allow override (import
-            // anyway).
-            // Otherwise skip it and count as duplicate.
-            boolean isDuplicate = p.getFingerprint() != null
-                    && transactionRepo.existsByImportFingerprint(p.getFingerprint());
-            boolean overrideAllowed = hasSelection
-                    && p.getFingerprint() != null
-                    && selectedFingerprints.contains(p.getFingerprint());
-            if (isDuplicate && !overrideAllowed) {
+            // Duplicate check by fingerprint
+            if (p.getFingerprint() != null
+                    && transactionRepo.existsByImportFingerprint(p.getFingerprint())) {
                 log.debug("Duplicate skipped: fingerprint={}", p.getFingerprint());
                 duplicates++;
                 continue;
@@ -253,7 +193,13 @@ public class TransactionImportService {
                     p.getRowNumber(), p.getTransactionDate(), p.getAmount(),
                     p.getDirection(), p.getCounterpartyName());
 
-            // ── Build base transaction ─────────────────────────────────────
+            ImportRowEnrichmentDTO enrichment = p.getFingerprint() != null
+                    ? enrichmentMap.get(p.getFingerprint())
+                    : null;
+
+            // Resolve direction: enrichment override > parser > INCOME default
+            TransactionDirection direction = resolveDirection(p.getDirection(), enrichment);
+
             FinancialTransaction tx = new FinancialTransaction();
 
             String year = String.valueOf(p.getTransactionDate().getYear());
@@ -263,6 +209,7 @@ public class TransactionImportService {
             tx.setTransactionDate(p.getTransactionDate());
             tx.setAccountingMonth(p.getTransactionDate().withDayOfMonth(1));
             tx.setAmount(p.getAmount());
+            tx.setDirection(direction);
             tx.setDescription(p.getDescription());
             tx.setCounterpartyName(p.getCounterpartyName());
             tx.setCounterpartyAccount(p.getCounterpartyAccount());
@@ -271,118 +218,168 @@ public class TransactionImportService {
             tx.setImportBatch(batch);
             tx.setBankAccount(bankAccount);
 
-            // Direction: parser value, may be overridden by enrichment below
-            TransactionDirection direction = p.getDirection() == null
-                    ? TransactionDirection.EXPENSE // fallback for CSV without sign
-                    : p.getDirection() == ParsedTransaction.Direction.INCOME
-                            ? TransactionDirection.INCOME
-                            : TransactionDirection.EXPENSE;
-            tx.setDirection(direction);
-
-            // ── Apply enrichment if present ────────────────────────────────
-            ImportRowEnrichmentDTO enrichment = p.getFingerprint() != null
-                    ? enrichmentMap.get(p.getFingerprint())
-                    : null;
-
-            // Always DRAFT at import — user confirms explicitly during review
-            tx.setStatus(TransactionStatus.DRAFT);
+            // Apply enrichments
             if (enrichment != null) {
                 applyEnrichment(tx, enrichment);
+                tx.setStatus(TransactionStatus.CONFIRMED);
+            } else {
+                // Auto-suggest lease even without explicit enrichment
+                suggestLease(tx, p.getCounterpartyAccount(), p.getTransactionDate());
+                tx.setStatus(TransactionStatus.DRAFT);
             }
-            transactionRepo.save(tx);
-            suggestLeaseFromCounterpartyIban(tx);
 
+            transactionRepo.save(tx);
             imported++;
         }
 
         batch.setImportedCount(imported);
         batch.setDuplicateCount(duplicates);
+        batch.setErrorCount(0);
         importBatchRepo.save(batch);
 
-        log.info("Import complete: batchId={} imported={} duplicates={} enriched={}",
-                batch.getId(), imported, duplicates, enrichmentMap.size());
+        log.info("Import complete: batchId={} imported={} duplicates={}",
+                batch.getId(), imported, duplicates);
 
-        return new ImportBatchResultDTO(batch.getId(), parsed.size(), imported, duplicates, 0,
-                List.of());
+        return new ImportBatchResultDTO(
+                batch.getId(), parsed.size(), imported, duplicates, 0, List.of());
     }
 
-    // ── Private helpers ───────────────────────────────────────────────────────
+    // ─── Private helpers ──────────────────────────────────────────────────────
 
     /**
-     * Apply user-provided enrichment onto an unsaved transaction.
-     * Direction override is applied first so downstream validations are consistent.
+     * Lease suggestion for the preview endpoint — returns a lightweight DTO,
+     * does not modify any entity.
+     */
+    private ImportPreviewRowDTO.SuggestedLeaseDTO suggestLeaseForPreview(
+            String counterpartyIban, LocalDate transactionDate) {
+
+        if (counterpartyIban == null || counterpartyIban.isBlank())
+            return null;
+
+        return personBankAccountRepo.findByIban(counterpartyIban)
+                .map(pba -> {
+                    List<Lease> leases = leaseRepo
+                            .findAllByTenantPersonIdOrderByStartDateDesc(pba.getPerson().getId());
+                    if (leases.isEmpty())
+                        return null;
+
+                    Lease best = pickBestLease(leases, transactionDate);
+
+                    // Find the matched tenant's name
+                    String personName = best.getTenants().stream()
+                            .filter(lt -> lt.getPerson().getId().equals(pba.getPerson().getId()))
+                            .findFirst()
+                            .map(lt -> lt.getPerson().getLastName() + " " + lt.getPerson().getFirstName())
+                            .orElse(pba.getPerson().getLastName() + " " + pba.getPerson().getFirstName());
+
+                    return new ImportPreviewRowDTO.SuggestedLeaseDTO(
+                            best.getId(),
+                            best.getHousingUnit().getId(),
+                            best.getHousingUnit().getUnitNumber(),
+                            best.getHousingUnit().getBuilding().getId(),
+                            best.getHousingUnit().getBuilding().getName(),
+                            pba.getPerson().getId(),
+                            personName);
+                })
+                .orElse(null);
+    }
+
+    /**
+     * Lease suggestion for the import endpoint — sets fields directly on the tx.
+     * Result stored in suggested_lease_id only — user confirms during review.
+     */
+    private void suggestLease(FinancialTransaction tx,
+            String counterpartyIban,
+            LocalDate transactionDate) {
+        if (counterpartyIban == null || counterpartyIban.isBlank())
+            return;
+
+        personBankAccountRepo.findByIban(counterpartyIban).ifPresent(pba -> {
+            List<Lease> leases = leaseRepo
+                    .findAllByTenantPersonIdOrderByStartDateDesc(pba.getPerson().getId());
+            if (leases.isEmpty())
+                return;
+
+            Lease best = pickBestLease(leases, transactionDate);
+            tx.setSuggestedLease(best);
+            if (tx.getHousingUnit() == null)
+                tx.setHousingUnit(best.getHousingUnit());
+            if (tx.getBuilding() == null && best.getHousingUnit() != null)
+                tx.setBuilding(best.getHousingUnit().getBuilding());
+
+            log.debug("Lease suggested: leaseId={} tenant={} status={}",
+                    best.getId(), pba.getPerson().getLastName(), best.getStatus());
+        });
+    }
+
+    /**
+     * Picks the best matching lease for a given transaction date.
+     *
+     * Priority:
+     * 1. Exactly one lease covers the date → use it.
+     * 2. Several cover it → prefer ACTIVE, then most recent startDate.
+     * 3. None covers it → closest endDate (historical import).
+     */
+    private Lease pickBestLease(List<Lease> leases, LocalDate transactionDate) {
+        List<Lease> covering = leases.stream()
+                .filter(l -> !transactionDate.isBefore(l.getStartDate())
+                        && !transactionDate.isAfter(l.getEndDate()))
+                .toList();
+
+        if (covering.size() == 1)
+            return covering.get(0);
+        if (covering.size() > 1) {
+            return covering.stream()
+                    .filter(l -> l.getStatus() == LeaseStatus.ACTIVE)
+                    .findFirst()
+                    .orElse(covering.get(0));
+        }
+        // Historical: closest endDate
+        return leases.stream()
+                .min(Comparator.comparingLong(
+                        l -> Math.abs(ChronoUnit.DAYS.between(l.getEndDate(), transactionDate))))
+                .orElse(leases.get(0));
+    }
+
+    /**
+     * Applies user-provided enrichment to a transaction.
+     * Non-null enrichment fields override auto-suggestions.
      */
     private void applyEnrichment(FinancialTransaction tx, ImportRowEnrichmentDTO e) {
-
-        // Direction override
-        if (e.directionOverride() != null && !e.directionOverride().isBlank()) {
-            try {
-                tx.setDirection(TransactionDirection.valueOf(e.directionOverride()));
-            } catch (IllegalArgumentException ex) {
-                log.warn("Unknown directionOverride '{}' — keeping parser value", e.directionOverride());
-            }
-        }
-
-        // Subcategory
         if (e.subcategoryId() != null) {
-            tx.setSubcategory(tagSubcategoryRepo.getReferenceById(e.subcategoryId()));
+            subcategoryRepo.findById(e.subcategoryId()).ifPresent(tx::setSubcategory);
         }
-
-        // Housing unit + cascade building
+        if (e.leaseId() != null) {
+            leaseRepo.findById(e.leaseId()).ifPresent(tx::setLease);
+        }
         if (e.housingUnitId() != null) {
-            var unit = housingUnitRepo.getReferenceById(e.housingUnitId());
-            tx.setHousingUnit(unit);
-            // Always derive building from unit to keep them consistent
-            tx.setBuilding(unit.getBuilding());
-        } else if (e.buildingId() != null) {
-            tx.setBuilding(buildingRepo.getReferenceById(e.buildingId()));
+            housingUnitRepo.findById(e.housingUnitId()).ifPresent(tx::setHousingUnit);
         }
-
-        // Lease (income only — business rule BR-UC014-02)
-        if (e.leaseId() != null && tx.getDirection() == TransactionDirection.INCOME) {
-            tx.setLease(leaseRepo.getReferenceById(e.leaseId()));
-            tx.setSuggestedLease(null);
+        if (e.buildingId() != null) {
+            buildingRepo.findById(e.buildingId()).ifPresent(tx::setBuilding);
+        }
+        // Propagate unit + building from lease when not explicitly set
+        if (tx.getLease() != null) {
+            if (tx.getHousingUnit() == null)
+                tx.setHousingUnit(tx.getLease().getHousingUnit());
+            if (tx.getBuilding() == null && tx.getLease().getHousingUnit() != null)
+                tx.setBuilding(tx.getLease().getHousingUnit().getBuilding());
         }
     }
 
-    /**
-     * Reinforce the learning engine after a confirmed enrichment.
-     * Mirrors the logic in FinancialTransactionService.reinforceLearning().
-     */
-    private void reinforceLearning(FinancialTransaction tx) {
-        if (tx.getSubcategory() == null)
-            return;
-        if (tx.getCounterpartyAccount() == null || tx.getCounterpartyAccount().isBlank())
-            return;
-        learningService.reinforceTagRule(tx.getSubcategory().getId(), tx.getCounterpartyAccount());
+    private TransactionDirection resolveDirection(
+            ParsedTransaction.Direction parsed, ImportRowEnrichmentDTO enrichment) {
+        if (enrichment != null && enrichment.directionOverride() != null) {
+            return TransactionDirection.valueOf(enrichment.directionOverride());
+        }
+        return toDirection(parsed);
     }
 
-    /**
-     * For DRAFT rows: auto-suggest a lease from the counterparty IBAN if possible.
-     * Sets suggestedLease + housingUnit + building on the transaction.
-     */
-    private void suggestLeaseFromCounterpartyIban(FinancialTransaction tx) {
-        if (tx.getCounterpartyAccount() == null || tx.getCounterpartyAccount().isBlank())
-            return;
-        if (tx.getDirection() != TransactionDirection.INCOME)
-            return;
-        if (tx.getSuggestedLease() != null)
-            return;
-
-        personBankAccountRepo.findByIban(tx.getCounterpartyAccount()).ifPresent(pba -> {
-            Long personId = pba.getPerson().getId();
-            leaseRepo.findAllActiveWithTenants().stream()
-                    .filter(l -> l.getTenants().stream()
-                            .anyMatch(t -> t.getPerson().getId().equals(personId)))
-                    .findFirst()
-                    .ifPresent(lease -> {
-                        tx.setSuggestedLease(lease);
-                        tx.setHousingUnit(lease.getHousingUnit());
-                        tx.setBuilding(lease.getHousingUnit().getBuilding());
-                        transactionRepo.save(tx);
-                        log.debug("Suggested lease {} for tx fingerprint={}",
-                                lease.getId(), tx.getImportFingerprint());
-                    });
-        });
+    private TransactionDirection toDirection(ParsedTransaction.Direction d) {
+        if (d == null)
+            return TransactionDirection.INCOME; // safe default
+        return d == ParsedTransaction.Direction.INCOME
+                ? TransactionDirection.INCOME
+                : TransactionDirection.EXPENSE;
     }
 }

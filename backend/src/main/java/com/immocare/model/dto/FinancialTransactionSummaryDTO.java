@@ -8,19 +8,23 @@ import com.immocare.model.enums.TransactionSource;
 import com.immocare.model.enums.TransactionStatus;
 
 public record FinancialTransactionSummaryDTO(
-        Long id,
-        String reference,
-        LocalDate transactionDate,
-        LocalDate accountingMonth,
-        TransactionDirection direction,
-        BigDecimal amount,
-        String counterpartyName,
-        TransactionStatus status,
-        TransactionSource source,
-        String bankAccountLabel,
-        String categoryName,
-        String subcategoryName,
-        String buildingName,
-        String unitNumber,
-        Long leaseId) {
+                Long id,
+                String reference,
+                LocalDate transactionDate,
+                LocalDate accountingMonth,
+                TransactionDirection direction,
+                BigDecimal amount,
+                String counterpartyName,
+                TransactionStatus status,
+                TransactionSource source,
+                String bankAccountLabel,
+                String categoryName,
+                String subcategoryName,
+                String buildingName,
+                String unitNumber,
+                Long leaseId,
+                // ── Suggestion fields (set at import, confirmed during review) ──
+                Long suggestedLeaseId,
+                Long buildingId,
+                Long housingUnitId) {
 }

@@ -73,6 +73,9 @@ export interface FinancialTransactionSummary {
   buildingName?: string;
   unitNumber?: string;
   leaseId?: number;
+  suggestedLeaseId?: number;
+  buildingId?: number;
+  housingUnitId?: number;
 }
 
 export interface FinancialTransaction extends FinancialTransactionSummary {
@@ -191,6 +194,7 @@ export interface ImportPreviewSuggestedLease {
   leaseId: number;
   unitId: number;
   unitNumber: string;
+  buildingId?: number;
   buildingName: string;
   personId: number;
   personFullName: string;

@@ -14,16 +14,19 @@ make dev-build
 npm run seed:dev -- --dataset=real
 
 # scratch DB
-docker compose -f docker-compose.dev.yml down -v
-docker compose -f docker-compose.dev.yml up -d
+docker compose -f docker-compose.dev.yml down -v && docker compose -f docker-compose.dev.yml up -d
 ```
 
 ## Feed DB
 ```
-#Real data
+# Real data from root
+cd frontend && npm run seed:dev -- --dataset=real && cd ..
+
+# Real data from frontend
 npm run seed:dev -- --dataset=real
 
-#Demo data
+
+# Demo data
 npm run seed:dev -- --dataset=demo
 ```
 

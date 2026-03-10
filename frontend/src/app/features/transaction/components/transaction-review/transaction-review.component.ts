@@ -68,7 +68,14 @@ export class TransactionReviewComponent implements OnInit {
   }
 
   confirmRow(tx: FinancialTransactionSummary): void {
-    this.transactionService.confirm(tx.id, {}).subscribe(() => this.load());
+    // Pre-fill confirm request with suggested lease/unit/building if not already set
+    this.transactionService
+      .confirm(tx.id, {
+        leaseId: tx.leaseId ?? tx.suggestedLeaseId,
+        housingUnitId: tx.housingUnitId,
+        buildingId: tx.buildingId,
+      })
+      .subscribe(() => this.load());
   }
 
   confirmAll(): void {

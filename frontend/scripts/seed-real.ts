@@ -17,7 +17,10 @@ import {
   createHousingUnit,
   createLease,
   createPerson,
+  createPersonBankAccount,
   createRooms,
+  createTagCategory,
+  createTagSubcategory,
   createUnitBoiler,
   createUnitMeter,
   login,
@@ -34,6 +37,79 @@ import {
   REAL_METERS,
   REAL_UNITS,
 } from "../e2e/shared/data-factory.real";
+
+// ─── Tag categories & subcategories ──────────────────────────────────────────
+// Source of truth for all transaction category labels.
+// Add / remove entries here — they will be created on next seed run.
+
+const TAG_CATEGORIES: Array<{
+  name: string;
+  subcategories: Array<{ name: string; direction: "INCOME" | "EXPENSE" | "BOTH" }>;
+}> = [
+  {
+    name: "Administration",
+    subcategories: [
+      { name: "Assurance habitation", direction: "EXPENSE" },
+      { name: "PEB",                  direction: "EXPENSE" },
+      { name: "Petits frais",         direction: "BOTH"    },
+      { name: "Syndic",               direction: "EXPENSE" },
+    ],
+  },
+  {
+    name: "Consommables",
+    subcategories: [
+      { name: "Adoucisseur", direction: "EXPENSE" },
+      { name: "Eau",         direction: "EXPENSE" },
+    ],
+  },
+  {
+    name: "Dépôt",
+    subcategories: [
+      { name: "Dépôt de garantie", direction: "INCOME" },
+    ],
+  },
+  {
+    name: "Location",
+    subcategories: [
+      { name: "Loyer",   direction: "INCOME" },
+      { name: "Charges", direction: "INCOME" },
+    ],
+  },
+  {
+    name: "Maintenance",
+    subcategories: [
+      { name: "Chaudière",  direction: "EXPENSE" },
+      { name: "Extincteur", direction: "EXPENSE" },
+      { name: "Divers",     direction: "EXPENSE" },
+    ],
+  },
+  {
+    name: "Prime",
+    subcategories: [
+      { name: "Prime rénovation", direction: "INCOME" },
+    ],
+  },
+  {
+    name: "Rente",
+    subcategories: [
+      { name: "Rente foncière", direction: "EXPENSE" },
+    ],
+  },
+  {
+    name: "Taxes",
+    subcategories: [
+      { name: "Précompte immobilier", direction: "EXPENSE" },
+      { name: "Taxe communale",       direction: "EXPENSE" },
+    ],
+  },
+  {
+    name: "Travaux",
+    subcategories: [
+      { name: "Rénovation", direction: "EXPENSE" },
+      { name: "Entretien",  direction: "EXPENSE" },
+    ],
+  },
+];
 
 // ─── Fire extinguisher API helper (not yet in api-client) ─────────────────────
 
@@ -60,11 +136,7 @@ async function apiPost<T>(path: string, body: unknown): Promise<T> {
 
 async function createFireExtinguisher(
   buildingId: number,
-  data: {
-    identificationNumber: string;
-    unitId: number | null;
-    notes: string | null;
-  },
+  data: { identificationNumber: string; unitId: number | null; notes: string | null },
 ): Promise<{ id: number }> {
   return apiPost(`/buildings/${buildingId}/fire-extinguishers`, data);
 }
@@ -92,6 +164,8 @@ function log(emoji: string, msg: string) {
 // ─── Main ─────────────────────────────────────────────────────────────────────
 
 export async function runReal({ dryRun }: { dryRun: boolean }) {
+  const totalSubcategories = TAG_CATEGORIES.reduce((n, c) => n + c.subcategories.length, 0);
+
   console.log("\n🏘️  ImmoCare — Real Seed (Saint-Gilles)");
   console.log("=========================================");
   if (dryRun) console.log("⚠️  DRY RUN — no API calls will be made\n");
@@ -103,8 +177,28 @@ export async function runReal({ dryRun }: { dryRun: boolean }) {
     log("✅", "Authenticated\n");
   }
 
-  // ── 1. Create persons ──────────────────────────────────────────────────────
-  log("👥", `Creating ${PERSONS.length} persons...`);
+  // ── 1. Tag categories & subcategories ──────────────────────────────────────
+  log("🏷️", `Creating ${TAG_CATEGORIES.length} categories / ${totalSubcategories} subcategories...`);
+
+  for (const cat of TAG_CATEGORIES) {
+    if (dryRun) {
+      log("  →", `Category: ${cat.name} (${cat.subcategories.length} subcategories)`);
+      continue;
+    }
+    try {
+      const created = await createTagCategory(cat.name);
+      log("  ✓", `${cat.name} → id ${created.id}`);
+      for (const sub of cat.subcategories) {
+        await createTagSubcategory(created.id, sub.name, sub.direction);
+        log("    ✓", `${sub.name} (${sub.direction})`);
+      }
+    } catch (err) {
+      log("  ⚠", `${cat.name} skipped: ${(err as Error).message}`);
+    }
+  }
+
+  // ── 2. Create persons ──────────────────────────────────────────────────────
+  log("\n👥", `Creating ${PERSONS.length} persons...`);
   const personIds: number[] = [];
 
   for (const p of PERSONS) {
@@ -113,23 +207,29 @@ export async function runReal({ dryRun }: { dryRun: boolean }) {
       personIds.push(personIds.length + 1);
       continue;
     }
-    const created = await createPerson(p);
+
+    const { bankAccounts, phone, ...personData } = p as any;
+    const created = await createPerson({ ...personData, gsm: phone });
     personIds.push(created.id);
     log("  ✓", `${p.firstName} ${p.lastName} → id ${created.id}`);
+
+    if (bankAccounts?.length) {
+      for (const ba of bankAccounts) {
+        await createPersonBankAccount(created.id, { iban: ba.iban, label: ba.label });
+        log("    ✓", `IBAN ${ba.iban}`);
+      }
+    }
   }
 
-  // personIds[0] = Gautier Vanderslyen (owner)
-  // personIds[1..4] = tenants
-
-  // ── 2. Create buildings + units + meters ───────────────────────────────────
+  // ── 3. Create buildings + units + meters ───────────────────────────────────
   log("\n🏢", `Creating ${BUILDINGS.length} building(s)...`);
 
   const buildingIds: number[] = [];
-  const allUnitIds: number[][] = []; // allUnitIds[buildingIndex][unitIndex]
+  const allUnitIds: number[][] = [];
 
   for (let bi = 0; bi < BUILDINGS.length; bi++) {
     const b = BUILDINGS[bi];
-    const ownerId = personIds[0]; // only one owner
+    const ownerId = personIds[0];
 
     if (dryRun) {
       log("  →", `Building: ${b.name} — ${b.city}`);
@@ -149,55 +249,35 @@ export async function runReal({ dryRun }: { dryRun: boolean }) {
     log("  ✓", `${b.name} → id ${building.id}`);
 
     const unitIds: number[] = [];
-    const units = REAL_UNITS[bi];
-
-    for (let ui = 0; ui < units.length; ui++) {
-      const u = units[ui];
+    for (let ui = 0; ui < REAL_UNITS[bi].length; ui++) {
+      const u = REAL_UNITS[bi][ui];
       const unit = await createHousingUnit({ buildingId: building.id, ...u });
       unitIds.push(unit.id);
       log("    ✓", `Unit ${u.unitNumber} → id ${unit.id}`);
 
-      // Rooms (generic for now — surface not provided, use 70m² template)
       await createRooms(unit.id, [
         { roomType: "LIVING_ROOM", approximateSurface: 20 },
-        { roomType: "BEDROOM", approximateSurface: 15 },
-        { roomType: "KITCHEN", approximateSurface: 10 },
-        { roomType: "BATHROOM", approximateSurface: 8 },
+        { roomType: "BEDROOM",     approximateSurface: 15 },
+        { roomType: "KITCHEN",     approximateSurface: 10 },
+        { roomType: "BATHROOM",    approximateSurface: 8  },
       ]);
 
-      // Unit meters
-      const unitMeters = REAL_METERS[bi]?.units[ui] ?? [];
-      for (const m of unitMeters) {
+      for (const m of REAL_METERS[bi]?.units[ui] ?? []) {
         await createUnitMeter(unit.id, m);
         log("      ✓", `Meter ${m.type} — ${m.meterNumber}`);
       }
     }
     allUnitIds.push(unitIds);
 
-    // Building meters
-    const buildingMeters = REAL_METERS[bi]?.building ?? [];
-    for (const m of buildingMeters) {
+    for (const m of REAL_METERS[bi]?.building ?? []) {
       await createBuildingMeter(building.id, m);
       log("    ✓", `Building meter ${m.type} — ${m.meterNumber}`);
     }
   }
 
-  // ── 3. Create leases ───────────────────────────────────────────────────────
+  // ── 4. Create leases ───────────────────────────────────────────────────────
   log("\n📄", `Creating ${REAL_LEASES.length} leases...`);
   let leaseCount = 0;
-
-  interface LeaseInfo {
-    leaseId: number;
-    buildingIndex: number;
-    unitIndex: number;
-    tenantName: string;
-    monthlyRent: number;
-    monthlyCharges: number;
-    startDate: Date;
-    endDate: Date;
-    active: boolean;
-  }
-  const leaseInfos: LeaseInfo[] = [];
 
   for (const tpl of REAL_LEASES) {
     const unitId = dryRun
@@ -208,24 +288,23 @@ export async function runReal({ dryRun }: { dryRun: boolean }) {
       : personIds[tpl.tenantPersonIndex];
     const tenant = PERSONS[tpl.tenantPersonIndex];
 
+    const tenants: { personId: number; role: "PRIMARY" | "CO_TENANT" }[] = [
+      { personId: tenantPersonId, role: "PRIMARY" },
+    ];
+    if (tpl.coTenantPersonIndices?.length) {
+      for (const coIdx of tpl.coTenantPersonIndices) {
+        tenants.push({
+          personId: dryRun ? coIdx + 1 : personIds[coIdx],
+          role: "CO_TENANT",
+        });
+      }
+    }
+
     if (dryRun) {
-      log(
-        "  →",
-        `Lease [${tpl.scenario}] ${tenant.firstName} ${tenant.lastName} — unit ${unitId} — ${tpl.baseRent}€/mo`,
-      );
-      leaseInfos.push({
-        leaseId: leaseCount + 1,
-        buildingIndex: tpl.buildingIndex,
-        unitIndex: tpl.unitIndex,
-        tenantName: `${tenant.firstName} ${tenant.lastName}`,
-        monthlyRent: tpl.baseRent,
-        monthlyCharges: tpl.charges,
-        startDate: new Date(tpl.startDate),
-        endDate: new Date(tpl.endDate),
-        active:
-          tpl.scenario === "active" ||
-          tpl.scenario === "active-with-adjustments",
-      });
+      const coNames = (tpl.coTenantPersonIndices ?? [])
+        .map((i) => `${PERSONS[i].firstName} ${PERSONS[i].lastName}`)
+        .join(", ");
+      log("  →", `Lease [${tpl.scenario}] ${tenant.firstName} ${tenant.lastName}${coNames ? ` + ${coNames}` : ""} — unit ${unitId} — ${tpl.baseRent}€/mo`);
       leaseCount++;
       continue;
     }
@@ -246,24 +325,20 @@ export async function runReal({ dryRun }: { dryRun: boolean }) {
           depositAmount: tpl.baseRent * tpl.depositMultiplier,
           depositType: "BANK_GUARANTEE",
           tenantInsuranceConfirmed: true,
-          tenants: [{ personId: tenantPersonId, role: "PRIMARY" }],
+          tenants,
         },
         false,
       );
-      log("  ✓", `Lease ${lease.id} — ${tenant.firstName} ${tenant.lastName}`);
 
-      // Rent adjustments
-      if (tpl.rentAdjustments && tpl.rentAdjustments.length > 0) {
-        // Must activate first to allow adjustments
+      const coNames = (tpl.coTenantPersonIndices ?? [])
+        .map((i) => `${PERSONS[i].firstName} ${PERSONS[i].lastName}`)
+        .join(", ");
+      log("  ✓", `Lease ${lease.id} — ${tenant.firstName} ${tenant.lastName}${coNames ? ` + ${coNames}` : ""}`);
+
+      if (tpl.rentAdjustments?.length) {
         await changeLeaseStatus(lease.id, "ACTIVE");
         for (const adj of tpl.rentAdjustments) {
-          await adjustRent(
-            lease.id,
-            "RENT",
-            adj.newRent,
-            adj.reason,
-            adj.effectiveDate,
-          );
+          await adjustRent(lease.id, "RENT", adj.newRent, adj.reason, adj.effectiveDate);
           log("    ✓", `Rent → ${adj.newRent}€ on ${adj.effectiveDate}`);
         }
         if (tpl.scenario === "finished-with-adjustments") {
@@ -271,44 +346,23 @@ export async function runReal({ dryRun }: { dryRun: boolean }) {
           log("    ✓", `Status → FINISHED`);
         }
       } else {
-        // Status transitions for leases without adjustments
         if (tpl.scenario === "finished") {
           await changeLeaseStatus(lease.id, "ACTIVE");
           await changeLeaseStatus(lease.id, "FINISHED");
           log("    ✓", `Status → ACTIVE → FINISHED`);
-        } else if (
-          tpl.scenario === "active" ||
-          tpl.scenario === "active-with-adjustments"
-        ) {
+        } else if (tpl.scenario === "active" || tpl.scenario === "active-with-adjustments") {
           await changeLeaseStatus(lease.id, "ACTIVE");
           log("    ✓", `Status → ACTIVE`);
         }
-        // "draft" stays as-is
       }
 
-      leaseInfos.push({
-        leaseId: lease.id,
-        buildingIndex: tpl.buildingIndex,
-        unitIndex: tpl.unitIndex,
-        tenantName: `${tenant.firstName} ${tenant.lastName}`,
-        monthlyRent: tpl.baseRent,
-        monthlyCharges: tpl.charges,
-        startDate: new Date(tpl.startDate),
-        endDate: new Date(tpl.endDate),
-        active:
-          tpl.scenario === "active" ||
-          tpl.scenario === "active-with-adjustments",
-      });
       leaseCount++;
     } catch (err) {
-      log(
-        "  ❌",
-        `Lease ${tenant.firstName} ${tenant.lastName} failed: ${(err as Error).message}`,
-      );
+      log("  ❌", `Lease ${tenant.firstName} ${tenant.lastName} failed: ${(err as Error).message}`);
     }
   }
 
-  // ── 4. Create bank accounts ────────────────────────────────────────────────
+  // ── 5. Create bank accounts ────────────────────────────────────────────────
   log("\n🏦", `Creating ${BANK_ACCOUNTS_SEED.length} bank account(s)...`);
   const bankAccountIds: number[] = [];
 
@@ -328,19 +382,15 @@ export async function runReal({ dryRun }: { dryRun: boolean }) {
     }
   }
 
-  // ── 5. Create boilers ──────────────────────────────────────────────────────
+  // ── 6. Create boilers ──────────────────────────────────────────────────────
   log("\n🔥", `Creating ${REAL_BOILERS.length} boiler(s)...`);
 
   for (const boiler of REAL_BOILERS) {
     if (dryRun) {
-      const loc =
-        boiler.unitIndex !== null
-          ? `unit ${REAL_UNITS[boiler.buildingIndex][boiler.unitIndex].unitNumber}`
-          : `building ${BUILDINGS[boiler.buildingIndex].name} (common)`;
-      log(
-        "  →",
-        `Boiler ${boiler.brand} — ${loc} — ${boiler.services.length} service(s)`,
-      );
+      const loc = boiler.unitIndex !== null
+        ? `unit ${REAL_UNITS[boiler.buildingIndex][boiler.unitIndex].unitNumber}`
+        : `building ${BUILDINGS[boiler.buildingIndex].name} (${boiler.notes ?? "common area"})`;
+      log("  →", `Boiler ${boiler.brand} — ${loc} — ${boiler.services.length} service(s)`);
       continue;
     }
 
@@ -352,62 +402,48 @@ export async function runReal({ dryRun }: { dryRun: boolean }) {
         brand: boiler.brand !== "Unknown" ? boiler.brand : undefined,
         model: boiler.model ?? undefined,
         serialNumber: boiler.serialNumber ?? undefined,
+        notes: boiler.notes ?? undefined,
       };
 
       let createdBoilerId: number;
-
       if (boiler.unitIndex !== null) {
         const unitId = allUnitIds[boiler.buildingIndex][boiler.unitIndex];
         const created = await createUnitBoiler(unitId, boilerPayload);
         createdBoilerId = created.id;
-        log(
-          "  ✓",
-          `Unit boiler → id ${created.id} (unit ${REAL_UNITS[boiler.buildingIndex][boiler.unitIndex].unitNumber})`,
-        );
+        log("  ✓", `Unit boiler → id ${created.id} (unit ${REAL_UNITS[boiler.buildingIndex][boiler.unitIndex].unitNumber})`);
       } else {
         const created = await createBuildingBoiler(buildingId, boilerPayload);
         createdBoilerId = created.id;
-        log(
-          "  ✓",
-          `Building boiler → id ${created.id} (${boiler.notes ?? "common area"})`,
-        );
+        log("  ✓", `Building boiler → id ${created.id} (${boiler.notes ?? "common area"})`);
       }
 
-      // Add service records
       for (const svc of boiler.services) {
         await addBoilerServiceRecord(createdBoilerId, {
           serviceDate: svc.serviceDate,
           validUntil: svc.validUntil,
           notes: svc.notes,
         });
-        log(
-          "    ✓",
-          `Service ${svc.serviceDate} → valid until ${svc.validUntil}`,
-        );
+        log("    ✓", `Service ${svc.serviceDate} → valid until ${svc.validUntil}`);
       }
     } catch (err) {
       log("  ❌", `Boiler failed: ${(err as Error).message}`);
     }
   }
 
-  // ── 6. Create fire extinguishers ───────────────────────────────────────────
+  // ── 7. Create fire extinguishers ───────────────────────────────────────────
   log("\n🧯", `Creating ${REAL_EXTINGUISHERS.length} fire extinguisher(s)...`);
 
   for (const ext of REAL_EXTINGUISHERS) {
     if (dryRun) {
-      log(
-        "  →",
-        `Extinguisher ${ext.identificationNumber} — ${ext.notes ?? "common area"} — ${ext.revisions.length} revision(s)`,
-      );
+      log("  →", `Extinguisher ${ext.identificationNumber} — ${ext.notes ?? "common area"} — ${ext.revisions.length} revision(s)`);
       continue;
     }
 
     try {
       const buildingId = buildingIds[ext.buildingIndex];
-      const unitId =
-        ext.unitIndex !== null
-          ? allUnitIds[ext.buildingIndex][ext.unitIndex]
-          : null;
+      const unitId = ext.unitIndex !== null
+        ? allUnitIds[ext.buildingIndex][ext.unitIndex]
+        : null;
 
       const created = await createFireExtinguisher(buildingId, {
         identificationNumber: ext.identificationNumber,
@@ -424,29 +460,24 @@ export async function runReal({ dryRun }: { dryRun: boolean }) {
         log("    ✓", `Revision ${rev.revisionDate}`);
       }
     } catch (err) {
-      log(
-        "  ❌",
-        `Extinguisher ${ext.identificationNumber} failed: ${(err as Error).message}`,
-      );
+      log("  ❌", `Extinguisher ${ext.identificationNumber} failed: ${(err as Error).message}`);
     }
   }
 
-  // ── 7. Punctual transactions ───────────────────────────────────────────────
+  // ── 8. Punctual transactions ───────────────────────────────────────────────
   if (PUNCTUAL_TRANSACTIONS.length > 0) {
     log("\n💳", `Creating ${PUNCTUAL_TRANSACTIONS.length} transaction(s)...`);
-    // TODO: implement if/when real transactions are added to data-factory.real.ts
+    // TODO: implement when real transactions are added to data-factory.real.ts
   }
 
   // ── Summary ────────────────────────────────────────────────────────────────
   console.log("\n=========================================");
   log("🎉", `Real seed complete!`);
   log("📦", `Dataset      : real (Saint-Gilles)`);
+  log("🏷️", `Categories   : ${TAG_CATEGORIES.length} / ${totalSubcategories} subcategories`);
   log("👥", `Persons      : ${PERSONS.length}`);
   log("🏢", `Buildings    : ${BUILDINGS.length}`);
-  log(
-    "🚪",
-    `Units        : ${allUnitIds.flat().length || REAL_UNITS.flat().length}`,
-  );
+  log("🚪", `Units        : ${allUnitIds.flat().length || REAL_UNITS.flat().length}`);
   log("📄", `Leases       : ${leaseCount}`);
   log("🏦", `Bank accounts: ${BANK_ACCOUNTS_SEED.length}`);
   log("🔥", `Boilers      : ${REAL_BOILERS.length}`);

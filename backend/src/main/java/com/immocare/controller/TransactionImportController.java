@@ -27,8 +27,10 @@ import lombok.extern.slf4j.Slf4j;
 /**
  * Endpoints for the 3-step transaction import flow.
  *
- * POST /api/v1/transactions/preview — parse only, no persistence, returns rows with suggestions
- * POST /api/v1/transactions/import  — parse + apply enrichments + persist as DRAFT or CONFIRMED
+ * POST /api/v1/transactions/preview — parse only, no persistence, returns rows
+ * with suggestions
+ * POST /api/v1/transactions/import — parse + apply enrichments + persist as
+ * DRAFT or CONFIRMED
  */
 @Slf4j
 @RestController
@@ -46,8 +48,8 @@ public class TransactionImportController {
      * Parse the file and return enriched rows without persisting anything.
      *
      * Multipart parts:
-     *   file       — CSV or PDF
-     *   parserCode — e.g. "keytrade-csv-20260102"
+     * file — CSV or PDF
+     * parserCode — e.g. "keytrade-csv-20260102"
      */
     @PostMapping(value = "/preview", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<?> previewFile(
@@ -72,10 +74,10 @@ public class TransactionImportController {
      * unmatched rows are saved as DRAFT.
      *
      * Multipart parts:
-     *   file          — CSV or PDF
-     *   parserCode    — e.g. "keytrade-csv-20260102"
-     *   bankAccountId — (optional) own bank account id
-     *   enrichments   — (optional) JSON array of ImportRowEnrichmentDTO
+     * file — CSV or PDF
+     * parserCode — e.g. "keytrade-csv-20260102"
+     * bankAccountId — (optional) own bank account id
+     * enrichments — (optional) JSON array of ImportRowEnrichmentDTO
      */
     @PostMapping(value = "/import", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<ImportBatchResultDTO> importFile(
@@ -92,7 +94,8 @@ public class TransactionImportController {
         if (enrichmentsJson != null && !enrichmentsJson.isBlank()) {
             try {
                 enrichments = MAPPER.readValue(
-                        enrichmentsJson, new TypeReference<List<ImportRowEnrichmentDTO>>() {});
+                        enrichmentsJson, new TypeReference<List<ImportRowEnrichmentDTO>>() {
+                        });
             } catch (Exception e) {
                 log.warn("Could not deserialize enrichments JSON: {}", e.getMessage());
             }
@@ -102,7 +105,8 @@ public class TransactionImportController {
         if (selectedFingerprintsJson != null && !selectedFingerprintsJson.isBlank()) {
             try {
                 List<String> fpList = MAPPER.readValue(
-                        selectedFingerprintsJson, new TypeReference<List<String>>() {});
+                        selectedFingerprintsJson, new TypeReference<List<String>>() {
+                        });
                 selectedFingerprints = new java.util.HashSet<>(fpList);
             } catch (Exception e) {
                 log.warn("Could not deserialize selectedFingerprints JSON: {}", e.getMessage());

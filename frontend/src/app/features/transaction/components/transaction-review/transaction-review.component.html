@@ -103,6 +103,7 @@
               >
             </th>
             <th>Category / Subcategory</th>
+            <th>Lease suggestion</th>
             <th class="sortable" (click)="sortBy('status')">
               Status
               <span class="sort-icon" [class.active]="sortField === 'status'">{{
@@ -145,6 +146,31 @@
               <span *ngIf="!tx.subcategoryName" class="text-muted">—</span>
             </td>
             <td>
+              <ng-container *ngIf="tx.suggestedLeaseId || tx.leaseId">
+                <span class="suggestion-badge">
+                  ✨ {{ tx.buildingName || "Building #" + tx.buildingId }} —
+                  {{ tx.unitNumber || "Unit #" + tx.housingUnitId }}
+                  <span
+                    *ngIf="tx.leaseId"
+                    class="badge badge--confirmed"
+                    title="Lease confirmed"
+                    >✓</span
+                  >
+                  <span
+                    *ngIf="!tx.leaseId && tx.suggestedLeaseId"
+                    class="badge badge--suggestion"
+                    title="Will be confirmed on click"
+                    >?</span
+                  >
+                </span>
+              </ng-container>
+              <span
+                *ngIf="!tx.suggestedLeaseId && !tx.leaseId"
+                class="text-muted"
+                >—</span
+              >
+            </td>
+            <td>
               <span class="badge badge--status-{{ tx.status.toLowerCase() }}">
                 {{ STATUS_LABELS[tx.status] }}
               </span>
@@ -166,7 +192,7 @@
             </td>
           </tr>
           <tr *ngIf="response.content.length === 0">
-            <td colspan="8" class="empty-state">
+            <td colspan="9" class="empty-state">
               No transactions found for this batch.
             </td>
           </tr>
