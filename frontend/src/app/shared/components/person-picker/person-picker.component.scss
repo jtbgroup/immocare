@@ -1,11 +1,7 @@
-// shared/components/person-picker/person-picker.component.scss
-
 .person-picker {
   position: relative;
   width: 100%;
 }
-
-// ─── Label ────────────────────────────────────────────────────────────────────
 
 .picker-label {
   display: block;
@@ -19,8 +15,6 @@
     margin-left: 2px;
   }
 }
-
-// ─── Search input ─────────────────────────────────────────────────────────────
 
 .picker-search-wrapper {
   position: relative;
@@ -44,8 +38,6 @@
   }
 }
 
-// ─── Dropdown ─────────────────────────────────────────────────────────────────
-
 .picker-dropdown {
   position: absolute;
   top: calc(100% + 2px);
@@ -59,8 +51,6 @@
   max-height: 280px;
   overflow-y: auto;
 }
-
-// ─── Dropdown items ───────────────────────────────────────────────────────────
 
 .picker-item {
   display: block;
@@ -87,7 +77,6 @@
   font-style: italic;
   font-size: 0.85rem;
 }
-
 .picker-result {
   &:hover,
   &:focus {
@@ -100,7 +89,6 @@
   font-weight: 600;
   color: #333;
 }
-
 .result-meta {
   color: #6c757d;
   font-size: 0.85rem;
@@ -119,7 +107,6 @@
     background: #e3f2fd;
     color: #1565c0;
   }
-
   &--tenant {
     background: #e8f5e9;
     color: #2e7d32;
@@ -136,8 +123,6 @@
     text-decoration: underline;
   }
 }
-
-// ─── Selected state ───────────────────────────────────────────────────────────
 
 .selected-person {
   display: flex;

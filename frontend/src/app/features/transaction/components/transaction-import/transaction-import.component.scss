@@ -1,6 +1,3 @@
-// transaction-import.component.scss
-// Shared global styles: info-card, form-group, form-control, btn, alert, data-table
-
 // ─── Drop zone ────────────────────────────────────────────────────────────────
 
 .drop-zone {
@@ -97,10 +94,6 @@
     overflow-x: auto;
   }
 
-  &.panel-open .preview-table-wrap {
-    // table shrinks gracefully when panel is open
-  }
-
   app-import-row-detail-panel {
     flex: 0 0 360px;
     position: sticky;
@@ -136,19 +129,23 @@
   text-align: center;
 }
 
-// ─── Badges ───────────────────────────────────────────────────────────────────
+// ─── Suggestion / enriched badges ────────────────────────────────────────────
 
-.suggestion-badge {
+%inline-badge {
   display: inline-flex;
   align-items: center;
   gap: 0.25rem;
   padding: 0.2em 0.5em;
-  background: #fffbeb;
-  border: 1px solid #fcd34d;
   border-radius: 4px;
   font-size: 0.75rem;
-  color: #92400e;
   white-space: nowrap;
+}
+
+.suggestion-badge {
+  @extend %inline-badge;
+  background: #fffbeb;
+  border: 1px solid #fcd34d;
+  color: #92400e;
 
   &--lease {
     background: #f0fdf4;
@@ -158,15 +155,11 @@
 }
 
 .enriched-badge {
-  display: inline-flex;
-  align-items: center;
+  @extend %inline-badge;
   padding: 0.2em 0.5em;
   background: #eff6ff;
   border: 1px solid #93c5fd;
-  border-radius: 4px;
-  font-size: 0.75rem;
   color: #1d4ed8;
-  white-space: nowrap;
 
   &--lease {
     background: #f0fdf4;
@@ -179,6 +172,8 @@
   color: #9ca3af;
   font-size: 0.8rem;
 }
+
+// ─── Badges ───────────────────────────────────────────────────────────────────
 
 .badge {
   display: inline-block;
@@ -218,44 +213,6 @@
   }
 }
 
-// ─── Duplicate link ───────────────────────────────────────────────────────────
-
-.dup-link {
-  font-size: 0.78rem;
-  color: #6b7280;
-  text-decoration: none;
-  white-space: nowrap;
-  opacity: 0.75;
-
-  &:hover {
-    color: #4f46e5;
-    opacity: 1;
-    text-decoration: underline;
-  }
-}
-
-// ─── Edit button ──────────────────────────────────────────────────────────────
-
-.btn-ghost {
-  background: none;
-  border: 1px solid transparent;
-  border-radius: 4px;
-  padding: 0.2rem 0.4rem;
-  cursor: pointer;
-  font-size: 0.85rem;
-  color: #6b7280;
-
-  &:hover {
-    background: #f3f4f6;
-    border-color: #d1d5db;
-  }
-  &--active {
-    background: #eff6ff;
-    border-color: #93c5fd;
-    color: #1d4ed8;
-  }
-}
-
 // ─── Import result ────────────────────────────────────────────────────────────
 
 .import-result {
@@ -285,7 +242,6 @@
     color: #374151;
     line-height: 1;
   }
-
   &__label {
     display: block;
     font-size: 0.78rem;
@@ -322,6 +278,44 @@
   display: flex;
   gap: 0.75rem;
   margin-top: 1rem;
+}
+
+// ─── Duplicate link ───────────────────────────────────────────────────────────
+
+.dup-link {
+  font-size: 0.78rem;
+  color: #6b7280;
+  text-decoration: none;
+  white-space: nowrap;
+  opacity: 0.75;
+
+  &:hover {
+    color: #4f46e5;
+    opacity: 1;
+    text-decoration: underline;
+  }
+}
+
+// ─── Edit button ──────────────────────────────────────────────────────────────
+
+.btn-ghost {
+  background: none;
+  border: 1px solid transparent;
+  border-radius: 4px;
+  padding: 0.2rem 0.4rem;
+  cursor: pointer;
+  font-size: 0.85rem;
+  color: #6b7280;
+
+  &:hover {
+    background: #f3f4f6;
+    border-color: #d1d5db;
+  }
+  &--active {
+    background: #eff6ff;
+    border-color: #93c5fd;
+    color: #1d4ed8;
+  }
 }
 
 // ─── Misc ─────────────────────────────────────────────────────────────────────
