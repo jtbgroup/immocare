@@ -8,40 +8,38 @@
 | **Priority** | MUST HAVE |
 | **Story Points** | 5 |
 
-**As an** ADMIN **I want to** review imported transactions and validate or correct automatic suggestions **so that** the classification and accounting month are accurate before the data enters reporting.
+**As an** ADMIN **I want to** review imported transactions and validate or correct automatic suggestions **so that** classification, accounting month, and lease links are accurate before the data enters reporting.
 
 ## Acceptance Criteria
 
-**AC1:** After import (US084), admin is automatically redirected to the batch review page at `/transactions/import/{batchId}`.
+**AC1:** After import (US084), admin is automatically redirected to `/transactions/import/{batchId}`.
 
-**AC2:** Page title: "Review import — [filename] — [imported_at date]". Progress indicator: "X / Y confirmed" updated in real time.
+**AC2:** Page header: "Review Import — Batch #{batchId}". Summary cards: Total / Confirmed / Draft. Progress updates in real time as rows are confirmed.
 
-**AC3:** Each DRAFT transaction row displays:
-- Execution date, accounting month (editable month picker inline), direction badge, amount, counterparty name, counterparty account.
-- Category + subcategory fields: pre-filled with suggestion if confidence ≥ threshold, shown with a ✨ icon indicating it is a suggestion. Editable dropdowns inline.
-- Confidence level shown as a small label next to the suggestion (e.g. "confidence: 7").
-- Bank account label (pre-assigned or empty dropdown).
-- Building / unit / lease fields (optional, inline dropdowns).
-- Row status: DRAFT (grey) / CONFIRMED (green) / REJECTED (strikethrough, red).
+**AC3:** Each row displays: date, accounting month (editable month picker inline), direction badge, amount, counterparty name, counterparty account, category + subcategory (editable dropdowns), bank account label, building / unit / lease dropdowns (optional), status badge (DRAFT grey / CONFIRMED green / CANCELLED red strikethrough).
 
-**AC4:** "Confirm" button per row → row status changes to CONFIRMED. Learning rules reinforced:
-- If subcategory suggestion was shown and accepted (not changed by admin): `tag_learning_rule.confidence += 1`.
-- If `accounting_month` proposal was accepted (not changed): `accounting_month_rule.confidence += 1`.
-- If admin manually changed subcategory or accounting_month: new or updated rule created with the corrected value.
+**AC4:** "Lease suggestion" column: shows ✓ badge (green) when a lease was confirmed during import, or ? badge (amber) when a suggestion is available but not yet confirmed. Pre-fills building + unit + lease dropdowns when admin opens the row for edit.
 
-**AC5:** "Reject" button per row → status set to CANCELLED (soft delete equivalent). Row greyed out and struck through. Rejected rows not included in statistics.
+**AC5:** "Confirm" button per DRAFT row:
+- Applies current inline values (accounting month, subcategory, lease, etc.).
+- Row status → CONFIRMED.
+- Learning rules reinforced: `tag_learning_rule.confidence += 1` if suggestion accepted; `accounting_month_rule.confidence += 1` if proposed month accepted. New rule created if admin manually changed value.
 
-**AC6:** "Confirm All" button → confirmation dialog: "Confirm [N] remaining DRAFT transactions? Suggestions will be applied as-is." Confirm → all DRAFT rows in batch set to CONFIRMED in one operation. Learning rules reinforced for each.
+**AC6:** "Reject" button per DRAFT row → status → CANCELLED. Row struck through, greyed out. Not included in statistics.
 
-**AC7:** Collapsed "Skipped duplicates ([N])" panel at bottom of page for audit. Shows: date, amount, direction, counterparty, and the reference of the existing matching transaction.
+**AC7:** "Confirm All Drafts" button → confirmation dialog "Confirm [N] remaining DRAFT transactions? Suggestions applied as-is." → all DRAFT rows confirmed in one `POST /api/v1/transactions/confirm-batch` call.
 
-**AC8:** Batch review page accessible at any time via `GET /api/v1/transactions/import/{batchId}` — even after partial confirmation. Already CONFIRMED or CANCELLED rows shown with their final status (non-editable).
+**AC8:** Already CONFIRMED or CANCELLED rows shown read-only with their final status.
 
-**AC9:** All transactions in batch are CONFIRMED or CANCELLED → "All transactions reviewed." banner with link back to transaction list.
+**AC9:** All rows CONFIRMED or CANCELLED → "All transactions reviewed." banner + "Back to transactions" link.
 
-**Endpoints:**
-- `GET /api/v1/transactions/import/{batchId}` — HTTP 200, paged list of transactions in batch.
-- `PATCH /api/v1/transactions/{id}/confirm` — HTTP 200, returns updated transaction.
-- `POST /api/v1/transactions/confirm-batch` body `{ batchId }` — HTTP 200, returns `{ confirmedCount: int }`.
+**AC10:** Page accessible at any time (bookmarkable URL) — partial confirmation supported across sessions.
 
-**Last Updated:** 2026-03-05 | **Status:** Ready for Development
+## Endpoints
+
+- `GET /api/v1/transactions/import/{batchId}` — paged list of transactions in batch (returns `FinancialTransactionSummaryDTO` with `suggestedLeaseId`, `buildingId`, `housingUnitId`)
+- `PATCH /api/v1/transactions/{id}/confirm` — confirm single row, returns updated transaction
+- `POST /api/v1/transactions/confirm-batch` body `{ batchId }` — confirm all drafts, returns `{ confirmedCount: int }`
+- `PATCH /api/v1/transactions/bulk` — bulk update fields (accounting month, subcategory, building, unit, lease) on multiple rows
+
+**Last Updated:** 2026-03-10 | **Status:** ✅ Implemented

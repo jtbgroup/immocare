@@ -1,23 +1,24 @@
-# User Story US048: Person Picker (Search)
+# User Story US048: Person Picker (Autocomplete)
 
 | Attribute | Value |
 |-----------|-------|
 | **Story ID** | US048 |
 | **Epic** | Person Management |
-| **Related UC** | UC009 |
+| **Related UC** | UC006 |
 | **Priority** | MUST HAVE |
 | **Story Points** | 2 |
 
-**As an** ADMIN **I want to** search for persons via an autocomplete picker **so that** I can quickly find and link a person when assigning owners or tenants.
+**As an** ADMIN **I want to** search for a person by name via an autocomplete picker **so that** I can quickly link them as owner or tenant in a form.
 
 ## Acceptance Criteria
 
 **AC1:** Type 1 char → no suggestions. Type 2+ chars → up to 10 matching persons shown within 300ms.
-**AC2:** Search matches last name, first name, or national ID (case-insensitive, partial).
-**AC3:** Each suggestion shows: full name + city + (optional) national ID last 4 digits.
-**AC4:** No match → "No person found. Create new?" shortcut shown.
+**AC2:** Search matches last name, first name, email, or national ID (case-insensitive, partial).
+**AC3:** Each suggestion shows: full name + city + (optional) last 4 digits of national ID.
+**AC4:** No match → "No person found." message (no create shortcut in picker — use Persons page).
 **AC5:** Select a suggestion → person linked, picker closed.
+**AC6:** Used in: building form (owner), housing unit form (owner), lease form (tenant).
 
-**Endpoint:** `GET /api/v1/persons/search?q={term}&limit=10` — min 2 chars, returns PersonSummaryDTO.
+**Endpoint:** `GET /api/v1/persons/picker?q={term}` — min 2 chars, max 10 results, returns `PersonSummaryDTO`.
 
-**Last Updated:** 2026-02-24 | **Status:** Ready for Development
+**Last Updated:** 2026-03-10 | **Status:** ✅ Implemented

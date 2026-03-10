@@ -4,7 +4,7 @@
 |-----------|-------|
 | **Story ID** | US045 |
 | **Epic** | Person Management |
-| **Related UC** | UC009 |
+| **Related UC** | UC006 |
 | **Priority** | MUST HAVE |
 | **Story Points** | 2 |
 
@@ -12,12 +12,14 @@
 
 ## Acceptance Criteria
 
-**AC1:** Person details page shows all fields + sections "Owned Buildings", "Owned Units" (if any).
+**AC1:** Person details page shows all fields plus sections: "Owned Buildings", "Owned Units", "Leases" (as tenant), "Bank Accounts (IBAN)".
 **AC2:** Click "Edit" → form pre-filled with all current values.
 **AC3:** Change any field → save → "Person updated successfully", new values shown.
-**AC4:** Set national ID already used by another person → error "This national ID is already assigned to another person".
+**AC4:** Set national ID already used by another person → error "This national ID is already assigned to another person."
 **AC5:** Cancel → changes discarded.
 
-**Endpoint:** `PUT /api/v1/persons/{id}`
+**Endpoints:**
+- `GET /api/v1/persons/{id}` — detail
+- `PUT /api/v1/persons/{id}` — update
 
-**Last Updated:** 2026-02-24 | **Status:** Ready for Development
+**Last Updated:** 2026-03-10 | **Status:** ✅ Implemented

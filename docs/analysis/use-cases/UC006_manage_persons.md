@@ -4,60 +4,71 @@
 
 | Attribute | Value |
 |---|---|
-| ID | UC006 |
-| Name | Manage Persons |
-| Actor | Admin |
-| Module | Persons |
-| Stack | Spring Boot · Angular · PostgreSQL |
-| Branch | develop |
+| **UC ID** | UC006 |
+| **Name** | Manage Persons |
+| **Actor** | ADMIN |
+| **Epic** | Person Management |
+| **Flyway** | V006 (person table — baseline) · V016 (person_bank_account) |
+| **Status** | ✅ Implemented |
+| **Branch** | develop |
 
-## Description
+A person record represents any natural person involved in the real estate portfolio — whether as the owner of a building or housing unit, or as a tenant on a lease. Person records are created and maintained independently of their role; the relationship to buildings, units, and leases is tracked via foreign keys on those entities.
 
-Allows an administrator to create, read, update, and delete persons. A person can be an owner of buildings or housing units, and a tenant in leases. The detail view aggregates all related buildings, units, and leases. A quick-search "picker" endpoint supports autocomplete in forms.
-
-> **Known limitation:** `isTenant` and `leases` are stubs (always `false` / empty list) pending full lease-person integration. The delete check only validates ownership; active lease tenant check is stubbed.
+Each person can hold one or more bank accounts (IBANs). These IBANs are used during transaction import to automatically suggest the related lease when a counterparty account matches a known person IBAN (see UC015 — Import Parser Strategies).
 
 ---
 
 ## User Stories
 
-### US024 — List Persons
+| Story | Title | Priority | Points |
+|---|---|---|---|
+| US024 | List Persons | MUST HAVE | 2 |
+| US025 | Get Person Details | MUST HAVE | 2 |
+| US026 | Create Person | MUST HAVE | 3 |
+| US027 | Edit Person | MUST HAVE | 2 |
+| US028 | Delete Person | SHOULD HAVE | 2 |
+| US029 | Person Picker (Autocomplete) | MUST HAVE | 1 |
+| US030 | Manage Person Bank Accounts (IBAN) | MUST HAVE | 3 |
 
-**As an** admin, **I want to** view a paginated list of persons **so that** I can browse the contacts.
+---
+
+## US024 — List Persons
+
+**As an** ADMIN **I want to** view a paginated list of persons **so that** I can browse the contact registry.
 
 **Acceptance Criteria:**
-- AC1: Returns paginated `PersonSummaryDTO` list.
-- AC2: Can be filtered by `search` (partial match on lastName, firstName, email — case-insensitive).
-- AC3: Each summary includes `isOwner` and `isTenant` flags (computed).
-- AC4: Default sort: lastName ASC.
+- AC1: Returns paginated list with: last name, first name, email, GSM, isOwner badge, isTenant badge.
+- AC2: Filterable by `search` (partial match on lastName, firstName, email — case-insensitive).
+- AC3: Default sort: lastName ASC.
+- AC4: Clicking a row navigates to person details.
 
 **Endpoint:** `GET /api/v1/persons?search=&page=&size=&sort=`
 
 ---
 
-### US025 — Get Person Details
+## US025 — Get Person Details
 
-**As an** admin, **I want to** view the full details of a person **so that** I can see all their relationships.
+**As an** ADMIN **I want to** view the full details of a person **so that** I can see all their relationships and registered IBANs.
 
 **Acceptance Criteria:**
 - AC1: Returns all personal fields.
-- AC2: Returns `ownedBuildings` (list of buildings where this person is owner).
-- AC3: Returns `ownedUnits` (list of housing units where this person is direct owner).
-- AC4: Returns `isOwner` flag (true if any building or unit references this person).
-- AC5: `isTenant` = false (stub — not yet implemented).
-- AC6: `leases` = [] (stub).
+- AC2: Returns `ownedBuildings` (buildings where this person is owner).
+- AC3: Returns `ownedUnits` (housing units where this person is direct owner).
+- AC4: Returns `leases` (active and past leases as tenant).
+- AC5: Returns `bankAccounts` (list of IBANs registered for this person).
+- AC6: Returns computed flags `isOwner` and `isTenant`.
 
 **Endpoint:** `GET /api/v1/persons/{id}`
 
 ---
 
-### US026 — Create Person
+## US026 — Create Person
 
-**As an** admin, **I want to** create a new person **so that** I can register owners and tenants.
+**As an** ADMIN **I want to** create a person record **so that** I can register owners and tenants.
 
 **Acceptance Criteria:**
 - AC1: Required fields: `lastName`, `firstName`.
-- AC2: `nationalId`, if provided, must be unique (case-insensitive). Returns HTTP 409 if duplicate.
+- AC2: `nationalId`, if provided, must be globally unique (case-insensitive) → HTTP 409 if duplicate.
 - AC3: `country` defaults to `Belgium` if not provided.
 - AC4: Returns HTTP 201 on success.
 
@@ -65,48 +76,72 @@ Allows an administrator to create, read, update, and delete persons. A person ca
 
 ---
 
-### US027 — Edit Person
+## US027 — Edit Person
 
-**As an** admin, **I want to** update a person's information **so that** I can keep the contact registry accurate.
+**As an** ADMIN **I want to** update a person's information **so that** I can keep the contact registry accurate.
 
 **Acceptance Criteria:**
 - AC1: All fields from US026 can be updated.
-- AC2: `nationalId` uniqueness is enforced excluding the current person.
+- AC2: `nationalId` uniqueness enforced excluding the current person.
 - AC3: Returns HTTP 404 if the person does not exist.
 
 **Endpoint:** `PUT /api/v1/persons/{id}`
 
 ---
 
-### US028 — Delete Person
+## US028 — Delete Person
 
-**As an** admin, **I want to** delete a person **so that** I can remove obsolete contacts.
+**As an** ADMIN **I want to** delete a person **so that** I can remove records created by mistake.
 
 **Acceptance Criteria:**
-- AC1: Deletion is blocked if the person is referenced as owner of any building or housing unit.
-- AC2: Returns HTTP 409 with lists of `ownedBuildings`, `ownedUnits`, and `activeLeases` (stubbed as empty).
-- AC3: Returns HTTP 204 on successful deletion.
+- AC1: Blocked if person is referenced as owner of any building or housing unit → HTTP 409 with lists of `ownedBuildings` and `ownedUnits`.
+- AC2: Blocked if person is an active tenant on any lease → HTTP 409.
+- AC3: On deletion, all associated `person_bank_account` records are cascade-deleted (ON DELETE CASCADE).
+- AC4: Returns HTTP 204 on success.
 
 **Endpoint:** `DELETE /api/v1/persons/{id}`
 
 ---
 
-### US029 — Person Picker (Autocomplete)
+## US029 — Person Picker (Autocomplete)
 
-**As an** admin, **I want to** search for a person by name **so that** I can link them as owner or tenant in a form.
+**As an** ADMIN **I want to** search for a person by name **so that** I can link them as owner or tenant in a form.
 
 **Acceptance Criteria:**
-- AC1: Accepts a `q` query parameter (min 2 characters).
+- AC1: Accepts `q` query parameter (min 2 characters).
 - AC2: Returns up to 10 matches ordered by lastName ASC.
-- AC3: Returns an empty list (not 404) if fewer than 2 characters.
+- AC3: Returns empty list (not 404) if fewer than 2 characters.
+- AC4: Used in: building form (owner picker), housing unit form (owner picker), lease form (tenant picker).
 
 **Endpoint:** `GET /api/v1/persons/picker?q={query}`
 
 ---
 
+## US030 — Manage Person Bank Accounts (IBAN)
+
+**As an** ADMIN **I want to** register one or more IBANs for a person **so that** transaction imports can automatically suggest the related lease when a counterparty account matches.
+
+**Acceptance Criteria:**
+- AC1: Person details page shows a "Bank Accounts (IBAN)" section listing all registered IBANs: IBAN (formatted), label (optional), primary flag.
+- AC2: "Add IBAN" opens an inline form: IBAN* (required, valid format, globally unique), label (optional), primary (checkbox).
+- AC3: IBAN stored normalised: uppercased, spaces removed.
+- AC4: Duplicate IBAN across any person → error "This IBAN is already registered."
+- AC5: At most one IBAN per person can be flagged as primary. Setting a new primary automatically clears the previous one.
+- AC6: Edit button → inline form pre-filled. All fields editable.
+- AC7: Delete button → confirmation dialog → HTTP 204. No cascade restriction.
+- AC8: IBANs are matched (case-insensitive) against `counterparty_account` on imported transactions to auto-suggest the lease linked to this person (see UC015).
+
+**Endpoints:**
+- `GET /api/v1/persons/{personId}/bank-accounts` — HTTP 200
+- `POST /api/v1/persons/{personId}/bank-accounts` — HTTP 201
+- `PUT /api/v1/persons/{personId}/bank-accounts/{id}` — HTTP 200
+- `DELETE /api/v1/persons/{personId}/bank-accounts/{id}` — HTTP 204
+
+---
+
 ## Data Model
 
-### Table: `person`
+### Table: `person` (V006)
 
 | Column | Type | Constraints |
 |---|---|---|
@@ -125,43 +160,49 @@ Allows an administrator to create, read, update, and delete persons. A person ca
 | `created_at` | TIMESTAMP | NOT NULL, DEFAULT NOW() |
 | `updated_at` | TIMESTAMP | NOT NULL, DEFAULT NOW() |
 
+### Table: `person_bank_account` (V016)
+
+| Column | Type | Constraints |
+|---|---|---|
+| `id` | BIGSERIAL | PK |
+| `person_id` | BIGINT | NOT NULL, FK → person(id) ON DELETE CASCADE |
+| `iban` | VARCHAR(50) | NOT NULL, UNIQUE |
+| `label` | VARCHAR(100) | nullable |
+| `is_primary` | BOOLEAN | NOT NULL, DEFAULT FALSE |
+| `created_at` | TIMESTAMP | NOT NULL, DEFAULT NOW() |
+
 ---
 
 ## DTOs
 
-### `PersonSummaryDTO` (list/picker response)
+### `PersonSummaryDTO` (list / picker)
 ```
 id, lastName, firstName, email, gsm, isOwner, isTenant
 ```
 
-### `PersonDTO` (detail response)
+### `PersonDTO` (detail)
 ```
 id, lastName, firstName, birthDate, birthPlace, nationalId,
 gsm, email, streetAddress, postalCode, city, country,
 createdAt, updatedAt,
 isOwner, isTenant,
-ownedBuildings: [{ id, name, city }]
-ownedUnits: [{ id, unitNumber, buildingId, buildingName }]
-leases: []   ← stub
+ownedBuildings: [{ id, name, city }],
+ownedUnits:     [{ id, unitNumber, buildingId, buildingName }],
+leases:         [{ id, reference, startDate, endDate, status, unitNumber, buildingName }],
+bankAccounts:   [{ id, iban, label, primary, createdAt }]
 ```
 
-### `CreatePersonRequest` (POST body)
+### `PersonBankAccountDTO`
 ```
-lastName*       VARCHAR(100)
-firstName*      VARCHAR(100)
-birthDate       LocalDate
-birthPlace      VARCHAR(100)
-nationalId      VARCHAR(20)   unique
-gsm             VARCHAR(20)
-email           VARCHAR(100)
-streetAddress   VARCHAR(200)
-postalCode      VARCHAR(20)
-city            VARCHAR(100)
-country         VARCHAR(100)  default "Belgium"
+id, personId, iban, label, primary, createdAt
 ```
 
-### `UpdatePersonRequest` (PUT body)
-Same fields as `CreatePersonRequest`.
+### `SavePersonBankAccountRequest`
+```
+iban*    VARCHAR(50)   required, normalized before save
+label    VARCHAR(100)  optional
+primary  boolean       default false
+```
 
 ---
 
@@ -172,53 +213,45 @@ Same fields as `CreatePersonRequest`.
 | BR-UC006-01 | `lastName` and `firstName` are required |
 | BR-UC006-02 | `nationalId`, if provided, must be globally unique (case-insensitive) |
 | BR-UC006-03 | `country` defaults to `Belgium` when null or blank |
-| BR-UC006-04 | Cannot delete a person who is owner of buildings or units |
-| BR-UC006-05 | `isTenant` is a stub (always false until lease integration) |
+| BR-UC006-04 | Cannot delete a person who is owner of buildings or units, or active tenant on a lease |
+| BR-UC006-05 | `isTenant` is `true` when at least one ACTIVE or FINISHED lease references this person as tenant |
+| BR-UC006-06 | IBAN stored normalised: uppercased, spaces removed |
+| BR-UC006-07 | IBAN must be globally unique across all persons |
+| BR-UC006-08 | Only one IBAN per person can be flagged as primary; setting a new primary clears the previous one |
+| BR-UC006-09 | `person_bank_account` rows are cascade-deleted when the person is deleted |
 
 ---
 
 ## Error Responses
 
-| Condition | HTTP | Error key |
+| Condition | HTTP | Message |
 |---|---|---|
-| Person not found | 404 | `NOT_FOUND` |
-| Duplicate nationalId | 409 | `IllegalArgumentException` message |
-| Referenced as owner on delete | 409 | `PERSON_REFERENCED` + ownedBuildings, ownedUnits, activeLeases |
+| Person not found | 404 | `Person not found` |
+| Duplicate nationalId | 409 | `This national ID is already assigned to another person` |
+| Referenced as owner or tenant on delete | 409 | `PERSON_REFERENCED` + ownedBuildings, ownedUnits, activeLeases |
+| Duplicate IBAN | 409 | `This IBAN is already registered` |
+| Bank account not found | 404 | `Person bank account not found` |
+| Bank account does not belong to person | 400 | `Account does not belong to person` |
 
 ---
 
-## Generation Prompt
+## API Endpoints
 
-```
-Generate the complete Spring Boot + Angular implementation for UC006 — Manage Persons in the ImmoCare application.
+| Method | Endpoint | Story |
+|---|---|---|
+| GET | `/api/v1/persons` | US024 |
+| GET | `/api/v1/persons/{id}` | US025 |
+| POST | `/api/v1/persons` | US026 |
+| PUT | `/api/v1/persons/{id}` | US027 |
+| DELETE | `/api/v1/persons/{id}` | US028 |
+| GET | `/api/v1/persons/picker` | US029 |
+| GET | `/api/v1/persons/{personId}/bank-accounts` | US030 |
+| POST | `/api/v1/persons/{personId}/bank-accounts` | US030 |
+| PUT | `/api/v1/persons/{personId}/bank-accounts/{id}` | US030 |
+| DELETE | `/api/v1/persons/{personId}/bank-accounts/{id}` | US030 |
 
-Stack:
-- Backend: Spring Boot 3, Java 17, Spring Data JPA, PostgreSQL, MapStruct, Spring Security (ROLE_ADMIN)
-- Frontend: Angular 17 standalone components, TypeScript, SCSS
-- Database: Flyway V001 already contains `person` table — do NOT generate a migration
-- Branch: develop
+---
 
-Backend classes to generate:
-1. Entity: `Person` — table `person`, all columns. @PrePersist/@PreUpdate on createdAt/updatedAt.
-2. DTOs: `PersonSummaryDTO` (id, lastName, firstName, email, gsm, isOwner, isTenant — isOwner/isTenant set in service), `PersonDTO` (full detail with nested OwnedBuildingDTO and OwnedUnitDTO inner classes), `CreatePersonRequest` (validated), `UpdatePersonRequest`
-3. Mapper: `PersonMapper` (MapStruct) — toDTO ignores isOwner, isTenant, ownedBuildings, ownedUnits, leases (set in service). toSummaryDTO ignores isOwner, isTenant.
-4. Repository: `PersonRepository` — findAll(Pageable), searchForPicker(query, PageRequest) with @Query (LIKE on lastName+firstName+email, case-insensitive), existsByNationalIdIgnoreCase, existsByNationalIdIgnoreCaseAndIdNot
-5. Exceptions: `PersonNotFoundException`, `PersonReferencedException` (with ownedBuildings, ownedUnits, activeLeases lists)
-6. Service: `PersonService` — getAll(search, Pageable), searchForPicker(q), getById(id), create(req), update(id, req), delete(id). `buildFullDTO`: sets isOwner (building OR unit owner), isTenant=false (stub), ownedBuildings, ownedUnits, leases=[]. `enrichSummaryFlags`: sets isOwner, isTenant=false.
-7. Controller: `PersonController` — @RequestMapping("/api/v1/persons"). GET /, GET /{id}, POST /, PUT /{id}, DELETE /{id}, GET /picker?q=
-
-Frontend classes to generate:
-1. Model: `person.model.ts` — PersonSummary, Person, CreatePersonRequest, UpdatePersonRequest, OwnedBuilding, OwnedUnit
-2. Service: `PersonService` — getAll(search?, page, size), getById(id), create(req), update(id, req), delete(id), searchForPicker(q)
-3. Components (standalone):
-   - `PersonListComponent` — paginated table with search bar, isOwner/isTenant badge columns, navigate to detail
-   - `PersonFormComponent` — reactive form create/edit, all fields, country default Belgium
-   - `PersonDetailsComponent` — full detail card, ownedBuildings list, ownedUnits list, edit/delete buttons
-   - `PersonPickerComponent` — reusable autocomplete component (input: [label], output: (personSelected)). Used in BuildingFormComponent and LeaseFormComponent as owner/tenant picker. Debounces input, min 2 chars, shows lastName + firstName + email.
-
-Business rules to enforce in frontend:
-- BR-UC006-01: required lastName, firstName
-- BR-UC006-02: uniqueness error displayed from backend message
-- BR-UC006-04: show ownedBuildings and ownedUnits in delete error dialog
-- PersonPickerComponent: disable submit until a person is selected
-```
+**Last Updated:** 2026-03-10
+**Branch:** develop
+**Status:** ✅ Implemented

@@ -4,7 +4,7 @@
 |-----------|-------|
 | **Story ID** | US047 |
 | **Epic** | Person Management |
-| **Related UC** | UC009 |
+| **Related UC** | UC006 |
 | **Priority** | MUST HAVE |
 | **Story Points** | 3 |
 
@@ -12,13 +12,13 @@
 
 ## Acceptance Criteria
 
-**AC1:** Building/unit edit form has "Owner" field with person picker.
-**AC2:** Type 2+ chars in picker → suggestions shown (max 10, <300ms response).
-**AC3:** Select a person → their name shown in owner field.
-**AC4:** Save → building/unit linked to person via `ownerId` FK.
-**AC5:** Person details show "Owned Buildings" and "Owned Units" sections reflecting all linked entities.
-**AC6:** Clear owner → `ownerId` = NULL, "Owner: Not specified" shown.
+**AC1:** Building and housing unit edit forms each have an "Owner" field with a person picker.
+**AC2:** Type 2+ chars in picker → suggestions shown (max 10, case-insensitive match on name/email/nationalId, <300ms).
+**AC3:** Select a person → their name shown in the owner field.
+**AC4:** Save → building/unit linked to the person via `owner_id` FK.
+**AC5:** Person details page shows "Owned Buildings" and "Owned Units" sections reflecting all linked entities.
+**AC6:** Clear owner → `owner_id` = NULL, displayed as "Owner: Not specified."
 
 **Implemented via:** `PUT /api/v1/buildings/{id}` and `PUT /api/v1/units/{id}` (ownerId field).
 
-**Last Updated:** 2026-02-24 | **Status:** Ready for Development
+**Last Updated:** 2026-03-10 | **Status:** ✅ Implemented

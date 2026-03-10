@@ -4,7 +4,7 @@
 |-----------|-------|
 | **Story ID** | US044 |
 | **Epic** | Person Management |
-| **Related UC** | UC009 |
+| **Related UC** | UC006 |
 | **Priority** | MUST HAVE |
 | **Story Points** | 3 |
 
@@ -12,12 +12,12 @@
 
 ## Acceptance Criteria
 
-**AC1:** Click "Add Person" → form with: last name*, first name*, optional: birth date, birth place, national ID, GSM, email, address fields. Country defaults to Belgium.
+**AC1:** "Add Person" button → form with: last name*, first name*, and optional: birth date, birth place, national ID, GSM, email, address fields. Country defaults to Belgium.
 **AC2:** Fill required fields → save → "Person created successfully", redirected to person details.
-**AC3:** National ID already used → error "This national ID is already assigned to another person".
-**AC4:** Invalid email format → error "Please enter a valid email address".
+**AC3:** National ID already used by another person → error "This national ID is already assigned to another person."
+**AC4:** Invalid email format → error "Please enter a valid email address."
 **AC5:** Cancel → no person created.
 
 **Endpoint:** `POST /api/v1/persons` — HTTP 201.
 
-**Last Updated:** 2026-02-24 | **Status:** Ready for Development
+**Last Updated:** 2026-03-10 | **Status:** ✅ Implemented
