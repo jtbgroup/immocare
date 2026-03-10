@@ -34,6 +34,8 @@ import com.immocare.model.dto.UpdatePersonRequest;
 import com.immocare.model.entity.Person;
 import com.immocare.repository.BuildingRepository;
 import com.immocare.repository.HousingUnitRepository;
+import com.immocare.repository.LeaseTenantRepository;
+import com.immocare.repository.PersonBankAccountRepository;
 import com.immocare.repository.PersonRepository;
 
 @ExtendWith(MockitoExtension.class)
@@ -47,6 +49,10 @@ class PersonServiceTest {
     HousingUnitRepository housingUnitRepository;
     @Mock
     PersonMapper personMapper;
+    @Mock
+    LeaseTenantRepository leaseTenantRepository;
+    @Mock
+    PersonBankAccountRepository personBankAccountRepository;
 
     @InjectMocks
     PersonService personService;

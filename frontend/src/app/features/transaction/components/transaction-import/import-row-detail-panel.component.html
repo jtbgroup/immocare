@@ -1,0 +1,132 @@
+<div class="detail-panel" *ngIf="row">
+  <div class="panel-header">
+    <h3>Row {{ row.rowNumber }}</h3>
+    <button class="btn-close" (click)="close.emit()">✕</button>
+  </div>
+
+  <div class="panel-body">
+
+    <!-- Raw info -->
+    <div class="panel-section">
+      <div class="panel-meta">
+        <span class="meta-label">Date</span>
+        <span>{{ row.transactionDate ?? "—" }}</span>
+      </div>
+      <div class="panel-meta">
+        <span class="meta-label">Amount</span>
+        <span
+          [class.income]="row.direction === 'INCOME'"
+          [class.expense]="row.direction === 'EXPENSE'"
+        >
+          {{ row.amount?.toFixed(2) }} €
+        </span>
+      </div>
+      <div class="panel-meta" *ngIf="row.counterpartyName">
+        <span class="meta-label">Counterparty</span>
+        <span>{{ row.counterpartyName }}</span>
+      </div>
+      <div class="panel-meta" *ngIf="row.counterpartyAccount">
+        <span class="meta-label">IBAN</span>
+        <span class="monospace">{{ row.counterpartyAccount }}</span>
+      </div>
+      <div class="panel-meta" *ngIf="row.description">
+        <span class="meta-label">Description</span>
+        <span class="description-text">{{ row.description }}</span>
+      </div>
+    </div>
+
+    <!-- Direction -->
+    <div class="panel-section">
+      <label class="field-label">Direction</label>
+      <div class="direction-toggle">
+        <button
+          class="dir-btn"
+          [class.dir-btn--active]="row.direction === 'INCOME'"
+          (click)="setDirection('INCOME')"
+        >
+          ↑ Income
+        </button>
+        <button
+          class="dir-btn"
+          [class.dir-btn--active]="row.direction === 'EXPENSE'"
+          (click)="setDirection('EXPENSE')"
+        >
+          ↓ Expense
+        </button>
+      </div>
+    </div>
+
+    <!-- Subcategory -->
+    <div class="panel-section">
+      <label class="field-label">Subcategory</label>
+      <div
+        *ngIf="row.suggestedSubcategory && !selectedSubcategoryId"
+        class="suggestion-pill"
+        (click)="acceptSubcategorySuggestion()"
+      >
+        ✨ Accept: {{ row.suggestedSubcategory.categoryName }} /
+        {{ row.suggestedSubcategory.subcategoryName }}
+      </div>
+      <select
+        class="form-control"
+        [(ngModel)]="selectedSubcategoryId"
+        (ngModelChange)="onSubcategoryChange($event)"
+      >
+        <option [ngValue]="null">— None —</option>
+        <optgroup
+          *ngFor="let group of groupedSubcategories"
+          [label]="group.categoryName"
+        >
+          <option
+            *ngFor="let sub of group.subcategories"
+            [ngValue]="sub.id"
+          >
+            {{ sub.name }}
+          </option>
+        </optgroup>
+      </select>
+    </div>
+
+    <!-- Lease -->
+    <div class="panel-section">
+      <label class="field-label">Link to lease / unit</label>
+
+      <div
+        *ngIf="row.suggestedLease && !selectedLeaseId"
+        class="suggestion-pill suggestion-pill--lease"
+        (click)="acceptLeaseSuggestion()"
+      >
+        🏠 Accept: {{ row.suggestedLease.unitNumber }} ·
+        {{ row.suggestedLease.buildingName }} ({{
+          row.suggestedLease.personFullName
+        }})
+      </div>
+
+      <select
+        class="form-control"
+        [(ngModel)]="filterBuildingId"
+        (ngModelChange)="onBuildingFilterChange($event)"
+      >
+        <option [ngValue]="null">— All buildings —</option>
+        <option *ngFor="let b of buildings" [ngValue]="b.id">
+          {{ b.name }}
+        </option>
+      </select>
+
+      <select
+        class="form-control mt-xs"
+        [(ngModel)]="selectedLeaseId"
+        (ngModelChange)="onLeaseChange($event)"
+        [disabled]="filteredLeases.length === 0"
+      >
+        <option [ngValue]="null">— No lease —</option>
+        <option *ngFor="let l of filteredLeases" [ngValue]="l.id">
+          {{ l.housingUnitNumber }} · {{ l.buildingName }} ({{
+            l.tenantNames.join(", ")
+          }})
+        </option>
+      </select>
+    </div>
+
+  </div>
+</div>

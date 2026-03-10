@@ -2,7 +2,9 @@
 
 ## git
 
+```
 git add * && git commit -a && git push
+```
 
 ## deploy locally
 
@@ -20,7 +22,7 @@ docker compose -f docker-compose.dev.yml down -v && docker compose -f docker-com
 ## Feed DB
 ```
 # Real data from root
-cd frontend && npm run seed:dev -- --dataset=real && cd ..
+cd frontend && npm run seed:dev -- --dataset=real & && cd ..
 
 # Real data from frontend
 npm run seed:dev -- --dataset=real
@@ -35,4 +37,10 @@ npm run seed:dev -- --dataset=demo
 ```
 docker compose -f docker-compose.dev.yml logs -f backend
 docker compose -f docker-compose.dev.yml logs -f frontend
+```
+
+## Tests
+
+```
+cd backend && mvn test & && cd ..
 ```

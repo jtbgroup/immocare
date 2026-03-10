@@ -1,0 +1,162 @@
+.detail-panel {
+  width: 360px;
+  min-width: 320px;
+  background: #fff;
+  border-left: 1px solid #e5e7eb;
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+
+.panel-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 1rem 1.25rem;
+  border-bottom: 1px solid #e5e7eb;
+  background: #f9fafb;
+
+  h3 {
+    margin: 0;
+    font-size: 1rem;
+  }
+}
+
+.btn-close {
+  background: none;
+  border: none;
+  font-size: 1rem;
+  cursor: pointer;
+  color: #6b7280;
+  padding: 0.25rem;
+
+  &:hover {
+    color: #111;
+  }
+}
+
+.panel-body {
+  padding: 1rem 1.25rem;
+  overflow-y: auto;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+}
+
+.panel-section {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.panel-meta {
+  display: flex;
+  gap: 0.5rem;
+  font-size: 0.875rem;
+}
+
+.meta-label {
+  font-weight: 600;
+  min-width: 90px;
+  color: #6b7280;
+}
+
+.description-text {
+  font-size: 0.8rem;
+  color: #374151;
+  word-break: break-word;
+}
+
+.field-label {
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: #374151;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.direction-toggle {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.dir-btn {
+  flex: 1;
+  padding: 0.4rem;
+  border: 1px solid #d1d5db;
+  border-radius: 4px;
+  background: #f9fafb;
+  cursor: pointer;
+  font-size: 0.875rem;
+  color: #374151;
+
+  &--active {
+    background: #e0f2fe;
+    border-color: #0284c7;
+    color: #0284c7;
+    font-weight: 600;
+  }
+
+  &:hover:not(.dir-btn--active) {
+    background: #f0f0f0;
+  }
+}
+
+.suggestion-pill {
+  padding: 0.4rem 0.75rem;
+  background: #fffbeb;
+  border: 1px solid #fcd34d;
+  border-radius: 20px;
+  font-size: 0.8rem;
+  cursor: pointer;
+  color: #92400e;
+  transition: background 0.15s;
+
+  &:hover {
+    background: #fef3c7;
+  }
+
+  &--lease {
+    background: #f0fdf4;
+    border-color: #86efac;
+    color: #166534;
+
+    &:hover {
+      background: #dcfce7;
+    }
+  }
+}
+
+.form-control {
+  width: 100%;
+  padding: 0.5rem 0.75rem;
+  border: 1px solid #d1d5db;
+  border-radius: 4px;
+  font-size: 0.875rem;
+  background: #fff;
+
+  &:disabled {
+    background: #f3f4f6;
+    color: #9ca3af;
+  }
+}
+
+.mt-xs {
+  margin-top: 0.5rem;
+}
+
+.income {
+  color: #16a34a;
+  font-weight: 600;
+}
+
+.expense {
+  color: #dc2626;
+  font-weight: 600;
+}
+
+.monospace {
+  font-family: monospace;
+  font-size: 0.8rem;
+}

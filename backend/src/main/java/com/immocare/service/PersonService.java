@@ -1,6 +1,5 @@
 package com.immocare.service;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -152,7 +151,7 @@ public class PersonService {
                 .stream()
                 .map(lt -> {
                     var lease = lt.getLease();
-                    var unit  = lease.getHousingUnit();
+                    var unit = lease.getHousingUnit();
                     return new PersonDTO.TenantLeaseDTO(
                             lease.getId(), unit.getId(), unit.getUnitNumber(),
                             unit.getBuilding().getName(), lease.getStatus().name());
