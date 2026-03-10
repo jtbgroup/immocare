@@ -43,7 +43,9 @@
   text-decoration: none;
   flex-shrink: 0;
 
-  &:hover { text-decoration: none; }
+  &:hover {
+    text-decoration: none;
+  }
 }
 
 .brand-icon {
@@ -93,7 +95,9 @@
   border-radius: 6px;
   font-size: 0.855rem;
   font-weight: 500;
-  transition: background 0.16s, color 0.16s;
+  transition:
+    background 0.16s,
+    color 0.16s;
   white-space: nowrap;
   border: none;
   background: none;
@@ -106,7 +110,8 @@
     text-decoration: none;
   }
 
-  &--active, &.app-nav__link--active {
+  &--active,
+  &.app-nav__link--active {
     background: rgba(255, 255, 255, 0.14);
     color: white;
   }
@@ -133,13 +138,17 @@
   left: 0;
   background: white;
   border-radius: 8px;
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.18), 0 2px 6px rgba(0, 0, 0, 0.1);
+  box-shadow:
+    0 8px 24px rgba(0, 0, 0, 0.18),
+    0 2px 6px rgba(0, 0, 0, 0.1);
   min-width: 180px;
   overflow: hidden;
   z-index: 200;
   animation: dropIn 0.15s ease;
 
-  &.open { display: block; }
+  &.open {
+    display: block;
+  }
 }
 
 .nav-dropdown__item {
@@ -181,9 +190,12 @@
   color: rgba(255, 255, 255, 0.55);
   text-decoration: none;
   font-size: 1.1rem;
-  transition: background 0.16s, color 0.16s;
+  transition:
+    background 0.16s,
+    color 0.16s;
 
-  &:hover, &--active {
+  &:hover,
+  &--active {
     background: rgba(255, 255, 255, 0.08);
     color: white;
     text-decoration: none;
@@ -224,7 +236,8 @@
   cursor: pointer;
   transition: background 0.16s;
 
-  &:hover, &.open {
+  &:hover,
+  &.open {
     background: rgba(255, 255, 255, 0.14);
   }
 }
@@ -256,7 +269,9 @@
   transition: transform 0.2s;
   margin-left: 0.1rem;
 
-  .avatar-btn.open & { transform: rotate(180deg); }
+  .avatar-btn.open & {
+    transform: rotate(180deg);
+  }
 }
 
 // ── Avatar Dropdown ───────────────────────────────────────────────────────────
@@ -268,18 +283,28 @@
   right: 0;
   background: white;
   border-radius: 10px;
-  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.18), 0 2px 8px rgba(0, 0, 0, 0.1);
+  box-shadow:
+    0 8px 32px rgba(0, 0, 0, 0.18),
+    0 2px 8px rgba(0, 0, 0, 0.1);
   min-width: 200px;
   overflow: hidden;
   z-index: 200;
   animation: dropIn 0.15s ease;
 
-  &.open { display: block; }
+  &.open {
+    display: block;
+  }
 }
 
 @keyframes dropIn {
-  from { opacity: 0; transform: translateY(-6px); }
-  to   { opacity: 1; transform: translateY(0); }
+  from {
+    opacity: 0;
+    transform: translateY(-6px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 .dropdown-header {
@@ -323,7 +348,10 @@
 
   &--logout {
     color: #dc2626;
-    &:hover { background: #fff5f5; color: #dc2626; }
+    &:hover {
+      background: #fff5f5;
+      color: #dc2626;
+    }
   }
 }
 
