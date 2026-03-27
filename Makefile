@@ -1,5 +1,5 @@
 # ImmoCare - Makefile
-.PHONY: help build up down restart logs shell db-shell backup restore \
+.PHONY: help build up up-postgres down restart logs shell db-shell backup restore \
         clean clean-all rebuild dev prod health install update \
         backend-test nginx-reload nginx-test \
         start stop dev-build logs-dev
@@ -9,191 +9,245 @@ APP_NAME = immocare
 VERSION  = 1.0
 BACKUP_DIR = ./backups
 
-help: ## Show available commands
-	@echo "ImmoCare v$(VERSION) - Available commands:"
+help: ## Affiche les commandes disponibles
+	@echo "ImmoCare v$(VERSION) — Commandes disponibles :"
+	@echo ""
+	@echo "── Profils de base de données ───────────────────────────────────────────"
+	@echo "  H2 (défaut)   : make up           → démarre sans PostgreSQL"
+	@echo "  PostgreSQL    : make up-postgres   → démarre avec PostgreSQL"
 	@echo ""
 	@grep -E '^[a-zA-Z_-]+:.*?## .*$$' $(MAKEFILE_LIST) | sort | \
-		awk 'BEGIN {FS = ":.*?## "}; {printf "\033[36m%-20s\033[0m %s\n", $$1, $$2}'
+		awk 'BEGIN {FS = ":.*?## "}; {printf "\033[36m%-22s\033[0m %s\n", $$1, $$2}'
 
-# ── Production ────────────────────────────────────────────────────────────────
+# ── Production — H2 (défaut) ──────────────────────────────────────────────────
 
-build: ## Build Docker image
-	@echo "Building $(APP_NAME):$(VERSION)..."
+build: ## Build l'image Docker
+	@echo "Build $(APP_NAME):$(VERSION)..."
 	docker compose build
 
-up: ## Start services
-	@echo "Starting services..."
+up: ## ▶  Démarrer avec H2 (base embarquée, recommandé)
+	@echo "Démarrage avec H2..."
 	docker compose up -d
-	@echo "✓ Services started"
+	@echo "✓ Services démarrés (H2)"
 	@echo "  Application : http://localhost:8090"
-	@echo "  Health      : http://localhost:8080/actuator/health"
+	@echo "  Health      : http://localhost:8090/actuator/health"
 
-down: ## Stop services
-	@echo "Stopping services..."
-	docker compose down
-	@echo "✓ Services stopped"
+# ── Production — PostgreSQL ───────────────────────────────────────────────────
 
-restart: ## Restart services
+up-postgres: ## ▶  Démarrer avec PostgreSQL (--profile postgres)
+	@echo "Démarrage avec PostgreSQL..."
+	DB_PROFILE=postgres docker compose --profile postgres up -d
+	@echo "✓ Services démarrés (PostgreSQL)"
+	@echo "  Application : http://localhost:8090"
+	@echo "  Health      : http://localhost:8090/actuator/health"
+
+down: ## ⏹  Arrêter tous les services
+	@echo "Arrêt des services..."
+	docker compose --profile postgres down
+	@echo "✓ Services arrêtés"
+
+restart: ## 🔄 Redémarrer les services
 	docker compose restart
-	@echo "✓ Services restarted"
+	@echo "✓ Services redémarrés"
 
-prod: ## Build and start in production mode
+prod: ## Build et démarrer en production (H2)
 	docker compose up -d --build
-	@echo "✓ Production deployment complete"
+	@echo "✓ Déploiement production (H2) terminé"
 	@echo "  Application : http://localhost:8090"
 
-rebuild: ## Full rebuild without cache
-	@echo "Rebuilding from scratch..."
+prod-postgres: ## Build et démarrer en production (PostgreSQL)
+	DB_PROFILE=postgres docker compose --profile postgres up -d --build
+	@echo "✓ Déploiement production (PostgreSQL) terminé"
+	@echo "  Application : http://localhost:8090"
+
+rebuild: ## Build complet sans cache
+	@echo "Rebuild depuis zéro..."
 	docker compose build --no-cache
-	@echo "✓ Rebuild complete"
+	@echo "✓ Rebuild terminé"
 
-# ── Development (daily use) ───────────────────────────────────────────────────
+# ── Développement (usage quotidien) ──────────────────────────────────────────
 
-start: ## ▶  Start dev environment WITHOUT rebuild (daily use)
-	@echo "Starting dev environment..."
+start: ## ▶  Démarrer l'env de dev avec H2 (sans rebuild)
+	@echo "Démarrage env de dev (H2)..."
 	docker compose -f docker-compose.dev.yml up -d
-	@echo "✓ Dev environment started (no rebuild)"
+	@echo "✓ Dev démarré (H2, sans rebuild)"
 	@echo "  Frontend : http://localhost:4200"
 	@echo "  Backend  : http://localhost:8080"
 
-stop: ## ⏹  Stop dev environment
-	@echo "Stopping dev environment..."
-	docker compose -f docker-compose.dev.yml down
-	@echo "✓ Dev environment stopped"
+start-postgres: ## ▶  Démarrer l'env de dev avec PostgreSQL (sans rebuild)
+	@echo "Démarrage env de dev (PostgreSQL)..."
+	DB_PROFILE=postgres docker compose -f docker-compose.dev.yml --profile postgres up -d
+	@echo "✓ Dev démarré (PostgreSQL, sans rebuild)"
+	@echo "  Frontend : http://localhost:4200"
+	@echo "  Backend  : http://localhost:8080"
 
-dev-build: ## 🔨 Rebuild dev images (only after pom.xml / package.json changes)
-	@echo "Rebuilding dev images..."
+stop: ## ⏹  Arrêter l'env de dev
+	@echo "Arrêt env de dev..."
+	docker compose -f docker-compose.dev.yml --profile postgres down
+	@echo "✓ Dev arrêté"
+
+dev-build: ## 🔨 Rebuild les images de dev (après changement pom.xml / package.json)
+	@echo "Rebuild images dev (H2)..."
 	docker compose -f docker-compose.dev.yml up -d --build
-	@echo "✓ Dev images rebuilt and started"
+	@echo "✓ Images dev rebuildées"
 	@echo "  Frontend : http://localhost:4200"
 	@echo "  Backend  : http://localhost:8080"
 
-logs-dev: ## View dev logs
+dev-build-postgres: ## 🔨 Rebuild les images de dev (PostgreSQL)
+	@echo "Rebuild images dev (PostgreSQL)..."
+	DB_PROFILE=postgres docker compose -f docker-compose.dev.yml --profile postgres up -d --build
+	@echo "✓ Images dev rebuildées (PostgreSQL)"
+
+logs-dev: ## Voir les logs de dev
 	docker compose -f docker-compose.dev.yml logs -f
 
-# ── Legacy dev commands (kept for compatibility) ──────────────────────────────
+# ── Commandes legacy (compatibilité) ─────────────────────────────────────────
 
-dev: ## Start in development mode with logs visible (rebuilds — use 'start' for daily use)
+dev: ## Démarrer en mode dev avec logs visibles (rebuild — utiliser 'start' au quotidien)
 	docker compose -f docker-compose.dev.yml up --build
 
-dev-d: ## Start in development mode detached (rebuilds — use 'start' for daily use)
+dev-d: ## Démarrer en mode dev détaché (rebuild — utiliser 'start' au quotidien)
 	docker compose -f docker-compose.dev.yml up -d --build
-	@echo "✓ Dev services started"
+	@echo "✓ Services dev démarrés"
 	@echo "  Frontend : http://localhost:4200"
 	@echo "  Backend  : http://localhost:8080"
 
-dev-down: ## Stop development services
+dev-down: ## Arrêter les services de développement
 	docker compose -f docker-compose.dev.yml down
-	@echo "✓ Dev services stopped"
+	@echo "✓ Services dev arrêtés"
 
-# ── Logs ──────────────────────────────────────────────────────────────────────
+# ── Logs ─────────────────────────────────────────────────────────────────────
 
-logs: ## View all logs
+logs: ## Voir tous les logs
 	docker compose logs -f
 
-logs-app: ## View application logs
+logs-app: ## Voir les logs de l'application
 	docker compose logs -f app
 
-logs-db: ## View database logs
+logs-db: ## Voir les logs de la base de données
 	docker compose logs -f postgres
 
-# ── Database ──────────────────────────────────────────────────────────────────
+# ── Base de données ───────────────────────────────────────────────────────────
 
-db-shell: ## Open PostgreSQL shell
-	docker compose exec postgres psql -U immocare -d immocare
+db-shell: ## Ouvrir un shell PostgreSQL (requiert --profile postgres)
+	docker compose --profile postgres exec postgres psql -U immocare -d immocare
 
-backup: ## Backup database
+h2-console: ## Afficher l'URL de la console H2
+	@echo "Console H2 : http://localhost:8080/h2-console"
+	@echo "  JDBC URL : jdbc:h2:file:./data/immocare"
+	@echo "  User     : sa"
+	@echo "  Password : (vide)"
+
+backup: ## Sauvegarder la base PostgreSQL
 	@mkdir -p $(BACKUP_DIR)
-	@echo "Creating backup..."
-	@docker compose exec -T postgres pg_dump -U immocare immocare \
+	@echo "Création du backup..."
+	@docker compose --profile postgres exec -T postgres pg_dump -U immocare immocare \
 		> $(BACKUP_DIR)/backup_$$(date +%Y%m%d_%H%M%S).sql
-	@echo "✓ Backup created in $(BACKUP_DIR)"
+	@echo "✓ Backup créé dans $(BACKUP_DIR)"
 
-restore: ## Restore database (usage: make restore FILE=backup.sql)
+restore: ## Restaurer la base PostgreSQL (usage: make restore FILE=backup.sql)
 	@if [ -z "$(FILE)" ]; then \
-		echo "Error: Please specify FILE=backup.sql"; \
+		echo "Erreur : spécifiez FILE=backup.sql"; \
 		exit 1; \
 	fi
-	@echo "Restoring from $(FILE)..."
-	@docker compose exec -T postgres psql -U immocare immocare < $(FILE)
-	@echo "✓ Backup restored"
+	@echo "Restauration depuis $(FILE)..."
+	@docker compose --profile postgres exec -T postgres psql -U immocare immocare < $(FILE)
+	@echo "✓ Backup restauré"
 
 # ── Tests ─────────────────────────────────────────────────────────────────────
 
-backend-test: ## Run backend tests
+backend-test: ## Lancer les tests backend (utilise H2 en mémoire)
 	cd backend && mvn test
-	@echo "✓ Backend tests complete"
+	@echo "✓ Tests backend terminés"
 
-# ── Shell access ──────────────────────────────────────────────────────────────
+# ── Accès aux shells ──────────────────────────────────────────────────────────
 
-shell: ## Open shell in app container
+shell: ## Ouvrir un shell dans le conteneur app
 	docker compose exec app sh
 
-shell-db: ## Open shell in database container
-	docker compose exec postgres sh
+shell-db: ## Ouvrir un shell dans le conteneur postgres
+	docker compose --profile postgres exec postgres sh
 
 # ── Nginx ─────────────────────────────────────────────────────────────────────
 
-nginx-reload: ## Reload nginx configuration
+nginx-reload: ## Recharger la configuration nginx
 	docker compose exec app nginx -s reload
-	@echo "✓ Nginx configuration reloaded"
+	@echo "✓ Configuration nginx rechargée"
 
-nginx-test: ## Test nginx configuration
+nginx-test: ## Tester la configuration nginx
 	docker compose exec app nginx -t
 
-# ── Health & Status ───────────────────────────────────────────────────────────
+# ── Santé & Statut ────────────────────────────────────────────────────────────
 
-status: ## Show service status
+status: ## Voir l'état des services
 	docker compose ps
 
-health: ## Check service health
-	@echo "Checking service health..."
+health: ## Vérifier la santé des services
+	@echo "Vérification de la santé des services..."
 	@docker compose ps
 	@echo ""
 	@curl -s -o /dev/null -w "App health : HTTP %{http_code}\n" \
-		http://localhost:8090/api/v1/buildings || echo "App: not responding"
+		http://localhost:8090/actuator/health || echo "App: ne répond pas"
 
-monitor: ## Show container resource usage
-	docker stats immocare-app immocare-db
+monitor: ## Voir l'utilisation des ressources
+	docker stats immocare-app
 
-# ── Cleanup ───────────────────────────────────────────────────────────────────
+# ── Nettoyage ─────────────────────────────────────────────────────────────────
 
-clean: ## Remove unused Docker resources
-	@echo "Cleaning up..."
+clean: ## Supprimer les ressources Docker inutilisées
+	@echo "Nettoyage..."
 	docker system prune -f
-	@echo "✓ Cleanup complete"
+	@echo "✓ Nettoyage terminé"
 
-clean-all: ## Remove everything including volumes ⚠️  deletes all data
-	@echo "⚠️  WARNING: This will delete all data!"
-	@read -p "Are you sure? [y/N] " -n 1 -r; \
+clean-all: ## Tout supprimer, y compris les volumes ⚠️  supprime toutes les données
+	@echo "⚠️  ATTENTION : toutes les données seront supprimées !"
+	@read -p "Continuer ? [y/N] " -n 1 -r; \
 	echo; \
 	if [[ $$REPLY =~ ^[Yy]$$ ]]; then \
-		docker compose down -v; \
+		docker compose --profile postgres down -v; \
+		docker compose -f docker-compose.dev.yml --profile postgres down -v; \
 		docker system prune -a -f; \
-		echo "✓ Full cleanup complete"; \
+		echo "✓ Nettoyage complet terminé"; \
 	fi
 
 # ── Installation ──────────────────────────────────────────────────────────────
 
-install: ## Full initial installation
-	@echo "=== ImmoCare Installation ==="
-	@echo "1. Building images..."
+install: ## Installation initiale complète (H2)
+	@echo "=== Installation ImmoCare ==="
+	@echo "1. Build des images..."
 	@$(MAKE) build
-	@echo "2. Starting services..."
+	@echo "2. Démarrage des services (H2)..."
 	@$(MAKE) up
-	@echo "3. Waiting for services to be ready..."
+	@echo "3. Attente que les services soient prêts..."
 	@sleep 15
-	@echo "4. Checking health..."
+	@echo "4. Vérification de la santé..."
 	@$(MAKE) health
 	@echo ""
-	@echo "✓ Installation complete!"
+	@echo "✓ Installation terminée !"
 	@echo "  Application : http://localhost:8090"
-	@echo "  Credentials : admin / Admin1234!"
+	@echo "  Identifiants par défaut : à configurer (H2 repart vierge)"
+	@echo ""
+	@echo "Pour utiliser PostgreSQL : make install-postgres"
 
-update: ## Update application (pull + rebuild + restart)
-	@echo "Updating application..."
+install-postgres: ## Installation initiale avec PostgreSQL
+	@echo "=== Installation ImmoCare (PostgreSQL) ==="
+	@echo "1. Build des images..."
+	@$(MAKE) build
+	@echo "2. Démarrage des services (PostgreSQL)..."
+	@$(MAKE) up-postgres
+	@echo "3. Attente que les services soient prêts..."
+	@sleep 20
+	@echo "4. Vérification de la santé..."
+	@$(MAKE) health
+	@echo ""
+	@echo "✓ Installation terminée !"
+	@echo "  Application : http://localhost:8090"
+	@echo "  Identifiants : admin / Admin1234!"
+
+update: ## Mettre à jour l'application (pull + rebuild + redémarrer)
+	@echo "Mise à jour..."
 	@git pull
 	@$(MAKE) down
 	@$(MAKE) build
 	@$(MAKE) up
-	@echo "✓ Update complete"
+	@echo "✓ Mise à jour terminée"

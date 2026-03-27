@@ -1,54 +1,62 @@
 name: immocare-dev
 
 services:
-  # PostgreSQL Database
-  postgres:
-    image: postgres:16-alpine
-    container_name: immocare-postgres-dev
-    environment:
-      POSTGRES_DB: immocare
-      POSTGRES_USER: immocare
-      POSTGRES_PASSWORD: immocare
-      PGDATA: /var/lib/postgresql/data/pgdata
-    ports:
-      - "5432:5432"
-    volumes:
-      - postgres_data_dev:/var/lib/postgresql/data
-    healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U immocare"]
-      interval: 10s
-      timeout: 5s
-      retries: 5
-    networks:
-      - immocare-network
+  # ── PostgreSQL (optionnel — activé avec --profile postgres) ───────────────
+  # postgres:
+  #   image: postgres:16-alpine
+  #   container_name: immocare-postgres-dev
+  #   environment:
+  #     POSTGRES_DB: ${DB_NAME:-immocare}
+  #     POSTGRES_USER: ${DB_USER:-immocare}
+  #     POSTGRES_PASSWORD: ${DB_PASSWORD:-immocare}
+  #     PGDATA: /var/lib/postgresql/data/pgdata
+  #   ports:
+  #     - "5432:5432"
+  #   volumes:
+  #     - postgres_data_dev:/var/lib/postgresql/data
+  #   healthcheck:
+  #     test: ["CMD-SHELL", "pg_isready -U ${DB_USER:-immocare}"]
+  #     interval: 10s
+  #     timeout: 5s
+  #     retries: 5
+  #   networks:
+  #     - immocare-network
+  #   profiles:
+  #     - postgres
 
-  # Spring Boot Backend (hot reload via DevTools)
+  # ── Spring Boot Backend (hot reload via DevTools) ─────────────────────────
   backend:
     build:
       context: ./backend
       dockerfile: Dockerfile.dev
     container_name: immocare-backend-dev
     environment:
-      - SPRING_DATASOURCE_URL=jdbc:postgresql://postgres:5432/immocare
-      - SPRING_DATASOURCE_USERNAME=immocare
-      - SPRING_DATASOURCE_PASSWORD=immocare
-      - SPRING_JPA_HIBERNATE_DDL_AUTO=validate
-      - SPRING_FLYWAY_ENABLED=true
-      - SPRING_DEVTOOLS_RESTART_ENABLED=true
+      # Profil actif : h2 (défaut) ou postgres
+      SPRING_PROFILES_ACTIVE: ${DB_PROFILE:-h2}
+      # PostgreSQL (utilisé si DB_PROFILE=postgres)
+      DB_HOST: ${DB_HOST:-postgres}
+      DB_PORT: ${DB_PORT:-5432}
+      DB_NAME: ${DB_NAME:-immocare}
+      DB_USER: ${DB_USER:-immocare}
+      DB_PASSWORD: ${DB_PASSWORD:-immocare}
+      SPRING_DEVTOOLS_RESTART_ENABLED: "true"
     ports:
       - "8080:8080"
-      - "5005:5005"
+      - "5005:5005"   # debug
     volumes:
       - ./backend/src:/app/src:ro
       - ./backend/pom.xml:/app/pom.xml:ro
       - maven_cache:/root/.m2
-    depends_on:
-      postgres:
-        condition: service_healthy
+      # Persistance H2 (ignoré si profil postgres)
+      - h2_data_dev:/app/data
+    # depends_on:
+    #   postgres:
+    #     condition: service_healthy
+    #     required: false
     networks:
       - immocare-network
 
-  # Angular Frontend (hot reload)
+  # ── Angular Frontend (hot reload) ─────────────────────────────────────────
   frontend:
     build:
       context: ./frontend
@@ -61,7 +69,7 @@ services:
       - ./frontend/angular.json:/app/angular.json:ro
       - ./frontend/tsconfig.json:/app/tsconfig.json:ro
       - ./frontend/package.json:/app/package.json:ro
-      # node_modules intentionally excluded — must not override image-installed packages
+      # node_modules intentionnellement exclu — ne pas écraser les packages installés dans l'image
     depends_on:
       - backend
     networks:
@@ -72,6 +80,8 @@ volumes:
   postgres_data_dev:
     driver: local
   maven_cache:
+    driver: local
+  h2_data_dev:
     driver: local
 
 networks:

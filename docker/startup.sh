@@ -1,35 +1,54 @@
 #!/bin/sh
 echo "=== ImmoCare Startup ==="
-echo "Starting services..."
+echo "Profil actif : ${SPRING_PROFILES_ACTIVE:-h2}"
 
-# Create nginx pid directory (required on Alpine)
+# Créer le répertoire pid nginx (requis sur Alpine)
 mkdir -p /run/nginx
 
-# Start nginx in background
-echo "Starting nginx..."
+# Créer le répertoire data H2 si besoin
+mkdir -p /app/data
+
+# Démarrer nginx en arrière-plan
+echo "Démarrage nginx..."
 nginx
 
-# Wait for nginx to write its pid file
 sleep 2
 
-# Verify nginx is running via pid file
 if [ ! -f /run/nginx/nginx.pid ]; then
-    echo "ERROR: nginx failed to start"
-    cat /var/log/nginx/error.log 2>/dev/null || echo "No error log available"
+    echo "ERREUR : nginx n'a pas démarré"
+    cat /var/log/nginx/error.log 2>/dev/null || echo "Pas de log disponible"
     exit 1
 fi
-echo "✓ nginx started successfully"
+echo "✓ nginx démarré"
 
-# Start Spring Boot backend (takes over the process with exec)
-echo "Starting Spring Boot backend..."
-echo "Database: ${DB_HOST:-postgres}:${DB_PORT:-5432}/${DB_NAME:-immocare}"
+# ── Construire les arguments JVM selon le profil ──────────────────────────
 
+ACTIVE_PROFILE="${SPRING_PROFILES_ACTIVE:-h2}"
+
+if [ "$ACTIVE_PROFILE" = "postgres" ] || [ "$ACTIVE_PROFILE" = "production" ]; then
+    echo "Démarrage Spring Boot → PostgreSQL"
+    echo "Base : ${DB_HOST:-postgres}:${DB_PORT:-5432}/${DB_NAME:-immocare}"
+    DB_ARGS="-Dspring.datasource.url=jdbc:postgresql://${DB_HOST:-postgres}:${DB_PORT:-5432}/${DB_NAME:-immocare} \
+             -Dspring.datasource.username=${DB_USER:-immocare} \
+             -Dspring.datasource.password=${DB_PASSWORD:-immocare} \
+             -Dspring.flyway.enabled=true \
+             -Dspring.jpa.hibernate.ddl-auto=none"
+else
+    echo "Démarrage Spring Boot → H2 (fichier /app/data/immocare)"
+    DB_ARGS="-Dspring.datasource.url=jdbc:h2:file:/app/data/immocare;AUTO_SERVER=TRUE;NON_KEYWORDS=VALUE \
+             -Dspring.datasource.driverClassName=org.h2.Driver \
+             -Dspring.datasource.username=sa \
+             -Dspring.datasource.password= \
+             -Dspring.flyway.enabled=false \
+             -Dspring.jpa.hibernate.ddl-auto=create \
+             -Dspring.jpa.database-platform=org.hibernate.dialect.H2Dialect"
+fi
+
+# Démarrer Spring Boot (prend la main avec exec)
 exec java \
     -Djava.security.egd=file:/dev/./urandom \
     -Dserver.port=8080 \
-    -Dspring.datasource.url=jdbc:postgresql://${DB_HOST:-postgres}:${DB_PORT:-5432}/${DB_NAME:-immocare} \
-    -Dspring.datasource.username=${DB_USER:-immocare} \
-    -Dspring.datasource.password=${DB_PASSWORD:-immocare} \
-    -Dspring.flyway.enabled=true \
-    -Dspring.jpa.hibernate.ddl-auto=none \
+    -Dspring.profiles.active="${ACTIVE_PROFILE}" \
+    ${JAVA_OPTS} \
+    ${DB_ARGS} \
     -jar /app/app.jar
