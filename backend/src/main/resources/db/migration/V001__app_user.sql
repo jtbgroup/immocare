@@ -23,3 +23,4 @@ VALUES (
     'admin@immocare.com',
     'ADMIN'
 );
+

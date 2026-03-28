@@ -60,7 +60,7 @@ fi
 log_section "Authenticating as '$ADMIN_USER' on $BASE_URL"
 
 HTTP_STATUS=$(curl -s -o /dev/null -w "%{http_code}" \
-  -X POST "$BASE_URL/api/auth/login" \
+  -X POST "$BASE_URL/api/v1/auth/login" \
   -H "Content-Type: application/json" \
   -d "{\"username\":\"$ADMIN_USER\",\"password\":\"$ADMIN_PASS\"}" \
   -c "$COOKIE_JAR")
@@ -99,7 +99,7 @@ else
     ')
 
     HTTP_STATUS=$(curl -s -o /tmp/seed_response.json -w "%{http_code}" \
-      -X POST "$BASE_URL/api/users" \
+      -X POST "$BASE_URL/api/v1/users" \
       -H "Content-Type: application/json" \
       -b "$COOKIE_JAR" \
       -d "$NORMALIZED_USER")
