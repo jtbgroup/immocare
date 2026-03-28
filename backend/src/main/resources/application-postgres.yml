@@ -24,4 +24,5 @@ spring:
 logging:
   level:
     com.immocare: DEBUG
-    org.hibernate.SQL: DEBUG
+    org.springframework.security: DEBUG
+    org.springframework.web: DEBUG

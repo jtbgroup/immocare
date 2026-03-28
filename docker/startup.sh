@@ -35,12 +35,12 @@ if [ "$ACTIVE_PROFILE" = "postgres" ] || [ "$ACTIVE_PROFILE" = "production" ]; t
              -Dspring.jpa.hibernate.ddl-auto=none"
 else
     echo "Démarrage Spring Boot → H2 (fichier /app/data/immocare)"
-    DB_ARGS="-Dspring.datasource.url=jdbc:h2:file:/app/data/immocare;AUTO_SERVER=TRUE;NON_KEYWORDS=VALUE \
+    DB_ARGS="-Dspring.datasource.url='jdbc:h2:file:/app/data/immocare;AUTO_SERVER=TRUE;NON_KEYWORDS=VALUE' \
              -Dspring.datasource.driverClassName=org.h2.Driver \
              -Dspring.datasource.username=sa \
              -Dspring.datasource.password= \
-             -Dspring.flyway.enabled=false \
-             -Dspring.jpa.hibernate.ddl-auto=create \
+             -Dspring.flyway.enabled=true \
+             -Dspring.jpa.hibernate.ddl-auto=validate \
              -Dspring.jpa.database-platform=org.hibernate.dialect.H2Dialect"
 fi
 

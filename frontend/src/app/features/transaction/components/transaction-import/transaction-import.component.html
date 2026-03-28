@@ -182,7 +182,7 @@
                       : row.direction === "EXPENSE"
                         ? "-"
                         : ""
-                  }}{{ row.amount?.toFixed(2) }} €
+                  }}{{ row.amount.toFixed(2) }} €
                 </ng-container>
                 <ng-container *ngIf="row.amount === null">—</ng-container>
               </td>

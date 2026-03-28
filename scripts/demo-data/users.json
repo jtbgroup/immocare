@@ -1,32 +1,37 @@
 [
   {
-    "username": "alice.martin",
+    "username": "alice_martin",
+    "email": "alice.martin@immocare.com",
     "password": "Demo1234!",
-    "role": ["ADMIN"],
-    "enabled": true
+    "confirmPassword": "Demo1234!",
+    "role": "ADMIN"
   },
   {
-    "username": "bob.dupont",
+    "username": "bob_dupont",
+    "email": "bob.dupont@immocare.com",
     "password": "Demo1234!",
-    "role": ["PROJECT_MANAGER"],
-    "enabled": true
+    "confirmPassword": "Demo1234!",
+    "role": "ADMIN"
   },
   {
-    "username": "claire.leroy",
+    "username": "claire_leroy",
+    "email": "claire.leroy@immocare.com",
     "password": "Demo1234!",
-    "role": ["PROJECT_MANAGER"],
-    "enabled": true
+    "confirmPassword": "Demo1234!",
+    "role": "ADMIN"
   },
   {
-    "username": "david.simon",
+    "username": "david_simon",
+    "email": "david.simon@immocare.com",
     "password": "Demo1234!",
-    "role": ["PROJECT_MANAGER"],
-    "enabled": false
+    "confirmPassword": "Demo1234!",
+    "role": "ADMIN"
   },
   {
-    "username": "emma.dubois",
+    "username": "emma_dubois",
+    "email": "emma.dubois@immocare.com",
     "password": "Demo1234!",
-    "role": ["ADMIN", "PROJECT_MANAGER"],
-    "enabled": true
+    "confirmPassword": "Demo1234!",
+    "role": "ADMIN"
   }
 ]

@@ -87,21 +87,30 @@ dev-down:
 dev-logs:
 	docker compose -f docker-compose.dev.yml logs -f
 
-dev-clean-start:
+dev-clean:
 	@echo "🧹 Cleaning development environment (removes volumes)..."
-	docker compose -f docker-compose.dev.yml down -v
+	docker compose -f docker-compose.dev.yml --profile postgres down -v
 	@echo "✅ Development environment cleaned"
+
+dev-clean-start:
+	make dev-clean
 	make dev-start
-
-
-
 
 dev-start-postgres: ## ▶  Démarrer l'env de dev avec PostgreSQL (sans rebuild)
 	@echo "Démarrage env de dev (PostgreSQL)..."
 	DB_PROFILE=postgres docker compose -f docker-compose.dev.yml --profile postgres up -d
-	@echo "✓ Dev démarré (PostgreSQL, sans rebuild)"
-	@echo "  Frontend : http://localhost:4200"
-	@echo "  Backend  : http://localhost:8080"
+	@echo ""
+	@echo "✅ Development services (postgres) started!"
+	@echo "   🌐 App (Nginx):       http://localhost:8080"
+	@echo "   🎨 Angular direct:    http://localhost:4200"
+	@echo "   🔧 Backend direct:    http://localhost:8081"
+	@echo "   🐛 Remote Debug:      localhost:5005"
+	@echo ""
+	@echo "📋 View logs: make dev-logs"
+
+dev-clean-start-postgres:
+	make dev-clean
+	make dev-start-postgres
 
 dev-stop: ## ⏹  Arrêter l'env de dev
 	@echo "Arrêt env de dev..."

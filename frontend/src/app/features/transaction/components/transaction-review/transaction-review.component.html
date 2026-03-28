@@ -119,7 +119,7 @@
             [class.row-confirmed]="tx.status === 'CONFIRMED'"
           >
             <td class="nowrap">{{ tx.transactionDate }}</td>
-            <td class="nowrap">{{ tx.accountingMonth?.substring(0, 7) }}</td>
+            <td class="nowrap">{{ tx.accountingMonth.substring(0, 7) }}</td>
             <td>
               <span
                 class="badge"

@@ -1,13 +1,23 @@
 package com.immocare.model.entity;
 
-import jakarta.persistence.*;
+import java.io.Serial;
+import java.io.Serializable;
+import java.time.LocalDateTime;
+import java.util.Collection;
+import java.util.List;
+
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
-import java.time.LocalDateTime;
-import java.util.Collection;
-import java.util.List;
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.PrePersist;
+import jakarta.persistence.PreUpdate;
+import jakarta.persistence.Table;
 
 /**
  * JPA entity for authenticated users.
@@ -16,7 +26,7 @@ import java.util.List;
  */
 @Entity
 @Table(name = "app_user")
-public class AppUser implements UserDetails {
+public class AppUser implements UserDetails, Serializable {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -39,6 +49,8 @@ public class AppUser implements UserDetails {
 
     @Column(name = "updated_at", nullable = false)
     private LocalDateTime updatedAt;
+    @Serial
+    private static final long serialVersionUID = 1L;
 
     // -------------------------------------------------------------------------
     // Lifecycle
@@ -64,7 +76,9 @@ public class AppUser implements UserDetails {
         return List.of(new SimpleGrantedAuthority("ROLE_" + role));
     }
 
-    /** Returns the BCrypt hash — Spring Security compares it via PasswordEncoder. */
+    /**
+     * Returns the BCrypt hash — Spring Security compares it via PasswordEncoder.
+     */
     @Override
     public String getPassword() {
         return passwordHash;
@@ -76,29 +90,62 @@ public class AppUser implements UserDetails {
     }
 
     @Override
-    public boolean isAccountNonExpired()  { return true; }
+    public boolean isAccountNonExpired() {
+        return true;
+    }
 
     @Override
-    public boolean isAccountNonLocked()   { return true; }
+    public boolean isAccountNonLocked() {
+        return true;
+    }
 
     @Override
-    public boolean isCredentialsNonExpired() { return true; }
+    public boolean isCredentialsNonExpired() {
+        return true;
+    }
 
     @Override
-    public boolean isEnabled() { return true; }
+    public boolean isEnabled() {
+        return true;
+    }
 
     // -------------------------------------------------------------------------
     // Getters & Setters
     // -------------------------------------------------------------------------
 
-    public Long getId()                  { return id; }
-    public String getEmail()             { return email; }
-    public String getRole()              { return role; }
-    public LocalDateTime getCreatedAt()  { return createdAt; }
-    public LocalDateTime getUpdatedAt()  { return updatedAt; }
+    public Long getId() {
+        return id;
+    }
 
-    public void setUsername(String username)         { this.username = username; }
-    public void setPasswordHash(String passwordHash) { this.passwordHash = passwordHash; }
-    public void setEmail(String email)               { this.email = email; }
-    public void setRole(String role)                 { this.role = role; }
+    public String getEmail() {
+        return email;
+    }
+
+    public String getRole() {
+        return role;
+    }
+
+    public LocalDateTime getCreatedAt() {
+        return createdAt;
+    }
+
+    public LocalDateTime getUpdatedAt() {
+        return updatedAt;
+    }
+
+    public void setUsername(String username) {
+        this.username = username;
+    }
+
+    public void setPasswordHash(String passwordHash) {
+        this.passwordHash = passwordHash;
+    }
+
+    public void setEmail(String email) {
+        this.email = email;
+    }
+
+    public void setRole(String role) {
+        this.role = role;
+    }
 }

@@ -16,6 +16,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.immocare.model.dto.LoginRequest;
+import com.immocare.model.dto.UserDTO;
+import com.immocare.model.entity.AppUser;
 
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpSession;
@@ -76,11 +78,18 @@ public class AuthController {
     }
 
     @GetMapping("/me")
-    public ResponseEntity<String> me() {
+    public ResponseEntity<UserDTO> me() {
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
         if (auth == null || !auth.isAuthenticated()) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
         }
-        return ResponseEntity.ok(auth.getName());
+        AppUser user = (AppUser) auth.getPrincipal();
+        return ResponseEntity.ok(new UserDTO(
+                user.getId(),
+                user.getUsername(),
+                user.getEmail(),
+                user.getRole(),
+                user.getCreatedAt(),
+                user.getUpdatedAt()));
     }
 }

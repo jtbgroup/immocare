@@ -26,6 +26,7 @@ services:
       - "4200:4200"   # Angular dev server (accès direct)
       - "8081:8081"   # Spring Boot (accès direct)
       - "5005:5005"   # Remote debug JDWP
+      - "9092:9092"   # H2 TCP server (SQL client externe)
     volumes:
       - ./backend:/app/backend
       - ./frontend:/app/frontend
