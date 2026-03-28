@@ -1,11 +1,9 @@
 -- ============================================================
--- V013 — UC014: Financial Transactions
+-- V014 — UC014: Financial Transactions
 -- ============================================================
 
--- ─── bank_account ────────────────────────────────────────────────────────────
-
 CREATE TABLE bank_account (
-    id             BIGSERIAL    PRIMARY KEY,
+    id             BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
     label          VARCHAR(100) NOT NULL,
     account_number VARCHAR(50)  NOT NULL,
     type           VARCHAR(10)  NOT NULL CHECK (type IN ('CURRENT','SAVINGS')),
@@ -16,10 +14,8 @@ CREATE TABLE bank_account (
     CONSTRAINT uq_bank_account_number UNIQUE (account_number)
 );
 
--- ─── tag_category ────────────────────────────────────────────────────────────
-
 CREATE TABLE tag_category (
-    id          BIGSERIAL    PRIMARY KEY,
+    id          BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
     name        VARCHAR(100) NOT NULL,
     description TEXT,
     created_at  TIMESTAMP    NOT NULL DEFAULT CURRENT_TIMESTAMP,
@@ -27,10 +23,8 @@ CREATE TABLE tag_category (
     CONSTRAINT uq_tag_category_name UNIQUE (name)
 );
 
--- ─── tag_subcategory ─────────────────────────────────────────────────────────
-
 CREATE TABLE tag_subcategory (
-    id          BIGSERIAL    PRIMARY KEY,
+    id          BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
     category_id BIGINT       NOT NULL REFERENCES tag_category (id) ON DELETE RESTRICT,
     name        VARCHAR(100) NOT NULL,
     direction   VARCHAR(10)  NOT NULL CHECK (direction IN ('INCOME','EXPENSE','BOTH')),
@@ -42,10 +36,8 @@ CREATE TABLE tag_subcategory (
 
 CREATE INDEX idx_tag_subcategory_category ON tag_subcategory (category_id);
 
--- ─── import_batch ────────────────────────────────────────────────────────────
-
 CREATE TABLE import_batch (
-    id              BIGSERIAL    PRIMARY KEY,
+    id              BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
     imported_at     TIMESTAMP    NOT NULL DEFAULT CURRENT_TIMESTAMP,
     filename        VARCHAR(255),
     total_rows      INTEGER      NOT NULL DEFAULT 0,
@@ -55,10 +47,13 @@ CREATE TABLE import_batch (
     created_by      BIGINT       REFERENCES app_user (id) ON DELETE SET NULL
 );
 
--- ─── financial_transaction ───────────────────────────────────────────────────
+CREATE SEQUENCE IF NOT EXISTS financial_transaction_ref_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO CYCLE;
 
 CREATE TABLE financial_transaction (
-    id                   BIGSERIAL     PRIMARY KEY,
+    id                   BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
     reference            VARCHAR(20)   NOT NULL,
     external_reference   VARCHAR(200),
     transaction_date     DATE          NOT NULL,
@@ -84,11 +79,6 @@ CREATE TABLE financial_transaction (
     CONSTRAINT uq_financial_transaction_reference UNIQUE (reference)
 );
 
-CREATE SEQUENCE IF NOT EXISTS financial_transaction_ref_seq
-    START WITH 1
-    INCREMENT BY 1
-    NO CYCLE;
-
 CREATE INDEX idx_ft_transaction_date ON financial_transaction (transaction_date DESC);
 CREATE INDEX idx_ft_accounting_month ON financial_transaction (accounting_month DESC);
 CREATE INDEX idx_ft_direction        ON financial_transaction (direction);
@@ -101,10 +91,8 @@ CREATE INDEX idx_ft_external_ref     ON financial_transaction (external_referenc
 CREATE INDEX idx_ft_subcategory      ON financial_transaction (subcategory_id);
 CREATE INDEX idx_ft_bank_account     ON financial_transaction (bank_account_id);
 
--- ─── transaction_asset_link ──────────────────────────────────────────────────
-
 CREATE TABLE transaction_asset_link (
-    id             BIGSERIAL   PRIMARY KEY,
+    id             BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
     transaction_id BIGINT      NOT NULL REFERENCES financial_transaction (id) ON DELETE CASCADE,
     asset_type     VARCHAR(30) NOT NULL CHECK (asset_type IN ('BOILER','FIRE_EXTINGUISHER','METER')),
     asset_id       BIGINT      NOT NULL,
@@ -115,10 +103,8 @@ CREATE TABLE transaction_asset_link (
 CREATE INDEX idx_tal_transaction ON transaction_asset_link (transaction_id);
 CREATE INDEX idx_tal_asset       ON transaction_asset_link (asset_type, asset_id);
 
--- ─── tag_learning_rule ───────────────────────────────────────────────────────
-
 CREATE TABLE tag_learning_rule (
-    id              BIGSERIAL    PRIMARY KEY,
+    id              BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
     match_field     VARCHAR(30)  NOT NULL
                                  CHECK (match_field IN ('COUNTERPARTY_ACCOUNT','COUNTERPARTY_NAME','DESCRIPTION')),
     match_value     VARCHAR(200) NOT NULL,
@@ -130,10 +116,8 @@ CREATE TABLE tag_learning_rule (
 
 CREATE INDEX idx_learning_rule_field_value ON tag_learning_rule (match_field, match_value);
 
--- ─── accounting_month_rule ───────────────────────────────────────────────────
-
 CREATE TABLE accounting_month_rule (
-    id                   BIGSERIAL   PRIMARY KEY,
+    id                   BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
     subcategory_id       BIGINT      NOT NULL REFERENCES tag_subcategory (id) ON DELETE CASCADE,
     counterparty_account VARCHAR(50),
     month_offset         INTEGER     NOT NULL DEFAULT 0,
@@ -144,11 +128,13 @@ CREATE TABLE accounting_month_rule (
 
 CREATE INDEX idx_amr_subcategory ON accounting_month_rule (subcategory_id);
 
--- ─── platform_config: import settings ────────────────────────────────────────
+-- ON CONFLICT remplacé par INSERT conditionnel compatible H2 + PostgreSQL
+INSERT INTO platform_config (config_key, config_value, value_type, description)
+    SELECT 'csv.import.suggestion.confidence.threshold', '3', 'INTEGER',
+        'Min confidence score to display a tag suggestion on import'
+    WHERE NOT EXISTS (SELECT 1 FROM platform_config WHERE config_key = 'csv.import.suggestion.confidence.threshold');
 
-INSERT INTO platform_config (config_key, config_value, value_type, description) VALUES
-    ('csv.import.suggestion.confidence.threshold', '3', 'INTEGER',
-        'Min confidence score to display a tag suggestion on import'),
-    ('import.on_duplicate', 'WARN', 'STRING',
-        'Behaviour on duplicate detected: WARN, SKIP or IMPORT')
-ON CONFLICT (config_key) DO NOTHING;
+INSERT INTO platform_config (config_key, config_value, value_type, description)
+    SELECT 'import.on_duplicate', 'WARN', 'STRING',
+        'Behaviour on duplicate detected: WARN, SKIP or IMPORT'
+    WHERE NOT EXISTS (SELECT 1 FROM platform_config WHERE config_key = 'import.on_duplicate');

@@ -1,11 +1,9 @@
 -- ============================================================
--- V012 — UC013: Fire Extinguishers
+-- V013 — UC013: Fire Extinguishers
 -- ============================================================
 
--- ─── fire_extinguisher ───────────────────────────────────────────────────────
-
 CREATE TABLE fire_extinguisher (
-    id                    BIGSERIAL   PRIMARY KEY,
+    id                    BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
     building_id           BIGINT      NOT NULL REFERENCES building (id) ON DELETE CASCADE,
     unit_id               BIGINT      NULL     REFERENCES housing_unit (id) ON DELETE SET NULL,
     identification_number VARCHAR(50) NOT NULL,
@@ -18,14 +16,8 @@ CREATE TABLE fire_extinguisher (
 CREATE INDEX idx_fire_extinguisher_building ON fire_extinguisher (building_id);
 CREATE INDEX idx_fire_extinguisher_unit     ON fire_extinguisher (unit_id);
 
-COMMENT ON TABLE  fire_extinguisher                       IS 'Fire extinguishers attached to a building';
-COMMENT ON COLUMN fire_extinguisher.identification_number IS 'Unique identifier within the building';
-COMMENT ON COLUMN fire_extinguisher.unit_id               IS 'Optional FK — housing unit where the extinguisher is located';
-
--- ─── fire_extinguisher_revision ──────────────────────────────────────────────
-
 CREATE TABLE fire_extinguisher_revision (
-    id                   BIGSERIAL PRIMARY KEY,
+    id                   BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
     fire_extinguisher_id BIGINT    NOT NULL REFERENCES fire_extinguisher (id) ON DELETE CASCADE,
     revision_date        DATE      NOT NULL,
     notes                TEXT      NULL,
@@ -33,5 +25,3 @@ CREATE TABLE fire_extinguisher_revision (
 );
 
 CREATE INDEX idx_fire_ext_revision_extinguisher ON fire_extinguisher_revision (fire_extinguisher_id);
-
-COMMENT ON TABLE fire_extinguisher_revision IS 'Revision history for a fire extinguisher';

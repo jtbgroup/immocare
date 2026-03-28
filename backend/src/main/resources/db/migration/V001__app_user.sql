@@ -3,7 +3,7 @@
 -- ============================================================
 
 CREATE TABLE app_user (
-    id            BIGSERIAL    PRIMARY KEY,
+    id            BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
     username      VARCHAR(50)  NOT NULL UNIQUE,
     password_hash VARCHAR(255) NOT NULL,
     email         VARCHAR(100) NOT NULL UNIQUE,
@@ -14,10 +14,6 @@ CREATE TABLE app_user (
 
 CREATE INDEX idx_app_user_username ON app_user (username);
 CREATE INDEX idx_app_user_email    ON app_user (email);
-
-COMMENT ON TABLE  app_user               IS 'Authenticated users of ImmoCare';
-COMMENT ON COLUMN app_user.password_hash IS 'BCrypt(12) hashed password — never plain text';
-COMMENT ON COLUMN app_user.role          IS 'ADMIN (Phase 1 only)';
 
 -- Default admin — password: admin123 (BCrypt strength 12)
 INSERT INTO app_user (username, password_hash, email, role)

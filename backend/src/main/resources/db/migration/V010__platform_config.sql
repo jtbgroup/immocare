@@ -11,18 +11,14 @@ CREATE TABLE platform_config (
     updated_by    BIGINT       REFERENCES app_user (id) ON DELETE SET NULL
 );
 
--- ─── Boiler service validity rules (temporal, append-only) ───────────────────
-
 CREATE TABLE boiler_service_validity_rule (
-    id                       BIGSERIAL PRIMARY KEY,
+    id                       BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
     valid_from               DATE      NOT NULL UNIQUE,
     validity_duration_months INTEGER   NOT NULL CHECK (validity_duration_months > 0),
     description              TEXT      NULL,
     created_at               TIMESTAMP NOT NULL DEFAULT NOW(),
     created_by               BIGINT    REFERENCES app_user (id) ON DELETE SET NULL
 );
-
--- ─── Default seeds ───────────────────────────────────────────────────────────
 
 INSERT INTO platform_config (config_key, config_value, value_type, description) VALUES
     ('peb_expiry_warning_days',               '90',       'INTEGER', 'Days before PEB certificate expiry to trigger a warning'),

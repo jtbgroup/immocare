@@ -2,10 +2,8 @@
 -- V011 — UC011: Boilers
 -- ============================================================
 
--- ─── boiler ──────────────────────────────────────────────────────────────────
-
 CREATE TABLE boiler (
-    id                BIGSERIAL    PRIMARY KEY,
+    id                BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
     owner_type        VARCHAR(20)  NOT NULL CHECK (owner_type IN ('HOUSING_UNIT','BUILDING')),
     owner_id          BIGINT       NOT NULL,
     brand             VARCHAR(100) NULL,
@@ -22,13 +20,12 @@ CREATE TABLE boiler (
     created_by        BIGINT       REFERENCES app_user (id) ON DELETE SET NULL
 );
 
-CREATE INDEX idx_boiler_owner        ON boiler (owner_type, owner_id);
-CREATE INDEX idx_boiler_active       ON boiler (owner_type, owner_id) WHERE removal_date IS NULL;
-
--- ─── boiler_service ──────────────────────────────────────────────────────────
+CREATE INDEX idx_boiler_owner  ON boiler (owner_type, owner_id);
+-- Index partiel WHERE supprimé (non supporté par H2)
+CREATE INDEX idx_boiler_active ON boiler (owner_type, owner_id, removal_date);
 
 CREATE TABLE boiler_service (
-    id           BIGSERIAL PRIMARY KEY,
+    id           BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
     boiler_id    BIGINT    NOT NULL REFERENCES boiler (id) ON DELETE RESTRICT,
     service_date DATE      NOT NULL,
     valid_until  DATE      NOT NULL,

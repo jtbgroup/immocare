@@ -1,0 +1,45 @@
+# ==========================================
+# Dockerfile.dev
+# Single dev container : nginx + Spring Boot + Angular ng serve
+# nginx:8080  →  /api/ → Spring Boot:8081
+#             →  /     → Angular ng serve:4200
+# ==========================================
+
+FROM node:22-alpine AS base
+
+# Installer Java 21, Maven, nginx
+RUN apk add --no-cache \
+    openjdk21-jre \
+    maven \
+    nginx \
+    curl \
+    && mkdir -p /run/nginx /var/log/nginx /app/backend /app/frontend
+
+WORKDIR /app
+
+# ── Dépendances Maven (cachées séparément) ────────────────────────────────
+COPY backend/pom.xml /app/backend/pom.xml
+RUN cd /app/backend && mvn dependency:go-offline -B || true
+
+# ── Dépendances npm (cachées séparément) ─────────────────────────────────
+COPY frontend/package.json /app/frontend/package.json
+RUN cd /app/frontend && npm install --force
+
+# ── Sources (montées en volume en dev — pas copiées dans l'image) ─────────
+# Les sources backend et frontend sont montées via volumes dans docker-compose.dev.yml
+
+# ── Config nginx dev ──────────────────────────────────────────────────────
+COPY docker/nginx.dev.conf /etc/nginx/nginx.conf
+
+# ── Startup script dev ────────────────────────────────────────────────────
+COPY docker/startup.dev.sh /app/startup.dev.sh
+RUN chmod +x /app/startup.dev.sh
+
+# Ports exposés :
+#  8080 → nginx (point d'entrée principal)
+#  4200 → Angular dev server (accès direct optionnel)
+#  8081 → Spring Boot (accès direct optionnel)
+#  5005 → JDWP debug
+EXPOSE 8080 4200 8081 5005
+
+ENTRYPOINT ["/app/startup.dev.sh"]

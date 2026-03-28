@@ -1,12 +1,9 @@
 -- ============================================================
--- V014 — UC015: Import Parser Strategies
--- Parser registry + fingerprint deduplication + bank account ownership.
+-- V015 — UC015: Import Parser Strategies
 -- ============================================================
 
--- ─── import_parser ───────────────────────────────────────────────────────────
-
 CREATE TABLE import_parser (
-    id          BIGSERIAL    PRIMARY KEY,
+    id          BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
     code        VARCHAR(60)  NOT NULL,
     label       VARCHAR(100) NOT NULL,
     description TEXT,
@@ -33,22 +30,18 @@ INSERT INTO import_parser (code, label, description, format, bank_hint) VALUES
     'Keytrade'
 );
 
--- ─── import_batch: link to parser + bank account ─────────────────────────────
-
 ALTER TABLE import_batch
-    ADD COLUMN parser_id       BIGINT REFERENCES import_parser (id) ON DELETE SET NULL,
+    ADD COLUMN parser_id       BIGINT REFERENCES import_parser (id) ON DELETE SET NULL;
+ALTER TABLE import_batch
     ADD COLUMN bank_account_id BIGINT REFERENCES bank_account (id)  ON DELETE SET NULL;
 
--- ─── financial_transaction: fingerprint + parser ─────────────────────────────
-
 ALTER TABLE financial_transaction
-    ADD COLUMN import_fingerprint VARCHAR(64),
+    ADD COLUMN import_fingerprint VARCHAR(64);
+ALTER TABLE financial_transaction
     ADD COLUMN parser_id          BIGINT REFERENCES import_parser (id) ON DELETE SET NULL;
 
-CREATE INDEX idx_ft_fingerprint ON financial_transaction (import_fingerprint)
-    WHERE import_fingerprint IS NOT NULL;
-
--- ─── bank_account: owner ─────────────────────────────────────────────────────
+-- Index partiel WHERE supprimé (non supporté par H2)
+CREATE INDEX idx_ft_fingerprint ON financial_transaction (import_fingerprint);
 
 ALTER TABLE bank_account
     ADD COLUMN owner_user_id BIGINT REFERENCES app_user (id) ON DELETE SET NULL;

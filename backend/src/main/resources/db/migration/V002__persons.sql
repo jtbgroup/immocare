@@ -3,7 +3,7 @@
 -- ============================================================
 
 CREATE TABLE person (
-    id             BIGSERIAL    PRIMARY KEY,
+    id             BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
     last_name      VARCHAR(100) NOT NULL,
     first_name     VARCHAR(100) NOT NULL,
     birth_date     DATE         NULL,

@@ -3,7 +3,7 @@
 -- ============================================================
 
 CREATE TABLE building (
-    id             BIGSERIAL    PRIMARY KEY,
+    id             BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
     name           VARCHAR(100) NOT NULL,
     street_address VARCHAR(200) NOT NULL,
     postal_code    VARCHAR(20)  NOT NULL,
@@ -18,7 +18,3 @@ CREATE TABLE building (
 CREATE INDEX idx_building_created_by ON building (created_by);
 CREATE INDEX idx_building_city       ON building (city);
 CREATE INDEX idx_building_owner      ON building (owner_id);
-
-COMMENT ON TABLE  building          IS 'Physical buildings containing housing units';
-COMMENT ON COLUMN building.name     IS 'Building name or identifier';
-COMMENT ON COLUMN building.owner_id IS 'FK to person — building owner';

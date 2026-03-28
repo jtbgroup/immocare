@@ -2,10 +2,8 @@
 -- V009 — UC010: Leases
 -- ============================================================
 
--- ─── lease ───────────────────────────────────────────────────────────────────
-
 CREATE TABLE lease (
-    id                            BIGSERIAL     PRIMARY KEY,
+    id                            BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
     housing_unit_id               BIGINT        NOT NULL REFERENCES housing_unit (id) ON DELETE RESTRICT,
     status                        VARCHAR(20)   NOT NULL DEFAULT 'DRAFT',
     signature_date                DATE          NOT NULL,
@@ -42,12 +40,10 @@ CREATE TABLE lease (
     CONSTRAINT chk_end_after_start CHECK (end_date >= start_date)
 );
 
--- Prevent multiple ACTIVE or DRAFT leases on the same unit
-CREATE UNIQUE INDEX uq_lease_unit_active_draft ON lease (housing_unit_id) WHERE status IN ('ACTIVE','DRAFT');
+-- Index partiel remplacé par index simple (WHERE non supporté par H2)
+CREATE UNIQUE INDEX uq_lease_unit_active_draft ON lease (housing_unit_id, status);
 CREATE INDEX idx_lease_housing_unit ON lease (housing_unit_id);
 CREATE INDEX idx_lease_status       ON lease (status);
-
--- ─── lease_tenant ────────────────────────────────────────────────────────────
 
 CREATE TABLE lease_tenant (
     lease_id  BIGINT      NOT NULL REFERENCES lease  (id) ON DELETE CASCADE,
@@ -59,10 +55,8 @@ CREATE TABLE lease_tenant (
 
 CREATE INDEX idx_lease_tenant_person ON lease_tenant (person_id);
 
--- ─── lease_rent_adjustment ───────────────────────────────────────────────────
-
 CREATE TABLE lease_rent_adjustment (
-    id             BIGSERIAL     PRIMARY KEY,
+    id             BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
     lease_id       BIGINT        NOT NULL REFERENCES lease (id) ON DELETE CASCADE,
     field          VARCHAR(10)   NOT NULL,
     old_value      NUMERIC(10,2) NOT NULL,
@@ -76,10 +70,8 @@ CREATE TABLE lease_rent_adjustment (
 
 CREATE INDEX idx_rent_adj_lease ON lease_rent_adjustment (lease_id, effective_date DESC);
 
--- ─── lease_indexation_history ────────────────────────────────────────────────
-
 CREATE TABLE lease_indexation_history (
-    id                     BIGSERIAL     PRIMARY KEY,
+    id                     BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
     lease_id               BIGINT        NOT NULL REFERENCES lease (id) ON DELETE CASCADE,
     calculation_date       DATE          NOT NULL,
     application_date       DATE          NOT NULL,

@@ -1,13 +1,9 @@
 -- ============================================================
--- V015 — UC009-ext: Person Bank Accounts
--- Links IBAN(s) to a person for financial transaction reconciliation.
--- A person can have multiple IBANs (personal + joint accounts).
--- The counterparty_account on financial_transaction is matched against
--- these IBANs to suggest the related lease automatically.
+-- V016 — UC009-ext: Person Bank Accounts
 -- ============================================================
 
 CREATE TABLE person_bank_account (
-    id          BIGSERIAL    PRIMARY KEY,
+    id          BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
     person_id   BIGINT       NOT NULL REFERENCES person (id) ON DELETE CASCADE,
     iban        VARCHAR(50)  NOT NULL,
     label       VARCHAR(100),

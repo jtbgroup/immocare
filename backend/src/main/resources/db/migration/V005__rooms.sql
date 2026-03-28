@@ -3,7 +3,7 @@
 -- ============================================================
 
 CREATE TABLE room (
-    id                  BIGSERIAL    PRIMARY KEY,
+    id                  BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
     housing_unit_id     BIGINT       NOT NULL REFERENCES housing_unit (id) ON DELETE CASCADE,
     room_type           VARCHAR(20)  NOT NULL,
     approximate_surface DECIMAL(6,2) NOT NULL,
@@ -18,7 +18,3 @@ CREATE TABLE room (
 );
 
 CREATE INDEX idx_room_housing_unit_id ON room (housing_unit_id);
-
-COMMENT ON TABLE  room                     IS 'Individual rooms within a housing unit';
-COMMENT ON COLUMN room.room_type           IS 'Enum: LIVING_ROOM, BEDROOM, KITCHEN, BATHROOM, TOILET, HALLWAY, STORAGE, OFFICE, DINING_ROOM, OTHER';
-COMMENT ON COLUMN room.approximate_surface IS 'Approximate surface in m² (not legally binding); must be > 0 and < 1000';

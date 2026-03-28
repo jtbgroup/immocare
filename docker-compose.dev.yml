@@ -1,87 +1,81 @@
 name: immocare-dev
 
 services:
-  # ── PostgreSQL (optionnel — activé avec --profile postgres) ───────────────
-  # postgres:
-  #   image: postgres:16-alpine
-  #   container_name: immocare-postgres-dev
-  #   environment:
-  #     POSTGRES_DB: ${DB_NAME:-immocare}
-  #     POSTGRES_USER: ${DB_USER:-immocare}
-  #     POSTGRES_PASSWORD: ${DB_PASSWORD:-immocare}
-  #     PGDATA: /var/lib/postgresql/data/pgdata
-  #   ports:
-  #     - "5432:5432"
-  #   volumes:
-  #     - postgres_data_dev:/var/lib/postgresql/data
-  #   healthcheck:
-  #     test: ["CMD-SHELL", "pg_isready -U ${DB_USER:-immocare}"]
-  #     interval: 10s
-  #     timeout: 5s
-  #     retries: 5
-  #   networks:
-  #     - immocare-network
-  #   profiles:
-  #     - postgres
-
-  # ── Spring Boot Backend (hot reload via DevTools) ─────────────────────────
-  backend:
+  # ── Application DEV (nginx + Spring Boot + Angular ng serve) ──────────────
+  # nginx:8080  →  /api/ → Spring Boot:8081
+  #             →  /     → Angular ng serve:4200
+  app:
     build:
-      context: ./backend
+      context: .
       dockerfile: Dockerfile.dev
-    container_name: immocare-backend-dev
+    container_name: immocare-dev
     environment:
       # Profil actif : h2 (défaut) ou postgres
       SPRING_PROFILES_ACTIVE: ${DB_PROFILE:-h2}
+      SERVER_PORT: 8081
+      MAVEN_OPTS: "-Xmx512m"
+      NODE_ENV: development
       # PostgreSQL (utilisé si DB_PROFILE=postgres)
       DB_HOST: ${DB_HOST:-postgres}
       DB_PORT: ${DB_PORT:-5432}
       DB_NAME: ${DB_NAME:-immocare}
       DB_USER: ${DB_USER:-immocare}
       DB_PASSWORD: ${DB_PASSWORD:-immocare}
-      SPRING_DEVTOOLS_RESTART_ENABLED: "true"
     ports:
-      - "8080:8080"
-      - "5005:5005"   # debug
+      - "8080:8080"   # nginx → point d'entrée principal
+      - "4200:4200"   # Angular dev server (accès direct)
+      - "8081:8081"   # Spring Boot (accès direct)
+      - "5005:5005"   # Remote debug JDWP
     volumes:
-      - ./backend/src:/app/src:ro
-      - ./backend/pom.xml:/app/pom.xml:ro
+      - ./backend:/app/backend
+      - ./frontend:/app/frontend
       - maven_cache:/root/.m2
-      # Persistance H2 (ignoré si profil postgres)
-      - h2_data_dev:/app/data
-    # depends_on:
-    #   postgres:
-    #     condition: service_healthy
-    #     required: false
-    networks:
-      - immocare-network
-
-  # ── Angular Frontend (hot reload) ─────────────────────────────────────────
-  frontend:
-    build:
-      context: ./frontend
-      dockerfile: Dockerfile.dev
-    container_name: immocare-frontend-dev
-    ports:
-      - "4200:4200"
-    volumes:
-      - ./frontend/src:/app/src:ro
-      - ./frontend/angular.json:/app/angular.json:ro
-      - ./frontend/tsconfig.json:/app/tsconfig.json:ro
-      - ./frontend/package.json:/app/package.json:ro
-      # node_modules intentionnellement exclu — ne pas écraser les packages installés dans l'image
+      - node_modules:/app/frontend/node_modules
+      - h2_data_dev:/app/backend/data
     depends_on:
-      - backend
+      postgres:
+        condition: service_healthy
+        required: false
     networks:
       - immocare-network
-    command: npm start -- --host 0.0.0.0 --poll 2000
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080/api/actuator/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 90s
+
+  # ── PostgreSQL (optionnel — activé avec --profile postgres) ───────────────
+  postgres:
+    image: postgres:16-alpine
+    container_name: immocare-postgres-dev
+    environment:
+      POSTGRES_DB: ${DB_NAME:-immocare}
+      POSTGRES_USER: ${DB_USER:-immocare}
+      POSTGRES_PASSWORD: ${DB_PASSWORD:-immocare}
+      PGDATA: /var/lib/postgresql/data/pgdata
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data_dev:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${DB_USER:-immocare}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - immocare-network
+    profiles:
+      - postgres
 
 volumes:
-  postgres_data_dev:
-    driver: local
   maven_cache:
     driver: local
+  node_modules:
+    driver: local
   h2_data_dev:
+    driver: local
+  postgres_data_dev:
     driver: local
 
 networks:

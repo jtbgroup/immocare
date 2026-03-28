@@ -67,54 +67,52 @@ rebuild: ## Build complet sans cache
 
 # ── Développement (usage quotidien) ──────────────────────────────────────────
 
-start: ## ▶  Démarrer l'env de dev avec H2 (sans rebuild)
-	@echo "Démarrage env de dev (H2)..."
-	docker compose -f docker-compose.dev.yml up -d
-	@echo "✓ Dev démarré (H2, sans rebuild)"
-	@echo "  Frontend : http://localhost:4200"
-	@echo "  Backend  : http://localhost:8080"
+dev-start:
+	@echo "🚀 Starting development environment (H2)..."
+	docker compose -f docker-compose.dev.yml up -d --build
+	@echo ""
+	@echo "✅ Development services started!"
+	@echo "   🌐 App (Nginx):       http://localhost:8080"
+	@echo "   🎨 Angular direct:    http://localhost:4200"
+	@echo "   🔧 Backend direct:    http://localhost:8081"
+	@echo "   🐛 Remote Debug:      localhost:5005"
+	@echo ""
+	@echo "📋 View logs: make dev-logs"
 
-start-postgres: ## ▶  Démarrer l'env de dev avec PostgreSQL (sans rebuild)
+dev-down:
+	@echo "⛔ Stopping development environment..."
+	docker compose -f docker-compose.dev.yml down
+	@echo "✅ Development services stopped"
+
+dev-logs:
+	docker compose -f docker-compose.dev.yml logs -f
+
+dev-clean-start:
+	@echo "🧹 Cleaning development environment (removes volumes)..."
+	docker compose -f docker-compose.dev.yml down -v
+	@echo "✅ Development environment cleaned"
+	make dev-start
+
+
+
+
+dev-start-postgres: ## ▶  Démarrer l'env de dev avec PostgreSQL (sans rebuild)
 	@echo "Démarrage env de dev (PostgreSQL)..."
 	DB_PROFILE=postgres docker compose -f docker-compose.dev.yml --profile postgres up -d
 	@echo "✓ Dev démarré (PostgreSQL, sans rebuild)"
 	@echo "  Frontend : http://localhost:4200"
 	@echo "  Backend  : http://localhost:8080"
 
-stop: ## ⏹  Arrêter l'env de dev
+dev-stop: ## ⏹  Arrêter l'env de dev
 	@echo "Arrêt env de dev..."
 	docker compose -f docker-compose.dev.yml --profile postgres down
 	@echo "✓ Dev arrêté"
-
-dev-build: ## 🔨 Rebuild les images de dev (après changement pom.xml / package.json)
-	@echo "Rebuild images dev (H2)..."
-	docker compose -f docker-compose.dev.yml up -d --build
-	@echo "✓ Images dev rebuildées"
-	@echo "  Frontend : http://localhost:4200"
-	@echo "  Backend  : http://localhost:8080"
 
 dev-build-postgres: ## 🔨 Rebuild les images de dev (PostgreSQL)
 	@echo "Rebuild images dev (PostgreSQL)..."
 	DB_PROFILE=postgres docker compose -f docker-compose.dev.yml --profile postgres up -d --build
 	@echo "✓ Images dev rebuildées (PostgreSQL)"
 
-logs-dev: ## Voir les logs de dev
-	docker compose -f docker-compose.dev.yml logs -f
-
-# ── Commandes legacy (compatibilité) ─────────────────────────────────────────
-
-dev: ## Démarrer en mode dev avec logs visibles (rebuild — utiliser 'start' au quotidien)
-	docker compose -f docker-compose.dev.yml up --build
-
-dev-d: ## Démarrer en mode dev détaché (rebuild — utiliser 'start' au quotidien)
-	docker compose -f docker-compose.dev.yml up -d --build
-	@echo "✓ Services dev démarrés"
-	@echo "  Frontend : http://localhost:4200"
-	@echo "  Backend  : http://localhost:8080"
-
-dev-down: ## Arrêter les services de développement
-	docker compose -f docker-compose.dev.yml down
-	@echo "✓ Services dev arrêtés"
 
 # ── Logs ─────────────────────────────────────────────────────────────────────
 
@@ -251,3 +249,21 @@ update: ## Mettre à jour l'application (pull + rebuild + redémarrer)
 	@$(MAKE) build
 	@$(MAKE) up
 	@echo "✓ Mise à jour terminée"
+
+# ============================================
+# DEMO DATA SEED
+# ============================================
+# Usage:
+#   make seed-demo                            # default users.json
+#   make seed-prod DATA=scripts/real-data/users.json
+seed-demo:
+	@echo "🌱 Seeding demo data (dev — http://localhost:8081)..."
+	@chmod +x scripts/seed.sh
+	@scripts/seed.sh http://localhost:8081 admin admin123 $(DATA)
+	@echo ""
+ 
+seed-prod:
+	@echo "🌱 Seeding demo data (prod — http://localhost:8080)..."
+	@chmod +x scripts/seed.sh
+	@scripts/seed.sh http://localhost:8080 admin admin123 $(DATA)
+	@echo ""

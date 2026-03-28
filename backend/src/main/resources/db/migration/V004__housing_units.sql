@@ -3,7 +3,7 @@
 -- ============================================================
 
 CREATE TABLE housing_unit (
-    id                   BIGSERIAL     PRIMARY KEY,
+    id                   BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
     building_id          BIGINT        NOT NULL REFERENCES building (id) ON DELETE CASCADE,
     unit_number          VARCHAR(20)   NOT NULL,
     floor                INTEGER       NOT NULL,
@@ -29,8 +29,3 @@ CREATE TABLE housing_unit (
 CREATE INDEX idx_housing_unit_building_id ON housing_unit (building_id);
 CREATE INDEX idx_housing_unit_created_by  ON housing_unit (created_by);
 CREATE INDEX idx_housing_unit_owner       ON housing_unit (owner_id);
-
-COMMENT ON TABLE  housing_unit             IS 'Individual apartments / units within a building';
-COMMENT ON COLUMN housing_unit.unit_number IS 'Unit identifier, unique within a building (e.g. A101, 1B)';
-COMMENT ON COLUMN housing_unit.floor       IS 'Floor number; negative values indicate underground levels';
-COMMENT ON COLUMN housing_unit.owner_id    IS 'Unit-specific owner; overrides building.owner_id when set';

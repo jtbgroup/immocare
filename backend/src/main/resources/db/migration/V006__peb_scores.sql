@@ -3,7 +3,7 @@
 -- ============================================================
 
 CREATE TABLE peb_score_history (
-    id                 BIGSERIAL   PRIMARY KEY,
+    id                 BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
     housing_unit_id    BIGINT      NOT NULL REFERENCES housing_unit (id) ON DELETE CASCADE,
     peb_score          VARCHAR(10) NOT NULL,
     score_date         DATE        NOT NULL,
@@ -16,9 +16,3 @@ CREATE TABLE peb_score_history (
 
 CREATE INDEX idx_peb_score_unit_date     ON peb_score_history (housing_unit_id, score_date DESC);
 CREATE INDEX idx_peb_score_unit_validity ON peb_score_history (housing_unit_id, valid_until);
-
-COMMENT ON TABLE  peb_score_history                    IS 'Append-only PEB energy certificate history per housing unit';
-COMMENT ON COLUMN peb_score_history.peb_score          IS 'Enum: A_PLUS_PLUS, A_PLUS, A, B, C, D, E, F, G';
-COMMENT ON COLUMN peb_score_history.score_date         IS 'Date of certificate issuance; cannot be in the future';
-COMMENT ON COLUMN peb_score_history.certificate_number IS 'Optional certificate reference number';
-COMMENT ON COLUMN peb_score_history.valid_until        IS 'Optional expiry date; must be after score_date if set';
