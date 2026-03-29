@@ -67,7 +67,7 @@ rebuild: ## Build complet sans cache
 
 # ── Développement (usage quotidien) ──────────────────────────────────────────
 
-dev-start:
+dev-start-h2:
 	@echo "🚀 Starting development environment (H2)..."
 	docker compose -f docker-compose.dev.yml up -d --build
 	@echo ""
@@ -92,9 +92,9 @@ dev-clean:
 	docker compose -f docker-compose.dev.yml --profile postgres down -v
 	@echo "✅ Development environment cleaned"
 
-dev-clean-start:
+dev-clean-start-h2:
 	make dev-clean
-	make dev-start
+	make dev-start-h2
 
 dev-start-postgres: ## ▶  Démarrer l'env de dev avec PostgreSQL (sans rebuild)
 	@echo "Démarrage env de dev (PostgreSQL)..."
@@ -278,7 +278,13 @@ seed-real: ## 🌱 Seed real data (prod)
 	@chmod +x scripts/seed.sh
 	@scripts/seed.sh $${URL:-http://localhost:8081} admin admin123 scripts/real-data
 
-reset-data:
+reset-postgres: ## 🗑  Reset via SQL direct (requiert psql + PostgreSQL)
 	@echo "🌱 Resetting data"
-	@chmod +x scripts/reset.sh
-	@scripts/reset.sh $${URL:-http://localhost:8081} admin admin123
+	@chmod +x scripts/reset-sql.sh
+	@scripts/reset-sql.sh \
+		$${DB_HOST:-localhost} \
+		$${DB_PORT:-5432} \
+		$${DB_NAME:-immocare} \
+		$${DB_USER:-immocare} \
+		$${DB_PASS:-immocare} \
+		$${ADMIN:-admin}
