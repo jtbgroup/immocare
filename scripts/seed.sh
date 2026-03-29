@@ -5,6 +5,7 @@
 # Correct routes (from controllers):
 #   POST /api/v1/users
 #   POST /api/v1/persons
+#   POST /api/v1/persons/{personId}/bank-accounts               ← PersonBankAccountController
 #   POST /api/v1/buildings
 #   POST /api/v1/units                                          ← HousingUnitController
 #   GET  /api/v1/buildings/{id}/units                           ← for 409 recovery
@@ -30,6 +31,11 @@
 #   make seed-demo                   → demo data on dev
 #   make seed-real                   → real data on prod
 #   ./scripts/seed.sh http://localhost:8081 admin admin123 scripts/real-data
+#
+# persons.json supports an optional `bankAccounts` array per person:
+#   "bankAccounts": [
+#     { "iban": "BE12 3456 7890 1234", "label": "Compte principal", "isPrimary": true }
+#   ]
 # =============================================================================
 
 set -euo pipefail
@@ -51,7 +57,6 @@ log_warn()    { echo -e "  ${YELLOW}⚠${NC}  $*"; }
 log_error()   { echo -e "  ${RED}✘${NC}  $*"; }
 log_section() { echo -e "\n${CYAN}▶ $*${NC}"; }
 
-# Logs HTTP status + full body for any non-2xx — makes debugging straightforward
 log_failure() {
   local label="$1" status="$2" file="$3"
   local body; body=$(cat "$file" 2>/dev/null || echo "(empty)")
@@ -68,7 +73,6 @@ fi
 log_section "Pre-flight checks"
 PREFLIGHT_OK=true
 
-# Check duplicate building names
 BUILDING_NAMES=$(jq -r '.[].name' "$DATA_DIR/buildings.json" | sort)
 BUILDING_DUPES=$(echo "$BUILDING_NAMES" | uniq -d)
 if [ -n "$BUILDING_DUPES" ]; then
@@ -77,7 +81,6 @@ if [ -n "$BUILDING_DUPES" ]; then
   PREFLIGHT_OK=false
 fi
 
-# Check that all building references in housing_units.json exist in buildings.json
 UNIT_BNAMES=$(jq -r '.[].buildingName' "$DATA_DIR/housing_units.json" | sort -u)
 while IFS= read -r bname; do
   if ! jq -e --arg n "$bname" '.[] | select(.name == $n)' "$DATA_DIR/buildings.json" > /dev/null 2>&1; then
@@ -86,7 +89,6 @@ while IFS= read -r bname; do
   fi
 done <<< "$UNIT_BNAMES"
 
-# Check that all building references in meters.json exist in buildings.json
 METER_BNAMES=$(jq -r '.[].buildingName' "$DATA_DIR/meters.json" | sort -u)
 while IFS= read -r bname; do
   if ! jq -e --arg n "$bname" '.[] | select(.name == $n)' "$DATA_DIR/buildings.json" > /dev/null 2>&1; then
@@ -137,29 +139,69 @@ if [ -f "$USERS_FILE" ]; then
   log_info "Users: $CREATED created, $SKIPPED skipped"
 fi
 
-# ─── 2. Persons ───────────────────────────────────────────────────────────────
-log_section "2/8 — Seeding persons"
+# ─── 2. Persons + bank accounts ───────────────────────────────────────────────
+log_section "2/8 — Seeding persons (+ bank accounts)"
 PERSONS_FILE="$DATA_DIR/persons.json"
 TOTAL=$(jq length "$PERSONS_FILE")
-declare -A PERSON_ID_MAP
+declare -A PERSON_ID_MAP    # indexed by nationalId
+declare -A PERSON_EMAIL_MAP # indexed by email (lowercase)
+
+seed_bank_accounts() {
+  local person_id="$1"
+  local person_json="$2"
+  local BANK_ACCOUNTS BA_COUNT BA IBAN BAS
+  BANK_ACCOUNTS=$(echo "$person_json" | jq '.bankAccounts // []')
+  BA_COUNT=$(echo "$BANK_ACCOUNTS" | jq length)
+  for k in $(seq 0 $(( BA_COUNT - 1 ))); do
+    BA=$(echo "$BANK_ACCOUNTS" | jq -c ".[$k]")
+    IBAN=$(echo "$BA" | jq -r '.iban')
+    BAS=$(curl -s -o /tmp/ba.json -w "%{http_code}" \
+      -X POST "$BASE_URL/api/v1/persons/$person_id/bank-accounts" \
+      -H "Content-Type: application/json" -b "$COOKIE_JAR" -d "$BA")
+    case "$BAS" in
+      200|201) log_ok "  Bank account: $IBAN";;
+      409)     log_warn "  Bank account: $IBAN (already exists)";;
+      *)       log_failure "  Bank account: $IBAN" "$BAS" /tmp/ba.json;;
+    esac
+  done
+}
 
 for i in $(seq 0 $(( TOTAL - 1 ))); do
   P=$(jq -c ".[$i]" "$PERSONS_FILE")
-  NID=$(echo "$P" | jq -r '.nationalId')
-  NAME=$(echo "$P" | jq -r '"\(.firstName) \(.lastName)"')
+  NID=$(echo "$P"   | jq -r '.nationalId // empty')
+  EMAIL=$(echo "$P" | jq -r '.email // empty' | tr '[:upper:]' '[:lower:]')
+  NAME=$(echo "$P"  | jq -r '"\(.firstName) \(.lastName)"')
+
+  # Strip bankAccounts before POSTing — not part of CreatePersonRequest
+  PAYLOAD=$(echo "$P" | jq 'del(.bankAccounts)')
+
   S=$(curl -s -o /tmp/sr.json -w "%{http_code}" \
-    -X POST "$BASE_URL/api/v1/persons" -H "Content-Type: application/json" -b "$COOKIE_JAR" -d "$P")
+    -X POST "$BASE_URL/api/v1/persons" -H "Content-Type: application/json" -b "$COOKIE_JAR" -d "$PAYLOAD")
   case "$S" in
     200|201)
       ID=$(jq -r '.id' /tmp/sr.json)
-      PERSON_ID_MAP["$NID"]="$ID"
+      [ -n "$NID" ]   && PERSON_ID_MAP["$NID"]="$ID"
+      [ -n "$EMAIL" ] && PERSON_EMAIL_MAP["$EMAIL"]="$ID"
       log_ok "Person: $NAME (id=$ID)"
+      seed_bank_accounts "$ID" "$P"
       ;;
     409)
-      SEARCH=$(get_resource "/api/v1/persons?search=$NID&size=5")
-      ID=$(echo "$SEARCH" | jq -r '.content[]? | select(.nationalId == "'"$NID"'") | .id' | head -1)
-      PERSON_ID_MAP["$NID"]="${ID:-}"
+      # Recover id: try nationalId search first, then email
+      ID=""
+      if [ -n "$NID" ]; then
+        SEARCH=$(get_resource "/api/v1/persons?search=$NID&size=5")
+        ID=$(echo "$SEARCH" | jq -r '.content[]? | select(.nationalId == "'"$NID"'") | .id' | head -1)
+      fi
+      if [ -z "$ID" ] && [ -n "$EMAIL" ]; then
+        ENC_EMAIL=$(python3 -c "import urllib.parse,sys; print(urllib.parse.quote(sys.argv[1]))" "$EMAIL" 2>/dev/null || echo "$EMAIL")
+        SEARCH=$(get_resource "/api/v1/persons?search=$ENC_EMAIL&size=10")
+        ID=$(echo "$SEARCH" | jq -r --arg em "$EMAIL" '.content[]? | select((.email // "" | ascii_downcase) == $em) | .id' | head -1)
+      fi
+      [ -n "$NID" ]   && PERSON_ID_MAP["$NID"]="${ID:-}"
+      [ -n "$EMAIL" ] && PERSON_EMAIL_MAP["$EMAIL"]="${ID:-}"
       log_warn "Person: $NAME (already exists${ID:+, id=$ID})"
+      # Attempt bank accounts in case they were missed on a previous run
+      [ -n "$ID" ] && seed_bank_accounts "$ID" "$P"
       ;;
     *)
       log_failure "Person: $NAME" "$S" /tmp/sr.json
@@ -268,7 +310,6 @@ for i in $(seq 0 $(( TOTAL - 1 ))); do
       BOILER_ID=$(jq -r '.id' /tmp/sr.json)
       log_ok "Boiler: $BRAND @ $BNAME/$UNIT_NUM (id=$BOILER_ID)"
 
-      # Inject service history: POST /api/v1/boilers/{boilerId}/services
       SERVICES=$(echo "$B" | jq '.services // []')
       SVC_COUNT=$(echo "$SERVICES" | jq length)
       for j in $(seq 0 $(( SVC_COUNT - 1 ))); do
@@ -290,8 +331,6 @@ for i in $(seq 0 $(( TOTAL - 1 ))); do
 done
 
 # ─── 6. Meters ────────────────────────────────────────────────────────────────
-# POST /api/v1/housing-units/{unitId}/meters  — HOUSING_UNIT
-# POST /api/v1/buildings/{buildingId}/meters  — BUILDING
 log_section "6/8 — Seeding meters"
 METERS_FILE="$DATA_DIR/meters.json"
 TOTAL=$(jq length "$METERS_FILE")
@@ -375,7 +414,7 @@ done
 
 # ─── 8. Leases ────────────────────────────────────────────────────────────────
 # Strategy to avoid unique constraint on (housing_unit_id, status):
-#   FINISHED → create as DRAFT, add tenants, PATCH → FINISHED immediately
+#   FINISHED → create as DRAFT, PATCH → ACTIVE → PATCH → FINISHED
 #   ACTIVE   → create with ?activate=true (bypasses DRAFT entirely)
 # Each FINISHED lease must be fully committed before the next one starts.
 log_section "8/8 — Seeding leases"
@@ -398,22 +437,47 @@ for i in $(seq 0 $(( TOTAL - 1 ))); do
     ERRORS=$(( ERRORS+1 )); continue
   fi
 
-  # Resolve tenants from nationalId → personId and build the tenants array
+  # ── Resolve tenants ────────────────────────────────────────────────────────
+  # Tenants may use `email` instead of `nationalId`.
+  # Resolution order: nationalId → local email map → live API search.
   TENANTS_JSON=$(echo "$L" | jq '.tenants // []')
   TENANT_COUNT=$(echo "$TENANTS_JSON" | jq length)
   RESOLVED_TENANTS='[]'
   for j in $(seq 0 $(( TENANT_COUNT - 1 ))); do
     T=$(echo "$TENANTS_JSON" | jq -c ".[$j]")
-    TNID=$(echo "$T" | jq -r '.nationalId')
-    TROLE=$(echo "$T" | jq -r '.role')
-    TID="${PERSON_ID_MAP[$TNID]:-}"
-    if [ -z "$TID" ]; then log_warn "  Tenant $TNID not resolved — skipped"; continue; fi
+    TNID=$(echo "$T"   | jq -r '.nationalId // empty')
+    TEMAIL=$(echo "$T" | jq -r '.email // empty' | tr '[:upper:]' '[:lower:]')
+    TROLE=$(echo "$T"  | jq -r '.role')
+
+    TID=""
+
+    # 1. Try nationalId
+    if [ -n "$TNID" ] && [ "$TNID" != "null" ]; then
+      TID="${PERSON_ID_MAP[$TNID]:-}"
+    fi
+
+    # 2. Fallback: local email map
+    if [ -z "$TID" ] && [ -n "$TEMAIL" ]; then
+      TID="${PERSON_EMAIL_MAP[$TEMAIL]:-}"
+    fi
+
+    # 3. Fallback: live API search by email, with caching
+    if [ -z "$TID" ] && [ -n "$TEMAIL" ]; then
+      ENC_EMAIL=$(python3 -c "import urllib.parse,sys; print(urllib.parse.quote(sys.argv[1]))" "$TEMAIL" 2>/dev/null || echo "$TEMAIL")
+      SEARCH=$(get_resource "/api/v1/persons?search=$ENC_EMAIL&size=10")
+      TID=$(echo "$SEARCH" | jq -r --arg em "$TEMAIL" '.content[]? | select((.email // "" | ascii_downcase) == $em) | .id' | head -1)
+      [ -n "$TID" ] && PERSON_EMAIL_MAP["$TEMAIL"]="$TID"
+    fi
+
+    if [ -z "$TID" ]; then
+      log_warn "  Tenant not resolved (nationalId='$TNID', email='$TEMAIL') — skipped"
+      continue
+    fi
+
     RESOLVED_TENANTS=$(echo "$RESOLVED_TENANTS" | \
       jq --argjson pid "$TID" --arg role "$TROLE" '. + [{personId: $pid, role: $role}]')
   done
 
-  # Tenants are required at creation (service validates PRIMARY tenant presence)
-  # Build full payload with tenants included, always create as DRAFT first
   PAYLOAD=$(echo "$L" \
     | jq 'del(.buildingName) | del(.unitNumber) | del(.tenants) | del(._comment)' \
     | jq --argjson uid "$UNIT_ID" '. + {housingUnitId: $uid}' \
@@ -435,8 +499,7 @@ for i in $(seq 0 $(( TOTAL - 1 ))); do
       log_ok "$LABEL (id=$LEASE_ID)"
       CREATED=$(( CREATED+1 ))
 
-      # FINISHED: DRAFT → ACTIVE → FINISHED (two PATCHes)
-      # ChangeLeaseStatusRequest uses field "targetStatus" (not "status")
+      # FINISHED: DRAFT → ACTIVE → FINISHED
       if [ "$STATUS_VAL" = "FINISHED" ]; then
         SS=$(curl -s -o /tmp/ss.json -w "%{http_code}" \
           -X PATCH "$BASE_URL/api/v1/leases/$LEASE_ID/status" \
