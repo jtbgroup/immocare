@@ -1,0 +1,60 @@
+[
+  {
+    "buildingName": "Résidence Les Acacias",
+    "unitNumber": "01",
+    "floor": 0,
+    "landingNumber": "A",
+    "totalSurface": 75.5,
+    "hasTerrace": false,
+    "hasGarden": true,
+    "gardenSurface": 20.0,
+    "gardenOrientation": "S",
+    "ownerPersonNationalId": "75031512345"
+  },
+  {
+    "buildingName": "Résidence Les Acacias",
+    "unitNumber": "02",
+    "floor": 1,
+    "landingNumber": "A",
+    "totalSurface": 68.0,
+    "hasTerrace": true,
+    "terraceSurface": 10.0,
+    "terraceOrientation": "SW",
+    "hasGarden": false,
+    "ownerPersonNationalId": "75031512345"
+  },
+  {
+    "buildingName": "Résidence Les Acacias",
+    "unitNumber": "03",
+    "floor": 2,
+    "landingNumber": "A",
+    "totalSurface": 55.0,
+    "hasTerrace": true,
+    "terraceSurface": 8.0,
+    "terraceOrientation": "NE",
+    "hasGarden": false,
+    "ownerPersonNationalId": "75031512345"
+  },
+  {
+    "buildingName": "Immeuble Midi",
+    "unitNumber": "01",
+    "floor": 1,
+    "landingNumber": "B",
+    "totalSurface": 82.0,
+    "hasTerrace": false,
+    "hasGarden": false,
+    "ownerPersonNationalId": "75031512345"
+  },
+  {
+    "buildingName": "Immeuble Midi",
+    "unitNumber": "02",
+    "floor": 2,
+    "landingNumber": "B",
+    "totalSurface": 90.0,
+    "hasTerrace": true,
+    "terraceSurface": 15.0,
+    "terraceOrientation": "S",
+    "hasGarden": false,
+    "ownerPersonNationalId": "75031512345"
+  }
+]

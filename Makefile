@@ -259,20 +259,26 @@ update: ## Mettre à jour l'application (pull + rebuild + redémarrer)
 	@$(MAKE) up
 	@echo "✓ Mise à jour terminée"
 
+
 # ============================================
-# DEMO DATA SEED
+# SEED
 # ============================================
 # Usage:
-#   make seed-demo                            # default users.json
-#   make seed-prod DATA=scripts/real-data/users.json
-seed-demo:
-	@echo "🌱 Seeding demo data (dev — http://localhost:8081)..."
+#   make seed-demo                   → demo data, dev (localhost:8081)
+#   make seed-real                   → real data, prod (localhost:8090)
+
+seed-demo: ## 🌱 Seed demo data (dev)
+	@echo "🌱 Seeding demo data"
 	@chmod +x scripts/seed.sh
-	@scripts/seed.sh http://localhost:8081 admin admin123 $(DATA)
-	@echo ""
- 
-seed-prod:
-	@echo "🌱 Seeding demo data (prod — http://localhost:8080)..."
+	@scripts/seed.sh http://localhost:8081 admin admin123 scripts/demo-data
+
+
+seed-real: ## 🌱 Seed real data (prod)
+	@echo "🌱 Seeding real data"
 	@chmod +x scripts/seed.sh
-	@scripts/seed.sh http://localhost:8080 admin admin123 $(DATA)
-	@echo ""
+	@scripts/seed.sh $${URL:-http://localhost:8081} admin admin123 scripts/real-data
+
+reset-data:
+	@echo "🌱 Resetting data"
+	@chmod +x scripts/reset.sh
+	@scripts/reset.sh $${URL:-http://localhost:8081} admin admin123

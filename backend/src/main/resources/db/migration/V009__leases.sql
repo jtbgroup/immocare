@@ -40,10 +40,13 @@ CREATE TABLE lease (
     CONSTRAINT chk_end_after_start CHECK (end_date >= start_date)
 );
 
--- Index partiel remplacé par index simple (WHERE non supporté par H2)
-CREATE UNIQUE INDEX uq_lease_unit_active_draft ON lease (housing_unit_id, status);
+-- Only one ACTIVE and one DRAFT lease allowed per unit at a time.
+-- FINISHED leases accumulate freely as historical records.
+-- NOTE: H2 does not support partial indexes (WHERE clause), so uniqueness
+-- for ACTIVE and DRAFT is enforced at the service layer, not in the DB.
 CREATE INDEX idx_lease_housing_unit ON lease (housing_unit_id);
 CREATE INDEX idx_lease_status       ON lease (status);
+CREATE INDEX idx_lease_unit_status  ON lease (housing_unit_id, status);
 
 CREATE TABLE lease_tenant (
     lease_id  BIGINT      NOT NULL REFERENCES lease  (id) ON DELETE CASCADE,

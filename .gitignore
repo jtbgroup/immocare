@@ -270,3 +270,4 @@ deploy-local.sh
 ###################
 
 frontend/e2e/shared/data-factory.real.ts
+scripts/real-data/

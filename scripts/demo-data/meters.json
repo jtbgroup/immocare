@@ -1,0 +1,152 @@
+[
+  {
+    "buildingName": "Résidence Les Acacias",
+    "unitNumber": "01",
+    "ownerType": "HOUSING_UNIT",
+    "type": "GAS",
+    "meterNumber": "GAZ-ACA-01-001",
+    "label": "Compteur gaz Acacias 01",
+    "eanCode": "541444903001001",
+    "startDate": "2019-06-15"
+  },
+  {
+    "buildingName": "Résidence Les Acacias",
+    "unitNumber": "01",
+    "ownerType": "HOUSING_UNIT",
+    "type": "ELECTRICITY",
+    "meterNumber": "ELE-ACA-01-001",
+    "label": "Compteur électricité Acacias 01",
+    "eanCode": "541444903001002",
+    "startDate": "2019-06-15"
+  },
+  {
+    "buildingName": "Résidence Les Acacias",
+    "unitNumber": "01",
+    "ownerType": "HOUSING_UNIT",
+    "type": "WATER",
+    "meterNumber": "EAU-ACA-01-001",
+    "label": "Compteur eau Acacias 01",
+    "installationNumber": "INST-ACA-01-W",
+    "startDate": "2019-06-15"
+  },
+  {
+    "buildingName": "Résidence Les Acacias",
+    "unitNumber": "02",
+    "ownerType": "HOUSING_UNIT",
+    "type": "GAS",
+    "meterNumber": "GAZ-ACA-02-001",
+    "label": "Compteur gaz Acacias 02",
+    "eanCode": "541444903002001",
+    "startDate": "2020-09-01"
+  },
+  {
+    "buildingName": "Résidence Les Acacias",
+    "unitNumber": "02",
+    "ownerType": "HOUSING_UNIT",
+    "type": "ELECTRICITY",
+    "meterNumber": "ELE-ACA-02-001",
+    "label": "Compteur électricité Acacias 02",
+    "eanCode": "541444903002002",
+    "startDate": "2020-09-01"
+  },
+  {
+    "buildingName": "Résidence Les Acacias",
+    "unitNumber": "02",
+    "ownerType": "HOUSING_UNIT",
+    "type": "WATER",
+    "meterNumber": "EAU-ACA-02-001",
+    "label": "Compteur eau Acacias 02",
+    "installationNumber": "INST-ACA-02-W",
+    "startDate": "2020-09-01"
+  },
+  {
+    "buildingName": "Résidence Les Acacias",
+    "unitNumber": "03",
+    "ownerType": "HOUSING_UNIT",
+    "type": "GAS",
+    "meterNumber": "GAZ-ACA-03-001",
+    "label": "Compteur gaz Acacias 03",
+    "eanCode": "541444903003001",
+    "startDate": "2021-03-20"
+  },
+  {
+    "buildingName": "Résidence Les Acacias",
+    "unitNumber": "03",
+    "ownerType": "HOUSING_UNIT",
+    "type": "ELECTRICITY",
+    "meterNumber": "ELE-ACA-03-001",
+    "label": "Compteur électricité Acacias 03",
+    "eanCode": "541444903003002",
+    "startDate": "2021-03-20"
+  },
+  {
+    "buildingName": "Résidence Les Acacias",
+    "unitNumber": "03",
+    "ownerType": "HOUSING_UNIT",
+    "type": "WATER",
+    "meterNumber": "EAU-ACA-03-001",
+    "label": "Compteur eau Acacias 03",
+    "installationNumber": "INST-ACA-03-W",
+    "startDate": "2021-03-20"
+  },
+  {
+    "buildingName": "Immeuble Midi",
+    "unitNumber": "01",
+    "ownerType": "HOUSING_UNIT",
+    "type": "GAS",
+    "meterNumber": "GAZ-MID-01-001",
+    "label": "Compteur gaz Midi 01",
+    "eanCode": "541455800001001",
+    "startDate": "2018-11-10"
+  },
+  {
+    "buildingName": "Immeuble Midi",
+    "unitNumber": "01",
+    "ownerType": "HOUSING_UNIT",
+    "type": "ELECTRICITY",
+    "meterNumber": "ELE-MID-01-001",
+    "label": "Compteur électricité Midi 01",
+    "eanCode": "541455800001002",
+    "startDate": "2018-11-10"
+  },
+  {
+    "buildingName": "Immeuble Midi",
+    "unitNumber": "01",
+    "ownerType": "HOUSING_UNIT",
+    "type": "WATER",
+    "meterNumber": "EAU-MID-01-001",
+    "label": "Compteur eau Midi 01",
+    "installationNumber": "INST-MID-01-W",
+    "startDate": "2018-11-10"
+  },
+  {
+    "buildingName": "Immeuble Midi",
+    "unitNumber": "02",
+    "ownerType": "HOUSING_UNIT",
+    "type": "GAS",
+    "meterNumber": "GAZ-MID-02-001",
+    "label": "Compteur gaz Midi 02",
+    "eanCode": "541455800002001",
+    "startDate": "2022-07-05"
+  },
+  {
+    "buildingName": "Immeuble Midi",
+    "unitNumber": "02",
+    "ownerType": "HOUSING_UNIT",
+    "type": "ELECTRICITY",
+    "meterNumber": "ELE-MID-02-001",
+    "label": "Compteur électricité Midi 02",
+    "eanCode": "541455800002002",
+    "startDate": "2022-07-05"
+  },
+  {
+    "buildingName": "Immeuble Midi",
+    "unitNumber": "02",
+    "ownerType": "HOUSING_UNIT",
+    "type": "WATER",
+    "meterNumber": "EAU-MID-02-001",
+    "label": "Compteur eau Midi 02",
+    "installationNumber": "INST-MID-02-W",
+    "startDate": "2022-07-05"
+  }
+]

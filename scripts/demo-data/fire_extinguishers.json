@@ -1,0 +1,57 @@
+[
+  {
+    "buildingName": "Résidence Les Acacias",
+    "identificationNumber": "EXT-ACA-001",
+    "notes": "Hall d'entrée — rez-de-chaussée",
+    "revisions": [
+      { "revisionDate": "2021-03-15", "notes": "Contrôle annuel OK" },
+      { "revisionDate": "2022-03-10", "notes": "Contrôle annuel OK — pression vérifiée" },
+      { "revisionDate": "2023-03-08", "notes": "Contrôle annuel OK" },
+      { "revisionDate": "2024-03-12", "notes": "Contrôle annuel OK — goupille remplacée" }
+    ]
+  },
+  {
+    "buildingName": "Résidence Les Acacias",
+    "identificationNumber": "EXT-ACA-002",
+    "notes": "Palier 1er étage",
+    "revisions": [
+      { "revisionDate": "2021-03-15", "notes": "Contrôle annuel OK" },
+      { "revisionDate": "2022-03-10", "notes": "Contrôle annuel OK" },
+      { "revisionDate": "2023-03-08", "notes": "Contrôle annuel OK" },
+      { "revisionDate": "2024-03-12", "notes": "Contrôle annuel OK" }
+    ]
+  },
+  {
+    "buildingName": "Résidence Les Acacias",
+    "identificationNumber": "EXT-ACA-003",
+    "notes": "Cave / local technique",
+    "revisions": [
+      { "revisionDate": "2022-04-05", "notes": "Nouveau extincteur — premier contrôle" },
+      { "revisionDate": "2023-04-03", "notes": "Contrôle annuel OK" },
+      { "revisionDate": "2024-04-08", "notes": "Contrôle annuel OK — manomètre vérifié" }
+    ]
+  },
+  {
+    "buildingName": "Immeuble Midi",
+    "identificationNumber": "EXT-MID-001",
+    "notes": "Hall principal — entrée rue du Midi",
+    "revisions": [
+      { "revisionDate": "2020-06-20", "notes": "Contrôle annuel OK" },
+      { "revisionDate": "2021-06-18", "notes": "Contrôle annuel OK" },
+      { "revisionDate": "2022-06-15", "notes": "Contrôle annuel OK — étiquette mise à jour" },
+      { "revisionDate": "2023-06-14", "notes": "Contrôle annuel OK" },
+      { "revisionDate": "2024-06-10", "notes": "Contrôle annuel OK — remplacement prévu 2025" }
+    ]
+  },
+  {
+    "buildingName": "Immeuble Midi",
+    "identificationNumber": "EXT-MID-002",
+    "notes": "Local poubelles / chaufferie",
+    "revisions": [
+      { "revisionDate": "2021-06-18", "notes": "Contrôle annuel OK" },
+      { "revisionDate": "2022-06-15", "notes": "Contrôle annuel OK" },
+      { "revisionDate": "2023-06-14", "notes": "Contrôle annuel OK" },
+      { "revisionDate": "2024-06-10", "notes": "Contrôle annuel OK" }
+    ]
+  }
+]
