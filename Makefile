@@ -288,3 +288,7 @@ reset-postgres: ## 🗑  Reset via SQL direct (requiert psql + PostgreSQL)
 		$${DB_USER:-immocare} \
 		$${DB_PASS:-immocare} \
 		$${ADMIN:-admin}
+
+seed-cleandata-real: ## 🌱 Seed real data after reset (dev)
+	@$(MAKE) reset-postgres
+	@$(MAKE) seed-real

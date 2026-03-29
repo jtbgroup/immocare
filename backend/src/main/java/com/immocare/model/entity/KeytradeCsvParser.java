@@ -15,23 +15,40 @@ import org.springframework.stereotype.Component;
 import com.immocare.exception.ParseException;
 
 /**
- * Parser for Keytrade Bank CSV exports (format observed from Jan 2026).
+ * Parser for Keytrade Bank CSV exports (7-column format, observed from Jan
+ * 2026).
  *
- * Expected columns (semicolon-separated, 1 header row):
- * Date ; Description ; De ; IBAN ; Montant
+ * Expected columns (semicolon-separated, UTF-8 BOM, 1 header row):
+ * Extrait ; Date ; Date valeur ; IBAN ; Description ; Montant ; Devise
  *
- * Amount format: "1234.56 EUR" — always positive, direction unknown.
- * Counterparty IBAN may be "-" for card payments / direct debits.
- * BOM (UTF-8 \uFEFF) stripped automatically.
+ * Column mapping:
+ * Extrait → externalReference (e.g. "2023/0012/0096" — unique Keytrade ref,
+ * used for dedup)
+ * Date → transactionDate (dd/MM/yyyy)
+ * Date valeur → valueDate (dd/MM/yyyy — may differ from transactionDate)
+ * IBAN → counterpartyAccount ("-" → null)
+ * Description → description (free text, may contain counterparty name)
+ * Montant → amount (abs) + direction (positive → INCOME, negative → EXPENSE)
+ * Devise → ignored (always EUR in practice)
  *
- * Direction: NULL — must be assigned manually during review.
+ * Direction is always determined from the sign of Montant — never null.
  */
 @Component
 public class KeytradeCsvParser implements TransactionParser {
 
     public static final String CODE = "keytrade-csv-20260102";
+
     private static final DateTimeFormatter DATE_FMT = DateTimeFormatter.ofPattern("dd/MM/yyyy");
     private static final String DELIMITER = ";";
+
+    // Column indices
+    private static final int COL_EXTRAIT = 0;
+    private static final int COL_DATE = 1;
+    private static final int COL_DATE_VALEUR = 2;
+    private static final int COL_IBAN = 3;
+    private static final int COL_DESCRIPTION = 4;
+    private static final int COL_MONTANT = 5;
+    // COL_DEVISE = 6 — ignored
 
     @Override
     public String getCode() {
@@ -40,7 +57,8 @@ public class KeytradeCsvParser implements TransactionParser {
 
     @Override
     public String getDescription() {
-        return "Keytrade CSV — colonnes: Date;Description;De;IBAN;Montant (montant positif, direction manuelle)";
+        return "Keytrade CSV — colonnes: Extrait;Date;Date valeur;IBAN;Description;Montant;Devise "
+                + "(montant signé: positif=INCOME, négatif=EXPENSE, séparateur \";\", encodage UTF-8 BOM)";
     }
 
     @Override
@@ -70,8 +88,9 @@ public class KeytradeCsvParser implements TransactionParser {
                 }
 
                 // Skip blank lines
-                if (line.isBlank())
+                if (line.isBlank()) {
                     continue;
+                }
 
                 try {
                     results.add(parseLine(line, rowNumber));
@@ -79,6 +98,7 @@ public class KeytradeCsvParser implements TransactionParser {
                     errors.add("Row " + rowNumber + ": " + e.getMessage());
                 }
             }
+
         } catch (Exception e) {
             throw new ParseException("Failed to read CSV file: " + e.getMessage(), e);
         }
@@ -91,63 +111,85 @@ public class KeytradeCsvParser implements TransactionParser {
     }
 
     private ParsedTransaction parseLine(String line, int rowNumber) throws ParseException {
-        // Handle quoted fields (description may contain semicolons)
         String[] cols = splitCsvLine(line);
 
-        if (cols.length < 5) {
-            throw new ParseException("Expected 5 columns, got " + cols.length);
+        if (cols.length < 6) {
+            throw new ParseException("Expected at least 6 columns, got " + cols.length);
         }
 
-        String rawDate = cols[0].trim();
-        String description = cols[1].trim().replaceAll("^\"|\"$", "");
-        String counterpartyName = cols[2].trim().replaceAll("^\"|\"$", "");
-        String counterpartyAccount = cols[3].trim();
-        String rawAmount = cols[4].trim().replaceAll("^\"|\"$", "");
+        String extrait = clean(cols[COL_EXTRAIT]);
+        String rawDate = clean(cols[COL_DATE]);
+        String rawValeur = clean(cols[COL_DATE_VALEUR]);
+        String rawIban = clean(cols[COL_IBAN]);
+        String description = clean(cols[COL_DESCRIPTION]);
+        String rawMontant = clean(cols[COL_MONTANT]);
 
-        // Parse date
-        LocalDate date;
+        // Parse transaction date
+        LocalDate transactionDate;
         try {
-            date = LocalDate.parse(rawDate, DATE_FMT);
+            transactionDate = LocalDate.parse(rawDate, DATE_FMT);
         } catch (Exception e) {
             throw new ParseException("Invalid date: " + rawDate);
         }
 
-        // Parse amount: "1234.56 EUR" → 1234.56
-        BigDecimal amount;
+        // Parse value date (optional — fallback to transactionDate if blank or
+        // unparseable)
+        LocalDate valueDate;
         try {
-            String amountStr = rawAmount
-                    .replaceAll("(?i)\\s*EUR\\s*$", "")
-                    .trim()
-                    .replace(",", ".");
-            amount = new BigDecimal(amountStr);
-            if (amount.compareTo(BigDecimal.ZERO) < 0) {
-                amount = amount.abs(); // normalize — direction set manually
-            }
+            valueDate = (rawValeur.isBlank()) ? transactionDate : LocalDate.parse(rawValeur, DATE_FMT);
         } catch (Exception e) {
-            throw new ParseException("Invalid amount: " + rawAmount);
+            valueDate = transactionDate;
         }
 
-        // Normalize IBAN (may be "-" for card payments)
-        String iban = "-".equals(counterpartyAccount) ? null : counterpartyAccount;
-        String name = "-".equals(counterpartyName) ? null : counterpartyName;
+        // Parse amount — signed: positive = INCOME, negative = EXPENSE
+        BigDecimal signedAmount;
+        try {
+            // Amount uses "." as decimal separator in this format (e.g. "900.00", "-15.00")
+            signedAmount = new BigDecimal(rawMontant.replace(",", "."));
+        } catch (Exception e) {
+            throw new ParseException("Invalid amount: " + rawMontant);
+        }
 
-        String fingerprint = FingerprintUtil.compute(date, amount, iban, name, description);
+        ParsedTransaction.Direction direction = signedAmount.compareTo(BigDecimal.ZERO) >= 0
+                ? ParsedTransaction.Direction.INCOME
+                : ParsedTransaction.Direction.EXPENSE;
+
+        BigDecimal amount = signedAmount.abs();
+
+        // Normalize IBAN ("-" = no counterparty account)
+        String counterpartyAccount = ("-".equals(rawIban) || rawIban.isBlank()) ? null : rawIban;
+
+        // Counterparty name: not a dedicated column — left null (learning rules will
+        // suggest)
+        String counterpartyName = null;
+
+        // Fingerprint — incorporates extrait for reliable dedup
+        String fingerprint = FingerprintUtil.compute(
+                transactionDate, amount, counterpartyAccount, counterpartyName, description);
 
         return ParsedTransaction.builder()
-                .transactionDate(date)
+                .transactionDate(transactionDate)
+                .valueDate(valueDate)
+                .externalReference(extrait)
                 .amount(amount)
-                .direction(null) // unknown — manual assignment during review
+                .direction(direction)
                 .description(description)
-                .counterpartyName(name)
-                .counterpartyAccount(iban)
+                .counterpartyName(counterpartyName)
+                .counterpartyAccount(counterpartyAccount)
                 .fingerprint(fingerprint)
                 .rawLine(line)
                 .rowNumber(rowNumber)
                 .build();
     }
 
+    private String clean(String s) {
+        if (s == null)
+            return "";
+        return s.trim().replaceAll("^\"|\"$", "");
+    }
+
     /**
-     * Simple CSV splitter that respects double-quoted fields.
+     * Simple CSV splitter respecting double-quoted fields.
      */
     private String[] splitCsvLine(String line) {
         List<String> tokens = new ArrayList<>();

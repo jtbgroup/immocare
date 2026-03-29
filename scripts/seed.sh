@@ -4,6 +4,8 @@
 #
 # Correct routes (from controllers):
 #   POST /api/v1/users
+#   POST /api/v1/tag-categories                                 ← TagCategoryController
+#   POST /api/v1/tag-subcategories                              ← TagSubcategoryController
 #   POST /api/v1/persons
 #   POST /api/v1/persons/{personId}/bank-accounts               ← PersonBankAccountController
 #   POST /api/v1/buildings
@@ -17,6 +19,17 @@
 #   POST /api/v1/leases
 #   POST /api/v1/leases/{id}/tenants
 #   PATCH /api/v1/leases/{id}/status
+#
+# Seeding order:
+#   1.  Users
+#   1b. Tag categories & subcategories
+#   2.  Persons (+ bank accounts)
+#   3.  Buildings
+#   4.  Housing units
+#   5.  Boilers (+ service records)
+#   6.  Meters
+#   7.  Fire extinguishers (+ revisions)
+#   8.  Leases (+ tenants + status transitions)
 #
 # Usage:
 #   ./scripts/seed.sh [BASE_URL] [ADMIN_USER] [ADMIN_PASS] [DATA_DIR]
@@ -34,7 +47,17 @@
 #
 # persons.json supports an optional `bankAccounts` array per person:
 #   "bankAccounts": [
-#     { "iban": "BE12 3456 7890 1234", "label": "Compte principal", "isPrimary": true }
+#     { "iban": "BE12 3456 7890 1234", "label": "Compte principal", "primary": true }
+#   ]
+#
+# tag_categories.json structure:
+#   [
+#     {
+#       "name": "Maintenance",
+#       "subcategories": [
+#         { "name": "Chaudière", "direction": "EXPENSE" }
+#       ]
+#     }
 #   ]
 # =============================================================================
 
@@ -137,6 +160,63 @@ if [ -f "$USERS_FILE" ]; then
     esac
   done
   log_info "Users: $CREATED created, $SKIPPED skipped"
+fi
+
+# ─── 1b. Tag Categories & Subcategories ──────────────────────────────────────
+TAGS_FILE="$DATA_DIR/tag_categories.json"
+if [ -f "$TAGS_FILE" ]; then
+  log_section "1b — Seeding tag categories & subcategories"
+  TOTAL=$(jq length "$TAGS_FILE"); CREATED=0; SKIPPED=0
+
+  for i in $(seq 0 $(( TOTAL - 1 ))); do
+    CAT=$(jq -c ".[$i]" "$TAGS_FILE")
+    CNAME=$(echo "$CAT" | jq -r '.name')
+
+    # Create category
+    CS=$(curl -s -o /tmp/cr.json -w "%{http_code}" \
+      -X POST "$BASE_URL/api/v1/tag-categories" \
+      -H "Content-Type: application/json" -b "$COOKIE_JAR" \
+      -d "$(echo "$CAT" | jq '{name, description}')")
+
+    case "$CS" in
+      200|201)
+        CAT_ID=$(jq -r '.id' /tmp/cr.json)
+        log_ok "Category: $CNAME (id=$CAT_ID)"
+        CREATED=$(( CREATED+1 ))
+        ;;
+      409)
+        # Recover existing id
+        CAT_ID=$(curl -s "$BASE_URL/api/v1/tag-categories" -b "$COOKIE_JAR" \
+          | jq -r --arg n "$CNAME" '.[] | select(.name == $n) | .id' | head -1)
+        log_warn "Category: $CNAME (already exists${CAT_ID:+, id=$CAT_ID})"
+        SKIPPED=$(( SKIPPED+1 ))
+        ;;
+      *)
+        log_failure "Category: $CNAME" "$CS" /tmp/cr.json
+        continue
+        ;;
+    esac
+
+    # Create subcategories
+    SUBS=$(echo "$CAT" | jq '.subcategories // []')
+    SUB_COUNT=$(echo "$SUBS" | jq length)
+    for j in $(seq 0 $(( SUB_COUNT - 1 ))); do
+      SUB=$(echo "$SUBS" | jq -c ".[$j]")
+      SNAME=$(echo "$SUB" | jq -r '.name')
+      PAYLOAD=$(echo "$SUB" | jq --argjson cid "$CAT_ID" '. + {categoryId: $cid}')
+
+      SS=$(curl -s -o /tmp/sr2.json -w "%{http_code}" \
+        -X POST "$BASE_URL/api/v1/tag-subcategories" \
+        -H "Content-Type: application/json" -b "$COOKIE_JAR" \
+        -d "$PAYLOAD")
+      case "$SS" in
+        200|201) log_ok "  Subcategory: $SNAME";;
+        409)     log_warn "  Subcategory: $SNAME (already exists)";;
+        *)       log_failure "  Subcategory: $SNAME" "$SS" /tmp/sr2.json;;
+      esac
+    done
+  done
+  log_info "Categories: $CREATED created, $SKIPPED skipped"
 fi
 
 # ─── 2. Persons + bank accounts ───────────────────────────────────────────────
@@ -541,6 +621,7 @@ echo ""
 log_ok "Full seed completed!"
 echo ""
 echo "  Summary:"
+echo "    Tag categories     : $(jq length "$DATA_DIR/tag_categories.json" 2>/dev/null || echo 0)"
 echo "    Buildings          : $(jq length "$DATA_DIR/buildings.json")"
 echo "    Housing units      : $(jq length "$DATA_DIR/housing_units.json")"
 echo "    Persons            : $(jq length "$DATA_DIR/persons.json")"

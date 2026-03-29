@@ -1,0 +1,76 @@
+[
+  {
+    "name": "Administration",
+    "subcategories": [
+      { "name": "Assurance habitation", "direction": "EXPENSE" },
+      { "name": "PEB",                  "direction": "EXPENSE" },
+      { "name": "Petits frais",         "direction": "EXPENSE" }
+    ]
+  },
+  {
+    "name": "Consommables",
+    "subcategories": [
+      { "name": "Adoucisseur", "direction": "EXPENSE" },
+      { "name": "Eau",         "direction": "EXPENSE" },
+      { "name": "Electricité", "direction": "EXPENSE" },
+      { "name": "Gaz",         "direction": "EXPENSE" }
+    ]
+  },
+  {
+    "name": "Dépôt",
+    "subcategories": [
+      { "name": "Garantie Locative", "direction": "BOTH" }
+    ]
+  },
+  {
+    "name": "Location",
+    "subcategories": [
+      { "name": "Annonce",           "direction": "EXPENSE" },
+      { "name": "Etat des lieux",    "direction": "EXPENSE" },
+      { "name": "Garantie Locative", "direction": "EXPENSE" },
+      { "name": "Loyer",             "direction": "INCOME"  },
+      { "name": "Petits travaux",    "direction": "EXPENSE" }
+    ]
+  },
+  {
+    "name": "Maintenance",
+    "subcategories": [
+      { "name": "Adoucisseur",        "direction": "EXPENSE" },
+      { "name": "Chaudière",          "direction": "EXPENSE" },
+      { "name": "Electricité",        "direction": "EXPENSE" },
+      { "name": "Extincteurs",        "direction": "EXPENSE" },
+      { "name": "Insert",             "direction": "EXPENSE" },
+      { "name": "Matériel",           "direction": "EXPENSE" },
+      { "name": "Nettoyage communs",  "direction": "EXPENSE" },
+      { "name": "Petits travaux",     "direction": "EXPENSE" },
+      { "name": "Plomberie",          "direction": "EXPENSE" }
+    ]
+  },
+  {
+    "name": "Prime",
+    "subcategories": [
+      { "name": "Banque",  "direction": "INCOME" },
+      { "name": "Retour",  "direction": "INCOME" },
+      { "name": "Usufruit","direction": "INCOME" }
+    ]
+  },
+  {
+    "name": "Rente",
+    "subcategories": [
+      { "name": "Usufruit", "direction": "EXPENSE" }
+    ]
+  },
+  {
+    "name": "Taxes",
+    "subcategories": [
+      { "name": "Précompte immobilier", "direction": "EXPENSE" }
+    ]
+  },
+  {
+    "name": "Travaux",
+    "subcategories": [
+      { "name": "Structure", "direction": "EXPENSE" },
+      { "name": "Toiture",   "direction": "EXPENSE" }
+    ]
+  }
+]

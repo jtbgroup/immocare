@@ -1,5 +1,6 @@
 -- ============================================================
 -- V015 — UC015: Import Parser Strategies
+-- Use case: UC-015
 -- ============================================================
 
 CREATE TABLE import_parser (
@@ -17,16 +18,9 @@ CREATE TABLE import_parser (
 INSERT INTO import_parser (code, label, description, format, bank_hint) VALUES
 (
     'keytrade-csv-20260102',
-    'Keytrade CSV (format fév. 2026)',
-    'Colonnes: Date;Description;De;IBAN;Montant — montant positif, suffixe EUR, direction manuelle, séparateur ";"',
+    'Keytrade CSV (format jan. 2026 — 7 colonnes)',
+    'Colonnes: Extrait;Date;Date valeur;IBAN;Description;Montant;Devise — montant signé (positif=INCOME, négatif=EXPENSE), séparateur ";", encodage UTF-8 BOM',
     'CSV',
-    'Keytrade'
-),
-(
-    'keytrade-pdf-20260301',
-    'Keytrade PDF (format mars 2026)',
-    'Relevé PDF Keytrade — blocs multi-lignes, signe +/- explicite, "vers:" = EXPENSE, "de:" = INCOME',
-    'PDF',
     'Keytrade'
 );
 
@@ -40,7 +34,6 @@ ALTER TABLE financial_transaction
 ALTER TABLE financial_transaction
     ADD COLUMN parser_id          BIGINT REFERENCES import_parser (id) ON DELETE SET NULL;
 
--- Index partiel WHERE supprimé (non supporté par H2)
 CREATE INDEX idx_ft_fingerprint ON financial_transaction (import_fingerprint);
 
 ALTER TABLE bank_account
