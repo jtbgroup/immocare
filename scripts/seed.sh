@@ -219,6 +219,30 @@ if [ -f "$TAGS_FILE" ]; then
   log_info "Categories: $CREATED created, $SKIPPED skipped"
 fi
 
+
+# ─── 1c. Bank Accounts ────────────────────────────────────────────────────────
+BANK_ACCOUNTS_FILE="$DATA_DIR/bank_accounts.json"
+if [ -f "$BANK_ACCOUNTS_FILE" ]; then
+  log_section "1c — Seeding bank accounts"
+  TOTAL=$(jq length "$BANK_ACCOUNTS_FILE"); CREATED=0; SKIPPED=0
+  for i in $(seq 0 $(( TOTAL - 1 ))); do
+    BA=$(jq -c ".[$i]" "$BANK_ACCOUNTS_FILE")
+    LABEL=$(echo "$BA" | jq -r '.label')
+    ACCOUNT_NUMBER=$(echo "$BA" | jq -r '.accountNumber')
+    S=$(curl -s -o /tmp/ba.json -w "%{http_code}" \
+      -X POST "$BASE_URL/api/v1/bank-accounts" \
+      -H "Content-Type: application/json" -b "$COOKIE_JAR" \
+      -d "$BA")
+    case "$S" in
+      200|201) log_ok "Bank account: $LABEL ($ACCOUNT_NUMBER)"; CREATED=$(( CREATED+1 ));;
+      409)     log_warn "Bank account: $LABEL ($ACCOUNT_NUMBER) (already exists)"; SKIPPED=$(( SKIPPED+1 ));;
+      *)       log_failure "Bank account: $LABEL ($ACCOUNT_NUMBER)" "$S" /tmp/ba.json;;
+    esac
+  done
+  log_info "Bank accounts: $CREATED created, $SKIPPED skipped"
+fi
+ 
+
 # ─── 2. Persons + bank accounts ───────────────────────────────────────────────
 log_section "2/8 — Seeding persons (+ bank accounts)"
 PERSONS_FILE="$DATA_DIR/persons.json"
@@ -622,6 +646,7 @@ log_ok "Full seed completed!"
 echo ""
 echo "  Summary:"
 echo "    Tag categories     : $(jq length "$DATA_DIR/tag_categories.json" 2>/dev/null || echo 0)"
+echo "    Bank accounts      : $(jq length "$DATA_DIR/bank_accounts.json" 2>/dev/null || echo 0)"
 echo "    Buildings          : $(jq length "$DATA_DIR/buildings.json")"
 echo "    Housing units      : $(jq length "$DATA_DIR/housing_units.json")"
 echo "    Persons            : $(jq length "$DATA_DIR/persons.json")"
