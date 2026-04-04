@@ -203,7 +203,6 @@ public class TransactionImportService {
                 row.getAmount(),
                 direction,
                 row.getDescription(),
-                row.getCounterpartyName(),
                 row.getCounterpartyAccount(),
                 row.getFingerprint(),
                 duplicate,
@@ -243,7 +242,6 @@ public class TransactionImportService {
 
         // Counterparty
         tx.setDescription(row.getDescription());
-        tx.setCounterpartyName(row.getCounterpartyName());
         tx.setCounterpartyAccount(row.getCounterpartyAccount());
 
         // External reference from Keytrade "Extrait" column

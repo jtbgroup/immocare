@@ -241,16 +241,7 @@
               sortField | sortIcon: sortDirection : "amount"
             }}</span>
           </th>
-          <th class="sortable" (click)="sortBy('counterpartyName')">
-            Counterparty
-            <span
-              class="sort-icon"
-              [class.active]="sortField === 'counterpartyName'"
-              >{{
-                sortField | sortIcon: sortDirection : "counterpartyName"
-              }}</span
-            >
-          </th>
+
           <th>Category</th>
           <th>Linked to</th>
           <th class="sortable" (click)="sortBy('status')">
@@ -303,7 +294,7 @@
                   : (tx.direction === "INCOME" ? "+" : "-")
             }}
           </td>
-          <td>{{ tx.counterpartyName || "—" }}</td>
+
           <td class="text-muted">
             <span *ngIf="tx.categoryName">{{ tx.categoryName }}</span>
             <span *ngIf="tx.subcategoryName"> / {{ tx.subcategoryName }}</span>

@@ -83,7 +83,6 @@ public class TransactionSpecification {
             return cb.or(
                     cb.like(cb.lower(root.get("reference")), pattern),
                     cb.like(cb.lower(root.get("description")), pattern),
-                    cb.like(cb.lower(root.get("counterpartyName")), pattern),
                     cb.like(cb.lower(root.get("counterpartyAccount")), pattern));
         };
     }

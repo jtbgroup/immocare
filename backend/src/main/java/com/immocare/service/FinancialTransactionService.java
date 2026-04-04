@@ -133,7 +133,6 @@ public class FinancialTransactionService {
         tx.setAccountingMonth(req.accountingMonth().withDayOfMonth(1));
         tx.setAmount(req.amount());
         tx.setDescription(req.description());
-        tx.setCounterpartyName(req.counterpartyName());
         tx.setCounterpartyAccount(req.counterpartyAccount());
         tx.setStatus(TransactionStatus.CONFIRMED);
         tx.setSource(TransactionSource.MANUAL);
@@ -184,7 +183,6 @@ public class FinancialTransactionService {
         tx.setAccountingMonth(req.accountingMonth().withDayOfMonth(1));
         tx.setAmount(req.amount());
         tx.setDescription(req.description());
-        tx.setCounterpartyName(req.counterpartyName());
         tx.setCounterpartyAccount(req.counterpartyAccount());
 
         applyRelations(tx, req.bankAccountId(), req.subcategoryId(),
@@ -485,7 +483,6 @@ public class FinancialTransactionService {
                             csv(tx.getAccountingMonth().format(monthFmt)) + ";" +
                             csv(tx.getDirection().name()) + ";" +
                             signedAmount + ";" +
-                            csv(tx.getCounterpartyName()) + ";" +
                             csv(tx.getDescription()) + ";" +
                             csv(tx.getSubcategory() != null ? tx.getSubcategory().getCategory().getName() : "") + ";" +
                             csv(tx.getSubcategory() != null ? tx.getSubcategory().getName() : "") + ";" +
@@ -641,7 +638,6 @@ public class FinancialTransactionService {
                 tx.getAccountingMonth(),
                 tx.getDirection(),
                 tx.getAmount(),
-                tx.getCounterpartyName(),
                 tx.getStatus(),
                 tx.getSource(),
                 tx.getBankAccount() != null ? tx.getBankAccount().getLabel() : null,
@@ -665,7 +661,7 @@ public class FinancialTransactionService {
                 tx.getId(), tx.getReference(), tx.getExternalReference(),
                 tx.getTransactionDate(), tx.getValueDate(), tx.getAccountingMonth(),
                 tx.getAmount(), tx.getDirection(), tx.getDescription(),
-                tx.getCounterpartyName(), tx.getCounterpartyAccount(), tx.getStatus(), tx.getSource(),
+                tx.getCounterpartyAccount(), tx.getStatus(), tx.getSource(),
                 tx.getBankAccount() != null ? tx.getBankAccount().getId() : null,
                 tx.getBankAccount() != null ? tx.getBankAccount().getLabel() : null,
                 tx.getSubcategory() != null ? tx.getSubcategory().getId() : null,

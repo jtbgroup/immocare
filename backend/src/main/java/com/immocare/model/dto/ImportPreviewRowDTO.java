@@ -29,7 +29,6 @@ public record ImportPreviewRowDTO(
                 TransactionDirection direction,
 
                 String description,
-                String counterpartyName,
                 String counterpartyAccount,
 
                 /**

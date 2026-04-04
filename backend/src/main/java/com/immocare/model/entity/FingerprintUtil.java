@@ -9,7 +9,7 @@ import java.time.LocalDate;
 /**
  * Generates a deterministic SHA-256 fingerprint for duplicate detection.
  *
- * Fields used: date + amount (normalized) + counterparty_account (or name) +
+ * Fields used: date + amount (normalized) + counterparty_account +
  * description[:60]
  * The IBAN is preferred over name because names can have encoding artefacts.
  */
@@ -22,14 +22,13 @@ public final class FingerprintUtil {
             LocalDate date,
             BigDecimal amount,
             String counterpartyAccount,
-            String counterpartyName,
             String description) {
 
         // Prefer IBAN over name (more stable)
         String counterparty = (counterpartyAccount != null && !counterpartyAccount.isBlank()
                 && !"-".equals(counterpartyAccount.trim()))
                         ? counterpartyAccount.trim().toUpperCase()
-                        : (counterpartyName != null ? normalize(counterpartyName, 50) : "");
+                        : "";
 
         // Normalize amount: strip trailing zeros → "1234.5" not "1234.50"
         String amt = amount.stripTrailingZeros().toPlainString();

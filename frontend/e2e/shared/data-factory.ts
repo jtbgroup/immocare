@@ -753,7 +753,6 @@ export function generateRentTransactions(p: RentTransactionParams): Array<{
   accountingMonth: string;
   amount: number;
   description: string;
-  counterpartyName: string;
   counterpartyAccount: string;
   buildingIndex: number;
   unitIndex: number;

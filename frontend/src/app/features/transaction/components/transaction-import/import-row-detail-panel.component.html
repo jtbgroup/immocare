@@ -5,7 +5,6 @@
   </div>
 
   <div class="panel-body">
-
     <!-- Raw info -->
     <div class="panel-section">
       <div class="panel-meta">
@@ -21,10 +20,7 @@
           {{ row.amount?.toFixed(2) }} €
         </span>
       </div>
-      <div class="panel-meta" *ngIf="row.counterpartyName">
-        <span class="meta-label">Counterparty</span>
-        <span>{{ row.counterpartyName }}</span>
-      </div>
+
       <div class="panel-meta" *ngIf="row.counterpartyAccount">
         <span class="meta-label">IBAN</span>
         <span class="monospace">{{ row.counterpartyAccount }}</span>
@@ -77,10 +73,7 @@
           *ngFor="let group of groupedSubcategories"
           [label]="group.categoryName"
         >
-          <option
-            *ngFor="let sub of group.subcategories"
-            [ngValue]="sub.id"
-          >
+          <option *ngFor="let sub of group.subcategories" [ngValue]="sub.id">
             {{ sub.name }}
           </option>
         </optgroup>
@@ -127,6 +120,5 @@
         </option>
       </select>
     </div>
-
   </div>
 </div>

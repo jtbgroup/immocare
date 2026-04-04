@@ -202,11 +202,10 @@
               </td>
 
               <td>
-                <div>{{ row.counterpartyName ?? "—" }}</div>
-                <small
+                <span
                   *ngIf="row.counterpartyAccount"
                   class="text-muted monospace"
-                  >{{ row.counterpartyAccount }}</small
+                  >{{ row.counterpartyAccount }}</span
                 >
               </td>
 

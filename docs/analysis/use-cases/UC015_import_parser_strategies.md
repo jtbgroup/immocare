@@ -75,7 +75,6 @@ valueDate          LocalDate  nullable
 amount             BigDecimal always positive
 direction          TransactionDirection  INCOME / EXPENSE / null (unknown — determined during enrichment)
 description        String
-counterpartyName   String
 counterpartyAccount String
 rowNumber          int
 parseError         String    null if row parsed successfully

@@ -59,9 +59,6 @@ public class FinancialTransaction {
     @Column(columnDefinition = "TEXT")
     private String description;
 
-    @Column(name = "counterparty_name", length = 200)
-    private String counterpartyName;
-
     @Column(name = "counterparty_account", length = 50)
     private String counterpartyAccount;
 
@@ -194,14 +191,6 @@ public class FinancialTransaction {
 
     public void setDescription(String description) {
         this.description = description;
-    }
-
-    public String getCounterpartyName() {
-        return counterpartyName;
-    }
-
-    public void setCounterpartyName(String counterpartyName) {
-        this.counterpartyName = counterpartyName;
     }
 
     public String getCounterpartyAccount() {

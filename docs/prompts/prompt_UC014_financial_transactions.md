@@ -249,7 +249,7 @@ Fields: `id`, `category` (`@ManyToOne TagCategory`, NOT NULL), `name`, `directio
 Fields: `id`, `importedAt`, `filename`, `totalRows`, `importedCount`, `duplicateCount`, `errorCount`, `createdBy` (`@ManyToOne AppUser`, nullable). `@PrePersist` sets `importedAt`.
 
 **5. `FinancialTransaction`** — table `financial_transaction`
-Fields: `id`, `reference`, `externalReference`, `transactionDate` (LocalDate), `valueDate` (LocalDate, nullable), `accountingMonth` (LocalDate — always 1st of month), `amount` (BigDecimal), `direction` (TransactionDirection), `description`, `counterpartyName`, `counterpartyAccount`, `status` (TransactionStatus, default DRAFT), `source` (TransactionSource).
+Fields: `id`, `reference`, `externalReference`, `transactionDate` (LocalDate), `valueDate` (LocalDate, nullable), `accountingMonth` (LocalDate — always 1st of month), `amount` (BigDecimal), `direction` (TransactionDirection), `description`, `counterpartyAccount`, `status` (TransactionStatus, default DRAFT), `source` (TransactionSource).
 Relations (all nullable ManyToOne unless noted):
 - `bankAccount` → `BankAccount`
 - `subcategory` → `TagSubcategory`
@@ -335,7 +335,7 @@ record FinancialTransactionDTO(
     Long id, String reference, String externalReference,
     LocalDate transactionDate, LocalDate valueDate, LocalDate accountingMonth,
     BigDecimal amount, TransactionDirection direction,
-    String description, String counterpartyName, String counterpartyAccount,
+    String description,  String counterpartyAccount,
     TransactionStatus status, TransactionSource source,
     Long bankAccountId, String bankAccountLabel,
     Long subcategoryId, String subcategoryName,
@@ -355,7 +355,7 @@ record FinancialTransactionDTO(
 record FinancialTransactionSummaryDTO(
     Long id, String reference, LocalDate transactionDate, LocalDate accountingMonth,
     TransactionDirection direction, BigDecimal amount,
-    String counterpartyName, TransactionStatus status, TransactionSource source,
+    TransactionStatus status, TransactionSource source,
     String bankAccountLabel, String categoryName, String subcategoryName,
     String buildingName, String unitNumber, String leaseReference) {}
 ```
@@ -378,7 +378,6 @@ record CreateTransactionRequest(
     @NotNull LocalDate accountingMonth,
     @NotNull @Positive BigDecimal amount,
     String description,
-    String counterpartyName,
     @Size(max=50) String counterpartyAccount,
     Long bankAccountId,
     Long subcategoryId,
@@ -586,7 +585,7 @@ public class TransactionSpecification {
         // JOIN to transaction_asset_link
     }
     public static Specification<FinancialTransaction> withSearch(String search) {
-        // ILIKE on reference, description, counterpartyName, counterpartyAccount
+        // ILIKE on reference, description, counterpartyAccount
     }
     public static Specification<FinancialTransaction> confirmedOrReconciled() {
         // status IN (CONFIRMED, RECONCILED) — for statistics
@@ -621,7 +620,7 @@ public class TransactionSpecification {
 ```java
 // Suggest subcategory based on counterparty/description patterns
 List<SubcategorySuggestionDTO> suggestSubcategory(
-    String counterpartyAccount, String counterpartyName,
+    String counterpartyAccount, 
     String description, TransactionDirection direction, int minConfidence);
 // → queries tag_learning_rule for each non-null field in priority order:
 //   COUNTERPARTY_ACCOUNT first (most specific), then COUNTERPARTY_NAME, then DESCRIPTION
@@ -653,7 +652,7 @@ void reinforceAccountingMonthRule(Long subcategoryId, String counterpartyAccount
 List<ParsedCsvRow> parsePreview(MultipartFile file, CsvMappingConfig config);
 // → reads platform_config for mapping; parses all rows; collects per-row errors
 // → ParsedCsvRow: rowNumber, rawLine, date, amount, direction, description,
-//                 counterpartyName, counterpartyAccount, externalReference,
+//                  counterpartyAccount, externalReference,
 //                 bankAccountIban, valueDate, parseError (nullable)
 
 // Step 2: Import (DB writes)
@@ -874,7 +873,7 @@ export interface FinancialTransactionSummary {
   id: number; reference: string;
   transactionDate: string; accountingMonth: string;  // 'YYYY-MM-DD'
   direction: TransactionDirection; amount: number;
-  counterpartyName?: string; status: TransactionStatus; source: TransactionSource;
+   status: TransactionStatus; source: TransactionSource;
   bankAccountLabel?: string; categoryName?: string; subcategoryName?: string;
   buildingName?: string; unitNumber?: string; leaseReference?: string;
 }

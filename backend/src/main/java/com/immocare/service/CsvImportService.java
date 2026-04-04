@@ -69,7 +69,6 @@ public class CsvImportService {
                 platformConfigService.getInt("csv.import.col.date", 0),
                 platformConfigService.getInt("csv.import.col.amount", 1),
                 platformConfigService.getInt("csv.import.col.description", 2),
-                platformConfigService.getInt("csv.import.col.counterparty_name", 3),
                 platformConfigService.getInt("csv.import.col.counterparty_account", 4),
                 platformConfigService.getInt("csv.import.col.external_reference", 5),
                 platformConfigService.getInt("csv.import.col.bank_account", 6),
@@ -106,7 +105,6 @@ public class CsvImportService {
                             : TransactionDirection.EXPENSE;
                     BigDecimal amount = rawAmount.abs();
                     String description = safeGet(cols, config.colDescription());
-                    String counterpartyName = safeGet(cols, config.colCounterpartyName());
                     String counterpartyAccount = safeGet(cols, config.colCounterpartyAccount());
                     String externalReference = safeGet(cols, config.colExternalReference());
                     String bankAccountIban = safeGet(cols, config.colBankAccount());
@@ -115,15 +113,15 @@ public class CsvImportService {
                             : null;
 
                     rows.add(new ParsedCsvRow(rowNumber, rawLine, transactionDate, valueDate,
-                            amount, direction, description, counterpartyName, counterpartyAccount,
+                            amount, direction, description, counterpartyAccount,
                             externalReference, bankAccountIban, null));
                 } catch (Exception e) {
-                    rows.add(new ParsedCsvRow(rowNumber, rawLine, null, null, null, null,
+                    rows.add(new ParsedCsvRow(rowNumber, rawLine, null, null, null,
                             null, null, null, null, null, e.getMessage()));
                 }
             }
         } catch (Exception e) {
-            rows.add(new ParsedCsvRow(0, "", null, null, null, null, null, null, null, null, null,
+            rows.add(new ParsedCsvRow(0, "", null, null, null, null, null, null, null, null,
                     "Failed to read file: " + e.getMessage()));
         }
         return rows;
@@ -168,7 +166,6 @@ public class CsvImportService {
                 tx.setAmount(row.amount());
                 tx.setDirection(row.direction());
                 tx.setDescription(row.description());
-                tx.setCounterpartyName(row.counterpartyName());
                 tx.setCounterpartyAccount(row.counterpartyAccount());
                 tx.setExternalReference(row.externalReference());
                 tx.setStatus(TransactionStatus.DRAFT);
@@ -183,7 +180,7 @@ public class CsvImportService {
 
                 // Suggest subcategory
                 List<SubcategorySuggestionDTO> suggestions = learningService.suggestSubcategory(
-                        row.counterpartyAccount(), row.counterpartyName(),
+                        row.counterpartyAccount(),
                         row.description(), row.direction(), minConfidence);
                 Long subcategoryId = null;
                 if (!suggestions.isEmpty()) {

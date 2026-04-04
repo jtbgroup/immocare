@@ -64,7 +64,6 @@ export interface FinancialTransactionSummary {
   accountingMonth: string;
   direction: TransactionDirection;
   amount: number;
-  counterpartyName?: string;
   status: TransactionStatus;
   source: TransactionSource;
   bankAccountLabel?: string;
@@ -207,7 +206,6 @@ export interface ImportPreviewRow {
   amount: number | null;
   direction: TransactionDirection | null;
   description: string | null;
-  counterpartyName: string | null;
   counterpartyAccount: string | null;
   fingerprint: string | null;
   duplicateInDb: boolean;
@@ -281,7 +279,6 @@ export interface CreateTransactionRequest {
   accountingMonth: string;
   amount: number;
   description?: string;
-  counterpartyName?: string;
   counterpartyAccount?: string;
   bankAccountId?: number;
   subcategoryId?: number;

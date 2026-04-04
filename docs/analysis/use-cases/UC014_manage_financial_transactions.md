@@ -172,7 +172,7 @@ During preview and import, the service attempts to match `counterparty_account` 
 ### `ImportPreviewRowDTO`
 ```
 rowNumber, fingerprint, transactionDate, amount, direction, description,
-counterpartyName, counterpartyAccount, parseError, duplicateInDb,
+counterpartyAccount, parseError, duplicateInDb,
 suggestedSubcategoryId, suggestedSubcategoryName,
 suggestedCategoryId, suggestedCategoryName, suggestionConfidence,
 suggestedLease: { leaseId, unitId, unitNumber, buildingId, buildingName, personId, personFullName }
@@ -187,7 +187,7 @@ buildingId, housingUnitId, leaseId
 ### `FinancialTransactionSummaryDTO` (list / batch review)
 ```
 id, reference, transactionDate, accountingMonth, direction, amount,
-counterpartyName, status, source,
+status, source,
 bankAccountLabel, categoryName, subcategoryName,
 buildingName, unitNumber, leaseReference,
 suggestedLeaseId, buildingId, housingUnitId

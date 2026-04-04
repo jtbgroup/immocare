@@ -6,10 +6,11 @@
     <span>{{ transaction.reference }}</span>
   </nav>
 
-  <!-- Header -->
-  <div class="details-content">
-    <div class="header">
-      <div class="header-title">
+  <!-- Single panel -->
+  <div class="info-card">
+    <!-- Header: title + actions -->
+    <div class="detail-header">
+      <div class="detail-header__title">
         <h1>{{ transaction.reference }}</h1>
         <span
           class="badge badge--direction-{{
@@ -23,16 +24,26 @@
         >
           {{ STATUS_LABELS[transaction.status] }}
         </span>
+        <div class="classification-badges" *ngIf="transaction.categoryName">
+          <span class="badge badge--category">{{
+            transaction.categoryName
+          }}</span>
+          <span class="classification-sep">›</span>
+          <span
+            class="badge badge--subcategory"
+            *ngIf="transaction.subcategoryName"
+          >
+            {{ transaction.subcategoryName }}
+          </span>
+        </div>
       </div>
-      <div class="actions" *ngIf="transaction.editable">
+      <div class="detail-header__actions" *ngIf="transaction.editable">
         <button class="btn btn-secondary" (click)="edit()">Edit</button>
         <button class="btn btn-danger" (click)="delete()">Delete</button>
       </div>
     </div>
-  </div>
 
-  <!-- Amount hero -->
-  <div class="info-card">
+    <!-- Amount hero -->
     <div
       class="amount-hero"
       [class.amount-hero--income]="transaction.direction === 'INCOME'"
@@ -45,146 +56,145 @@
         >{{ transaction.amount.toFixed(2) }} €</span
       >
     </div>
-  </div>
 
-  <!-- General -->
-  <div class="info-card">
-    <h2>General</h2>
-    <div class="info-grid">
+    <div class="detail-divider"></div>
+
+    <!-- Main grid -->
+    <div class="detail-grid">
+      <!-- Reference -->
+      <div class="info-item">
+        <label>Reference</label>
+        <p class="monospace">{{ transaction.reference }}</p>
+      </div>
+
+      <!-- Transaction date -->
       <div class="info-item">
         <label>Transaction Date</label>
         <p>{{ transaction.transactionDate }}</p>
       </div>
+
+      <!-- Accounting month -->
       <div class="info-item">
         <label>Accounting Month</label>
         <p>{{ transaction.accountingMonth.substring(0, 7) }}</p>
       </div>
+
+      <!-- Value date -->
       <div class="info-item" *ngIf="transaction.valueDate">
         <label>Value Date</label>
         <p>{{ transaction.valueDate }}</p>
       </div>
+
+      <!-- Source -->
       <div class="info-item">
         <label>Source</label>
         <p>{{ transaction.source }}</p>
       </div>
-      <div class="info-item" *ngIf="transaction.description">
-        <label>Description</label>
-        <p>{{ transaction.description }}</p>
-      </div>
-    </div>
-  </div>
 
-  <!-- Counterparty -->
-  <div class="info-card">
-    <h2>Counterparty</h2>
-    <div class="info-grid">
-      <div class="info-item">
-        <label>Name</label>
-        <p>{{ transaction.counterpartyName || "—" }}</p>
-      </div>
-      <div class="info-item" *ngIf="transaction.counterpartyAccount">
-        <label>IBAN</label>
-        <p class="monospace">{{ transaction.counterpartyAccount }}</p>
-      </div>
+      <!-- Bank account -->
       <div class="info-item">
         <label>Bank Account</label>
         <p>{{ transaction.bankAccountLabel || "—" }}</p>
       </div>
+
+      <!-- Counterparty IBAN -->
+      <div class="info-item" *ngIf="transaction.counterpartyAccount">
+        <label>Counterparty IBAN</label>
+        <p class="monospace">{{ transaction.counterpartyAccount }}</p>
+      </div>
+
+      <!-- External reference -->
       <div class="info-item" *ngIf="transaction.externalReference">
         <label>External Ref.</label>
         <p class="monospace">{{ transaction.externalReference }}</p>
       </div>
     </div>
-  </div>
 
-  <!-- Classification -->
-  <div class="info-card">
-    <h2>Classification</h2>
-    <div class="info-grid">
-      <div class="info-item">
-        <label>Category</label>
-        <p>{{ transaction.categoryName || "—" }}</p>
-      </div>
-      <div class="info-item">
-        <label>Subcategory</label>
-        <p>{{ transaction.subcategoryName || "—" }}</p>
-      </div>
+    <!-- Description — full width, outside grid -->
+    <div class="detail-description" *ngIf="transaction.description">
+      <label>Description</label>
+      <p>{{ transaction.description }}</p>
     </div>
-  </div>
 
-  <!-- Links -->
-  <div
-    class="info-card"
-    *ngIf="
-      transaction.buildingId ||
-      transaction.housingUnitId ||
-      transaction.leaseId ||
-      transaction.suggestedLeaseId
-    "
-  >
-    <h2>Links</h2>
-    <div class="info-grid">
-      <div class="info-item" *ngIf="transaction.buildingId">
-        <label>Building</label>
-        <p>
-          <a [routerLink]="['/buildings', transaction.buildingId]">
-            {{
-              transaction.buildingName || "Building #" + transaction.buildingId
-            }}
-          </a>
-        </p>
-      </div>
-      <div class="info-item" *ngIf="transaction.housingUnitId">
-        <label>Unit</label>
-        <p>
-          <a [routerLink]="['/units', transaction.housingUnitId]">
-            {{ transaction.unitNumber || "Unit #" + transaction.housingUnitId }}
-          </a>
-        </p>
-      </div>
-      <div class="info-item" *ngIf="transaction.leaseId">
-        <label>Lease</label>
-        <p>
-          <a [routerLink]="['/leases', transaction.leaseId]">
-            Lease #{{ transaction.leaseId }}
-          </a>
-        </p>
-      </div>
-      <div class="info-item" *ngIf="transaction.suggestedLeaseId">
-        <label>Suggested Lease</label>
-        <p>
-          <a [routerLink]="['/leases', transaction.suggestedLeaseId]">
-            Lease #{{ transaction.suggestedLeaseId }}
-          </a>
+    <!-- Linked row: Building › Unit › Lease -->
+    <div
+      class="detail-linked"
+      *ngIf="
+        transaction.buildingId ||
+        transaction.housingUnitId ||
+        transaction.leaseId ||
+        transaction.suggestedLeaseId
+      "
+    >
+      <label>Linked to</label>
+      <div class="linked-chain">
+        <a
+          *ngIf="transaction.buildingId"
+          [routerLink]="['/buildings', transaction.buildingId]"
+          class="linked-chip linked-chip--building"
+        >
+          🏢
+          {{
+            transaction.buildingName || "Building #" + transaction.buildingId
+          }}
+        </a>
+        <span
+          *ngIf="transaction.buildingId && transaction.housingUnitId"
+          class="linked-sep"
+          >›</span
+        >
+        <a
+          *ngIf="transaction.housingUnitId"
+          [routerLink]="['/units', transaction.housingUnitId]"
+          class="linked-chip linked-chip--unit"
+        >
+          🚪
+          {{ transaction.unitNumber || "Unit #" + transaction.housingUnitId }}
+        </a>
+        <span
+          *ngIf="
+            transaction.housingUnitId &&
+            (transaction.leaseId || transaction.suggestedLeaseId)
+          "
+          class="linked-sep"
+          >›</span
+        >
+        <a
+          *ngIf="transaction.leaseId"
+          [routerLink]="['/leases', transaction.leaseId]"
+          class="linked-chip linked-chip--lease"
+        >
+          📄 Lease #{{ transaction.leaseId }}
+        </a>
+        <a
+          *ngIf="transaction.suggestedLeaseId && !transaction.leaseId"
+          [routerLink]="['/leases', transaction.suggestedLeaseId]"
+          class="linked-chip linked-chip--lease linked-chip--suggestion"
+        >
+          📄 Lease #{{ transaction.suggestedLeaseId }}
           <span class="badge badge--suggestion">Suggestion</span>
-        </p>
+        </a>
       </div>
     </div>
-  </div>
 
-  <!-- Related Assets -->
-  <div class="info-card" *ngIf="transaction.assetLinks?.length">
-    <h2>Related Assets</h2>
-    <ul class="asset-list">
-      <li *ngFor="let link of transaction.assetLinks" class="asset-item">
-        <span class="badge badge--asset">{{ link.assetType }}</span>
-        <span>{{ link.assetLabel }}</span>
-        <span *ngIf="link.notes" class="asset-notes">— {{ link.notes }}</span>
-      </li>
-    </ul>
-  </div>
+    <!-- Related assets — full width, conditional -->
+    <div class="detail-assets" *ngIf="transaction.assetLinks?.length">
+      <div class="detail-divider"></div>
+      <label>Related Assets</label>
+      <ul class="asset-list">
+        <li *ngFor="let link of transaction.assetLinks" class="asset-item">
+          <span class="badge badge--asset">{{ link.assetType }}</span>
+          <span>{{ link.assetLabel }}</span>
+          <span *ngIf="link.notes" class="asset-notes">— {{ link.notes }}</span>
+        </li>
+      </ul>
+    </div>
 
-  <!-- Metadata -->
-  <div class="info-card info-card--meta">
-    <div class="info-grid">
-      <div class="info-item">
-        <label>Created</label>
-        <p class="text-muted">{{ transaction.createdAt }}</p>
-      </div>
-      <div class="info-item">
-        <label>Updated</label>
-        <p class="text-muted">{{ transaction.updatedAt }}</p>
-      </div>
+    <!-- Metadata footer -->
+    <div class="detail-divider"></div>
+    <div class="detail-meta">
+      <span>Created: {{ transaction.createdAt }}</span>
+      <span>Updated: {{ transaction.updatedAt }}</span>
     </div>
   </div>
 </div>

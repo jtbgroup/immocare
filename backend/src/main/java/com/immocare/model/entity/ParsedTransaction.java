@@ -37,12 +37,6 @@ public class ParsedTransaction {
     /** Full description / communication line. */
     String description;
 
-    /**
-     * Counterparty display name. May be null if not available as a dedicated
-     * column.
-     */
-    String counterpartyName;
-
     /** Counterparty IBAN (may be null for card payments or direct debits). */
     String counterpartyAccount;
 

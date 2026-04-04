@@ -326,7 +326,6 @@ export interface TransactionPayload {
   accountingMonth: string;
   amount: number;
   description?: string;
-  counterpartyName?: string;
   counterpartyAccount?: string;
   bankAccountId?: number;
   subcategoryId?: number;

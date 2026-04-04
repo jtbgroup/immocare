@@ -62,7 +62,6 @@ CREATE TABLE financial_transaction (
     amount               DECIMAL(12,2) NOT NULL CHECK (amount > 0),
     direction            VARCHAR(10)   NOT NULL CHECK (direction IN ('INCOME','EXPENSE')),
     description          TEXT,
-    counterparty_name    VARCHAR(200),
     counterparty_account VARCHAR(50),
     status               VARCHAR(20)   NOT NULL DEFAULT 'DRAFT'
                                        CHECK (status IN ('DRAFT','CONFIRMED','RECONCILED')),
@@ -106,7 +105,7 @@ CREATE INDEX idx_tal_asset       ON transaction_asset_link (asset_type, asset_id
 CREATE TABLE tag_learning_rule (
     id              BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
     match_field     VARCHAR(30)  NOT NULL
-                                 CHECK (match_field IN ('COUNTERPARTY_ACCOUNT','COUNTERPARTY_NAME','DESCRIPTION')),
+                                 CHECK (match_field IN ('COUNTERPARTY_ACCOUNT','DESCRIPTION')),
     match_value     VARCHAR(200) NOT NULL,
     subcategory_id  BIGINT       NOT NULL REFERENCES tag_subcategory (id) ON DELETE CASCADE,
     confidence      INTEGER      NOT NULL DEFAULT 1 CHECK (confidence >= 1),

@@ -161,11 +161,10 @@ public class KeytradeCsvParser implements TransactionParser {
 
         // Counterparty name: not a dedicated column — left null (learning rules will
         // suggest)
-        String counterpartyName = null;
 
         // Fingerprint — incorporates extrait for reliable dedup
         String fingerprint = FingerprintUtil.compute(
-                transactionDate, amount, counterpartyAccount, counterpartyName, description);
+                transactionDate, amount, counterpartyAccount, description);
 
         return ParsedTransaction.builder()
                 .transactionDate(transactionDate)
@@ -174,7 +173,6 @@ public class KeytradeCsvParser implements TransactionParser {
                 .amount(amount)
                 .direction(direction)
                 .description(description)
-                .counterpartyName(counterpartyName)
                 .counterpartyAccount(counterpartyAccount)
                 .fingerprint(fingerprint)
                 .rawLine(line)

@@ -1,23 +1,66 @@
 // transaction-detail.component.scss
-// Shared styles (btn, info-card, info-grid, info-item, breadcrumb,
-// details-content .header, badge, alert, loading)
-// come from global styles.scss partials.
+
+// ─── Header (title + actions) ─────────────────────────────────────────────────
+
+.detail-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-bottom: 1.25rem;
+  flex-wrap: wrap;
+
+  &__title {
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+    flex-wrap: wrap;
+    row-gap: 0.4rem;
+
+    h1 {
+      margin: 0;
+      font-size: 1.4rem;
+    }
+  }
+
+  &__actions {
+    display: flex;
+    gap: 0.5rem;
+    flex-shrink: 0;
+  }
+}
+
+// ─── Classification badges (header) ──────────────────────────────────────────
+
+.classification-badges {
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+  margin-top: 0.1rem;
+  flex-basis: 100%; // force line break after reference + status badges
+}
+
+.classification-sep {
+  color: #aaa;
+  font-size: 0.8rem;
+  line-height: 1;
+}
 
 // ─── Amount hero ──────────────────────────────────────────────────────────────
 
 .amount-hero {
   display: flex;
   align-items: baseline;
-  gap: 0.25rem;
-  padding: 0.5rem 0;
+  gap: 0.2rem;
+  margin-bottom: 1.25rem;
 
   &__sign {
-    font-size: 1.5rem;
+    font-size: 1.6rem;
     font-weight: 700;
   }
 
   &__value {
-    font-size: 2rem;
+    font-size: 2.4rem;
     font-weight: 700;
     letter-spacing: -0.02em;
   }
@@ -37,16 +80,211 @@
   }
 }
 
+// ─── Divider ──────────────────────────────────────────────────────────────────
+
+.detail-divider {
+  height: 1px;
+  background: #e9ecef;
+  margin: 1.25rem 0;
+}
+
+// ─── Main grid (3 columns) ────────────────────────────────────────────────────
+
+.detail-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1rem 1.5rem;
+
+  @media (max-width: 768px) {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  @media (max-width: 480px) {
+    grid-template-columns: 1fr;
+  }
+}
+
+// ─── Info item (shared with global _cards.scss pattern) ───────────────────────
+
+.info-item {
+  label {
+    display: block;
+    font-weight: 600;
+    color: #6c757d;
+    font-size: 0.75rem;
+    margin-bottom: 0.2rem;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+
+  p {
+    margin: 0;
+    color: #212529;
+    font-size: 0.95rem;
+    word-break: break-word;
+
+    a {
+      color: #007bff;
+      text-decoration: none;
+      &:hover {
+        text-decoration: underline;
+      }
+    }
+  }
+}
+
+// ─── Description — full width ─────────────────────────────────────────────────
+
+.detail-description {
+  margin-top: 1rem;
+
+  label {
+    display: block;
+    font-weight: 600;
+    color: #6c757d;
+    font-size: 0.75rem;
+    margin-bottom: 0.35rem;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+
+  p {
+    margin: 0;
+    color: #212529;
+    font-size: 0.95rem;
+    line-height: 1.6;
+    background: #f8f9fa;
+    border-left: 3px solid #dee2e6;
+    padding: 0.6rem 0.9rem;
+    border-radius: 0 4px 4px 0;
+    white-space: pre-wrap;
+    word-break: break-word;
+  }
+}
+
+// ─── Linked row (Building › Unit › Lease) ────────────────────────────────────
+
+.detail-linked {
+  margin-top: 1rem;
+
+  label {
+    display: block;
+    font-weight: 600;
+    color: #6c757d;
+    font-size: 0.75rem;
+    margin-bottom: 0.4rem;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+}
+
+.linked-chain {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+}
+
+.linked-sep {
+  color: #adb5bd;
+  font-size: 0.9rem;
+  font-weight: 500;
+}
+
+.linked-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  padding: 0.3em 0.75em;
+  border-radius: 20px;
+  font-size: 0.85rem;
+  font-weight: 500;
+  text-decoration: none;
+  transition: opacity 0.15s;
+
+  &:hover {
+    opacity: 0.8;
+    text-decoration: none;
+  }
+
+  &--building {
+    background: #e3f2fd;
+    color: #1565c0;
+  }
+
+  &--unit {
+    background: #f3e5f5;
+    color: #6a1b9a;
+  }
+
+  &--lease {
+    background: #e8f5e9;
+    color: #2e7d32;
+  }
+
+  &--suggestion {
+    background: #fff8e1;
+    color: #e65100;
+    border: 1px dashed #ffb74d;
+  }
+}
+
+// ─── Related assets ───────────────────────────────────────────────────────────
+
+.detail-assets {
+  label {
+    display: block;
+    font-weight: 600;
+    color: #6c757d;
+    font-size: 0.75rem;
+    margin-bottom: 0.5rem;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+}
+
+.asset-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+}
+
+.asset-item {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.9rem;
+}
+
+.asset-notes {
+  color: #888;
+  font-size: 0.85rem;
+}
+
+// ─── Metadata footer ──────────────────────────────────────────────────────────
+
+.detail-meta {
+  display: flex;
+  gap: 1.5rem;
+  font-size: 0.8rem;
+  color: #aaa;
+  flex-wrap: wrap;
+}
+
 // ─── Badges ───────────────────────────────────────────────────────────────────
 
 .badge {
   display: inline-block;
-  padding: 0.2em 0.6em;
+  padding: 0.2em 0.65em;
   border-radius: 4px;
   font-size: 0.75rem;
   font-weight: 600;
   color: #fff;
   vertical-align: middle;
+  white-space: nowrap;
 
   &--direction-income {
     background-color: #2e7d32;
@@ -68,64 +306,28 @@
   &--asset {
     background-color: #6a1b9a;
   }
+
+  &--category {
+    background-color: #e8eaf6;
+    color: #3949ab;
+    font-weight: 600;
+  }
+
+  &--subcategory {
+    background-color: #3949ab;
+    color: #fff;
+    font-weight: 600;
+  }
+
   &--suggestion {
     background-color: #e65100;
     margin-left: 0.4rem;
   }
 }
 
-// ─── Header title ─────────────────────────────────────────────────────────────
-
-.header-title {
-  display: flex;
-  align-items: center;
-  gap: 0.6rem;
-  flex-wrap: wrap;
-
-  h1 {
-    margin: 0;
-  }
-}
-
-// ─── Monospace values ─────────────────────────────────────────────────────────
+// ─── Monospace ────────────────────────────────────────────────────────────────
 
 .monospace {
   font-family: "Courier New", Courier, monospace;
-  font-size: 0.9rem;
-}
-
-// ─── Asset list ───────────────────────────────────────────────────────────────
-
-.asset-list {
-  list-style: none;
-  margin: 0;
-  padding: 0;
-  display: flex;
-  flex-direction: column;
-  gap: 0.5rem;
-}
-
-.asset-item {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-  font-size: 0.9rem;
-}
-
-.asset-notes {
-  color: #888;
-  font-size: 0.85rem;
-}
-
-// ─── Meta card (lighter) ──────────────────────────────────────────────────────
-
-.info-card--meta {
-  background: #fafafa;
-  box-shadow: none;
-  border: 1px solid #e9ecef;
-
-  .text-muted {
-    color: #888;
-    font-size: 0.85rem;
-  }
+  font-size: 0.875rem;
 }
