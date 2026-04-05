@@ -1,0 +1,23 @@
+# User Story US061: View Active Boiler
+
+| Attribute | Value |
+|-----------|-------|
+| **Story ID** | US061 |
+| **Epic** | Boiler Management |
+| **Related UC** | UC011 |
+| **Priority** | MUST HAVE |
+| **Story Points** | 2 |
+
+**As an** ADMIN **I want to** view the active boiler of a housing unit **so that** I can quickly see heating equipment details and service validity.
+
+## Acceptance Criteria
+
+**AC1:** Active boiler card shows: brand, model (if set), fuel type (if set), installation date, latest service date, valid until, validity status badge.
+**AC2:** No active boiler → "No boiler registered" message + "Add Boiler" button.
+**AC3:** Active boiler with no service record → validity badge shows 🔴 "No service recorded".
+**AC4:** Validity badge colors: 🔴 Expired / 🟠 Expiring soon / ✅ Valid — thresholds from platform config.
+**AC5:** "View History" link visible when at least one boiler exists (active or removed).
+
+**Endpoint:** `GET /api/v1/housing-units/{unitId}/boilers/active` — HTTP 200 or 204 if none.
+
+**Last Updated:** 2026-03-01 | **Status:** Ready for Development

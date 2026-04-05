@@ -1,0 +1,24 @@
+# User Story US064: Add Boiler Service Record
+
+| Attribute | Value |
+|-----------|-------|
+| **Story ID** | US064 |
+| **Epic** | Boiler Management |
+| **Related UC** | UC011 |
+| **Priority** | MUST HAVE |
+| **Story Points** | 3 |
+
+**As an** ADMIN **I want to** record a boiler service **so that** I can track maintenance history and validity.
+
+## Acceptance Criteria
+
+**AC1:** "+ Add Service" button visible on the active boiler's service section.
+**AC2:** Form: service date* (required, not future), valid until (auto-filled, editable), notes (optional).
+**AC3:** On service date change → valid_until auto-recalculates using the validity rule in effect on that date. User sees the calculated date before saving.
+**AC4:** Admin can manually override valid_until (any date accepted).
+**AC5:** Service date in future → error "Service date cannot be in the future".
+**AC6:** Save → record appears at top of service history; validity badge on boiler card updates.
+
+**Endpoint:** `POST /api/v1/boilers/{boilerId}/services` — HTTP 201.
+
+**Last Updated:** 2026-03-01 | **Status:** Ready for Development

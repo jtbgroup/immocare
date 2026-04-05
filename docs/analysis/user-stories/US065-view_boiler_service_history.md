@@ -1,0 +1,23 @@
+# User Story US065: View Boiler Service History
+
+| Attribute | Value |
+|-----------|-------|
+| **Story ID** | US065 |
+| **Epic** | Boiler Management |
+| **Related UC** | UC011 |
+| **Priority** | MUST HAVE |
+| **Story Points** | 2 |
+
+**As an** ADMIN **I want to** view the service history of a boiler **so that** I can review past maintenance records.
+
+## Acceptance Criteria
+
+**AC1:** Service history section shown on the active boiler card (and in full history view per boiler).
+**AC2:** Columns: service date, valid until, notes, status badge.
+**AC3:** Ordered by service date DESC.
+**AC4:** Each row shows validity status badge (Expired / Expiring soon / Valid).
+**AC5:** No service records → "No service recorded" with 🔴 badge.
+
+**Endpoint:** `GET /api/v1/boilers/{boilerId}/services` — returns all service records for the boiler.
+
+**Last Updated:** 2026-03-01 | **Status:** Ready for Development
