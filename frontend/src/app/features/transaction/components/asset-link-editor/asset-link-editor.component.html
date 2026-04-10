@@ -1,29 +1,162 @@
 <div class="asset-link-editor">
-  <div class="no-context-hint" *ngIf="!hasContext">
-    Select a building or unit to link assets.
+
+  <!-- Empty state hint -->
+  <p class="ale-empty-hint" *ngIf="rows.length === 0">
+    No asset linked to this expense. Click <em>Add asset link</em> to associate a device.
+  </p>
+
+  <!-- ── Rows ──────────────────────────────────────────────────────────────── -->
+  <div class="ale-row" *ngFor="let row of rows; let i = index">
+
+    <!-- 1. Asset type -->
+    <div class="ale-cell ale-cell--type">
+      <label class="ale-label">Type</label>
+      <select
+        class="ale-select"
+        [(ngModel)]="row.assetType"
+        (ngModelChange)="onTypeChange(row)"
+      >
+        <option *ngFor="let t of assetTypes" [value]="t">
+          {{ assetTypeLabels[t] }}
+        </option>
+      </select>
+    </div>
+
+    <!-- 2. Device picker -->
+    <div class="ale-cell ale-cell--picker">
+      <label class="ale-label">Device</label>
+      <div class="ale-picker-wrap">
+
+        <!-- Selected device chip -->
+        <div class="ale-selected-chip" *ngIf="row.assetId != null">
+          <span class="ale-chip-label">{{ row.assetLabel }}</span>
+          <button
+            type="button"
+            class="ale-chip-clear"
+            (click)="clearDevice(row)"
+            title="Change device"
+          >✕</button>
+        </div>
+
+        <!-- Search input (hidden once a device is selected) -->
+        <ng-container *ngIf="row.assetId == null">
+          <input
+            type="text"
+            class="ale-search-input"
+            [placeholder]="'Search ' + assetTypeLabels[row.assetType] + '… (min 2 chars)'"
+            [value]="row.searchQuery"
+            (input)="onSearchInput(row, i, $any($event.target).value)"
+            (blur)="closeDropdown(row)"
+            autocomplete="off"
+          />
+          <span class="ale-spinner" *ngIf="row.searching">⏳</span>
+
+          <!-- Dropdown results -->
+          <ul class="ale-dropdown" *ngIf="row.dropdownOpen && row.searchResults.length > 0">
+            <li
+              class="ale-dropdown-item"
+              *ngFor="let result of row.searchResults"
+              (mousedown)="selectDevice(row, result)"
+            >
+              <span class="ale-result-label">{{ result.label }}</span>
+              <span class="ale-result-context">
+                <span *ngIf="result.unitNumber">🚪 {{ result.unitNumber }} · </span>
+                🏢 {{ result.buildingName }}
+              </span>
+            </li>
+          </ul>
+
+          <!-- No results -->
+          <p
+            class="ale-no-results"
+            *ngIf="row.dropdownOpen && row.searchResults.length === 0 && !row.searching"
+          >
+            No results found.
+          </p>
+        </ng-container>
+      </div>
+    </div>
+
+    <!-- 3. Context (read-only) -->
+    <div class="ale-cell ale-cell--context">
+      <label class="ale-label">Location</label>
+      <div class="ale-context-chips" *ngIf="row.assetId != null; else contextEmpty">
+        <span class="ale-ctx-chip ale-ctx-chip--unit" *ngIf="row.unitNumber">
+          🚪 {{ row.unitNumber }}
+        </span>
+        <span class="ale-ctx-chip ale-ctx-chip--building" *ngIf="row.buildingName">
+          🏢 {{ row.buildingName }}
+        </span>
+      </div>
+      <ng-template #contextEmpty>
+        <span class="ale-context-placeholder">—</span>
+      </ng-template>
+    </div>
+
+    <!-- 4. Amount -->
+    <div class="ale-cell ale-cell--amount">
+      <label class="ale-label">Amount (€) <span class="ale-optional">optional</span></label>
+      <input
+        type="number"
+        class="ale-amount-input"
+        [(ngModel)]="row.amount"
+        (ngModelChange)="onAmountChange()"
+        placeholder="0.00"
+        min="0.01"
+        step="0.01"
+      />
+    </div>
+
+    <!-- 5. Notes -->
+    <div class="ale-cell ale-cell--notes">
+      <label class="ale-label">Notes <span class="ale-optional">optional</span></label>
+      <input
+        type="text"
+        class="ale-notes-input"
+        [(ngModel)]="row.notes"
+        (ngModelChange)="onNotesChange()"
+        placeholder="e.g. Annual service"
+        maxlength="200"
+      />
+    </div>
+
+    <!-- 6. Remove -->
+    <div class="ale-cell ale-cell--remove">
+      <button
+        type="button"
+        class="ale-remove-btn"
+        (click)="removeRow(i)"
+        title="Remove this link"
+      >✕</button>
+    </div>
   </div>
 
-  <div *ngFor="let link of localLinks; let i = index" class="link-row">
-    <select [(ngModel)]="link.assetType" (change)="onLinkChange()" [disabled]="!hasContext">
-      <option *ngFor="let t of assetTypes" [value]="t">{{ t }}</option>
-    </select>
-    <input
-      type="number"
-      [(ngModel)]="link.assetId"
-      (change)="onLinkChange()"
-      placeholder="Asset ID"
-      [disabled]="!hasContext"
-      min="1" />
-    <input
-      type="text"
-      [(ngModel)]="link.notes"
-      (change)="onLinkChange()"
-      placeholder="Notes (optional)"
-      [disabled]="!hasContext" />
-    <button class="icon-btn remove-btn" type="button" (click)="removeLink(i)" title="Remove">✕</button>
+  <!-- ── Ventilation summary ────────────────────────────────────────────────── -->
+  <div
+    class="ale-ventilation"
+    *ngIf="rows.length > 0 && hasPartialAmounts"
+    [class.ale-ventilation--valid]="ventilationValid"
+    [class.ale-ventilation--invalid]="!ventilationValid"
+  >
+    <span class="ale-vent-icon">{{ ventilationValid ? '✓' : '✗' }}</span>
+    <span class="ale-vent-text">
+      Ventilated: <strong>{{ ventilatedTotal.toFixed(2) }} €</strong>
+      <ng-container *ngIf="transactionAmount != null">
+        &nbsp;/&nbsp; Transaction total: <strong>{{ transactionAmount.toFixed(2) }} €</strong>
+      </ng-container>
+    </span>
+    <span class="ale-vent-warn" *ngIf="!ventilationValid">
+      Sum of partial amounts exceeds the transaction total.
+    </span>
   </div>
 
-  <button class="btn btn-sm btn-secondary" type="button" (click)="addLink()" [disabled]="!hasContext">
+  <!-- ── Add button ─────────────────────────────────────────────────────────── -->
+  <button
+    type="button"
+    class="btn btn-sm btn-secondary ale-add-btn"
+    (click)="addRow()"
+  >
     + Add asset link
   </button>
+
 </div>

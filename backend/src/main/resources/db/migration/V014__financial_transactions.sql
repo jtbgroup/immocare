@@ -73,6 +73,7 @@ CREATE TABLE financial_transaction (
     housing_unit_id      BIGINT        REFERENCES housing_unit (id) ON DELETE SET NULL,
     building_id          BIGINT        REFERENCES building (id) ON DELETE SET NULL,
     import_batch_id      BIGINT        REFERENCES import_batch (id) ON DELETE SET NULL,
+    import_fingerprint   VARCHAR(64),
     created_at           TIMESTAMP     NOT NULL DEFAULT CURRENT_TIMESTAMP,
     updated_at           TIMESTAMP     NOT NULL DEFAULT CURRENT_TIMESTAMP,
     CONSTRAINT uq_financial_transaction_reference UNIQUE (reference)
@@ -89,23 +90,30 @@ CREATE INDEX idx_ft_import_batch     ON financial_transaction (import_batch_id);
 CREATE INDEX idx_ft_external_ref     ON financial_transaction (external_reference);
 CREATE INDEX idx_ft_subcategory      ON financial_transaction (subcategory_id);
 CREATE INDEX idx_ft_bank_account     ON financial_transaction (bank_account_id);
+CREATE INDEX idx_ft_fingerprint      ON financial_transaction (import_fingerprint);
 
+-- transaction_asset_link includes housing_unit_id, building_id (resolved server-side)
+-- and amount for partial ventilation (BR-UC014-15)
 CREATE TABLE transaction_asset_link (
-    id             BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
-    transaction_id BIGINT      NOT NULL REFERENCES financial_transaction (id) ON DELETE CASCADE,
-    asset_type     VARCHAR(30) NOT NULL CHECK (asset_type IN ('BOILER','FIRE_EXTINGUISHER','METER')),
-    asset_id       BIGINT      NOT NULL,
-    notes          TEXT,
+    id              BIGINT        GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+    transaction_id  BIGINT        NOT NULL REFERENCES financial_transaction (id) ON DELETE CASCADE,
+    asset_type      VARCHAR(30)   NOT NULL CHECK (asset_type IN ('BOILER','FIRE_EXTINGUISHER','METER')),
+    asset_id        BIGINT        NOT NULL,
+    housing_unit_id BIGINT        REFERENCES housing_unit (id) ON DELETE SET NULL,
+    building_id     BIGINT        REFERENCES building (id)      ON DELETE SET NULL,
+    amount          DECIMAL(12,2) NULL CHECK (amount > 0),
+    notes           TEXT,
     CONSTRAINT uq_asset_link UNIQUE (transaction_id, asset_type, asset_id)
 );
 
 CREATE INDEX idx_tal_transaction ON transaction_asset_link (transaction_id);
 CREATE INDEX idx_tal_asset       ON transaction_asset_link (asset_type, asset_id);
 
+-- match_field: COUNTERPARTY_NAME removed, ASSET_TYPE added (BR-UC014-18/19)
 CREATE TABLE tag_learning_rule (
     id              BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
     match_field     VARCHAR(30)  NOT NULL
-                                 CHECK (match_field IN ('COUNTERPARTY_ACCOUNT','DESCRIPTION')),
+                                 CHECK (match_field IN ('COUNTERPARTY_ACCOUNT','DESCRIPTION','ASSET_TYPE')),
     match_value     VARCHAR(200) NOT NULL,
     subcategory_id  BIGINT       NOT NULL REFERENCES tag_subcategory (id) ON DELETE CASCADE,
     confidence      INTEGER      NOT NULL DEFAULT 1 CHECK (confidence >= 1),
@@ -127,7 +135,6 @@ CREATE TABLE accounting_month_rule (
 
 CREATE INDEX idx_amr_subcategory ON accounting_month_rule (subcategory_id);
 
--- ON CONFLICT remplacé par INSERT conditionnel compatible H2 + PostgreSQL
 INSERT INTO platform_config (config_key, config_value, value_type, description)
     SELECT 'csv.import.suggestion.confidence.threshold', '3', 'INTEGER',
         'Min confidence score to display a tag suggestion on import'

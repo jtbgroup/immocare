@@ -1,16 +1,5 @@
 package com.immocare.service;
 
-import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.util.Comparator;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
-
 import com.immocare.model.dto.AccountingMonthSuggestionDTO;
 import com.immocare.model.dto.SubcategorySuggestionDTO;
 import com.immocare.model.entity.AccountingMonthRule;
@@ -22,6 +11,16 @@ import com.immocare.model.enums.TransactionDirection;
 import com.immocare.repository.AccountingMonthRuleRepository;
 import com.immocare.repository.TagLearningRuleRepository;
 import com.immocare.repository.TagSubcategoryRepository;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.util.Comparator;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
 
 @Service
 @Transactional(readOnly = true)
@@ -39,12 +38,26 @@ public class LearningService {
         this.tagSubcategoryRepository = tagSubcategoryRepository;
     }
 
+    /**
+     * Suggest a subcategory based on transaction fields.
+     * Priority order (BR-UC014-18/19):
+     * 1. ASSET_TYPE (if assetType non-null) — exact match on match_value
+     * 2. COUNTERPARTY_ACCOUNT (if non-blank) — exact match
+     * 3. DESCRIPTION (if non-blank) — contains match
+     * Results filtered by direction compatibility and deduplicated by subcategoryId.
+     */
     public List<SubcategorySuggestionDTO> suggestSubcategory(
             String counterpartyAccount,
-            String description, TransactionDirection direction, int minConfidence) {
+            String description,
+            String assetType,
+            TransactionDirection direction,
+            int minConfidence) {
 
         Map<Long, SubcategorySuggestionDTO> best = new LinkedHashMap<>();
 
+        if (assetType != null && !assetType.isBlank()) {
+            findSuggestionsForField(TagMatchField.ASSET_TYPE, assetType, direction, minConfidence, best);
+        }
         if (counterpartyAccount != null && !counterpartyAccount.isBlank()) {
             findSuggestionsForField(TagMatchField.COUNTERPARTY_ACCOUNT, counterpartyAccount, direction, minConfidence,
                     best);
@@ -56,6 +69,17 @@ public class LearningService {
         return best.values().stream()
                 .sorted(Comparator.comparingInt(SubcategorySuggestionDTO::confidence).reversed())
                 .toList();
+    }
+
+    /**
+     * Overload without assetType for backward compatibility with existing callers.
+     */
+    public List<SubcategorySuggestionDTO> suggestSubcategory(
+            String counterpartyAccount,
+            String description,
+            TransactionDirection direction,
+            int minConfidence) {
+        return suggestSubcategory(counterpartyAccount, description, null, direction, minConfidence);
     }
 
     private void findSuggestionsForField(TagMatchField field, String value, TransactionDirection direction,
@@ -87,7 +111,6 @@ public class LearningService {
                 : List.of();
 
         if (rules.isEmpty()) {
-            // Try generic rule
             Optional<AccountingMonthRule> generic = accountingMonthRuleRepository
                     .findBySubcategoryIdAndCounterpartyAccountIsNull(subcategoryId);
             if (generic.isEmpty()) {
@@ -106,20 +129,17 @@ public class LearningService {
     }
 
     @Transactional
-    public void reinforceTagRule(Long subcategoryId, String counterpartyAccount) {
-        if (counterpartyAccount == null || counterpartyAccount.isBlank())
-            return;
+    public void reinforceTagRule(Long subcategoryId, TagMatchField field, String matchValue) {
+        if (matchValue == null || matchValue.isBlank()) return;
         TagSubcategory sub = tagSubcategoryRepository.findById(subcategoryId).orElse(null);
-        if (sub == null)
-            return;
+        if (sub == null) return;
 
         TagLearningRule rule = learningRuleRepository
-                .findByMatchFieldAndMatchValueIgnoreCaseAndSubcategoryId(
-                        TagMatchField.COUNTERPARTY_ACCOUNT, counterpartyAccount, subcategoryId)
+                .findByMatchFieldAndMatchValueIgnoreCaseAndSubcategoryId(field, matchValue, subcategoryId)
                 .orElseGet(() -> {
                     TagLearningRule r = new TagLearningRule();
-                    r.setMatchField(TagMatchField.COUNTERPARTY_ACCOUNT);
-                    r.setMatchValue(counterpartyAccount);
+                    r.setMatchField(field);
+                    r.setMatchValue(matchValue);
                     r.setSubcategory(sub);
                     r.setConfidence(0);
                     return r;
@@ -129,11 +149,18 @@ public class LearningService {
         learningRuleRepository.save(rule);
     }
 
+    /**
+     * Convenience overload for the most common case (COUNTERPARTY_ACCOUNT).
+     */
+    @Transactional
+    public void reinforceTagRule(Long subcategoryId, String counterpartyAccount) {
+        reinforceTagRule(subcategoryId, TagMatchField.COUNTERPARTY_ACCOUNT, counterpartyAccount);
+    }
+
     @Transactional
     public void reinforceAccountingMonthRule(Long subcategoryId, String counterpartyAccount, int offset) {
         TagSubcategory sub = tagSubcategoryRepository.findById(subcategoryId).orElse(null);
-        if (sub == null)
-            return;
+        if (sub == null) return;
 
         boolean isGeneric = counterpartyAccount == null || counterpartyAccount.isBlank();
 

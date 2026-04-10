@@ -92,43 +92,55 @@
     <div class="info-card">
       <div class="section-header">
         <h2>Financial</h2>
-        <button
-          class="btn btn-ghost btn-sm"
-          (click)="viewBuildingTransactions(building.id)"
-        >
-          View all transactions →
-        </button>
-      </div>
-      <div *ngIf="buildingStats; else financialLoading">
-        <div class="financial-stats-grid">
-          <div class="financial-stat financial-stat--income">
-            <span class="financial-stat__label">Income</span>
-            <span class="financial-stat__value"
-              >+{{ buildingStats.totalIncome.toFixed(2) }} €</span
-            >
-          </div>
-          <div class="financial-stat financial-stat--expense">
-            <span class="financial-stat__label">Expenses</span>
-            <span class="financial-stat__value"
-              >-{{ buildingStats.totalExpenses.toFixed(2) }} €</span
-            >
-          </div>
-          <div
-            class="financial-stat"
-            [class.financial-stat--positive]="buildingStats.netBalance >= 0"
-            [class.financial-stat--negative]="buildingStats.netBalance < 0"
+        <div class="actions">
+          <button
+            class="btn btn-ghost btn-sm"
+            (click)="showFinancial = !showFinancial"
           >
-            <span class="financial-stat__label">Net Balance</span>
-            <span class="financial-stat__value"
-              >{{ buildingStats.netBalance >= 0 ? "+" : ""
-              }}{{ buildingStats.netBalance.toFixed(2) }} €</span
-            >
-          </div>
+            {{ showFinancial ? "Hide ▲" : "Show ▼" }}
+          </button>
+          <button
+            *ngIf="showFinancial"
+            class="btn btn-ghost btn-sm"
+            (click)="viewBuildingTransactions(building.id)"
+          >
+            View all transactions →
+          </button>
         </div>
       </div>
-      <ng-template #financialLoading>
-        <p class="loading-placeholder">Loading financial data…</p>
-      </ng-template>
+
+      <ng-container *ngIf="showFinancial">
+        <div *ngIf="buildingStats; else financialLoading">
+          <div class="financial-stats-grid">
+            <div class="financial-stat financial-stat--income">
+              <span class="financial-stat__label">Income</span>
+              <span class="financial-stat__value"
+                >+{{ buildingStats.totalIncome.toFixed(2) }} €</span
+              >
+            </div>
+            <div class="financial-stat financial-stat--expense">
+              <span class="financial-stat__label">Expenses</span>
+              <span class="financial-stat__value"
+                >-{{ buildingStats.totalExpenses.toFixed(2) }} €</span
+              >
+            </div>
+            <div
+              class="financial-stat"
+              [class.financial-stat--positive]="buildingStats.netBalance >= 0"
+              [class.financial-stat--negative]="buildingStats.netBalance < 0"
+            >
+              <span class="financial-stat__label">Net Balance</span>
+              <span class="financial-stat__value"
+                >{{ buildingStats.netBalance >= 0 ? "+" : ""
+                }}{{ buildingStats.netBalance.toFixed(2) }} €</span
+              >
+            </div>
+          </div>
+        </div>
+        <ng-template #financialLoading>
+          <p class="loading-placeholder">Loading financial data…</p>
+        </ng-template>
+      </ng-container>
     </div>
 
     <!-- Housing Units section -->

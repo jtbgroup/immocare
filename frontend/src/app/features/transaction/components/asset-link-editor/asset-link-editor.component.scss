@@ -1,3 +1,378 @@
+// asset-link-editor.component.scss
+// Uses global variables via the project SCSS design system.
+// Avoids redefining tokens already in _variables.scss.
+
+// ─── Host ─────────────────────────────────────────────────────────────────────
+
 :host {
   display: block;
+}
+
+// ─── Empty hint ───────────────────────────────────────────────────────────────
+
+.ale-empty-hint {
+  font-size: 0.875rem;
+  color: #6c757d;
+  font-style: italic;
+  margin: 0 0 0.75rem;
+}
+
+// ─── Row ──────────────────────────────────────────────────────────────────────
+
+.ale-row {
+  display: grid;
+  grid-template-columns:
+    160px          // type
+    1fr            // device picker (flexible)
+    160px          // context (read-only)
+    110px          // amount
+    1fr            // notes
+    32px;          // remove button
+
+  gap: 0.5rem;
+  align-items: end;
+  padding: 0.75rem;
+  margin-bottom: 0.5rem;
+  background: #f8f9fa;
+  border: 1px solid #e9ecef;
+  border-radius: 6px;
+  transition: border-color 0.15s;
+
+  &:hover {
+    border-color: #ced4da;
+  }
+
+  @media (max-width: 900px) {
+    grid-template-columns: 1fr 1fr;
+    grid-template-rows: auto auto auto;
+
+    .ale-cell--remove {
+      grid-column: 2;
+      grid-row: 1;
+      justify-self: end;
+      align-self: start;
+    }
+  }
+}
+
+// ─── Cell ─────────────────────────────────────────────────────────────────────
+
+.ale-cell {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  min-width: 0; // prevent overflow in grid
+}
+
+.ale-cell--remove {
+  justify-content: flex-end;
+  padding-bottom: 0.1rem;
+}
+
+// ─── Label ────────────────────────────────────────────────────────────────────
+
+.ale-label {
+  font-size: 0.72rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: #6c757d;
+  white-space: nowrap;
+}
+
+.ale-optional {
+  font-weight: 400;
+  text-transform: none;
+  letter-spacing: 0;
+  color: #adb5bd;
+  font-size: 0.68rem;
+}
+
+// ─── Select ───────────────────────────────────────────────────────────────────
+
+.ale-select {
+  width: 100%;
+  padding: 0.4rem 0.6rem;
+  border: 1px solid #dee2e6;
+  border-radius: 4px;
+  font-size: 0.875rem;
+  font-family: inherit;
+  background: #fff;
+  cursor: pointer;
+
+  &:focus {
+    outline: none;
+    border-color: #80bdff;
+    box-shadow: 0 0 0 2px rgba(0, 123, 255, 0.15);
+  }
+}
+
+// ─── Device picker ────────────────────────────────────────────────────────────
+
+.ale-picker-wrap {
+  position: relative;
+}
+
+.ale-search-input {
+  width: 100%;
+  padding: 0.4rem 0.6rem;
+  border: 1px solid #dee2e6;
+  border-radius: 4px;
+  font-size: 0.875rem;
+  font-family: inherit;
+  background: #fff;
+
+  &:focus {
+    outline: none;
+    border-color: #80bdff;
+    box-shadow: 0 0 0 2px rgba(0, 123, 255, 0.15);
+  }
+
+  &::placeholder {
+    color: #adb5bd;
+  }
+}
+
+.ale-spinner {
+  position: absolute;
+  right: 0.5rem;
+  top: 50%;
+  transform: translateY(-50%);
+  font-size: 0.8rem;
+  pointer-events: none;
+}
+
+// ─── Selected chip ────────────────────────────────────────────────────────────
+
+.ale-selected-chip {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.35rem 0.6rem;
+  background: #e3f2fd;
+  border: 1px solid #90caf9;
+  border-radius: 4px;
+  font-size: 0.875rem;
+  color: #1565c0;
+}
+
+.ale-chip-label {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-weight: 500;
+}
+
+.ale-chip-clear {
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: #1565c0;
+  font-size: 0.75rem;
+  padding: 0;
+  line-height: 1;
+  flex-shrink: 0;
+  opacity: 0.7;
+
+  &:hover {
+    opacity: 1;
+  }
+}
+
+// ─── Dropdown ─────────────────────────────────────────────────────────────────
+
+.ale-dropdown {
+  position: absolute;
+  top: calc(100% + 2px);
+  left: 0;
+  right: 0;
+  z-index: 200;
+  background: #fff;
+  border: 1px solid #dee2e6;
+  border-radius: 4px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  list-style: none;
+  margin: 0;
+  padding: 0.25rem 0;
+  max-height: 220px;
+  overflow-y: auto;
+}
+
+.ale-dropdown-item {
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
+  padding: 0.5rem 0.75rem;
+  cursor: pointer;
+  transition: background 0.12s;
+
+  &:hover {
+    background: #f0f7ff;
+  }
+}
+
+.ale-result-label {
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: #212529;
+}
+
+.ale-result-context {
+  font-size: 0.75rem;
+  color: #6c757d;
+}
+
+.ale-no-results {
+  padding: 0.5rem 0.75rem;
+  font-size: 0.8rem;
+  color: #adb5bd;
+  margin: 0;
+}
+
+// ─── Context chips (read-only) ────────────────────────────────────────────────
+
+.ale-context-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.3rem;
+  padding-top: 0.25rem;
+}
+
+.ale-ctx-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.2rem;
+  padding: 0.2em 0.55em;
+  border-radius: 20px;
+  font-size: 0.75rem;
+  font-weight: 500;
+  white-space: nowrap;
+
+  &--unit {
+    background: #f3e5f5;
+    color: #6a1b9a;
+  }
+
+  &--building {
+    background: #e3f2fd;
+    color: #1565c0;
+  }
+}
+
+.ale-context-placeholder {
+  font-size: 0.875rem;
+  color: #adb5bd;
+  padding-top: 0.3rem;
+}
+
+// ─── Amount input ─────────────────────────────────────────────────────────────
+
+.ale-amount-input {
+  width: 100%;
+  padding: 0.4rem 0.6rem;
+  border: 1px solid #dee2e6;
+  border-radius: 4px;
+  font-size: 0.875rem;
+  font-family: inherit;
+  background: #fff;
+  text-align: right;
+
+  &:focus {
+    outline: none;
+    border-color: #80bdff;
+    box-shadow: 0 0 0 2px rgba(0, 123, 255, 0.15);
+  }
+}
+
+// ─── Notes input ──────────────────────────────────────────────────────────────
+
+.ale-notes-input {
+  width: 100%;
+  padding: 0.4rem 0.6rem;
+  border: 1px solid #dee2e6;
+  border-radius: 4px;
+  font-size: 0.875rem;
+  font-family: inherit;
+  background: #fff;
+
+  &:focus {
+    outline: none;
+    border-color: #80bdff;
+    box-shadow: 0 0 0 2px rgba(0, 123, 255, 0.15);
+  }
+
+  &::placeholder {
+    color: #adb5bd;
+  }
+}
+
+// ─── Remove button ────────────────────────────────────────────────────────────
+
+.ale-remove-btn {
+  background: none;
+  border: 1px solid transparent;
+  border-radius: 4px;
+  cursor: pointer;
+  color: #adb5bd;
+  font-size: 0.85rem;
+  padding: 0.25rem 0.4rem;
+  line-height: 1;
+  transition: color 0.15s, border-color 0.15s, background 0.15s;
+
+  &:hover {
+    color: #dc3545;
+    border-color: #f5c6cb;
+    background: #fff5f5;
+  }
+}
+
+// ─── Ventilation summary ──────────────────────────────────────────────────────
+
+.ale-ventilation {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.5rem 0.75rem;
+  border-radius: 4px;
+  font-size: 0.875rem;
+  margin-bottom: 0.5rem;
+
+  &--valid {
+    background: #d4edda;
+    border: 1px solid #c3e6cb;
+    color: #155724;
+
+    .ale-vent-icon { color: #28a745; }
+  }
+
+  &--invalid {
+    background: #f8d7da;
+    border: 1px solid #f5c6cb;
+    color: #721c24;
+
+    .ale-vent-icon { color: #dc3545; }
+  }
+}
+
+.ale-vent-icon {
+  font-weight: 700;
+  font-size: 1rem;
+  flex-shrink: 0;
+}
+
+.ale-vent-text {
+  flex: 1;
+}
+
+.ale-vent-warn {
+  font-size: 0.8rem;
+  font-style: italic;
+}
+
+// ─── Add button ───────────────────────────────────────────────────────────────
+
+.ale-add-btn {
+  margin-top: 0.25rem;
 }

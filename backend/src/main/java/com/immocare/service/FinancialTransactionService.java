@@ -1,19 +1,5 @@
 package com.immocare.service;
 
-import java.io.IOException;
-import java.io.PrintWriter;
-import java.math.BigDecimal;
-import java.time.LocalDate;
-import java.time.format.DateTimeFormatter;
-import java.util.List;
-import java.util.stream.Collectors;
-
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
-import org.springframework.data.jpa.domain.Specification;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
-
 import com.immocare.exception.AssetLinkValidationException;
 import com.immocare.exception.SubcategoryDirectionMismatchException;
 import com.immocare.exception.SubcategoryNotFoundException;
@@ -35,6 +21,7 @@ import com.immocare.model.dto.TransactionStatisticsDTO;
 import com.immocare.model.dto.UpdateTransactionRequest;
 import com.immocare.model.entity.AppUser;
 import com.immocare.model.entity.Boiler;
+import com.immocare.model.entity.Building;
 import com.immocare.model.entity.FinancialTransaction;
 import com.immocare.model.entity.FireExtinguisher;
 import com.immocare.model.entity.HousingUnit;
@@ -43,6 +30,7 @@ import com.immocare.model.entity.TransactionAssetLink;
 import com.immocare.model.enums.AssetType;
 import com.immocare.model.enums.BankAccountType;
 import com.immocare.model.enums.SubcategoryDirection;
+import com.immocare.model.enums.TagMatchField;
 import com.immocare.model.enums.TransactionDirection;
 import com.immocare.model.enums.TransactionSource;
 import com.immocare.model.enums.TransactionStatus;
@@ -57,8 +45,20 @@ import com.immocare.repository.MeterRepository;
 import com.immocare.repository.TagSubcategoryRepository;
 import com.immocare.repository.TransactionAssetLinkRepository;
 import com.immocare.repository.spec.TransactionSpecification;
-
 import jakarta.servlet.http.HttpServletResponse;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.domain.Specification;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import java.io.IOException;
+import java.io.PrintWriter;
+import java.math.BigDecimal;
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
+import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 @Transactional(readOnly = true)
@@ -69,8 +69,6 @@ public class FinancialTransactionService {
     private final BankAccountRepository bankAccountRepository;
     private final TransactionAssetLinkRepository assetLinkRepository;
     private final LearningService learningService;
-
-    // Repositories for asset label resolution
     private final BoilerRepository boilerRepository;
     private final FireExtinguisherRepository fireExtinguisherRepository;
     private final MeterRepository meterRepository;
@@ -87,7 +85,8 @@ public class FinancialTransactionService {
             FireExtinguisherRepository fireExtinguisherRepository,
             MeterRepository meterRepository,
             HousingUnitRepository housingUnitRepository,
-            BuildingRepository buildingRepository, LeaseRepository leaseRepository) {
+            BuildingRepository buildingRepository,
+            LeaseRepository leaseRepository) {
         this.transactionRepository = transactionRepository;
         this.tagSubcategoryRepository = tagSubcategoryRepository;
         this.bankAccountRepository = bankAccountRepository;
@@ -101,11 +100,12 @@ public class FinancialTransactionService {
         this.leaseRepository = leaseRepository;
     }
 
+    // ─── Read ─────────────────────────────────────────────────────────────────
+
     public PagedTransactionResponse getAll(TransactionFilter filter, Pageable pageable) {
         Specification<FinancialTransaction> spec = buildSpec(filter);
         Page<FinancialTransaction> page = transactionRepository.findAll(spec, pageable);
 
-        // Aggregate totals over full filter (all pages)
         BigDecimal totalIncome = computeTotal(spec, TransactionDirection.INCOME);
         BigDecimal totalExpenses = computeTotal(spec, TransactionDirection.EXPENSE);
         BigDecimal netBalance = totalIncome.subtract(totalExpenses);
@@ -121,10 +121,12 @@ public class FinancialTransactionService {
         return toDTO(findOrThrow(id));
     }
 
+    // ─── Create ───────────────────────────────────────────────────────────────
+
     @Transactional
     public FinancialTransactionDTO create(CreateTransactionRequest req, AppUser currentUser) {
         validateTransactionRequest(req.direction(), req.leaseId(), req.subcategoryId(),
-                req.housingUnitId(), req.assetLinks());
+                req.housingUnitId(), req.assetLinks(), null);
 
         FinancialTransaction tx = new FinancialTransaction();
         tx.setDirection(req.direction());
@@ -140,33 +142,24 @@ public class FinancialTransactionService {
         applyRelations(tx, req.bankAccountId(), req.subcategoryId(),
                 req.leaseId(), req.housingUnitId(), req.buildingId());
 
-        // BR-UC014-03: unit → building
         if (tx.getHousingUnit() != null) {
             tx.setBuilding(tx.getHousingUnit().getBuilding());
         }
 
-        // Generate reference
         String year = String.valueOf(req.transactionDate().getYear());
         long seq = transactionRepository.nextRefSequence();
         tx.setReference("TXN-" + year + "-" + String.format("%05d", seq));
 
-        // Asset links
-        if (req.assetLinks() != null) {
-            for (SaveAssetLinkRequest linkReq : req.assetLinks()) {
-                validateAssetLink(linkReq, tx);
-                TransactionAssetLink link = new TransactionAssetLink();
-                link.setTransaction(tx);
-                link.setAssetType(linkReq.assetType());
-                link.setAssetId(linkReq.assetId());
-                link.setNotes(linkReq.notes());
-                tx.getAssetLinks().add(link);
-            }
+        if (req.assetLinks() != null && !req.assetLinks().isEmpty()) {
+            applyAssetLinks(tx, req.assetLinks(), req.amount());
         }
 
         FinancialTransaction saved = transactionRepository.save(tx);
         reinforceLearning(saved);
         return toDTO(saved);
     }
+
+    // ─── Update ───────────────────────────────────────────────────────────────
 
     @Transactional
     public FinancialTransactionDTO update(Long id, UpdateTransactionRequest req) {
@@ -175,7 +168,7 @@ public class FinancialTransactionService {
             throw new TransactionNotEditableException("Reconciled transactions cannot be modified");
         }
         validateTransactionRequest(req.direction(), req.leaseId(), req.subcategoryId(),
-                req.housingUnitId(), req.assetLinks());
+                req.housingUnitId(), req.assetLinks(), null);
 
         tx.setDirection(req.direction());
         tx.setTransactionDate(req.transactionDate());
@@ -192,22 +185,16 @@ public class FinancialTransactionService {
         }
 
         tx.getAssetLinks().clear();
-        if (req.assetLinks() != null) {
-            for (SaveAssetLinkRequest linkReq : req.assetLinks()) {
-                validateAssetLink(linkReq, tx);
-                TransactionAssetLink link = new TransactionAssetLink();
-                link.setTransaction(tx);
-                link.setAssetType(linkReq.assetType());
-                link.setAssetId(linkReq.assetId());
-                link.setNotes(linkReq.notes());
-                tx.getAssetLinks().add(link);
-            }
+        if (req.assetLinks() != null && !req.assetLinks().isEmpty()) {
+            applyAssetLinks(tx, req.assetLinks(), req.amount());
         }
 
         FinancialTransaction saved = transactionRepository.save(tx);
         reinforceLearning(saved);
         return toDTO(saved);
     }
+
+    // ─── Delete ───────────────────────────────────────────────────────────────
 
     @Transactional
     public void delete(Long id) {
@@ -217,6 +204,8 @@ public class FinancialTransactionService {
         }
         transactionRepository.delete(tx);
     }
+
+    // ─── Confirm ──────────────────────────────────────────────────────────────
 
     @Transactional
     public FinancialTransactionDTO confirm(Long id, ConfirmTransactionRequest req, AppUser currentUser) {
@@ -230,9 +219,6 @@ public class FinancialTransactionService {
         if (req.accountingMonth() != null) {
             tx.setAccountingMonth(req.accountingMonth().withDayOfMonth(1));
         }
-        if (req.leaseId() != null && tx.getDirection() == TransactionDirection.INCOME) {
-            // accept lease link on income
-        }
         if (req.buildingId() != null) {
             tx.setBuilding(buildingRepository.getReferenceById(req.buildingId()));
         }
@@ -240,13 +226,10 @@ public class FinancialTransactionService {
             tx.setHousingUnit(housingUnitRepository.getReferenceById(req.housingUnitId()));
             tx.setBuilding(tx.getHousingUnit().getBuilding());
         }
-        // Promote suggested lease
         if (tx.getSuggestedLease() != null && req.leaseId() == null) {
             tx.setLease(tx.getSuggestedLease());
             tx.setSuggestedLease(null);
         } else if (req.leaseId() != null) {
-            // set directly — not injecting LeaseRepository to keep scope clean; use
-            // reference
             tx.setSuggestedLease(null);
         }
         tx.setStatus(TransactionStatus.CONFIRMED);
@@ -254,6 +237,8 @@ public class FinancialTransactionService {
         reinforceLearning(saved);
         return toDTO(saved);
     }
+
+    // ─── Confirm batch ────────────────────────────────────────────────────────
 
     @Transactional
     public int confirmBatch(Long batchId) {
@@ -271,23 +256,14 @@ public class FinancialTransactionService {
         return count;
     }
 
-    /**
-     * Bulk patch: apply status and/or subcategory to a list of transactions.
-     *
-     * Rules:
-     * - RECONCILED transactions are always skipped.
-     * - subcategoryId == 0 means "clear subcategory".
-     * - subcategory direction must be compatible with transaction direction
-     * (BR-UC014-06).
-     * On mismatch the row is skipped (not an error — silently ignored).
-     */
+    // ─── Bulk patch ───────────────────────────────────────────────────────────
+
     @Transactional
     public BulkPatchTransactionResult bulkPatch(BulkPatchTransactionRequest req) {
         if (req.status() == null && req.subcategoryId() == null) {
             throw new IllegalArgumentException("At least one patch field (status or subcategoryId) must be provided");
         }
 
-        // Pre-load subcategory once if needed
         TagSubcategory subcategory = null;
         if (req.subcategoryId() != null && req.subcategoryId() != 0) {
             subcategory = tagSubcategoryRepository.findById(req.subcategoryId())
@@ -308,25 +284,22 @@ public class FinancialTransactionService {
 
             boolean changed = false;
 
-            // Apply status
             if (req.status() != null && tx.getStatus() != req.status()) {
                 tx.setStatus(req.status());
                 changed = true;
             }
 
-            // Apply subcategory
             if (req.subcategoryId() != null) {
                 if (req.subcategoryId() == 0) {
-                    // Explicit clear
                     tx.setSubcategory(null);
                     changed = true;
                 } else {
-                    // Direction compatibility check (BR-UC014-06)
                     boolean compatible = resolvedSub.getDirection() == null
                             || (resolvedSub.getDirection() == SubcategoryDirection.INCOME
                                     && tx.getDirection() == TransactionDirection.INCOME)
                             || (resolvedSub.getDirection() == SubcategoryDirection.EXPENSE
-                                    && tx.getDirection() == TransactionDirection.EXPENSE);
+                                    && tx.getDirection() == TransactionDirection.EXPENSE)
+                            || resolvedSub.getDirection() == SubcategoryDirection.BOTH;
                     if (compatible) {
                         tx.setSubcategory(resolvedSub);
                         changed = true;
@@ -349,6 +322,8 @@ public class FinancialTransactionService {
         return new BulkPatchTransactionResult(updated, skipped);
     }
 
+    // ─── Statistics ───────────────────────────────────────────────────────────
+
     public TransactionStatisticsDTO getStatistics(StatisticsFilter filter) {
         Specification<FinancialTransaction> base = TransactionSpecification.confirmedOrReconciled();
         if (filter.accountingFrom() != null)
@@ -370,7 +345,6 @@ public class FinancialTransactionService {
         BigDecimal totalExpenses = sum(all, TransactionDirection.EXPENSE);
         BigDecimal netBalance = totalIncome.subtract(totalExpenses);
 
-        // byCategory
         var byCategory = all.stream()
                 .filter(t -> t.getSubcategory() != null)
                 .collect(Collectors.groupingBy(t -> t.getSubcategory().getCategory().getId()))
@@ -397,14 +371,12 @@ public class FinancialTransactionService {
                     return new TransactionStatisticsDTO.CategoryBreakdownDTO(entry.getKey(), catName, subs, catTotal);
                 }).toList();
 
-        // byBuilding
         var byBuilding = all.stream()
                 .collect(Collectors.groupingBy(t -> t.getBuilding() != null ? t.getBuilding().getId() : -1L))
                 .entrySet().stream()
                 .map(e -> {
                     var txs = e.getValue();
-                    String name = e.getKey() == -1L ? "Unassigned"
-                            : txs.get(0).getBuilding().getName();
+                    String name = e.getKey() == -1L ? "Unassigned" : txs.get(0).getBuilding().getName();
                     Long bid = e.getKey() == -1L ? null : e.getKey();
                     return new TransactionStatisticsDTO.BuildingBreakdownDTO(bid, name,
                             sum(txs, TransactionDirection.INCOME),
@@ -412,7 +384,6 @@ public class FinancialTransactionService {
                             sum(txs, TransactionDirection.INCOME).subtract(sum(txs, TransactionDirection.EXPENSE)));
                 }).toList();
 
-        // byUnit
         var byUnit = all.stream()
                 .filter(t -> t.getHousingUnit() != null)
                 .collect(Collectors.groupingBy(t -> t.getHousingUnit().getId()))
@@ -427,7 +398,6 @@ public class FinancialTransactionService {
                             sum(txs, TransactionDirection.INCOME).subtract(sum(txs, TransactionDirection.EXPENSE)));
                 }).toList();
 
-        // byBankAccount
         var byBankAccount = all.stream()
                 .collect(Collectors.groupingBy(t -> t.getBankAccount() != null ? t.getBankAccount().getId() : -1L))
                 .entrySet().stream()
@@ -442,7 +412,6 @@ public class FinancialTransactionService {
                             sum(txs, TransactionDirection.INCOME).subtract(sum(txs, TransactionDirection.EXPENSE)));
                 }).toList();
 
-        // monthlyTrend
         var monthlyTrend = all.stream()
                 .collect(Collectors.groupingBy(
                         t -> t.getAccountingMonth().getYear() * 100 + t.getAccountingMonth().getMonthValue()))
@@ -461,6 +430,8 @@ public class FinancialTransactionService {
                 byCategory, byBuilding, byUnit, byBankAccount, monthlyTrend);
     }
 
+    // ─── Export ───────────────────────────────────────────────────────────────
+
     public void exportCsv(TransactionFilter filter, HttpServletResponse response) throws IOException {
         response.setContentType("text/csv; charset=UTF-8");
         response.setHeader("Content-Disposition", "attachment; filename=\"transactions.csv\"");
@@ -468,10 +439,10 @@ public class FinancialTransactionService {
         List<FinancialTransaction> all = transactionRepository.findAll(spec);
 
         PrintWriter writer = response.getWriter();
-        // UTF-8 BOM
         writer.write('\uFEFF');
         writer.println(
-                "Reference;Date;AccountingMonth;Direction;Amount;Counterparty;Description;Category;Subcategory;Status;BankAccount;Building;Unit;Lease");
+                "Reference;ExternalReference;Date;AccountingMonth;Direction;Amount;Category;Subcategory;" +
+                "Status;BankAccount;CounterpartyAccount;Description;Building;Unit;Lease;Source");
         DateTimeFormatter monthFmt = DateTimeFormatter.ofPattern("yyyy-MM");
         for (FinancialTransaction tx : all) {
             BigDecimal signedAmount = tx.getDirection() == TransactionDirection.INCOME
@@ -479,18 +450,21 @@ public class FinancialTransactionService {
                     : tx.getAmount().negate();
             writer.println(
                     csv(tx.getReference()) + ";" +
-                            csv(tx.getTransactionDate()) + ";" +
-                            csv(tx.getAccountingMonth().format(monthFmt)) + ";" +
-                            csv(tx.getDirection().name()) + ";" +
-                            signedAmount + ";" +
-                            csv(tx.getDescription()) + ";" +
-                            csv(tx.getSubcategory() != null ? tx.getSubcategory().getCategory().getName() : "") + ";" +
-                            csv(tx.getSubcategory() != null ? tx.getSubcategory().getName() : "") + ";" +
-                            csv(tx.getStatus().name()) + ";" +
-                            csv(tx.getBankAccount() != null ? tx.getBankAccount().getLabel() : "") + ";" +
-                            csv(tx.getBuilding() != null ? tx.getBuilding().getName() : "") + ";" +
-                            csv(tx.getHousingUnit() != null ? tx.getHousingUnit().getUnitNumber() : "") + ";" +
-                            csv(tx.getLease() != null ? String.valueOf(tx.getLease().getId()) : ""));
+                    csv(tx.getExternalReference()) + ";" +
+                    csv(tx.getTransactionDate()) + ";" +
+                    csv(tx.getAccountingMonth().format(monthFmt)) + ";" +
+                    csv(tx.getDirection().name()) + ";" +
+                    signedAmount + ";" +
+                    csv(tx.getSubcategory() != null ? tx.getSubcategory().getCategory().getName() : "") + ";" +
+                    csv(tx.getSubcategory() != null ? tx.getSubcategory().getName() : "") + ";" +
+                    csv(tx.getStatus().name()) + ";" +
+                    csv(tx.getBankAccount() != null ? tx.getBankAccount().getLabel() : "") + ";" +
+                    csv(tx.getCounterpartyAccount()) + ";" +
+                    csv(tx.getDescription()) + ";" +
+                    csv(tx.getBuilding() != null ? tx.getBuilding().getName() : "") + ";" +
+                    csv(tx.getHousingUnit() != null ? tx.getHousingUnit().getUnitNumber() : "") + ";" +
+                    csv(tx.getLease() != null ? String.valueOf(tx.getLease().getId()) : "") + ";" +
+                    csv(tx.getSource().name()));
         }
         writer.flush();
     }
@@ -551,50 +525,93 @@ public class FinancialTransactionService {
             Long leaseId, Long housingUnitId, Long buildingId) {
         tx.setBankAccount(bankAccountId != null ? bankAccountRepository.getReferenceById(bankAccountId) : null);
         tx.setSubcategory(subcategoryId != null ? tagSubcategoryRepository.getReferenceById(subcategoryId) : null);
-        tx.setLease(leaseId != null ? leaseRepository.getReferenceById(leaseId) : null); // ← manquant
+        tx.setLease(leaseId != null ? leaseRepository.getReferenceById(leaseId) : null);
         tx.setHousingUnit(housingUnitId != null ? housingUnitRepository.getReferenceById(housingUnitId) : null);
         tx.setBuilding(buildingId != null ? buildingRepository.getReferenceById(buildingId) : null);
     }
 
-    private void validateTransactionRequest(TransactionDirection direction, Long leaseId,
-            Long subcategoryId, Long housingUnitId,
-            List<SaveAssetLinkRequest> assetLinks) {
-        // BR-UC014-02
-        if (direction == TransactionDirection.EXPENSE && leaseId != null) {
-            throw new TransactionValidationException("Lease link is only allowed for income transactions");
+    /**
+     * Build and attach asset links to a transaction.
+     * Resolves housing_unit and building server-side (BR-UC014-14).
+     * Validates that the sum of non-null amounts does not exceed the transaction total (BR-UC014-15).
+     * Validates that a BOILER belongs to the same building as the transaction (BR-UC014-09).
+     */
+    private void applyAssetLinks(FinancialTransaction tx, List<SaveAssetLinkRequest> linkRequests,
+            BigDecimal txAmount) {
+        // BR-UC014-15: validate sum of partial amounts
+        BigDecimal partialSum = linkRequests.stream()
+                .map(SaveAssetLinkRequest::amount)
+                .filter(a -> a != null)
+                .reduce(BigDecimal.ZERO, BigDecimal::add);
+        if (partialSum.compareTo(txAmount) > 0) {
+            throw new AssetLinkValidationException(
+                    "Sum of asset link amounts (" + partialSum + ") exceeds transaction total (" + txAmount + ")");
         }
-        // BR-UC014-06
-        if (subcategoryId != null) {
-            TagSubcategory sub = tagSubcategoryRepository.findById(subcategoryId)
-                    .orElseThrow(() -> new SubcategoryNotFoundException("Subcategory not found: " + subcategoryId));
-            if ((sub.getDirection() == SubcategoryDirection.INCOME && direction == TransactionDirection.EXPENSE) ||
-                    (sub.getDirection() == SubcategoryDirection.EXPENSE && direction == TransactionDirection.INCOME)) {
-                throw new SubcategoryDirectionMismatchException(
-                        "Subcategory '" + sub.getName() + "' is not compatible with direction " + direction);
+
+        for (SaveAssetLinkRequest linkReq : linkRequests) {
+            // BR-UC014-09: BOILER must belong to the same building when building is set
+            if (linkReq.assetType() == AssetType.BOILER && tx.getBuilding() != null) {
+                boilerRepository.findById(linkReq.assetId()).ifPresent(boiler -> {
+                    Long boilerBuildingId = resolveBuildingIdFromBoiler(boiler);
+                    if (boilerBuildingId != null && !boilerBuildingId.equals(tx.getBuilding().getId())) {
+                        throw new AssetLinkValidationException(
+                                "Boiler " + linkReq.assetId() + " does not belong to building "
+                                        + tx.getBuilding().getId());
+                    }
+                });
             }
+
+            TransactionAssetLink link = new TransactionAssetLink();
+            link.setTransaction(tx);
+            link.setAssetType(linkReq.assetType());
+            link.setAssetId(linkReq.assetId());
+            link.setAmount(linkReq.amount());
+            link.setNotes(linkReq.notes());
+
+            // BR-UC014-14: resolve housing_unit and building server-side
+            resolveAssetLinkContext(link);
+
+            tx.getAssetLinks().add(link);
         }
     }
 
-    private void validateAssetLink(SaveAssetLinkRequest linkReq, FinancialTransaction tx) {
-        // BR-UC014-09: BOILER must belong to the same building as the transaction.
-        // Boiler uses a polymorphic ownership pattern (ownerType + ownerId — no direct
-        // FK).
-        if (linkReq.assetType() == AssetType.BOILER && tx.getBuilding() != null) {
-            boilerRepository.findById(linkReq.assetId()).ifPresent(boiler -> {
-                Long boilerBuildingId = resolveBuildingIdFromBoiler(boiler);
-                if (boilerBuildingId != null && !boilerBuildingId.equals(tx.getBuilding().getId())) {
-                    throw new AssetLinkValidationException(
-                            "Boiler " + linkReq.assetId() + " does not belong to building " + tx.getBuilding().getId());
+    /**
+     * Resolves housing_unit and building on an asset link from the asset's ownership.
+     * BOILER: ownerType + ownerId → unit or building
+     * FIRE_EXTINGUISHER: building FK + optional unit FK
+     * METER: ownerType + ownerId → unit or building
+     */
+    private void resolveAssetLinkContext(TransactionAssetLink link) {
+        switch (link.getAssetType()) {
+            case BOILER -> boilerRepository.findById(link.getAssetId()).ifPresent(boiler -> {
+                if ("HOUSING_UNIT".equals(boiler.getOwnerType())) {
+                    housingUnitRepository.findById(boiler.getOwnerId()).ifPresent(unit -> {
+                        link.setHousingUnit(unit);
+                        link.setBuilding(unit.getBuilding());
+                    });
+                } else if ("BUILDING".equals(boiler.getOwnerType())) {
+                    buildingRepository.findById(boiler.getOwnerId()).ifPresent(link::setBuilding);
+                }
+            });
+            case FIRE_EXTINGUISHER -> fireExtinguisherRepository.findById(link.getAssetId()).ifPresent(ext -> {
+                link.setBuilding(ext.getBuilding());
+                if (ext.getUnit() != null) {
+                    link.setHousingUnit(ext.getUnit());
+                }
+            });
+            case METER -> meterRepository.findById(link.getAssetId()).ifPresent(meter -> {
+                if ("HOUSING_UNIT".equals(meter.getOwnerType())) {
+                    housingUnitRepository.findById(meter.getOwnerId()).ifPresent(unit -> {
+                        link.setHousingUnit(unit);
+                        link.setBuilding(unit.getBuilding());
+                    });
+                } else if ("BUILDING".equals(meter.getOwnerType())) {
+                    buildingRepository.findById(meter.getOwnerId()).ifPresent(link::setBuilding);
                 }
             });
         }
     }
 
-    /**
-     * Resolves the building ID from a Boiler using its polymorphic ownership.
-     * ownerType = BUILDING -> ownerId is directly the building ID
-     * ownerType = HOUSING_UNIT -> load the unit to get its building ID
-     */
     private Long resolveBuildingIdFromBoiler(Boiler boiler) {
         if ("BUILDING".equals(boiler.getOwnerType())) {
             return boiler.getOwnerId();
@@ -607,27 +624,77 @@ public class FinancialTransactionService {
         return null;
     }
 
+    private void validateTransactionRequest(TransactionDirection direction, Long leaseId,
+            Long subcategoryId, Long housingUnitId,
+            List<SaveAssetLinkRequest> assetLinks,
+            BigDecimal amount) {
+        // BR-UC014-02: lease link only for income
+        if (direction == TransactionDirection.EXPENSE && leaseId != null) {
+            throw new TransactionValidationException("Lease link is only allowed for income transactions");
+        }
+        // BR-UC014-06: subcategory direction compatibility
+        if (subcategoryId != null) {
+            TagSubcategory sub = tagSubcategoryRepository.findById(subcategoryId)
+                    .orElseThrow(() -> new SubcategoryNotFoundException("Subcategory not found: " + subcategoryId));
+            if ((sub.getDirection() == SubcategoryDirection.INCOME && direction == TransactionDirection.EXPENSE) ||
+                    (sub.getDirection() == SubcategoryDirection.EXPENSE && direction == TransactionDirection.INCOME)) {
+                throw new SubcategoryDirectionMismatchException(
+                        "Subcategory '" + sub.getName() + "' is not compatible with direction " + direction);
+            }
+        }
+    }
+
     private void reinforceLearning(FinancialTransaction tx) {
         if (tx.getSubcategory() != null && tx.getCounterpartyAccount() != null
                 && !tx.getCounterpartyAccount().isBlank()) {
-            learningService.reinforceTagRule(tx.getSubcategory().getId(), tx.getCounterpartyAccount());
+            learningService.reinforceTagRule(tx.getSubcategory().getId(), TagMatchField.COUNTERPARTY_ACCOUNT,
+                    tx.getCounterpartyAccount());
             int offset = (int) (tx.getAccountingMonth().getYear() * 12L
                     + tx.getAccountingMonth().getMonthValue()
                     - LocalDate.now().getYear() * 12L - LocalDate.now().getMonthValue());
             learningService.reinforceAccountingMonthRule(
                     tx.getSubcategory().getId(), tx.getCounterpartyAccount(), offset);
         }
+        // BR-UC014-19: reinforce ASSET_TYPE rule for each distinct asset type in links
+        if (tx.getSubcategory() != null) {
+            tx.getAssetLinks().stream()
+                    .map(l -> l.getAssetType().name())
+                    .distinct()
+                    .forEach(assetTypeName -> learningService.reinforceTagRule(
+                            tx.getSubcategory().getId(), TagMatchField.ASSET_TYPE, assetTypeName));
+        }
     }
 
     private String resolveAssetLabel(AssetType type, Long assetId) {
         return switch (type) {
             case BOILER -> boilerRepository.findById(assetId)
-                    .map(b -> b.getBrand() + " " + b.getModel()).orElse("Boiler #" + assetId);
+                    .map(b -> (b.getBrand() != null ? b.getBrand() : "") + " " + (b.getModel() != null ? b.getModel() : ""))
+                    .map(String::trim)
+                    .filter(s -> !s.isBlank())
+                    .orElse("Boiler #" + assetId);
             case FIRE_EXTINGUISHER -> fireExtinguisherRepository.findById(assetId)
-                    .map(FireExtinguisher::getIdentificationNumber).orElse("Extinguisher #" + assetId);
+                    .map(FireExtinguisher::getIdentificationNumber)
+                    .orElse("Extinguisher #" + assetId);
             case METER -> meterRepository.findById(assetId)
-                    .map(m -> m.getMeterNumber() + " (" + m.getType() + ")").orElse("Meter #" + assetId);
+                    .map(m -> m.getMeterNumber() + " (" + m.getType() + ")")
+                    .orElse("Meter #" + assetId);
         };
+    }
+
+    private TransactionAssetLinkDTO toLinkDTO(TransactionAssetLink l) {
+        HousingUnit unit = l.getHousingUnit();
+        Building building = l.getBuilding();
+        return new TransactionAssetLinkDTO(
+                l.getId(),
+                l.getAssetType(),
+                l.getAssetId(),
+                resolveAssetLabel(l.getAssetType(), l.getAssetId()),
+                unit != null ? unit.getId() : null,
+                unit != null ? unit.getUnitNumber() : null,
+                building != null ? building.getId() : null,
+                building != null ? building.getName() : null,
+                l.getAmount(),
+                l.getNotes());
     }
 
     private FinancialTransactionSummaryDTO toSummaryDTO(FinancialTransaction tx) {
@@ -638,6 +705,7 @@ public class FinancialTransactionService {
                 tx.getAccountingMonth(),
                 tx.getDirection(),
                 tx.getAmount(),
+                tx.getCounterpartyAccount(),
                 tx.getStatus(),
                 tx.getSource(),
                 tx.getBankAccount() != null ? tx.getBankAccount().getLabel() : null,
@@ -646,7 +714,6 @@ public class FinancialTransactionService {
                 tx.getBuilding() != null ? tx.getBuilding().getName() : null,
                 tx.getHousingUnit() != null ? tx.getHousingUnit().getUnitNumber() : null,
                 tx.getLease() != null ? tx.getLease().getId() : null,
-                // suggestion fields
                 tx.getSuggestedLease() != null ? tx.getSuggestedLease().getId() : null,
                 tx.getBuilding() != null ? tx.getBuilding().getId() : null,
                 tx.getHousingUnit() != null ? tx.getHousingUnit().getId() : null);
@@ -654,8 +721,7 @@ public class FinancialTransactionService {
 
     private FinancialTransactionDTO toDTO(FinancialTransaction tx) {
         List<TransactionAssetLinkDTO> links = tx.getAssetLinks().stream()
-                .map(l -> new TransactionAssetLinkDTO(l.getId(), l.getAssetType(), l.getAssetId(),
-                        resolveAssetLabel(l.getAssetType(), l.getAssetId()), l.getNotes()))
+                .map(this::toLinkDTO)
                 .toList();
         return new FinancialTransactionDTO(
                 tx.getId(), tx.getReference(), tx.getExternalReference(),
@@ -681,8 +747,7 @@ public class FinancialTransactionService {
     }
 
     private String csv(Object value) {
-        if (value == null)
-            return "";
+        if (value == null) return "";
         String s = value.toString().replace("\"", "\"\"");
         return s.contains(";") || s.contains("\"") ? "\"" + s + "\"" : s;
     }

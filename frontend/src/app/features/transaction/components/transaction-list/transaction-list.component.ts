@@ -48,11 +48,29 @@ export class TransactionListComponent implements OnInit {
   categories: any[] = [];
   subcategories: any[] = [];
   bankAccounts: any[] = [];
-  allSubcategories: any[] = []; // for bulk picker (no direction filter)
+  allSubcategories: any[] = [];
 
   readonly DIRECTION_LABELS = DIRECTION_LABELS;
   readonly STATUS_LABELS = STATUS_LABELS;
-  readonly statuses: TransactionStatus[] = ["DRAFT", "CONFIRMED", "RECONCILED"];
+
+  /** All statuses available in the filter dropdown — including CANCELLED. */
+  readonly statuses: TransactionStatus[] = [
+    "DRAFT",
+    "CONFIRMED",
+    "RECONCILED",
+    "CANCELLED",
+  ];
+
+  /**
+   * Statuses available in the bulk-edit picker.
+   * CANCELLED is excluded: it is a server-side transition, not a manual one.
+   */
+  readonly bulkStatuses: TransactionStatus[] = [
+    "DRAFT",
+    "CONFIRMED",
+    "RECONCILED",
+  ];
+
   readonly directions: TransactionDirection[] = ["INCOME", "EXPENSE"];
 
   // ── Selection state ──────────────────────────────────────────────────────────
@@ -211,7 +229,7 @@ export class TransactionListComponent implements OnInit {
   }
 
   navigateToDetail(tx: FinancialTransactionSummary): void {
-    if (this.someSelected) return; // don't navigate when in selection mode
+    if (this.someSelected) return;
     this.router.navigate(["/transactions", tx.id]);
   }
 

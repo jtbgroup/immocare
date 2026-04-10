@@ -20,7 +20,7 @@ git clone <your-repo>
 cd immocare
 
 # Start all services (PostgreSQL + Backend + Frontend)
-docker-compose up -d
+docker compose up -d
 
 # Or use make (if available)
 make up
@@ -35,7 +35,7 @@ make up
 ### Stop Everything
 
 ```bash
-docker-compose down
+docker compose down
 
 # Or
 make down
@@ -57,7 +57,7 @@ make down
 
 ```bash
 # Start with automatic code reload
-docker-compose -f docker-compose.dev.yml up
+docker compose -f docker compose.dev.yml up
 
 # Or
 make dev
@@ -98,7 +98,7 @@ Extensions are auto-suggested when you open the project.
 
 1. **Start development mode**:
    ```bash
-   docker-compose -f docker-compose.dev.yml up -d
+   docker compose -f docker compose.dev.yml up -d
    ```
 
 2. **Start debugging**:
@@ -131,28 +131,28 @@ make health        # Check service health
 
 ```bash
 # Production mode
-docker-compose up -d                    # Start
-docker-compose down                     # Stop
-docker-compose logs -f                  # View logs
-docker-compose restart                  # Restart
-docker-compose up -d --build            # Rebuild
+docker compose up -d                    # Start
+docker compose down                     # Stop
+docker compose logs -f                  # View logs
+docker compose restart                  # Restart
+docker compose up -d --build            # Rebuild
 
 # Development mode
-docker-compose -f docker-compose.dev.yml up    # Start dev
-docker-compose -f docker-compose.dev.yml down  # Stop dev
+docker compose -f docker compose.dev.yml up    # Start dev
+docker compose -f docker compose.dev.yml down  # Stop dev
 ```
 
 ### Individual Services
 
 ```bash
 # Restart just one service
-docker-compose restart backend
+docker compose restart backend
 
 # Rebuild just one service
-docker-compose up -d --build frontend
+docker compose up -d --build frontend
 
 # View logs of one service
-docker-compose logs -f backend
+docker compose logs -f backend
 ```
 
 ---
@@ -163,18 +163,18 @@ docker-compose logs -f backend
 
 ```bash
 # All services
-docker-compose logs -f
+docker compose logs -f
 
 # Specific service
-docker-compose logs -f backend
-docker-compose logs -f frontend
-docker-compose logs -f postgres
+docker compose logs -f backend
+docker compose logs -f frontend
+docker compose logs -f postgres
 ```
 
 ### Check Status
 
 ```bash
-docker-compose ps
+docker compose ps
 
 # Or with make
 make ps
@@ -256,35 +256,35 @@ Email:    admin@immocare.com
 lsof -i :8080
 kill -9 <PID>
 
-# Or change port in docker-compose.yml
+# Or change port in docker compose.yml
 ```
 
 ### Container won't start
 
 ```bash
 # View detailed logs
-docker-compose logs backend
+docker compose logs backend
 
 # Rebuild image
-docker-compose up -d --build backend
+docker compose up -d --build backend
 ```
 
 ### Database connection issues
 
 ```bash
 # Check postgres is healthy
-docker-compose ps
+docker compose ps
 
 # Restart database
-docker-compose restart postgres
+docker compose restart postgres
 ```
 
 ### Clear everything and start fresh
 
 ```bash
 # ⚠️ This will delete all data
-docker-compose down -v
-docker-compose up -d
+docker compose down -v
+docker compose up -d
 
 # Or
 make clean
@@ -309,8 +309,8 @@ immocare/
 │   ├── Dockerfile.dev          # Development image (ng serve)
 │   └── package.json
 │
-├── docker-compose.yml          # Production orchestration
-├── docker-compose.dev.yml      # Development orchestration
+├── docker compose.yml          # Production orchestration
+├── docker compose.dev.yml      # Development orchestration
 ├── Makefile                    # Simplified commands
 │
 ├── .vscode/                    # VS Code configuration
@@ -340,21 +340,21 @@ immocare/
 ### 1. Full Stack Docker (Recommended for beginners)
 
 ```bash
-docker-compose -f docker-compose.dev.yml up
+docker compose -f docker compose.dev.yml up
 # Edit code → automatically reloaded!
 ```
 
 ### 2. Frontend only in Docker
 
 ```bash
-docker-compose up -d postgres backend
+docker compose up -d postgres backend
 cd frontend && npm start
 ```
 
 ### 3. Backend only in Docker
 
 ```bash
-docker-compose up -d postgres frontend
+docker compose up -d postgres frontend
 cd backend && mvn spring-boot:run
 ```
 

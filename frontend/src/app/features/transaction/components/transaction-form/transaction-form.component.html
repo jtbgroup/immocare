@@ -192,7 +192,9 @@
           [buildingId]="form.get('buildingId')?.value"
           [unitId]="form.get('housingUnitId')?.value"
           [links]="assetLinks"
+          [transactionAmount]="form.get('amount')?.value"
           (linksChanged)="assetLinks = $event"
+          (subcategoryPreFill)="onAssetSubcategoryPreFill($event)"
         />
       </div>
     </div>

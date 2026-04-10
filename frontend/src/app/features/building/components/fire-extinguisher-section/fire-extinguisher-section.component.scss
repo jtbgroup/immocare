@@ -98,6 +98,31 @@
   font-size: 0.875rem;
 }
 
+// ─── Transaction count badge ──────────────────────────────────────────────────
+
+.transaction-count-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  margin: 0 1rem 0.65rem;
+  padding: 0.2em 0.65em;
+  background: #fff8e1;
+  border: 1px solid #ffe082;
+  border-radius: 20px;
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: #e65100;
+  cursor: pointer;
+  transition:
+    background 0.15s,
+    border-color 0.15s;
+
+  &:hover {
+    background: #fff3cd;
+    border-color: #ffca28;
+  }
+}
+
 // ── Footer: revision toggle ───────────────────────────────────────────────────
 
 .ext-card__footer {

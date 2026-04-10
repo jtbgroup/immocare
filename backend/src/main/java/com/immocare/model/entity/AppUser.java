@@ -1,7 +1,6 @@
 package com.immocare.model.entity;
 
 import java.io.Serial;
-import java.io.Serializable;
 import java.time.LocalDateTime;
 import java.util.Collection;
 import java.util.List;
@@ -26,7 +25,7 @@ import jakarta.persistence.Table;
  */
 @Entity
 @Table(name = "app_user")
-public class AppUser implements UserDetails, Serializable {
+public class AppUser implements UserDetails {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

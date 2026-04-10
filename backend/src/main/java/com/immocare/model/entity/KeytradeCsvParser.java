@@ -19,16 +19,16 @@ import com.immocare.exception.ParseException;
  * 2026).
  *
  * Expected columns (semicolon-separated, UTF-8 BOM, 1 header row):
- * Extrait ; Date ; Date valeur ; IBAN ; Description ; Montant ; Devise
+ * Extract ; Date ; Value Date ; IBAN ; Description ; Amount ; Currency
  *
  * Column mapping:
- * Extrait → externalReference (e.g. "2023/0012/0096" — unique Keytrade ref,
+ * Extract → externalReference (e.g. "2023/0012/0096" — unique Keytrade ref,
  * used for dedup)
  * Date → transactionDate (dd/MM/yyyy)
- * Date valeur → valueDate (dd/MM/yyyy — may differ from transactionDate)
+ * Value Date → valueDate (dd/MM/yyyy — may differ from transactionDate)
  * IBAN → counterpartyAccount ("-" → null)
  * Description → description (free text, may contain counterparty name)
- * Montant → amount (abs) + direction (positive → INCOME, negative → EXPENSE)
+ * Amount → amount (abs) + direction (positive → INCOME, negative → EXPENSE)
  * Devise → ignored (always EUR in practice)
  *
  * Direction is always determined from the sign of Montant — never null.
@@ -39,16 +39,15 @@ public class KeytradeCsvParser implements TransactionParser {
     public static final String CODE = "keytrade-csv-20260102";
 
     private static final DateTimeFormatter DATE_FMT = DateTimeFormatter.ofPattern("dd/MM/yyyy");
-    private static final String DELIMITER = ";";
 
     // Column indices
-    private static final int COL_EXTRAIT = 0;
+    private static final int COL_EXTRACT = 0;
     private static final int COL_DATE = 1;
-    private static final int COL_DATE_VALEUR = 2;
+    private static final int COL_VALUE_DATE = 2;
     private static final int COL_IBAN = 3;
     private static final int COL_DESCRIPTION = 4;
-    private static final int COL_MONTANT = 5;
-    // COL_DEVISE = 6 — ignored
+    private static final int COL_AMOUNT = 5;
+    // COL_CURRENCY = 6 — ignored
 
     @Override
     public String getCode() {
@@ -57,8 +56,8 @@ public class KeytradeCsvParser implements TransactionParser {
 
     @Override
     public String getDescription() {
-        return "Keytrade CSV — colonnes: Extrait;Date;Date valeur;IBAN;Description;Montant;Devise "
-                + "(montant signé: positif=INCOME, négatif=EXPENSE, séparateur \";\", encodage UTF-8 BOM)";
+        return "Keytrade CSV — columns: Extract;Date;Value Date;IBAN;Description;Amount;Currency "
+                + "(signed amount: positive=INCOME, negative=EXPENSE, separator \";\", encoding UTF-8 BOM)";
     }
 
     @Override
@@ -117,12 +116,12 @@ public class KeytradeCsvParser implements TransactionParser {
             throw new ParseException("Expected at least 6 columns, got " + cols.length);
         }
 
-        String extrait = clean(cols[COL_EXTRAIT]);
+        String extrait = clean(cols[COL_EXTRACT]);
         String rawDate = clean(cols[COL_DATE]);
-        String rawValeur = clean(cols[COL_DATE_VALEUR]);
+        String rawValeur = clean(cols[COL_VALUE_DATE]);
         String rawIban = clean(cols[COL_IBAN]);
         String description = clean(cols[COL_DESCRIPTION]);
-        String rawMontant = clean(cols[COL_MONTANT]);
+        String rawMontant = clean(cols[COL_AMOUNT]);
 
         // Parse transaction date
         LocalDate transactionDate;

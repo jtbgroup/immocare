@@ -256,6 +256,13 @@ export class TransactionFormComponent implements OnInit {
     });
   }
 
+  onAssetSubcategoryPreFill(subcategoryId: number): void {
+    // Ne pré-remplit que si aucune subcategory n'est déjà saisie
+    if (!this.form.get("subcategoryId")?.value) {
+      this.form.patchValue({ subcategoryId }, { emitEvent: false });
+    }
+  }
+
   onSubmit(): void {
     if (this.form.invalid) {
       this.form.markAllAsTouched();

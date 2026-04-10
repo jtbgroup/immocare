@@ -1,5 +1,9 @@
 export type TransactionDirection = "INCOME" | "EXPENSE";
-export type TransactionStatus = "DRAFT" | "CONFIRMED" | "RECONCILED";
+export type TransactionStatus =
+  | "DRAFT"
+  | "CONFIRMED"
+  | "RECONCILED"
+  | "CANCELLED";
 export type TransactionSource = "MANUAL" | "IMPORT";
 export type AssetType = "BOILER" | "FIRE_EXTINGUISHER" | "METER";
 export type SubcategoryDirection = "INCOME" | "EXPENSE" | "BOTH";
@@ -54,6 +58,18 @@ export interface TransactionAssetLink {
   assetType: AssetType;
   assetId: number;
   assetLabel?: string;
+  unitNumber?: string;
+  buildingName?: string;
+  buildingId?: number;
+  housingUnitId?: number;
+  amount?: number;
+  notes?: string;
+}
+
+export interface SaveAssetLinkRequest {
+  assetType: AssetType;
+  assetId: number;
+  amount?: number;
   notes?: string;
 }
 
@@ -72,6 +88,7 @@ export interface FinancialTransactionSummary {
   buildingName?: string;
   unitNumber?: string;
   leaseId?: number;
+  leaseReference?: string;
   suggestedLeaseId?: number;
   buildingId?: number;
   housingUnitId?: number;
@@ -85,7 +102,6 @@ export interface FinancialTransaction extends FinancialTransactionSummary {
   bankAccountId?: number;
   subcategoryId?: number;
   categoryId?: number;
-  leaseId?: number;
   suggestedLeaseId?: number;
   housingUnitId?: number;
   buildingId?: number;
@@ -285,7 +301,7 @@ export interface CreateTransactionRequest {
   leaseId?: number;
   housingUnitId?: number;
   buildingId?: number;
-  assetLinks?: TransactionAssetLink[];
+  assetLinks?: SaveAssetLinkRequest[];
 }
 
 export interface ConfirmTransactionRequest {
@@ -326,6 +342,7 @@ export const STATUS_LABELS: Record<TransactionStatus, string> = {
   DRAFT: "Draft",
   CONFIRMED: "Confirmed",
   RECONCILED: "Reconciled",
+  CANCELLED: "Cancelled",
 };
 
 export const BANK_ACCOUNT_TYPE_LABELS: Record<BankAccountType, string> = {
