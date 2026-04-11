@@ -2,265 +2,294 @@
   <!-- Section header -->
   <div class="section-header">
     <h3>🧯 Fire Extinguishers</h3>
-    <button
-      class="btn btn-sm btn-primary"
-      *ngIf="!showForm"
-      (click)="openAddForm()"
-    >
-      + Add Fire Extinguisher
-    </button>
+    @if (!showForm) {
+      <button class="btn btn-sm btn-primary" (click)="openAddForm()">
+        + Add Fire Extinguisher
+      </button>
+    }
   </div>
 
-  <div *ngIf="loading" class="loading-placeholder">Loading…</div>
-  <div *ngIf="error" class="error-banner">{{ error }}</div>
+  @if (loading) {
+    <div class="loading-placeholder">Loading…</div>
+  }
+  @if (error) {
+    <div class="error-banner">{{ error }}</div>
+  }
 
-  <div
-    class="no-data"
-    *ngIf="!loading && !error && extinguishers.length === 0 && !showForm"
-  >
-    No fire extinguishers registered.
-  </div>
+  @if (!loading && !error && extinguishers.length === 0 && !showForm) {
+    <div class="no-data">No fire extinguishers registered.</div>
+  }
 
   <!-- Extinguisher list -->
-  <div class="ext-list" *ngIf="!loading && extinguishers.length > 0">
-    <div class="ext-card" *ngFor="let ext of extinguishers">
-      <!-- Card header -->
-      <div class="ext-card__header">
-        <div class="ext-card__identity">
-          <span class="ext-name">{{ ext.identificationNumber }}</span>
-          <span class="ext-unit" *ngIf="ext.unitNumber"
-            >· Unit {{ ext.unitNumber }}</span
-          >
-        </div>
-        <div class="ext-card__actions">
-          <button
-            class="btn btn-sm btn-secondary"
-            (click)="openEditForm(ext)"
-            *ngIf="deleteConfirmId !== ext.id"
-          >
-            Edit
-          </button>
-          <button
-            class="btn btn-sm btn-danger"
-            (click)="confirmDelete(ext.id)"
-            *ngIf="deleteConfirmId !== ext.id"
-          >
-            Delete
-          </button>
-        </div>
-      </div>
-
-      <!-- Card body -->
-      <div class="ext-card__body">
-        <p class="ext-notes" *ngIf="ext.notes">{{ ext.notes }}</p>
-        <div class="ext-meta">
-          <span>{{ ext.revisions.length }} revision(s)</span>
-          <span *ngIf="latestRevisionDate(ext)">
-            · Last inspected: {{ latestRevisionDate(ext) | appDate }}
-          </span>
-          <span class="text-muted" *ngIf="!latestRevisionDate(ext)">
-            · Never inspected
-          </span>
-        </div>
-      </div>
-
-      <span
-        class="transaction-count-badge"
-        *ngIf="extinguisherTransactionCounts[ext.id] > 0"
-        (click)="navigateToExtinguisherTransactions(ext.id)"
-        title="View related transactions"
-      >
-        💶 {{ extinguisherTransactionCounts[ext.id] }} expense(s)
-      </span>
-
-      <!-- Delete confirmation -->
-      <div class="delete-confirm" *ngIf="deleteConfirmId === ext.id">
-        <span>Delete this extinguisher and all its revisions?</span>
-        <button class="btn btn-xs btn-danger" (click)="doDelete()">
-          Yes, delete
-        </button>
-        <button class="btn btn-xs btn-secondary" (click)="cancelDelete()">
-          Cancel
-        </button>
-      </div>
-
-      <!-- Revision panel toggle -->
-      <div class="ext-card__footer">
-        <button class="btn-link" (click)="toggleRevisionPanel(ext.id)">
-          {{
-            revisionPanelOpen[ext.id]
-              ? "Hide revisions"
-              : "View revisions (" + ext.revisions.length + ")"
-          }}
-        </button>
-      </div>
-
-      <!-- Revision panel -->
-      <div class="revision-panel" *ngIf="revisionPanelOpen[ext.id]">
-        <!-- Add revision inline form -->
-        <div class="service-form-panel" *ngIf="revisionFormOpenId === ext.id">
-          <h5>New Revision Record</h5>
-          <form [formGroup]="revisionForm">
-            <div class="form-row">
-              <label>Revision date <span class="required">*</span></label>
-              <input type="date" formControlName="revisionDate" [max]="today" />
-              <span
-                class="field-error"
-                *ngIf="
-                  revisionForm.get('revisionDate')?.invalid &&
-                  revisionForm.get('revisionDate')?.touched
-                "
-              >
-                Revision date is required and cannot be in the future.
-              </span>
+  @if (!loading && extinguishers.length > 0) {
+    <div class="ext-list">
+      @for (ext of extinguishers; track ext.id) {
+        <div class="ext-card">
+          <!-- Card header -->
+          <div class="ext-card__header">
+            <div class="ext-card__identity">
+              <span class="ext-name">{{ ext.identificationNumber }}</span>
+              @if (ext.unitNumber) {
+                <span class="ext-unit">· Unit {{ ext.unitNumber }}</span>
+              }
             </div>
-            <div class="form-row">
-              <label>Notes</label>
-              <textarea
-                formControlName="notes"
-                rows="2"
-                maxlength="2000"
-              ></textarea>
+            <div class="ext-card__actions">
+              @if (deleteConfirmId !== ext.id) {
+                <button
+                  class="btn btn-sm btn-secondary"
+                  (click)="openEditForm(ext)"
+                >
+                  Edit
+                </button>
+              }
+              @if (deleteConfirmId !== ext.id) {
+                <button
+                  class="btn btn-sm btn-danger"
+                  (click)="confirmDelete(ext.id)"
+                >
+                  Delete
+                </button>
+              }
             </div>
-            <div class="error-banner" *ngIf="revisionFormError">
-              {{ revisionFormError }}
+          </div>
+
+          <!-- Card body -->
+          <div class="ext-card__body">
+            @if (ext.notes) {
+              <p class="ext-notes">{{ ext.notes }}</p>
+            }
+            <div class="ext-meta">
+              <span>{{ ext.revisions.length }} revision(s)</span>
+              @if (latestRevisionDate(ext)) {
+                <span>
+                  · Last inspected: {{ latestRevisionDate(ext) | appDate }}
+                </span>
+              } @else {
+                <span class="text-muted">· Never inspected</span>
+              }
             </div>
-            <div class="form-actions">
-              <button
-                class="btn btn-sm btn-primary"
-                (click)="saveRevision(ext.id)"
-                [disabled]="savingRevision"
-              >
-                {{ savingRevision ? "Saving…" : "Save" }}
+          </div>
+
+          @if (extinguisherTransactionCounts[ext.id] > 0) {
+            <span
+              class="transaction-count-badge"
+              (click)="navigateToExtinguisherTransactions(ext.id)"
+              title="View related transactions"
+            >
+              💶 {{ extinguisherTransactionCounts[ext.id] }} expense(s)
+            </span>
+          }
+
+          <!-- Delete confirmation -->
+          @if (deleteConfirmId === ext.id) {
+            <div class="delete-confirm">
+              <span>Delete this extinguisher and all its revisions?</span>
+              <button class="btn btn-xs btn-danger" (click)="doDelete()">
+                Yes, delete
               </button>
-              <button
-                class="btn btn-sm btn-secondary"
-                (click)="cancelRevisionForm()"
-                [disabled]="savingRevision"
-              >
+              <button class="btn btn-xs btn-secondary" (click)="cancelDelete()">
                 Cancel
               </button>
             </div>
-          </form>
-        </div>
+          }
 
-        <!-- Revision history header -->
-        <div class="history-header">
-          <h4>Revision History</h4>
-          <button
-            class="btn btn-sm btn-primary"
-            (click)="openRevisionForm(ext.id)"
-            *ngIf="revisionFormOpenId !== ext.id"
-          >
-            + Add revision
-          </button>
-        </div>
+          <!-- Revision panel toggle -->
+          <div class="ext-card__footer">
+            <button class="btn-link" (click)="toggleRevisionPanel(ext.id)">
+              {{
+                revisionPanelOpen[ext.id]
+                  ? "Hide revisions"
+                  : "View revisions (" + ext.revisions.length + ")"
+              }}
+            </button>
+          </div>
 
-        <div *ngIf="ext.revisions.length === 0" class="no-data">
-          No revision recorded yet.
-        </div>
+          <!-- Revision panel -->
+          @if (revisionPanelOpen[ext.id]) {
+            <div class="revision-panel">
+              <!-- Add revision inline form -->
+              @if (revisionFormOpenId === ext.id) {
+                <div class="service-form-panel">
+                  <h5>New Revision Record</h5>
+                  <form [formGroup]="revisionForm">
+                    <div class="form-row">
+                      <label
+                        >Revision date <span class="required">*</span></label
+                      >
+                      <input
+                        type="date"
+                        formControlName="revisionDate"
+                        [max]="today"
+                      />
+                      @if (
+                        revisionForm.get("revisionDate")?.invalid &&
+                        revisionForm.get("revisionDate")?.touched
+                      ) {
+                        <span class="field-error">
+                          Revision date is required and cannot be in the future.
+                        </span>
+                      }
+                    </div>
+                    <div class="form-row">
+                      <label>Notes</label>
+                      <textarea
+                        formControlName="notes"
+                        rows="2"
+                        maxlength="2000"
+                      ></textarea>
+                    </div>
+                    @if (revisionFormError) {
+                      <div class="error-banner">{{ revisionFormError }}</div>
+                    }
+                    <div class="form-actions">
+                      <button
+                        class="btn btn-sm btn-primary"
+                        (click)="saveRevision(ext.id)"
+                        [disabled]="savingRevision"
+                      >
+                        {{ savingRevision ? "Saving…" : "Save" }}
+                      </button>
+                      <button
+                        class="btn btn-sm btn-secondary"
+                        (click)="cancelRevisionForm()"
+                        [disabled]="savingRevision"
+                      >
+                        Cancel
+                      </button>
+                    </div>
+                  </form>
+                </div>
+              }
 
-        <table class="history-table" *ngIf="ext.revisions.length > 0">
-          <thead>
-            <tr>
-              <th>Date</th>
-              <th>Notes</th>
-              <th></th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr *ngFor="let rev of ext.revisions">
-              <td>{{ rev.revisionDate | appDate }}</td>
-              <td>{{ rev.notes || "—" }}</td>
-              <td>
-                <ng-container
-                  *ngIf="deleteRevisionConfirmId === rev.id; else revDeleteBtn"
-                >
-                  <span class="delete-inline-confirm">
-                    Delete?
-                    <button
-                      class="btn btn-xs btn-danger"
-                      (click)="doDeleteRevision()"
-                    >
-                      Yes
-                    </button>
-                    <button
-                      class="btn btn-xs btn-secondary"
-                      (click)="cancelDeleteRevision()"
-                    >
-                      No
-                    </button>
-                  </span>
-                </ng-container>
-                <ng-template #revDeleteBtn>
+              <!-- Revision history header -->
+              <div class="history-header">
+                <h4>Revision History</h4>
+                @if (revisionFormOpenId !== ext.id) {
                   <button
-                    class="btn btn-xs btn-danger"
-                    (click)="confirmDeleteRevision(ext.id, rev.id)"
+                    class="btn btn-sm btn-primary"
+                    (click)="openRevisionForm(ext.id)"
                   >
-                    Delete
+                    + Add revision
                   </button>
-                </ng-template>
-              </td>
-            </tr>
-          </tbody>
-        </table>
-      </div>
+                }
+              </div>
+
+              @if (ext.revisions.length === 0) {
+                <div class="no-data">No revision recorded yet.</div>
+              }
+
+              @if (ext.revisions.length > 0) {
+                <table class="history-table">
+                  <thead>
+                    <tr>
+                      <th>Date</th>
+                      <th>Notes</th>
+                      <th></th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    @for (rev of ext.revisions; track rev.id) {
+                      <tr>
+                        <td>{{ rev.revisionDate | appDate }}</td>
+                        <td>{{ rev.notes || "—" }}</td>
+                        <td>
+                          @if (deleteRevisionConfirmId === rev.id) {
+                            <span class="delete-inline-confirm">
+                              Delete?
+                              <button
+                                class="btn btn-xs btn-danger"
+                                (click)="doDeleteRevision()"
+                              >
+                                Yes
+                              </button>
+                              <button
+                                class="btn btn-xs btn-secondary"
+                                (click)="cancelDeleteRevision()"
+                              >
+                                No
+                              </button>
+                            </span>
+                          } @else {
+                            <button
+                              class="btn btn-xs btn-danger"
+                              (click)="confirmDeleteRevision(ext.id, rev.id)"
+                            >
+                              Delete
+                            </button>
+                          }
+                        </td>
+                      </tr>
+                    }
+                  </tbody>
+                </table>
+              }
+            </div>
+          }
+        </div>
+      }
     </div>
-  </div>
+  }
 
   <!-- Add / Edit extinguisher form -->
-  <div class="ext-form-panel" *ngIf="showForm">
-    <h4>
-      {{ editingId ? "Edit Fire Extinguisher" : "Add Fire Extinguisher" }}
-    </h4>
-    <form [formGroup]="form">
-      <div class="form-row">
-        <label>Identification number <span class="required">*</span></label>
-        <input
-          type="text"
-          formControlName="identificationNumber"
-          maxlength="50"
-        />
-        <span
-          class="field-error"
-          *ngIf="
-            form.get('identificationNumber')?.invalid &&
-            form.get('identificationNumber')?.touched
-          "
-        >
-          Identification number is required (max 50 characters).
-        </span>
-      </div>
-      <div class="form-row">
-        <label>Unit <span class="hint">(optional)</span></label>
-        <select formControlName="unitId">
-          <option [ngValue]="null">— Not assigned —</option>
-          <option *ngFor="let u of buildingUnits" [ngValue]="u.id">
-            Unit {{ u.unitNumber }}
-          </option>
-        </select>
-      </div>
-      <div class="form-row">
-        <label>Notes <span class="hint">(optional)</span></label>
-        <textarea formControlName="notes" rows="2" maxlength="2000"></textarea>
-      </div>
-      <div class="error-banner" *ngIf="saveError">{{ saveError }}</div>
-      <div class="form-actions">
-        <button
-          class="btn btn-sm btn-primary"
-          (click)="saveForm()"
-          [disabled]="saving"
-        >
-          {{ saving ? "Saving…" : "Save" }}
-        </button>
-        <button
-          class="btn btn-sm btn-secondary"
-          (click)="cancelForm()"
-          [disabled]="saving"
-        >
-          Cancel
-        </button>
-      </div>
-    </form>
-  </div>
+  @if (showForm) {
+    <div class="ext-form-panel">
+      <h4>
+        {{ editingId ? "Edit Fire Extinguisher" : "Add Fire Extinguisher" }}
+      </h4>
+      <form [formGroup]="form">
+        <div class="form-row">
+          <label>Identification number <span class="required">*</span></label>
+          <input
+            type="text"
+            formControlName="identificationNumber"
+            maxlength="50"
+          />
+          @if (
+            form.get("identificationNumber")?.invalid &&
+            form.get("identificationNumber")?.touched
+          ) {
+            <span class="field-error">
+              Identification number is required (max 50 characters).
+            </span>
+          }
+        </div>
+        <div class="form-row">
+          <label>Unit <span class="hint">(optional)</span></label>
+          <select formControlName="unitId">
+            <option [ngValue]="null">— Not assigned —</option>
+            @for (u of buildingUnits; track u.id) {
+              <option [ngValue]="u.id">Unit {{ u.unitNumber }}</option>
+            }
+          </select>
+        </div>
+        <div class="form-row">
+          <label>Notes <span class="hint">(optional)</span></label>
+          <textarea
+            formControlName="notes"
+            rows="2"
+            maxlength="2000"
+          ></textarea>
+        </div>
+        @if (saveError) {
+          <div class="error-banner">{{ saveError }}</div>
+        }
+        <div class="form-actions">
+          <button
+            class="btn btn-sm btn-primary"
+            (click)="saveForm()"
+            [disabled]="saving"
+          >
+            {{ saving ? "Saving…" : "Save" }}
+          </button>
+          <button
+            class="btn btn-sm btn-secondary"
+            (click)="cancelForm()"
+            [disabled]="saving"
+          >
+            Cancel
+          </button>
+        </div>
+      </form>
+    </div>
+  }
 </section>

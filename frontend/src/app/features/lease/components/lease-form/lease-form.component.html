@@ -6,274 +6,296 @@
     </div>
   </div>
 
-  <div *ngIf="isLoading" class="loading">Loading…</div>
-  <div *ngIf="errorMessage" class="alert alert-error">{{ errorMessage }}</div>
+  @if (isLoading) {
+    <div class="loading">Loading…</div>
+  }
+  @if (errorMessage) {
+    <div class="alert alert-error">{{ errorMessage }}</div>
+  }
 
-  <form *ngIf="!isLoading" [formGroup]="form">
-    <div class="form-card">
-      <!-- 1 — General -->
-      <div class="form-section-title">1 — General</div>
-      <div class="form-row form-row-3">
-        <div class="form-group">
-          <label>Signature Date <span class="required">*</span></label>
-          <input
-            type="date"
-            formControlName="signatureDate"
-            [class.error]="isInvalid('signatureDate')"
-          />
+  @if (!isLoading) {
+    <form [formGroup]="form">
+      <div class="form-card">
+        <!-- 1 — General -->
+        <div class="form-section-title">1 — General</div>
+        <div class="form-row form-row-3">
+          <div class="form-group">
+            <label>Signature Date <span class="required">*</span></label>
+            <input
+              type="date"
+              formControlName="signatureDate"
+              [class.error]="isInvalid('signatureDate')"
+            />
+          </div>
+          <div class="form-group">
+            <label>Start Date <span class="required">*</span></label>
+            <input
+              type="date"
+              formControlName="startDate"
+              [class.error]="isInvalid('startDate')"
+            />
+          </div>
+          <div class="form-group">
+            <label>End Date <span class="required">*</span></label>
+            <input
+              type="date"
+              formControlName="endDate"
+              [class.error]="isInvalid('endDate')"
+            />
+          </div>
         </div>
-        <div class="form-group">
-          <label>Start Date <span class="required">*</span></label>
-          <input
-            type="date"
-            formControlName="startDate"
-            [class.error]="isInvalid('startDate')"
-          />
+        <div class="form-row form-row-3">
+          <div class="form-group">
+            <label>Lease Type <span class="required">*</span></label>
+            <select formControlName="leaseType">
+              @for (t of LEASE_TYPES; track t) {
+                <option [value]="t">
+                  {{ LEASE_TYPE_LABELS[t] }}
+                </option>
+              }
+            </select>
+          </div>
+          <div class="form-group">
+            <label>Duration (months) <span class="required">*</span></label>
+            <input
+              type="number"
+              formControlName="durationMonths"
+              min="1"
+              [class.error]="isInvalid('durationMonths')"
+            />
+          </div>
+          <div class="form-group">
+            <label
+              >Notice Period (months) <span class="required">*</span></label
+            >
+            <input type="number" formControlName="noticePeriodMonths" min="1" />
+          </div>
         </div>
-        <div class="form-group">
-          <label>End Date <span class="required">*</span></label>
-          <input
-            type="date"
-            formControlName="endDate"
-            [class.error]="isInvalid('endDate')"
-          />
-        </div>
-      </div>
-      <div class="form-row form-row-3">
-        <div class="form-group">
-          <label>Lease Type <span class="required">*</span></label>
-          <select formControlName="leaseType">
-            <option *ngFor="let t of LEASE_TYPES" [value]="t">
-              {{ LEASE_TYPE_LABELS[t] }}
-            </option>
-          </select>
-        </div>
-        <div class="form-group">
-          <label>Duration (months) <span class="required">*</span></label>
-          <input
-            type="number"
-            formControlName="durationMonths"
-            min="1"
-            [class.error]="isInvalid('durationMonths')"
-          />
-        </div>
-        <div class="form-group">
-          <label>Notice Period (months) <span class="required">*</span></label>
-          <input type="number" formControlName="noticePeriodMonths" min="1" />
-        </div>
-      </div>
 
-      <hr class="form-section-divider" />
-
-      <!-- 2 — Financial -->
-      <div class="form-section-title">2 — Financial</div>
-      <div class="form-row form-row-3">
-        <div class="form-group">
-          <label>Monthly Rent (€) <span class="required">*</span></label>
-          <input
-            type="number"
-            formControlName="monthlyRent"
-            min="0.01"
-            step="0.01"
-            [class.error]="isInvalid('monthlyRent')"
-          />
-        </div>
-        <div class="form-group">
-          <label>Monthly Charges (€)</label>
-          <input
-            type="number"
-            formControlName="monthlyCharges"
-            min="0"
-            step="0.01"
-          />
-        </div>
-        <div class="form-group">
-          <label>Charges Type</label>
-          <select formControlName="chargesType">
-            <option value="FORFAIT">Forfait</option>
-            <option value="PROVISION">Provision</option>
-          </select>
-        </div>
-      </div>
-      <div class="form-group">
-        <label>Charges Description</label>
-        <input type="text" formControlName="chargesDescription" />
-      </div>
-
-      <hr class="form-section-divider" />
-
-      <!-- 3 — Registration -->
-      <div class="form-section-title">3 — Registration</div>
-
-      <div class="form-subsection-label">Lease deed</div>
-      <div class="form-row">
-        <div class="form-group">
-          <label>SPF Finances reference</label>
-          <input type="text" formControlName="registrationSpf" />
-        </div>
-        <div class="form-group">
-          <label
-            >Region reference <span class="field-hint">(Brussels)</span></label
-          >
-          <input type="text" formControlName="registrationRegion" />
-        </div>
-      </div>
-
-      <div class="form-subsection-label">Inventory (état des lieux)</div>
-      <div class="form-row">
-        <div class="form-group">
-          <label>SPF Finances reference</label>
-          <input type="text" formControlName="registrationInventorySpf" />
-        </div>
-        <div class="form-group">
-          <label
-            >Region reference <span class="field-hint">(Brussels)</span></label
-          >
-          <input type="text" formControlName="registrationInventoryRegion" />
-        </div>
-      </div>
-
-      <hr class="form-section-divider" />
-
-      <!-- 4 — Guarantee / Deposit -->
-      <div class="form-section-title">4 — Guarantee / Deposit</div>
-      <div class="form-row form-row-3">
-        <div class="form-group">
-          <label>Amount (€)</label>
-          <input
-            type="number"
-            formControlName="depositAmount"
-            min="0"
-            step="0.01"
-          />
-        </div>
-        <div class="form-group">
-          <label>Type</label>
-          <select formControlName="depositType">
-            <option [value]="null">—</option>
-            <option value="BLOCKED_ACCOUNT">Blocked Account</option>
-            <option value="BANK_GUARANTEE">Bank Guarantee</option>
-            <option value="CPAS">CPAS</option>
-            <option value="INSURANCE">Insurance</option>
-            <option value="HAND_TO_HAND">Hand To Hand</option>
-          </select>
-        </div>
-        <div class="form-group">
-          <label>Reference</label>
-          <input type="text" formControlName="depositReference" />
-        </div>
-      </div>
-
-      <hr class="form-section-divider" />
-
-      <!-- 5 — Tenant Insurance -->
-      <div class="form-section-title">5 — Tenant Insurance</div>
-      <div class="form-check-group">
-        <input
-          type="checkbox"
-          id="insuranceCheck"
-          formControlName="tenantInsuranceConfirmed"
-        />
-        <label for="insuranceCheck">Insurance confirmed</label>
-      </div>
-      <div *ngIf="showInsuranceDetails" class="form-row">
-        <div class="form-group">
-          <label>Reference</label>
-          <input type="text" formControlName="tenantInsuranceReference" />
-        </div>
-        <div class="form-group">
-          <label>Expiry Date</label>
-          <input type="date" formControlName="tenantInsuranceExpiry" />
-        </div>
-      </div>
-
-      <!-- 6 — Tenants (create only) -->
-      <ng-container *ngIf="!isEditMode">
         <hr class="form-section-divider" />
-        <div class="form-section-title">6 — Tenants</div>
 
-        <ul *ngIf="pendingTenants.length" class="tenant-list">
-          <li *ngFor="let t of pendingTenants; let i = index">
-            <span class="tenant-name"
-              >{{ t.person.lastName }} {{ t.person.firstName }}</span
-            >
-            <select
-              class="tenant-role-select"
-              [(ngModel)]="t.role"
-              [ngModelOptions]="{ standalone: true }"
-            >
-              <option value="PRIMARY">Primary</option>
-              <option value="CO_TENANT">Co-tenant</option>
-              <option value="GUARANTOR">Guarantor</option>
-            </select>
-            <button
-              type="button"
-              class="btn btn-sm btn-danger"
-              (click)="removePendingTenant(i)"
-            >
-              ✕
-            </button>
-          </li>
-        </ul>
-
-        <div *ngIf="!showTenantPicker">
-          <button
-            type="button"
-            class="btn btn-secondary btn-sm"
-            (click)="showTenantPicker = true"
-          >
-            + Add Tenant
-          </button>
-        </div>
-
-        <div *ngIf="showTenantPicker" class="picker-panel">
-          <app-person-picker
-            label="Select Person"
-            [required]="false"
-            (personSelected)="onTenantPersonSelected($event)"
-          ></app-person-picker>
-          <div class="form-group" style="margin-top: 0.75rem">
-            <label>Role</label>
-            <select
-              [(ngModel)]="newTenantRole"
-              [ngModelOptions]="{ standalone: true }"
-            >
-              <option value="PRIMARY">Primary</option>
-              <option value="CO_TENANT">Co-tenant</option>
-              <option value="GUARANTOR">Guarantor</option>
+        <!-- 2 — Financial -->
+        <div class="form-section-title">2 — Financial</div>
+        <div class="form-row form-row-3">
+          <div class="form-group">
+            <label>Monthly Rent (€) <span class="required">*</span></label>
+            <input
+              type="number"
+              formControlName="monthlyRent"
+              min="0.01"
+              step="0.01"
+              [class.error]="isInvalid('monthlyRent')"
+            />
+          </div>
+          <div class="form-group">
+            <label>Monthly Charges (€)</label>
+            <input
+              type="number"
+              formControlName="monthlyCharges"
+              min="0"
+              step="0.01"
+            />
+          </div>
+          <div class="form-group">
+            <label>Charges Type</label>
+            <select formControlName="chargesType">
+              <option value="FORFAIT">Forfait</option>
+              <option value="PROVISION">Provision</option>
             </select>
           </div>
-          <div class="picker-actions">
-            <button
-              type="button"
-              class="btn btn-primary btn-sm"
-              [disabled]="!selectedTenantPerson"
-              (click)="confirmAddTenant()"
+        </div>
+        <div class="form-group">
+          <label>Charges Description</label>
+          <input type="text" formControlName="chargesDescription" />
+        </div>
+
+        <hr class="form-section-divider" />
+
+        <!-- 3 — Registration -->
+        <div class="form-section-title">3 — Registration</div>
+
+        <div class="form-subsection-label">Lease deed</div>
+        <div class="form-row">
+          <div class="form-group">
+            <label>SPF Finances reference</label>
+            <input type="text" formControlName="registrationSpf" />
+          </div>
+          <div class="form-group">
+            <label
+              >Region reference
+              <span class="field-hint">(Brussels)</span></label
             >
-              Add
-            </button>
-            <button
-              type="button"
-              class="btn btn-secondary btn-sm"
-              (click)="cancel()"
-            >
-              Cancel
-            </button>
+            <input type="text" formControlName="registrationRegion" />
           </div>
         </div>
-      </ng-container>
-    </div>
-    <!-- end form-card -->
 
-    <div class="form-actions">
-      <a
-        [routerLink]="isEditMode ? ['/leases', leaseId] : ['/units', unitId]"
-        class="btn btn-secondary"
-        >Cancel</a
-      >
-      <button type="button" class="btn btn-primary" (click)="save()">
-        {{ isEditMode ? "Save" : "Create" }}
-      </button>
-    </div>
-  </form>
+        <div class="form-subsection-label">Inventory (état des lieux)</div>
+        <div class="form-row">
+          <div class="form-group">
+            <label>SPF Finances reference</label>
+            <input type="text" formControlName="registrationInventorySpf" />
+          </div>
+          <div class="form-group">
+            <label
+              >Region reference
+              <span class="field-hint">(Brussels)</span></label
+            >
+            <input type="text" formControlName="registrationInventoryRegion" />
+          </div>
+        </div>
+
+        <hr class="form-section-divider" />
+
+        <!-- 4 — Guarantee / Deposit -->
+        <div class="form-section-title">4 — Guarantee / Deposit</div>
+        <div class="form-row form-row-3">
+          <div class="form-group">
+            <label>Amount (€)</label>
+            <input
+              type="number"
+              formControlName="depositAmount"
+              min="0"
+              step="0.01"
+            />
+          </div>
+          <div class="form-group">
+            <label>Type</label>
+            <select formControlName="depositType">
+              <option [value]="null">—</option>
+              <option value="BLOCKED_ACCOUNT">Blocked Account</option>
+              <option value="BANK_GUARANTEE">Bank Guarantee</option>
+              <option value="CPAS">CPAS</option>
+              <option value="INSURANCE">Insurance</option>
+              <option value="HAND_TO_HAND">Hand To Hand</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>Reference</label>
+            <input type="text" formControlName="depositReference" />
+          </div>
+        </div>
+
+        <hr class="form-section-divider" />
+
+        <!-- 5 — Tenant Insurance -->
+        <div class="form-section-title">5 — Tenant Insurance</div>
+        <div class="form-check-group">
+          <input
+            type="checkbox"
+            id="insuranceCheck"
+            formControlName="tenantInsuranceConfirmed"
+          />
+          <label for="insuranceCheck">Insurance confirmed</label>
+        </div>
+        @if (showInsuranceDetails) {
+          <div class="form-row">
+            <div class="form-group">
+              <label>Reference</label>
+              <input type="text" formControlName="tenantInsuranceReference" />
+            </div>
+            <div class="form-group">
+              <label>Expiry Date</label>
+              <input type="date" formControlName="tenantInsuranceExpiry" />
+            </div>
+          </div>
+        }
+
+        <!-- 6 — Tenants (create only) -->
+        @if (!isEditMode) {
+          <hr class="form-section-divider" />
+          <div class="form-section-title">6 — Tenants</div>
+
+          @if (pendingTenants.length) {
+            <ul class="tenant-list">
+              @for (t of pendingTenants; track t.person.id; let i = $index) {
+                <li>
+                  <span class="tenant-name"
+                    >{{ t.person.lastName }} {{ t.person.firstName }}</span
+                  >
+                  <select
+                    class="tenant-role-select"
+                    [(ngModel)]="t.role"
+                    [ngModelOptions]="{ standalone: true }"
+                  >
+                    <option value="PRIMARY">Primary</option>
+                    <option value="CO_TENANT">Co-tenant</option>
+                    <option value="GUARANTOR">Guarantor</option>
+                  </select>
+                  <button
+                    type="button"
+                    class="btn btn-sm btn-danger"
+                    (click)="removePendingTenant(i)"
+                  >
+                    ✕
+                  </button>
+                </li>
+              }
+            </ul>
+          }
+
+          @if (!showTenantPicker) {
+            <div>
+              <button
+                type="button"
+                class="btn btn-secondary btn-sm"
+                (click)="showTenantPicker = true"
+              >
+                + Add Tenant
+              </button>
+            </div>
+          }
+
+          @if (showTenantPicker) {
+            <div class="picker-panel">
+              <app-person-picker
+                label="Select Person"
+                [required]="false"
+                (personSelected)="onTenantPersonSelected($event)"
+              ></app-person-picker>
+              <div class="form-group" style="margin-top: 0.75rem">
+                <label>Role</label>
+                <select
+                  [(ngModel)]="newTenantRole"
+                  [ngModelOptions]="{ standalone: true }"
+                >
+                  <option value="PRIMARY">Primary</option>
+                  <option value="CO_TENANT">Co-tenant</option>
+                  <option value="GUARANTOR">Guarantor</option>
+                </select>
+              </div>
+              <div class="picker-actions">
+                <button
+                  type="button"
+                  class="btn btn-primary btn-sm"
+                  [disabled]="!selectedTenantPerson"
+                  (click)="confirmAddTenant()"
+                >
+                  Add
+                </button>
+                <button
+                  type="button"
+                  class="btn btn-secondary btn-sm"
+                  (click)="cancel()"
+                >
+                  Cancel
+                </button>
+              </div>
+            </div>
+          }
+        }
+      </div>
+      <!-- end form-card -->
+
+      <div class="form-actions">
+        <a
+          [routerLink]="isEditMode ? ['/leases', leaseId] : ['/units', unitId]"
+          class="btn btn-secondary"
+          >Cancel</a
+        >
+        <button type="button" class="btn btn-primary" (click)="save()">
+          {{ isEditMode ? "Save" : "Create" }}
+        </button>
+      </div>
+    </form>
+  }
 </div>

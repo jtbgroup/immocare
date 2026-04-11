@@ -25,7 +25,9 @@
       (change)="onCityFilterChange(selectedCity)"
     >
       <option value="">All Cities</option>
-      <option *ngFor="let city of cities" [value]="city">{{ city }}</option>
+      @for (city of cities; track city) {
+        <option [value]="city">{{ city }}</option>
+      }
     </select>
     <button class="btn btn-secondary" (click)="clearFilters()">
       Clear Filters
@@ -33,87 +35,95 @@
   </div>
 
   <!-- Loading -->
-  <div *ngIf="loading" class="loading">Loading buildings...</div>
+  @if (loading) {
+    <div class="loading">Loading buildings...</div>
+  }
 
   <!-- Error -->
-  <div *ngIf="error" class="alert alert-error">{{ error }}</div>
+  @if (error) {
+    <div class="alert alert-error">{{ error }}</div>
+  }
 
   <!-- Empty State -->
-  <div *ngIf="!loading && !error && buildings.length === 0" class="empty-state">
-    <p>No buildings yet</p>
-    <p class="help-text">Create your first building to get started</p>
-  </div>
+  @if (!loading && !error && buildings.length === 0) {
+    <div class="empty-state">
+      <p>No buildings yet</p>
+      <p class="help-text">Create your first building to get started</p>
+    </div>
+  }
 
   <!-- Table -->
-  <div *ngIf="!loading && !error && buildings.length > 0" class="data-table">
-    <table>
-      <thead>
-        <tr>
-          <th class="sortable" (click)="onSortChange('name')">
-            Name
-            <span class="sort-icon" [class.active]="sortField === 'name'">
-              {{ sortField | sortIcon: sortDirection : "name" }}
-            </span>
-          </th>
-          <th>Address</th>
-          <th class="sortable" (click)="onSortChange('city')">
-            City
-            <span class="sort-icon" [class.active]="sortField === 'city'">
-              {{ sortField | sortIcon: sortDirection : "city" }}
-            </span>
-          </th>
-          <th>Country</th>
-          <th>Owner</th>
-          <th>Units</th>
-          <th>Actions</th>
-        </tr>
-      </thead>
-      <tbody>
-        <tr
-          *ngFor="let building of buildings"
-          class="clickable"
-          (click)="viewBuilding(building)"
-        >
-          <td>{{ building.name }}</td>
-          <td>{{ building.streetAddress }}, {{ building.postalCode }}</td>
-          <td>{{ building.city }}</td>
-          <td>{{ building.country }}</td>
-          <td>{{ building.ownerName || "Not specified" }}</td>
-          <td>{{ building.unitCount }} units</td>
-          <td>
-            <button
-              class="btn btn-sm btn-link"
-              (click)="viewBuilding(building); $event.stopPropagation()"
-            >
-              View
-            </button>
-          </td>
-        </tr>
-      </tbody>
-    </table>
-  </div>
+  @if (!loading && !error && buildings.length > 0) {
+    <div class="data-table">
+      <table>
+        <thead>
+          <tr>
+            <th class="sortable" (click)="onSortChange('name')">
+              Name
+              <span class="sort-icon" [class.active]="sortField === 'name'">
+                {{ sortField | sortIcon: sortDirection : "name" }}
+              </span>
+            </th>
+            <th>Address</th>
+            <th class="sortable" (click)="onSortChange('city')">
+              City
+              <span class="sort-icon" [class.active]="sortField === 'city'">
+                {{ sortField | sortIcon: sortDirection : "city" }}
+              </span>
+            </th>
+            <th>Country</th>
+            <th>Owner</th>
+            <th>Units</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (building of buildings; track building.id) {
+            <tr class="clickable" (click)="viewBuilding(building)">
+              <td>{{ building.name }}</td>
+              <td>{{ building.streetAddress }}, {{ building.postalCode }}</td>
+              <td>{{ building.city }}</td>
+              <td>{{ building.country }}</td>
+              <td>{{ building.ownerName || "Not specified" }}</td>
+              <td>{{ building.unitCount }} units</td>
+              <td>
+                <button
+                  class="btn btn-sm btn-link"
+                  (click)="viewBuilding(building); $event.stopPropagation()"
+                >
+                  View
+                </button>
+              </td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+  }
 
   <!-- Pagination -->
-  <div *ngIf="totalPages > 1" class="pagination">
-    <button
-      class="btn btn-secondary"
-      (click)="previousPage()"
-      [disabled]="currentPage === 0"
-    >
-      Previous
-    </button>
-    <span class="page-info"
-      >Page {{ currentPage + 1 }} of {{ totalPages }} ({{
-        totalElements
-      }}
-      total)</span
-    >
-    <button
-      class="btn btn-secondary"
-      (click)="nextPage()"
-      [disabled]="currentPage >= totalPages - 1"
-    >
-      Next
-    </button>
-  </div>
+  @if (totalPages > 1) {
+    <div class="pagination">
+      <button
+        class="btn btn-secondary"
+        (click)="previousPage()"
+        [disabled]="currentPage === 0"
+      >
+        Previous
+      </button>
+      <span class="page-info"
+        >Page {{ currentPage + 1 }} of {{ totalPages }} ({{
+          totalElements
+        }}
+        total)</span
+      >
+      <button
+        class="btn btn-secondary"
+        (click)="nextPage()"
+        [disabled]="currentPage >= totalPages - 1"
+      >
+        Next
+      </button>
+    </div>
+  }
 </div>

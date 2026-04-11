@@ -2,15 +2,11 @@
 <div class="info-card">
   <div class="info-card-title">
     <h2>Rent History</h2>
-    <button
-      *ngIf="
-        (lease.status === 'ACTIVE' || lease.status === 'DRAFT') && !showForm
-      "
-      class="btn btn-primary btn-sm"
-      (click)="openForm()"
-    >
-      Adjust Rent
-    </button>
+    @if ((lease.status === "ACTIVE" || lease.status === "DRAFT") && !showForm) {
+      <button class="btn btn-primary btn-sm" (click)="openForm()">
+        Adjust Rent
+      </button>
+    }
   </div>
 
   <!-- Current amounts summary -->
@@ -40,118 +36,121 @@
   </div>
 
   <!-- Adjustment form -->
-  <div *ngIf="showForm" class="picker-panel">
-    <div *ngIf="formError" class="alert alert-error">{{ formError }}</div>
+  @if (showForm) {
+    <div class="picker-panel">
+      @if (formError) {
+        <div class="alert alert-error">{{ formError }}</div>
+      }
 
-    <div class="form-row form-row-3">
-      <div class="form-group">
-        <label>Field <span class="required">*</span></label>
-        <select [(ngModel)]="req.field" (ngModelChange)="onFieldChange()">
-          <option value="RENT">Rent</option>
-          <option value="CHARGES">Charges</option>
-        </select>
+      <div class="form-row form-row-3">
+        <div class="form-group">
+          <label>Field <span class="required">*</span></label>
+          <select [(ngModel)]="req.field" (ngModelChange)="onFieldChange()">
+            <option value="RENT">Rent</option>
+            <option value="CHARGES">Charges</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Current amount</label>
+          <input
+            type="text"
+            class="current-value-readonly"
+            [value]="currentValue | currency: 'EUR' : 'symbol' : '1.2-2'"
+            readonly
+            tabindex="-1"
+          />
+        </div>
+        <div class="form-group">
+          <label>New amount (€) <span class="required">*</span></label>
+          <input
+            type="number"
+            [(ngModel)]="req.newValue"
+            step="0.01"
+            min="0.01"
+          />
+        </div>
       </div>
-      <div class="form-group">
-        <label>Current amount</label>
-        <input
-          type="text"
-          class="current-value-readonly"
-          [value]="currentValue | currency: 'EUR' : 'symbol' : '1.2-2'"
-          readonly
-          tabindex="-1"
-        />
+      <div class="form-row">
+        <div class="form-group">
+          <label>Effective date <span class="required">*</span></label>
+          <input type="date" [(ngModel)]="req.effectiveDate" />
+        </div>
+        <div class="form-group">
+          <label>Reason <span class="required">*</span></label>
+          <input
+            type="text"
+            [(ngModel)]="req.reason"
+            placeholder="e.g. Annual indexation, Market adjustment…"
+          />
+        </div>
       </div>
-      <div class="form-group">
-        <label>New amount (€) <span class="required">*</span></label>
-        <input
-          type="number"
-          [(ngModel)]="req.newValue"
-          step="0.01"
-          min="0.01"
-        />
+      <div class="picker-panel-actions">
+        <button class="btn btn-secondary btn-sm" (click)="showForm = false">
+          Cancel
+        </button>
+        <button
+          class="btn btn-primary btn-sm"
+          (click)="save()"
+          [disabled]="isSaving"
+        >
+          {{ isSaving ? "Saving…" : "Save adjustment" }}
+        </button>
       </div>
     </div>
-    <div class="form-row">
-      <div class="form-group">
-        <label>Effective date <span class="required">*</span></label>
-        <input type="date" [(ngModel)]="req.effectiveDate" />
-      </div>
-      <div class="form-group">
-        <label>Reason <span class="required">*</span></label>
-        <input
-          type="text"
-          [(ngModel)]="req.reason"
-          placeholder="e.g. Annual indexation, Market adjustment…"
-        />
-      </div>
-    </div>
-    <div class="picker-panel-actions">
-      <button class="btn btn-secondary btn-sm" (click)="showForm = false">
-        Cancel
-      </button>
-      <button
-        class="btn btn-primary btn-sm"
-        (click)="save()"
-        [disabled]="isSaving"
-      >
-        {{ isSaving ? "Saving…" : "Save adjustment" }}
-      </button>
-    </div>
-  </div>
+  }
 
   <!-- History table -->
-  <div
-    *ngIf="lease.rentAdjustments && lease.rentAdjustments.length > 0"
-    class="data-table"
-  >
-    <table>
-      <thead>
-        <tr>
-          <th>Date</th>
-          <th>Field</th>
-          <th>Old</th>
-          <th>New</th>
-          <th>Δ</th>
-          <th>Reason</th>
-        </tr>
-      </thead>
-      <tbody>
-        <tr *ngFor="let adj of lease.rentAdjustments">
-          <td>{{ adj.effectiveDate | date: "dd/MM/yyyy" }}</td>
-          <td>
-            <span
-              class="field-badge"
-              [class.field-rent]="adj.field === 'RENT'"
-              [class.field-charges]="adj.field === 'CHARGES'"
-            >
-              {{ adj.field }}
-            </span>
-          </td>
-          <td>{{ adj.oldValue | currency: "EUR" : "symbol" : "1.2-2" }}</td>
-          <td>
-            <strong>{{
-              adj.newValue | currency: "EUR" : "symbol" : "1.2-2"
-            }}</strong>
-          </td>
-          <td
-            [class.delta-up]="adj.newValue > adj.oldValue"
-            [class.delta-down]="adj.newValue < adj.oldValue"
-          >
-            {{ adj.newValue > adj.oldValue ? "+" : ""
-            }}{{
-              adj.newValue - adj.oldValue | currency: "EUR" : "symbol" : "1.2-2"
-            }}
-          </td>
-          <td>{{ adj.reason }}</td>
-        </tr>
-      </tbody>
-    </table>
-  </div>
+  @if (lease.rentAdjustments && lease.rentAdjustments.length > 0) {
+    <div class="data-table">
+      <table>
+        <thead>
+          <tr>
+            <th>Date</th>
+            <th>Field</th>
+            <th>Old</th>
+            <th>New</th>
+            <th>Δ</th>
+            <th>Reason</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (adj of lease.rentAdjustments; track adj.effectiveDate) {
+            <tr>
+              <td>{{ adj.effectiveDate | date: "dd/MM/yyyy" }}</td>
+              <td>
+                <span
+                  class="field-badge"
+                  [class.field-rent]="adj.field === 'RENT'"
+                  [class.field-charges]="adj.field === 'CHARGES'"
+                >
+                  {{ adj.field }}
+                </span>
+              </td>
+              <td>{{ adj.oldValue | currency: "EUR" : "symbol" : "1.2-2" }}</td>
+              <td>
+                <strong>{{
+                  adj.newValue | currency: "EUR" : "symbol" : "1.2-2"
+                }}</strong>
+              </td>
+              <td
+                [class.delta-up]="adj.newValue > adj.oldValue"
+                [class.delta-down]="adj.newValue < adj.oldValue"
+              >
+                {{ adj.newValue > adj.oldValue ? "+" : ""
+                }}{{
+                  adj.newValue - adj.oldValue
+                    | currency: "EUR" : "symbol" : "1.2-2"
+                }}
+              </td>
+              <td>{{ adj.reason }}</td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+  }
 
-  <p
-    *ngIf="!lease.rentAdjustments || lease.rentAdjustments.length === 0"
-    class="empty-message"
-  >
-    No adjustments recorded yet.
-  </p>
+  @if (!lease.rentAdjustments || lease.rentAdjustments.length === 0) {
+    <p class="empty-message">No adjustments recorded yet.</p>
+  }
 </div>

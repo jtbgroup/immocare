@@ -13,45 +13,54 @@
     </div>
     <div class="header-actions">
       <!-- Status change -->
-      <div class="status-change-bar" *ngIf="canChangeStatus">
-        <select
-          [(ngModel)]="selectedStatus"
-          class="form-control form-control-sm"
-        >
-          <option value="">Change status…</option>
-          <option *ngFor="let s of eligibleStatuses" [value]="s">
-            {{ s }}
-          </option>
-        </select>
-        <button
-          class="btn btn-sm btn-warning"
-          [disabled]="!selectedStatus || isChangingStatus"
-          (click)="applyStatusChange()"
-        >
-          {{ isChangingStatus ? "Saving…" : "Apply" }}
-        </button>
-      </div>
+      @if (canChangeStatus) {
+        <div class="status-change-bar">
+          <select
+            [(ngModel)]="selectedStatus"
+            class="form-control form-control-sm"
+          >
+            <option value="">Change status…</option>
+            @for (s of eligibleStatuses; track s) {
+              <option [value]="s">{{ s }}</option>
+            }
+          </select>
+          <button
+            class="btn btn-sm btn-warning"
+            [disabled]="!selectedStatus || isChangingStatus"
+            (click)="applyStatusChange()"
+          >
+            {{ isChangingStatus ? "Saving…" : "Apply" }}
+          </button>
+        </div>
+      }
 
-      <a
-        *ngIf="canEdit()"
-        [routerLink]="['/leases', lease.id, 'edit']"
-        class="btn btn-secondary"
-      >
-        Edit
-      </a>
+      @if (canEdit()) {
+        <a
+          [routerLink]="['/leases', lease.id, 'edit']"
+          class="btn btn-secondary"
+        >
+          Edit
+        </a>
+      }
     </div>
   </div>
 
   <!-- Status error -->
-  <div *ngIf="statusError" class="alert alert-error">{{ statusError }}</div>
+  @if (statusError) {
+    <div class="alert alert-error">{{ statusError }}</div>
+  }
 
   <!-- Alert banners -->
-  <div *ngIf="lease.indexationAlertActive" class="alert alert-warning">
-    🔔 Indexation due — anniversary {{ lease.indexationAlertDate | appDate }}
-  </div>
-  <div *ngIf="lease.endNoticeAlertActive" class="alert alert-warning">
-    ⚠ End notice deadline — {{ lease.endNoticeAlertDate | appDate }}
-  </div>
+  @if (lease.indexationAlertActive) {
+    <div class="alert alert-warning">
+      🔔 Indexation due — anniversary {{ lease.indexationAlertDate | appDate }}
+    </div>
+  }
+  @if (lease.endNoticeAlertActive) {
+    <div class="alert alert-warning">
+      ⚠ End notice deadline — {{ lease.endNoticeAlertDate | appDate }}
+    </div>
+  }
 
   <!-- Unit info -->
   <div class="info-card">
@@ -145,77 +154,88 @@
   </app-tenant-section>
 
   <!-- Registration -->
-  <div
-    class="info-card"
-    *ngIf="
-      lease.registrationSpf ||
-      lease.registrationRegion ||
-      lease.registrationInventorySpf ||
-      lease.registrationInventoryRegion
-    "
-  >
-    <h2>Registration</h2>
-    <div class="info-subsection-label">Lease deed</div>
-    <div class="info-grid">
-      <div class="info-item">
-        <label>SPF Finances</label>
-        <p>{{ lease.registrationSpf || "—" }}</p>
+  @if (
+    lease.registrationSpf ||
+    lease.registrationRegion ||
+    lease.registrationInventorySpf ||
+    lease.registrationInventoryRegion
+  ) {
+    <div class="info-card">
+      <h2>Registration</h2>
+      <div class="info-subsection-label">Lease deed</div>
+      <div class="info-grid">
+        <div class="info-item">
+          <label>SPF Finances</label>
+          <p>{{ lease.registrationSpf || "—" }}</p>
+        </div>
+        <div class="info-item">
+          <label>Region</label>
+          <p>{{ lease.registrationRegion || "—" }}</p>
+        </div>
       </div>
-      <div class="info-item">
-        <label>Region</label>
-        <p>{{ lease.registrationRegion || "—" }}</p>
+      <div class="info-subsection-label">Inventory</div>
+      <div class="info-grid">
+        <div class="info-item">
+          <label>SPF Finances</label>
+          <p>{{ lease.registrationInventorySpf || "—" }}</p>
+        </div>
+        <div class="info-item">
+          <label>Region</label>
+          <p>{{ lease.registrationInventoryRegion || "—" }}</p>
+        </div>
       </div>
     </div>
-    <div class="info-subsection-label">Inventory</div>
-    <div class="info-grid">
-      <div class="info-item">
-        <label>SPF Finances</label>
-        <p>{{ lease.registrationInventorySpf || "—" }}</p>
-      </div>
-      <div class="info-item">
-        <label>Region</label>
-        <p>{{ lease.registrationInventoryRegion || "—" }}</p>
-      </div>
-    </div>
-  </div>
+  }
 
   <!-- Deposit -->
-  <div class="info-card" *ngIf="lease.depositAmount || lease.depositType">
-    <h2>Deposit</h2>
-    <div class="info-grid">
-      <div class="info-item">
-        <label>Amount</label>
-        <p>{{ lease.depositAmount | currency: "EUR" : "symbol" : "1.2-2" }}</p>
-      </div>
-      <div class="info-item">
-        <label>Type</label>
-        <p>{{ lease.depositType || "—" }}</p>
-      </div>
-      <div class="info-item" *ngIf="lease.depositReference">
-        <label>Reference</label>
-        <p>{{ lease.depositReference }}</p>
+  @if (lease.depositAmount || lease.depositType) {
+    <div class="info-card">
+      <h2>Deposit</h2>
+      <div class="info-grid">
+        <div class="info-item">
+          <label>Amount</label>
+          <p>
+            {{ lease.depositAmount | currency: "EUR" : "symbol" : "1.2-2" }}
+          </p>
+        </div>
+        <div class="info-item">
+          <label>Type</label>
+          <p>{{ lease.depositType || "—" }}</p>
+        </div>
+        @if (lease.depositReference) {
+          <div class="info-item">
+            <label>Reference</label>
+            <p>{{ lease.depositReference }}</p>
+          </div>
+        }
       </div>
     </div>
-  </div>
+  }
 
   <!-- Insurance -->
-  <div class="info-card" *ngIf="lease.tenantInsuranceConfirmed">
-    <h2>Tenant Insurance</h2>
-    <div class="info-grid">
-      <div class="info-item">
-        <label>Confirmed</label>
-        <p>✅ Yes</p>
-      </div>
-      <div class="info-item" *ngIf="lease.tenantInsuranceReference">
-        <label>Reference</label>
-        <p>{{ lease.tenantInsuranceReference }}</p>
-      </div>
-      <div class="info-item" *ngIf="lease.tenantInsuranceExpiry">
-        <label>Expiry</label>
-        <p>{{ lease.tenantInsuranceExpiry | appDate }}</p>
+  @if (lease.tenantInsuranceConfirmed) {
+    <div class="info-card">
+      <h2>Tenant Insurance</h2>
+      <div class="info-grid">
+        <div class="info-item">
+          <label>Confirmed</label>
+          <p>✅ Yes</p>
+        </div>
+        @if (lease.tenantInsuranceReference) {
+          <div class="info-item">
+            <label>Reference</label>
+            <p>{{ lease.tenantInsuranceReference }}</p>
+          </div>
+        }
+        @if (lease.tenantInsuranceExpiry) {
+          <div class="info-item">
+            <label>Expiry</label>
+            <p>{{ lease.tenantInsuranceExpiry | appDate }}</p>
+          </div>
+        }
       </div>
     </div>
-  </div>
+  }
 
   <!-- Transaction Statistics -->
   <div class="info-card">
@@ -225,7 +245,7 @@
         View all transactions →
       </button>
     </div>
-    <div *ngIf="leaseStats; else financialLoading">
+    @if (leaseStats) {
       <div class="financial-stats-grid">
         <div class="financial-stat financial-stat--income">
           <span class="financial-stat__label">Income</span>
@@ -251,14 +271,17 @@
           >
         </div>
       </div>
-    </div>
-    <ng-template #financialLoading>
+    } @else {
       <p class="loading-placeholder">Loading financial data…</p>
-    </ng-template>
+    }
   </div>
 </div>
 
 <ng-template #loading>
-  <div *ngIf="isLoading" class="loading">Loading…</div>
-  <div *ngIf="errorMessage" class="alert alert-error">{{ errorMessage }}</div>
+  @if (isLoading) {
+    <div class="loading">Loading…</div>
+  }
+  @if (errorMessage) {
+    <div class="alert alert-error">{{ errorMessage }}</div>
+  }
 </ng-template>

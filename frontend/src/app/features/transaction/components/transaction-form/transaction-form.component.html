@@ -3,210 +3,218 @@
   <div class="details-content">
     <div class="header">
       <h1>{{ isEdit ? "Edit Transaction" : "New Transaction" }}</h1>
-      <p class="reference text-muted" *ngIf="existing">
-        {{ existing.reference }}
-      </p>
+      @if (existing) {
+        <p class="reference text-muted">{{ existing.reference }}</p>
+      }
     </div>
   </div>
 
-  <div class="alert alert-error" *ngIf="error">{{ error }}</div>
-  <div class="loading" *ngIf="loading">Loading…</div>
+  @if (error) {
+    <div class="alert alert-error">{{ error }}</div>
+  }
+  @if (loading) {
+    <div class="loading">Loading…</div>
+  }
 
-  <form [formGroup]="form" (ngSubmit)="onSubmit()" *ngIf="!loading">
-    <!-- 1. General -->
-    <div class="form-card">
-      <div class="form-section">
-        <div class="form-section-title">General</div>
+  @if (!loading) {
+    <form [formGroup]="form" (ngSubmit)="onSubmit()">
+      <!-- 1. General -->
+      <div class="form-card">
+        <div class="form-section">
+          <div class="form-section-title">General</div>
 
-        <div class="form-row">
-          <div class="form-group">
-            <label>Direction <span class="required">*</span></label>
-            <div class="radio-group">
-              <label class="radio-label">
-                <input
-                  type="radio"
-                  formControlName="direction"
-                  value="INCOME"
-                />
-                Income
-              </label>
-              <label class="radio-label">
-                <input
-                  type="radio"
-                  formControlName="direction"
-                  value="EXPENSE"
-                />
-                Expense
-              </label>
+          <div class="form-row">
+            <div class="form-group">
+              <label>Direction <span class="required">*</span></label>
+              <div class="radio-group">
+                <label class="radio-label">
+                  <input
+                    type="radio"
+                    formControlName="direction"
+                    value="INCOME"
+                  />
+                  Income
+                </label>
+                <label class="radio-label">
+                  <input
+                    type="radio"
+                    formControlName="direction"
+                    value="EXPENSE"
+                  />
+                  Expense
+                </label>
+              </div>
+            </div>
+            <div class="form-group">
+              <label>Amount (€) <span class="required">*</span></label>
+              <input
+                type="number"
+                formControlName="amount"
+                step="0.01"
+                min="0.01"
+              />
+              @if (form.get("amount")?.invalid && form.get("amount")?.touched) {
+                <span class="error-message"
+                  >A positive amount is required.</span
+                >
+              }
             </div>
           </div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label>Transaction Date <span class="required">*</span></label>
+              <input type="date" formControlName="transactionDate" />
+            </div>
+            <div class="form-group">
+              <label>Accounting Month <span class="required">*</span></label>
+              <input type="month" formControlName="accountingMonth" />
+            </div>
+          </div>
+
           <div class="form-group">
-            <label>Amount (€) <span class="required">*</span></label>
-            <input
-              type="number"
-              formControlName="amount"
-              step="0.01"
-              min="0.01"
+            <label>Description</label>
+            <textarea formControlName="description" rows="2"></textarea>
+          </div>
+        </div>
+      </div>
+
+      <!-- 2. Counterparty -->
+      <div class="form-card">
+        <div class="form-section">
+          <div class="form-section-title">Counterparty</div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label>Value Date</label>
+              <input type="date" formControlName="valueDate" />
+            </div>
+            <div class="form-group">
+              <label>Bank Account</label>
+              <select formControlName="bankAccountId">
+                <option [ngValue]="null">— Select —</option>
+                @for (b of bankAccounts; track b.id) {
+                  <option [value]="b.id">{{ b.label }}</option>
+                }
+              </select>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 3. Classification -->
+      <div class="form-card">
+        <div class="form-section">
+          <div class="form-section-title">Classification</div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label>Category</label>
+              <select formControlName="categoryId">
+                <option [ngValue]="null">— Select —</option>
+                @for (c of categories; track c.id) {
+                  <option [value]="c.id">{{ c.name }}</option>
+                }
+              </select>
+            </div>
+            <div class="form-group">
+              <label>Subcategory</label>
+              <select
+                formControlName="subcategoryId"
+                [attr.disabled]="!form.get('categoryId')?.value ? '' : null"
+              >
+                <option [ngValue]="null">— Select —</option>
+                @for (s of subcategories; track s.id) {
+                  <option [value]="s.id">{{ s.name }}</option>
+                }
+              </select>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 4. Links -->
+      <div class="form-card">
+        <div class="form-section">
+          <div class="form-section-title">Links</div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label>Building</label>
+              <select formControlName="buildingId">
+                <option [ngValue]="null">— None —</option>
+                @for (b of buildings; track b.id) {
+                  <option [value]="b.id">{{ b.name }}</option>
+                }
+              </select>
+            </div>
+            <div class="form-group"><!-- spacer --></div>
+          </div>
+
+          @if (form.get("buildingId")?.value) {
+            <div class="form-row">
+              <div class="form-group">
+                <label>Housing Unit</label>
+                <select formControlName="housingUnitId">
+                  <option [ngValue]="null">— None —</option>
+                  @for (u of units; track u.id) {
+                    <option [value]="u.id">{{ unitLabel(u) }}</option>
+                  }
+                </select>
+                @if (units.length === 0) {
+                  <span class="hint">No units in this building.</span>
+                }
+              </div>
+              <div class="form-group"><!-- spacer --></div>
+            </div>
+          }
+
+          @if (form.get("housingUnitId")?.value) {
+            <div class="form-row">
+              <div class="form-group">
+                <label>Lease</label>
+                <select formControlName="leaseId">
+                  <option [ngValue]="null">— None —</option>
+                  @for (l of leases; track l.id) {
+                    <option [ngValue]="l.id">{{ leaseLabel(l) }}</option>
+                  }
+                </select>
+                @if (leases.length === 0) {
+                  <span class="hint">No leases for this unit.</span>
+                }
+              </div>
+              <div class="form-group"><!-- spacer --></div>
+            </div>
+          }
+        </div>
+      </div>
+
+      <!-- 5. Related Assets (expense only) -->
+      @if (!isIncomeDirection) {
+        <div class="form-card">
+          <div class="form-section">
+            <div class="form-section-title">Related Assets</div>
+            <app-asset-link-editor
+              [buildingId]="form.get('buildingId')?.value"
+              [unitId]="form.get('housingUnitId')?.value"
+              [links]="assetLinks"
+              [transactionAmount]="form.get('amount')?.value"
+              (linksChanged)="assetLinks = $event"
+              (subcategoryPreFill)="onAssetSubcategoryPreFill($event)"
             />
-            <span
-              class="error-message"
-              *ngIf="form.get('amount')?.invalid && form.get('amount')?.touched"
-            >
-              A positive amount is required.
-            </span>
           </div>
         </div>
+      }
 
-        <div class="form-row">
-          <div class="form-group">
-            <label>Transaction Date <span class="required">*</span></label>
-            <input type="date" formControlName="transactionDate" />
-          </div>
-          <div class="form-group">
-            <label>Accounting Month <span class="required">*</span></label>
-            <input type="month" formControlName="accountingMonth" />
-          </div>
-        </div>
-
-        <div class="form-group">
-          <label>Description</label>
-          <textarea formControlName="description" rows="2"></textarea>
-        </div>
+      <!-- Actions -->
+      <div class="form-actions">
+        <button type="button" class="btn btn-secondary" (click)="cancel()">
+          Cancel
+        </button>
+        <button type="submit" class="btn btn-primary" [disabled]="form.invalid">
+          {{ isEdit ? "Save Changes" : "Create Transaction" }}
+        </button>
       </div>
-    </div>
-
-    <!-- 2. Counterparty -->
-    <div class="form-card">
-      <div class="form-section">
-        <div class="form-section-title">Counterparty</div>
-
-        <div class="form-row">
-          <div class="form-group">
-            <label>Value Date</label>
-            <input type="date" formControlName="valueDate" />
-          </div>
-          <div class="form-group">
-            <label>Bank Account</label>
-            <select formControlName="bankAccountId">
-              <option [ngValue]="null">— Select —</option>
-              <option *ngFor="let b of bankAccounts" [value]="b.id">
-                {{ b.label }}
-              </option>
-            </select>
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <!-- 3. Classification -->
-    <div class="form-card">
-      <div class="form-section">
-        <div class="form-section-title">Classification</div>
-
-        <div class="form-row">
-          <div class="form-group">
-            <label>Category</label>
-            <select formControlName="categoryId">
-              <option [ngValue]="null">— Select —</option>
-              <option *ngFor="let c of categories" [value]="c.id">
-                {{ c.name }}
-              </option>
-            </select>
-          </div>
-          <div class="form-group">
-            <label>Subcategory</label>
-            <select
-              formControlName="subcategoryId"
-              [attr.disabled]="!form.get('categoryId')?.value ? '' : null"
-            >
-              <option [ngValue]="null">— Select —</option>
-              <option *ngFor="let s of subcategories" [value]="s.id">
-                {{ s.name }}
-              </option>
-            </select>
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <!-- 4. Links -->
-    <div class="form-card">
-      <div class="form-section">
-        <div class="form-section-title">Links</div>
-
-        <!-- Row 1: Building -->
-        <div class="form-row">
-          <div class="form-group">
-            <label>Building</label>
-            <select formControlName="buildingId">
-              <option [ngValue]="null">— None —</option>
-              <option *ngFor="let b of buildings" [value]="b.id">
-                {{ b.name }}
-              </option>
-            </select>
-          </div>
-          <div class="form-group"><!-- spacer --></div>
-        </div>
-
-        <!-- Row 2: Unit (only if building selected) -->
-        <div class="form-row" *ngIf="form.get('buildingId')?.value">
-          <div class="form-group">
-            <label>Housing Unit</label>
-            <select formControlName="housingUnitId">
-              <option [ngValue]="null">— None —</option>
-              <option *ngFor="let u of units" [value]="u.id">
-                {{ unitLabel(u) }}
-              </option>
-            </select>
-            <span class="hint" *ngIf="units.length === 0"
-              >No units in this building.</span
-            >
-          </div>
-          <div class="form-group"><!-- spacer --></div>
-        </div>
-
-        <!-- Row 3: Lease (unit must be selected) -->
-        <div class="form-row" *ngIf="form.get('housingUnitId')?.value">
-          <div class="form-group">
-            <label>Lease</label>
-            <select formControlName="leaseId">
-              <option [ngValue]="null">— None —</option>
-              <option *ngFor="let l of leases" [ngValue]="l.id">
-                {{ leaseLabel(l) }}
-              </option>
-            </select>
-            <span class="hint" *ngIf="leases.length === 0"
-              >No leases for this unit.</span
-            >
-          </div>
-          <div class="form-group"><!-- spacer --></div>
-        </div>
-      </div>
-    </div>
-
-    <!-- 5. Related Assets (expense only) -->
-    <div class="form-card" *ngIf="!isIncomeDirection">
-      <div class="form-section">
-        <div class="form-section-title">Related Assets</div>
-        <app-asset-link-editor
-          [buildingId]="form.get('buildingId')?.value"
-          [unitId]="form.get('housingUnitId')?.value"
-          [links]="assetLinks"
-          [transactionAmount]="form.get('amount')?.value"
-          (linksChanged)="assetLinks = $event"
-          (subcategoryPreFill)="onAssetSubcategoryPreFill($event)"
-        />
-      </div>
-    </div>
-
-    <!-- Actions -->
-    <div class="form-actions">
-      <button type="button" class="btn btn-secondary" (click)="cancel()">
-        Cancel
-      </button>
-      <button type="submit" class="btn btn-primary" [disabled]="form.invalid">
-        {{ isEdit ? "Save Changes" : "Create Transaction" }}
-      </button>
-    </div>
-  </form>
+    </form>
+  }
 </div>

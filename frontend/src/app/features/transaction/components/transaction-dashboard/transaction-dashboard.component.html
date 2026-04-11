@@ -25,9 +25,11 @@
     </div>
   </div>
 
-  <div class="loading" *ngIf="loading">Loading…</div>
+  @if (loading) {
+    <div class="loading">Loading…</div>
+  }
 
-  <ng-container *ngIf="stats && !loading">
+  @if (stats && !loading) {
     <!-- Summary cards -->
     <div class="summary-cards">
       <div class="card card--income">
@@ -53,146 +55,170 @@
     </div>
 
     <!-- By Category -->
-    <section class="dashboard-section" *ngIf="stats.byCategory.length">
-      <h3>By Category / Subcategory</h3>
-      <table class="data-table">
-        <thead>
-          <tr>
-            <th>Category / Subcategory</th>
-            <th>Direction</th>
-            <th>Amount</th>
-            <th>Tx count</th>
-            <th>%</th>
-            <th>Bar</th>
-          </tr>
-        </thead>
-        <tbody>
-          <ng-container *ngFor="let cat of stats.byCategory">
-            <tr class="category-row">
-              <td colspan="2">
-                <strong>{{ cat.categoryName }}</strong>
-              </td>
-              <td>
-                <strong>{{ cat.categoryTotal | belgianCurrency }}</strong>
-              </td>
-              <td></td>
-              <td></td>
-              <td>
-                <div
-                  class="bar"
-                  [style.width]="barWidth(cat.categoryTotal)"
-                ></div>
-              </td>
+    @if (stats.byCategory.length) {
+      <section class="dashboard-section">
+        <h3>By Category / Subcategory</h3>
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th>Category / Subcategory</th>
+              <th>Direction</th>
+              <th>Amount</th>
+              <th>Tx count</th>
+              <th>%</th>
+              <th>Bar</th>
             </tr>
-            <tr *ngFor="let sub of cat.subcategories" class="subcategory-row">
-              <td class="indented">{{ sub.subcategoryName }}</td>
-              <td>
-                <span
-                  class="badge badge--dir-{{ sub.direction.toLowerCase() }}"
-                  >{{ sub.direction }}</span
-                >
-              </td>
-              <td>{{ sub.amount | belgianCurrency }}</td>
-              <td>{{ sub.transactionCount }}</td>
-              <td>{{ sub.percentage.toFixed(1) }}%</td>
-              <td></td>
-            </tr>
-          </ng-container>
-        </tbody>
-      </table>
-    </section>
+          </thead>
+          <tbody>
+            @for (cat of stats.byCategory; track cat.categoryName) {
+              <tr class="category-row">
+                <td colspan="2">
+                  <strong>{{ cat.categoryName }}</strong>
+                </td>
+                <td>
+                  <strong>{{ cat.categoryTotal | belgianCurrency }}</strong>
+                </td>
+                <td></td>
+                <td></td>
+                <td>
+                  <div
+                    class="bar"
+                    [style.width]="barWidth(cat.categoryTotal)"
+                  ></div>
+                </td>
+              </tr>
+              @for (sub of cat.subcategories; track sub.subcategoryName) {
+                <tr class="subcategory-row">
+                  <td class="indented">{{ sub.subcategoryName }}</td>
+                  <td>
+                    <span
+                      class="badge badge--dir-{{ sub.direction.toLowerCase() }}"
+                    >
+                      {{ sub.direction }}
+                    </span>
+                  </td>
+                  <td>{{ sub.amount | belgianCurrency }}</td>
+                  <td>{{ sub.transactionCount }}</td>
+                  <td>{{ sub.percentage.toFixed(1) }}%</td>
+                  <td></td>
+                </tr>
+              }
+            }
+          </tbody>
+        </table>
+      </section>
+    }
 
     <!-- By Building -->
-    <section class="dashboard-section" *ngIf="stats.byBuilding.length">
-      <h3>By Building</h3>
-      <table class="data-table">
-        <thead>
-          <tr>
-            <th>Building</th>
-            <th>Income</th>
-            <th>Expenses</th>
-            <th>Balance</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr *ngFor="let b of stats.byBuilding">
-            <td>{{ b.buildingName }}</td>
-            <td class="income">{{ b.income | belgianCurrency: true : "+" }}</td>
-            <td class="expense">
-              {{ b.expenses | belgianCurrency: true : "-" }}
-            </td>
-            <td [class.income]="b.balance >= 0" [class.expense]="b.balance < 0">
-              {{ b.balance | belgianCurrency }}
-            </td>
-          </tr>
-        </tbody>
-      </table>
-    </section>
+    @if (stats.byBuilding.length) {
+      <section class="dashboard-section">
+        <h3>By Building</h3>
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th>Building</th>
+              <th>Income</th>
+              <th>Expenses</th>
+              <th>Balance</th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (b of stats.byBuilding; track b.buildingName) {
+              <tr>
+                <td>{{ b.buildingName }}</td>
+                <td class="income">
+                  {{ b.income | belgianCurrency: true : "+" }}
+                </td>
+                <td class="expense">
+                  {{ b.expenses | belgianCurrency: true : "-" }}
+                </td>
+                <td
+                  [class.income]="b.balance >= 0"
+                  [class.expense]="b.balance < 0"
+                >
+                  {{ b.balance | belgianCurrency }}
+                </td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </section>
+    }
 
     <!-- By Bank Account -->
-    <section class="dashboard-section" *ngIf="stats.byBankAccount.length">
-      <h3>By Bank Account</h3>
-      <table class="data-table">
-        <thead>
-          <tr>
-            <th>Account</th>
-            <th>Type</th>
-            <th>Income</th>
-            <th>Expenses</th>
-            <th>Balance</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr *ngFor="let ba of stats.byBankAccount">
-            <td>{{ ba.label }}</td>
-            <td>{{ ba.type || "—" }}</td>
-            <td class="income">
-              {{ ba.income | belgianCurrency: true : "+" }}
-            </td>
-            <td class="expense">
-              {{ ba.expenses | belgianCurrency: true : "-" }}
-            </td>
-            <td
-              [class.income]="ba.balance >= 0"
-              [class.expense]="ba.balance < 0"
-            >
-              {{ ba.balance | belgianCurrency }}
-            </td>
-          </tr>
-        </tbody>
-      </table>
-    </section>
+    @if (stats.byBankAccount.length) {
+      <section class="dashboard-section">
+        <h3>By Bank Account</h3>
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th>Account</th>
+              <th>Type</th>
+              <th>Income</th>
+              <th>Expenses</th>
+              <th>Balance</th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (ba of stats.byBankAccount; track ba.label) {
+              <tr>
+                <td>{{ ba.label }}</td>
+                <td>{{ ba.type || "—" }}</td>
+                <td class="income">
+                  {{ ba.income | belgianCurrency: true : "+" }}
+                </td>
+                <td class="expense">
+                  {{ ba.expenses | belgianCurrency: true : "-" }}
+                </td>
+                <td
+                  [class.income]="ba.balance >= 0"
+                  [class.expense]="ba.balance < 0"
+                >
+                  {{ ba.balance | belgianCurrency }}
+                </td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </section>
+    }
 
     <!-- Monthly Trend -->
-    <section class="dashboard-section" *ngIf="stats.monthlyTrend.length">
-      <h3>Monthly Trend</h3>
-      <table class="data-table">
-        <thead>
-          <tr>
-            <th>Year</th>
-            <th>Month</th>
-            <th>Income</th>
-            <th>Expenses</th>
-            <th>Balance</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr *ngFor="let m of stats.monthlyTrend">
-            <td>{{ m.year }}</td>
-            <td>{{ m.month.toString().padStart(2, "0") }}</td>
-            <td class="income">{{ m.income | belgianCurrency: true : "+" }}</td>
-            <td class="expense">
-              {{ m.expenses | belgianCurrency: true : "-" }}
-            </td>
-            <td
-              [class.income]="m.income >= m.expenses"
-              [class.expense]="m.income < m.expenses"
-            >
-              {{ m.income - m.expenses | belgianCurrency }}
-            </td>
-          </tr>
-        </tbody>
-      </table>
-    </section>
-  </ng-container>
+    @if (stats.monthlyTrend.length) {
+      <section class="dashboard-section">
+        <h3>Monthly Trend</h3>
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th>Year</th>
+              <th>Month</th>
+              <th>Income</th>
+              <th>Expenses</th>
+              <th>Balance</th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (m of stats.monthlyTrend; track m.year + "-" + m.month) {
+              <tr>
+                <td>{{ m.year }}</td>
+                <td>{{ m.month.toString().padStart(2, "0") }}</td>
+                <td class="income">
+                  {{ m.income | belgianCurrency: true : "+" }}
+                </td>
+                <td class="expense">
+                  {{ m.expenses | belgianCurrency: true : "-" }}
+                </td>
+                <td
+                  [class.income]="m.income >= m.expenses"
+                  [class.expense]="m.income < m.expenses"
+                >
+                  {{ m.income - m.expenses | belgianCurrency }}
+                </td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </section>
+    }
+  }
 </div>

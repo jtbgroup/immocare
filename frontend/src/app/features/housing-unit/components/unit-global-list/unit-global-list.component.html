@@ -4,13 +4,16 @@
   <div class="details-content">
     <div class="header">
       <h1>All Housing Units</h1>
-      <span class="total-count" *ngIf="!loading">
-        {{ filteredUnits.length }} unit{{ filteredUnits.length !== 1 ? 's' : ''
-        }}
-        <ng-container *ngIf="searchTerm">
-          matching "{{ searchTerm }}"</ng-container
-        >
-      </span>
+      @if (!loading) {
+        <span class="total-count">
+          {{ filteredUnits.length }} unit{{
+            filteredUnits.length !== 1 ? "s" : ""
+          }}
+          @if (searchTerm) {
+            matching "{{ searchTerm }}"
+          }
+        </span>
+      }
     </div>
   </div>
 
@@ -40,77 +43,89 @@
   </div>
 
   <!-- Loading -->
-  <div *ngIf="loading" class="loading">Loading units…</div>
+  @if (loading) {
+    <div class="loading">Loading units…</div>
+  }
 
   <!-- Error -->
-  <div *ngIf="error" class="alert alert-error">{{ error }}</div>
+  @if (error) {
+    <div class="alert alert-error">{{ error }}</div>
+  }
 
   <!-- Empty -->
-  <div
-    *ngIf="!loading && !error && filteredUnits.length === 0"
-    class="empty-state"
-  >
-    <p *ngIf="!searchTerm">No housing units registered yet.</p>
-    <p *ngIf="searchTerm">
-      No units found for building "{{ searchTerm }}".
-      <button class="btn btn-link" (click)="clearSearch()">Clear filter</button>
-    </p>
-  </div>
+  @if (!loading && !error && filteredUnits.length === 0) {
+    <div class="empty-state">
+      @if (!searchTerm) {
+        <p>No housing units registered yet.</p>
+      }
+      @if (searchTerm) {
+        <p>
+          No units found for building "{{ searchTerm }}".
+          <button class="btn btn-link" (click)="clearSearch()">
+            Clear filter
+          </button>
+        </p>
+      }
+    </div>
+  }
 
   <!-- Table -->
-  <div
-    *ngIf="!loading && !error && filteredUnits.length > 0"
-    class="data-table"
-  >
-    <table>
-      <thead>
-        <tr>
-          <th>Building</th>
-          <th>Unit #</th>
-          <th>Floor</th>
-          <th>Surface (m²)</th>
-          <th>Rooms</th>
-          <th>Rent</th>
-          <th>PEB</th>
-          <th>Lease</th>
-          <th>Owner</th>
-        </tr>
-      </thead>
-      <tbody>
-        <tr
-          *ngFor="let unit of filteredUnits"
-          class="data-row"
-          (click)="viewUnit(unit.id)"
-        >
-          <td>{{ unit.buildingName ?? '—' }}</td>
-          <td>{{ unit.unitNumber }}</td>
-          <td>{{ unit.floor }}</td>
-          <td>{{ unit.totalSurface ?? '—' }}</td>
-          <td>{{ unit.roomCount ?? '—' }}</td>
-          <td>{{ formatRent(unit.currentMonthlyRent) }}</td>
-          <td>
-            <span
-              *ngIf="unit.currentPebScore"
-              class="peb-badge"
-              [style.background]="pebDisplay[unit.currentPebScore].color"
-              [style.color]="pebDisplay[unit.currentPebScore].textColor"
-            >
-              {{ pebDisplay[unit.currentPebScore].label }}
-            </span>
-            <span *ngIf="!unit.currentPebScore" class="text-muted">—</span>
-          </td>
-          <td>
-            <span
-              *ngIf="unit.activeLeaseStatus"
-              class="lease-status-badge lease-status-badge--{{ unit.activeLeaseStatus | lowercase }}"
-            >
-              {{ unit.activeLeaseStatus }}
-            </span>
-            <span *ngIf="!unit.activeLeaseStatus" class="text-muted">—</span>
-          </td>
-          <td>{{ unit.effectiveOwnerName ?? '—' }}</td>
-        </tr>
-      </tbody>
-    </table>
-  </div>
+  @if (!loading && !error && filteredUnits.length > 0) {
+    <div class="data-table">
+      <table>
+        <thead>
+          <tr>
+            <th>Building</th>
+            <th>Unit #</th>
+            <th>Floor</th>
+            <th>Surface (m²)</th>
+            <th>Rooms</th>
+            <th>Rent</th>
+            <th>PEB</th>
+            <th>Lease</th>
+            <th>Owner</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (unit of filteredUnits; track unit.id) {
+            <tr class="data-row" (click)="viewUnit(unit.id)">
+              <td>{{ unit.buildingName ?? "—" }}</td>
+              <td>{{ unit.unitNumber }}</td>
+              <td>{{ unit.floor }}</td>
+              <td>{{ unit.totalSurface ?? "—" }}</td>
+              <td>{{ unit.roomCount ?? "—" }}</td>
+              <td>{{ formatRent(unit.currentMonthlyRent) }}</td>
+              <td>
+                @if (unit.currentPebScore) {
+                  <span
+                    class="peb-badge"
+                    [style.background]="pebDisplay[unit.currentPebScore].color"
+                    [style.color]="pebDisplay[unit.currentPebScore].textColor"
+                  >
+                    {{ pebDisplay[unit.currentPebScore].label }}
+                  </span>
+                } @else {
+                  <span class="text-muted">—</span>
+                }
+              </td>
+              <td>
+                @if (unit.activeLeaseStatus) {
+                  <span
+                    class="lease-status-badge lease-status-badge--{{
+                      unit.activeLeaseStatus | lowercase
+                    }}"
+                  >
+                    {{ unit.activeLeaseStatus }}
+                  </span>
+                } @else {
+                  <span class="text-muted">—</span>
+                }
+              </td>
+              <td>{{ unit.effectiveOwnerName ?? "—" }}</td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+  }
 </div>

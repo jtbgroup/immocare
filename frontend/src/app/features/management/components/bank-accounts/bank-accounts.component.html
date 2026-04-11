@@ -15,103 +15,117 @@
     </div>
   </div>
 
-  <div class="alert alert-error" *ngIf="error">{{ error }}</div>
-  <div class="alert alert-success" *ngIf="successMessage">
-    ✅ {{ successMessage }}
-  </div>
-  <div class="loading" *ngIf="loading">Loading…</div>
+  @if (error) {
+    <div class="alert alert-error">{{ error }}</div>
+  }
+  @if (successMessage) {
+    <div class="alert alert-success">✅ {{ successMessage }}</div>
+  }
+  @if (loading) {
+    <div class="loading">Loading…</div>
+  }
 
   <!-- Add / Edit form -->
-  <div class="info-card" *ngIf="showForm || editingAccount">
-    <h2>{{ editingAccount ? "Edit Account" : "New Account" }}</h2>
-    <div class="form-section">
-      <div class="form-row">
-        <div class="form-group">
-          <label>Label <span class="required">*</span></label>
-          <input
-            type="text"
-            [(ngModel)]="formData.label"
-            placeholder="e.g. ING Main Account"
-          />
+  @if (showForm || editingAccount) {
+    <div class="info-card">
+      <h2>{{ editingAccount ? "Edit Account" : "New Account" }}</h2>
+      <div class="form-section">
+        <div class="form-row">
+          <div class="form-group">
+            <label>Label <span class="required">*</span></label>
+            <input
+              type="text"
+              [(ngModel)]="formData.label"
+              placeholder="e.g. ING Main Account"
+            />
+          </div>
+          <div class="form-group">
+            <label>IBAN <span class="required">*</span></label>
+            <input
+              type="text"
+              [(ngModel)]="formData.accountNumber"
+              placeholder="BE12 3456 7890 1234"
+              class="monospace"
+            />
+          </div>
         </div>
-        <div class="form-group">
-          <label>IBAN <span class="required">*</span></label>
-          <input
-            type="text"
-            [(ngModel)]="formData.accountNumber"
-            placeholder="BE12 3456 7890 1234"
-            class="monospace"
-          />
+        <div class="form-row">
+          <div class="form-group">
+            <label>Type</label>
+            <select [(ngModel)]="formData.type">
+              @for (t of accountTypes; track t) {
+                <option [value]="t">{{ t }}</option>
+              }
+            </select>
+          </div>
+          <div class="form-group form-group--checkbox">
+            <label>
+              <input type="checkbox" [(ngModel)]="formData.isActive" />
+              Active
+            </label>
+          </div>
         </div>
       </div>
-      <div class="form-row">
-        <div class="form-group">
-          <label>Type</label>
-          <select [(ngModel)]="formData.type">
-            <option *ngFor="let t of accountTypes" [value]="t">{{ t }}</option>
-          </select>
-        </div>
-        <div class="form-group form-group--checkbox">
-          <label>
-            <input type="checkbox" [(ngModel)]="formData.isActive" />
-            Active
-          </label>
-        </div>
+      <div class="form-actions">
+        <button
+          class="btn btn-secondary"
+          (click)="editingAccount = undefined; showForm = false"
+        >
+          Cancel
+        </button>
+        <button class="btn btn-primary" (click)="save()">
+          {{ editingAccount ? "Update" : "Create" }}
+        </button>
       </div>
     </div>
-    <div class="form-actions">
-      <button
-        class="btn btn-secondary"
-        (click)="editingAccount = undefined; showForm = false"
-      >
-        Cancel
-      </button>
-      <button class="btn btn-primary" (click)="save()">
-        {{ editingAccount ? "Update" : "Create" }}
-      </button>
-    </div>
-  </div>
+  }
 
   <!-- Table -->
-  <div class="info-card" *ngIf="!loading">
-    <div class="data-table">
-      <table>
-        <thead>
-          <tr>
-            <th>Label</th>
-            <th>IBAN</th>
-            <th>Type</th>
-            <th class="text-center">Active</th>
-            <th></th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr *ngFor="let ba of accounts">
-            <td>{{ ba.label }}</td>
-            <td class="monospace">{{ ba.accountNumber }}</td>
-            <td>{{ ba.type }}</td>
-            <td class="text-center">
-              <span
-                class="badge"
-                [class.badge--active]="ba.isActive"
-                [class.badge--inactive]="!ba.isActive"
-              >
-                {{ ba.isActive ? "Active" : "Inactive" }}
-              </span>
-            </td>
-            <td class="actions-cell">
-              <button class="icon-btn" title="Edit" (click)="edit(ba)">
-                ✏️
-              </button>
-            </td>
-          </tr>
-          <tr *ngIf="accounts.length === 0">
-            <td colspan="5" class="empty-state">
-              No bank accounts configured.
-            </td>
-          </tr>
-        </tbody>
-      </table>
+  @if (!loading) {
+    <div class="info-card">
+      <div class="data-table">
+        <table>
+          <thead>
+            <tr>
+              <th>Label</th>
+              <th>IBAN</th>
+              <th>Type</th>
+              <th class="text-center">Active</th>
+              <th></th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (ba of accounts; track ba.id) {
+              <tr>
+                <td>{{ ba.label }}</td>
+                <td class="monospace">{{ ba.accountNumber }}</td>
+                <td>{{ ba.type }}</td>
+                <td class="text-center">
+                  <span
+                    class="badge"
+                    [class.badge--active]="ba.isActive"
+                    [class.badge--inactive]="!ba.isActive"
+                  >
+                    {{ ba.isActive ? "Active" : "Inactive" }}
+                  </span>
+                </td>
+                <td class="actions-cell">
+                  <button class="icon-btn" title="Edit" (click)="edit(ba)">
+                    ✏️
+                  </button>
+                </td>
+              </tr>
+            }
+            @if (accounts.length === 0) {
+              <tr>
+                <td colspan="5" class="empty-state">
+                  No bank accounts configured.
+                </td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
     </div>
-  </div>
+  }
 </div>

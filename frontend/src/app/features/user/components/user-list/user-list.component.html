@@ -12,97 +12,111 @@
   </div>
 
   <!-- Error -->
-  <div *ngIf="errorMessage" class="alert alert-error">{{ errorMessage }}</div>
+  @if (errorMessage) {
+    <div class="alert alert-error">{{ errorMessage }}</div>
+  }
 
   <!-- Loading -->
-  <div *ngIf="loading" class="loading">Loading...</div>
+  @if (loading) {
+    <div class="loading">Loading...</div>
+  }
 
-  <!-- Empty state -->
-  <ng-container *ngIf="!loading">
-    <div *ngIf="users.length === 0" class="empty-state">
-      <p>No users found.</p>
-    </div>
+  @if (!loading) {
+    <!-- Empty state -->
+    @if (users.length === 0) {
+      <div class="empty-state">
+        <p>No users found.</p>
+      </div>
+    }
 
     <!-- Table -->
-    <div *ngIf="users.length > 0" class="data-table">
-      <table>
-        <thead>
-          <tr>
-            <th class="sortable" (click)="sort('username')">
-              Username
-              <span class="sort-icon" [class.active]="sortField === 'username'">
-                {{ sortField | sortIcon: sortDir : "username" }}
-              </span>
-            </th>
-            <th class="sortable" (click)="sort('email')">
-              Email
-              <span class="sort-icon" [class.active]="sortField === 'email'">
-                {{ sortField | sortIcon: sortDir : "email" }}
-              </span>
-            </th>
-            <th class="sortable" (click)="sort('role')">
-              Role
-              <span class="sort-icon" [class.active]="sortField === 'role'">
-                {{ sortField | sortIcon: sortDir : "role" }}
-              </span>
-            </th>
-            <th class="sortable" (click)="sort('createdAt')">
-              Created At
-              <span
-                class="sort-icon"
-                [class.active]="sortField === 'createdAt'"
-              >
-                {{ sortField | sortIcon: sortDir : "createdAt" }}
-              </span>
-            </th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr
-            *ngFor="let user of pagedUsers"
-            class="clickable"
-            (click)="navigateTo(user)"
-          >
-            <td>{{ user.username }}</td>
-            <td>{{ user.email }}</td>
-            <td>
-              <span class="badge badge-role">{{ user.role }}</span>
-            </td>
-            <td>{{ user.createdAt | date: "yyyy-MM-dd HH:mm" }}</td>
-          </tr>
-        </tbody>
-      </table>
-    </div>
+    @if (users.length > 0) {
+      <div class="data-table">
+        <table>
+          <thead>
+            <tr>
+              <th class="sortable" (click)="sort('username')">
+                Username
+                <span
+                  class="sort-icon"
+                  [class.active]="sortField === 'username'"
+                >
+                  {{ sortField | sortIcon: sortDir : "username" }}
+                </span>
+              </th>
+              <th class="sortable" (click)="sort('email')">
+                Email
+                <span class="sort-icon" [class.active]="sortField === 'email'">
+                  {{ sortField | sortIcon: sortDir : "email" }}
+                </span>
+              </th>
+              <th class="sortable" (click)="sort('role')">
+                Role
+                <span class="sort-icon" [class.active]="sortField === 'role'">
+                  {{ sortField | sortIcon: sortDir : "role" }}
+                </span>
+              </th>
+              <th class="sortable" (click)="sort('createdAt')">
+                Created At
+                <span
+                  class="sort-icon"
+                  [class.active]="sortField === 'createdAt'"
+                >
+                  {{ sortField | sortIcon: sortDir : "createdAt" }}
+                </span>
+              </th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (user of pagedUsers; track user.id) {
+              <tr class="clickable" (click)="navigateTo(user)">
+                <td>{{ user.username }}</td>
+                <td>{{ user.email }}</td>
+                <td>
+                  <span class="badge badge-role">{{ user.role }}</span>
+                </td>
+                <td>{{ user.createdAt | date: "yyyy-MM-dd HH:mm" }}</td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+    }
 
     <!-- Pagination -->
-    <div *ngIf="totalPages > 1" class="pagination">
-      <button
-        class="btn btn-secondary"
-        [disabled]="currentPage === 1"
-        (click)="goToPage(currentPage - 1)"
-      >
-        Previous
-      </button>
-      <button
-        *ngFor="let p of pages()"
-        class="btn btn-secondary"
-        [class.btn-active]="p === currentPage"
-        (click)="goToPage(p)"
-      >
-        {{ p }}
-      </button>
-      <button
-        class="btn btn-secondary"
-        [disabled]="currentPage === totalPages"
-        (click)="goToPage(currentPage + 1)"
-      >
-        Next
-      </button>
-    </div>
+    @if (totalPages > 1) {
+      <div class="pagination">
+        <button
+          class="btn btn-secondary"
+          [disabled]="currentPage === 1"
+          (click)="goToPage(currentPage - 1)"
+        >
+          Previous
+        </button>
+        @for (p of pages(); track p) {
+          <button
+            class="btn btn-secondary"
+            [class.btn-active]="p === currentPage"
+            (click)="goToPage(p)"
+          >
+            {{ p }}
+          </button>
+        }
+        <button
+          class="btn btn-secondary"
+          [disabled]="currentPage === totalPages"
+          (click)="goToPage(currentPage + 1)"
+        >
+          Next
+        </button>
+      </div>
+    }
 
-    <p *ngIf="users.length > 0" class="page-info-bottom">
-      Showing {{ (currentPage - 1) * pageSize + 1 }}–{{ endIndex }} of
-      {{ users.length }} users
-    </p>
-  </ng-container>
+    @if (users.length > 0) {
+      <p class="page-info-bottom">
+        Showing {{ (currentPage - 1) * pageSize + 1 }}–{{ endIndex }} of
+        {{ users.length }} users
+      </p>
+    }
+  }
 </div>

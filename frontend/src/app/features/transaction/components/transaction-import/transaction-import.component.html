@@ -1,6 +1,6 @@
 <div class="import-container">
   <!-- ══════════════════════════════════════════════════════ STEP: FORM -->
-  <ng-container *ngIf="step === 'form'">
+  @if (step === "form") {
     <div class="details-content">
       <div class="header">
         <h1>Import Transactions</h1>
@@ -12,24 +12,26 @@
         <label class="form-label">Parser</label>
         <select class="form-control" [(ngModel)]="selectedParserCode">
           <option value="">— Select a parser —</option>
-          <option *ngFor="let p of parsers" [value]="p.code">
-            {{ p.label }}
-          </option>
+          @for (p of parsers; track p.code) {
+            <option [value]="p.code">{{ p.label }}</option>
+          }
         </select>
-        <small *ngIf="selectedParser" class="form-hint">{{
-          selectedParser.description
-        }}</small>
+        @if (selectedParser) {
+          <small class="form-hint">{{ selectedParser.description }}</small>
+        }
       </div>
 
-      <div class="form-group" *ngIf="bankAccounts.length > 0">
-        <label class="form-label">Own bank account (optional)</label>
-        <select class="form-control" [(ngModel)]="selectedBankAccountId">
-          <option [ngValue]="null">— None —</option>
-          <option *ngFor="let a of bankAccounts" [ngValue]="a.id">
-            {{ a.label }}
-          </option>
-        </select>
-      </div>
+      @if (bankAccounts.length > 0) {
+        <div class="form-group">
+          <label class="form-label">Own bank account (optional)</label>
+          <select class="form-control" [(ngModel)]="selectedBankAccountId">
+            <option [ngValue]="null">— None —</option>
+            @for (a of bankAccounts; track a.id) {
+              <option [ngValue]="a.id">{{ a.label }}</option>
+            }
+          </select>
+        </div>
+      }
 
       <div
         class="drop-zone"
@@ -39,7 +41,7 @@
         (dragleave)="onDragLeave()"
         (drop)="onDrop($event)"
       >
-        <ng-container *ngIf="!selectedFile">
+        @if (!selectedFile) {
           <div class="drop-zone__icon">📂</div>
           <p class="drop-zone__text">Drag & drop your file here, or</p>
           <label class="btn btn-secondary">
@@ -52,17 +54,18 @@
             />
           </label>
           <p class="drop-zone__hint">Accepted: {{ acceptedFileTypes }}</p>
-        </ng-container>
-        <ng-container *ngIf="selectedFile">
+        } @else {
           <div class="drop-zone__icon">📄</div>
           <p class="drop-zone__filename">{{ selectedFile.name }}</p>
           <button class="btn btn-sm btn-secondary" (click)="clearFile()">
             Remove
           </button>
-        </ng-container>
+        }
       </div>
 
-      <div class="alert alert-error" *ngIf="error">{{ error }}</div>
+      @if (error) {
+        <div class="alert alert-error">{{ error }}</div>
+      }
 
       <div class="form-actions">
         <button
@@ -74,10 +77,10 @@
         </button>
       </div>
     </div>
-  </ng-container>
+  }
 
   <!-- ══════════════════════════════════════════════════ STEP: PREVIEW -->
-  <ng-container *ngIf="step === 'preview'">
+  @if (step === "preview") {
     <div class="details-content">
       <div class="header">
         <h1>Preview — {{ previewRows.length }} rows</h1>
@@ -103,34 +106,32 @@
     <!-- Summary bar -->
     <div class="preview-summary">
       <span class="preview-summary__item">{{ validRows.length }} valid</span>
-      <span
-        class="preview-summary__item preview-summary__item--dup"
-        *ngIf="duplicateCount > 0"
-      >
-        ⚠️ {{ duplicateCount }} already in DB
-      </span>
-      <span
-        class="preview-summary__item preview-summary__item--err"
-        *ngIf="previewRows.length - validRows.length > 0"
-      >
-        ❌ {{ previewRows.length - validRows.length }} errors
-      </span>
-      <span
-        class="preview-summary__item preview-summary__item--enriched"
-        *ngIf="enrichedCount > 0"
-      >
-        ✏️ {{ enrichedCount }} enriched
-      </span>
+      @if (duplicateCount > 0) {
+        <span class="preview-summary__item preview-summary__item--dup">
+          ⚠️ {{ duplicateCount }} already in DB
+        </span>
+      }
+      @if (previewRows.length - validRows.length > 0) {
+        <span class="preview-summary__item preview-summary__item--err">
+          ❌ {{ previewRows.length - validRows.length }} errors
+        </span>
+      }
+      @if (enrichedCount > 0) {
+        <span class="preview-summary__item preview-summary__item--enriched">
+          ✏️ {{ enrichedCount }} enriched
+        </span>
+      }
       <span class="preview-summary__item preview-summary__item--sel">
         ✅ {{ selectedRows.length }} selected
       </span>
     </div>
 
-    <div class="alert alert-error" *ngIf="error">{{ error }}</div>
+    @if (error) {
+      <div class="alert alert-error">{{ error }}</div>
+    }
 
-    <!-- Split layout: table + optional detail panel -->
+    <!-- Split layout -->
     <div class="preview-layout" [class.panel-open]="!!selectedRow">
-      <!-- Table -->
       <div class="preview-table-wrap">
         <table class="data-table">
           <thead>
@@ -153,185 +154,164 @@
             </tr>
           </thead>
           <tbody>
-            <tr
-              *ngFor="let row of previewRows"
-              [class.row-duplicate]="row.duplicateInDb"
-              [class.row-error]="!!row.parseError"
-              [class.row-selected]="row.selected"
-              [class.row-active]="selectedRow?.rowNumber === row.rowNumber"
-            >
-              <td class="col-check">
-                <input
-                  type="checkbox"
-                  [(ngModel)]="row.selected"
-                  [disabled]="!!row.parseError"
-                />
-              </td>
-
-              <td>{{ row.transactionDate ?? "—" }}</td>
-
-              <td
-                class="amount"
-                [class.income]="row.direction === 'INCOME'"
-                [class.expense]="row.direction === 'EXPENSE'"
+            @for (row of previewRows; track row.rowNumber) {
+              <tr
+                [class.row-duplicate]="row.duplicateInDb"
+                [class.row-error]="!!row.parseError"
+                [class.row-selected]="row.selected"
+                [class.row-active]="selectedRow?.rowNumber === row.rowNumber"
               >
-                <ng-container *ngIf="row.amount !== null">
-                  {{
-                    row.direction === "INCOME"
-                      ? "+"
-                      : row.direction === "EXPENSE"
-                        ? "-"
-                        : ""
-                  }}{{ row.amount.toFixed(2) }} €
-                </ng-container>
-                <ng-container *ngIf="row.amount === null">—</ng-container>
-              </td>
-
-              <td>
-                <span
-                  *ngIf="row.direction"
-                  class="badge"
-                  [class.badge--income]="row.direction === 'INCOME'"
-                  [class.badge--expense]="row.direction === 'EXPENSE'"
+                <td class="col-check">
+                  <input
+                    type="checkbox"
+                    [(ngModel)]="row.selected"
+                    [disabled]="!!row.parseError"
+                  />
+                </td>
+                <td>{{ row.transactionDate ?? "—" }}</td>
+                <td
+                  class="amount"
+                  [class.income]="row.direction === 'INCOME'"
+                  [class.expense]="row.direction === 'EXPENSE'"
                 >
-                  {{ row.direction === "INCOME" ? "↑" : "↓" }}
-                </span>
-                <span *ngIf="!row.direction" class="badge badge--neutral"
-                  >?</span
-                >
-              </td>
-
-              <td>
-                <span
-                  *ngIf="row.counterpartyAccount"
-                  class="text-muted monospace"
-                  >{{ row.counterpartyAccount }}</span
-                >
-              </td>
-
-              <td>
-                <!-- Enriched value takes precedence over suggestion -->
-                <span
-                  *ngIf="row.enrichedSubcategoryName"
-                  class="enriched-badge"
-                >
-                  ✏️ {{ row.enrichedSubcategoryName }}
-                </span>
-                <span
-                  *ngIf="
-                    !row.enrichedSubcategoryName && row.suggestedSubcategory
-                  "
-                  class="suggestion-badge"
-                >
-                  ✨ {{ row.suggestedSubcategory.categoryName }} /
-                  {{ row.suggestedSubcategory.subcategoryName }}
-                </span>
-                <span
-                  *ngIf="
-                    !row.enrichedSubcategoryName && !row.suggestedSubcategory
-                  "
-                  class="no-suggestion"
-                  >—</span
-                >
-              </td>
-
-              <td>
-                <span
-                  *ngIf="row.enrichedUnitNumber"
-                  class="enriched-badge enriched-badge--lease"
-                >
-                  ✏️ {{ row.enrichedUnitNumber }} ·
-                  {{ row.enrichedBuildingName }}
-                </span>
-                <span
-                  *ngIf="!row.enrichedUnitNumber && row.suggestedLease"
-                  class="suggestion-badge suggestion-badge--lease"
-                >
-                  🏠 {{ row.suggestedLease.unitNumber }} ·
-                  {{ row.suggestedLease.buildingName }}
-                </span>
-                <span
-                  *ngIf="!row.enrichedUnitNumber && !row.suggestedLease"
-                  class="no-suggestion"
-                  >—</span
-                >
-              </td>
-
-              <td>
-                <span
-                  *ngIf="row.parseError"
-                  class="badge badge--error"
-                  [title]="row.parseError"
-                  >❌ Error</span
-                >
-                <span
-                  *ngIf="!row.parseError && row.duplicateInDb && !row.selected"
-                  class="badge badge--warning"
-                  title="Already in DB"
-                  >⚠️ Dup.</span
-                >
-                <span
-                  *ngIf="!row.parseError && row.duplicateInDb && row.selected"
-                  class="badge badge--override"
-                  title="Duplicate — will be imported anyway"
-                  >⚠️ Override</span
-                >
-                <span
-                  *ngIf="!row.parseError && !row.duplicateInDb"
-                  class="badge badge--ok"
-                  >✓ New</span
-                >
-              </td>
-
-              <td class="col-actions">
-                <!-- Duplicate: discrete link to existing transaction, opens in new tab -->
-                <a
-                  *ngIf="
+                  @if (row.amount !== null) {
+                    {{
+                      row.direction === "INCOME"
+                        ? "+"
+                        : row.direction === "EXPENSE"
+                          ? "-"
+                          : ""
+                    }}{{ row.amount.toFixed(2) }} €
+                  } @else {
+                    —
+                  }
+                </td>
+                <td>
+                  @if (row.direction) {
+                    <span
+                      class="badge"
+                      [class.badge--income]="row.direction === 'INCOME'"
+                      [class.badge--expense]="row.direction === 'EXPENSE'"
+                    >
+                      {{ row.direction === "INCOME" ? "↑" : "↓" }}
+                    </span>
+                  } @else {
+                    <span class="badge badge--neutral">?</span>
+                  }
+                </td>
+                <td>
+                  @if (row.counterpartyAccount) {
+                    <span class="text-muted monospace">{{
+                      row.counterpartyAccount
+                    }}</span>
+                  }
+                </td>
+                <td>
+                  @if (row.enrichedSubcategoryName) {
+                    <span class="enriched-badge"
+                      >✏️ {{ row.enrichedSubcategoryName }}</span
+                    >
+                  } @else if (row.suggestedSubcategory) {
+                    <span class="suggestion-badge">
+                      ✨ {{ row.suggestedSubcategory.categoryName }} /
+                      {{ row.suggestedSubcategory.subcategoryName }}
+                    </span>
+                  } @else {
+                    <span class="no-suggestion">—</span>
+                  }
+                </td>
+                <td>
+                  @if (row.enrichedUnitNumber) {
+                    <span class="enriched-badge enriched-badge--lease">
+                      ✏️ {{ row.enrichedUnitNumber }} ·
+                      {{ row.enrichedBuildingName }}
+                    </span>
+                  } @else if (row.suggestedLease) {
+                    <span class="suggestion-badge suggestion-badge--lease">
+                      🏠 {{ row.suggestedLease.unitNumber }} ·
+                      {{ row.suggestedLease.buildingName }}
+                    </span>
+                  } @else {
+                    <span class="no-suggestion">—</span>
+                  }
+                </td>
+                <td>
+                  @if (row.parseError) {
+                    <span class="badge badge--error" [title]="row.parseError"
+                      >❌ Error</span
+                    >
+                  } @else if (
+                    !row.parseError && row.duplicateInDb && !row.selected
+                  ) {
+                    <span class="badge badge--warning" title="Already in DB"
+                      >⚠️ Dup.</span
+                    >
+                  } @else if (
+                    !row.parseError && row.duplicateInDb && row.selected
+                  ) {
+                    <span
+                      class="badge badge--override"
+                      title="Duplicate — will be imported anyway"
+                      >⚠️ Override</span
+                    >
+                  } @else {
+                    <span class="badge badge--ok">✓ New</span>
+                  }
+                </td>
+                <td class="col-actions">
+                  @if (
                     !row.parseError &&
                     row.duplicateInDb &&
                     row.duplicateTransactionId
-                  "
-                  class="dup-link"
-                  [routerLink]="['/transactions', row.duplicateTransactionId]"
-                  target="_blank"
-                  title="View existing transaction"
-                >
-                  voir →
-                </a>
-                <!-- New row: open enrichment panel -->
-                <button
-                  *ngIf="!row.parseError && !row.duplicateInDb"
-                  class="btn btn-sm btn-ghost"
-                  [class.btn-ghost--active]="
-                    selectedRow?.rowNumber === row.rowNumber
-                  "
-                  (click)="
-                    selectedRow?.rowNumber === row.rowNumber
-                      ? closePanel()
-                      : openPanel(row)
-                  "
-                  title="Enrich before import"
-                >
-                  ✏️
-                </button>
-              </td>
-            </tr>
+                  ) {
+                    <a
+                      class="dup-link"
+                      [routerLink]="[
+                        '/transactions',
+                        row.duplicateTransactionId,
+                      ]"
+                      target="_blank"
+                      title="View existing transaction"
+                    >
+                      voir →
+                    </a>
+                  }
+                  @if (!row.parseError && !row.duplicateInDb) {
+                    <button
+                      class="btn btn-sm btn-ghost"
+                      [class.btn-ghost--active]="
+                        selectedRow?.rowNumber === row.rowNumber
+                      "
+                      (click)="
+                        selectedRow?.rowNumber === row.rowNumber
+                          ? closePanel()
+                          : openPanel(row)
+                      "
+                      title="Enrich before import"
+                    >
+                      ✏️
+                    </button>
+                  }
+                </td>
+              </tr>
+            }
           </tbody>
         </table>
       </div>
 
       <!-- Detail panel -->
-      <app-import-row-detail-panel
-        *ngIf="selectedRow"
-        [row]="selectedRow"
-        (close)="closePanel()"
-        (rowChanged)="onRowChanged($event)"
-      ></app-import-row-detail-panel>
+      @if (selectedRow) {
+        <app-import-row-detail-panel
+          [row]="selectedRow"
+          (close)="closePanel()"
+          (rowChanged)="onRowChanged($event)"
+        ></app-import-row-detail-panel>
+      }
     </div>
-  </ng-container>
+  }
 
   <!-- ══════════════════════════════════════════════════ STEP: RESULT -->
-  <ng-container *ngIf="step === 'result' && result">
+  @if (step === "result" && result) {
     <div class="details-content">
       <div class="header"><h1>Import complete</h1></div>
     </div>
@@ -346,29 +326,29 @@
           <span class="result-stat__value">{{ result.importedCount }}</span>
           <span class="result-stat__label">Imported</span>
         </div>
-        <div
-          class="result-stat result-stat--warning"
-          *ngIf="result.duplicateCount > 0"
-        >
-          <span class="result-stat__value">{{ result.duplicateCount }}</span>
-          <span class="result-stat__label">Duplicates skipped</span>
-        </div>
-        <div
-          class="result-stat result-stat--error"
-          *ngIf="result.errorCount > 0"
-        >
-          <span class="result-stat__value">{{ result.errorCount }}</span>
-          <span class="result-stat__label">Errors</span>
-        </div>
+        @if (result.duplicateCount > 0) {
+          <div class="result-stat result-stat--warning">
+            <span class="result-stat__value">{{ result.duplicateCount }}</span>
+            <span class="result-stat__label">Duplicates skipped</span>
+          </div>
+        }
+        @if (result.errorCount > 0) {
+          <div class="result-stat result-stat--error">
+            <span class="result-stat__value">{{ result.errorCount }}</span>
+            <span class="result-stat__label">Errors</span>
+          </div>
+        }
       </div>
-      <div class="import-actions" *ngIf="result.batchId">
-        <button class="btn btn-primary" (click)="reviewBatch()">
-          Review imported transactions →
-        </button>
-        <button class="btn btn-secondary" (click)="clearFile()">
-          Import another file
-        </button>
-      </div>
+      @if (result.batchId) {
+        <div class="import-actions">
+          <button class="btn btn-primary" (click)="reviewBatch()">
+            Review imported transactions →
+          </button>
+          <button class="btn btn-secondary" (click)="clearFile()">
+            Import another file
+          </button>
+        </div>
+      }
     </div>
-  </ng-container>
+  }
 </div>

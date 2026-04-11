@@ -1,158 +1,251 @@
-<div class="settings-page" *ngIf="!loading">
-
-  <div class="details-content">
-    <div class="header">
-      <h1>⚙️ Paramètres</h1>
+@if (!loading) {
+  <div class="settings-page">
+    <div class="details-content">
+      <div class="header">
+        <h1>⚙️ Paramètres</h1>
+      </div>
     </div>
+
+    @if (error) {
+      <div class="alert alert-error">{{ error }}</div>
+    }
+    @if (successMessage) {
+      <div class="alert alert-success">✅ {{ successMessage }}</div>
+    }
+    @if (loading) {
+      <div class="loading">Chargement…</div>
+    }
+
+    @if (!loading && form) {
+      <div class="settings-layout">
+        <!-- Sidebar -->
+        <aside class="settings-nav">
+          <button
+            class="settings-nav__item"
+            [class.settings-nav__item--active]="activeSection === 'general'"
+            (click)="setSection('general')"
+          >
+            🌐 Général
+          </button>
+          <button
+            class="settings-nav__item"
+            [class.settings-nav__item--active]="activeSection === 'alerts'"
+            (click)="setSection('alerts')"
+          >
+            🔔 Alertes
+          </button>
+          <button
+            class="settings-nav__item"
+            [class.settings-nav__item--active]="activeSection === 'import'"
+            (click)="setSection('import')"
+          >
+            📥 Import de transactions
+          </button>
+        </aside>
+
+        <!-- Main content -->
+        <form [formGroup]="form" (ngSubmit)="save()" class="settings-content">
+          <!-- General -->
+          @if (activeSection === "general") {
+            <div class="info-card">
+              <div class="section-header">
+                <h2>🌐 Général</h2>
+              </div>
+
+              <div class="settings-fields">
+                @for (config of generalConfigs; track config.configKey) {
+                  <!-- Date format -->
+                  @if (isDateFormatKey(config.configKey)) {
+                    <div class="form-group">
+                      <label [for]="config.configKey">{{
+                        labelFor(config.configKey)
+                      }}</label>
+                      <select
+                        [id]="config.configKey + '_preset'"
+                        [value]="presetOrCustom(config.configKey)"
+                        (change)="
+                          onDateFormatSelectChange(config.configKey, $event)
+                        "
+                      >
+                        @for (p of DATE_FORMAT_PRESETS; track p.value) {
+                          <option [value]="p.value">{{ p.label }}</option>
+                        }
+                        <option value="__custom__">Personnalisé…</option>
+                      </select>
+                      @if (presetOrCustom(config.configKey) === "__custom__") {
+                        <input
+                          [id]="config.configKey"
+                          type="text"
+                          [formControlName]="config.configKey"
+                          placeholder="ex: dd-MM-yyyy"
+                          class="mt-2"
+                        />
+                      }
+                      @if (fieldError(config.configKey)) {
+                        <div class="field-error">
+                          {{ fieldError(config.configKey) }}
+                        </div>
+                      }
+                    </div>
+                  }
+
+                  <!-- Text fields -->
+                  @if (!isDateFormatKey(config.configKey)) {
+                    <div class="form-group">
+                      <label [for]="config.configKey">{{
+                        labelFor(config.configKey)
+                      }}</label>
+                      <input
+                        [id]="config.configKey"
+                        type="text"
+                        [formControlName]="config.configKey"
+                      />
+                      @if (fieldError(config.configKey)) {
+                        <div class="field-error">
+                          {{ fieldError(config.configKey) }}
+                        </div>
+                      }
+                    </div>
+                  }
+                }
+              </div>
+
+              <div class="form-actions">
+                <button
+                  type="submit"
+                  class="btn btn-primary"
+                  [disabled]="saving"
+                >
+                  {{ saving ? "Enregistrement…" : "Enregistrer" }}
+                </button>
+              </div>
+            </div>
+          }
+
+          <!-- Alerts -->
+          @if (activeSection === "alerts") {
+            <div class="info-card">
+              <div class="section-header">
+                <h2>🔔 Seuils d'alertes</h2>
+              </div>
+              <p class="section-desc">
+                Délais (en jours) avant lesquels une alerte est générée.
+              </p>
+
+              <div class="settings-fields">
+                @for (config of alertConfigs; track config.configKey) {
+                  <div class="form-group">
+                    <label [for]="config.configKey">{{
+                      labelFor(config.configKey)
+                    }}</label>
+                    <div class="input-with-unit">
+                      <input
+                        [id]="config.configKey"
+                        type="number"
+                        min="1"
+                        [formControlName]="config.configKey"
+                      />
+                      <span class="unit">jours</span>
+                    </div>
+                    @if (fieldError(config.configKey)) {
+                      <div class="field-error">
+                        {{ fieldError(config.configKey) }}
+                      </div>
+                    }
+                  </div>
+                }
+              </div>
+
+              <div class="form-actions">
+                <button
+                  type="submit"
+                  class="btn btn-primary"
+                  [disabled]="saving"
+                >
+                  {{ saving ? "Enregistrement…" : "Enregistrer" }}
+                </button>
+              </div>
+            </div>
+          }
+
+          <!-- Import -->
+          @if (activeSection === "import") {
+            <div class="info-card">
+              <div class="section-header">
+                <h2>📥 Import de transactions</h2>
+              </div>
+              <p class="section-desc">
+                Les formats d'import sont définis par des parseurs dédiés,
+                sélectionnables lors de chaque import. Ces paramètres
+                configurent le comportement global.
+              </p>
+
+              <div class="settings-fields">
+                @for (config of importConfigs; track config.configKey) {
+                  <!-- Select -->
+                  @if (isSelectKey(config.configKey)) {
+                    <div class="form-group">
+                      <label [for]="config.configKey">{{
+                        labelFor(config.configKey)
+                      }}</label>
+                      <select
+                        [id]="config.configKey"
+                        [formControlName]="config.configKey"
+                      >
+                        @for (opt of ON_DUPLICATE_OPTIONS; track opt.value) {
+                          <option [value]="opt.value">{{ opt.label }}</option>
+                        }
+                      </select>
+                      @if (fieldError(config.configKey)) {
+                        <div class="field-error">
+                          {{ fieldError(config.configKey) }}
+                        </div>
+                      }
+                    </div>
+                  }
+
+                  <!-- Integer fields -->
+                  @if (
+                    !isSelectKey(config.configKey) &&
+                    isIntegerKey(config.configKey)
+                  ) {
+                    <div class="form-group">
+                      <label [for]="config.configKey">{{
+                        labelFor(config.configKey)
+                      }}</label>
+                      <input
+                        [id]="config.configKey"
+                        type="number"
+                        min="1"
+                        [formControlName]="config.configKey"
+                      />
+                      <span class="field-hint"
+                        >Minimum 1 — une valeur plus élevée = suggestions moins
+                        fréquentes</span
+                      >
+                      @if (fieldError(config.configKey)) {
+                        <div class="field-error">
+                          {{ fieldError(config.configKey) }}
+                        </div>
+                      }
+                    </div>
+                  }
+                }
+              </div>
+
+              <div class="form-actions">
+                <button
+                  type="submit"
+                  class="btn btn-primary"
+                  [disabled]="saving"
+                >
+                  {{ saving ? "Enregistrement…" : "Enregistrer" }}
+                </button>
+              </div>
+            </div>
+          }
+        </form>
+      </div>
+    }
   </div>
-
-  <div class="alert alert-error" *ngIf="error">{{ error }}</div>
-  <div class="alert alert-success" *ngIf="successMessage">✅ {{ successMessage }}</div>
-  <div class="loading" *ngIf="loading">Chargement…</div>
-
-  <div class="settings-layout" *ngIf="!loading && form">
-
-    <!-- ── Sidebar ──────────────────────────────────────────────────────────── -->
-    <aside class="settings-nav">
-      <button class="settings-nav__item"
-              [class.settings-nav__item--active]="activeSection === 'general'"
-              (click)="setSection('general')">
-        🌐 Général
-      </button>
-      <button class="settings-nav__item"
-              [class.settings-nav__item--active]="activeSection === 'alerts'"
-              (click)="setSection('alerts')">
-        🔔 Alertes
-      </button>
-      <button class="settings-nav__item"
-              [class.settings-nav__item--active]="activeSection === 'import'"
-              (click)="setSection('import')">
-        📥 Import de transactions
-      </button>
-    </aside>
-
-    <!-- ── Main content ─────────────────────────────────────────────────────── -->
-    <form [formGroup]="form" (ngSubmit)="save()" class="settings-content">
-
-      <!-- ── General ─────────────────────────────────────────────────────────── -->
-      <div *ngIf="activeSection === 'general'" class="info-card">
-        <div class="section-header">
-          <h2>🌐 Général</h2>
-        </div>
-
-        <div class="settings-fields">
-          <ng-container *ngFor="let config of generalConfigs">
-
-            <!-- Date format — select + optional custom input -->
-            <div class="form-group" *ngIf="isDateFormatKey(config.configKey)">
-              <label [for]="config.configKey">{{ labelFor(config.configKey) }}</label>
-              <select [id]="config.configKey + '_preset'"
-                      [value]="presetOrCustom(config.configKey)"
-                      (change)="onDateFormatSelectChange(config.configKey, $event)">
-                <option *ngFor="let p of DATE_FORMAT_PRESETS" [value]="p.value">{{ p.label }}</option>
-                <option value="__custom__">Personnalisé…</option>
-              </select>
-              <input *ngIf="presetOrCustom(config.configKey) === '__custom__'"
-                     [id]="config.configKey"
-                     type="text"
-                     [formControlName]="config.configKey"
-                     placeholder="ex: dd-MM-yyyy"
-                     class="mt-2" />
-              <div class="field-error" *ngIf="fieldError(config.configKey)">{{ fieldError(config.configKey) }}</div>
-            </div>
-
-            <!-- Text fields -->
-            <div class="form-group" *ngIf="!isDateFormatKey(config.configKey)">
-              <label [for]="config.configKey">{{ labelFor(config.configKey) }}</label>
-              <input [id]="config.configKey"
-                     type="text"
-                     [formControlName]="config.configKey" />
-              <div class="field-error" *ngIf="fieldError(config.configKey)">{{ fieldError(config.configKey) }}</div>
-            </div>
-
-          </ng-container>
-        </div>
-
-        <div class="form-actions">
-          <button type="submit" class="btn btn-primary" [disabled]="saving">
-            {{ saving ? 'Enregistrement…' : 'Enregistrer' }}
-          </button>
-        </div>
-      </div>
-
-      <!-- ── Alerts ──────────────────────────────────────────────────────────── -->
-      <div *ngIf="activeSection === 'alerts'" class="info-card">
-        <div class="section-header">
-          <h2>🔔 Seuils d'alertes</h2>
-        </div>
-        <p class="section-desc">Délais (en jours) avant lesquels une alerte est générée.</p>
-
-        <div class="settings-fields">
-          <div class="form-group" *ngFor="let config of alertConfigs">
-            <label [for]="config.configKey">{{ labelFor(config.configKey) }}</label>
-            <div class="input-with-unit">
-              <input [id]="config.configKey"
-                     type="number"
-                     min="1"
-                     [formControlName]="config.configKey" />
-              <span class="unit">jours</span>
-            </div>
-            <div class="field-error" *ngIf="fieldError(config.configKey)">{{ fieldError(config.configKey) }}</div>
-          </div>
-        </div>
-
-        <div class="form-actions">
-          <button type="submit" class="btn btn-primary" [disabled]="saving">
-            {{ saving ? 'Enregistrement…' : 'Enregistrer' }}
-          </button>
-        </div>
-      </div>
-
-      <!-- ── Import ──────────────────────────────────────────────────────────── -->
-      <div *ngIf="activeSection === 'import'" class="info-card">
-        <div class="section-header">
-          <h2>📥 Import de transactions</h2>
-        </div>
-        <p class="section-desc">
-          Les formats d'import sont définis par des parseurs dédiés, sélectionnables
-          lors de chaque import. Ces paramètres configurent le comportement global.
-        </p>
-
-        <div class="settings-fields">
-          <ng-container *ngFor="let config of importConfigs">
-
-            <!-- On duplicate — select -->
-            <div class="form-group" *ngIf="isSelectKey(config.configKey)">
-              <label [for]="config.configKey">{{ labelFor(config.configKey) }}</label>
-              <select [id]="config.configKey" [formControlName]="config.configKey">
-                <option *ngFor="let opt of ON_DUPLICATE_OPTIONS" [value]="opt.value">
-                  {{ opt.label }}
-                </option>
-              </select>
-              <div class="field-error" *ngIf="fieldError(config.configKey)">{{ fieldError(config.configKey) }}</div>
-            </div>
-
-            <!-- Integer fields -->
-            <div class="form-group" *ngIf="!isSelectKey(config.configKey) && isIntegerKey(config.configKey)">
-              <label [for]="config.configKey">{{ labelFor(config.configKey) }}</label>
-              <input [id]="config.configKey"
-                     type="number"
-                     min="1"
-                     [formControlName]="config.configKey" />
-              <span class="field-hint">Minimum 1 — une valeur plus élevée = suggestions moins fréquentes</span>
-              <div class="field-error" *ngIf="fieldError(config.configKey)">{{ fieldError(config.configKey) }}</div>
-            </div>
-
-          </ng-container>
-        </div>
-
-        <div class="form-actions">
-          <button type="submit" class="btn btn-primary" [disabled]="saving">
-            {{ saving ? 'Enregistrement…' : 'Enregistrer' }}
-          </button>
-        </div>
-      </div>
-
-    </form>
-  </div>
-</div>
+}

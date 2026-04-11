@@ -21,87 +21,102 @@
   </div>
 
   <!-- Error -->
-  <div *ngIf="errorMessage" class="alert alert-error">{{ errorMessage }}</div>
+  @if (errorMessage) {
+    <div class="alert alert-error">{{ errorMessage }}</div>
+  }
 
   <!-- Loading -->
-  <div *ngIf="isLoading" class="loading">Loading...</div>
+  @if (isLoading) {
+    <div class="loading">Loading...</div>
+  }
 
   <!-- Empty state -->
-  <div *ngIf="!isLoading && persons.length === 0" class="empty-state">
-    <p>No persons yet.</p>
-    <a routerLink="/persons/new" class="btn btn-primary">Add Person</a>
-  </div>
+  @if (!isLoading && persons.length === 0) {
+    <div class="empty-state">
+      <p>No persons yet.</p>
+      <a routerLink="/persons/new" class="btn btn-primary">Add Person</a>
+    </div>
+  }
 
   <!-- Table -->
-  <div *ngIf="!isLoading && persons.length > 0" class="data-table">
-    <table>
-      <thead>
-        <tr>
-          <th class="sortable" (click)="sortBy('lastName')">
-            Last Name
-            <span class="sort-icon" [class.active]="sortField === 'lastName'">
-              {{ sortField | sortIcon: sortDirection : "lastName" }}
-            </span>
-          </th>
-          <th class="sortable" (click)="sortBy('firstName')">
-            First Name
-            <span class="sort-icon" [class.active]="sortField === 'firstName'">
-              {{ sortField | sortIcon: sortDirection : "firstName" }}
-            </span>
-          </th>
-          <th class="sortable" (click)="sortBy('city')">
-            City
-            <span class="sort-icon" [class.active]="sortField === 'city'">
-              {{ sortField | sortIcon: sortDirection : "city" }}
-            </span>
-          </th>
-          <th>National ID</th>
-          <th>Roles</th>
-        </tr>
-      </thead>
-      <tbody>
-        <tr
-          *ngFor="let person of persons"
-          class="clickable"
-          [routerLink]="['/persons', person.id]"
-        >
-          <td>
-            <strong>{{ person.lastName }}</strong>
-          </td>
-          <td>{{ person.firstName }}</td>
-          <td>{{ person.city || "—" }}</td>
-          <td>{{ person.nationalId || "—" }}</td>
-          <td>
-            <span *ngIf="person.isOwner" class="badge badge-owner">Owner</span>
-            <span *ngIf="person.isTenant" class="badge badge-tenant"
-              >Tenant</span
-            >
-            <span *ngIf="!person.isOwner && !person.isTenant">—</span>
-          </td>
-        </tr>
-      </tbody>
-    </table>
-  </div>
+  @if (!isLoading && persons.length > 0) {
+    <div class="data-table">
+      <table>
+        <thead>
+          <tr>
+            <th class="sortable" (click)="sortBy('lastName')">
+              Last Name
+              <span class="sort-icon" [class.active]="sortField === 'lastName'">
+                {{ sortField | sortIcon: sortDirection : "lastName" }}
+              </span>
+            </th>
+            <th class="sortable" (click)="sortBy('firstName')">
+              First Name
+              <span
+                class="sort-icon"
+                [class.active]="sortField === 'firstName'"
+              >
+                {{ sortField | sortIcon: sortDirection : "firstName" }}
+              </span>
+            </th>
+            <th class="sortable" (click)="sortBy('city')">
+              City
+              <span class="sort-icon" [class.active]="sortField === 'city'">
+                {{ sortField | sortIcon: sortDirection : "city" }}
+              </span>
+            </th>
+            <th>National ID</th>
+            <th>Roles</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (person of persons; track person.id) {
+            <tr class="clickable" [routerLink]="['/persons', person.id]">
+              <td>
+                <strong>{{ person.lastName }}</strong>
+              </td>
+              <td>{{ person.firstName }}</td>
+              <td>{{ person.city || "—" }}</td>
+              <td>{{ person.nationalId || "—" }}</td>
+              <td>
+                @if (person.isOwner) {
+                  <span class="badge badge-owner">Owner</span>
+                }
+                @if (person.isTenant) {
+                  <span class="badge badge-tenant">Tenant</span>
+                }
+                @if (!person.isOwner && !person.isTenant) {
+                  <span>—</span>
+                }
+              </td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+  }
 
   <!-- Pagination -->
-  <div *ngIf="totalPages > 1" class="pagination">
-    <button
-      class="btn btn-secondary"
-      (click)="goToPage(currentPage - 1)"
-      [disabled]="currentPage === 0"
-    >
-      Previous
-    </button>
-    <span class="page-info"
-      >{{ totalElements }} person(s) — Page {{ currentPage + 1 }} of
-      {{ totalPages }}</span
-    >
-    <button
-      class="btn btn-secondary"
-      (click)="goToPage(currentPage + 1)"
-      [disabled]="currentPage === totalPages - 1"
-    >
-      Next
-    </button>
-  </div>
+  @if (totalPages > 1) {
+    <div class="pagination">
+      <button
+        class="btn btn-secondary"
+        (click)="goToPage(currentPage - 1)"
+        [disabled]="currentPage === 0"
+      >
+        Previous
+      </button>
+      <span class="page-info"
+        >{{ totalElements }} person(s) — Page {{ currentPage + 1 }} of
+        {{ totalPages }}</span
+      >
+      <button
+        class="btn btn-secondary"
+        (click)="goToPage(currentPage + 1)"
+        [disabled]="currentPage === totalPages - 1"
+      >
+        Next
+      </button>
+    </div>
+  }
 </div>
