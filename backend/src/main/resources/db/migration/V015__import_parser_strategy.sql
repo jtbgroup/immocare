@@ -29,12 +29,10 @@ ALTER TABLE import_batch
 ALTER TABLE import_batch
     ADD COLUMN bank_account_id BIGINT REFERENCES bank_account (id)  ON DELETE SET NULL;
 
-ALTER TABLE financial_transaction
-    ADD COLUMN import_fingerprint VARCHAR(64);
+
 ALTER TABLE financial_transaction
     ADD COLUMN parser_id          BIGINT REFERENCES import_parser (id) ON DELETE SET NULL;
 
-CREATE INDEX idx_ft_fingerprint ON financial_transaction (import_fingerprint);
 
 ALTER TABLE bank_account
     ADD COLUMN owner_user_id BIGINT REFERENCES app_user (id) ON DELETE SET NULL;

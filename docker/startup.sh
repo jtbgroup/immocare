@@ -1,11 +1,11 @@
 #!/bin/sh
 echo "=== ImmoCare Startup ==="
-echo "Profil actif : ${SPRING_PROFILES_ACTIVE:-h2}"
+echo "Profil actif : ${SPRING_PROFILES_ACTIVE:-postgres}}"
 
 # Créer le répertoire pid nginx (requis sur Alpine)
 mkdir -p /run/nginx
 
-# Créer le répertoire data H2 si besoin
+# Créer le répertoire data si besoin
 mkdir -p /app/data
 
 # Démarrer nginx en arrière-plan
@@ -23,9 +23,9 @@ echo "✓ nginx démarré"
 
 # ── Construire les arguments JVM selon le profil ──────────────────────────
 
-ACTIVE_PROFILE="${SPRING_PROFILES_ACTIVE:-h2}"
+ACTIVE_PROFILE="${SPRING_PROFILES_ACTIVE:-postgres}"
 
-if [ "$ACTIVE_PROFILE" = "postgres" ] || [ "$ACTIVE_PROFILE" = "production" ]; then
+
     echo "Démarrage Spring Boot → PostgreSQL"
     echo "Base : ${DB_HOST:-postgres}:${DB_PORT:-5432}/${DB_NAME:-immocare}"
     DB_ARGS="-Dspring.datasource.url=jdbc:postgresql://${DB_HOST:-postgres}:${DB_PORT:-5432}/${DB_NAME:-immocare} \
@@ -33,16 +33,7 @@ if [ "$ACTIVE_PROFILE" = "postgres" ] || [ "$ACTIVE_PROFILE" = "production" ]; t
              -Dspring.datasource.password=${DB_PASSWORD:-immocare} \
              -Dspring.flyway.enabled=true \
              -Dspring.jpa.hibernate.ddl-auto=none"
-else
-    echo "Démarrage Spring Boot → H2 (fichier /app/data/immocare)"
-    DB_ARGS="-Dspring.datasource.url='jdbc:h2:file:/app/data/immocare;AUTO_SERVER=TRUE;NON_KEYWORDS=VALUE' \
-             -Dspring.datasource.driverClassName=org.h2.Driver \
-             -Dspring.datasource.username=sa \
-             -Dspring.datasource.password= \
-             -Dspring.flyway.enabled=true \
-             -Dspring.jpa.hibernate.ddl-auto=validate \
-             -Dspring.jpa.database-platform=org.hibernate.dialect.H2Dialect"
-fi
+
 
 # Démarrer Spring Boot (prend la main avec exec)
 exec java \

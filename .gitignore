@@ -197,11 +197,11 @@ junit/
 #################
 
 # Frontend build
-/code/frontend/dist/
-/code/frontend/.angular/
+/frontend/dist/
+/frontend/.angular/
 
 # Backend build
-/code/backend/target/
+/backend/target/
 
 #################
 # Logs

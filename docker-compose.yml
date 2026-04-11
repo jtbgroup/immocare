@@ -9,9 +9,7 @@ services:
     container_name: immocare-app
     restart: unless-stopped
     environment:
-      # Profil actif : h2 (défaut) ou postgres
-      # Pour utiliser PostgreSQL : DB_PROFILE=postgres docker compose --profile postgres up
-      SPRING_PROFILES_ACTIVE: ${DB_PROFILE:-h2}
+      SPRING_PROFILES_ACTIVE: ${DB_PROFILE:-postgres}
       SERVER_PORT: 8080
       # PostgreSQL (utilisé si SPRING_PROFILES_ACTIVE=postgres)
       DB_HOST: ${DB_HOST:-postgres}
@@ -21,15 +19,12 @@ services:
       DB_PASSWORD: ${DB_PASSWORD:-immocare}
       JAVA_OPTS: "-Xmx1024m -Xms512m"
     volumes:
-      # Persistance H2 (ignoré si profil postgres)
-      - h2_data:/app/data
       - app_logs:/var/log/nginx
     ports:
       - "8090:80"
     depends_on:
       postgres:
         condition: service_healthy
-        required: false   # pas obligatoire si profil h2
     networks:
       - immocare-network
     healthcheck:
@@ -60,12 +55,10 @@ services:
       retries: 5
     networks:
       - immocare-network
-    profiles:
-      - postgres   # démarré seulement avec : docker compose --profile postgres up
+
 
 volumes:
-  h2_data:
-    driver: local
+
   postgres_data:
     driver: local
   app_logs:

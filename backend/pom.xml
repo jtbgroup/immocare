@@ -61,13 +61,6 @@
       <scope>runtime</scope>
     </dependency>
 
-    <!-- Database — H2 (profil h2 en dev + tests) -->
-    <dependency>
-      <groupId>com.h2database</groupId>
-      <artifactId>h2</artifactId>
-      <scope>runtime</scope>
-    </dependency>
-
     <!-- Flyway — Spring Boot 4 requires the dedicated starter for autoconfiguration -->
     <dependency>
       <groupId>org.springframework.boot</groupId>

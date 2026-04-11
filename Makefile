@@ -6,7 +6,7 @@
 
 # Variables
 APP_NAME = immocare
-VERSION  = 1.0
+VERSION := $(shell cat VERSION 2>/dev/null || echo "0.0.1")
 BACKUP_DIR = ./backups
 
 help: ## Affiche les commandes disponibles
@@ -18,6 +18,22 @@ help: ## Affiche les commandes disponibles
 	@echo ""
 	@grep -E '^[a-zA-Z_-]+:.*?## .*$$' $(MAKEFILE_LIST) | sort | \
 		awk 'BEGIN {FS = ":.*?## "}; {printf "\033[36m%-22s\033[0m %s\n", $$1, $$2}'
+
+# ============================================
+# VERSION MANAGEMENT
+# ============================================
+show-version:
+	@echo "📌 Current version: $(VERSION)"
+
+set-version:
+	@if [ -z "$(V)" ]; then \
+		echo "❌ Usage: make set-version V=x.y.z"; \
+		exit 1; \
+	fi
+	@echo "$(V)" > VERSION
+	@mvn -f backend/pom.xml versions:set -DnewVersion=$(V) -DgenerateBackupPoms=false -q 2>/dev/null || echo "⚠️  Maven version update skipped"
+	@cd frontend && npm version $(V) --no-git-tag-version --allow-same-version > /dev/null 2>&1 || echo "⚠️  npm version update skipped"
+	@echo "✅ Version set to $(V) (VERSION file updated)"
 
 # ── Production — H2 (défaut) ──────────────────────────────────────────────────
 
@@ -67,17 +83,6 @@ rebuild: ## Build complet sans cache
 
 # ── Développement (usage quotidien) ──────────────────────────────────────────
 
-dev-start-h2:
-	@echo "🚀 Starting development environment (H2)..."
-	docker compose -f docker-compose.dev.yml up -d --build
-	@echo ""
-	@echo "✅ Development services started!"
-	@echo "   🌐 App (Nginx):       http://localhost:8080"
-	@echo "   🎨 Angular direct:    http://localhost:4200"
-	@echo "   🔧 Backend direct:    http://localhost:8081"
-	@echo "   🐛 Remote Debug:      localhost:5005"
-	@echo ""
-	@echo "📋 View logs: make dev-logs"
 
 dev-down:
 	@echo "⛔ Stopping development environment..."
@@ -92,13 +97,10 @@ dev-clean:
 	docker compose -f docker-compose.dev.yml --profile postgres down -v
 	@echo "✅ Development environment cleaned"
 
-dev-clean-start-h2:
-	make dev-clean
-	make dev-start-h2
 
-dev-start-postgres: ## ▶  Démarrer l'env de dev avec PostgreSQL (sans rebuild)
+dev-start: ## ▶  Démarrer l'env de dev avec PostgreSQL (sans rebuild)
 	@echo "Démarrage env de dev (PostgreSQL)..."
-	DB_PROFILE=postgres docker compose -f docker-compose.dev.yml --profile postgres up -d
+	DB_PROFILE=postgres docker compose -f docker-compose.dev.yml up -d
 	@echo ""
 	@echo "✅ Development services (postgres) started!"
 	@echo "   🌐 App (Nginx):       http://localhost:8080"
@@ -108,9 +110,9 @@ dev-start-postgres: ## ▶  Démarrer l'env de dev avec PostgreSQL (sans rebuild
 	@echo ""
 	@echo "📋 View logs: make dev-logs"
 
-dev-clean-start-postgres:
+dev-clean-start:
 	make dev-clean
-	make dev-start-postgres
+	make dev-start
 
 dev-stop: ## ⏹  Arrêter l'env de dev
 	@echo "Arrêt env de dev..."
