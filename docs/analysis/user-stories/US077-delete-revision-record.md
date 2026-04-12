@@ -4,7 +4,7 @@
 |-----------|-------|
 | **Story ID** | US077 |
 | **Epic** | Fire Safety Management |
-| **Related UC** | UC013 |
+| **Related UC** | UC011 |
 | **Priority** | SHOULD HAVE |
 | **Story Points** | 1 |
 

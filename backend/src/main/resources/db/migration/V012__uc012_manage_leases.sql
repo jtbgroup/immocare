@@ -1,5 +1,9 @@
 -- ============================================================
--- V009 — UC010: Leases
+-- V012 — UC012: Manage Leases
+-- Tables: lease, lease_tenant, lease_rent_adjustment
+-- Note: lease_indexation_history is intentionally omitted.
+--       Indexation is now tracked via lease_rent_adjustment
+--       (field = 'RENT') as per UC012 design decision.
 -- ============================================================
 
 CREATE TABLE lease (
@@ -33,8 +37,8 @@ CREATE TABLE lease (
     created_at                    TIMESTAMP     NOT NULL DEFAULT NOW(),
     updated_at                    TIMESTAMP     NOT NULL DEFAULT NOW(),
 
-    CONSTRAINT chk_lease_status    CHECK (status     IN ('DRAFT','ACTIVE','FINISHED','CANCELLED')),
-    CONSTRAINT chk_lease_type      CHECK (lease_type IN ('SHORT_TERM','MAIN_RESIDENCE_3Y','MAIN_RESIDENCE_6Y','MAIN_RESIDENCE_9Y','STUDENT','GLIDING','COMMERCIAL')),
+    CONSTRAINT chk_lease_status    CHECK (status      IN ('DRAFT','ACTIVE','FINISHED','CANCELLED')),
+    CONSTRAINT chk_lease_type      CHECK (lease_type  IN ('SHORT_TERM','MAIN_RESIDENCE_3Y','MAIN_RESIDENCE_6Y','MAIN_RESIDENCE_9Y','STUDENT','GLIDING','COMMERCIAL')),
     CONSTRAINT chk_charges_type    CHECK (charges_type IN ('FORFAIT','PROVISION')),
     CONSTRAINT chk_deposit_type    CHECK (deposit_type IN ('BLOCKED_ACCOUNT','BANK_GUARANTEE','CPAS','INSURANCE','HAND_TO_HAND') OR deposit_type IS NULL),
     CONSTRAINT chk_end_after_start CHECK (end_date >= start_date)
@@ -52,8 +56,9 @@ CREATE TABLE lease_tenant (
     lease_id  BIGINT      NOT NULL REFERENCES lease  (id) ON DELETE CASCADE,
     person_id BIGINT      NOT NULL REFERENCES person (id) ON DELETE RESTRICT,
     role      VARCHAR(20) NOT NULL DEFAULT 'PRIMARY',
-    CONSTRAINT pk_lease_tenant PRIMARY KEY (lease_id, person_id),
-    CONSTRAINT chk_tenant_role CHECK (role IN ('PRIMARY','CO_TENANT','GUARANTOR'))
+
+    CONSTRAINT pk_lease_tenant  PRIMARY KEY (lease_id, person_id),
+    CONSTRAINT chk_tenant_role  CHECK (role IN ('PRIMARY','CO_TENANT','GUARANTOR'))
 );
 
 CREATE INDEX idx_lease_tenant_person ON lease_tenant (person_id);
@@ -72,19 +77,3 @@ CREATE TABLE lease_rent_adjustment (
 );
 
 CREATE INDEX idx_rent_adj_lease ON lease_rent_adjustment (lease_id, effective_date DESC);
-
-CREATE TABLE lease_indexation_history (
-    id                     BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
-    lease_id               BIGINT        NOT NULL REFERENCES lease (id) ON DELETE CASCADE,
-    calculation_date       DATE          NOT NULL,
-    application_date       DATE          NOT NULL,
-    old_rent               NUMERIC(10,2) NOT NULL,
-    new_index_value        NUMERIC(8,4)  NOT NULL,
-    new_index_month        DATE          NOT NULL,
-    applied_rent           NUMERIC(10,2) NOT NULL CHECK (applied_rent > 0),
-    notification_sent_date DATE          NULL,
-    notes                  TEXT          NULL,
-    created_at             TIMESTAMP     NOT NULL DEFAULT NOW()
-);
-
-CREATE INDEX idx_indexation_lease ON lease_indexation_history (lease_id, application_date DESC);

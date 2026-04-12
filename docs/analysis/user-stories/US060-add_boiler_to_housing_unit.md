@@ -4,7 +4,7 @@
 |-----------|-------|
 | **Story ID** | US060 |
 | **Epic** | Boiler Management |
-| **Related UC** | UC011 |
+| **Related UC** | UC013 |
 | **Priority** | MUST HAVE |
 | **Story Points** | 3 |
 

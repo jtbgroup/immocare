@@ -1,5 +1,6 @@
 -- ============================================================
--- V001 — AUTH / UC007: Application users
+-- V001 — UC001: Authentication
+-- Tables: app_user
 -- ============================================================
 
 CREATE TABLE app_user (
@@ -23,4 +24,3 @@ VALUES (
     'admin@immocare.com',
     'ADMIN'
 );
-

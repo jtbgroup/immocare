@@ -1,0 +1,9 @@
+-- ============================================================
+-- V002 — UC002: Manage Users
+-- Tables: (none)
+-- Note: UC002 uses the app_user table created in V001 (UC001).
+--       app_user is the bootstrap table required for authentication
+--       and cannot be moved to V002 without breaking V001.
+--       All UC002 logic (CRUD users) operates on app_user via
+--       UserService / UserController with no additional schema.
+-- ============================================================

@@ -1,6 +1,6 @@
-# ImmoCare — UC004 Manage PEB Scores — Implementation Prompt
+# ImmoCare — UC005 Manage PEB Scores — Implementation Prompt
 
-I want to implement Use Case UC004 - Manage PEB Scores for ImmoCare.
+I want to implement Use Case UC005 - Manage PEB Scores for ImmoCare.
 
 ## CONTEXT
 

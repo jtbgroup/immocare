@@ -1,6 +1,6 @@
-# ImmoCare — UC005 Manage Rents — Implementation Prompt
+# ImmoCare — UC004 Manage Rents — Implementation Prompt
 
-I want to implement Use Case UC005 - Manage Rents for ImmoCare.
+I want to implement Use Case UC004 - Manage Rents for ImmoCare.
 
 ## CONTEXT
 

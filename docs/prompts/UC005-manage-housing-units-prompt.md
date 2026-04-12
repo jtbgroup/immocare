@@ -54,13 +54,13 @@
 
 | Rule | Description |
 |---|---|
-| BR-UC002-01 | `unitNumber` unique within building (case-insensitive) |
-| BR-UC002-04 | `hasTerrace = false` → clear `terraceSurface` and `terraceOrientation` |
-| BR-UC002-05 | `hasGarden = false` → clear `gardenSurface` and `gardenOrientation` |
-| BR-UC002-06 | Cannot delete unit with rooms; return `roomCount` in error |
-| BR-UC002-07 | `hasTerrace = true` → `terraceSurface` required and must be > 0 |
-| BR-UC002-08 | `hasGarden = true` → `gardenSurface` required and must be > 0 |
-| BR-UC002-09 | `effectiveOwnerName` = unit.owner ?? building.owner |
+| BR-UC005-01 | `unitNumber` unique within building (case-insensitive) |
+| BR-UC005-04 | `hasTerrace = false` → clear `terraceSurface` and `terraceOrientation` |
+| BR-UC005-05 | `hasGarden = false` → clear `gardenSurface` and `gardenOrientation` |
+| BR-UC005-06 | Cannot delete unit with rooms; return `roomCount` in error |
+| BR-UC005-07 | `hasTerrace = true` → `terraceSurface` required and must be > 0 |
+| BR-UC005-08 | `hasGarden = true` → `gardenSurface` required and must be > 0 |
+| BR-UC005-09 | `effectiveOwnerName` = unit.owner ?? building.owner |
 
 **Note on orientation (NullValuePropertyMappingStrategy):** The MapStruct mapper uses `IGNORE` strategy. After calling `updateEntityFromRequest`, the service must explicitly call `unit.setTerraceOrientation(normalizeOrientation(...))` and `unit.setGardenOrientation(normalizeOrientation(...))` when the respective flag is true, to allow clearing the orientation. `normalizeOrientation` converts `""` and `null` to `null`.
 

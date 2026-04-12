@@ -1,5 +1,6 @@
 -- ============================================================
--- V013 — UC013: Fire Extinguishers
+-- V011 — UC011: Manage Fire Extinguishers
+-- Tables: fire_extinguisher, fire_extinguisher_revision
 -- ============================================================
 
 CREATE TABLE fire_extinguisher (
@@ -10,6 +11,7 @@ CREATE TABLE fire_extinguisher (
     notes                 TEXT        NULL,
     created_at            TIMESTAMP   NOT NULL DEFAULT CURRENT_TIMESTAMP,
     updated_at            TIMESTAMP   NOT NULL DEFAULT CURRENT_TIMESTAMP,
+
     CONSTRAINT uq_extinguisher_number UNIQUE (building_id, identification_number)
 );
 

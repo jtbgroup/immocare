@@ -1,5 +1,6 @@
 -- ============================================================
--- V006 — UC004: PEB Scores
+-- V007 — UC007: Manage PEB Scores
+-- Tables: peb_score_history
 -- ============================================================
 
 CREATE TABLE peb_score_history (

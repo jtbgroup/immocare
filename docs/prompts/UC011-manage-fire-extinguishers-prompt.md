@@ -1,6 +1,6 @@
-# ImmoCare — UC013 Manage Fire Extinguishers — Implementation Prompt
+# ImmoCare — UC012 Manage Fire Extinguishers — Implementation Prompt
 
-I want to implement Use Case UC013 - Manage Fire Extinguishers for ImmoCare.
+I want to implement Use Case UC012 - Manage Fire Extinguishers for ImmoCare.
 
 ---
 
@@ -188,10 +188,10 @@ void deleteRevision(Long extinguisherId, Long revisionId);
 
 | Rule | Implementation |
 |---|---|
-| BR-UC013-01 | On create: `existsByBuildingIdAndIdentificationNumberIgnoreCase` → throw `FireExtinguisherDuplicateNumberException`. On update: use `existsByBuildingIdAndNumberIgnoreCaseExcluding`. |
-| BR-UC013-02 | If `req.unitId()` not null: load `HousingUnit`, verify `unit.building.id == buildingId`, else throw `IllegalArgumentException("The specified unit does not belong to this building")` |
-| BR-UC013-03 | `revisionDate` must not be after `LocalDate.now()`, else throw `IllegalArgumentException("Revision date cannot be in the future")` |
-| BR-UC013-04 | Cascade on entity handles deletion of revisions — no extra logic needed |
+| BR-UC012-01 | On create: `existsByBuildingIdAndIdentificationNumberIgnoreCase` → throw `FireExtinguisherDuplicateNumberException`. On update: use `existsByBuildingIdAndNumberIgnoreCaseExcluding`. |
+| BR-UC012-02 | If `req.unitId()` not null: load `HousingUnit`, verify `unit.building.id == buildingId`, else throw `IllegalArgumentException("The specified unit does not belong to this building")` |
+| BR-UC012-03 | `revisionDate` must not be after `LocalDate.now()`, else throw `IllegalArgumentException("Revision date cannot be in the future")` |
+| BR-UC012-04 | Cascade on entity handles deletion of revisions — no extra logic needed |
 
 **`toDTO` helper** — maps entity to `FireExtinguisherDTO`. Set `unitNumber` from `entity.getUnit() != null ? entity.getUnit().getUnitNumber() : null`. Map revisions list from the `@OneToMany` collection (already sorted by `@OrderBy`).
 
@@ -213,7 +213,7 @@ Security is handled globally — no `@PreAuthorize` needed.
 ### GlobalExceptionHandler — add these handlers
 
 ```java
-// ─── UC013 - Fire Extinguishers ───────────────────────────────────────────────
+// ─── UC012 - Fire Extinguishers ───────────────────────────────────────────────
 
 @ExceptionHandler(FireExtinguisherNotFoundException.class)
 public ResponseEntity<ErrorResponse> handleFireExtinguisherNotFound(FireExtinguisherNotFoundException ex) {

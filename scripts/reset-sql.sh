@@ -64,7 +64,15 @@ psql \
   --dbname="$DB_NAME" \
   --set ON_ERROR_STOP=1 \
   <<SQL
--- UC014 — Financial transactions
+
+-- ============================================================
+-- Reset DB — truncate order respects FK constraints
+-- Leaf tables first, root tables last.
+-- app_user, platform_config, import_parser,
+-- boiler_service_validity_rule kept (seed/config data).
+-- ============================================================
+ 
+-- ─── UC014 — Financial transactions (deepest leaves first) ───────────────────
 TRUNCATE TABLE transaction_asset_link CASCADE;
 TRUNCATE TABLE accounting_month_rule  CASCADE;
 TRUNCATE TABLE tag_learning_rule      CASCADE;
@@ -73,47 +81,48 @@ TRUNCATE TABLE import_batch           CASCADE;
 TRUNCATE TABLE bank_account           CASCADE;
 TRUNCATE TABLE tag_subcategory        CASCADE;
 TRUNCATE TABLE tag_category           CASCADE;
-
--- UC013 — Fire extinguishers
+ 
+-- ─── UC011 — Fire extinguishers ───────────────────────────────────────────────
 TRUNCATE TABLE fire_extinguisher_revision CASCADE;
 TRUNCATE TABLE fire_extinguisher          CASCADE;
-
--- UC011 — Boilers
+ 
+-- ─── UC010 — Boilers ──────────────────────────────────────────────────────────
 TRUNCATE TABLE boiler_service CASCADE;
 TRUNCATE TABLE boiler         CASCADE;
-
--- UC008 — Meters
+ 
+-- ─── UC008 — Meters ───────────────────────────────────────────────────────────
 TRUNCATE TABLE meter CASCADE;
-
--- UC010 — Leases
+ 
+-- ─── UC012 — Leases ───────────────────────────────────────────────────────────
 TRUNCATE TABLE lease_rent_adjustment CASCADE;
 TRUNCATE TABLE lease_tenant          CASCADE;
 TRUNCATE TABLE lease                 CASCADE;
-
--- UC005 — Rent history
+ 
+-- ─── UC009 — Rent history ─────────────────────────────────────────────────────
 TRUNCATE TABLE rent_history CASCADE;
-
--- UC004 — PEB scores
+ 
+-- ─── UC007 — PEB scores ───────────────────────────────────────────────────────
 TRUNCATE TABLE peb_score_history CASCADE;
-
--- UC003 — Rooms
+ 
+-- ─── UC006 — Rooms ────────────────────────────────────────────────────────────
 TRUNCATE TABLE room CASCADE;
-
--- UC002 — Housing units
+ 
+-- ─── UC005 — Housing units ────────────────────────────────────────────────────
 TRUNCATE TABLE housing_unit CASCADE;
-
--- UC001 — Buildings
+ 
+-- ─── UC004 — Buildings ────────────────────────────────────────────────────────
 TRUNCATE TABLE building CASCADE;
-
--- UC009 — Persons & bank accounts
+ 
+-- ─── UC003 — Persons & bank accounts ─────────────────────────────────────────
 TRUNCATE TABLE person_bank_account CASCADE;
 TRUNCATE TABLE person              CASCADE;
-
--- UC007 — Users (keep admin)
+ 
+-- ─── UC002 — Users (keep admin) ───────────────────────────────────────────────
 DELETE FROM app_user WHERE username != '$ADMIN_USER';
-
--- Reset transaction reference sequence
+ 
+-- ─── Reset sequences ──────────────────────────────────────────────────────────
 ALTER SEQUENCE financial_transaction_ref_seq RESTART WITH 1;
+
 SQL
 
 unset PGPASSWORD

@@ -1,13 +1,13 @@
-# ImmoCare — UC011 Manage Boilers — Implementation Prompt
+# ImmoCare — UC012 Manage Boilers — Implementation Prompt
 
-I want to implement Use Case UC011 - Manage Boilers for ImmoCare.
+I want to implement Use Case UC012 - Manage Boilers for ImmoCare.
 
 ## CONTEXT
 
 - **Stack**: Spring Boot 3.x + Angular 19+ + PostgreSQL 16 — API-First, ADMIN only
 - **Branch**: `develop`
 - **Already implemented**: Buildings, Housing Units, Rooms, PEB Scores, Rents, Users, Meters, Persons, Leases, Platform Config
-- **Prerequisite**: UC012 (Manage Platform Configuration) must be fully implemented before starting this UC (boiler alert threshold is read from platform_config)
+- **Prerequisite**: UC013 (Manage Platform Configuration) must be fully implemented before starting this UC (boiler alert threshold is read from platform_config)
 
 ---
 
@@ -27,7 +27,7 @@ I want to implement Use Case UC011 - Manage Boilers for ImmoCare.
 
 ## DATABASE MIGRATION — `V012__create_boiler.sql`
 
-> Do NOT include platform_config or boiler_service_validity_rule tables here — those are in UC012 migration.
+> Do NOT include platform_config or boiler_service_validity_rule tables here — those are in UC013 migration.
 
 ```sql
 -- Boiler per housing unit (append-only history)

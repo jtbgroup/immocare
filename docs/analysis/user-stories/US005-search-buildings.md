@@ -4,7 +4,7 @@
 |-----------|-------|
 | **Story ID** | US005 |
 | **Epic** | Building Management |
-| **Related UC** | UC001 |
+| **Related UC** | UC007 |
 | **Priority** | SHOULD HAVE |
 | **Story Points** | 2 |
 

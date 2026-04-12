@@ -4,7 +4,7 @@
 |-----------|-------|
 | **Story ID** | US035 |
 | **Epic** | User Management |
-| **Related UC** | UC007 |
+| **Related UC** | UC009 |
 | **Priority** | MUST HAVE |
 | **Story Points** | 2 |
 

@@ -1,6 +1,6 @@
-# ImmoCare — UC001 Manage Buildings — Implementation Prompt
+# ImmoCare — UC007 Manage Buildings — Implementation Prompt
 
-I want to implement Use Case UC001 - Manage Buildings for ImmoCare.
+I want to implement Use Case UC007 - Manage Buildings for ImmoCare.
 
 ---
 
@@ -28,7 +28,7 @@ I want to implement Use Case UC001 - Manage Buildings for ImmoCare.
 
 ## REFERENCE DOCUMENTS
 
-- `docs/analysis/use-cases/UC001-manage-buildings.md` — flows, business rules, test scenarios
+- `docs/analysis/use-cases/UC004-manage-buildings.md` — flows, business rules, test scenarios
 - `docs/analysis/user-stories/US001-005` — acceptance criteria per story
 - `docs/analysis/data-model.md` — Building entity definition
 - `docs/analysis/data-dictionary.md` — attribute constraints and validation rules
@@ -51,7 +51,7 @@ building {
 }
 ```
 
-> **Note**: `owner_id` is a FK to `person`. The old `owner_name` VARCHAR column has been removed (UC009 migration).
+> **Note**: `owner_id` is a FK to `person`. The old `owner_name` VARCHAR column has been removed (UC004 migration).
 
 ---
 
@@ -118,8 +118,8 @@ List<String> findDistinctCities();
 - `updateBuilding(Long id, UpdateBuildingRequest)` → `BuildingDTO`
 - `deleteBuilding(Long id)` → void
 - Business rules:
-  - BR-UC001-01: name, streetAddress, postalCode, city, country required
-  - BR-UC001-03: cannot delete if housing units exist → `BuildingHasUnitsException`
+  - BR-UC004-01: name, streetAddress, postalCode, city, country required
+  - BR-UC004-03: cannot delete if housing units exist → `BuildingHasUnitsException`
 
 ### `BuildingController`
 

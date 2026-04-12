@@ -1,6 +1,6 @@
-# ImmoCare — UC003 Manage Rooms — Implementation Prompt
+# ImmoCare — UC006 Manage Rooms — Implementation Prompt
 
-I want to implement Use Case UC003 - Manage Rooms for ImmoCare.
+I want to implement Use Case UC006 - Manage Rooms for ImmoCare.
 
 ## CONTEXT
 

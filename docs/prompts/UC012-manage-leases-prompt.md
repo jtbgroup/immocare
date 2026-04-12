@@ -1,13 +1,13 @@
-# ImmoCare — UC010 Manage Leases — Implementation Prompt
+# ImmoCare — UC013 Manage Leases — Implementation Prompt
 
-I want to implement Use Case UC010 - Manage Leases for ImmoCare.
+I want to implement Use Case UC013 - Manage Leases for ImmoCare.
 
 ## CONTEXT
 
 - **Stack**: Spring Boot 4.x + Angular 19+ + PostgreSQL 16 — API-First, ADMIN only
 - **Branch**: `develop`
 - **Already implemented**: Buildings, Housing Units, Rooms, PEB Scores, Rents, Users, Meters, Persons
-- **Prerequisite**: UC009 (Manage Persons) must be fully implemented before starting this UC
+- **Prerequisite**: UC004 (Manage Persons) must be fully implemented before starting this UC
 
 ## USER STORIES
 

@@ -1,6 +1,6 @@
-# ImmoCare — UC007 Manage Users — Implementation Prompt
+# ImmoCare — UC005 Manage Users — Implementation Prompt
 
-I want to implement Use Case UC007 - Manage Users for ImmoCare.
+I want to implement Use Case UC005 - Manage Users for ImmoCare.
 
 ## CONTEXT
 
@@ -43,11 +43,11 @@ Default seed: admin / admin@immocare.com / admin123 (BCrypt 12)
 6. `UserRepository` — add: `existsByUsernameIgnoreCase`, `existsByEmailIgnoreCase`, `countByRole`
 7. `UserService`:
    - `getAllUsers()`, `getUserById(id)`, `createUser(req)`, `updateUser(id, req)`, `changePassword(id, req)`, `deleteUser(id, currentUserId)`
-   - BR-UC007-02: username unique (case-insensitive)
-   - BR-UC007-03: email unique
-   - BR-UC007-04: password BCrypt strength 10; complexity: ≥8 chars, 1 upper, 1 lower, 1 digit
-   - BR-UC007-05: cannot delete own account
-   - BR-UC007-06: cannot delete last ADMIN
+   - BR-UC005-02: username unique (case-insensitive)
+   - BR-UC005-03: email unique
+   - BR-UC005-04: password BCrypt strength 10; complexity: ≥8 chars, 1 upper, 1 lower, 1 digit
+   - BR-UC005-05: cannot delete own account
+   - BR-UC005-06: cannot delete last ADMIN
    - **DO NOT** inject `FindByIndexNameSessionRepository`
 8. `UserController` — all endpoints `@PreAuthorize("hasRole('ADMIN')")`:
 

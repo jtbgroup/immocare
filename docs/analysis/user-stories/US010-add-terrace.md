@@ -4,7 +4,7 @@
 |-----------|-------|
 | **Story ID** | US010 |
 | **Epic** | Housing Unit Management |
-| **Related UC** | UC002 |
+| **Related UC** | UC009 |
 | **Priority** | SHOULD HAVE |
 | **Story Points** | 2 |
 

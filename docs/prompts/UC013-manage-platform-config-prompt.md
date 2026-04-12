@@ -7,7 +7,7 @@ I want to implement Use Case UC012 - Manage Platform Configuration for ImmoCare.
 - **Stack**: Spring Boot 3.x + Angular 19+ + PostgreSQL 16 — API-First, ADMIN only
 - **Branch**: `develop`
 - **Already implemented**: Buildings, Housing Units, Rooms, PEB Scores, Rents, Users, Meters, Persons, Leases
-- **Implement this UC before UC011** — boiler alert threshold and validity rules are read from platform_config
+- **Implement this UC before UC012** — boiler alert threshold and validity rules are read from platform_config
 
 ---
 

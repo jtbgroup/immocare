@@ -4,7 +4,7 @@
 |-----------|-------|
 | **Story ID** | US021 |
 | **Epic** | Rent Management |
-| **Related UC** | UC005 |
+| **Related UC** | UC009 |
 | **Priority** | MUST HAVE |
 | **Story Points** | 3 |
 

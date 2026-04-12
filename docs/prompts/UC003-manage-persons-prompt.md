@@ -1,6 +1,6 @@
-# ImmoCare — UC009 Manage Persons — Implementation Prompt
+# ImmoCare — UC004 Manage Persons — Implementation Prompt
 
-I want to implement Use Case UC009 - Manage Persons for ImmoCare.
+I want to implement Use Case UC004 - Manage Persons for ImmoCare.
 
 ## CONTEXT
 

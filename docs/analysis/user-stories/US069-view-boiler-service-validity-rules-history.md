@@ -4,7 +4,7 @@
 |-----------|-------|
 | **Story ID** | US069 |
 | **Epic** | Platform Administration |
-| **Related UC** | UC012 |
+| **Related UC** | UC013 |
 | **Priority** | MUST HAVE |
 | **Story Points** | 2 |
 

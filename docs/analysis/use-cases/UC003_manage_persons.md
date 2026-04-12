@@ -1,14 +1,14 @@
-# UC006 — Manage Persons
+# UC003 — Manage Persons
 
 ## Overview
 
 | Attribute | Value |
 |---|---|
-| **UC ID** | UC006 |
+| **UC ID** | UC003 |
 | **Name** | Manage Persons |
 | **Actor** | ADMIN |
 | **Epic** | Person Management |
-| **Flyway** | V006 (person table — baseline) · V016 (person_bank_account) |
+| **Flyway** | V002 (`person`) · V016 (`person_bank_account`) |
 | **Status** | ✅ Implemented |
 | **Branch** | develop |
 
@@ -22,17 +22,18 @@ Each person can hold one or more bank accounts (IBANs). These IBANs are used dur
 
 | Story | Title | Priority | Points |
 |---|---|---|---|
-| US024 | List Persons | MUST HAVE | 2 |
-| US025 | Get Person Details | MUST HAVE | 2 |
-| US026 | Create Person | MUST HAVE | 3 |
-| US027 | Edit Person | MUST HAVE | 2 |
-| US028 | Delete Person | SHOULD HAVE | 2 |
-| US029 | Person Picker (Autocomplete) | MUST HAVE | 1 |
+| US043 | List Persons | MUST HAVE | 2 |
+| US044 | Get Person Details | MUST HAVE | 2 |
+| US045 | Create Person | MUST HAVE | 3 |
+| US046 | Edit Person | MUST HAVE | 2 |
+| US047 | Delete Person | SHOULD HAVE | 2 |
+| US048 | Person Picker (Autocomplete) | MUST HAVE | 1 |
+| US049 | Assign Person as Owner | MUST HAVE | 3 |
 | US030 | Manage Person Bank Accounts (IBAN) | MUST HAVE | 3 |
 
 ---
 
-## US024 — List Persons
+## US043 — List Persons
 
 **As an** ADMIN **I want to** view a paginated list of persons **so that** I can browse the contact registry.
 
@@ -46,7 +47,7 @@ Each person can hold one or more bank accounts (IBANs). These IBANs are used dur
 
 ---
 
-## US025 — Get Person Details
+## US044 — Get Person Details
 
 **As an** ADMIN **I want to** view the full details of a person **so that** I can see all their relationships and registered IBANs.
 
@@ -62,7 +63,7 @@ Each person can hold one or more bank accounts (IBANs). These IBANs are used dur
 
 ---
 
-## US026 — Create Person
+## US045 — Create Person
 
 **As an** ADMIN **I want to** create a person record **so that** I can register owners and tenants.
 
@@ -76,12 +77,12 @@ Each person can hold one or more bank accounts (IBANs). These IBANs are used dur
 
 ---
 
-## US027 — Edit Person
+## US046 — Edit Person
 
 **As an** ADMIN **I want to** update a person's information **so that** I can keep the contact registry accurate.
 
 **Acceptance Criteria:**
-- AC1: All fields from US026 can be updated.
+- AC1: All fields from US045 can be updated.
 - AC2: `nationalId` uniqueness enforced excluding the current person.
 - AC3: Returns HTTP 404 if the person does not exist.
 
@@ -89,7 +90,7 @@ Each person can hold one or more bank accounts (IBANs). These IBANs are used dur
 
 ---
 
-## US028 — Delete Person
+## US047 — Delete Person
 
 **As an** ADMIN **I want to** delete a person **so that** I can remove records created by mistake.
 
@@ -103,7 +104,7 @@ Each person can hold one or more bank accounts (IBANs). These IBANs are used dur
 
 ---
 
-## US029 — Person Picker (Autocomplete)
+## US048 — Person Picker (Autocomplete)
 
 **As an** ADMIN **I want to** search for a person by name **so that** I can link them as owner or tenant in a form.
 
@@ -117,19 +118,34 @@ Each person can hold one or more bank accounts (IBANs). These IBANs are used dur
 
 ---
 
+## US049 — Assign Person as Owner
+
+**As an** ADMIN **I want to** assign a person as owner of a building or housing unit **so that** ownership is tracked with a real person record.
+
+**Acceptance Criteria:**
+- AC1: Building and housing unit edit forms each have an "Owner" field with a person picker.
+- AC2: Type 2+ chars in picker → suggestions shown (max 10, case-insensitive match on name/email/nationalId, <300ms).
+- AC3: Select a person → their name shown in the owner field.
+- AC4: Save → building/unit linked to the person via `owner_id` FK.
+- AC5: Person details page shows "Owned Buildings" and "Owned Units" sections reflecting all linked entities.
+- AC6: Clear owner → `owner_id` = NULL, displayed as "Owner: Not specified."
+
+**Implemented via:** `PUT /api/v1/buildings/{id}` and `PUT /api/v1/units/{id}` (ownerId field).
+
+---
+
 ## US030 — Manage Person Bank Accounts (IBAN)
 
 **As an** ADMIN **I want to** register one or more IBANs for a person **so that** transaction imports can automatically suggest the related lease when a counterparty account matches.
 
 **Acceptance Criteria:**
-- AC1: Person details page shows a "Bank Accounts (IBAN)" section listing all registered IBANs: IBAN (formatted), label (optional), primary flag.
-- AC2: "Add IBAN" opens an inline form: IBAN* (required, valid format, globally unique), label (optional), primary (checkbox).
-- AC3: IBAN stored normalised: uppercased, spaces removed.
-- AC4: Duplicate IBAN across any person → error "This IBAN is already registered."
-- AC5: At most one IBAN per person can be flagged as primary. Setting a new primary automatically clears the previous one.
-- AC6: Edit button → inline form pre-filled. All fields editable.
-- AC7: Delete button → confirmation dialog → HTTP 204. No cascade restriction.
-- AC8: IBANs are matched (case-insensitive) against `counterparty_account` on imported transactions to auto-suggest the lease linked to this person (see UC015).
+- AC1: Person details page shows a "Bank Accounts (IBAN)" section listing all registered IBANs: IBAN (formatted with spaces), label (or "—"), primary badge (★ Primary).
+- AC2: "Add IBAN" button opens an inline form with fields: IBAN* (required), label (optional), Primary checkbox. Save → IBAN normalised (uppercase, spaces removed) and stored. Section refreshed.
+- AC3: Duplicate IBAN (same IBAN already registered on any person) → error "This IBAN is already registered."
+- AC4: At most one IBAN per person can be flagged as primary. Setting a new primary automatically clears the previous one.
+- AC5: Edit button per row → inline form pre-filled. All fields editable. Same uniqueness rules apply.
+- AC6: Delete button per row → confirmation dialog → HTTP 204. No cascade restriction on the IBAN itself.
+- AC7: During transaction import (UC015), `counterparty_account` is matched case-insensitively against all known IBANs. If a match is found, the system suggests the most suitable lease of the matched person (see Lease Suggestion Algorithm below).
 
 **Endpoints:**
 - `GET /api/v1/persons/{personId}/bank-accounts` — HTTP 200
@@ -139,9 +155,32 @@ Each person can hold one or more bank accounts (IBANs). These IBANs are used dur
 
 ---
 
+## Lease Suggestion Algorithm
+
+Used by `TransactionImportService` during both preview (`previewFile`) and import (`importFile`).
+
+### Input
+- `counterpartyAccount` — raw IBAN from the parsed transaction row (may contain spaces, mixed case)
+- `transactionDate` — date of the transaction
+
+### Steps
+1. Normalise `counterpartyAccount` (uppercase, strip spaces).
+2. Look up `person_bank_account` by IBAN (case-insensitive). If no match → no suggestion.
+3. Load all leases where this person is a tenant (`lease_tenant.person_id`), ordered by `start_date DESC`.
+4. **Pick best lease** using `pickBestLease(leases, transactionDate)`:
+   - First pass: leases whose date range contains `transactionDate` (`start_date ≤ date ≤ end_date`). If multiple → prefer status ACTIVE → then closest `end_date`.
+   - Second pass (fallback — historical import): all leases regardless of date. Prefer closest `end_date` to `transactionDate`.
+5. Return `SuggestedLeaseDTO` with `leaseId`, `unitId`, `unitNumber`, `buildingId`, `buildingName`, `personId`, `personFullName`.
+
+### Preview vs Import
+- **Preview** (`suggestLeaseForPreview`): pure computation, returns a DTO, no entity mutation.
+- **Import** (`suggestLease`): sets `suggestedLease`, `housingUnit`, and `building` on the `FinancialTransaction` entity being persisted.
+
+---
+
 ## Data Model
 
-### Table: `person` (V006)
+### Table: `person` (V002)
 
 | Column | Type | Constraints |
 |---|---|---|
@@ -165,11 +204,15 @@ Each person can hold one or more bank accounts (IBANs). These IBANs are used dur
 | Column | Type | Constraints |
 |---|---|---|
 | `id` | BIGSERIAL | PK |
-| `person_id` | BIGINT | NOT NULL, FK → person(id) ON DELETE CASCADE |
-| `iban` | VARCHAR(50) | NOT NULL, UNIQUE |
+| `person_id` | BIGINT | NOT NULL, FK → `person(id)` ON DELETE CASCADE |
+| `iban` | VARCHAR(50) | NOT NULL, UNIQUE (globally) |
 | `label` | VARCHAR(100) | nullable |
 | `is_primary` | BOOLEAN | NOT NULL, DEFAULT FALSE |
 | `created_at` | TIMESTAMP | NOT NULL, DEFAULT NOW() |
+
+**Indexes:**
+- `idx_pba_person` ON `person_id`
+- `idx_pba_iban` ON `iban`
 
 ---
 
@@ -188,7 +231,7 @@ createdAt, updatedAt,
 isOwner, isTenant,
 ownedBuildings: [{ id, name, city }],
 ownedUnits:     [{ id, unitNumber, buildingId, buildingName }],
-leases:         [{ id, reference, startDate, endDate, status, unitNumber, buildingName }],
+leases:         [{ id, startDate, endDate, status, unitNumber, buildingName }],
 bankAccounts:   [{ id, iban, label, primary, createdAt }]
 ```
 
@@ -199,7 +242,7 @@ id, personId, iban, label, primary, createdAt
 
 ### `SavePersonBankAccountRequest`
 ```
-iban*    VARCHAR(50)   required, normalized before save
+iban*    VARCHAR(50)   required; normalised before save (uppercase, no spaces)
 label    VARCHAR(100)  optional
 primary  boolean       default false
 ```
@@ -210,15 +253,18 @@ primary  boolean       default false
 
 | ID | Rule |
 |---|---|
-| BR-UC006-01 | `lastName` and `firstName` are required |
-| BR-UC006-02 | `nationalId`, if provided, must be globally unique (case-insensitive) |
-| BR-UC006-03 | `country` defaults to `Belgium` when null or blank |
-| BR-UC006-04 | Cannot delete a person who is owner of buildings or units, or active tenant on a lease |
-| BR-UC006-05 | `isTenant` is `true` when at least one ACTIVE or FINISHED lease references this person as tenant |
-| BR-UC006-06 | IBAN stored normalised: uppercased, spaces removed |
-| BR-UC006-07 | IBAN must be globally unique across all persons |
-| BR-UC006-08 | Only one IBAN per person can be flagged as primary; setting a new primary clears the previous one |
-| BR-UC006-09 | `person_bank_account` rows are cascade-deleted when the person is deleted |
+| BR-UC003-01 | `lastName` and `firstName` are required |
+| BR-UC003-02 | `nationalId`, if provided, must be globally unique (case-insensitive) |
+| BR-UC003-03 | `country` defaults to `Belgium` when null or blank |
+| BR-UC003-04 | Cannot delete a person who is owner of buildings or units, or active tenant on a lease |
+| BR-UC003-05 | `isTenant` is `true` when at least one ACTIVE or FINISHED lease references this person as tenant |
+| BR-UC003-06 | IBAN stored normalised: uppercased, spaces removed |
+| BR-UC003-07 | IBAN must be globally unique across all persons |
+| BR-UC003-08 | Only one IBAN per person can be flagged as primary; setting a new primary clears the previous one |
+| BR-UC003-09 | `person_bank_account` rows are cascade-deleted when the person is deleted |
+| BR-UC003-10 | Lease suggestion loads leases of all statuses (DRAFT / ACTIVE / FINISHED / CANCELLED) to support historical transaction imports |
+| BR-UC003-11 | Best lease selection: exact date match preferred; within matches, ACTIVE preferred; fallback to closest end_date |
+| BR-UC003-12 | If no lease is found for the matched person, suggestion fields are null (no suggestion, no error) |
 
 ---
 
@@ -229,9 +275,9 @@ primary  boolean       default false
 | Person not found | 404 | `Person not found` |
 | Duplicate nationalId | 409 | `This national ID is already assigned to another person` |
 | Referenced as owner or tenant on delete | 409 | `PERSON_REFERENCED` + ownedBuildings, ownedUnits, activeLeases |
-| Duplicate IBAN | 409 | `This IBAN is already registered` |
-| Bank account not found | 404 | `Person bank account not found` |
-| Bank account does not belong to person | 400 | `Account does not belong to person` |
+| Duplicate IBAN | 409 | `IBAN already registered: {iban}` |
+| Bank account not found | 404 | `Person bank account not found: {id}` |
+| Bank account does not belong to person | 400 | `Account does not belong to person: {personId}` |
 
 ---
 
@@ -239,12 +285,12 @@ primary  boolean       default false
 
 | Method | Endpoint | Story |
 |---|---|---|
-| GET | `/api/v1/persons` | US024 |
-| GET | `/api/v1/persons/{id}` | US025 |
-| POST | `/api/v1/persons` | US026 |
-| PUT | `/api/v1/persons/{id}` | US027 |
-| DELETE | `/api/v1/persons/{id}` | US028 |
-| GET | `/api/v1/persons/picker` | US029 |
+| GET | `/api/v1/persons` | US043 |
+| GET | `/api/v1/persons/{id}` | US044 |
+| POST | `/api/v1/persons` | US045 |
+| PUT | `/api/v1/persons/{id}` | US046 |
+| DELETE | `/api/v1/persons/{id}` | US047 |
+| GET | `/api/v1/persons/picker` | US048 |
 | GET | `/api/v1/persons/{personId}/bank-accounts` | US030 |
 | POST | `/api/v1/persons/{personId}/bank-accounts` | US030 |
 | PUT | `/api/v1/persons/{personId}/bank-accounts/{id}` | US030 |
@@ -252,6 +298,18 @@ primary  boolean       default false
 
 ---
 
-**Last Updated:** 2026-03-10
+## Cross-UC Dependencies
+
+| UC | Dependency |
+|---|---|
+| UC004 | Buildings use `owner_id → person` |
+| UC005 | Housing units use `owner_id → person` |
+| UC012 | Leases reference persons as tenants via `lease_tenant` |
+| UC014 | Import flow calls lease suggestion algorithm (IBAN matching) |
+| UC015 | Parser produces `counterpartyAccount`; IBAN lookup triggers lease suggestion |
+
+---
+
+**Last Updated:** 2026-04-12
 **Branch:** develop
 **Status:** ✅ Implemented

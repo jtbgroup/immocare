@@ -4,7 +4,7 @@
 |-----------|-------|
 | **Story ID** | US020 |
 | **Epic** | PEB Score Management |
-| **Related UC** | UC004 |
+| **Related UC** | UC007 |
 | **Priority** | COULD HAVE |
 | **Story Points** | 3 |
 

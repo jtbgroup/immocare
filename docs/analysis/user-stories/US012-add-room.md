@@ -4,7 +4,7 @@
 |-----------|-------|
 | **Story ID** | US012 |
 | **Epic** | Room Management |
-| **Related UC** | UC003 |
+| **Related UC** | UC006 |
 | **Priority** | MUST HAVE |
 | **Story Points** | 3 |
 

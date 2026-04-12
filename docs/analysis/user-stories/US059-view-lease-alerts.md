@@ -4,7 +4,7 @@
 |-----------|-------|
 | **Story ID** | US059 |
 | **Epic** | Lease Management |
-| **Related UC** | UC010 |
+| **Related UC** | UC013 |
 | **Priority** | SHOULD HAVE |
 | **Story Points** | 3 |
 

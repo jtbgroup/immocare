@@ -1,5 +1,6 @@
 -- ============================================================
--- V003 — UC001: Buildings
+-- V004 — UC004: Manage Buildings
+-- Tables: building
 -- ============================================================
 
 CREATE TABLE building (
@@ -15,6 +16,6 @@ CREATE TABLE building (
     updated_at     TIMESTAMP    NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
 
-CREATE INDEX idx_building_created_by ON building (created_by);
 CREATE INDEX idx_building_city       ON building (city);
 CREATE INDEX idx_building_owner      ON building (owner_id);
+CREATE INDEX idx_building_created_by ON building (created_by);
