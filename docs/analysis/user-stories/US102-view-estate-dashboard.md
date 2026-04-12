@@ -1,0 +1,53 @@
+# US102 — View Estate Dashboard
+
+## Overview
+
+| Attribute | Value |
+|---|---|
+| **ID** | US102 |
+| **UC** | [UC016 — Manage Estates](../use-cases/UC016_manage_estates.md) |
+| **Actor** | MANAGER, VIEWER, PLATFORM_ADMIN |
+| **Priority** | MUST HAVE |
+
+## User Story
+
+**As a** MANAGER or VIEWER **I want to** see a summary of my estate when I enter it **so that** I have an immediate overview of my property portfolio.
+
+## Acceptance Criteria
+
+- AC1: Dashboard shows: estate name, total buildings, total housing units, active leases count, pending alerts count (boiler, fire extinguisher, lease end, indexation).
+- AC2: Quick-access navigation cards to: Buildings, Transactions, Persons, Alerts.
+- AC3: VIEWER sees the same dashboard but all action buttons (Create, Edit, Delete) are hidden throughout the app.
+- AC4: PLATFORM_ADMIN accessing an estate sees the dashboard with full MANAGER-equivalent rights.
+
+## Endpoint
+
+`GET /api/v1/estates/{id}/dashboard`
+
+## Response
+
+HTTP 200 — `EstateDashboardDTO`
+
+```json
+{
+  "estateId": "a3f8c2d1-7b4e-4f2a-9c1d-8e5f3a2b1c0d",
+  "estateName": "My Estate",
+  "totalBuildings": 3,
+  "totalUnits": 12,
+  "activeLeases": 9,
+  "pendingAlerts": {
+    "boiler": 1,
+    "fireExtinguisher": 0,
+    "leaseEnd": 2,
+    "indexation": 1
+  }
+}
+```
+
+## Implementation Notes
+
+In Phase 1, all counts return 0 and will be populated in Phase 6 when all entities are estate-scoped.
+
+## Business Rules
+
+- BR-UC016-08: VIEWER sees read-only view — enforced in the frontend by checking the role from `ActiveEstateService`
