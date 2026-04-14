@@ -23,6 +23,11 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpSession;
 import jakarta.validation.Valid;
 
+/**
+ * Authentication controller — login, logout, and current user endpoint.
+ *
+ * UC016 Phase 1: GET /me now returns {@code isPlatformAdmin} instead of {@code role}.
+ */
 @RestController
 @RequestMapping("/api/v1/auth")
 public class AuthController {
@@ -44,13 +49,13 @@ public class AuthController {
                             request.username(),
                             request.password()));
 
-            // Invalide l'ancienne session (protection contre la fixation de session)
+            // Invalidate old session (session fixation protection)
             HttpSession oldSession = httpRequest.getSession(false);
             if (oldSession != null) {
                 oldSession.invalidate();
             }
 
-            // Crée une nouvelle session et y persiste le SecurityContext
+            // Create new session and persist the SecurityContext
             SecurityContext context = SecurityContextHolder.createEmptyContext();
             context.setAuthentication(auth);
             SecurityContextHolder.setContext(context);
@@ -88,7 +93,7 @@ public class AuthController {
                 user.getId(),
                 user.getUsername(),
                 user.getEmail(),
-                user.getRole(),
+                user.isPlatformAdmin(),
                 user.getCreatedAt(),
                 user.getUpdatedAt()));
     }

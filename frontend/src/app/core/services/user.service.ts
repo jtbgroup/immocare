@@ -1,20 +1,20 @@
-import { Injectable } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
-import { Observable } from 'rxjs';
+import { HttpClient } from "@angular/common/http";
+import { Injectable } from "@angular/core";
+import { Observable } from "rxjs";
 import {
-  User,
+  ChangePasswordRequest,
   CreateUserRequest,
   UpdateUserRequest,
-  ChangePasswordRequest,
-} from '../../models/user.model';
+  User,
+} from "../../models/user.model";
 
-const API = '/api/v1/users';
+const API = "/api/v1/users";
 
 /**
  * Service for UC007 — Manage Users.
  * All methods require ROLE_ADMIN (enforced server-side).
  */
-@Injectable({ providedIn: 'root' })
+@Injectable({ providedIn: "root" })
 export class UserService {
   constructor(private http: HttpClient) {}
 

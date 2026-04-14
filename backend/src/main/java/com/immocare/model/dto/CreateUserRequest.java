@@ -2,12 +2,14 @@ package com.immocare.model.dto;
 
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
+import jakarta.validation.constraints.Pattern;
 
 /**
  * Request body for POST /api/v1/users.
  * Password complexity and confirmation are validated in {@code UserService}.
+ *
+ * UC016 Phase 1: replaced {@code role} with {@code isPlatformAdmin}.
  */
 public record CreateUserRequest(
 
@@ -29,6 +31,5 @@ public record CreateUserRequest(
         @NotBlank(message = "Password confirmation is required")
         String confirmPassword,
 
-        @NotBlank(message = "Role is required")
-        String role
+        boolean isPlatformAdmin
 ) {}

@@ -1,0 +1,10 @@
+@if (activeEstateService.activeEstate()) {
+  <div class="estate-header">
+    <span class="estate-name">
+      🏢 {{ activeEstateService.activeEstate()!.name }}
+    </span>
+    <button class="switch-btn" (click)="switchEstate()" title="Switch estate">
+      Switch
+    </button>
+  </div>
+}

@@ -31,7 +31,7 @@ import jakarta.validation.Valid;
  */
 @RestController
 @RequestMapping("/api/v1/housing-units/{unitId}/rents")
-@PreAuthorize("hasRole('ADMIN')")
+@PreAuthorize("isAuthenticated()")
 public class RentHistoryController {
 
     private final RentHistoryService rentHistoryService;

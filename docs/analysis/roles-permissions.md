@@ -105,7 +105,7 @@ This document defines user roles and their associated permissions in the ImmoCar
 ### Implementation
 - **Framework**: Spring Security
 - **Method**: Role-based Access Control (RBAC)
-- **Annotation**: `@PreAuthorize("hasRole('ADMIN')")`
+- **Annotation**: `@PreAuthorize("isAuthenticated()")`
 - **Enforcement**: Controller and Service layer
 
 ### Access Decision
@@ -133,7 +133,7 @@ If user lacks required role → **DENY (403 Forbidden)**
 All API endpoints are protected by role-based authentication:
 
 ```java
-@PreAuthorize("hasRole('ADMIN')")
+@PreAuthorize("isAuthenticated()")
 @GetMapping("/api/v1/buildings")
 public List<Building> getAllBuildings() { ... }
 ```

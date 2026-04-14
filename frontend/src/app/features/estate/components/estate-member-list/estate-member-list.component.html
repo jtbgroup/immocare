@@ -1,0 +1,195 @@
+<div class="estate-member-list-container">
+  <!-- Header -->
+  <div class="details-content">
+    <div class="header">
+      <h1>👥 Members</h1>
+      <div class="actions">
+        <button class="btn btn-primary" (click)="toggleAddPanel()">
+          {{ showAddPanel ? 'Cancel' : '+ Add Member' }}
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Global errors -->
+  @if (error) {
+    <div class="alert alert-error">{{ error }}</div>
+  }
+  @if (deleteError) {
+    <div class="alert alert-error">{{ deleteError }}</div>
+  }
+  @if (roleEditError) {
+    <div class="alert alert-error">{{ roleEditError }}</div>
+  }
+
+  <!-- Add member panel -->
+  @if (showAddPanel) {
+    <div class="add-member-panel">
+      <h3>Add a Member</h3>
+
+      @if (addError) {
+        <div class="alert alert-error">{{ addError }}</div>
+      }
+
+      <div class="add-member-row">
+        <!-- User picker -->
+        <div class="form-group picker-wrapper">
+          <label>User <span class="required">*</span></label>
+          @if (selectedNewUser) {
+            <div class="selected-person">
+              <span class="selected-badge">
+                👤 {{ selectedNewUser.username }}
+                <span class="selected-email">— {{ selectedNewUser.email }}</span>
+              </span>
+              <button type="button" class="btn-clear" (click)="clearNewUser()">✕</button>
+            </div>
+          } @else {
+            <div class="picker-search-wrapper">
+              <input type="text" class="picker-input"
+                     placeholder="Search by username or email…"
+                     [value]="addUserSearch"
+                     (input)="onAddUserSearchInput($any($event.target).value)"
+                     (blur)="closeAddDropdown()"
+                     autocomplete="off" />
+              @if (addUserDropdownOpen) {
+                <div class="picker-dropdown">
+                  @if (addUserSearchLoading) {
+                    <div class="picker-item picker-hint">Searching…</div>
+                  }
+                  @if (!addUserSearchLoading && addUserResults.length === 0) {
+                    <div class="picker-item picker-hint">No users found.</div>
+                  }
+                  @for (user of addUserResults; track user.id) {
+                    <button type="button" class="picker-item picker-result"
+                            (mousedown)="selectNewUser(user)">
+                      <span class="result-name">{{ user.username }}</span>
+                      <span class="result-meta"> — {{ user.email }}</span>
+                    </button>
+                  }
+                </div>
+              }
+            </div>
+          }
+        </div>
+
+        <!-- Role selector -->
+        <div class="form-group role-selector">
+          <label>Role <span class="required">*</span></label>
+          <select [(ngModel)]="newMemberRole" name="newMemberRole">
+            @for (role of ROLES; track role) {
+              <option [value]="role">{{ ESTATE_ROLE_LABELS[role] }}</option>
+            }
+          </select>
+        </div>
+
+        <!-- Actions -->
+        <div class="form-group add-actions">
+          <label>&nbsp;</label>
+          <button class="btn btn-primary" (click)="submitAddMember()" [disabled]="addSubmitting">
+            {{ addSubmitting ? 'Adding…' : 'Add' }}
+          </button>
+        </div>
+      </div>
+    </div>
+  }
+
+  <!-- Loading -->
+  @if (loading) {
+    <div class="loading">Loading members…</div>
+  }
+
+  <!-- Empty state -->
+  @if (!loading && members.length === 0) {
+    <div class="empty-state">
+      <p>No members yet.</p>
+    </div>
+  }
+
+  <!-- Members table -->
+  @if (!loading && members.length > 0) {
+    <div class="data-table">
+      <table>
+        <thead>
+          <tr>
+            <th>Username</th>
+            <th>Email</th>
+            <th>Role</th>
+            <th>Added at</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (member of members; track member.userId) {
+            <tr>
+              <td>
+                <strong>{{ member.username }}</strong>
+                @if (isSelf(member)) {
+                  <span class="self-badge">you</span>
+                }
+              </td>
+              <td>{{ member.email }}</td>
+              <td>
+                @if (roleEditMemberId === member.userId) {
+                  <!-- Inline role edit -->
+                  <div class="role-edit-inline">
+                    <select [(ngModel)]="roleEditValue" [name]="'role-' + member.userId">
+                      @for (role of ROLES; track role) {
+                        <option [value]="role">{{ ESTATE_ROLE_LABELS[role] }}</option>
+                      }
+                    </select>
+                    <button class="btn btn-sm btn-primary"
+                            (click)="saveRoleEdit(member)"
+                            [disabled]="roleEditSubmitting">
+                      {{ roleEditSubmitting ? '…' : 'Save' }}
+                    </button>
+                    <button class="btn btn-sm btn-secondary"
+                            (click)="cancelRoleEdit()">Cancel</button>
+                  </div>
+                } @else {
+                  <span class="role-badge"
+                        [style.background]="roleStyle(member.role).background"
+                        [style.color]="roleStyle(member.role).color">
+                    {{ ESTATE_ROLE_LABELS[member.role] }}
+                  </span>
+                }
+              </td>
+              <td>{{ member.addedAt | date: 'dd/MM/yyyy HH:mm' }}</td>
+              <td class="actions-cell">
+                @if (roleEditMemberId !== member.userId) {
+                  <!-- Edit role button -->
+                  <button class="btn btn-sm btn-secondary"
+                          [disabled]="!canEditRole(member)"
+                          [title]="editRoleTooltip(member)"
+                          (click)="openRoleEdit(member)">
+                    Edit Role
+                  </button>
+
+                  <!-- Remove button -->
+                  @if (deleteConfirmMemberId !== member.userId) {
+                    <button class="btn btn-sm btn-danger"
+                            [disabled]="!canRemove(member)"
+                            [title]="removeTooltip(member)"
+                            (click)="requestRemove(member)">
+                      Remove
+                    </button>
+                  } @else {
+                    <span class="confirm-inline">
+                      Remove {{ member.username }}?
+                      <button class="btn btn-xs btn-danger"
+                              (click)="confirmRemove()"
+                              [disabled]="deleting">
+                        {{ deleting ? '…' : 'Yes' }}
+                      </button>
+                      <button class="btn btn-xs btn-secondary"
+                              (click)="cancelRemove()">No</button>
+                    </span>
+                  }
+                }
+              </td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+  }
+</div>

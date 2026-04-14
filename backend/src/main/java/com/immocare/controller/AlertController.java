@@ -16,14 +16,17 @@ import lombok.RequiredArgsConstructor;
 /**
  * REST controller for cross-cutting alerts.
  *
- * <p>Aggregates alerts from all sources (leases, boilers, …) into a single endpoint.
- * Contextual endpoints on each resource controller (/leases/alerts, /boilers/alerts)
+ * <p>
+ * Aggregates alerts from all sources (leases, boilers, …) into a single
+ * endpoint.
+ * Contextual endpoints on each resource controller (/leases/alerts,
+ * /boilers/alerts)
  * are kept for inline banners on detail pages.
  */
 @RestController
 @RequestMapping("/api/v1/alerts")
 @RequiredArgsConstructor
-@PreAuthorize("hasRole('ADMIN')")
+@PreAuthorize("isAuthenticated()") // All endpoints require authentication, but no specific role
 public class AlertController {
 
     private final AlertService alertService;

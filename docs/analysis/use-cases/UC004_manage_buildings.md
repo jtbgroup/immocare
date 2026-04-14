@@ -179,7 +179,7 @@ Backend classes to generate:
 4. Repository: `BuildingRepository` extends JpaRepository — methods: findByCity(Pageable), searchBuildings(term, Pageable), searchBuildingsByCity(city, term, Pageable), findDistinctCities(), existsByOwnerId(Long), findByOwnerId(Long)
 5. Exception: `BuildingNotFoundException`, `BuildingHasUnitsException` (with unitCount field)
 6. Service: `BuildingService` — getAllBuildings(city, search, Pageable), getBuildingById(id), createBuilding(req), updateBuilding(id, req), deleteBuilding(id), getAllCities(). Enforce all BR-UC001-xx rules.
-7. Controller: `BuildingController` — @RequestMapping("/api/v1/buildings"), all endpoints as per US001–US005b. @PreAuthorize("hasRole('ADMIN')").
+7. Controller: `BuildingController` — @RequestMapping("/api/v1/buildings"), all endpoints as per US001–US005b. @PreAuthorize("isAuthenticated()").
 8. GlobalExceptionHandler entries for `BuildingNotFoundException` (404) and `BuildingHasUnitsException` (400 with unitCount).
 
 Frontend classes to generate:

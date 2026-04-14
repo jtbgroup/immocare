@@ -42,7 +42,7 @@ import lombok.RequiredArgsConstructor;
 
 @RestController
 @RequiredArgsConstructor
-@PreAuthorize("hasRole('ADMIN')")
+@PreAuthorize("isAuthenticated()")
 public class LeaseController {
 
     private final LeaseService leaseService;
@@ -138,7 +138,8 @@ public class LeaseController {
                     .map(LeaseStatus::valueOf)
                     .collect(Collectors.toList()));
         }
-        if (leaseType != null) params.setLeaseType(LeaseType.valueOf(leaseType));
+        if (leaseType != null)
+            params.setLeaseType(LeaseType.valueOf(leaseType));
         params.setBuildingId(buildingId);
         params.setHousingUnitId(housingUnitId);
         params.setStartDateFrom(startDateFrom);
@@ -150,7 +151,8 @@ public class LeaseController {
 
         String[] sortParts = sort.split(",");
         Sort.Direction direction = sortParts.length > 1 && sortParts[1].equalsIgnoreCase("desc")
-                ? Sort.Direction.DESC : Sort.Direction.ASC;
+                ? Sort.Direction.DESC
+                : Sort.Direction.ASC;
         Pageable pageable = PageRequest.of(page, size, Sort.by(direction, sortParts[0]));
 
         return ResponseEntity.ok(leaseService.getAll(params, pageable));

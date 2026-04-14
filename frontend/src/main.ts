@@ -10,6 +10,8 @@ import { provideRouter } from "@angular/router";
 import { AppComponent } from "./app/app.component";
 import { AuthGuard } from "./app/core/auth/auth.guard";
 import { AuthInterceptor } from "./app/core/auth/auth.interceptor";
+import { EstateGuard } from "./app/core/auth/estate.guard";
+import { PlatformAdminGuard } from "./app/core/auth/platform-admin.guard";
 import { DateFormatService } from "./app/core/services/date-format.service";
 
 bootstrapApplication(AppComponent, {
@@ -269,8 +271,64 @@ bootstrapApplication(AppComponent, {
             (m) => m.AlertsComponent,
           ),
       },
+
+      // ─── Estate selector ────────────────────────────────────────────────
+      {
+        path: "select-estate",
+        loadComponent: () =>
+          import("./app/features/estate/components/estate-selector/estate-selector.component").then(
+            (m) => m.EstateSelectorComponent,
+          ),
+      },
+
+      // ─── Admin: Estates (PLATFORM_ADMIN only) ────────────────────────────
+      {
+        path: "admin/estates",
+        canActivate: [AuthGuard, PlatformAdminGuard],
+        loadComponent: () =>
+          import("./app/features/estate/components/admin-estate-list/admin-estate-list.component").then(
+            (m) => m.AdminEstateListComponent,
+          ),
+      },
+      {
+        path: "admin/estates/new",
+        canActivate: [AuthGuard, PlatformAdminGuard],
+        loadComponent: () =>
+          import("./app/features/estate/components/admin-estate-form/admin-estate-form.component").then(
+            (m) => m.AdminEstateFormComponent,
+          ),
+      },
+      {
+        path: "admin/estates/:id/edit",
+        canActivate: [AuthGuard, PlatformAdminGuard],
+        loadComponent: () =>
+          import("./app/features/estate/components/admin-estate-form/admin-estate-form.component").then(
+            (m) => m.AdminEstateFormComponent,
+          ),
+      },
+
+      // ─── Estate dashboard ────────────────────────────────────────────────
+      {
+        path: "estates/:estateId/dashboard",
+        canActivate: [AuthGuard, EstateGuard],
+        loadComponent: () =>
+          import("./app/features/estate/components/estate-dashboard/estate-dashboard.component").then(
+            (m) => m.EstateDashboardComponent,
+          ),
+      },
+
+      // ─── Estate members ──────────────────────────────────────────────────
+      {
+        path: "estates/:estateId/members",
+        canActivate: [AuthGuard, EstateGuard],
+        loadComponent: () =>
+          import("./app/features/estate/components/estate-member-list/estate-member-list.component").then(
+            (m) => m.EstateMemberListComponent,
+          ),
+      },
+
       // ─── Fallback ───────────────────────────────────────────────────────────
-      { path: "", redirectTo: "/buildings", pathMatch: "full" },
+      // { path: "", redirectTo: "/buildings", pathMatch: "full" },
       { path: "**", redirectTo: "/buildings" },
     ]),
   ],

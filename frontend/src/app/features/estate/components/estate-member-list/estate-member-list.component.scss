@@ -1,0 +1,214 @@
+// Shared: btn, btn-sm, btn-xs, data-table, empty-state, loading, alert,
+// form-group, required from global styles.scss partials.
+
+.estate-member-list-container {
+  padding: 2rem;
+  max-width: 1100px;
+  margin: 0 auto;
+}
+
+// ─── Add member panel ─────────────────────────────────────────────────────────
+
+.add-member-panel {
+  background: white;
+  border-radius: 8px;
+  border: 1px solid #dee2e6;
+  padding: 1.25rem 1.5rem;
+  margin-bottom: 1.5rem;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.06);
+
+  h3 {
+    margin: 0 0 1rem;
+    font-size: 1rem;
+    font-weight: 600;
+  }
+}
+
+.add-member-row {
+  display: flex;
+  gap: 1rem;
+  align-items: flex-end;
+  flex-wrap: wrap;
+}
+
+.picker-wrapper {
+  flex: 2;
+  min-width: 260px;
+}
+
+.role-selector {
+  flex: 1;
+  min-width: 140px;
+
+  select {
+    width: 100%;
+    padding: 0.75rem;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    font-size: 1rem;
+    font-family: inherit;
+    background: white;
+  }
+}
+
+.add-actions {
+  flex-shrink: 0;
+}
+
+// ─── User picker ──────────────────────────────────────────────────────────────
+
+.picker-search-wrapper {
+  position: relative;
+}
+
+.picker-input {
+  width: 100%;
+  padding: 0.75rem;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  font-size: 1rem;
+  font-family: inherit;
+  background: #fff;
+  box-sizing: border-box;
+
+  &:focus {
+    outline: none;
+    border-color: #007bff;
+    box-shadow: 0 0 0 2px rgba(0, 123, 255, 0.1);
+  }
+}
+
+.picker-dropdown {
+  position: absolute;
+  top: calc(100% + 2px);
+  left: 0;
+  right: 0;
+  z-index: 1050;
+  background: #fff;
+  border: 1px solid #dee2e6;
+  border-radius: 4px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12);
+  max-height: 240px;
+  overflow-y: auto;
+}
+
+.picker-item {
+  display: block;
+  width: 100%;
+  padding: 0.5rem 0.75rem;
+  border: none;
+  border-bottom: 1px solid #f0f0f0;
+  background: transparent;
+  text-align: left;
+  cursor: pointer;
+  font-family: inherit;
+  font-size: 0.9rem;
+  color: #333;
+  &:last-child { border-bottom: none; }
+}
+
+.picker-hint {
+  color: #6c757d;
+  font-style: italic;
+  font-size: 0.85rem;
+}
+
+.picker-result:hover { background: #f0f7ff; }
+
+.result-name { font-weight: 600; }
+.result-meta { color: #6c757d; font-size: 0.85rem; }
+
+.selected-person {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.selected-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  padding: 0.4rem 0.75rem;
+  background: #e3f2fd;
+  color: #1565c0;
+  border-radius: 4px;
+  font-size: 0.9rem;
+  font-weight: 500;
+}
+
+.selected-email {
+  color: #5a8abf;
+  font-weight: 400;
+}
+
+.btn-clear {
+  background: none;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  cursor: pointer;
+  color: #6c757d;
+  font-size: 0.85rem;
+  padding: 0.3rem 0.5rem;
+  transition: background 0.15s, color 0.15s;
+  &:hover { background: #f8d7da; color: #c62828; border-color: #f5c6cb; }
+}
+
+// ─── Role badge ───────────────────────────────────────────────────────────────
+
+.role-badge {
+  display: inline-block;
+  padding: 0.2em 0.65em;
+  border-radius: 4px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+// ─── Self badge ───────────────────────────────────────────────────────────────
+
+.self-badge {
+  display: inline-block;
+  margin-left: 0.4rem;
+  padding: 0.1em 0.45em;
+  background: #f0f0f0;
+  color: #666;
+  border-radius: 3px;
+  font-size: 0.72rem;
+  font-weight: 500;
+}
+
+// ─── Inline role edit ─────────────────────────────────────────────────────────
+
+.role-edit-inline {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+
+  select {
+    padding: 0.3rem 0.5rem;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    font-family: inherit;
+    font-size: 0.875rem;
+  }
+}
+
+// ─── Inline confirm ───────────────────────────────────────────────────────────
+
+.confirm-inline {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  font-size: 0.85rem;
+  color: #555;
+}
+
+// ─── Actions cell ─────────────────────────────────────────────────────────────
+
+.actions-cell {
+  white-space: nowrap;
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+}

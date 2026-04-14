@@ -49,7 +49,7 @@ Default seed: admin / admin@immocare.com / admin123 (BCrypt 12)
    - BR-UC005-05: cannot delete own account
    - BR-UC005-06: cannot delete last ADMIN
    - **DO NOT** inject `FindByIndexNameSessionRepository`
-8. `UserController` — all endpoints `@PreAuthorize("hasRole('ADMIN')")`:
+8. `UserController` — all endpoints `@PreAuthorize("isAuthenticated()")`:
 
 | Method | Endpoint | Story |
 |--------|----------|-------|

@@ -1,0 +1,67 @@
+<div class="estate-selector-container">
+  <div class="selector-header">
+    <div class="brand-row">
+      <div class="brand-icon">🏢</div>
+      <h1 class="brand-title">ImmoCare</h1>
+    </div>
+    <p class="selector-subtitle">Select the estate you want to work in</p>
+  </div>
+
+  @if (loading) {
+    <div class="loading">Loading your estates…</div>
+  }
+
+  @if (error) {
+    <div class="alert alert-error">{{ error }}</div>
+  }
+
+  @if (!loading && !error && estates.length === 0 && !isPlatformAdmin) {
+    <div class="no-estate-panel">
+      <div class="no-estate-icon">🏗️</div>
+      <h2>No estate assigned</h2>
+      <p>You are not yet a member of any estate. Please contact your administrator to gain access.</p>
+    </div>
+  }
+
+  @if (!loading && estates.length > 0) {
+    <div class="estates-grid">
+      @for (estate of estates; track estate.id) {
+        <div class="estate-card" (click)="selectEstate(estate)" role="button" tabindex="0"
+             (keydown.enter)="selectEstate(estate)" (keydown.space)="selectEstate(estate)">
+          <div class="estate-card__header">
+            <div class="estate-card__icon">🏢</div>
+            <span class="role-badge" [style.background]="roleStyle(estate).background"
+                  [style.color]="roleStyle(estate).color">
+              {{ roleLabel(estate) }}
+            </span>
+          </div>
+          <h2 class="estate-card__name">{{ estate.name }}</h2>
+          @if (estate.description) {
+            <p class="estate-card__desc">{{ estate.description }}</p>
+          }
+          <div class="estate-card__stats">
+            <span class="stat-item">
+              <span class="stat-icon">🏢</span>
+              {{ estate.buildingCount }} building{{ estate.buildingCount !== 1 ? 's' : '' }}
+            </span>
+            <span class="stat-item">
+              <span class="stat-icon">🏠</span>
+              {{ estate.unitCount }} unit{{ estate.unitCount !== 1 ? 's' : '' }}
+            </span>
+          </div>
+          <div class="estate-card__footer">
+            <span class="enter-hint">Click to enter →</span>
+          </div>
+        </div>
+      }
+    </div>
+  }
+
+  @if (!loading && isPlatformAdmin) {
+    <div class="admin-section">
+      <button class="btn btn-secondary" (click)="goToAdmin()">
+        ⚙️ Manage all estates (Admin)
+      </button>
+    </div>
+  }
+</div>

@@ -6,15 +6,28 @@ import {
   OnInit,
   ViewChild,
 } from "@angular/core";
-import { Router, RouterLink, RouterLinkActive, RouterOutlet } from "@angular/router";
+import {
+  Router,
+  RouterLink,
+  RouterLinkActive,
+  RouterOutlet,
+} from "@angular/router";
 import { AuthService } from "./core/auth/auth.service";
+import { ActiveEstateService } from "./core/services/active-estate.service";
 import { AlertService } from "./core/services/alert.service";
 import { VersionService } from "./core/services/version.service";
+import { EstateHeaderComponent } from "./features/estate/components/estate-header/estate-header.component";
 
 @Component({
   selector: "app-root",
   standalone: true,
-  imports: [CommonModule, RouterOutlet, RouterLink, RouterLinkActive],
+  imports: [
+    CommonModule,
+    RouterOutlet,
+    RouterLink,
+    RouterLinkActive,
+    EstateHeaderComponent,
+  ],
   templateUrl: "./app.component.html",
   styleUrls: ["./app.component.scss"],
 })
@@ -34,6 +47,7 @@ export class AppComponent implements OnInit {
     private versionService: VersionService,
     private alertService: AlertService,
     private router: Router,
+    readonly activeEstateService: ActiveEstateService,
   ) {}
 
   ngOnInit(): void {

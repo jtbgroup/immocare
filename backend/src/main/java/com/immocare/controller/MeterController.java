@@ -1,31 +1,40 @@
 package com.immocare.controller;
 
+import java.util.List;
+
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
+
 import com.immocare.model.dto.AddMeterRequest;
 import com.immocare.model.dto.MeterDTO;
 import com.immocare.model.dto.MeterSearchResultDTO;
 import com.immocare.model.dto.RemoveMeterRequest;
 import com.immocare.model.dto.ReplaceMeterRequest;
 import com.immocare.model.enums.AssetType;
-import com.immocare.repository.HousingUnitRepository;
 import com.immocare.repository.BuildingRepository;
+import com.immocare.repository.HousingUnitRepository;
 import com.immocare.repository.MeterRepository;
 import com.immocare.repository.TransactionAssetLinkRepository;
 import com.immocare.service.MeterService;
+
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
-import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.web.bind.annotation.*;
-
-import java.util.List;
 
 /**
  * REST controller for UC008 - Manage Meters.
  */
 @RestController
 @RequiredArgsConstructor
-@PreAuthorize("hasRole('ADMIN')")
+@PreAuthorize("isAuthenticated()")
 public class MeterController {
 
     private static final String HOUSING_UNIT = "HOUSING_UNIT";
@@ -118,7 +127,8 @@ public class MeterController {
     /**
      * GET /api/v1/meters/search?q=&buildingId=
      * Asset picker endpoint for transaction forms.
-     * Searches active meters by meter number, label or EAN code (case-insensitive, min 2 chars).
+     * Searches active meters by meter number, label or EAN code (case-insensitive,
+     * min 2 chars).
      * Optionally filtered by building.
      */
     @GetMapping("/api/v1/meters/search")
@@ -179,7 +189,8 @@ public class MeterController {
     // ─── Private helpers ──────────────────────────────────────────────────────
 
     private Long resolveBuildingId(String ownerType, Long ownerId) {
-        if (BUILDING.equals(ownerType)) return ownerId;
+        if (BUILDING.equals(ownerType))
+            return ownerId;
         if (HOUSING_UNIT.equals(ownerType)) {
             return housingUnitRepository.findById(ownerId)
                     .map(u -> u.getBuilding().getId())

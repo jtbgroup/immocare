@@ -1,0 +1,122 @@
+// Shared: btn, form-card, form-group, form-actions, required, optional,
+// error-message, alert, loading, help-text from global styles.scss partials.
+
+.admin-estate-form-container {
+  padding: 2rem;
+  max-width: 720px;
+  margin: 0 auto;
+}
+
+// ─── User picker (reuses person-picker styles pattern) ────────────────────────
+
+.picker-search-wrapper {
+  position: relative;
+}
+
+.picker-input {
+  width: 100%;
+  padding: 0.75rem;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  font-size: 1rem;
+  font-family: inherit;
+  background: #fff;
+  box-sizing: border-box;
+
+  &:focus {
+    outline: none;
+    border-color: #007bff;
+    box-shadow: 0 0 0 2px rgba(0, 123, 255, 0.1);
+  }
+}
+
+.picker-dropdown {
+  position: absolute;
+  top: calc(100% + 2px);
+  left: 0;
+  right: 0;
+  z-index: 1050;
+  background: #fff;
+  border: 1px solid #dee2e6;
+  border-radius: 4px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12);
+  max-height: 240px;
+  overflow-y: auto;
+}
+
+.picker-item {
+  display: block;
+  width: 100%;
+  padding: 0.5rem 0.75rem;
+  border: none;
+  border-bottom: 1px solid #f0f0f0;
+  background: transparent;
+  text-align: left;
+  cursor: pointer;
+  font-family: inherit;
+  font-size: 0.9rem;
+  color: #333;
+
+  &:last-child { border-bottom: none; }
+}
+
+.picker-hint {
+  color: #6c757d;
+  font-style: italic;
+  font-size: 0.85rem;
+}
+
+.picker-result:hover {
+  background: #f0f7ff;
+}
+
+.result-name {
+  font-weight: 600;
+}
+
+.result-meta {
+  color: #6c757d;
+  font-size: 0.85rem;
+}
+
+// ─── Selected manager display ─────────────────────────────────────────────────
+
+.selected-person {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.selected-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  padding: 0.4rem 0.75rem;
+  background: #e3f2fd;
+  color: #1565c0;
+  border-radius: 4px;
+  font-size: 0.9rem;
+  font-weight: 500;
+}
+
+.selected-email {
+  color: #5a8abf;
+  font-weight: 400;
+}
+
+.btn-clear {
+  background: none;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  cursor: pointer;
+  color: #6c757d;
+  font-size: 0.85rem;
+  padding: 0.3rem 0.5rem;
+  transition: background 0.15s, color 0.15s;
+
+  &:hover {
+    background: #f8d7da;
+    color: #c62828;
+    border-color: #f5c6cb;
+  }
+}

@@ -22,10 +22,18 @@ import jakarta.persistence.Table;
  * JPA entity for authenticated users.
  * Implements {@link UserDetails} so Spring Security can use it directly.
  * Mapped to the {@code app_user} table (avoids PostgreSQL reserved keyword).
+ *
+ * UC016 Phase 1: replaced {@code role} string field with
+ * {@code isPlatformAdmin} boolean.
+ * Fine-grained access within an estate is handled via
+ * {@code estate_member.role}.
  */
 @Entity
 @Table(name = "app_user")
 public class AppUser implements UserDetails {
+
+    @Serial
+    private static final long serialVersionUID = 1L;
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -40,16 +48,14 @@ public class AppUser implements UserDetails {
     @Column(nullable = false, unique = true, length = 100)
     private String email;
 
-    @Column(nullable = false, length = 20)
-    private String role;
+    @Column(name = "is_platform_admin", nullable = false)
+    private boolean isPlatformAdmin = false;
 
     @Column(name = "created_at", nullable = false, updatable = false)
     private LocalDateTime createdAt;
 
     @Column(name = "updated_at", nullable = false)
     private LocalDateTime updatedAt;
-    @Serial
-    private static final long serialVersionUID = 1L;
 
     // -------------------------------------------------------------------------
     // Lifecycle
@@ -72,7 +78,10 @@ public class AppUser implements UserDetails {
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
-        return List.of(new SimpleGrantedAuthority("ROLE_" + role));
+        if (isPlatformAdmin) {
+            return List.of(new SimpleGrantedAuthority("ROLE_PLATFORM_ADMIN"));
+        }
+        return List.of(new SimpleGrantedAuthority("ROLE_USER"));
     }
 
     /**
@@ -120,8 +129,8 @@ public class AppUser implements UserDetails {
         return email;
     }
 
-    public String getRole() {
-        return role;
+    public boolean isPlatformAdmin() {
+        return isPlatformAdmin;
     }
 
     public LocalDateTime getCreatedAt() {
@@ -144,7 +153,7 @@ public class AppUser implements UserDetails {
         this.email = email;
     }
 
-    public void setRole(String role) {
-        this.role = role;
+    public void setIsPlatformAdmin(boolean isPlatformAdmin) {
+        this.isPlatformAdmin = isPlatformAdmin;
     }
 }

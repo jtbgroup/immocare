@@ -242,10 +242,10 @@
                 <div class="loading-placeholder">Loading history…</div>
               }
               @if (!serviceHistoryLoading[boiler.id]) {
-                @if (!serviceHistoryMap[boiler.id]?.length) {
+                @if (!serviceHistoryMap[boiler.id].length) {
                   <div class="no-data">No service recorded.</div>
                 }
-                @if (serviceHistoryMap[boiler.id]?.length) {
+                @if (serviceHistoryMap[boiler.id].length) {
                   <table class="history-table">
                     <thead>
                       <tr>

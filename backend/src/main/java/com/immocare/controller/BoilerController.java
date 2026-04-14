@@ -1,29 +1,38 @@
 package com.immocare.controller;
 
+import java.util.List;
+
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
+
 import com.immocare.model.dto.BoilerDTO;
 import com.immocare.model.dto.BoilerSearchResultDTO;
 import com.immocare.model.dto.SaveBoilerRequest;
 import com.immocare.model.enums.AssetType;
 import com.immocare.repository.BoilerRepository;
-import com.immocare.repository.HousingUnitRepository;
 import com.immocare.repository.BuildingRepository;
+import com.immocare.repository.HousingUnitRepository;
 import com.immocare.repository.TransactionAssetLinkRepository;
 import com.immocare.service.BoilerService;
+
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
-import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.web.bind.annotation.*;
-
-import java.util.List;
 
 /**
  * REST controller for UC011 — Manage Boilers.
  */
 @RestController
 @RequiredArgsConstructor
-@PreAuthorize("hasRole('ADMIN')")
+@PreAuthorize("isAuthenticated()")
 public class BoilerController {
 
     private static final String HOUSING_UNIT = "HOUSING_UNIT";
@@ -141,7 +150,8 @@ public class BoilerController {
     // ─── Private helpers ──────────────────────────────────────────────────────
 
     private Long resolveBuildingId(String ownerType, Long ownerId) {
-        if (BUILDING.equals(ownerType)) return ownerId;
+        if (BUILDING.equals(ownerType))
+            return ownerId;
         if (HOUSING_UNIT.equals(ownerType)) {
             return housingUnitRepository.findById(ownerId)
                     .map(u -> u.getBuilding().getId())
@@ -152,13 +162,16 @@ public class BoilerController {
 
     private String buildLabel(String brand, String model, String serial) {
         StringBuilder sb = new StringBuilder();
-        if (brand != null && !brand.isBlank()) sb.append(brand);
+        if (brand != null && !brand.isBlank())
+            sb.append(brand);
         if (model != null && !model.isBlank()) {
-            if (sb.length() > 0) sb.append(" ");
+            if (sb.length() > 0)
+                sb.append(" ");
             sb.append(model);
         }
         if (serial != null && !serial.isBlank()) {
-            if (sb.length() > 0) sb.append(" — ");
+            if (sb.length() > 0)
+                sb.append(" — ");
             sb.append(serial);
         }
         return sb.length() > 0 ? sb.toString() : "Boiler";

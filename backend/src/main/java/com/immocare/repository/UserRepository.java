@@ -7,6 +7,8 @@ import java.util.Optional;
 
 /**
  * Spring Data JPA repository for {@link AppUser}.
+ *
+ * UC016 Phase 1: replaced {@code countByRole} with {@code countByIsPlatformAdminTrue}.
  */
 public interface UserRepository extends JpaRepository<AppUser, Long> {
 
@@ -16,5 +18,5 @@ public interface UserRepository extends JpaRepository<AppUser, Long> {
 
     boolean existsByEmailIgnoreCase(String email);
 
-    long countByRole(String role);
+    long countByIsPlatformAdminTrue();
 }

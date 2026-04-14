@@ -1,0 +1,92 @@
+<div class="admin-estate-form-container">
+  <div class="details-content">
+    <div class="header">
+      <h1>{{ isEdit ? 'Edit Estate' : 'Create Estate' }}</h1>
+    </div>
+  </div>
+
+  @if (loading) {
+    <div class="loading">Loading…</div>
+  }
+
+  @if (!loading) {
+    <div class="form-card">
+      <form [formGroup]="form" (ngSubmit)="submit()" novalidate>
+
+        @if (errorMessage) {
+          <div class="alert alert-error">{{ errorMessage }}</div>
+        }
+
+        <!-- Name -->
+        <div class="form-group">
+          <label for="name">Estate Name <span class="required">*</span></label>
+          <input id="name" type="text" formControlName="name"
+                 placeholder="e.g. Brussels Portfolio"
+                 [class.error]="form.get('name')?.invalid && form.get('name')?.touched" />
+          @if (fieldError('name')) {
+            <span class="error-message">{{ fieldError('name') }}</span>
+          }
+        </div>
+
+        <!-- Description -->
+        <div class="form-group">
+          <label for="description">Description <span class="optional">(optional)</span></label>
+          <textarea id="description" formControlName="description" rows="3"
+                    placeholder="Brief description of this estate…"></textarea>
+        </div>
+
+        <!-- First Manager — create mode only -->
+        @if (!isEdit) {
+          <div class="form-group">
+            <label>First Manager <span class="optional">(optional)</span></label>
+            <p class="help-text">Assign a user as the initial MANAGER of this estate.</p>
+
+            @if (selectedManager) {
+              <div class="selected-person">
+                <span class="selected-badge">
+                  👤 {{ selectedManager.username }}
+                  <span class="selected-email">— {{ selectedManager.email }}</span>
+                </span>
+                <button type="button" class="btn-clear" (click)="clearManager()">✕</button>
+              </div>
+            } @else {
+              <div class="picker-search-wrapper">
+                <input type="text" class="picker-input"
+                       placeholder="Search by username or email…"
+                       [value]="userSearchTerm"
+                       (input)="onUserSearchInput($any($event.target).value)"
+                       (blur)="closeUserDropdown()"
+                       autocomplete="off" />
+                @if (userDropdownOpen) {
+                  <div class="picker-dropdown">
+                    @if (userSearchLoading) {
+                      <div class="picker-item picker-hint">Searching…</div>
+                    }
+                    @if (!userSearchLoading && userResults.length === 0) {
+                      <div class="picker-item picker-hint">No users found.</div>
+                    }
+                    @for (user of userResults; track user.id) {
+                      <button type="button" class="picker-item picker-result"
+                              (mousedown)="selectManager(user)">
+                        <span class="result-name">{{ user.username }}</span>
+                        <span class="result-meta"> — {{ user.email }}</span>
+                      </button>
+                    }
+                  </div>
+                }
+              </div>
+            }
+          </div>
+        }
+
+        <div class="form-actions">
+          <button type="button" class="btn btn-secondary" (click)="cancel()">Cancel</button>
+          <button type="submit" class="btn btn-primary" [disabled]="submitting">
+            {{ submitting ? 'Saving…' : isEdit ? 'Save Changes' : 'Create Estate' }}
+          </button>
+        </div>
+
+      </form>
+    </div>
+  }
+</div>

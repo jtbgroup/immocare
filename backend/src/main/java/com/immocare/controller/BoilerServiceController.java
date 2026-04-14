@@ -21,7 +21,7 @@ import lombok.RequiredArgsConstructor;
 /** REST endpoints for boiler maintenance history — UC011 (US064/US065). */
 @RestController
 @RequiredArgsConstructor
-@PreAuthorize("hasRole('ADMIN')")
+@PreAuthorize("isAuthenticated()")
 public class BoilerServiceController {
 
     private final BoilerServiceHistoryService historyService;

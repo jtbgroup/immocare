@@ -15,6 +15,8 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 /**
  * Global exception handler for REST controllers.
  * Provides consistent error response format across the application.
+ *
+ * UC016 Phase 1: added handlers for all estate-related exceptions.
  */
 @RestControllerAdvice
 public class GlobalExceptionHandler {
@@ -260,13 +262,67 @@ public class GlobalExceptionHandler {
   @ExceptionHandler(CannotDeleteLastAdminException.class)
   public ResponseEntity<ErrorResponse> handleCannotDeleteLastAdmin(CannotDeleteLastAdminException ex) {
     return ResponseEntity.status(HttpStatus.CONFLICT)
-        .body(new ErrorResponse(409, "LAST_ADMIN", ex.getMessage(), LocalDateTime.now()));
+        .body(new ErrorResponse(409, "LAST_PLATFORM_ADMIN", ex.getMessage(), LocalDateTime.now()));
   }
 
   @ExceptionHandler(CannotDeleteSelfException.class)
   public ResponseEntity<ErrorResponse> handleCannotDeleteSelf(CannotDeleteSelfException ex) {
     return ResponseEntity.status(HttpStatus.FORBIDDEN)
         .body(new ErrorResponse(403, "CANNOT_DELETE_SELF", ex.getMessage(), LocalDateTime.now()));
+  }
+
+  // ─── UC016 - Estates ──────────────────────────────────────────────────────
+
+  @ExceptionHandler(EstateNotFoundException.class)
+  public ResponseEntity<ErrorResponse> handleEstateNotFound(EstateNotFoundException ex) {
+    return notFound("Estate not found", ex.getMessage());
+  }
+
+  @ExceptionHandler(EstateNameTakenException.class)
+  public ResponseEntity<ErrorResponse> handleEstateNameTaken(EstateNameTakenException ex) {
+    return ResponseEntity.status(HttpStatus.CONFLICT)
+        .body(new ErrorResponse(409, "ESTATE_NAME_TAKEN",
+            "An estate with this name already exists", LocalDateTime.now()));
+  }
+
+  @ExceptionHandler(EstateHasBuildingsException.class)
+  public ResponseEntity<Map<String, Object>> handleEstateHasBuildings(EstateHasBuildingsException ex) {
+    Map<String, Object> body = new HashMap<>();
+    body.put("timestamp", LocalDateTime.now());
+    body.put("status", 409);
+    body.put("error", "ESTATE_HAS_BUILDINGS");
+    body.put("message", ex.getMessage());
+    body.put("buildingCount", ex.getBuildingCount());
+    return ResponseEntity.status(HttpStatus.CONFLICT).body(body);
+  }
+
+  @ExceptionHandler(EstateMemberNotFoundException.class)
+  public ResponseEntity<ErrorResponse> handleEstateMemberNotFound(EstateMemberNotFoundException ex) {
+    return notFound("Estate member not found", ex.getMessage());
+  }
+
+  @ExceptionHandler(EstateMemberAlreadyExistsException.class)
+  public ResponseEntity<ErrorResponse> handleEstateMemberAlreadyExists(EstateMemberAlreadyExistsException ex) {
+    return ResponseEntity.status(HttpStatus.CONFLICT)
+        .body(new ErrorResponse(409, "ESTATE_MEMBER_EXISTS", ex.getMessage(), LocalDateTime.now()));
+  }
+
+  @ExceptionHandler(EstateLastManagerException.class)
+  public ResponseEntity<ErrorResponse> handleEstateLastManager(EstateLastManagerException ex) {
+    return ResponseEntity.status(HttpStatus.CONFLICT)
+        .body(new ErrorResponse(409, "ESTATE_LAST_MANAGER", ex.getMessage(), LocalDateTime.now()));
+  }
+
+  @ExceptionHandler(EstateSelfOperationException.class)
+  public ResponseEntity<ErrorResponse> handleEstateSelfOperation(EstateSelfOperationException ex) {
+    return ResponseEntity.status(HttpStatus.CONFLICT)
+        .body(new ErrorResponse(409, "ESTATE_SELF_OPERATION", ex.getMessage(), LocalDateTime.now()));
+  }
+
+  @ExceptionHandler(EstateAccessDeniedException.class)
+  public ResponseEntity<ErrorResponse> handleEstateAccessDenied(EstateAccessDeniedException ex) {
+    return ResponseEntity.status(HttpStatus.FORBIDDEN)
+        .body(new ErrorResponse(403, "ESTATE_ACCESS_DENIED", ex.getMessage(), LocalDateTime.now()));
   }
 
   // ─── Generic ──────────────────────────────────────────────────────────────
@@ -291,12 +347,6 @@ public class GlobalExceptionHandler {
     return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(body);
   }
 
-  /**
-   * Catches Spring's UnexpectedRollbackException and unwraps the root cause
-   * so the user receives a meaningful error message instead of
-   * "Transaction silently rolled back because it has been marked as
-   * rollback-only".
-   */
   @ExceptionHandler(UnexpectedRollbackException.class)
   public ResponseEntity<ErrorResponse> handleUnexpectedRollback(UnexpectedRollbackException ex) {
     Throwable rootCause = ex;
@@ -339,6 +389,5 @@ public class GlobalExceptionHandler {
     return ResponseEntity.status(status).body(body);
   }
 
-  public record ErrorResponse(int status, String error, String message, LocalDateTime timestamp) {
-  }
+  public record ErrorResponse(int status, String error, String message, LocalDateTime timestamp) {}
 }

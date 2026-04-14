@@ -1,0 +1,110 @@
+<div class="admin-estate-list-container">
+  <!-- Header -->
+  <div class="details-content">
+    <div class="header">
+      <h1>🏛️ Estates</h1>
+      <div class="actions">
+        <button class="btn btn-primary" (click)="create()">+ Create Estate</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Error / delete error -->
+  @if (error) {
+    <div class="alert alert-error">{{ error }}</div>
+  }
+  @if (deleteError) {
+    <div class="alert alert-error">{{ deleteError }}</div>
+  }
+
+  <!-- Filters -->
+  <div class="filters">
+    <input
+      type="text"
+      class="search-input"
+      placeholder="Search by name…"
+      [value]="searchTerm"
+      (input)="onSearchChange($any($event.target).value)"
+    />
+  </div>
+
+  <!-- Loading -->
+  @if (loading) {
+    <div class="loading">Loading estates…</div>
+  }
+
+  <!-- Empty state -->
+  @if (!loading && estates.length === 0) {
+    <div class="empty-state">
+      <p>No estates found.</p>
+      <p class="help-text">Create your first estate to get started.</p>
+    </div>
+  }
+
+  <!-- Table -->
+  @if (!loading && estates.length > 0) {
+    <div class="data-table">
+      <table>
+        <thead>
+          <tr>
+            <th>Name</th>
+            <th>Description</th>
+            <th>Members</th>
+            <th>Buildings</th>
+            <th>Created at</th>
+            <th>Created by</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (estate of estates; track estate.id) {
+            <tr class="clickable" (click)="edit(estate)">
+              <td><strong>{{ estate.name }}</strong></td>
+              <td>{{ estate.description || '—' }}</td>
+              <td>{{ estate.memberCount }}</td>
+              <td>{{ estate.buildingCount }}</td>
+              <td>{{ estate.createdAt | date: 'dd/MM/yyyy' }}</td>
+              <td>{{ estate.createdByUsername || '—' }}</td>
+              <td>
+                <button class="btn btn-sm btn-secondary"
+                        (click)="edit(estate); $event.stopPropagation()">Edit</button>
+                <button class="btn btn-sm btn-danger"
+                        (click)="requestDelete(estate); $event.stopPropagation()">Delete</button>
+              </td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+  }
+
+  <!-- Pagination -->
+  @if (totalPages > 1) {
+    <div class="pagination">
+      <button class="btn btn-secondary" (click)="previousPage()" [disabled]="currentPage === 0">Previous</button>
+      <span class="page-info">Page {{ currentPage + 1 }} of {{ totalPages }} ({{ totalElements }} total)</span>
+      <button class="btn btn-secondary" (click)="nextPage()" [disabled]="currentPage >= totalPages - 1">Next</button>
+    </div>
+  }
+</div>
+
+<!-- Delete confirmation modal -->
+@if (deleteConfirmId) {
+  <div class="modal-overlay">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h2>Delete Estate</h2>
+      </div>
+      <div class="modal-body">
+        <p>Are you sure you want to delete <strong>{{ estateToDelete()?.name }}</strong>?</p>
+        <p class="warning">This action cannot be undone.</p>
+      </div>
+      <div class="modal-actions">
+        <button class="btn btn-secondary" (click)="cancelDelete()" [disabled]="deleting">Cancel</button>
+        <button class="btn btn-danger" (click)="confirmDelete()" [disabled]="deleting">
+          {{ deleting ? 'Deleting…' : 'Delete' }}
+        </button>
+      </div>
+    </div>
+  </div>
+}

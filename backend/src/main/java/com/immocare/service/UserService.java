@@ -1,6 +1,18 @@
 package com.immocare.service;
 
-import com.immocare.exception.*;
+import java.util.List;
+import java.util.regex.Pattern;
+
+import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import com.immocare.exception.CannotDeleteLastAdminException;
+import com.immocare.exception.CannotDeleteSelfException;
+import com.immocare.exception.EmailTakenException;
+import com.immocare.exception.PasswordMismatchException;
+import com.immocare.exception.UserNotFoundException;
+import com.immocare.exception.UsernameTakenException;
 import com.immocare.mapper.UserMapper;
 import com.immocare.model.dto.ChangePasswordRequest;
 import com.immocare.model.dto.CreateUserRequest;
@@ -8,36 +20,28 @@ import com.immocare.model.dto.UpdateUserRequest;
 import com.immocare.model.dto.UserDTO;
 import com.immocare.model.entity.AppUser;
 import com.immocare.repository.UserRepository;
-import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
-
-import java.util.List;
-import java.util.regex.Pattern;
 
 /**
  * Business logic for UC007 — Manage Users.
  *
- * <p>All business rules (BR-UC007-01 → BR-UC007-08) are enforced here,
- * not only in the UI layer.
+ * UC016 Phase 1: removed role-based logic; users are now identified as
+ * PLATFORM_ADMIN (boolean) or regular users. The "last admin" guard now
+ * checks {@code isPlatformAdmin} rather than a string role.
  */
 @Service
 @Transactional
 public class UserService {
 
-    private static final String ROLE_ADMIN = "ADMIN";
-
     /** BR-UC007-04: password complexity — 8+ chars, 1 upper, 1 lower, 1 digit. */
-    private static final Pattern PASSWORD_COMPLEXITY =
-            Pattern.compile("^(?=.*[a-z])(?=.*[A-Z])(?=.*\\d).{8,}$");
+    private static final Pattern PASSWORD_COMPLEXITY = Pattern.compile("^(?=.*[a-z])(?=.*[A-Z])(?=.*\\d).{8,}$");
 
     private final UserRepository userRepository;
     private final UserMapper userMapper;
     private final PasswordEncoder passwordEncoder;
 
     public UserService(UserRepository userRepository,
-                       UserMapper userMapper,
-                       PasswordEncoder passwordEncoder) {
+            UserMapper userMapper,
+            PasswordEncoder passwordEncoder) {
         this.userRepository = userRepository;
         this.userMapper = userMapper;
         this.passwordEncoder = passwordEncoder;
@@ -79,7 +83,7 @@ public class UserService {
         AppUser user = new AppUser();
         user.setUsername(req.username());
         user.setEmail(req.email());
-        user.setRole(req.role());
+        user.setIsPlatformAdmin(req.isPlatformAdmin());
         user.setPasswordHash(passwordEncoder.encode(req.password()));
 
         return userMapper.toDTO(userRepository.save(user));
@@ -105,7 +109,7 @@ public class UserService {
 
         user.setUsername(req.username());
         user.setEmail(req.email());
-        user.setRole(req.role());
+        user.setIsPlatformAdmin(req.isPlatformAdmin());
 
         return userMapper.toDTO(userRepository.save(user));
     }
@@ -116,9 +120,7 @@ public class UserService {
 
     public void changePassword(Long id, ChangePasswordRequest req) {
         AppUser user = findOrThrow(id);
-
         validatePassword(req.newPassword(), req.confirmPassword());
-
         user.setPasswordHash(passwordEncoder.encode(req.newPassword()));
         userRepository.save(user);
     }
@@ -135,8 +137,8 @@ public class UserService {
             throw new CannotDeleteSelfException();
         }
 
-        // BR-UC007-06: cannot delete last ADMIN
-        if (ROLE_ADMIN.equals(user.getRole()) && userRepository.countByRole(ROLE_ADMIN) <= 1) {
+        // BR-UC007-06: cannot delete last PLATFORM_ADMIN
+        if (user.isPlatformAdmin() && userRepository.countByIsPlatformAdminTrue() <= 1) {
             throw new CannotDeleteLastAdminException();
         }
 
@@ -163,7 +165,7 @@ public class UserService {
         if (!PASSWORD_COMPLEXITY.matcher(password).matches()) {
             throw new IllegalArgumentException(
                     "Password must be at least 8 characters and contain at least "
-                    + "one uppercase letter, one lowercase letter, and one digit");
+                            + "one uppercase letter, one lowercase letter, and one digit");
         }
     }
 }

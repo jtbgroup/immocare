@@ -1,0 +1,62 @@
+<div class="estate-dashboard-container">
+  @if (loading) {
+    <div class="loading">Loading dashboard…</div>
+  }
+
+  @if (error) {
+    <div class="alert alert-error">{{ error }}</div>
+  }
+
+  @if (!loading && dashboard) {
+    <!-- Header -->
+    <div class="details-content">
+      <div class="header">
+        <h1>{{ dashboard.estateName }}</h1>
+      </div>
+    </div>
+
+    <!-- Summary stats -->
+    <div class="info-card">
+      <h2>Overview</h2>
+      <div class="stats-grid">
+        <div class="stat-card">
+          <div class="stat-card__icon">🏢</div>
+          <div class="stat-card__value">{{ dashboard.totalBuildings }}</div>
+          <div class="stat-card__label">Buildings</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-card__icon">🏠</div>
+          <div class="stat-card__value">{{ dashboard.totalUnits }}</div>
+          <div class="stat-card__label">Housing Units</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-card__icon">📄</div>
+          <div class="stat-card__value">{{ dashboard.activeLeases }}</div>
+          <div class="stat-card__label">Active Leases</div>
+        </div>
+        <div class="stat-card" [class.stat-card--alert]="totalAlerts > 0">
+          <div class="stat-card__icon">🔔</div>
+          <div class="stat-card__value">{{ totalAlerts }}</div>
+          <div class="stat-card__label">Pending Alerts</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Quick access -->
+    <div class="info-card">
+      <h2>Quick Access</h2>
+      <div class="quick-access-grid">
+        @for (card of quickAccessCards; track card.label) {
+          <a [routerLink]="card.route" class="quick-card">
+            <div class="quick-card__icon">{{ card.icon }}</div>
+            <div class="quick-card__content">
+              <div class="quick-card__label">{{ card.label }}</div>
+              <div class="quick-card__desc">{{ card.description }}</div>
+            </div>
+            <div class="quick-card__arrow">→</div>
+          </a>
+        }
+      </div>
+    </div>
+  }
+</div>

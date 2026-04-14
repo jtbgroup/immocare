@@ -193,7 +193,7 @@ Backend classes to generate:
    - addRent(unitId, req): validates date (max 1 year future), inserts in sorted order, recalculates adjacent effectiveTo values using the sorted list. @Transactional.
    - updateRent(unitId, rentId, req): updates fields, recalculates timeline. @Transactional.
    - deleteRent(unitId, rentId): removes record, restores previous effectiveTo. @Transactional.
-6. Controller: `RentHistoryController` — @RequestMapping("/api/v1/housing-units/{unitId}/rents"), @PreAuthorize("hasRole('ADMIN')")
+6. Controller: `RentHistoryController` — @RequestMapping("/api/v1/housing-units/{unitId}/rents"), @PreAuthorize("isAuthenticated()")
 
 Timeline recalculation algorithm:
 - Load all records for unit ordered by effectiveFrom ASC

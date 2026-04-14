@@ -36,7 +36,7 @@ import jakarta.validation.Valid;
  */
 @RestController
 @RequestMapping("/api/v1/housing-units/{unitId}/peb-scores")
-@PreAuthorize("hasRole('ADMIN')")
+@PreAuthorize("isAuthenticated()")
 public class PebScoreController {
 
     private final PebScoreService pebScoreService;
