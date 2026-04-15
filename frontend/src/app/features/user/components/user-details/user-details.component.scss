@@ -11,6 +11,14 @@
   border-radius: 4px;
   font-size: 0.75rem;
   font-weight: 600;
-  background-color: #e3f2fd;
-  color: #1565c0;
+
+  &--admin {
+    background-color: #e3f2fd;
+    color: #1565c0;
+  }
+
+  &--user {
+    background-color: #e2e3e5;
+    color: #383d41;
+  }
 }

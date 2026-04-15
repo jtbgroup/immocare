@@ -69,7 +69,11 @@
         <div class="info-item">
           <label>Role</label>
           <p>
-            <span class="badge-role">{{ user.role }}</span>
+            @if (user.isPlatformAdmin) {
+              <span class="badge-role badge-role--admin">Platform Admin</span>
+            } @else {
+              <span class="badge-role badge-role--user">User</span>
+            }
           </p>
         </div>
         <div class="info-item">

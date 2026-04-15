@@ -2,7 +2,7 @@ export interface User {
   id: number;
   username: string;
   email: string;
-  role: string;
+  isPlatformAdmin: boolean;
   createdAt: string;
   updatedAt: string;
 }
@@ -12,13 +12,13 @@ export interface CreateUserRequest {
   email: string;
   password: string;
   confirmPassword: string;
-  role: string;
+  isPlatformAdmin: boolean;
 }
 
 export interface UpdateUserRequest {
   username: string;
   email: string;
-  role: string;
+  isPlatformAdmin: boolean;
 }
 
 export interface ChangePasswordRequest {

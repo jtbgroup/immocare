@@ -16,9 +16,7 @@
       <form [formGroup]="form" (ngSubmit)="submit()" novalidate>
         <!-- Error -->
         @if (errorMessage) {
-          <div class="alert alert-error">
-            {{ errorMessage }}
-          </div>
+          <div class="alert alert-error">{{ errorMessage }}</div>
         }
 
         <!-- Username -->
@@ -101,23 +99,18 @@
           </div>
         }
 
-        <!-- Role -->
+        <!-- Platform Admin -->
         <div class="form-group">
-          <label for="role">Role <span class="required">*</span></label>
-          <select
-            id="role"
-            formControlName="role"
-            [class.error]="
-              form.get('role')?.invalid && form.get('role')?.touched
-            "
-          >
-            @for (r of roles; track r) {
-              <option [value]="r">{{ r }}</option>
-            }
-          </select>
-          @if (fieldError("role")) {
-            <span class="error-message">{{ fieldError("role") }}</span>
-          }
+          <div class="section-toggle">
+            <label>
+              <input type="checkbox" formControlName="isPlatformAdmin" />
+              Platform Administrator
+            </label>
+          </div>
+          <span class="help-text">
+            Platform administrators have full access to all estates and
+            platform-level settings.
+          </span>
         </div>
 
         <div class="form-actions">

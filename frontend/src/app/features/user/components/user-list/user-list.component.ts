@@ -5,7 +5,10 @@ import { UserService } from "../../../../core/services/user.service";
 import { User } from "../../../../models/user.model";
 import { SortIconPipe } from "../../../../shared/pipes/sort-icon.pipe";
 
-type SortField = keyof Pick<User, "username" | "email" | "role" | "createdAt">;
+type SortField = keyof Pick<
+  User,
+  "username" | "email" | "isPlatformAdmin" | "createdAt"
+>;
 type SortDir = "asc" | "desc";
 
 @Component({
@@ -70,24 +73,30 @@ export class UserListComponent implements OnInit {
   get totalPages(): number {
     return Math.max(1, Math.ceil(this.users.length / this.pageSize));
   }
+
   get pagedUsers(): User[] {
     const start = (this.currentPage - 1) * this.pageSize;
     return this.sortedUsers.slice(start, start + this.pageSize);
   }
+
   get endIndex(): number {
     return Math.min(this.currentPage * this.pageSize, this.users.length);
   }
+
   pages(): number[] {
     return Array.from({ length: this.totalPages }, (_, i) => i + 1);
   }
+
   goToPage(page: number): void {
     if (page >= 1 && page <= this.totalPages) {
       this.currentPage = page;
     }
   }
+
   navigateTo(user: User): void {
     this.router.navigate(["/users", user.id]);
   }
+
   create(): void {
     this.router.navigate(["/users/new"]);
   }
