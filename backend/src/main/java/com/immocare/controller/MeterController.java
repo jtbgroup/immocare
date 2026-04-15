@@ -1,6 +1,7 @@
 package com.immocare.controller;
 
 import java.util.List;
+import java.util.UUID;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -31,6 +32,7 @@ import lombok.RequiredArgsConstructor;
 
 /**
  * REST controller for UC008 - Manage Meters.
+ * UC016 Phase 2: building and housing unit meter routes now scoped to an estate.
  */
 @RestController
 @RequiredArgsConstructor
@@ -48,8 +50,10 @@ public class MeterController {
 
     // ─── Housing unit meters ──────────────────────────────────────────────────
 
-    @GetMapping("/api/v1/housing-units/{unitId}/meters")
+    @GetMapping("/api/v1/estates/{estateId}/housing-units/{unitId}/meters")
+    @PreAuthorize("@security.isMemberOf(#estateId)")
     public ResponseEntity<List<MeterDTO>> getUnitMeters(
+            @PathVariable UUID estateId,
             @PathVariable Long unitId,
             @RequestParam(required = false) String status) {
         List<MeterDTO> result = "active".equalsIgnoreCase(status)
@@ -58,16 +62,20 @@ public class MeterController {
         return ResponseEntity.ok(result);
     }
 
-    @PostMapping("/api/v1/housing-units/{unitId}/meters")
+    @PostMapping("/api/v1/estates/{estateId}/housing-units/{unitId}/meters")
+    @PreAuthorize("@security.isManagerOf(#estateId)")
     public ResponseEntity<MeterDTO> addUnitMeter(
+            @PathVariable UUID estateId,
             @PathVariable Long unitId,
             @Valid @RequestBody AddMeterRequest request) {
         MeterDTO created = meterService.addMeter(HOUSING_UNIT, unitId, request);
         return ResponseEntity.status(HttpStatus.CREATED).body(created);
     }
 
-    @PutMapping("/api/v1/housing-units/{unitId}/meters/{meterId}/replace")
+    @PutMapping("/api/v1/estates/{estateId}/housing-units/{unitId}/meters/{meterId}/replace")
+    @PreAuthorize("@security.isManagerOf(#estateId)")
     public ResponseEntity<MeterDTO> replaceUnitMeter(
+            @PathVariable UUID estateId,
             @PathVariable Long unitId,
             @PathVariable Long meterId,
             @Valid @RequestBody ReplaceMeterRequest request) {
@@ -75,8 +83,10 @@ public class MeterController {
         return ResponseEntity.ok(newMeter);
     }
 
-    @DeleteMapping("/api/v1/housing-units/{unitId}/meters/{meterId}")
+    @DeleteMapping("/api/v1/estates/{estateId}/housing-units/{unitId}/meters/{meterId}")
+    @PreAuthorize("@security.isManagerOf(#estateId)")
     public ResponseEntity<Void> removeUnitMeter(
+            @PathVariable UUID estateId,
             @PathVariable Long unitId,
             @PathVariable Long meterId,
             @Valid @RequestBody RemoveMeterRequest request) {
@@ -86,8 +96,10 @@ public class MeterController {
 
     // ─── Building meters ──────────────────────────────────────────────────────
 
-    @GetMapping("/api/v1/buildings/{buildingId}/meters")
+    @GetMapping("/api/v1/estates/{estateId}/buildings/{buildingId}/meters")
+    @PreAuthorize("@security.isMemberOf(#estateId)")
     public ResponseEntity<List<MeterDTO>> getBuildingMeters(
+            @PathVariable UUID estateId,
             @PathVariable Long buildingId,
             @RequestParam(required = false) String status) {
         List<MeterDTO> result = "active".equalsIgnoreCase(status)
@@ -96,16 +108,20 @@ public class MeterController {
         return ResponseEntity.ok(result);
     }
 
-    @PostMapping("/api/v1/buildings/{buildingId}/meters")
+    @PostMapping("/api/v1/estates/{estateId}/buildings/{buildingId}/meters")
+    @PreAuthorize("@security.isManagerOf(#estateId)")
     public ResponseEntity<MeterDTO> addBuildingMeter(
+            @PathVariable UUID estateId,
             @PathVariable Long buildingId,
             @Valid @RequestBody AddMeterRequest request) {
         MeterDTO created = meterService.addMeter(BUILDING, buildingId, request);
         return ResponseEntity.status(HttpStatus.CREATED).body(created);
     }
 
-    @PutMapping("/api/v1/buildings/{buildingId}/meters/{meterId}/replace")
+    @PutMapping("/api/v1/estates/{estateId}/buildings/{buildingId}/meters/{meterId}/replace")
+    @PreAuthorize("@security.isManagerOf(#estateId)")
     public ResponseEntity<MeterDTO> replaceBuildingMeter(
+            @PathVariable UUID estateId,
             @PathVariable Long buildingId,
             @PathVariable Long meterId,
             @Valid @RequestBody ReplaceMeterRequest request) {
@@ -113,8 +129,10 @@ public class MeterController {
         return ResponseEntity.ok(newMeter);
     }
 
-    @DeleteMapping("/api/v1/buildings/{buildingId}/meters/{meterId}")
+    @DeleteMapping("/api/v1/estates/{estateId}/buildings/{buildingId}/meters/{meterId}")
+    @PreAuthorize("@security.isManagerOf(#estateId)")
     public ResponseEntity<Void> removeBuildingMeter(
+            @PathVariable UUID estateId,
             @PathVariable Long buildingId,
             @PathVariable Long meterId,
             @Valid @RequestBody RemoveMeterRequest request) {
@@ -122,15 +140,8 @@ public class MeterController {
         return ResponseEntity.noContent().build();
     }
 
-    // ─── Search (asset picker) ────────────────────────────────────────────────
+    // ─── Search (asset picker — kept without estate scope for transaction forms) ─
 
-    /**
-     * GET /api/v1/meters/search?q=&buildingId=
-     * Asset picker endpoint for transaction forms.
-     * Searches active meters by meter number, label or EAN code (case-insensitive,
-     * min 2 chars).
-     * Optionally filtered by building.
-     */
     @GetMapping("/api/v1/meters/search")
     public ResponseEntity<List<MeterSearchResultDTO>> search(
             @RequestParam(required = false, defaultValue = "") String q,
@@ -189,8 +200,7 @@ public class MeterController {
     // ─── Private helpers ──────────────────────────────────────────────────────
 
     private Long resolveBuildingId(String ownerType, Long ownerId) {
-        if (BUILDING.equals(ownerType))
-            return ownerId;
+        if (BUILDING.equals(ownerType)) return ownerId;
         if (HOUSING_UNIT.equals(ownerType)) {
             return housingUnitRepository.findById(ownerId)
                     .map(u -> u.getBuilding().getId())

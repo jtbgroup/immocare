@@ -1,17 +1,15 @@
 package com.immocare.controller;
 
-import com.immocare.model.dto.BuildingDTO;
-import com.immocare.model.dto.CreateBuildingRequest;
-import com.immocare.model.dto.UpdateBuildingRequest;
-import com.immocare.service.BuildingService;
-import jakarta.validation.Valid;
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
+
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -22,110 +20,109 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.immocare.model.dto.BuildingDTO;
+import com.immocare.model.dto.CreateBuildingRequest;
+import com.immocare.model.dto.UpdateBuildingRequest;
+import com.immocare.service.BuildingService;
+
+import jakarta.validation.Valid;
+
 /**
  * REST controller for Building management.
- * Implements API endpoints for UC001 - Manage Buildings.
- * 
+ * UC016 Phase 2: all routes are now scoped to an estate.
+ *
  * API Endpoints:
- * - GET    /api/v1/buildings - List all buildings with filters
- * - GET    /api/v1/buildings/{id} - Get building details
- * - POST   /api/v1/buildings - Create new building
- * - PUT    /api/v1/buildings/{id} - Update building
- * - DELETE /api/v1/buildings/{id} - Delete building
- * - GET    /api/v1/buildings/cities - Get all distinct cities
+ * - GET    /api/v1/estates/{estateId}/buildings         - List buildings (US004, US005)
+ * - GET    /api/v1/estates/{estateId}/buildings/{id}    - Get building details
+ * - GET    /api/v1/estates/{estateId}/buildings/cities  - Get distinct cities
+ * - POST   /api/v1/estates/{estateId}/buildings         - Create building (US001)
+ * - PUT    /api/v1/estates/{estateId}/buildings/{id}    - Update building (US002)
+ * - DELETE /api/v1/estates/{estateId}/buildings/{id}    - Delete building (US003)
  */
 @RestController
-@RequestMapping("/api/v1/buildings")
+@RequestMapping("/api/v1/estates/{estateId}/buildings")
 public class BuildingController {
 
-  private final BuildingService buildingService;
+    private final BuildingService buildingService;
 
-  public BuildingController(BuildingService buildingService) {
-    this.buildingService = buildingService;
-  }
+    public BuildingController(BuildingService buildingService) {
+        this.buildingService = buildingService;
+    }
 
-  /**
-   * Get all buildings with optional filtering and search.
-   * Implements US004 - View Buildings List and US005 - Search Buildings.
-   * 
-   * @param city optional city filter
-   * @param search optional search term
-   * @param pageable pagination parameters (default: page 0, size 20)
-   * @return page of buildings
-   */
-  @GetMapping
-  public ResponseEntity<Page<BuildingDTO>> getAllBuildings(
-      @RequestParam(required = false) String city,
-      @RequestParam(required = false) String search,
-      @PageableDefault(size = 20) Pageable pageable) {
-    Page<BuildingDTO> buildings = buildingService.getAllBuildings(city, search, pageable);
-    return ResponseEntity.ok(buildings);
-  }
+    /**
+     * Get all buildings within an estate with optional filtering and search.
+     * US004 - View Buildings List, US005 - Search Buildings.
+     */
+    @GetMapping
+    @PreAuthorize("@security.isMemberOf(#estateId)")
+    public ResponseEntity<Page<BuildingDTO>> getAllBuildings(
+            @PathVariable UUID estateId,
+            @RequestParam(required = false) String city,
+            @RequestParam(required = false) String search,
+            @PageableDefault(size = 20) Pageable pageable) {
+        Page<BuildingDTO> buildings = buildingService.getAllBuildings(estateId, city, search, pageable);
+        return ResponseEntity.ok(buildings);
+    }
 
-  /**
-   * Get a building by ID.
-   * 
-   * @param id the building ID
-   * @return the building details
-   */
-  @GetMapping("/{id}")
-  public ResponseEntity<BuildingDTO> getBuildingById(@PathVariable Long id) {
-    BuildingDTO building = buildingService.getBuildingById(id);
-    return ResponseEntity.ok(building);
-  }
+    /**
+     * Get a building by ID, scoped to the estate.
+     */
+    @GetMapping("/{id}")
+    @PreAuthorize("@security.isMemberOf(#estateId)")
+    public ResponseEntity<BuildingDTO> getBuildingById(
+            @PathVariable UUID estateId,
+            @PathVariable Long id) {
+        BuildingDTO building = buildingService.getBuildingById(estateId, id);
+        return ResponseEntity.ok(building);
+    }
 
-  /**
-   * Create a new building.
-   * Implements US001 - Create Building.
-   * 
-   * @param request the building creation request
-   * @return the created building with HTTP 201 status
-   */
-  @PostMapping
-  public ResponseEntity<BuildingDTO> createBuilding(
-      @Valid @RequestBody CreateBuildingRequest request) {
-    BuildingDTO createdBuilding = buildingService.createBuilding(request);
-    return ResponseEntity.status(HttpStatus.CREATED).body(createdBuilding);
-  }
+    /**
+     * Get all distinct cities for buildings in the estate.
+     */
+    @GetMapping("/cities")
+    @PreAuthorize("@security.isMemberOf(#estateId)")
+    public ResponseEntity<List<String>> getAllCities(@PathVariable UUID estateId) {
+        List<String> cities = buildingService.getAllCities(estateId);
+        return ResponseEntity.ok(cities);
+    }
 
-  /**
-   * Update an existing building.
-   * Implements US002 - Edit Building.
-   * 
-   * @param id the building ID
-   * @param request the building update request
-   * @return the updated building
-   */
-  @PutMapping("/{id}")
-  public ResponseEntity<BuildingDTO> updateBuilding(
-      @PathVariable Long id,
-      @Valid @RequestBody UpdateBuildingRequest request) {
-    BuildingDTO updatedBuilding = buildingService.updateBuilding(id, request);
-    return ResponseEntity.ok(updatedBuilding);
-  }
+    /**
+     * Create a new building within the estate.
+     * US001 - Create Building.
+     */
+    @PostMapping
+    @PreAuthorize("@security.isManagerOf(#estateId)")
+    public ResponseEntity<BuildingDTO> createBuilding(
+            @PathVariable UUID estateId,
+            @Valid @RequestBody CreateBuildingRequest request) {
+        BuildingDTO createdBuilding = buildingService.createBuilding(estateId, request);
+        return ResponseEntity.status(HttpStatus.CREATED).body(createdBuilding);
+    }
 
-  /**
-   * Delete a building.
-   * Implements US003 - Delete Building.
-   * 
-   * @param id the building ID
-   * @return success message with HTTP 200 status
-   */
-  @DeleteMapping("/{id}")
-  public ResponseEntity<Map<String, String>> deleteBuilding(@PathVariable Long id) {
-    buildingService.deleteBuilding(id);
-    return ResponseEntity.ok(Map.of("message", "Building deleted successfully"));
-  }
+    /**
+     * Update an existing building within the estate.
+     * US002 - Edit Building.
+     */
+    @PutMapping("/{id}")
+    @PreAuthorize("@security.isManagerOf(#estateId)")
+    public ResponseEntity<BuildingDTO> updateBuilding(
+            @PathVariable UUID estateId,
+            @PathVariable Long id,
+            @Valid @RequestBody UpdateBuildingRequest request) {
+        BuildingDTO updatedBuilding = buildingService.updateBuilding(estateId, id, request);
+        return ResponseEntity.ok(updatedBuilding);
+    }
 
-  /**
-   * Get all distinct cities for filtering.
-   * Supports US004 filter functionality.
-   * 
-   * @return list of city names
-   */
-  @GetMapping("/cities")
-  public ResponseEntity<List<String>> getAllCities() {
-    List<String> cities = buildingService.getAllCities();
-    return ResponseEntity.ok(cities);
-  }
+    /**
+     * Delete a building within the estate.
+     * US003 - Delete Building.
+     */
+    @DeleteMapping("/{id}")
+    @PreAuthorize("@security.isManagerOf(#estateId)")
+    public ResponseEntity<Map<String, String>> deleteBuilding(
+            @PathVariable UUID estateId,
+            @PathVariable Long id) {
+        buildingService.deleteBuilding(estateId, id);
+        return ResponseEntity.ok(Map.of("message", "Building deleted successfully"));
+    }
 }

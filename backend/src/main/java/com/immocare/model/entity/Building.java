@@ -2,6 +2,7 @@ package com.immocare.model.entity;
 
 import jakarta.persistence.*;
 import java.time.LocalDateTime;
+import java.util.UUID;
 
 @Entity
 @Table(name = "building")
@@ -26,10 +27,18 @@ public class Building {
     @Column(nullable = false, length = 100)
     private String country;
 
-    /** Owner now references the Person entity instead of a free-text string */
+    /** Owner references the Person entity instead of a free-text string. */
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "owner_id")
     private Person owner;
+
+    /**
+     * Estate this building belongs to.
+     * UC016 Phase 2 — all buildings must be scoped to an estate.
+     */
+    @ManyToOne(fetch = FetchType.LAZY, optional = false)
+    @JoinColumn(name = "estate_id", nullable = false)
+    private Estate estate;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "created_by")
@@ -76,6 +85,9 @@ public class Building {
 
     public Person getOwner() { return owner; }
     public void setOwner(Person owner) { this.owner = owner; }
+
+    public Estate getEstate() { return estate; }
+    public void setEstate(Estate estate) { this.estate = estate; }
 
     public AppUser getCreatedBy() { return createdBy; }
     public void setCreatedBy(AppUser createdBy) { this.createdBy = createdBy; }

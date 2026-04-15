@@ -2,9 +2,11 @@ package com.immocare.controller;
 
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -22,84 +24,97 @@ import jakarta.validation.Valid;
 
 /**
  * REST controller for Housing Unit management.
- * Implements UC002 - Manage Housing Units.
+ * UC016 Phase 2: all routes are now scoped to an estate.
  *
  * Endpoints:
- * GET /api/v1/buildings/{buildingId}/units — list units in a building
- * GET /api/v1/units/{id} — get unit details
- * POST /api/v1/units — create unit
- * PUT /api/v1/units/{id} — update unit
- * DELETE /api/v1/units/{id} — delete unit
+ * GET    /api/v1/estates/{estateId}/buildings/{buildingId}/units  - list units in a building
+ * GET    /api/v1/estates/{estateId}/units                        - list all units in estate
+ * GET    /api/v1/estates/{estateId}/units/{id}                   - get unit details
+ * POST   /api/v1/estates/{estateId}/units                        - create unit
+ * PUT    /api/v1/estates/{estateId}/units/{id}                   - update unit
+ * DELETE /api/v1/estates/{estateId}/units/{id}                   - delete unit
  */
 @RestController
 public class HousingUnitController {
 
-  private final HousingUnitService housingUnitService;
+    private final HousingUnitService housingUnitService;
 
-  public HousingUnitController(HousingUnitService housingUnitService) {
-    this.housingUnitService = housingUnitService;
-  }
+    public HousingUnitController(HousingUnitService housingUnitService) {
+        this.housingUnitService = housingUnitService;
+    }
 
-  /**
-   * Get all units in a building.
-   * Supports US009 - View Housing Unit Details (list view).
-   */
-  @GetMapping("/api/v1/buildings/{buildingId}/units")
-  public ResponseEntity<List<HousingUnitDTO>> getUnitsByBuilding(
-      @PathVariable Long buildingId) {
-    List<HousingUnitDTO> units = housingUnitService.getUnitsByBuilding(buildingId);
-    return ResponseEntity.ok(units);
-  }
+    /**
+     * Get all units in a specific building within the estate.
+     * US009 - View Housing Unit Details (list view).
+     */
+    @GetMapping("/api/v1/estates/{estateId}/buildings/{buildingId}/units")
+    @PreAuthorize("@security.isMemberOf(#estateId)")
+    public ResponseEntity<List<HousingUnitDTO>> getUnitsByBuilding(
+            @PathVariable UUID estateId,
+            @PathVariable Long buildingId) {
+        List<HousingUnitDTO> units = housingUnitService.getUnitsByBuilding(estateId, buildingId);
+        return ResponseEntity.ok(units);
+    }
 
-  /**
-   * Get a single unit by ID.
-   * Supports US009.
-   */
-  @GetMapping("/api/v1/units/{id}")
-  public ResponseEntity<HousingUnitDTO> getUnitById(@PathVariable Long id) {
-    HousingUnitDTO unit = housingUnitService.getUnitById(id);
-    return ResponseEntity.ok(unit);
-  }
+    /**
+     * Get all units across all buildings of the estate.
+     */
+    @GetMapping("/api/v1/estates/{estateId}/units")
+    @PreAuthorize("@security.isMemberOf(#estateId)")
+    public ResponseEntity<List<HousingUnitDTO>> getAllUnits(@PathVariable UUID estateId) {
+        return ResponseEntity.ok(housingUnitService.getAllUnits(estateId));
+    }
 
-  /**
-   * Create a new housing unit.
-   * Implements US006 - Create Housing Unit.
-   */
-  @PostMapping("/api/v1/units")
-  public ResponseEntity<HousingUnitDTO> createUnit(
-      @Valid @RequestBody CreateHousingUnitRequest request) {
-    HousingUnitDTO created = housingUnitService.createUnit(request);
-    return ResponseEntity.status(HttpStatus.CREATED).body(created);
-  }
+    /**
+     * Get a single unit by ID within the estate.
+     * US009.
+     */
+    @GetMapping("/api/v1/estates/{estateId}/units/{id}")
+    @PreAuthorize("@security.isMemberOf(#estateId)")
+    public ResponseEntity<HousingUnitDTO> getUnitById(
+            @PathVariable UUID estateId,
+            @PathVariable Long id) {
+        HousingUnitDTO unit = housingUnitService.getUnitById(estateId, id);
+        return ResponseEntity.ok(unit);
+    }
 
-  /**
-   * Update an existing housing unit.
-   * Implements US007 - Edit Housing Unit.
-   */
-  @PutMapping("/api/v1/units/{id}")
-  public ResponseEntity<HousingUnitDTO> updateUnit(
-      @PathVariable Long id,
-      @Valid @RequestBody UpdateHousingUnitRequest request) {
-    HousingUnitDTO updated = housingUnitService.updateUnit(id, request);
-    return ResponseEntity.ok(updated);
-  }
+    /**
+     * Create a new housing unit within the estate.
+     * US006 - Create Housing Unit.
+     */
+    @PostMapping("/api/v1/estates/{estateId}/units")
+    @PreAuthorize("@security.isManagerOf(#estateId)")
+    public ResponseEntity<HousingUnitDTO> createUnit(
+            @PathVariable UUID estateId,
+            @Valid @RequestBody CreateHousingUnitRequest request) {
+        HousingUnitDTO created = housingUnitService.createUnit(estateId, request);
+        return ResponseEntity.status(HttpStatus.CREATED).body(created);
+    }
 
-  /**
-   * Delete a housing unit.
-   * Implements US008 - Delete Housing Unit.
-   */
-  @DeleteMapping("/api/v1/units/{id}")
-  public ResponseEntity<Map<String, String>> deleteUnit(@PathVariable Long id) {
-    housingUnitService.deleteUnit(id);
-    return ResponseEntity.ok(Map.of("message", "Housing unit deleted successfully"));
-  }
+    /**
+     * Update an existing housing unit within the estate.
+     * US007 - Edit Housing Unit.
+     */
+    @PutMapping("/api/v1/estates/{estateId}/units/{id}")
+    @PreAuthorize("@security.isManagerOf(#estateId)")
+    public ResponseEntity<HousingUnitDTO> updateUnit(
+            @PathVariable UUID estateId,
+            @PathVariable Long id,
+            @Valid @RequestBody UpdateHousingUnitRequest request) {
+        HousingUnitDTO updated = housingUnitService.updateUnit(estateId, id, request);
+        return ResponseEntity.ok(updated);
+    }
 
-  /**
-   * Get all housing units across all buildings.
-   * Supports global Units list page.
-   */
-  @GetMapping("/api/v1/units")
-  public ResponseEntity<List<HousingUnitDTO>> getAllUnits() {
-    return ResponseEntity.ok(housingUnitService.getAllUnits());
-  }
+    /**
+     * Delete a housing unit within the estate.
+     * US008 - Delete Housing Unit.
+     */
+    @DeleteMapping("/api/v1/estates/{estateId}/units/{id}")
+    @PreAuthorize("@security.isManagerOf(#estateId)")
+    public ResponseEntity<Map<String, String>> deleteUnit(
+            @PathVariable UUID estateId,
+            @PathVariable Long id) {
+        housingUnitService.deleteUnit(estateId, id);
+        return ResponseEntity.ok(Map.of("message", "Housing unit deleted successfully"));
+    }
 }

@@ -29,15 +29,15 @@ import com.immocare.model.entity.AppUser;
 import com.immocare.model.entity.Estate;
 import com.immocare.model.entity.EstateMember;
 import com.immocare.model.enums.EstateRole;
+import com.immocare.repository.BuildingRepository;
 import com.immocare.repository.EstateMemberRepository;
 import com.immocare.repository.EstateRepository;
+import com.immocare.repository.HousingUnitRepository;
 import com.immocare.repository.UserRepository;
 
 /**
- * Business logic for UC016 — Manage Estates (Phase 1).
- *
- * <p>All business rules (BR-UC016-01 → BR-UC016-09) are enforced here.
- * Dashboard counts are all 0 in Phase 1 — they will be populated in Phase 6.
+ * Business logic for UC016 — Manage Estates.
+ * Phase 2: getDashboard() now returns real building and unit counts.
  */
 @Service
 @Transactional(readOnly = true)
@@ -48,13 +48,19 @@ public class EstateService {
     private final EstateRepository estateRepository;
     private final EstateMemberRepository estateMemberRepository;
     private final UserRepository userRepository;
+    private final BuildingRepository buildingRepository;
+    private final HousingUnitRepository housingUnitRepository;
 
     public EstateService(EstateRepository estateRepository,
                          EstateMemberRepository estateMemberRepository,
-                         UserRepository userRepository) {
+                         UserRepository userRepository,
+                         BuildingRepository buildingRepository,
+                         HousingUnitRepository housingUnitRepository) {
         this.estateRepository = estateRepository;
         this.estateMemberRepository = estateMemberRepository;
         this.userRepository = userRepository;
+        this.buildingRepository = buildingRepository;
+        this.housingUnitRepository = housingUnitRepository;
     }
 
     // ─── US095 — List all estates (PLATFORM_ADMIN only) ──────────────────────
@@ -68,11 +74,6 @@ public class EstateService {
 
     // ─── US103 — View my estates ──────────────────────────────────────────────
 
-    /**
-     * Returns estates visible to the caller.
-     * If {@code isPlatformAdmin}: returns all estates with {@code myRole = null}.
-     * Otherwise: returns only the estates where the user is a member, with their role.
-     */
     public List<EstateSummaryDTO> getMyEstates(Long currentUserId, boolean isPlatformAdmin) {
         if (isPlatformAdmin) {
             return estateRepository.findAllByOrderByNameAsc(Pageable.unpaged())
@@ -96,15 +97,20 @@ public class EstateService {
 
     /**
      * Returns the estate dashboard.
-     * All counts are 0 in Phase 1 — will be enriched in Phase 6.
+     * Phase 2: totalBuildings and totalUnits are now populated with real counts.
+     * activeLeases and pendingAlerts remain 0 until Phase 3/6.
      */
     public EstateDashboardDTO getDashboard(UUID estateId) {
         Estate estate = findEstateOrThrow(estateId);
+        int totalBuildings = (int) buildingRepository.countByEstateId(estateId);
+        int totalUnits = (int) housingUnitRepository.countByBuilding_Estate_Id(estateId);
         return new EstateDashboardDTO(
                 estate.getId(),
                 estate.getName(),
-                0, 0, 0,
-                new EstatePendingAlertsDTO(0, 0, 0, 0));
+                totalBuildings,
+                totalUnits,
+                0, // activeLeases — Phase 3
+                new EstatePendingAlertsDTO(0, 0, 0, 0)); // pendingAlerts — Phase 6
     }
 
     // ─── US092 — Create estate ────────────────────────────────────────────────
@@ -144,7 +150,6 @@ public class EstateService {
     public EstateDTO updateEstate(UUID id, UpdateEstateRequest req) {
         Estate estate = findEstateOrThrow(id);
 
-        // BR-UC016-01: name unique excluding self
         if (!estate.getName().equalsIgnoreCase(req.name())
                 && estateRepository.existsByNameIgnoreCaseAndIdNot(req.name(), id)) {
             throw new EstateNameTakenException(req.name());
@@ -159,17 +164,15 @@ public class EstateService {
 
     @Transactional
     public void deleteEstate(UUID id) {
-        Estate estate = findEstateOrThrow(id);
+        findEstateOrThrow(id);
 
-        // BR-UC016-09: cannot delete estate with buildings
-        // buildingCount = 0 in Phase 1; check will be activated in Phase 2
-        // when estate_id is added to the building table.
-        int buildingCount = 0;
+        // BR-UC016-09: cannot delete estate with buildings (Phase 2: real count)
+        int buildingCount = (int) buildingRepository.countByEstateId(id);
         if (buildingCount > 0) {
             throw new EstateHasBuildingsException(buildingCount);
         }
 
-        estateRepository.delete(estate);
+        estateRepository.deleteById(id);
     }
 
     // ─── US097 — Get members ──────────────────────────────────────────────────
@@ -191,7 +194,6 @@ public class EstateService {
         AppUser user = userRepository.findById(req.userId())
                 .orElseThrow(() -> new UserNotFoundException(req.userId()));
 
-        // US098 AC3: not already a member
         if (estateMemberRepository.existsByEstateIdAndUserId(estateId, req.userId())) {
             throw new EstateMemberAlreadyExistsException();
         }
@@ -214,7 +216,6 @@ public class EstateService {
                                             Long currentUserId) {
         findEstateOrThrow(estateId);
 
-        // BR-UC016-04: cannot change own role
         if (userId.equals(currentUserId)) {
             throw new EstateSelfOperationException("You cannot change your own role");
         }
@@ -222,7 +223,6 @@ public class EstateService {
         EstateMember member = estateMemberRepository.findByEstateIdAndUserId(estateId, userId)
                 .orElseThrow(EstateMemberNotFoundException::new);
 
-        // BR-UC016-02: cannot demote last MANAGER
         if (member.getRole() == EstateRole.MANAGER
                 && req.role() == EstateRole.VIEWER
                 && estateMemberRepository.countByEstateIdAndRole(estateId, ROLE_MANAGER) <= 1) {
@@ -239,7 +239,6 @@ public class EstateService {
     public void removeMember(UUID estateId, Long userId, Long currentUserId) {
         findEstateOrThrow(estateId);
 
-        // BR-UC016-03: cannot remove self
         if (userId.equals(currentUserId)) {
             throw new EstateSelfOperationException("You cannot remove yourself from an estate");
         }
@@ -247,7 +246,6 @@ public class EstateService {
         EstateMember member = estateMemberRepository.findByEstateIdAndUserId(estateId, userId)
                 .orElseThrow(EstateMemberNotFoundException::new);
 
-        // BR-UC016-02: cannot remove last MANAGER
         if (member.getRole() == EstateRole.MANAGER
                 && estateMemberRepository.countByEstateIdAndRole(estateId, ROLE_MANAGER) <= 1) {
             throw new EstateLastManagerException();
@@ -265,8 +263,7 @@ public class EstateService {
 
     private EstateDTO toDTO(Estate estate) {
         int memberCount = (int) estateMemberRepository.countByEstateId(estate.getId());
-        // buildingCount = 0 in Phase 1 — will be populated in Phase 2
-        int buildingCount = 0;
+        int buildingCount = (int) buildingRepository.countByEstateId(estate.getId());
         return new EstateDTO(
                 estate.getId(),
                 estate.getName(),
@@ -278,14 +275,15 @@ public class EstateService {
     }
 
     private EstateSummaryDTO toSummaryDTO(Estate estate, EstateRole myRole) {
-        // buildingCount and unitCount = 0 in Phase 1 — will be populated in Phase 2
+        int buildingCount = (int) buildingRepository.countByEstateId(estate.getId());
+        int unitCount = (int) housingUnitRepository.countByBuilding_Estate_Id(estate.getId());
         return new EstateSummaryDTO(
                 estate.getId(),
                 estate.getName(),
                 estate.getDescription(),
                 myRole,
-                0,
-                0);
+                buildingCount,
+                unitCount);
     }
 
     private EstateMemberDTO toMemberDTO(EstateMember member) {
