@@ -1,131 +1,90 @@
-<!-- features/housing-unit/components/unit-global-list/unit-global-list.component.html -->
-<div class="unit-global-list-container">
+<div class="unit-details-container">
+
   <!-- Header -->
-  <div class="details-content">
-    <div class="header">
-      <h1>All Housing Units</h1>
-      @if (!loading) {
-        <span class="total-count">
-          {{ filteredUnits.length }} unit{{
-            filteredUnits.length !== 1 ? "s" : ""
-          }}
-          @if (searchTerm) {
-            matching "{{ searchTerm }}"
-          }
-        </span>
+  <div class="page-header">
+    <h1>Housing Units</h1>
+    <div class="actions">
+      @if (activeEstateService.canEdit()) {
+        <button class="btn btn-primary" (click)="create()">+ Add Unit</button>
       }
     </div>
   </div>
 
-  <!-- Filter bar -->
-  <div class="filters-panel">
-    <div class="filter-group">
-      <label class="filter-label" for="building-search">Building</label>
-      <input
-        id="building-search"
-        type="text"
-        [(ngModel)]="searchTerm"
-        (ngModelChange)="onSearchChange()"
-        placeholder="Filter by building name…"
-        class="filter-input"
-        autocomplete="off"
-      />
-    </div>
-    <div class="filter-group filter-group--actions">
-      <button
-        class="btn btn-secondary btn-sm"
-        (click)="clearSearch()"
-        [disabled]="!searchTerm"
-      >
-        Reset
-      </button>
-    </div>
+  @if (errorMessage) {
+    <div class="alert alert-error">{{ errorMessage }}</div>
+  }
+
+  <!-- Filters -->
+  <div class="filters">
+    <input
+      type="search"
+      class="search-input"
+      placeholder="Search by unit number or building…"
+      [(ngModel)]="searchTerm"
+    />
+    <select [(ngModel)]="selectedBuildingId" (change)="onBuildingFilter()">
+      <option [value]="null">All buildings</option>
+      @for (b of buildings; track b.id) {
+        <option [value]="b.id">{{ b.name }}</option>
+      }
+    </select>
+    @if (searchTerm || selectedBuildingId) {
+      <button class="btn btn-secondary btn-sm" (click)="clearFilters()">Clear</button>
+    }
   </div>
 
-  <!-- Loading -->
   @if (loading) {
-    <div class="loading">Loading units…</div>
+    <div class="loading">Loading…</div>
   }
 
-  <!-- Error -->
-  @if (error) {
-    <div class="alert alert-error">{{ error }}</div>
-  }
-
-  <!-- Empty -->
-  @if (!loading && !error && filteredUnits.length === 0) {
-    <div class="empty-state">
-      @if (!searchTerm) {
-        <p>No housing units registered yet.</p>
-      }
-      @if (searchTerm) {
-        <p>
-          No units found for building "{{ searchTerm }}".
-          <button class="btn btn-link" (click)="clearSearch()">
-            Clear filter
-          </button>
-        </p>
-      }
-    </div>
-  }
-
-  <!-- Table -->
-  @if (!loading && !error && filteredUnits.length > 0) {
-    <div class="data-table">
-      <table>
-        <thead>
-          <tr>
-            <th>Building</th>
-            <th>Unit #</th>
-            <th>Floor</th>
-            <th>Surface (m²)</th>
-            <th>Rooms</th>
-            <th>Rent</th>
-            <th>PEB</th>
-            <th>Lease</th>
-            <th>Owner</th>
-          </tr>
-        </thead>
-        <tbody>
-          @for (unit of filteredUnits; track unit.id) {
-            <tr class="data-row" (click)="viewUnit(unit.id)">
-              <td>{{ unit.buildingName ?? "—" }}</td>
-              <td>{{ unit.unitNumber }}</td>
-              <td>{{ unit.floor }}</td>
-              <td>{{ unit.totalSurface ?? "—" }}</td>
-              <td>{{ unit.roomCount ?? "—" }}</td>
-              <td>{{ formatRent(unit.currentMonthlyRent) }}</td>
-              <td>
-                @if (unit.currentPebScore) {
-                  <span
-                    class="peb-badge"
-                    [style.background]="pebDisplay[unit.currentPebScore].color"
-                    [style.color]="pebDisplay[unit.currentPebScore].textColor"
-                  >
-                    {{ pebDisplay[unit.currentPebScore].label }}
-                  </span>
-                } @else {
-                  <span class="text-muted">—</span>
-                }
-              </td>
-              <td>
-                @if (unit.activeLeaseStatus) {
-                  <span
-                    class="lease-status-badge lease-status-badge--{{
-                      unit.activeLeaseStatus | lowercase
-                    }}"
-                  >
-                    {{ unit.activeLeaseStatus }}
-                  </span>
-                } @else {
-                  <span class="text-muted">—</span>
-                }
-              </td>
-              <td>{{ unit.effectiveOwnerName ?? "—" }}</td>
+  @if (!loading) {
+    @if (filteredUnits.length === 0) {
+      <div class="empty-state">
+        <p>No units found.</p>
+        @if (activeEstateService.canEdit()) {
+          <p class="help-text">Get started by adding a unit to a building.</p>
+        }
+      </div>
+    } @else {
+      <div class="data-table">
+        <table>
+          <thead>
+            <tr>
+              <th>Unit #</th>
+              <th>Building</th>
+              <th>Floor</th>
+              <th>Surface</th>
+              <th>Rooms</th>
+              <th>Rent (€/mo)</th>
+              <th>PEB</th>
+              <th>Lease</th>
             </tr>
-          }
-        </tbody>
-      </table>
-    </div>
+          </thead>
+          <tbody>
+            @for (unit of filteredUnits; track unit.id) {
+              <tr class="clickable" (click)="navigateTo(unit)">
+                <td>{{ unit.unitNumber }}</td>
+                <td>{{ unit.buildingName ?? '—' }}</td>
+                <td>{{ unit.floor }}</td>
+                <td>{{ unit.totalSurface != null ? unit.totalSurface + ' m²' : '—' }}</td>
+                <td>{{ unit.roomCount ?? '—' }}</td>
+                <td>{{ unit.currentMonthlyRent != null ? (unit.currentMonthlyRent | number:'1.0-0') : '—' }}</td>
+                <td>{{ unit.currentPebScore ?? '—' }}</td>
+                <td>
+                  @if (unit.activeLeaseStatus === 'ACTIVE') {
+                    <span class="lease-status-badge lease-status-badge--active">Active</span>
+                  } @else if (unit.activeLeaseStatus === 'DRAFT') {
+                    <span class="lease-status-badge lease-status-badge--draft">Draft</span>
+                  } @else {
+                    <span class="lease-status-badge lease-status-badge--finished">Vacant</span>
+                  }
+                </td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+    }
   }
+
 </div>

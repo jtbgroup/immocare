@@ -1,39 +1,60 @@
-@if (unit) {
-  <div class="unit-details-container">
+<div class="unit-details-container">
+
+  @if (loading) {
+    <div class="loading">Loading…</div>
+  }
+
+  @if (errorMessage && !loading) {
+    <div class="error-container">
+      <p class="error">{{ errorMessage }}</p>
+      <button class="btn btn-primary" (click)="back()">Back to Units</button>
+    </div>
+  }
+
+  @if (unit && !loading) {
+
     <!-- Breadcrumb -->
     <nav class="breadcrumb" aria-label="breadcrumb">
-      <a routerLink="/buildings">Buildings</a>
+      <a [routerLink]="['/estates', activeEstateService.activeEstateId(), 'buildings']">Buildings</a>
       <span class="breadcrumb-separator">›</span>
-      <a [routerLink]="['/buildings', unit.buildingId]">{{
-        unit.buildingName
-      }}</a>
+      <a [routerLink]="['/estates', activeEstateService.activeEstateId(), 'buildings', unit.buildingId]">
+        {{ unit.buildingName }}
+      </a>
       <span class="breadcrumb-separator">›</span>
       <span>Unit {{ unit.unitNumber }}</span>
     </nav>
 
     <!-- Header -->
-    <div class="details-content">
-      <div class="header">
-        <h1>Unit {{ unit.unitNumber }}</h1>
-        <div class="actions">
+    <div class="page-header">
+      <h1>Unit {{ unit.unitNumber }}</h1>
+      <div class="actions">
+        @if (activeEstateService.canEdit()) {
           <button class="btn btn-secondary" (click)="edit()">Edit</button>
-          <button class="btn btn-danger" (click)="confirmDelete()">
-            Delete
+          <button class="btn btn-danger" [disabled]="deleting" (click)="confirmDelete()">
+            {{ deleting ? 'Deleting…' : 'Delete' }}
           </button>
-        </div>
+        }
       </div>
     </div>
 
-    <!-- Info card -->
+    @if (deleteError) {
+      <div class="alert alert-error">{{ deleteError }}</div>
+    }
+
+    <!-- Unit info -->
     <div class="info-card">
-      <h2>Information</h2>
+      <h2>Unit Information</h2>
       <div class="info-grid">
+        <div class="info-item">
+          <label>Unit Number</label>
+          <p>{{ unit.unitNumber }}</p>
+        </div>
         <div class="info-item">
           <label>Building</label>
           <p>
-            <a [routerLink]="['/buildings', unit.buildingId]">{{
-              unit.buildingName
-            }}</a>
+            <a [routerLink]="['/estates', activeEstateService.activeEstateId(), 'buildings', unit.buildingId]">
+              {{ unit.buildingName }}
+            </a>
           </p>
         </div>
         <div class="info-item">
@@ -46,168 +67,55 @@
             <p>{{ unit.landingNumber }}</p>
           </div>
         }
-        @if (unit.totalSurface) {
-          <div class="info-item">
-            <label>Surface</label>
-            <p>{{ unit.totalSurface }} m²</p>
-          </div>
-        }
+        <div class="info-item">
+          <label>Total Surface</label>
+          <p>{{ unit.totalSurface != null ? unit.totalSurface + ' m²' : '—' }}</p>
+        </div>
         <div class="info-item">
           <label>Owner</label>
+          <p>{{ unit.effectiveOwnerName ?? unit.ownerName ?? '—' }}</p>
+        </div>
+        <div class="info-item">
+          <label>Lease Status</label>
           <p>
-            @if (unit.ownerId) {
-              <a [routerLink]="['/persons', unit.ownerId]">
-                {{ unit.ownerName }}
-              </a>
+            @if (unit.activeLeaseStatus === 'ACTIVE') {
+              <span class="lease-status-badge lease-status-badge--active">Active</span>
+            } @else if (unit.activeLeaseStatus === 'DRAFT') {
+              <span class="lease-status-badge lease-status-badge--draft">Draft</span>
             } @else {
-              {{ unit.ownerName ?? "—" }}
+              <span class="lease-status-badge lease-status-badge--finished">Vacant</span>
             }
           </p>
         </div>
-        @if (unit.hasTerrace) {
+        @if (unit.currentMonthlyRent != null) {
           <div class="info-item">
-            <label>Terrace</label>
-            <p>
-              {{ unit.terraceSurface ? unit.terraceSurface + " m²" : "—" }}
-              {{
-                unit.terraceOrientation ? " · " + unit.terraceOrientation : ""
-              }}
-            </p>
+            <label>Current Rent</label>
+            <p>{{ unit.currentMonthlyRent | number:'1.0-0' }} €/month</p>
           </div>
         }
-        @if (unit.hasGarden) {
+        @if (unit.currentPebScore) {
           <div class="info-item">
-            <label>Garden</label>
-            <p>
-              {{ unit.gardenSurface ? unit.gardenSurface + " m²" : "—" }}
-              {{ unit.gardenOrientation ? " · " + unit.gardenOrientation : "" }}
-            </p>
+            <label>PEB Score</label>
+            <p>{{ unit.currentPebScore }}</p>
           </div>
         }
       </div>
-    </div>
 
-    <!-- Rooms — UC003 -->
-    <div class="info-card">
-      <app-room-section [unitId]="unit.id"></app-room-section>
-    </div>
-
-    <!-- PEB — UC004 -->
-    <div class="info-card">
-      <app-peb-section [unitId]="unit.id"></app-peb-section>
-    </div>
-
-    <!-- Rent — UC005 -->
-    <div class="info-card">
-      <app-rent-section [unitId]="unit.id"></app-rent-section>
-    </div>
-
-    <!-- Meters — UC008 -->
-    <div class="info-card">
-      <app-meter-section
-        [ownerType]="'HOUSING_UNIT'"
-        [ownerId]="unit.id"
-      ></app-meter-section>
-    </div>
-
-    <!-- Boilers — UC011 -->
-    <div class="info-card">
-      <app-boiler-section ownerType="HOUSING_UNIT" [ownerId]="unit.id" />
-    </div>
-
-    <!-- Lease — UC010 -->
-    <div class="info-card">
-      <app-lease-section [unitId]="unit.id"></app-lease-section>
-    </div>
-
-    <!-- Financial -->
-    <div class="info-card">
-      <div class="section-header">
-        <h2>Financial</h2>
-        <div class="actions">
-          <button
-            class="btn btn-ghost btn-sm"
-            (click)="showFinancial = !showFinancial"
-          >
-            {{ showFinancial ? "Hide ▲" : "Show ▼" }}
-          </button>
-          @if (showFinancial) {
-            <button
-              class="btn btn-ghost btn-sm"
-              (click)="viewUnitTransactions(unit.id)"
-            >
-              View all transactions →
-            </button>
-          }
+      <!-- Terrace -->
+      @if (unit.hasTerrace) {
+        <div class="card-footer">
+          🏡 Terrace{{ unit.terraceSurface ? ' — ' + unit.terraceSurface + ' m²' : '' }}
+          {{ unit.terraceOrientation ? '(' + unit.terraceOrientation + ')' : '' }}
         </div>
-      </div>
-
-      @if (showFinancial) {
-        @if (unitStats) {
-          <div class="financial-stats-grid">
-            <div class="financial-stat financial-stat--income">
-              <span class="financial-stat__label">Income</span>
-              <span class="financial-stat__value"
-                >+{{ unitStats.totalIncome.toFixed(2) }} €</span
-              >
-            </div>
-            <div class="financial-stat financial-stat--expense">
-              <span class="financial-stat__label">Expenses</span>
-              <span class="financial-stat__value"
-                >-{{ unitStats.totalExpenses.toFixed(2) }} €</span
-              >
-            </div>
-            <div
-              class="financial-stat"
-              [class.financial-stat--positive]="unitStats.netBalance >= 0"
-              [class.financial-stat--negative]="unitStats.netBalance < 0"
-            >
-              <span class="financial-stat__label">Net Balance</span>
-              <span class="financial-stat__value"
-                >{{ unitStats.netBalance >= 0 ? "+" : ""
-                }}{{ unitStats.netBalance.toFixed(2) }} €</span
-              >
-            </div>
-          </div>
-        } @else {
-          <p class="loading-placeholder">Loading financial data…</p>
-        }
+      }
+      <!-- Garden -->
+      @if (unit.hasGarden) {
+        <div class="card-footer">
+          🌿 Garden{{ unit.gardenSurface ? ' — ' + unit.gardenSurface + ' m²' : '' }}
+          {{ unit.gardenOrientation ? '(' + unit.gardenOrientation + ')' : '' }}
+        </div>
       }
     </div>
-  </div>
-}
 
-<!-- Loading -->
-@if (loading) {
-  <div class="loading">Loading...</div>
-}
-
-<!-- Delete Confirmation Modal -->
-@if (showDeleteConfirm) {
-  <div class="modal-overlay">
-    <div class="modal-content">
-      <div class="modal-header">
-        <h2>Delete Unit</h2>
-      </div>
-      <div class="modal-body">
-        <p>
-          Are you sure you want to delete unit
-          <strong>{{ unit?.unitNumber }}</strong
-          >?
-        </p>
-        <p class="warning">This action cannot be undone.</p>
-        @if (deleteError) {
-          <div class="alert alert-error">{{ deleteError }}</div>
-        }
-      </div>
-      <div class="modal-actions">
-        <button class="btn btn-secondary" (click)="showDeleteConfirm = false">
-          Cancel
-        </button>
-        <button class="btn btn-danger" (click)="delete()" [disabled]="deleting">
-          {{ deleting ? "Deleting..." : "Delete" }}
-        </button>
-      </div>
-    </div>
-  </div>
-}
+  }
+</div>

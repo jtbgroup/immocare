@@ -1,141 +1,150 @@
 import { CommonModule } from "@angular/common";
-import { Component, OnDestroy, OnInit } from "@angular/core";
+import { Component, OnInit } from "@angular/core";
 import { FormsModule } from "@angular/forms";
 import { Router } from "@angular/router";
-import { Subject } from "rxjs";
-import { debounceTime, distinctUntilChanged, takeUntil } from "rxjs/operators";
+import { ActiveEstateService } from "../../../../core/services/active-estate.service";
 import { BuildingService } from "../../../../core/services/building.service";
-import { Building, Page } from "../../../../models/building.model";
-import { SortIconPipe } from "../../../../shared/pipes/sort-icon.pipe";
+import { Building } from "../../../../models/building.model";
 
+/**
+ * Displays the paginated list of buildings scoped to the active estate.
+ * UC016 Phase 2: navigation includes estateId in all routerLink / router.navigate calls.
+ */
 @Component({
   selector: "app-building-list",
   standalone: true,
-  imports: [CommonModule, FormsModule, SortIconPipe],
+  imports: [CommonModule, FormsModule],
   templateUrl: "./building-list.component.html",
   styleUrls: ["./building-list.component.scss"],
 })
-export class BuildingListComponent implements OnInit, OnDestroy {
+export class BuildingListComponent implements OnInit {
   buildings: Building[] = [];
   cities: string[] = [];
+  loading = false;
+  errorMessage = "";
+  deleteError = "";
 
-  currentPage = 0;
-  pageSize = 20;
+  // Filters
+  searchTerm = "";
+  selectedCity = "";
+
+  // Pagination
   totalElements = 0;
   totalPages = 0;
+  currentPage = 0;
+  readonly pageSize = 20;
 
-  selectedCity = "";
-  searchTerm = "";
+  // Sort
   sortField = "name";
-  sortDirection: "asc" | "desc" = "asc";
-
-  private searchSubject = new Subject<string>();
-  private destroy$ = new Subject<void>();
-
-  loading = false;
-  error: string | null = null;
+  sortDir: "asc" | "desc" = "asc";
 
   constructor(
     private buildingService: BuildingService,
     private router: Router,
+    readonly activeEstateService: ActiveEstateService,
   ) {}
 
   ngOnInit(): void {
     this.loadCities();
-    this.loadBuildings();
-
-    this.searchSubject
-      .pipe(debounceTime(300), distinctUntilChanged(), takeUntil(this.destroy$))
-      .subscribe((searchTerm) => {
-        this.searchTerm = searchTerm;
-        this.currentPage = 0;
-        this.loadBuildings();
-      });
+    this.load();
   }
 
-  ngOnDestroy(): void {
-    this.destroy$.next();
-    this.destroy$.complete();
+  private get estateId(): string {
+    return this.activeEstateService.activeEstateId()!;
   }
 
-  loadBuildings(): void {
+  load(): void {
     this.loading = true;
-    this.error = null;
-    const sort = `${this.sortField},${this.sortDirection}`;
+    this.errorMessage = "";
+    const sort = `${this.sortField},${this.sortDir}`;
     this.buildingService
       .getAllBuildings(
         this.currentPage,
         this.pageSize,
         sort,
         this.selectedCity || undefined,
-        this.searchTerm || undefined,
+        this.searchTerm.trim() || undefined,
       )
-      .pipe(takeUntil(this.destroy$))
       .subscribe({
-        next: (page: Page<Building>) => {
+        next: (page) => {
           this.buildings = page.content;
           this.totalElements = page.totalElements;
           this.totalPages = page.totalPages;
-          this.currentPage = page.number;
           this.loading = false;
         },
         error: () => {
-          this.error = "Failed to load buildings";
+          this.errorMessage = "Failed to load buildings.";
           this.loading = false;
         },
       });
   }
 
-  loadCities(): void {
-    this.buildingService
-      .getAllCities()
-      .pipe(takeUntil(this.destroy$))
-      .subscribe({
-        next: (cities) => {
-          this.cities = cities;
-        },
-      });
+  private loadCities(): void {
+    this.buildingService.getAllCities().subscribe({
+      next: (cities) => (this.cities = cities),
+      error: () => {
+        /* non-blocking */
+      },
+    });
   }
 
-  onSearchChange(searchTerm: string): void {
-    this.searchSubject.next(searchTerm);
-  }
-  onCityFilterChange(city: string): void {
-    this.selectedCity = city;
+  onSearch(): void {
     this.currentPage = 0;
-    this.loadBuildings();
+    this.load();
   }
-  onSortChange(field: string): void {
+
+  onCityFilter(): void {
+    this.currentPage = 0;
+    this.load();
+  }
+
+  clearFilters(): void {
+    this.searchTerm = "";
+    this.selectedCity = "";
+    this.currentPage = 0;
+    this.load();
+  }
+
+  sort(field: string): void {
     if (this.sortField === field) {
-      this.sortDirection = this.sortDirection === "asc" ? "desc" : "asc";
+      this.sortDir = this.sortDir === "asc" ? "desc" : "asc";
     } else {
       this.sortField = field;
-      this.sortDirection = "asc";
+      this.sortDir = "asc";
     }
-    this.loadBuildings();
-  }
-  previousPage(): void {
-    if (this.currentPage > 0) {
-      this.currentPage--;
-      this.loadBuildings();
-    }
-  }
-  nextPage(): void {
-    if (this.currentPage < this.totalPages - 1) {
-      this.currentPage++;
-      this.loadBuildings();
-    }
-  }
-  viewBuilding(building: Building): void {
-    this.router.navigate(["/buildings", building.id]);
-  }
-  createBuilding(): void {
-    this.router.navigate(["/buildings/new"]);
-  }
-  clearFilters(): void {
-    this.selectedCity = "";
-    this.searchTerm = "";
     this.currentPage = 0;
-    this.loadBuildings();
+    this.load();
+  }
+
+  goToPage(page: number): void {
+    if (page >= 0 && page < this.totalPages) {
+      this.currentPage = page;
+      this.load();
+    }
+  }
+
+  pages(): number[] {
+    return Array.from({ length: this.totalPages }, (_, i) => i);
+  }
+
+  navigateTo(building: Building): void {
+    this.router.navigate(["/estates", this.estateId, "buildings", building.id]);
+  }
+
+  create(): void {
+    this.router.navigate(["/estates", this.estateId, "buildings", "new"]);
+  }
+
+  confirmDelete(building: Building, event: Event): void {
+    event.stopPropagation();
+    if (!confirm(`Delete building "${building.name}"? This cannot be undone.`))
+      return;
+    this.deleteError = "";
+    this.buildingService.deleteBuilding(building.id).subscribe({
+      next: () => this.load(),
+      error: (err) => {
+        this.deleteError = err.error?.message ?? "Failed to delete building.";
+      },
+    });
   }
 }

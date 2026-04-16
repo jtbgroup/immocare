@@ -1,148 +1,195 @@
 <div class="building-form-container">
   <!-- Header -->
-  <div class="details-content">
-    <div class="header">
-      <h1>{{ isEditMode ? "Edit Building" : "Create Building" }}</h1>
-    </div>
+  <div class="page-header">
+    <h1>{{ isEdit ? "Edit Building" : "Add Building" }}</h1>
   </div>
 
-  <!-- Error -->
-  @if (error) {
-    <div class="alert alert-error">{{ error }}</div>
-  }
+  <!-- Breadcrumb -->
+  <nav class="breadcrumb" aria-label="breadcrumb">
+    <a
+      [routerLink]="[
+        '/estates',
+        activeEstateService.activeEstateId(),
+        'buildings',
+      ]"
+      >Buildings</a
+    >
+    <span class="breadcrumb-separator">›</span>
+    @if (isEdit && buildingId) {
+      <a
+        [routerLink]="[
+          '/estates',
+          activeEstateService.activeEstateId(),
+          'buildings',
+          buildingId,
+        ]"
+        >Building</a
+      >
+      <span class="breadcrumb-separator">›</span>
+      <span>Edit</span>
+    } @else {
+      <span>New</span>
+    }
+  </nav>
 
   <!-- Loading -->
-  @if (loading && isEditMode) {
-    <div class="loading">Loading building...</div>
+  @if (loading) {
+    <div class="loading">Loading…</div>
   }
 
-  <!-- Form -->
-  @if (!loading || !isEditMode) {
+  @if (!loading) {
     <div class="form-card">
-      <form [formGroup]="buildingForm" (ngSubmit)="onSubmit()">
+      <form [formGroup]="form" (ngSubmit)="submit()" novalidate>
+        @if (errorMessage) {
+          <div class="alert alert-error">{{ errorMessage }}</div>
+        }
+
+        <!-- Name -->
         <div class="form-group">
-          <label for="name"
-            >Building Name <span class="required">*</span></label
-          >
+          <label for="name">Name <span class="required">*</span></label>
           <input
-            type="text"
             id="name"
+            type="text"
             formControlName="name"
+            placeholder="e.g. Résidence Les Érables"
             [class.error]="
-              hasError('name', 'required') || hasError('name', 'maxlength')
+              form.get('name')?.invalid && form.get('name')?.touched
             "
           />
-          @if (hasError("name", "required") || hasError("name", "maxlength")) {
-            <span class="error-message">
-              {{ getErrorMessage("name") }}
-            </span>
+          @if (fieldError("name")) {
+            <span class="error-message">{{ fieldError("name") }}</span>
           }
         </div>
 
+        <!-- Address -->
         <div class="form-group">
           <label for="streetAddress"
             >Street Address <span class="required">*</span></label
           >
           <input
-            type="text"
             id="streetAddress"
+            type="text"
             formControlName="streetAddress"
+            placeholder="e.g. Rue de la Paix 12"
             [class.error]="
-              hasError('streetAddress', 'required') ||
-              hasError('streetAddress', 'maxlength')
+              form.get('streetAddress')?.invalid &&
+              form.get('streetAddress')?.touched
             "
           />
-          @if (
-            hasError("streetAddress", "required") ||
-            hasError("streetAddress", "maxlength")
-          ) {
-            <span class="error-message">
-              {{ getErrorMessage("streetAddress") }}
-            </span>
+          @if (fieldError("streetAddress")) {
+            <span class="error-message">{{ fieldError("streetAddress") }}</span>
           }
         </div>
 
+        <!-- Postal + City -->
         <div class="form-row">
           <div class="form-group">
             <label for="postalCode"
               >Postal Code <span class="required">*</span></label
             >
             <input
-              type="text"
               id="postalCode"
+              type="text"
               formControlName="postalCode"
+              placeholder="e.g. 1000"
               [class.error]="
-                hasError('postalCode', 'required') ||
-                hasError('postalCode', 'maxlength')
+                form.get('postalCode')?.invalid &&
+                form.get('postalCode')?.touched
               "
             />
-            @if (
-              hasError("postalCode", "required") ||
-              hasError("postalCode", "maxlength")
-            ) {
-              <span class="error-message">
-                {{ getErrorMessage("postalCode") }}
-              </span>
+            @if (fieldError("postalCode")) {
+              <span class="error-message">{{ fieldError("postalCode") }}</span>
             }
           </div>
 
           <div class="form-group">
             <label for="city">City <span class="required">*</span></label>
             <input
-              type="text"
               id="city"
+              type="text"
               formControlName="city"
+              placeholder="e.g. Brussels"
               [class.error]="
-                hasError('city', 'required') || hasError('city', 'maxlength')
+                form.get('city')?.invalid && form.get('city')?.touched
               "
             />
-            @if (
-              hasError("city", "required") || hasError("city", "maxlength")
-            ) {
-              <span class="error-message">
-                {{ getErrorMessage("city") }}
-              </span>
+            @if (fieldError("city")) {
+              <span class="error-message">{{ fieldError("city") }}</span>
             }
           </div>
         </div>
 
+        <!-- Country -->
         <div class="form-group">
           <label for="country">Country <span class="required">*</span></label>
           <input
-            type="text"
             id="country"
+            type="text"
             formControlName="country"
+            placeholder="e.g. Belgium"
             [class.error]="
-              hasError('country', 'required') ||
-              hasError('country', 'maxlength')
+              form.get('country')?.invalid && form.get('country')?.touched
             "
           />
-          @if (
-            hasError("country", "required") || hasError("country", "maxlength")
-          ) {
-            <span class="error-message">
-              {{ getErrorMessage("country") }}
-            </span>
+          @if (fieldError("country")) {
+            <span class="error-message">{{ fieldError("country") }}</span>
           }
         </div>
 
+        <!-- Owner picker -->
         <div class="form-group">
-          <app-person-picker
-            label="Owner"
-            [required]="false"
-            formControlName="owner"
-          ></app-person-picker>
-          <small class="help-text"
-            >Optional — search by name or national ID</small
-          >
+          <label>Owner <span class="optional">(optional)</span></label>
+          @if (selectedOwner) {
+            <div class="selected-owner">
+              <span
+                >{{ selectedOwner.lastName }}
+                {{ selectedOwner.firstName }}</span
+              >
+              <button
+                type="button"
+                class="btn btn-secondary btn-sm"
+                (click)="clearOwner()"
+              >
+                ×
+              </button>
+            </div>
+          } @else {
+            <input
+              type="text"
+              [value]="ownerSearchTerm"
+              (input)="
+                ownerSearchTerm = $any($event.target).value; searchOwner()
+              "
+              placeholder="Search by name…"
+            />
+            @if (ownerSearchLoading) {
+              <span class="help-text">Searching…</span>
+            }
+            @if (ownerResults.length > 0) {
+              <ul class="picker-results">
+                @for (p of ownerResults; track p.id) {
+                  <li (click)="selectOwner(p)">
+                    {{ p.lastName }} {{ p.firstName }}
+                  </li>
+                }
+              </ul>
+            }
+          }
         </div>
 
+        <!-- Actions -->
         <div class="form-actions">
-          <button type="button" class="btn btn-secondary" (click)="onCancel()">
+          <button type="button" class="btn btn-secondary" (click)="cancel()">
             Cancel
           </button>
-          <button type="submit" class="btn btn-primary" [disabled]="loading">
-            {{ loading ? "Saving..." : "Save" }}
+          <button type="submit" class="btn btn-primary" [disabled]="submitting">
+            {{
+              submitting
+                ? "Saving…"
+                : isEdit
+                  ? "Save Changes"
+                  : "Create Building"
+            }}
           </button>
         </div>
       </form>

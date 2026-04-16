@@ -1,20 +1,20 @@
 // features/estate/components/admin-estate-list/admin-estate-list.component.ts — UC016 US092-US095
-import { CommonModule } from '@angular/common';
-import { Component, OnDestroy, OnInit } from '@angular/core';
-import { FormsModule } from '@angular/forms';
-import { Router } from '@angular/router';
-import { Subject } from 'rxjs';
-import { debounceTime, distinctUntilChanged, takeUntil } from 'rxjs/operators';
-import { EstateService } from '../../../../core/services/estate.service';
-import { Estate } from '../../../../models/estate.model';
-import { Page } from '../../../../models/page.model';
+import { CommonModule } from "@angular/common";
+import { Component, OnDestroy, OnInit } from "@angular/core";
+import { FormsModule } from "@angular/forms";
+import { Router } from "@angular/router";
+import { Subject } from "rxjs";
+import { debounceTime, distinctUntilChanged, takeUntil } from "rxjs/operators";
+import { EstateService } from "../../../../core/services/estate.service";
+import { Estate } from "../../../../models/estate.model";
+import { Page } from "../../../../models/page.model";
 
 @Component({
-  selector: 'app-admin-estate-list',
+  selector: "app-admin-estate-list",
   standalone: true,
   imports: [CommonModule, FormsModule],
-  templateUrl: './admin-estate-list.component.html',
-  styleUrls: ['./admin-estate-list.component.scss'],
+  templateUrl: "./admin-estate-list.component.html",
+  styleUrls: ["./admin-estate-list.component.scss"],
 })
 export class AdminEstateListComponent implements OnInit, OnDestroy {
   estates: Estate[] = [];
@@ -23,7 +23,7 @@ export class AdminEstateListComponent implements OnInit, OnDestroy {
   currentPage = 0;
   pageSize = 20;
 
-  searchTerm = '';
+  searchTerm = "";
   loading = false;
   error: string | null = null;
 
@@ -42,7 +42,7 @@ export class AdminEstateListComponent implements OnInit, OnDestroy {
   ngOnInit(): void {
     this.searchSubject
       .pipe(debounceTime(300), distinctUntilChanged(), takeUntil(this.destroy$))
-      .subscribe(term => {
+      .subscribe((term) => {
         this.searchTerm = term;
         this.currentPage = 0;
         this.load();
@@ -60,7 +60,11 @@ export class AdminEstateListComponent implements OnInit, OnDestroy {
     this.loading = true;
     this.error = null;
     this.estateService
-      .getAllEstates(this.currentPage, this.pageSize, this.searchTerm || undefined)
+      .getAllEstates(
+        this.currentPage,
+        this.pageSize,
+        this.searchTerm || undefined,
+      )
       .pipe(takeUntil(this.destroy$))
       .subscribe({
         next: (page: Page<Estate>) => {
@@ -71,7 +75,7 @@ export class AdminEstateListComponent implements OnInit, OnDestroy {
           this.loading = false;
         },
         error: () => {
-          this.error = 'Failed to load estates.';
+          this.error = "Failed to load estates.";
           this.loading = false;
         },
       });
@@ -82,11 +86,15 @@ export class AdminEstateListComponent implements OnInit, OnDestroy {
   }
 
   create(): void {
-    this.router.navigate(['/admin/estates/new']);
+    this.router.navigate(["/admin/estates/new"]);
   }
 
   edit(estate: Estate): void {
-    this.router.navigate(['/admin/estates', estate.id, 'edit']);
+    this.router.navigate(["/admin/estates", estate.id, "edit"]);
+  }
+
+  viewDashboard(estate: Estate): void {
+    this.router.navigate(["/estates", estate.id, "dashboard"]);
   }
 
   requestDelete(estate: Estate): void {
@@ -103,7 +111,8 @@ export class AdminEstateListComponent implements OnInit, OnDestroy {
     if (!this.deleteConfirmId) return;
     this.deleting = true;
     this.deleteError = null;
-    this.estateService.deleteEstate(this.deleteConfirmId)
+    this.estateService
+      .deleteEstate(this.deleteConfirmId)
       .pipe(takeUntil(this.destroy$))
       .subscribe({
         next: () => {
@@ -111,26 +120,32 @@ export class AdminEstateListComponent implements OnInit, OnDestroy {
           this.deleteConfirmId = null;
           this.load();
         },
-        error: err => {
+        error: (err) => {
           this.deleting = false;
           const buildingCount = err.error?.buildingCount;
           this.deleteError = buildingCount
             ? `Cannot delete: this estate contains ${buildingCount} building(s).`
-            : (err.error?.message ?? 'Failed to delete estate.');
+            : (err.error?.message ?? "Failed to delete estate.");
           this.deleteConfirmId = null;
         },
       });
   }
 
   previousPage(): void {
-    if (this.currentPage > 0) { this.currentPage--; this.load(); }
+    if (this.currentPage > 0) {
+      this.currentPage--;
+      this.load();
+    }
   }
 
   nextPage(): void {
-    if (this.currentPage < this.totalPages - 1) { this.currentPage++; this.load(); }
+    if (this.currentPage < this.totalPages - 1) {
+      this.currentPage++;
+      this.load();
+    }
   }
 
   estateToDelete(): Estate | undefined {
-    return this.estates.find(e => e.id === this.deleteConfirmId);
+    return this.estates.find((e) => e.id === this.deleteConfirmId);
   }
 }

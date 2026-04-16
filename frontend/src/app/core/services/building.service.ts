@@ -1,113 +1,92 @@
-import { HttpClient, HttpParams } from "@angular/common/http";
-import { Injectable } from "@angular/core";
-import { Observable } from "rxjs";
-import { environment } from "../../../environments/environment";
+import { HttpClient, HttpParams } from '@angular/common/http';
+import { Injectable } from '@angular/core';
+import { Observable } from 'rxjs';
+import { ActiveEstateService } from '../services/active-estate.service';
 import {
   Building,
   CreateBuildingRequest,
   Page,
   UpdateBuildingRequest,
-} from "../../models/building.model";
+} from '../../models/building.model';
 
 /**
  * Service for Building API operations.
- * Handles all HTTP requests to the building endpoints.
+ * UC016 Phase 2: all endpoints scoped to the active estate.
+ * Base URL: /api/v1/estates/{estateId}/buildings
  */
-@Injectable({
-  providedIn: "root",
-})
+@Injectable({ providedIn: 'root' })
 export class BuildingService {
-  private readonly apiUrl = `${environment.apiUrl}/buildings`;
 
-  constructor(private http: HttpClient) {}
+  constructor(
+    private http: HttpClient,
+    private activeEstateService: ActiveEstateService,
+  ) {}
+
+  private get estateId(): string {
+    const id = this.activeEstateService.activeEstateId();
+    if (!id) throw new Error('No active estate — cannot call BuildingService without an estate context.');
+    return id;
+  }
+
+  private get base(): string {
+    return `/api/v1/estates/${this.estateId}/buildings`;
+  }
 
   /**
-   * Get all buildings with optional filters.
-   * Implements US004 - View Buildings List and US005 - Search Buildings.
-   *
-   * @param page page number (0-indexed)
-   * @param size page size
-   * @param sort sort parameter (e.g., 'name,asc')
-   * @param city optional city filter
-   * @param search optional search term
-   * @returns observable of paginated buildings
+   * GET /api/v1/estates/{estateId}/buildings
+   * US004 — View Buildings List / US005 — Search Buildings.
    */
   getAllBuildings(
-    page: number = 0,
-    size: number = 20,
-    sort: string = "name,asc",
+    page = 0,
+    size = 20,
+    sort = 'name,asc',
     city?: string,
     search?: string,
   ): Observable<Page<Building>> {
     let params = new HttpParams()
-      .set("page", page.toString())
-      .set("size", size.toString())
-      .set("sort", sort);
-
-    if (city) {
-      params = params.set("city", city);
-    }
-
-    if (search) {
-      params = params.set("search", search);
-    }
-
-    return this.http.get<Page<Building>>(this.apiUrl, { params });
+      .set('page', page.toString())
+      .set('size', size.toString())
+      .set('sort', sort);
+    if (city)   params = params.set('city', city);
+    if (search) params = params.set('search', search);
+    return this.http.get<Page<Building>>(this.base, { params });
   }
 
   /**
-   * Get a building by ID.
-   *
-   * @param id the building ID
-   * @returns observable of the building
+   * GET /api/v1/estates/{estateId}/buildings/{id}
    */
   getBuildingById(id: number): Observable<Building> {
-    return this.http.get<Building>(`${this.apiUrl}/${id}`);
+    return this.http.get<Building>(`${this.base}/${id}`);
   }
 
   /**
-   * Create a new building.
-   * Implements US001 - Create Building.
-   *
-   * @param request the building creation request
-   * @returns observable of the created building
-   */
-  createBuilding(request: CreateBuildingRequest): Observable<Building> {
-    return this.http.post<Building>(this.apiUrl, request);
-  }
-
-  /**
-   * Update an existing building.
-   * Implements US002 - Edit Building.
-   *
-   * @param id the building ID
-   * @param request the building update request
-   * @returns observable of the updated building
-   */
-  updateBuilding(
-    id: number,
-    request: UpdateBuildingRequest,
-  ): Observable<Building> {
-    return this.http.put<Building>(`${this.apiUrl}/${id}`, request);
-  }
-
-  /**
-   * Delete a building.
-   * Implements US003 - Delete Building.
-   *
-   * @param id the building ID
-   * @returns observable of the deletion response
-   */
-  deleteBuilding(id: number): Observable<{ message: string }> {
-    return this.http.delete<{ message: string }>(`${this.apiUrl}/${id}`);
-  }
-
-  /**
-   * Get all distinct cities for filtering.
-   *
-   * @returns observable of city names
+   * GET /api/v1/estates/{estateId}/buildings/cities
    */
   getAllCities(): Observable<string[]> {
-    return this.http.get<string[]>(`${this.apiUrl}/cities`);
+    return this.http.get<string[]>(`${this.base}/cities`);
+  }
+
+  /**
+   * POST /api/v1/estates/{estateId}/buildings
+   * US001 — Create Building.
+   */
+  createBuilding(request: CreateBuildingRequest): Observable<Building> {
+    return this.http.post<Building>(this.base, request);
+  }
+
+  /**
+   * PUT /api/v1/estates/{estateId}/buildings/{id}
+   * US002 — Edit Building.
+   */
+  updateBuilding(id: number, request: UpdateBuildingRequest): Observable<Building> {
+    return this.http.put<Building>(`${this.base}/${id}`, request);
+  }
+
+  /**
+   * DELETE /api/v1/estates/{estateId}/buildings/{id}
+   * US003 — Delete Building.
+   */
+  deleteBuilding(id: number): Observable<{ message: string }> {
+    return this.http.delete<{ message: string }>(`${this.base}/${id}`);
   }
 }

@@ -1,172 +1,232 @@
-import { CommonModule } from "@angular/common";
-import { Component, OnDestroy, OnInit } from "@angular/core";
+import { CommonModule } from '@angular/common';
+import { Component, OnInit } from '@angular/core';
 import {
   FormBuilder,
   FormGroup,
   ReactiveFormsModule,
   Validators,
-} from "@angular/forms";
-import { ActivatedRoute, Router } from "@angular/router";
-import { Subject } from "rxjs";
-import { takeUntil } from "rxjs/operators";
-import { HousingUnitService } from "../../../../core/services/housing-unit.service";
+} from '@angular/forms';
+import { ActivatedRoute, Router, RouterLink } from '@angular/router';
+import { ActiveEstateService } from '../../../../core/services/active-estate.service';
+import { BuildingService } from '../../../../core/services/building.service';
+import { HousingUnitService } from '../../../../core/services/housing-unit.service';
+import { PersonService } from '../../../../core/services/person.service';
+import { Building } from '../../../../models/building.model';
 import {
+  HousingUnit,
   ORIENTATIONS,
   Orientation,
-} from "../../../../models/housing-unit.model";
-import { PersonSummary } from "../../../../models/person.model";
-import { PersonPickerComponent } from "../../../../shared/components/person-picker/person-picker.component";
+} from '../../../../models/housing-unit.model';
+import { PersonSummary } from '../../../../models/person.model';
 
+/**
+ * Create / Edit housing unit form.
+ * UC016 Phase 2: buildingId may come from query param; navigation includes estateId.
+ */
 @Component({
-  selector: "app-housing-unit-form",
+  selector: 'app-housing-unit-form',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule, PersonPickerComponent],
-  templateUrl: "./housing-unit-form.component.html",
-  styleUrls: ["./housing-unit-form.component.scss"],
+  imports: [CommonModule, ReactiveFormsModule, RouterLink],
+  templateUrl: './housing-unit-form.component.html',
+  styleUrls: ['./housing-unit-form.component.scss'],
 })
-export class HousingUnitFormComponent implements OnInit, OnDestroy {
+export class HousingUnitFormComponent implements OnInit {
   form!: FormGroup;
-  isEditMode = false;
+  isEdit = false;
   unitId?: number;
-  buildingId?: number;
-  saving = false;
-  errorMessage = "";
-  orientations: Orientation[] = ORIENTATIONS;
+  preselectedBuildingId?: number;
+  loading = false;
+  submitting = false;
+  errorMessage = '';
+  isDirty = false;
 
-  private destroy$ = new Subject<void>();
+  buildings: Building[] = [];
+  readonly orientations: Orientation[] = ORIENTATIONS;
+
+  // Owner picker
+  ownerSearchTerm = '';
+  ownerResults: PersonSummary[] = [];
+  selectedOwner: PersonSummary | null = null;
+  ownerSearchLoading = false;
 
   constructor(
     private fb: FormBuilder,
     private housingUnitService: HousingUnitService,
-    private route: ActivatedRoute,
+    private buildingService: BuildingService,
+    private personService: PersonService,
     private router: Router,
+    private route: ActivatedRoute,
+    readonly activeEstateService: ActiveEstateService,
   ) {}
 
   ngOnInit(): void {
-    this.buildingId = this.route.snapshot.queryParams["buildingId"]
-      ? +this.route.snapshot.queryParams["buildingId"]
+    const id = this.route.snapshot.paramMap.get('id');
+    this.isEdit = !!id && id !== 'new';
+    this.preselectedBuildingId = this.route.snapshot.queryParams['buildingId']
+      ? Number(this.route.snapshot.queryParams['buildingId'])
       : undefined;
-    const id = this.route.snapshot.paramMap.get("id");
-    this.isEditMode = !!id;
+
+    this.loadBuildings();
     this.buildForm();
-    if (this.isEditMode && id) {
-      this.unitId = +id;
-      this.loadUnit(this.unitId);
+
+    if (this.isEdit) {
+      this.unitId = Number(id);
+      this.loading = true;
+      this.housingUnitService.getUnitById(this.unitId).subscribe({
+        next: (u) => {
+          this.patchForm(u);
+          this.loading = false;
+          setTimeout(() => this.form.markAsPristine());
+        },
+        error: () => {
+          this.errorMessage = 'Failed to load unit.';
+          this.loading = false;
+        },
+      });
     }
+
+    this.form.valueChanges.subscribe(() => {
+      this.isDirty = this.form.dirty;
+    });
   }
 
-  ngOnDestroy(): void {
-    this.destroy$.next();
-    this.destroy$.complete();
+  private get estateId(): string {
+    return this.activeEstateService.activeEstateId()!;
+  }
+
+  private loadBuildings(): void {
+    this.buildingService.getAllBuildings(0, 200, 'name,asc').subscribe({
+      next: (page) => (this.buildings = page.content),
+      error: () => { /* non-blocking */ },
+    });
   }
 
   private buildForm(): void {
     this.form = this.fb.group({
-      unitNumber: ["", Validators.required],
-      floor: [
-        0,
-        [Validators.required, Validators.min(-10), Validators.max(100)],
-      ],
-      landingNumber: [""],
-      totalSurface: [null],
-      owner: [null],
-      hasTerrace: [false],
-      terraceSurface: [null, [Validators.min(0.01)]],
-      terraceOrientation: [""],
-      hasGarden: [false],
-      gardenSurface: [null, [Validators.min(0.01)]],
-      gardenOrientation: [""],
+      buildingId:          [this.preselectedBuildingId ?? null, Validators.required],
+      unitNumber:          ['', [Validators.required, Validators.maxLength(20)]],
+      floor:               [0, [Validators.required]],
+      landingNumber:       [''],
+      totalSurface:        [null],
+      hasTerrace:          [false],
+      terraceSurface:      [null],
+      terraceOrientation:  [null],
+      hasGarden:           [false],
+      gardenSurface:       [null],
+      gardenOrientation:   [null],
     });
-
-    // Dynamically add/remove required validator on surface fields
-    this.form
-      .get("hasTerrace")!
-      .valueChanges.pipe(takeUntil(this.destroy$))
-      .subscribe((checked: boolean) =>
-        this.updateSurfaceValidators("terraceSurface", checked),
-      );
-
-    this.form
-      .get("hasGarden")!
-      .valueChanges.pipe(takeUntil(this.destroy$))
-      .subscribe((checked: boolean) =>
-        this.updateSurfaceValidators("gardenSurface", checked),
-      );
   }
 
-  private updateSurfaceValidators(field: string, required: boolean): void {
-    const ctrl = this.form.get(field)!;
-    if (required) {
-      ctrl.setValidators([Validators.required, Validators.min(0.01)]);
-    } else {
-      ctrl.setValidators([Validators.min(0.01)]);
+  private patchForm(u: HousingUnit): void {
+    this.form.patchValue({
+      buildingId:         u.buildingId,
+      unitNumber:         u.unitNumber,
+      floor:              u.floor,
+      landingNumber:      u.landingNumber ?? '',
+      totalSurface:       u.totalSurface ?? null,
+      hasTerrace:         u.hasTerrace,
+      terraceSurface:     u.terraceSurface ?? null,
+      terraceOrientation: u.terraceOrientation ?? null,
+      hasGarden:          u.hasGarden,
+      gardenSurface:      u.gardenSurface ?? null,
+      gardenOrientation:  u.gardenOrientation ?? null,
+    });
+    if (u.ownerId && u.ownerName) {
+      this.selectedOwner = {
+        id: u.ownerId,
+        lastName: u.ownerName,
+        firstName: '',
+        isOwner: true,
+        isTenant: false,
+      };
     }
-    ctrl.updateValueAndValidity();
   }
 
-  private loadUnit(id: number): void {
-    this.housingUnitService
-      .getUnitById(id)
-      .pipe(takeUntil(this.destroy$))
-      .subscribe({
-        next: (unit) => {
-          this.form.patchValue(unit);
-          this.buildingId = unit.buildingId;
-          if (unit.ownerId && unit.ownerName) {
-            const parts = unit.ownerName.trim().split(" ");
-            const ownerSummary: PersonSummary = {
-              id: unit.ownerId,
-              firstName: parts.slice(1).join(" ") ?? "",
-              lastName: parts[0] ?? unit.ownerName,
-            } as PersonSummary;
-            this.form.patchValue({ owner: ownerSummary });
-          }
-        },
-        error: () => {
-          this.errorMessage = "Failed to load unit.";
-        },
-      });
+  get hasTerrace(): boolean { return !!this.form.get('hasTerrace')?.value; }
+  get hasGarden():  boolean { return !!this.form.get('hasGarden')?.value;  }
+
+  fieldError(name: string): string {
+    const ctrl = this.form.get(name);
+    if (!ctrl || !ctrl.invalid || !ctrl.touched) return '';
+    if (ctrl.errors?.['required'])  return 'Required field';
+    if (ctrl.errors?.['maxlength']) return 'Value too long';
+    return '';
   }
 
-  isInvalid(field: string): boolean {
-    const ctrl = this.form.get(field);
-    return !!(ctrl && ctrl.invalid && ctrl.touched);
+  // ── Owner picker ──────────────────────────────────────────────────────────
+
+  searchOwner(): void {
+    const q = this.ownerSearchTerm.trim();
+    if (q.length < 2) { this.ownerResults = []; return; }
+    this.ownerSearchLoading = true;
+    this.personService.searchForPicker(q).subscribe({
+      next: (r) => { this.ownerResults = r; this.ownerSearchLoading = false; },
+      error: () => (this.ownerSearchLoading = false),
+    });
   }
 
-  onSubmit(): void {
-    if (this.form.invalid) {
-      this.form.markAllAsTouched();
-      return;
-    }
-    this.saving = true;
-    const { owner, ...rest } = this.form.value;
-    const value = {
-      ...rest,
-      buildingId: this.buildingId,
-      ownerId: (owner as PersonSummary | null)?.id ?? null,
-      terraceOrientation: rest.terraceOrientation || null,
-      gardenOrientation: rest.gardenOrientation || null,
+  selectOwner(p: PersonSummary): void {
+    this.selectedOwner = p;
+    this.ownerSearchTerm = '';
+    this.ownerResults = [];
+    this.form.markAsDirty();
+  }
+
+  clearOwner(): void {
+    this.selectedOwner = null;
+    this.form.markAsDirty();
+  }
+
+  // ── Submit / Cancel ───────────────────────────────────────────────────────
+
+  submit(): void {
+    this.form.markAllAsTouched();
+    if (this.form.invalid) return;
+
+    this.submitting = true;
+    this.errorMessage = '';
+    const val = this.form.value;
+
+    const payload = {
+      buildingId:         Number(val['buildingId']),
+      unitNumber:         val['unitNumber'],
+      floor:              Number(val['floor']),
+      landingNumber:      val['landingNumber'] || undefined,
+      totalSurface:       val['totalSurface'] ? Number(val['totalSurface']) : undefined,
+      hasTerrace:         !!val['hasTerrace'],
+      terraceSurface:     val['hasTerrace'] && val['terraceSurface'] ? Number(val['terraceSurface']) : undefined,
+      terraceOrientation: val['hasTerrace'] ? val['terraceOrientation'] : undefined,
+      hasGarden:          !!val['hasGarden'],
+      gardenSurface:      val['hasGarden'] && val['gardenSurface'] ? Number(val['gardenSurface']) : undefined,
+      gardenOrientation:  val['hasGarden'] ? val['gardenOrientation'] : undefined,
+      ownerId:            this.selectedOwner?.id ?? null,
     };
-    const obs =
-      this.isEditMode && this.unitId
-        ? this.housingUnitService.update(this.unitId, value)
-        : this.housingUnitService.create(value);
-    obs.pipe(takeUntil(this.destroy$)).subscribe({
+
+    const obs$ = this.isEdit && this.unitId != null
+      ? this.housingUnitService.update(this.unitId, payload)
+      : this.housingUnitService.create(payload);
+
+    obs$.subscribe({
       next: (unit) => {
-        this.router.navigate(["/units", unit.id]);
+        this.submitting = false;
+        this.form.markAsPristine();
+        this.router.navigate(['/estates', this.estateId, 'units', unit.id]);
       },
       error: (err) => {
-        this.saving = false;
-        this.errorMessage = err.error?.message ?? "Failed to save unit.";
+        this.submitting = false;
+        this.errorMessage = err.error?.message ?? 'An error occurred.';
       },
     });
   }
 
-  onCancel(): void {
-    if (this.buildingId) {
-      this.router.navigate(["/buildings", this.buildingId]);
+  cancel(): void {
+    if (this.isDirty && !confirm('Unsaved changes. Cancel anyway?')) return;
+    if (this.isEdit && this.unitId != null) {
+      this.router.navigate(['/estates', this.estateId, 'units', this.unitId]);
+    } else if (this.preselectedBuildingId) {
+      this.router.navigate(['/estates', this.estateId, 'buildings', this.preselectedBuildingId]);
     } else {
-      this.router.navigate(["/buildings"]);
+      this.router.navigate(['/estates', this.estateId, 'units']);
     }
   }
 }

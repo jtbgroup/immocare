@@ -1,9 +1,10 @@
 /**
- * Building model interface.
- * Matches the BuildingDTO from backend.
+ * Building model — UC016 Phase 2: estateId added.
+ * Matches BuildingDTO from backend after V018 migration.
  */
 export interface Building {
   id: number;
+  estateId: string;           // UUID — Phase 2: every building belongs to an estate
   name: string;
   streetAddress: string;
   postalCode: string;
@@ -19,6 +20,7 @@ export interface Building {
 
 /**
  * Request interface for creating a building.
+ * estateId is implicit from the URL path — never sent in body.
  */
 export interface CreateBuildingRequest {
   name: string;

@@ -1,114 +1,76 @@
-import { CommonModule } from "@angular/common";
-import { Component, OnDestroy, OnInit } from "@angular/core";
-import { ActivatedRoute, Router, RouterLink } from "@angular/router";
-import { Subject } from "rxjs";
-import { takeUntil } from "rxjs/operators";
-import { TransactionService } from "src/app/core/services/transaction.service";
-import { TransactionStatistics } from "src/app/models/transaction.model";
-import { HousingUnitService } from "../../../../core/services/housing-unit.service";
-import { HousingUnit } from "../../../../models/housing-unit.model";
-import { MeterSectionComponent } from "../../../../shared/components/meter-section/meter-section.component";
-import { LeaseSectionComponent } from "../../../lease/components/lease-section/lease-section.component";
-import { BoilerSectionComponent } from "../boiler-section/boiler-section.component";
-import { PebSectionComponent } from "../peb-section/peb-section.component";
-import { RentSectionComponent } from "../rent-section/rent-section.component";
-import { RoomSectionComponent } from "../room-section/room-section.component";
+import { CommonModule } from '@angular/common';
+import { Component, OnInit } from '@angular/core';
+import { ActivatedRoute, Router, RouterLink } from '@angular/router';
+import { ActiveEstateService } from '../../../../core/services/active-estate.service';
+import { HousingUnitService } from '../../../../core/services/housing-unit.service';
+import { HousingUnit } from '../../../../models/housing-unit.model';
 
+/**
+ * Housing unit detail page.
+ * UC016 Phase 2: all navigation includes estateId.
+ */
 @Component({
-  selector: "app-housing-unit-details",
+  selector: 'app-housing-unit-details',
   standalone: true,
-  imports: [
-    CommonModule,
-    RouterLink,
-    RoomSectionComponent,
-    PebSectionComponent,
-    RentSectionComponent,
-    MeterSectionComponent,
-    LeaseSectionComponent,
-    BoilerSectionComponent,
-  ],
-  templateUrl: "./housing-unit-details.component.html",
-  styleUrls: ["./housing-unit-details.component.scss"],
+  imports: [CommonModule, RouterLink],
+  templateUrl: './housing-unit-details.component.html',
+  styleUrls: ['./housing-unit-details.component.scss'],
 })
-export class HousingUnitDetailsComponent implements OnInit, OnDestroy {
+export class HousingUnitDetailsComponent implements OnInit {
   unit?: HousingUnit;
   loading = false;
-  showDeleteConfirm = false;
+  errorMessage = '';
+  deleteError = '';
   deleting = false;
-  deleteError = "";
-  private destroy$ = new Subject<void>();
-  unitStats: TransactionStatistics | null = null;
-  showFinancial = false;
 
   constructor(
+    private housingUnitService: HousingUnitService,
     private route: ActivatedRoute,
     private router: Router,
-    private housingUnitService: HousingUnitService,
-    private transactionService: TransactionService,
+    readonly activeEstateService: ActiveEstateService,
   ) {}
 
   ngOnInit(): void {
-    const id = +(this.route.snapshot.paramMap.get("id") ?? 0);
-    if (id) {
-      this.loading = true;
-      this.housingUnitService
-        .getUnitById(id)
-        .pipe(takeUntil(this.destroy$))
-        .subscribe({
-          next: (u) => {
-            this.unit = u;
-            this.loading = false;
-            this.loadUnitStats(u.id);
-          },
-          error: () => {
-            this.loading = false;
-          },
-        });
-    }
+    const id = Number(this.route.snapshot.paramMap.get('id'));
+    this.loading = true;
+    this.housingUnitService.getUnitById(id).subscribe({
+      next: (u) => {
+        this.unit = u;
+        this.loading = false;
+      },
+      error: () => {
+        this.errorMessage = 'Unit not found.';
+        this.loading = false;
+      },
+    });
   }
 
-  ngOnDestroy(): void {
-    this.destroy$.next();
-    this.destroy$.complete();
+  private get estateId(): string {
+    return this.activeEstateService.activeEstateId()!;
   }
 
   edit(): void {
-    if (this.unit) {
-      this.router.navigate(["/units", this.unit.id, "edit"]);
-    }
+    this.router.navigate(['/estates', this.estateId, 'units', this.unit!.id, 'edit']);
+  }
+
+  backToBuilding(): void {
+    this.router.navigate(['/estates', this.estateId, 'buildings', this.unit!.buildingId]);
+  }
+
+  back(): void {
+    this.router.navigate(['/estates', this.estateId, 'units']);
   }
 
   confirmDelete(): void {
-    this.showDeleteConfirm = true;
-  }
-
-  delete(): void {
     if (!this.unit) return;
+    if (!confirm(`Delete unit "${this.unit.unitNumber}"? This cannot be undone.`)) return;
     this.deleting = true;
-    this.housingUnitService
-      .delete(this.unit.id)
-      .pipe(takeUntil(this.destroy$))
-      .subscribe({
-        next: () => {
-          this.router.navigate(["/buildings", this.unit!.buildingId]);
-        },
-        error: (err) => {
-          this.deleting = false;
-          this.deleteError = err.error?.message ?? "Failed to delete unit.";
-        },
-      });
-  }
-
-  loadUnitStats(unitId: number): void {
-    this.transactionService
-      .getStatistics({ unitId })
-      .pipe(takeUntil(this.destroy$))
-      .subscribe((s) => (this.unitStats = s));
-  }
-
-  viewUnitTransactions(unitId: number): void {
-    this.router.navigate(["/transactions"], {
-      queryParams: { tab: "list", unitId },
+    this.housingUnitService.delete(this.unit.id).subscribe({
+      next: () => this.router.navigate(['/estates', this.estateId, 'buildings', this.unit!.buildingId]),
+      error: (err) => {
+        this.deleting = false;
+        this.deleteError = err.error?.message ?? 'Failed to delete unit.';
+      },
     });
   }
 }

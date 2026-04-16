@@ -1,129 +1,150 @@
 <div class="building-list-container">
+
   <!-- Header -->
-  <div class="details-content">
-    <div class="header">
-      <h1>Buildings</h1>
-      <div class="actions">
-        <button class="btn btn-primary" (click)="createBuilding()">
-          Create Building
-        </button>
-      </div>
+  <div class="page-header">
+    <h1>Buildings</h1>
+    <div class="actions">
+      @if (activeEstateService.canEdit()) {
+        <button class="btn btn-primary" (click)="create()">+ Add Building</button>
+      }
     </div>
   </div>
+
+  <!-- Alerts -->
+  @if (errorMessage) {
+    <div class="alert alert-error">{{ errorMessage }}</div>
+  }
+  @if (deleteError) {
+    <div class="alert alert-error">{{ deleteError }}</div>
+  }
 
   <!-- Filters -->
   <div class="filters">
     <input
-      type="text"
+      type="search"
       class="search-input"
-      placeholder="Search buildings..."
-      [value]="searchTerm"
-      (input)="onSearchChange($any($event.target).value)"
+      placeholder="Search by name, address, city…"
+      [(ngModel)]="searchTerm"
+      (keyup.enter)="onSearch()"
     />
-    <select
-      [(ngModel)]="selectedCity"
-      (change)="onCityFilterChange(selectedCity)"
-    >
-      <option value="">All Cities</option>
+    <select [(ngModel)]="selectedCity" (change)="onCityFilter()">
+      <option value="">All cities</option>
       @for (city of cities; track city) {
         <option [value]="city">{{ city }}</option>
       }
     </select>
-    <button class="btn btn-secondary" (click)="clearFilters()">
-      Clear Filters
-    </button>
+    <button class="btn btn-secondary btn-sm" (click)="onSearch()">Search</button>
+    @if (searchTerm || selectedCity) {
+      <button class="btn btn-secondary btn-sm" (click)="clearFilters()">Clear</button>
+    }
   </div>
 
   <!-- Loading -->
   @if (loading) {
-    <div class="loading">Loading buildings...</div>
+    <div class="loading">Loading…</div>
   }
 
-  <!-- Error -->
-  @if (error) {
-    <div class="alert alert-error">{{ error }}</div>
-  }
+  @if (!loading) {
+    <!-- Empty state -->
+    @if (buildings.length === 0) {
+      <div class="empty-state">
+        <p>No buildings found.</p>
+        @if (searchTerm || selectedCity) {
+          <p class="help-text">Try adjusting your filters.</p>
+        } @else if (activeEstateService.canEdit()) {
+          <p class="help-text">Get started by adding your first building.</p>
+        }
+      </div>
+    }
 
-  <!-- Empty State -->
-  @if (!loading && !error && buildings.length === 0) {
-    <div class="empty-state">
-      <p>No buildings yet</p>
-      <p class="help-text">Create your first building to get started</p>
-    </div>
-  }
-
-  <!-- Table -->
-  @if (!loading && !error && buildings.length > 0) {
-    <div class="data-table">
-      <table>
-        <thead>
-          <tr>
-            <th class="sortable" (click)="onSortChange('name')">
-              Name
-              <span class="sort-icon" [class.active]="sortField === 'name'">
-                {{ sortField | sortIcon: sortDirection : "name" }}
-              </span>
-            </th>
-            <th>Address</th>
-            <th class="sortable" (click)="onSortChange('city')">
-              City
-              <span class="sort-icon" [class.active]="sortField === 'city'">
-                {{ sortField | sortIcon: sortDirection : "city" }}
-              </span>
-            </th>
-            <th>Country</th>
-            <th>Owner</th>
-            <th>Units</th>
-            <th>Actions</th>
-          </tr>
-        </thead>
-        <tbody>
-          @for (building of buildings; track building.id) {
-            <tr class="clickable" (click)="viewBuilding(building)">
-              <td>{{ building.name }}</td>
-              <td>{{ building.streetAddress }}, {{ building.postalCode }}</td>
-              <td>{{ building.city }}</td>
-              <td>{{ building.country }}</td>
-              <td>{{ building.ownerName || "Not specified" }}</td>
-              <td>{{ building.unitCount }} units</td>
-              <td>
-                <button
-                  class="btn btn-sm btn-link"
-                  (click)="viewBuilding(building); $event.stopPropagation()"
-                >
-                  View
-                </button>
-              </td>
+    <!-- Table -->
+    @if (buildings.length > 0) {
+      <div class="data-table">
+        <table>
+          <thead>
+            <tr>
+              <th class="sortable" (click)="sort('name')">
+                Name
+                <span class="sort-icon" [class.active]="sortField === 'name'">
+                  {{ sortField === 'name' ? (sortDir === 'asc' ? '↑' : '↓') : '↕' }}
+                </span>
+              </th>
+              <th class="sortable" (click)="sort('streetAddress')">
+                Address
+                <span class="sort-icon" [class.active]="sortField === 'streetAddress'">
+                  {{ sortField === 'streetAddress' ? (sortDir === 'asc' ? '↑' : '↓') : '↕' }}
+                </span>
+              </th>
+              <th class="sortable" (click)="sort('city')">
+                City
+                <span class="sort-icon" [class.active]="sortField === 'city'">
+                  {{ sortField === 'city' ? (sortDir === 'asc' ? '↑' : '↓') : '↕' }}
+                </span>
+              </th>
+              <th>Units</th>
+              <th>Owner</th>
+              @if (activeEstateService.canEdit()) {
+                <th></th>
+              }
             </tr>
+          </thead>
+          <tbody>
+            @for (building of buildings; track building.id) {
+              <tr class="clickable" (click)="navigateTo(building)">
+                <td>{{ building.name }}</td>
+                <td>{{ building.streetAddress }}</td>
+                <td>{{ building.city }}</td>
+                <td>{{ building.unitCount }}</td>
+                <td>{{ building.ownerName ?? '—' }}</td>
+                @if (activeEstateService.canEdit()) {
+                  <td>
+                    <button
+                      class="btn btn-danger btn-sm"
+                      (click)="confirmDelete(building, $event)"
+                    >
+                      Delete
+                    </button>
+                  </td>
+                }
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+
+      <!-- Pagination -->
+      @if (totalPages > 1) {
+        <div class="pagination">
+          <button
+            class="btn btn-secondary btn-sm"
+            [disabled]="currentPage === 0"
+            (click)="goToPage(currentPage - 1)"
+          >
+            Previous
+          </button>
+          @for (p of pages(); track p) {
+            <button
+              class="btn btn-secondary btn-sm"
+              [class.btn-active]="p === currentPage"
+              (click)="goToPage(p)"
+            >
+              {{ p + 1 }}
+            </button>
           }
-        </tbody>
-      </table>
-    </div>
+          <button
+            class="btn btn-secondary btn-sm"
+            [disabled]="currentPage === totalPages - 1"
+            (click)="goToPage(currentPage + 1)"
+          >
+            Next
+          </button>
+          <span class="page-info">
+            Page {{ currentPage + 1 }} of {{ totalPages }}
+            ({{ totalElements }} total)
+          </span>
+        </div>
+      }
+    }
   }
 
-  <!-- Pagination -->
-  @if (totalPages > 1) {
-    <div class="pagination">
-      <button
-        class="btn btn-secondary"
-        (click)="previousPage()"
-        [disabled]="currentPage === 0"
-      >
-        Previous
-      </button>
-      <span class="page-info"
-        >Page {{ currentPage + 1 }} of {{ totalPages }} ({{
-          totalElements
-        }}
-        total)</span
-      >
-      <button
-        class="btn btn-secondary"
-        (click)="nextPage()"
-        [disabled]="currentPage >= totalPages - 1"
-      >
-        Next
-      </button>
-    </div>
-  }
 </div>

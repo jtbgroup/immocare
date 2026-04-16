@@ -1,4 +1,4 @@
-<!-- app.component.html -->
+<!-- app.component.html — UC016 Phase 2 -->
 <div class="app-container">
   <header class="app-header">
     <!-- Brand -->
@@ -6,24 +6,36 @@
       <div class="brand-icon">🏢</div>
       <span class="brand-name">ImmoCare</span>
     </a>
+
     <!-- Nav + right zone: visible only when logged in -->
     <ng-container *ngIf="currentUser$ | async as user">
       <div class="header-sep"></div>
       <nav class="app-nav">
-        <a
-          routerLink="/buildings"
-          routerLinkActive="app-nav__link--active"
-          class="app-nav__link"
-        >
-          🏢 Buildings
-        </a>
-        <a
-          routerLink="/units"
-          routerLinkActive="app-nav__link--active"
-          class="app-nav__link"
-        >
-          🏠 Units
-        </a>
+
+        <!--
+          Phase 2: Buildings and Units links are now estate-scoped.
+          Falls back gracefully to /select-estate if no estate is active.
+        -->
+        @if (activeEstateService.activeEstateId()) {
+          <a
+            [routerLink]="['/estates', activeEstateService.activeEstateId(), 'buildings']"
+            routerLinkActive="app-nav__link--active"
+            class="app-nav__link"
+          >
+            🏢 Buildings
+          </a>
+          <a
+            [routerLink]="['/estates', activeEstateService.activeEstateId(), 'units']"
+            routerLinkActive="app-nav__link--active"
+            class="app-nav__link"
+          >
+            🏠 Units
+          </a>
+        } @else {
+          <span class="app-nav__link app-nav__link--disabled">🏢 Buildings</span>
+          <span class="app-nav__link app-nav__link--disabled">🏠 Units</span>
+        }
+
         <a
           routerLink="/leases"
           routerLinkActive="app-nav__link--active"
@@ -43,32 +55,25 @@
         <div class="nav-dropdown-wrapper" #managementWrapper>
           <button
             class="app-nav__link app-nav__link--dropdown"
-            [class.app-nav__link--active]="
-              managementOpen || isManagementActive()
-            "
+            [class.app-nav__link--active]="managementOpen || isManagementActive()"
             (click)="toggleManagement()"
           >
             🗂 Management <span class="nav-chevron">▾</span>
           </button>
           <div class="nav-dropdown" [class.open]="managementOpen">
-            <a
-              routerLink="/persons"
-              class="nav-dropdown__item"
-              (click)="closeManagement()"
-            >
+            <a routerLink="/persons" class="nav-dropdown__item" (click)="closeManagement()">
               👤 People
             </a>
-            <a
-              routerLink="/bank-accounts"
-              class="nav-dropdown__item"
-              (click)="closeManagement()"
-            >
+            <a routerLink="/bank-accounts" class="nav-dropdown__item" (click)="closeManagement()">
               🏦 Bank Accounts
             </a>
           </div>
         </div>
+
       </nav>
+
       <app-estate-header></app-estate-header>
+
       <!-- Right zone -->
       <div class="right-zone">
         <!-- Bell -->
@@ -79,10 +84,9 @@
           title="Alerts"
         >
           🔔
-          <span *ngIf="alertCount > 0" class="bell-badge">{{
-            alertCount
-          }}</span>
+          <span *ngIf="alertCount > 0" class="bell-badge">{{ alertCount }}</span>
         </a>
+
         <!-- Avatar dropdown -->
         <div class="avatar-wrapper" #avatarWrapper>
           <button
@@ -98,42 +102,27 @@
             <div class="dropdown-header">
               <div class="dropdown-username">{{ user.username }}</div>
               <div class="dropdown-role">
-                {{ user.isPlatformAdmin ? "Platform Admin" : "User" }}
+                {{ user.isPlatformAdmin ? 'Platform Admin' : 'User' }}
               </div>
             </div>
-            <a
-              routerLink="/users"
-              class="dropdown-item"
-              (click)="closeDropdown()"
-            >
+            <a routerLink="/users" class="dropdown-item" (click)="closeDropdown()">
               <span class="di-icon">👥</span> Manage Users
             </a>
             @if (
               activeEstateService.activeEstate()?.myRole === null ||
               !activeEstateService.activeEstate()
             ) {
-              <a
-                routerLink="/admin/estates"
-                class="dropdown-item"
-                (click)="closeDropdown()"
-              >
+              <a routerLink="/admin/estates" class="dropdown-item" (click)="closeDropdown()">
                 <span class="di-icon">🏛️</span> Manage Estates
               </a>
               <div class="dropdown-divider"></div>
             }
             <div class="dropdown-divider"></div>
-            <a
-              routerLink="/settings"
-              class="dropdown-item"
-              (click)="closeDropdown()"
-            >
+            <a routerLink="/settings" class="dropdown-item" (click)="closeDropdown()">
               <span class="di-icon">⚙️</span> Settings
             </a>
             <div class="dropdown-divider"></div>
-            <button
-              class="dropdown-item dropdown-item--logout"
-              (click)="logout()"
-            >
+            <button class="dropdown-item dropdown-item--logout" (click)="logout()">
               <span class="di-icon">↩</span> Logout
             </button>
           </div>
@@ -141,9 +130,11 @@
       </div>
     </ng-container>
   </header>
+
   <main class="app-content">
     <router-outlet></router-outlet>
   </main>
+
   <footer class="app-footer">
     <span>v{{ version }}</span>
   </footer>

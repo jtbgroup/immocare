@@ -1,36 +1,57 @@
 <div class="building-details-container">
-  @if (building) {
-    <!-- Breadcrumb / nav -->
+
+  <!-- Loading -->
+  @if (loading) {
+    <div class="loading">Loading…</div>
+  }
+
+  <!-- Error -->
+  @if (errorMessage && !loading) {
+    <div class="error-container">
+      <p class="error">{{ errorMessage }}</p>
+      <button class="btn btn-primary" (click)="back()">Back to Buildings</button>
+    </div>
+  }
+
+  @if (building && !loading) {
+
+    <!-- Breadcrumb -->
     <nav class="breadcrumb" aria-label="breadcrumb">
-      <a routerLink="/buildings">Buildings</a>
+      <a [routerLink]="['/estates', activeEstateService.activeEstateId(), 'buildings']">Buildings</a>
       <span class="breadcrumb-separator">›</span>
       <span>{{ building.name }}</span>
     </nav>
 
     <!-- Header -->
-    <div class="details-content">
-      <div class="header">
-        <h1>{{ building.name }}</h1>
-        <div class="actions">
-          <button class="btn btn-secondary" (click)="editBuilding()">
-            Edit
+    <div class="page-header">
+      <h1>{{ building.name }}</h1>
+      <div class="actions">
+        @if (activeEstateService.canEdit()) {
+          <button class="btn btn-secondary" (click)="edit()">Edit</button>
+          <button
+            class="btn btn-danger"
+            [disabled]="deleting"
+            (click)="confirmDelete()"
+          >
+            {{ deleting ? 'Deleting…' : 'Delete' }}
           </button>
-          <button class="btn btn-danger" (click)="confirmDelete()">
-            Delete
-          </button>
-        </div>
+        }
       </div>
     </div>
 
-    <!-- Error banner -->
+    <!-- Alerts -->
     @if (deleteError) {
       <div class="alert alert-error">{{ deleteError }}</div>
     }
 
-    <!-- Info card -->
+    <!-- Building info -->
     <div class="info-card">
-      <h2>Information</h2>
+      <h2>Building Information</h2>
       <div class="info-grid">
+        <div class="info-item">
+          <label>Name</label>
+          <p>{{ building.name }}</p>
+        </div>
         <div class="info-item">
           <label>Address</label>
           <p>{{ building.streetAddress }}</p>
@@ -45,133 +66,63 @@
         </div>
         <div class="info-item">
           <label>Owner</label>
-          <p>
-            @if (building.ownerId) {
-              <a [routerLink]="['/persons', building.ownerId]">
-                {{ building.ownerName }}
-              </a>
-            } @else {
-              {{ building.ownerName ?? "—" }}
-            }
-          </p>
+          <p>{{ building.ownerName ?? '—' }}</p>
         </div>
         <div class="info-item">
-          <label>Housing Units</label>
-          <p>{{ building.unitCount }} unit(s)</p>
+          <label>Units</label>
+          <p>{{ building.unitCount }}</p>
         </div>
       </div>
-      <div class="card-footer">
-        Created by {{ building.createdByUsername || "N/A" }} ·
-        {{ building.createdAt | date: "dd/MM/yyyy HH:mm" }} · Updated
-        {{ building.updatedAt | date: "dd/MM/yyyy HH:mm" }}
-      </div>
     </div>
 
-    <!-- Meters section -->
-    <div class="info-card">
-      <app-meter-section
-        [ownerType]="'BUILDING'"
-        [ownerId]="building.id"
-      ></app-meter-section>
-    </div>
-
-    <!-- Boiler section -->
-    <div class="info-card">
-      <app-boiler-section ownerType="BUILDING" [ownerId]="building.id" />
-    </div>
-
-    <!-- Fire Extinguishers section -->
-    <div class="info-card">
-      <app-fire-extinguisher-section
-        [buildingId]="building.id"
-        [buildingUnits]="buildingUnits"
-      ></app-fire-extinguisher-section>
-    </div>
-
-    <!-- Financial section -->
+    <!-- Housing Units -->
     <div class="info-card">
       <div class="section-header">
-        <h2>Financial</h2>
-        <div class="actions">
-          <button
-            class="btn btn-ghost btn-sm"
-            (click)="showFinancial = !showFinancial"
-          >
-            {{ showFinancial ? "Hide ▲" : "Show ▼" }}
-          </button>
-          @if (showFinancial) {
-            <button
-              class="btn btn-ghost btn-sm"
-              (click)="viewBuildingTransactions(building.id)"
-            >
-              View all transactions →
-            </button>
-          }
-        </div>
+        <h2 class="section-heading">🏠 Housing Units</h2>
+        @if (activeEstateService.canEdit()) {
+          <button class="btn btn-primary btn-sm" (click)="addUnit()">+ Add Unit</button>
+        }
       </div>
 
-      @if (showFinancial) {
-        @if (buildingStats) {
-          <div class="financial-stats-grid">
-            <div class="financial-stat financial-stat--income">
-              <span class="financial-stat__label">Income</span>
-              <span class="financial-stat__value"
-                >+{{ buildingStats.totalIncome.toFixed(2) }} €</span
-              >
-            </div>
-            <div class="financial-stat financial-stat--expense">
-              <span class="financial-stat__label">Expenses</span>
-              <span class="financial-stat__value"
-                >-{{ buildingStats.totalExpenses.toFixed(2) }} €</span
-              >
-            </div>
-            <div
-              class="financial-stat"
-              [class.financial-stat--positive]="buildingStats.netBalance >= 0"
-              [class.financial-stat--negative]="buildingStats.netBalance < 0"
-            >
-              <span class="financial-stat__label">Net Balance</span>
-              <span class="financial-stat__value"
-                >{{ buildingStats.netBalance >= 0 ? "+" : ""
-                }}{{ buildingStats.netBalance.toFixed(2) }} €</span
-              >
-            </div>
-          </div>
-        } @else {
-          <p class="loading-placeholder">Loading financial data…</p>
-        }
+      @if (units.length === 0) {
+        <p class="empty-message">No units yet.</p>
+      } @else {
+        <div class="data-table">
+          <table>
+            <thead>
+              <tr>
+                <th>Unit #</th>
+                <th>Floor</th>
+                <th>Surface (m²)</th>
+                <th>Rooms</th>
+                <th>Rent</th>
+                <th>Status</th>
+              </tr>
+            </thead>
+            <tbody>
+              @for (unit of units; track unit.id) {
+                <tr class="clickable" (click)="navigateToUnit(unit)">
+                  <td>{{ unit.unitNumber }}</td>
+                  <td>{{ unit.floor }}</td>
+                  <td>{{ unit.totalSurface ?? '—' }}</td>
+                  <td>{{ unit.roomCount ?? '—' }}</td>
+                  <td>{{ unit.currentMonthlyRent != null ? (unit.currentMonthlyRent | number:'1.0-0') + ' €' : '—' }}</td>
+                  <td>
+                    @if (unit.activeLeaseStatus === 'ACTIVE') {
+                      <span class="lease-status-badge lease-status-badge--active">Active</span>
+                    } @else if (unit.activeLeaseStatus === 'DRAFT') {
+                      <span class="lease-status-badge lease-status-badge--draft">Draft</span>
+                    } @else {
+                      <span class="lease-status-badge lease-status-badge--finished">Vacant</span>
+                    }
+                  </td>
+                </tr>
+              }
+            </tbody>
+          </table>
+        </div>
       }
     </div>
 
-    <!-- Housing Units section -->
-    <div class="info-card">
-      <app-housing-unit-list [buildingId]="building.id"></app-housing-unit-list>
-    </div>
-  }
-
-  <!-- Delete Confirmation Modal -->
-  @if (showDeleteConfirm) {
-    <div class="modal-overlay">
-      <div class="modal-content">
-        <div class="modal-header">
-          <h2>Delete Building</h2>
-        </div>
-        <div class="modal-body">
-          <p>
-            Are you sure you want to delete <strong>{{ building?.name }}</strong
-            >?
-          </p>
-          <p class="warning">This action cannot be undone.</p>
-        </div>
-        <div class="modal-actions">
-          <button class="btn btn-secondary" (click)="cancelDelete()">
-            Cancel
-          </button>
-          <button class="btn btn-danger" (click)="deleteBuilding()">
-            Delete
-          </button>
-        </div>
-      </div>
-    </div>
   }
 </div>
