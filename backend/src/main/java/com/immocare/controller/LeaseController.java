@@ -3,6 +3,7 @@ package com.immocare.controller;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.List;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
 import org.springframework.data.domain.Page;
@@ -40,84 +41,53 @@ import com.immocare.service.LeaseService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 
+/**
+ * REST controller for Lease management.
+ * UC016 Phase 3: all routes are now scoped to an estate.
+ *
+ * Endpoints:
+ *   GET    /api/v1/estates/{estateId}/housing-units/{unitId}/leases          - leases by unit
+ *   POST   /api/v1/estates/{estateId}/housing-units/{unitId}/leases          - create lease
+ *   GET    /api/v1/estates/{estateId}/leases                                 - global paginated list
+ *   GET    /api/v1/estates/{estateId}/leases/alerts                          - contextual alerts
+ *   GET    /api/v1/estates/{estateId}/leases/{id}                            - get by id
+ *   PUT    /api/v1/estates/{estateId}/leases/{id}                            - update
+ *   PATCH  /api/v1/estates/{estateId}/leases/{id}/status                     - change status
+ *   POST   /api/v1/estates/{estateId}/leases/{id}/tenants                    - add tenant
+ *   DELETE /api/v1/estates/{estateId}/leases/{id}/tenants/{personId}         - remove tenant
+ *   POST   /api/v1/estates/{estateId}/leases/{id}/rent-adjustments           - adjust rent
+ */
 @RestController
 @RequiredArgsConstructor
-@PreAuthorize("isAuthenticated()")
+@PreAuthorize("@security.isMemberOf(#estateId)")
 public class LeaseController {
 
     private final LeaseService leaseService;
 
-    /** GET /api/v1/housing-units/{unitId}/leases */
-    @GetMapping("/api/v1/housing-units/{unitId}/leases")
-    public ResponseEntity<List<LeaseSummaryDTO>> getByUnit(@PathVariable Long unitId) {
-        return ResponseEntity.ok(leaseService.getByUnit(unitId));
+    /** GET /api/v1/estates/{estateId}/housing-units/{unitId}/leases */
+    @GetMapping("/api/v1/estates/{estateId}/housing-units/{unitId}/leases")
+    public ResponseEntity<List<LeaseSummaryDTO>> getByUnit(
+            @PathVariable UUID estateId,
+            @PathVariable Long unitId) {
+        return ResponseEntity.ok(leaseService.getByUnit(estateId, unitId));
     }
 
-    /** GET /api/v1/leases/{id} */
-    @GetMapping("/api/v1/leases/{id}")
-    public ResponseEntity<LeaseDTO> getById(@PathVariable Long id) {
-        return ResponseEntity.ok(leaseService.getById(id));
-    }
-
-    /** POST /api/v1/leases */
-    @PostMapping("/api/v1/leases")
-    public ResponseEntity<LeaseDTO> create(@Valid @RequestBody CreateLeaseRequest req,
+    /** POST /api/v1/estates/{estateId}/housing-units/{unitId}/leases */
+    @PostMapping("/api/v1/estates/{estateId}/housing-units/{unitId}/leases")
+    @PreAuthorize("@security.isManagerOf(#estateId)")
+    public ResponseEntity<LeaseDTO> create(
+            @PathVariable UUID estateId,
+            @PathVariable Long unitId,
+            @Valid @RequestBody CreateLeaseRequest req,
             @RequestParam(defaultValue = "false") boolean activate) {
-        return ResponseEntity.status(HttpStatus.CREATED).body(leaseService.create(req, activate));
+        return ResponseEntity.status(HttpStatus.CREATED)
+                .body(leaseService.create(estateId, unitId, req, activate));
     }
 
-    /** PUT /api/v1/leases/{id} */
-    @PutMapping("/api/v1/leases/{id}")
-    public ResponseEntity<LeaseDTO> update(@PathVariable Long id,
-            @Valid @RequestBody UpdateLeaseRequest req) {
-        return ResponseEntity.ok(leaseService.update(id, req));
-    }
-
-    /** PATCH /api/v1/leases/{id}/status */
-    @PatchMapping("/api/v1/leases/{id}/status")
-    public ResponseEntity<LeaseDTO> changeStatus(@PathVariable Long id,
-            @Valid @RequestBody ChangeLeaseStatusRequest req) {
-        return ResponseEntity.ok(leaseService.changeStatus(id, req));
-    }
-
-    /** POST /api/v1/leases/{id}/tenants */
-    @PostMapping("/api/v1/leases/{id}/tenants")
-    public ResponseEntity<LeaseDTO> addTenant(@PathVariable Long id,
-            @Valid @RequestBody AddTenantRequest req) {
-        return ResponseEntity.ok(leaseService.addTenant(id, req));
-    }
-
-    /** DELETE /api/v1/leases/{id}/tenants/{personId} */
-    @DeleteMapping("/api/v1/leases/{id}/tenants/{personId}")
-    public ResponseEntity<LeaseDTO> removeTenant(@PathVariable Long id,
-            @PathVariable Long personId) {
-        return ResponseEntity.ok(leaseService.removeTenant(id, personId));
-    }
-
-    /** POST /api/v1/leases/{id}/rent-adjustments */
-    @PostMapping("/api/v1/leases/{id}/rent-adjustments")
-    public ResponseEntity<LeaseDTO> adjustRent(@PathVariable Long id,
-            @Valid @RequestBody AdjustRentRequest req) {
-        return ResponseEntity.ok(leaseService.adjustRent(id, req));
-    }
-
-    /**
-     * GET /api/v1/leases/alerts — contextual lease alerts (used by inline banners).
-     * Global alerts page uses GET /api/v1/alerts instead.
-     */
-    @GetMapping("/api/v1/leases/alerts")
-    public ResponseEntity<List<LeaseAlertDTO>> getAlerts() {
-        return ResponseEntity.ok(leaseService.getAlerts());
-    }
-
-    /**
-     * GET /api/v1/leases
-     *
-     * Global paginated lease list. All parameters are optional.
-     * Defaults to status=ACTIVE, page=0, size=20, sorted by startDate DESC.
-     */
-    @GetMapping("/api/v1/leases")
+    /** GET /api/v1/estates/{estateId}/leases */
+    @GetMapping("/api/v1/estates/{estateId}/leases")
     public ResponseEntity<Page<LeaseGlobalSummaryDTO>> getAll(
+            @PathVariable UUID estateId,
             @RequestParam(required = false) List<String> status,
             @RequestParam(required = false) String leaseType,
             @RequestParam(required = false) Long buildingId,
@@ -134,12 +104,9 @@ public class LeaseController {
 
         LeaseFilterParams params = new LeaseFilterParams();
         if (status != null && !status.isEmpty()) {
-            params.setStatuses(status.stream()
-                    .map(LeaseStatus::valueOf)
-                    .collect(Collectors.toList()));
+            params.setStatuses(status.stream().map(LeaseStatus::valueOf).collect(Collectors.toList()));
         }
-        if (leaseType != null)
-            params.setLeaseType(LeaseType.valueOf(leaseType));
+        if (leaseType != null) params.setLeaseType(LeaseType.valueOf(leaseType));
         params.setBuildingId(buildingId);
         params.setHousingUnitId(housingUnitId);
         params.setStartDateFrom(startDateFrom);
@@ -151,10 +118,73 @@ public class LeaseController {
 
         String[] sortParts = sort.split(",");
         Sort.Direction direction = sortParts.length > 1 && sortParts[1].equalsIgnoreCase("desc")
-                ? Sort.Direction.DESC
-                : Sort.Direction.ASC;
+                ? Sort.Direction.DESC : Sort.Direction.ASC;
         Pageable pageable = PageRequest.of(page, size, Sort.by(direction, sortParts[0]));
 
-        return ResponseEntity.ok(leaseService.getAll(params, pageable));
+        return ResponseEntity.ok(leaseService.getAll(estateId, params, pageable));
+    }
+
+    /** GET /api/v1/estates/{estateId}/leases/alerts */
+    @GetMapping("/api/v1/estates/{estateId}/leases/alerts")
+    public ResponseEntity<List<LeaseAlertDTO>> getAlerts(@PathVariable UUID estateId) {
+        return ResponseEntity.ok(leaseService.getAlerts(estateId));
+    }
+
+    /** GET /api/v1/estates/{estateId}/leases/{id} */
+    @GetMapping("/api/v1/estates/{estateId}/leases/{id}")
+    public ResponseEntity<LeaseDTO> getById(
+            @PathVariable UUID estateId,
+            @PathVariable Long id) {
+        return ResponseEntity.ok(leaseService.getById(estateId, id));
+    }
+
+    /** PUT /api/v1/estates/{estateId}/leases/{id} */
+    @PutMapping("/api/v1/estates/{estateId}/leases/{id}")
+    @PreAuthorize("@security.isManagerOf(#estateId)")
+    public ResponseEntity<LeaseDTO> update(
+            @PathVariable UUID estateId,
+            @PathVariable Long id,
+            @Valid @RequestBody UpdateLeaseRequest req) {
+        return ResponseEntity.ok(leaseService.update(estateId, id, req));
+    }
+
+    /** PATCH /api/v1/estates/{estateId}/leases/{id}/status */
+    @PatchMapping("/api/v1/estates/{estateId}/leases/{id}/status")
+    @PreAuthorize("@security.isManagerOf(#estateId)")
+    public ResponseEntity<LeaseDTO> changeStatus(
+            @PathVariable UUID estateId,
+            @PathVariable Long id,
+            @Valid @RequestBody ChangeLeaseStatusRequest req) {
+        return ResponseEntity.ok(leaseService.changeStatus(estateId, id, req));
+    }
+
+    /** POST /api/v1/estates/{estateId}/leases/{id}/tenants */
+    @PostMapping("/api/v1/estates/{estateId}/leases/{id}/tenants")
+    @PreAuthorize("@security.isManagerOf(#estateId)")
+    public ResponseEntity<LeaseDTO> addTenant(
+            @PathVariable UUID estateId,
+            @PathVariable Long id,
+            @Valid @RequestBody AddTenantRequest req) {
+        return ResponseEntity.ok(leaseService.addTenant(estateId, id, req));
+    }
+
+    /** DELETE /api/v1/estates/{estateId}/leases/{id}/tenants/{personId} */
+    @DeleteMapping("/api/v1/estates/{estateId}/leases/{id}/tenants/{personId}")
+    @PreAuthorize("@security.isManagerOf(#estateId)")
+    public ResponseEntity<LeaseDTO> removeTenant(
+            @PathVariable UUID estateId,
+            @PathVariable Long id,
+            @PathVariable Long personId) {
+        return ResponseEntity.ok(leaseService.removeTenant(estateId, id, personId));
+    }
+
+    /** POST /api/v1/estates/{estateId}/leases/{id}/rent-adjustments */
+    @PostMapping("/api/v1/estates/{estateId}/leases/{id}/rent-adjustments")
+    @PreAuthorize("@security.isManagerOf(#estateId)")
+    public ResponseEntity<LeaseDTO> adjustRent(
+            @PathVariable UUID estateId,
+            @PathVariable Long id,
+            @Valid @RequestBody AdjustRentRequest req) {
+        return ResponseEntity.ok(leaseService.adjustRent(estateId, id, req));
     }
 }

@@ -1,6 +1,7 @@
 package com.immocare.controller;
 
 import java.util.List;
+import java.util.UUID;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -20,9 +21,19 @@ import com.immocare.service.PersonBankAccountService;
 
 import jakarta.validation.Valid;
 
+/**
+ * REST controller for PersonBankAccount management.
+ * UC016 Phase 3: all routes are now scoped to an estate.
+ *
+ * Endpoints:
+ *   GET    /api/v1/estates/{estateId}/persons/{personId}/bank-accounts
+ *   POST   /api/v1/estates/{estateId}/persons/{personId}/bank-accounts
+ *   PUT    /api/v1/estates/{estateId}/persons/{personId}/bank-accounts/{id}
+ *   DELETE /api/v1/estates/{estateId}/persons/{personId}/bank-accounts/{id}
+ */
 @RestController
-@RequestMapping("/api/v1/persons/{personId}/bank-accounts")
-@PreAuthorize("isAuthenticated()")
+@RequestMapping("/api/v1/estates/{estateId}/persons/{personId}/bank-accounts")
+@PreAuthorize("@security.isMemberOf(#estateId)")
 public class PersonBankAccountController {
 
     private final PersonBankAccountService service;
@@ -31,32 +42,40 @@ public class PersonBankAccountController {
         this.service = service;
     }
 
-    /** GET /api/v1/persons/{personId}/bank-accounts */
     @GetMapping
-    public List<PersonBankAccountDTO> getAll(@PathVariable Long personId) {
-        return service.getByPerson(personId);
+    public List<PersonBankAccountDTO> getAll(
+            @PathVariable UUID estateId,
+            @PathVariable Long personId) {
+        return service.getByPerson(estateId, personId);
     }
 
-    /** POST /api/v1/persons/{personId}/bank-accounts */
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
-    public PersonBankAccountDTO create(@PathVariable Long personId,
+    @PreAuthorize("@security.isManagerOf(#estateId)")
+    public PersonBankAccountDTO create(
+            @PathVariable UUID estateId,
+            @PathVariable Long personId,
             @Valid @RequestBody SavePersonBankAccountRequest req) {
-        return service.create(personId, req);
+        return service.create(estateId, personId, req);
     }
 
-    /** PUT /api/v1/persons/{personId}/bank-accounts/{id} */
     @PutMapping("/{id}")
-    public PersonBankAccountDTO update(@PathVariable Long personId,
+    @PreAuthorize("@security.isManagerOf(#estateId)")
+    public PersonBankAccountDTO update(
+            @PathVariable UUID estateId,
+            @PathVariable Long personId,
             @PathVariable Long id,
             @Valid @RequestBody SavePersonBankAccountRequest req) {
-        return service.update(personId, id, req);
+        return service.update(estateId, personId, id, req);
     }
 
-    /** DELETE /api/v1/persons/{personId}/bank-accounts/{id} */
     @DeleteMapping("/{id}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
-    public void delete(@PathVariable Long personId, @PathVariable Long id) {
-        service.delete(personId, id);
+    @PreAuthorize("@security.isManagerOf(#estateId)")
+    public void delete(
+            @PathVariable UUID estateId,
+            @PathVariable Long personId,
+            @PathVariable Long id) {
+        service.delete(estateId, personId, id);
     }
 }

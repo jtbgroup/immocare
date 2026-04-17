@@ -1,6 +1,7 @@
 package com.immocare.service;
 
 import java.util.List;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
 import org.springframework.data.domain.Page;
@@ -9,6 +10,8 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.immocare.exception.EstateAccessDeniedException;
+import com.immocare.exception.EstateNotFoundException;
 import com.immocare.exception.PersonNotFoundException;
 import com.immocare.exception.PersonReferencedException;
 import com.immocare.mapper.PersonMapper;
@@ -17,13 +20,19 @@ import com.immocare.model.dto.PersonBankAccountDTO;
 import com.immocare.model.dto.PersonDTO;
 import com.immocare.model.dto.PersonSummaryDTO;
 import com.immocare.model.dto.UpdatePersonRequest;
+import com.immocare.model.entity.Estate;
 import com.immocare.model.entity.Person;
 import com.immocare.repository.BuildingRepository;
+import com.immocare.repository.EstateRepository;
 import com.immocare.repository.HousingUnitRepository;
 import com.immocare.repository.LeaseTenantRepository;
 import com.immocare.repository.PersonBankAccountRepository;
 import com.immocare.repository.PersonRepository;
 
+/**
+ * Service for Person management.
+ * UC016 Phase 3: all operations are now scoped to an estate.
+ */
 @Service
 @Transactional
 public class PersonService {
@@ -34,26 +43,32 @@ public class PersonService {
     private final HousingUnitRepository housingUnitRepository;
     private final LeaseTenantRepository leaseTenantRepository;
     private final PersonBankAccountRepository personBankAccountRepository;
+    private final EstateRepository estateRepository;
 
     public PersonService(PersonRepository personRepository,
             PersonMapper personMapper,
             BuildingRepository buildingRepository,
             HousingUnitRepository housingUnitRepository,
             LeaseTenantRepository leaseTenantRepository,
-            PersonBankAccountRepository personBankAccountRepository) {
+            PersonBankAccountRepository personBankAccountRepository,
+            EstateRepository estateRepository) {
         this.personRepository = personRepository;
         this.personMapper = personMapper;
         this.buildingRepository = buildingRepository;
         this.housingUnitRepository = housingUnitRepository;
         this.leaseTenantRepository = leaseTenantRepository;
         this.personBankAccountRepository = personBankAccountRepository;
+        this.estateRepository = estateRepository;
     }
 
+    // ─── Queries ──────────────────────────────────────────────────────────────
+
     @Transactional(readOnly = true)
-    public Page<PersonSummaryDTO> getAll(String search, Pageable pageable) {
+    public Page<PersonSummaryDTO> getAll(UUID estateId, String search, Pageable pageable) {
         Page<Person> page = (search != null && !search.isBlank())
-                ? personRepository.searchPersons(search.trim(), pageable)
-                : personRepository.findAll(pageable);
+                ? personRepository.searchByEstate(estateId, search.trim(), pageable)
+                : personRepository.findByEstateIdOrderByLastNameAsc(estateId, pageable);
+
         return page.map(p -> {
             PersonSummaryDTO dto = personMapper.toSummaryDTO(p);
             enrichSummaryFlags(dto, p.getId());
@@ -62,45 +77,51 @@ public class PersonService {
     }
 
     @Transactional(readOnly = true)
-    public List<PersonSummaryDTO> searchForPicker(String q) {
-        if (q == null || q.trim().length() < 2)
-            return List.of();
+    public List<PersonSummaryDTO> searchForPicker(UUID estateId, String q) {
+        if (q == null || q.trim().length() < 2) return List.of();
         List<PersonSummaryDTO> results = personRepository
-                .searchForPicker(q.trim(), PageRequest.of(0, 10));
+                .searchForPickerByEstate(estateId, q.trim(), PageRequest.of(0, 10));
         results.forEach(dto -> enrichSummaryFlags(dto, dto.getId()));
         return results;
     }
 
     @Transactional(readOnly = true)
-    public PersonDTO getById(Long id) {
-        Person person = personRepository.findById(id)
-                .orElseThrow(() -> new PersonNotFoundException(id));
+    public PersonDTO getById(UUID estateId, Long id) {
+        verifyPersonBelongsToEstate(estateId, id);
+        Person person = findOrThrow(id);
         return buildFullDTO(person);
     }
 
-    public PersonDTO create(CreatePersonRequest request) {
+    // ─── Commands ─────────────────────────────────────────────────────────────
+
+    public PersonDTO create(UUID estateId, CreatePersonRequest request) {
+        Estate estate = findEstateOrThrow(estateId);
         normalizeCountry(request);
         normalizeNationalId(request);
-        validateNationalIdUniqueness(request.getNationalId(), null);
+        validateNationalIdUniqueness(estateId, request.getNationalId(), null);
+
         Person person = personMapper.toEntity(request);
+        person.setEstate(estate);
         person = personRepository.save(person);
         return buildFullDTO(person);
     }
 
-    public PersonDTO update(Long id, UpdatePersonRequest request) {
-        Person person = personRepository.findById(id)
-                .orElseThrow(() -> new PersonNotFoundException(id));
+    public PersonDTO update(UUID estateId, Long id, UpdatePersonRequest request) {
+        verifyPersonBelongsToEstate(estateId, id);
+        Person person = findOrThrow(id);
+
         normalizeCountryOnUpdate(request);
         normalizeNationalIdOnUpdate(request);
-        validateNationalIdUniquenessOnUpdate(request.getNationalId(), id);
+        validateNationalIdUniquenessOnUpdate(estateId, request.getNationalId(), id);
+
         personMapper.updateEntity(request, person);
         person = personRepository.save(person);
         return buildFullDTO(person);
     }
 
-    public void delete(Long id) {
-        Person person = personRepository.findById(id)
-                .orElseThrow(() -> new PersonNotFoundException(id));
+    public void delete(UUID estateId, Long id) {
+        verifyPersonBelongsToEstate(estateId, id);
+        Person person = findOrThrow(id);
 
         List<String> buildings = buildingRepository.findByOwnerId(id).stream()
                 .map(b -> b.getName() + " (" + b.getCity() + ")")
@@ -119,24 +140,45 @@ public class PersonService {
 
     // ─── Private helpers ──────────────────────────────────────────────────────
 
+    /**
+     * Verifies that the person belongs to the given estate.
+     * Throws {@link PersonNotFoundException} if the person does not exist,
+     * or {@link EstateAccessDeniedException} if it exists but belongs to another estate.
+     */
+    private void verifyPersonBelongsToEstate(UUID estateId, Long personId) {
+        if (!personRepository.existsById(personId)) {
+            throw new PersonNotFoundException(personId);
+        }
+        if (!personRepository.existsByEstateIdAndId(estateId, personId)) {
+            throw new EstateAccessDeniedException();
+        }
+    }
+
+    private Person findOrThrow(Long id) {
+        return personRepository.findById(id)
+                .orElseThrow(() -> new PersonNotFoundException(id));
+    }
+
+    private Estate findEstateOrThrow(UUID estateId) {
+        return estateRepository.findById(estateId)
+                .orElseThrow(() -> new EstateNotFoundException(estateId));
+    }
+
     private PersonDTO buildFullDTO(Person person) {
         PersonDTO dto = personMapper.toDTO(person);
 
-        // Owner / tenant flags
         boolean isOwner = buildingRepository.existsByOwnerId(person.getId())
                 || housingUnitRepository.existsByOwnerId(person.getId());
         boolean isTenant = leaseTenantRepository.existsByPersonId(person.getId());
         dto.setOwner(isOwner);
         dto.setTenant(isTenant);
 
-        // Owned buildings
         List<PersonDTO.OwnedBuildingDTO> buildings = buildingRepository.findByOwnerId(person.getId())
                 .stream()
                 .map(b -> new PersonDTO.OwnedBuildingDTO(b.getId(), b.getName(), b.getCity()))
                 .collect(Collectors.toList());
         dto.setOwnedBuildings(buildings);
 
-        // Owned units
         List<PersonDTO.OwnedUnitDTO> units = housingUnitRepository.findByOwnerId(person.getId())
                 .stream()
                 .map(u -> new PersonDTO.OwnedUnitDTO(
@@ -145,7 +187,6 @@ public class PersonService {
                 .collect(Collectors.toList());
         dto.setOwnedUnits(units);
 
-        // Leases as tenant
         List<PersonDTO.TenantLeaseDTO> leases = leaseTenantRepository
                 .findByPersonId(person.getId())
                 .stream()
@@ -159,7 +200,6 @@ public class PersonService {
                 .collect(Collectors.toList());
         dto.setLeases(leases);
 
-        // Bank accounts (for transaction reconciliation)
         List<PersonBankAccountDTO> bankAccounts = personBankAccountRepository
                 .findByPersonIdOrderByPrimaryDescCreatedAtAsc(person.getId())
                 .stream()
@@ -181,38 +221,30 @@ public class PersonService {
         dto.setTenant(isTenant);
     }
 
-    /**
-     * Converts a blank national ID to null so that multiple persons without a
-     * national ID can coexist (PostgreSQL UNIQUE allows multiple NULLs).
-     */
     private void normalizeNationalId(CreatePersonRequest request) {
         if (request.getNationalId() != null && request.getNationalId().isBlank()) {
             request.setNationalId(null);
         }
     }
 
-    /**
-     * Converts a blank national ID to null for update requests.
-     */
     private void normalizeNationalIdOnUpdate(UpdatePersonRequest request) {
         if (request.getNationalId() != null && request.getNationalId().isBlank()) {
             request.setNationalId(null);
         }
     }
 
-    private void validateNationalIdUniqueness(String nationalId, Long excludeId) {
-        if (nationalId == null || nationalId.isBlank())
-            return;
-        if (personRepository.existsByNationalIdIgnoreCase(nationalId.trim())) {
+    private void validateNationalIdUniqueness(UUID estateId, String nationalId, Long excludeId) {
+        if (nationalId == null || nationalId.isBlank()) return;
+        if (personRepository.existsByEstateIdAndNationalIdIgnoreCase(estateId, nationalId.trim())) {
             throw new IllegalArgumentException(
                     "A person with national ID '" + nationalId + "' already exists.");
         }
     }
 
-    private void validateNationalIdUniquenessOnUpdate(String nationalId, Long currentId) {
-        if (nationalId == null || nationalId.isBlank())
-            return;
-        if (personRepository.existsByNationalIdIgnoreCaseAndIdNot(nationalId.trim(), currentId)) {
+    private void validateNationalIdUniquenessOnUpdate(UUID estateId, String nationalId, Long currentId) {
+        if (nationalId == null || nationalId.isBlank()) return;
+        if (personRepository.existsByEstateIdAndNationalIdIgnoreCaseAndIdNot(
+                estateId, nationalId.trim(), currentId)) {
             throw new IllegalArgumentException(
                     "A person with national ID '" + nationalId + "' already exists.");
         }

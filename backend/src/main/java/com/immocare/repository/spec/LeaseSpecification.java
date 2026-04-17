@@ -4,6 +4,7 @@ import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 
 import org.springframework.data.jpa.domain.Specification;
 
@@ -16,17 +17,11 @@ import jakarta.persistence.criteria.Predicate;
 
 /**
  * JPA Specifications for Lease queries.
- *
- * Each static method returns an independent Specification that can be composed
- * with others using Specification.where(...).and(...).
- *
- * To add a new filter criterion in the future, simply add a new static method
- * here and wire it in {@link #of(LeaseFilterParams)}.
+ * UC016 Phase 3: {@link #hasEstate(UUID)} added for estate-scoped filtering.
  */
 public class LeaseSpecification {
 
-    private LeaseSpecification() {
-    }
+    private LeaseSpecification() {}
 
     // ── Individual specs ──────────────────────────────────────────────────────
 
@@ -39,11 +34,22 @@ public class LeaseSpecification {
     }
 
     public static Specification<Lease> hasBuilding(Long buildingId) {
-        return (root, query, cb) -> cb.equal(root.get("housingUnit").get("building").get("id"), buildingId);
+        return (root, query, cb) ->
+                cb.equal(root.get("housingUnit").get("building").get("id"), buildingId);
     }
 
     public static Specification<Lease> hasHousingUnit(Long housingUnitId) {
-        return (root, query, cb) -> cb.equal(root.get("housingUnit").get("id"), housingUnitId);
+        return (root, query, cb) ->
+                cb.equal(root.get("housingUnit").get("id"), housingUnitId);
+    }
+
+    /**
+     * Restricts results to leases whose housing unit belongs to the given estate.
+     * UC016 Phase 3 — used by LeaseService.getAll() to enforce estate scope.
+     */
+    public static Specification<Lease> hasEstate(UUID estateId) {
+        return (root, query, cb) ->
+                cb.equal(root.get("housingUnit").get("building").get("estate").get("id"), estateId);
     }
 
     public static Specification<Lease> startDateFrom(LocalDate from) {
@@ -75,6 +81,8 @@ public class LeaseSpecification {
     /**
      * Builds a combined Specification from a {@link LeaseFilterParams} object.
      * Only non-null/non-empty params produce predicates.
+     * Note: estate scope is NOT added here — call {@code .and(hasEstate(estateId))}
+     * explicitly in the service when needed.
      */
     public static Specification<Lease> of(LeaseFilterParams params) {
         return (root, query, cb) -> {

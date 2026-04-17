@@ -3,6 +3,7 @@ package com.immocare.service;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
+import java.util.UUID;
 
 import org.springframework.stereotype.Service;
 
@@ -34,24 +35,24 @@ public class AlertService {
          * Returns all pending alerts from all sources, sorted by deadline ASC.
          * Null deadlines are sorted last.
          */
-        public List<AlertDTO> getAll() {
+        public List<AlertDTO> getAll(UUID estateId) {
                 List<AlertDTO> alerts = new ArrayList<>();
-                alerts.addAll(leaseAlertsToDTO());
-                alerts.addAll(boilerAlertsToDTO());
+                alerts.addAll(leaseAlertsToDTO(estateId));
+                alerts.addAll(boilerAlertsToDTO(estateId));
                 alerts.sort(Comparator.comparing(AlertDTO::deadline,
                                 Comparator.nullsLast(Comparator.naturalOrder())));
                 return alerts;
         }
 
         /** Returns only the total count — used by the bell badge. */
-        public int getCount() {
-                return getAll().size();
+        public int getCount(UUID estateId) {
+                return getAll(estateId).size();
         }
 
         // ─── Lease alerts ────────────────────────────────────────────────────────
 
-        private List<AlertDTO> leaseAlertsToDTO() {
-                return leaseService.getAlerts().stream()
+        private List<AlertDTO> leaseAlertsToDTO(UUID estateId) {
+                return leaseService.getAlerts(estateId).stream()
                                 .map(this::fromLease)
                                 .toList();
         }
@@ -74,8 +75,8 @@ public class AlertService {
 
         // ─── Boiler alerts ───────────────────────────────────────────────────────
 
-        private List<AlertDTO> boilerAlertsToDTO() {
-                return boilerService.getServiceAlerts().stream()
+        private List<AlertDTO> boilerAlertsToDTO(UUID estateId) {
+                return boilerService.getServiceAlerts(estateId).stream()
                                 .map(this::fromBoiler)
                                 .toList();
         }

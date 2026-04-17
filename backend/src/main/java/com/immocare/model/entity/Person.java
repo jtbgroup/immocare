@@ -45,6 +45,14 @@ public class Person {
     @Column(name = "country", length = 100)
     private String country;
 
+    /**
+     * Estate this person belongs to.
+     * UC016 Phase 3 — all persons must be scoped to an estate.
+     */
+    @ManyToOne(fetch = FetchType.LAZY, optional = false)
+    @JoinColumn(name = "estate_id", nullable = false)
+    private Estate estate;
+
     @Column(name = "created_at", nullable = false, updatable = false)
     private LocalDateTime createdAt;
 
@@ -102,13 +110,15 @@ public class Person {
     public String getCountry() { return country; }
     public void setCountry(String country) { this.country = country; }
 
+    public Estate getEstate() { return estate; }
+    public void setEstate(Estate estate) { this.estate = estate; }
+
     public LocalDateTime getCreatedAt() { return createdAt; }
     public void setCreatedAt(LocalDateTime createdAt) { this.createdAt = createdAt; }
 
     public LocalDateTime getUpdatedAt() { return updatedAt; }
     public void setUpdatedAt(LocalDateTime updatedAt) { this.updatedAt = updatedAt; }
 
-    /** Convenience: full display name */
     @Transient
     public String getFullName() {
         return firstName + " " + lastName;

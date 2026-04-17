@@ -82,7 +82,7 @@ export class PersonFormComponent implements OnInit {
 
   loadPerson(id: number): void {
     this.isLoading = true;
-    this.personService.getById(id).subscribe({
+    this.personService.getPersonById(id).subscribe({
       next: (person: Person) => {
         this.form.patchValue({
           lastName: person.lastName,

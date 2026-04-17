@@ -1,6 +1,7 @@
 package com.immocare.controller;
 
 import java.util.List;
+import java.util.UUID;
 
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -33,13 +34,13 @@ public class AlertController {
 
     /** GET /api/v1/alerts — all pending alerts, sorted by deadline ASC */
     @GetMapping
-    public ResponseEntity<List<AlertDTO>> getAll() {
-        return ResponseEntity.ok(alertService.getAll());
+    public ResponseEntity<List<AlertDTO>> getAll(UUID estateId) {
+        return ResponseEntity.ok(alertService.getAll(estateId));
     }
 
     /** GET /api/v1/alerts/count — total count for the bell badge */
     @GetMapping("/count")
-    public ResponseEntity<Integer> getCount() {
-        return ResponseEntity.ok(alertService.getCount());
+    public ResponseEntity<Integer> getCount(UUID estateId) {
+        return ResponseEntity.ok(alertService.getCount(estateId));
     }
 }

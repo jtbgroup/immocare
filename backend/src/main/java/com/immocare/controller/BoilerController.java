@@ -46,7 +46,7 @@ public class BoilerController {
 
     @GetMapping("/api/v1/boilers/alerts")
     public ResponseEntity<List<BoilerDTO>> getServiceAlerts() {
-        return ResponseEntity.ok(boilerService.getServiceAlerts());
+        return ResponseEntity.ok(boilerService.getServiceAlerts(null));
     }
 
     /**

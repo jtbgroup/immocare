@@ -4,6 +4,7 @@ import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
 import org.springframework.data.domain.Page;
@@ -11,6 +12,8 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.immocare.exception.EstateAccessDeniedException;
+import com.immocare.exception.HousingUnitNotFoundException;
 import com.immocare.exception.LeaseNotEditableException;
 import com.immocare.exception.LeaseNotFoundException;
 import com.immocare.exception.LeaseOverlapException;
@@ -43,6 +46,10 @@ import com.immocare.repository.LeaseTenantRepository;
 import com.immocare.repository.PersonRepository;
 import com.immocare.repository.spec.LeaseSpecification;
 
+/**
+ * Business logic for UC010 — Manage Leases.
+ * UC016 Phase 3: all operations are now scoped to an estate.
+ */
 @Service
 public class LeaseService {
 
@@ -75,112 +82,65 @@ public class LeaseService {
         this.personRepository = personRepository;
     }
 
-    // ---- Get ----
+    // ─── Queries ──────────────────────────────────────────────────────────────
 
-    public List<LeaseSummaryDTO> getByUnit(Long unitId) {
-        return leaseRepository.findByHousingUnitIdOrderByStartDateDesc(unitId)
+    public List<LeaseSummaryDTO> getByUnit(UUID estateId, Long unitId) {
+        verifyUnitBelongsToEstate(estateId, unitId);
+        return leaseRepository.findByEstateIdAndUnitId(estateId, unitId)
                 .stream().map(this::toSummary).collect(Collectors.toList());
     }
 
-    public LeaseDTO getById(Long id) {
-        return toDTO(findLease(id));
+    public LeaseDTO getById(UUID estateId, Long id) {
+        return toDTO(findLeaseInEstate(estateId, id));
     }
 
-    /**
-     * Global paginated lease list, filtered by {@link LeaseFilterParams}.
-     * Defaults to ACTIVE-only when no status filter is provided.
-     */
-    public Page<LeaseGlobalSummaryDTO> getAll(LeaseFilterParams params, Pageable pageable) {
-        // Default to ACTIVE when caller sends no status filter
+    public Page<LeaseGlobalSummaryDTO> getAll(UUID estateId, LeaseFilterParams params, Pageable pageable) {
         if (params.getStatuses() == null || params.getStatuses().isEmpty()) {
             params.setStatuses(List.of(LeaseStatus.ACTIVE));
         }
+        // Force estate scope in the specification
+        var spec = LeaseSpecification.of(params)
+                .and(LeaseSpecification.hasEstate(estateId));
+        return leaseRepository.findAll(spec, pageable).map(this::toGlobalSummary);
+    }
 
+    public List<LeaseAlertDTO> getAlerts(UUID estateId) {
         return leaseRepository
-                .findAll(LeaseSpecification.of(params), pageable)
-                .map(this::toGlobalSummary);
+                .findByEstateIdAndStatusIn(estateId, List.of(LeaseStatus.ACTIVE, LeaseStatus.DRAFT))
+                .stream()
+                .flatMap(lease -> {
+                    List<LeaseAlertDTO> alerts = new java.util.ArrayList<>();
+                    LocalDate today = LocalDate.now();
+                    LocalDate noticeDeadline = lease.getEndDate()
+                            .minusMonths(lease.getNoticePeriodMonths());
+                    if (!today.isBefore(noticeDeadline)) {
+                        alerts.add(buildAlert(lease, "END_NOTICE", noticeDeadline));
+                    }
+                    addIndexationAlert(lease, today, alerts);
+                    return alerts.stream();
+                })
+                .collect(Collectors.toList());
     }
 
-    private LeaseGlobalSummaryDTO toGlobalSummary(Lease lease) {
-        LeaseGlobalSummaryDTO dto = new LeaseGlobalSummaryDTO();
-        dto.setId(lease.getId());
-        dto.setStatus(lease.getStatus().name());
-        dto.setLeaseType(lease.getLeaseType().name());
-
-        HousingUnit unit = lease.getHousingUnit();
-        dto.setHousingUnitId(unit.getId());
-        dto.setHousingUnitNumber(unit.getUnitNumber());
-        dto.setBuildingId(unit.getBuilding().getId());
-        dto.setBuildingName(unit.getBuilding().getName());
-
-        dto.setStartDate(lease.getStartDate());
-        dto.setEndDate(lease.getEndDate());
-        dto.setMonthlyRent(lease.getMonthlyRent());
-        dto.setMonthlyCharges(lease.getMonthlyCharges());
-        dto.setTotalRent(lease.getMonthlyRent().add(lease.getMonthlyCharges()));
-        dto.setChargesType(lease.getChargesType().name());
-
-        dto.setTenantNames(lease.getTenants().stream()
-                .filter(t -> t.getRole() == TenantRole.PRIMARY || t.getRole() == TenantRole.CO_TENANT)
-                .map(t -> t.getPerson().getLastName() + " " + t.getPerson().getFirstName())
-                .collect(Collectors.toList()));
-
-        // Reuse alert logic from existing toSummary()
-        computeAlerts(dto, lease);
-
-        return dto;
-    }
-
-    /**
-     * Computes indexation and end-notice alerts for a LeaseGlobalSummaryDTO.
-     * Mirror of the alert logic used in toSummary().
-     */
-    private void computeAlerts(LeaseGlobalSummaryDTO dto, Lease lease) {
-        if (lease.getStatus() != LeaseStatus.ACTIVE || lease.getStartDate() == null)
-            return;
-
-        LocalDate today = LocalDate.now();
-
-        // Indexation alert: anniversary within INDEXATION_NOTICE_DAYS and not yet
-        // indexed this year
-        LocalDate anniversary = lease.getStartDate().withYear(today.getYear());
-        if (anniversary.isBefore(today))
-            anniversary = anniversary.plusYears(1);
-        long daysToAnniversary = java.time.temporal.ChronoUnit.DAYS.between(today, anniversary);
-        boolean indexedThisYear = adjustmentRepository.existsRentAdjustmentForYear(lease.getId(), today.getYear());
-        if (daysToAnniversary <= INDEXATION_NOTICE_DAYS && !indexedThisYear) {
-            dto.setIndexationAlertActive(true);
-            dto.setIndexationAlertDate(anniversary);
-        }
-
-        // End-notice alert: end date within noticePeriodMonths
-        if (lease.getEndDate() != null) {
-            LocalDate noticeDeadline = lease.getEndDate().minusMonths(lease.getNoticePeriodMonths());
-            if (!today.isAfter(lease.getEndDate()) && !today.isBefore(noticeDeadline)) {
-                dto.setEndNoticeAlertActive(true);
-                dto.setEndNoticeAlertDate(noticeDeadline);
-            }
-        }
-    }
-
-    // ---- Create ----
+    // ─── Create ───────────────────────────────────────────────────────────────
 
     @Transactional
-    public LeaseDTO create(CreateLeaseRequest req, boolean activate) {
-        Long unitId = req.getHousingUnitId();
-        if (leaseRepository.existsByHousingUnitIdAndStatusIn(unitId, List.of(LeaseStatus.ACTIVE, LeaseStatus.DRAFT)))
+    public LeaseDTO create(UUID estateId, Long unitId, CreateLeaseRequest req, boolean activate) {
+        verifyUnitBelongsToEstate(estateId, unitId);
+
+        if (leaseRepository.existsByEstateIdAndUnitIdAndStatusIn(
+                estateId, unitId, List.of(LeaseStatus.ACTIVE, LeaseStatus.DRAFT))) {
             throw new LeaseOverlapException(unitId);
+        }
 
         HousingUnit unit = housingUnitRepository.findById(unitId)
-                .orElseThrow(() -> new IllegalArgumentException("Housing unit not found: " + unitId));
+                .orElseThrow(() -> new HousingUnitNotFoundException(unitId));
 
         validatePrimaryTenant(req.getTenants());
 
         Lease lease = new Lease();
         lease.setHousingUnit(unit);
         applyRequest(lease, req);
-        // endDate is provided directly by the frontend (bidirectional with
-        // durationMonths)
         lease.setEndDate(req.getEndDate());
         lease.setStatus(activate ? LeaseStatus.ACTIVE : LeaseStatus.DRAFT);
 
@@ -188,35 +148,147 @@ public class LeaseService {
 
         for (AddTenantRequest tr : req.getTenants()) {
             Person person = personRepository.findById(tr.getPersonId())
-                    .orElseThrow(() -> new IllegalArgumentException("Person not found: " + tr.getPersonId()));
+                    .orElseThrow(() -> new IllegalArgumentException(
+                            "Person not found: " + tr.getPersonId()));
+            // BR: tenant must belong to the same estate
+            if (!personRepository.existsByEstateIdAndId(estateId, tr.getPersonId())) {
+                throw new EstateAccessDeniedException();
+            }
             leaseTenantRepository.save(new LeaseTenant(saved, person, TenantRole.valueOf(tr.getRole())));
         }
 
         return toDTO(leaseRepository.findById(saved.getId()).orElseThrow());
     }
 
-    // ---- Update ----
+    // ─── Update ───────────────────────────────────────────────────────────────
 
     @Transactional
-    public LeaseDTO update(Long id, UpdateLeaseRequest req) {
-        Lease lease = findLease(id);
+    public LeaseDTO update(UUID estateId, Long id, UpdateLeaseRequest req) {
+        Lease lease = findLeaseInEstate(estateId, id);
         if (!lease.isEditable())
             throw new LeaseNotEditableException(id, lease.getStatus().name());
         applyUpdateRequest(lease, req);
-        // endDate is provided directly by the frontend — no auto-recalculation
         lease.setEndDate(req.getEndDate());
         return toDTO(leaseRepository.save(lease));
     }
 
-    // ---- Status ----
+    // ─── Status ───────────────────────────────────────────────────────────────
 
     @Transactional
-    public LeaseDTO changeStatus(Long id, ChangeLeaseStatusRequest req) {
-        Lease lease = findLease(id);
+    public LeaseDTO changeStatus(UUID estateId, Long id, ChangeLeaseStatusRequest req) {
+        Lease lease = findLeaseInEstate(estateId, id);
         LeaseStatus to = LeaseStatus.valueOf(req.getTargetStatus());
         validateTransition(lease.getStatus(), to, id, lease);
         lease.setStatus(to);
         return toDTO(leaseRepository.save(lease));
+    }
+
+    // ─── Tenants ──────────────────────────────────────────────────────────────
+
+    @Transactional
+    public LeaseDTO addTenant(UUID estateId, Long leaseId, AddTenantRequest req) {
+        Lease lease = findLeaseInEstate(estateId, leaseId);
+        if (!lease.isEditable())
+            throw new LeaseNotEditableException(leaseId, lease.getStatus().name());
+
+        if (leaseTenantRepository.existsByLeaseIdAndPersonId(leaseId, req.getPersonId())) {
+            throw new IllegalArgumentException(
+                    "Person " + req.getPersonId() + " is already a tenant on this lease.");
+        }
+
+        // BR: tenant must belong to the same estate
+        if (!personRepository.existsByEstateIdAndId(estateId, req.getPersonId())) {
+            throw new EstateAccessDeniedException();
+        }
+
+        Person person = personRepository.findById(req.getPersonId())
+                .orElseThrow(() -> new IllegalArgumentException("Person not found: " + req.getPersonId()));
+
+        lease.getTenants().add(new LeaseTenant(lease, person, TenantRole.valueOf(req.getRole())));
+        return toDTO(leaseRepository.save(lease));
+    }
+
+    @Transactional
+    public LeaseDTO removeTenant(UUID estateId, Long leaseId, Long personId) {
+        Lease lease = findLeaseInEstate(estateId, leaseId);
+        if (!lease.isEditable())
+            throw new LeaseNotEditableException(leaseId, lease.getStatus().name());
+
+        LeaseTenant target = lease.getTenants().stream()
+                .filter(t -> t.getPerson().getId().equals(personId)).findFirst()
+                .orElseThrow(() -> new IllegalArgumentException(
+                        "Person " + personId + " is not a tenant on lease " + leaseId));
+
+        if (target.getRole() == TenantRole.PRIMARY) {
+            long count = leaseTenantRepository.countByLeaseIdAndRole(leaseId, TenantRole.PRIMARY);
+            if (count <= 1)
+                throw new IllegalStateException("Cannot remove the last PRIMARY tenant.");
+        }
+
+        lease.getTenants().remove(target);
+        return toDTO(leaseRepository.save(lease));
+    }
+
+    // ─── Rent adjustments ─────────────────────────────────────────────────────
+
+    @Transactional
+    public LeaseDTO adjustRent(UUID estateId, Long leaseId, AdjustRentRequest req) {
+        Lease lease = findLeaseInEstate(estateId, leaseId);
+        if (!lease.isEditable())
+            throw new LeaseNotEditableException(leaseId, lease.getStatus().name());
+
+        String field = req.getField().toUpperCase();
+        if (!field.equals("RENT") && !field.equals("CHARGES")) {
+            throw new IllegalArgumentException("field must be RENT or CHARGES");
+        }
+
+        BigDecimal oldValue = field.equals("RENT") ? lease.getMonthlyRent() : lease.getMonthlyCharges();
+
+        LeaseRentAdjustment adj = new LeaseRentAdjustment();
+        adj.setLease(lease);
+        adj.setField(field);
+        adj.setOldValue(oldValue);
+        adj.setNewValue(req.getNewValue());
+        adj.setReason(req.getReason());
+        adj.setEffectiveDate(req.getEffectiveDate());
+        adjustmentRepository.save(adj);
+
+        if (field.equals("RENT"))
+            lease.setMonthlyRent(req.getNewValue());
+        else
+            lease.setMonthlyCharges(req.getNewValue());
+
+        return toDTO(leaseRepository.save(lease));
+    }
+
+    // ─── Private helpers ──────────────────────────────────────────────────────
+
+    /**
+     * Loads a lease and verifies it belongs to the given estate.
+     * Throws {@link LeaseNotFoundException} if the lease does not exist,
+     * or {@link EstateAccessDeniedException} if it belongs to another estate.
+     */
+    private Lease findLeaseInEstate(UUID estateId, Long leaseId) {
+        return leaseRepository.findByEstateIdAndId(estateId, leaseId)
+                .orElseGet(() -> {
+                    // Distinguish "not found at all" from "wrong estate"
+                    if (!leaseRepository.existsById(leaseId)) {
+                        throw new LeaseNotFoundException(leaseId);
+                    }
+                    throw new EstateAccessDeniedException();
+                });
+    }
+
+    /**
+     * Verifies that the housing unit belongs to the given estate.
+     */
+    private void verifyUnitBelongsToEstate(UUID estateId, Long unitId) {
+        if (!housingUnitRepository.existsById(unitId)) {
+            throw new HousingUnitNotFoundException(unitId);
+        }
+        if (!housingUnitRepository.existsByBuilding_Estate_IdAndId(estateId, unitId)) {
+            throw new EstateAccessDeniedException();
+        }
     }
 
     private void validateTransition(LeaseStatus from, LeaseStatus to, Long id, Lease lease) {
@@ -227,102 +299,15 @@ public class LeaseService {
         };
         if (!valid)
             throw new IllegalStateException("Cannot transition from " + from + " to " + to);
-        if (to == LeaseStatus.ACTIVE && lease.getStartDate() == null)
+        if (to == LeaseStatus.ACTIVE && lease.getStartDate() == null) {
             throw new IllegalStateException("Cannot activate a lease without a start date.");
-    }
-
-    // ---- Tenants ----
-
-    @Transactional
-    public LeaseDTO addTenant(Long leaseId, AddTenantRequest req) {
-        Lease lease = findLease(leaseId);
-        if (!lease.isEditable())
-            throw new LeaseNotEditableException(leaseId, lease.getStatus().name());
-        if (leaseTenantRepository.existsByLeaseIdAndPersonId(leaseId, req.getPersonId()))
-            throw new IllegalArgumentException("Person " + req.getPersonId() + " is already a tenant on this lease.");
-        Person person = personRepository.findById(req.getPersonId())
-                .orElseThrow(() -> new IllegalArgumentException("Person not found: " + req.getPersonId()));
-        lease.getTenants().add(new LeaseTenant(lease, person, TenantRole.valueOf(req.getRole())));
-        return toDTO(leaseRepository.save(lease));
-    }
-
-    @Transactional
-    public LeaseDTO removeTenant(Long leaseId, Long personId) {
-        Lease lease = findLease(leaseId);
-        if (!lease.isEditable())
-            throw new LeaseNotEditableException(leaseId, lease.getStatus().name());
-        LeaseTenant target = lease.getTenants().stream()
-                .filter(t -> t.getPerson().getId().equals(personId)).findFirst()
-                .orElseThrow(() -> new IllegalArgumentException(
-                        "Person " + personId + " is not a tenant on lease " + leaseId));
-        if (target.getRole() == TenantRole.PRIMARY) {
-            long count = leaseTenantRepository.countByLeaseIdAndRole(leaseId, TenantRole.PRIMARY);
-            if (count <= 1)
-                throw new IllegalStateException("Cannot remove the last PRIMARY tenant.");
         }
-        lease.getTenants().remove(target);
-        return toDTO(leaseRepository.save(lease));
-    }
-
-    // ---- Rent Adjustments ----
-
-    @Transactional
-    public LeaseDTO adjustRent(Long leaseId, AdjustRentRequest req) {
-        Lease lease = findLease(leaseId);
-        if (!lease.isEditable())
-            throw new LeaseNotEditableException(leaseId, lease.getStatus().name());
-
-        String field = req.getField().toUpperCase();
-        if (!field.equals("RENT") && !field.equals("CHARGES"))
-            throw new IllegalArgumentException("field must be RENT or CHARGES");
-
-        BigDecimal oldValue = field.equals("RENT") ? lease.getMonthlyRent() : lease.getMonthlyCharges();
-        BigDecimal newValue = req.getNewValue();
-
-        LeaseRentAdjustment adj = new LeaseRentAdjustment();
-        adj.setLease(lease);
-        adj.setField(field);
-        adj.setOldValue(oldValue);
-        adj.setNewValue(newValue);
-        adj.setReason(req.getReason());
-        adj.setEffectiveDate(req.getEffectiveDate());
-        adjustmentRepository.save(adj);
-
-        if (field.equals("RENT"))
-            lease.setMonthlyRent(newValue);
-        else
-            lease.setMonthlyCharges(newValue);
-
-        return toDTO(leaseRepository.save(lease));
-    }
-
-    // ---- Alerts ----
-
-    public List<LeaseAlertDTO> getAlerts() {
-        return leaseRepository.findByStatusIn(List.of(LeaseStatus.ACTIVE, LeaseStatus.DRAFT))
-                .stream()
-                .flatMap(lease -> {
-                    List<LeaseAlertDTO> alerts = new java.util.ArrayList<>();
-                    LocalDate today = LocalDate.now();
-                    LocalDate noticeDeadline = lease.getEndDate().minusMonths(lease.getNoticePeriodMonths());
-                    if (!today.isBefore(noticeDeadline))
-                        alerts.add(buildAlert(lease, "END_NOTICE", noticeDeadline));
-                    addIndexationAlert(lease, today, alerts);
-                    return alerts.stream();
-                })
-                .collect(Collectors.toList());
-    }
-
-    // ── Private helpers ───────────────────────────────────────────────────────
-
-    private Lease findLease(Long id) {
-        return leaseRepository.findById(id)
-                .orElseThrow(() -> new LeaseNotFoundException(id));
     }
 
     private void validatePrimaryTenant(List<AddTenantRequest> tenants) {
-        if (tenants == null || tenants.stream().noneMatch(t -> "PRIMARY".equals(t.getRole())))
+        if (tenants == null || tenants.stream().noneMatch(t -> "PRIMARY".equals(t.getRole()))) {
             throw new IllegalArgumentException("At least one PRIMARY tenant is required.");
+        }
     }
 
     private void applyRequest(Lease lease, CreateLeaseRequest req) {
@@ -330,12 +315,14 @@ public class LeaseService {
         lease.setStartDate(req.getStartDate());
         lease.setLeaseType(LeaseType.valueOf(req.getLeaseType()));
         lease.setDurationMonths(req.getDurationMonths());
-        lease.setNoticePeriodMonths(req.getNoticePeriodMonths() > 0 ? req.getNoticePeriodMonths()
+        lease.setNoticePeriodMonths(req.getNoticePeriodMonths() > 0
+                ? req.getNoticePeriodMonths()
                 : DEFAULT_NOTICE.getOrDefault(req.getLeaseType(), 3));
         lease.setMonthlyRent(req.getMonthlyRent());
         lease.setMonthlyCharges(req.getMonthlyCharges() != null ? req.getMonthlyCharges() : BigDecimal.ZERO);
-        lease.setChargesType(
-                req.getChargesType() != null ? ChargesType.valueOf(req.getChargesType()) : ChargesType.FORFAIT);
+        lease.setChargesType(req.getChargesType() != null
+                ? ChargesType.valueOf(req.getChargesType())
+                : ChargesType.FORFAIT);
         lease.setChargesDescription(req.getChargesDescription());
         lease.setRegistrationSpf(req.getRegistrationSpf());
         lease.setRegistrationRegion(req.getRegistrationRegion());
@@ -354,12 +341,14 @@ public class LeaseService {
         lease.setStartDate(req.getStartDate());
         lease.setLeaseType(LeaseType.valueOf(req.getLeaseType()));
         lease.setDurationMonths(req.getDurationMonths());
-        lease.setNoticePeriodMonths(req.getNoticePeriodMonths() > 0 ? req.getNoticePeriodMonths()
+        lease.setNoticePeriodMonths(req.getNoticePeriodMonths() > 0
+                ? req.getNoticePeriodMonths()
                 : DEFAULT_NOTICE.getOrDefault(req.getLeaseType(), 3));
         lease.setMonthlyRent(req.getMonthlyRent());
         lease.setMonthlyCharges(req.getMonthlyCharges() != null ? req.getMonthlyCharges() : BigDecimal.ZERO);
-        lease.setChargesType(
-                req.getChargesType() != null ? ChargesType.valueOf(req.getChargesType()) : ChargesType.FORFAIT);
+        lease.setChargesType(req.getChargesType() != null
+                ? ChargesType.valueOf(req.getChargesType())
+                : ChargesType.FORFAIT);
         lease.setChargesDescription(req.getChargesDescription());
         lease.setRegistrationSpf(req.getRegistrationSpf());
         lease.setRegistrationRegion(req.getRegistrationRegion());
@@ -429,13 +418,36 @@ public class LeaseService {
         return dto;
     }
 
+    private LeaseGlobalSummaryDTO toGlobalSummary(Lease lease) {
+        LeaseGlobalSummaryDTO dto = new LeaseGlobalSummaryDTO();
+        dto.setId(lease.getId());
+        dto.setStatus(lease.getStatus().name());
+        dto.setLeaseType(lease.getLeaseType().name());
+        HousingUnit unit = lease.getHousingUnit();
+        dto.setHousingUnitId(unit.getId());
+        dto.setHousingUnitNumber(unit.getUnitNumber());
+        dto.setBuildingId(unit.getBuilding().getId());
+        dto.setBuildingName(unit.getBuilding().getName());
+        dto.setStartDate(lease.getStartDate());
+        dto.setEndDate(lease.getEndDate());
+        dto.setMonthlyRent(lease.getMonthlyRent());
+        dto.setMonthlyCharges(lease.getMonthlyCharges());
+        dto.setTotalRent(lease.getMonthlyRent().add(lease.getMonthlyCharges()));
+        dto.setChargesType(lease.getChargesType().name());
+        dto.setTenantNames(lease.getTenants().stream()
+                .filter(t -> t.getRole() == TenantRole.PRIMARY || t.getRole() == TenantRole.CO_TENANT)
+                .map(t -> t.getPerson().getLastName() + " " + t.getPerson().getFirstName())
+                .collect(Collectors.toList()));
+        computeAlerts(dto, lease);
+        return dto;
+    }
+
     private void computeAlerts(Lease lease, LeaseDTO dto) {
         LocalDate today = LocalDate.now();
         LocalDate noticeDeadline = lease.getEndDate().minusMonths(lease.getNoticePeriodMonths());
         dto.setEndNoticeAlertActive(!today.isBefore(noticeDeadline));
         dto.setEndNoticeAlertDate(noticeDeadline);
-        setIndexationAlert(lease, today,
-                dto::setIndexationAlertActive, dto::setIndexationAlertDate);
+        setIndexationAlert(lease, today, dto::setIndexationAlertActive, dto::setIndexationAlertDate);
     }
 
     private void computeAlerts(Lease lease, LeaseSummaryDTO dto) {
@@ -443,8 +455,30 @@ public class LeaseService {
         LocalDate noticeDeadline = lease.getEndDate().minusMonths(lease.getNoticePeriodMonths());
         dto.setEndNoticeAlertActive(!today.isBefore(noticeDeadline));
         dto.setEndNoticeAlertDate(noticeDeadline);
-        setIndexationAlert(lease, today,
-                dto::setIndexationAlertActive, dto::setIndexationAlertDate);
+        setIndexationAlert(lease, today, dto::setIndexationAlertActive, dto::setIndexationAlertDate);
+    }
+
+    private void computeAlerts(LeaseGlobalSummaryDTO dto, Lease lease) {
+        if (lease.getStatus() != LeaseStatus.ACTIVE || lease.getStartDate() == null)
+            return;
+        LocalDate today = LocalDate.now();
+        LocalDate anniversary = lease.getStartDate().withYear(today.getYear());
+        if (anniversary.isBefore(today))
+            anniversary = anniversary.plusYears(1);
+        long daysToAnniversary = java.time.temporal.ChronoUnit.DAYS.between(today, anniversary);
+        boolean indexedThisYear = adjustmentRepository.existsRentAdjustmentForYear(
+                lease.getId(), today.getYear());
+        if (daysToAnniversary <= INDEXATION_NOTICE_DAYS && !indexedThisYear) {
+            dto.setIndexationAlertActive(true);
+            dto.setIndexationAlertDate(anniversary);
+        }
+        if (lease.getEndDate() != null) {
+            LocalDate noticeDeadline = lease.getEndDate().minusMonths(lease.getNoticePeriodMonths());
+            if (!today.isAfter(lease.getEndDate()) && !today.isBefore(noticeDeadline)) {
+                dto.setEndNoticeAlertActive(true);
+                dto.setEndNoticeAlertDate(noticeDeadline);
+            }
+        }
     }
 
     private void setIndexationAlert(Lease lease, LocalDate today,
@@ -452,14 +486,15 @@ public class LeaseService {
             java.util.function.Consumer<LocalDate> setDate) {
         if (lease.getStartDate() == null)
             return;
-        int month = lease.getStartDate().getMonthValue();
-        int day = lease.getStartDate().getDayOfMonth();
-        LocalDate anniversary = LocalDate.of(today.getYear(), month, day);
+        LocalDate anniversary = LocalDate.of(today.getYear(),
+                lease.getStartDate().getMonthValue(),
+                lease.getStartDate().getDayOfMonth());
         if (anniversary.isBefore(today))
             anniversary = anniversary.plusYears(1);
         LocalDate trigger = anniversary.minusDays(INDEXATION_NOTICE_DAYS);
         if (!today.isBefore(trigger)) {
-            boolean done = adjustmentRepository.existsRentAdjustmentForYear(lease.getId(), anniversary.getYear());
+            boolean done = adjustmentRepository.existsRentAdjustmentForYear(
+                    lease.getId(), anniversary.getYear());
             setActive.accept(!done);
             setDate.accept(anniversary);
         }
@@ -468,14 +503,15 @@ public class LeaseService {
     private void addIndexationAlert(Lease lease, LocalDate today, List<LeaseAlertDTO> alerts) {
         if (lease.getStartDate() == null)
             return;
-        int month = lease.getStartDate().getMonthValue();
-        int day = lease.getStartDate().getDayOfMonth();
-        LocalDate anniversary = LocalDate.of(today.getYear(), month, day);
+        LocalDate anniversary = LocalDate.of(today.getYear(),
+                lease.getStartDate().getMonthValue(),
+                lease.getStartDate().getDayOfMonth());
         if (anniversary.isBefore(today))
             anniversary = anniversary.plusYears(1);
         LocalDate trigger = anniversary.minusDays(INDEXATION_NOTICE_DAYS);
         if (!today.isBefore(trigger)) {
-            boolean done = adjustmentRepository.existsRentAdjustmentForYear(lease.getId(), anniversary.getYear());
+            boolean done = adjustmentRepository.existsRentAdjustmentForYear(
+                    lease.getId(), anniversary.getYear());
             if (!done)
                 alerts.add(buildAlert(lease, "INDEXATION", anniversary));
         }

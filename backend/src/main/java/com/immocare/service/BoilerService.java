@@ -3,6 +3,7 @@ package com.immocare.service;
 import java.time.LocalDate;
 import java.time.temporal.ChronoUnit;
 import java.util.List;
+import java.util.UUID;
 
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -60,7 +61,7 @@ public class BoilerService {
      * Returns all boilers with service due within the configured warning window
      * (for alerts page).
      */
-    public List<BoilerDTO> getServiceAlerts() {
+    public List<BoilerDTO> getServiceAlerts(UUID estateId) {
         int warningDays = platformConfigService.getInt(
                 com.immocare.model.dto.PlatformConfigDTOs.KEY_BOILER_SERVICE_WARNING_DAYS, 30);
         LocalDate threshold = LocalDate.now().plusDays(warningDays);

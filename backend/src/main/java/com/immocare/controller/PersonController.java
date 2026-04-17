@@ -1,6 +1,7 @@
 package com.immocare.controller;
 
 import java.util.List;
+import java.util.UUID;
 
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -27,9 +28,21 @@ import com.immocare.service.PersonService;
 
 import jakarta.validation.Valid;
 
+/**
+ * REST controller for Person management.
+ * UC016 Phase 3: all routes are now scoped to an estate.
+ *
+ * Endpoints:
+ *   GET    /api/v1/estates/{estateId}/persons              - paginated list with optional search
+ *   GET    /api/v1/estates/{estateId}/persons/picker       - picker search (max 10)
+ *   GET    /api/v1/estates/{estateId}/persons/{id}         - full person details
+ *   POST   /api/v1/estates/{estateId}/persons              - create person
+ *   PUT    /api/v1/estates/{estateId}/persons/{id}         - update person
+ *   DELETE /api/v1/estates/{estateId}/persons/{id}         - delete person
+ */
 @RestController
-@RequestMapping("/api/v1/persons")
-@PreAuthorize("isAuthenticated()")
+@RequestMapping("/api/v1/estates/{estateId}/persons")
+@PreAuthorize("@security.isMemberOf(#estateId)")
 public class PersonController {
 
     private final PersonService personService;
@@ -39,71 +52,77 @@ public class PersonController {
     }
 
     /**
-     * GET /api/v1/persons?page=0&size=20&sort=lastName,asc&search=dupont
-     * Paginated person list with optional search.
+     * GET /api/v1/estates/{estateId}/persons?page=0&size=20&sort=lastName,asc&search=dupont
      */
     @GetMapping
     public ResponseEntity<Page<PersonSummaryDTO>> getAll(
+            @PathVariable UUID estateId,
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "20") int size,
             @RequestParam(defaultValue = "lastName,asc") String sort,
             @RequestParam(required = false) String search) {
 
         String[] sortParts = sort.split(",");
-        String sortField = sortParts[0];
         Sort.Direction direction = sortParts.length > 1 && sortParts[1].equalsIgnoreCase("desc")
-                ? Sort.Direction.DESC
-                : Sort.Direction.ASC;
+                ? Sort.Direction.DESC : Sort.Direction.ASC;
+        Pageable pageable = PageRequest.of(page, size, Sort.by(direction, sortParts[0]));
 
-        Pageable pageable = PageRequest.of(page, size, Sort.by(direction, sortField));
-        return ResponseEntity.ok(personService.getAll(search, pageable));
+        return ResponseEntity.ok(personService.getAll(estateId, search, pageable));
     }
 
     /**
-     * GET /api/v1/persons/search?q=dupont
+     * GET /api/v1/estates/{estateId}/persons/picker?q=dupont
      * Picker search — max 10 results, min 2 chars.
      */
-    @GetMapping("/search")
-    public ResponseEntity<List<PersonSummaryDTO>> searchForPicker(@RequestParam String q) {
-        return ResponseEntity.ok(personService.searchForPicker(q));
+    @GetMapping("/picker")
+    public ResponseEntity<List<PersonSummaryDTO>> searchForPicker(
+            @PathVariable UUID estateId,
+            @RequestParam String q) {
+        return ResponseEntity.ok(personService.searchForPicker(estateId, q));
     }
 
     /**
-     * GET /api/v1/persons/{id}
-     * Full person details including owned buildings/units and leases.
+     * GET /api/v1/estates/{estateId}/persons/{id}
      */
     @GetMapping("/{id}")
-    public ResponseEntity<PersonDTO> getById(@PathVariable Long id) {
-        return ResponseEntity.ok(personService.getById(id));
+    public ResponseEntity<PersonDTO> getById(
+            @PathVariable UUID estateId,
+            @PathVariable Long id) {
+        return ResponseEntity.ok(personService.getById(estateId, id));
     }
 
     /**
-     * POST /api/v1/persons
-     * Create a new person.
+     * POST /api/v1/estates/{estateId}/persons
      */
     @PostMapping
-    public ResponseEntity<PersonDTO> create(@Valid @RequestBody CreatePersonRequest request) {
-        PersonDTO created = personService.create(request);
-        return ResponseEntity.status(HttpStatus.CREATED).body(created);
+    @PreAuthorize("@security.isManagerOf(#estateId)")
+    public ResponseEntity<PersonDTO> create(
+            @PathVariable UUID estateId,
+            @Valid @RequestBody CreatePersonRequest request) {
+        return ResponseEntity.status(HttpStatus.CREATED).body(personService.create(estateId, request));
     }
 
     /**
-     * PUT /api/v1/persons/{id}
-     * Update an existing person.
+     * PUT /api/v1/estates/{estateId}/persons/{id}
      */
     @PutMapping("/{id}")
-    public ResponseEntity<PersonDTO> update(@PathVariable Long id,
+    @PreAuthorize("@security.isManagerOf(#estateId)")
+    public ResponseEntity<PersonDTO> update(
+            @PathVariable UUID estateId,
+            @PathVariable Long id,
             @Valid @RequestBody UpdatePersonRequest request) {
-        return ResponseEntity.ok(personService.update(id, request));
+        return ResponseEntity.ok(personService.update(estateId, id, request));
     }
 
     /**
-     * DELETE /api/v1/persons/{id}
-     * Delete a person. Returns 409 if still referenced as owner or tenant.
+     * DELETE /api/v1/estates/{estateId}/persons/{id}
      */
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> delete(@PathVariable Long id) {
-        personService.delete(id);
+    @PreAuthorize("@security.isManagerOf(#estateId)")
+    public ResponseEntity<Void> delete(
+            @PathVariable UUID estateId,
+            @PathVariable Long id) {
+        personService.delete(estateId, id);
         return ResponseEntity.noContent().build();
     }
 }

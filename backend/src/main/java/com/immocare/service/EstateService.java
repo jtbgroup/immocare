@@ -29,15 +29,17 @@ import com.immocare.model.entity.AppUser;
 import com.immocare.model.entity.Estate;
 import com.immocare.model.entity.EstateMember;
 import com.immocare.model.enums.EstateRole;
+import com.immocare.model.enums.LeaseStatus;
 import com.immocare.repository.BuildingRepository;
 import com.immocare.repository.EstateMemberRepository;
 import com.immocare.repository.EstateRepository;
 import com.immocare.repository.HousingUnitRepository;
+import com.immocare.repository.LeaseRepository;
 import com.immocare.repository.UserRepository;
 
 /**
  * Business logic for UC016 — Manage Estates.
- * Phase 2: getDashboard() now returns real building and unit counts.
+ * Phase 3: getDashboard() now returns the real activeLeases count.
  */
 @Service
 @Transactional(readOnly = true)
@@ -50,20 +52,23 @@ public class EstateService {
     private final UserRepository userRepository;
     private final BuildingRepository buildingRepository;
     private final HousingUnitRepository housingUnitRepository;
+    private final LeaseRepository leaseRepository;
 
     public EstateService(EstateRepository estateRepository,
                          EstateMemberRepository estateMemberRepository,
                          UserRepository userRepository,
                          BuildingRepository buildingRepository,
-                         HousingUnitRepository housingUnitRepository) {
+                         HousingUnitRepository housingUnitRepository,
+                         LeaseRepository leaseRepository) {
         this.estateRepository = estateRepository;
         this.estateMemberRepository = estateMemberRepository;
         this.userRepository = userRepository;
         this.buildingRepository = buildingRepository;
         this.housingUnitRepository = housingUnitRepository;
+        this.leaseRepository = leaseRepository;
     }
 
-    // ─── US095 — List all estates (PLATFORM_ADMIN only) ──────────────────────
+    // ─── US095 — List all estates ─────────────────────────────────────────────
 
     public Page<EstateDTO> getAllEstates(String search, Pageable pageable) {
         Page<Estate> page = (search != null && !search.isBlank())
@@ -97,19 +102,21 @@ public class EstateService {
 
     /**
      * Returns the estate dashboard.
-     * Phase 2: totalBuildings and totalUnits are now populated with real counts.
-     * activeLeases and pendingAlerts remain 0 until Phase 3/6.
+     * Phase 3: activeLeases is now populated with the real count of ACTIVE leases.
+     * pendingAlerts remain 0 until Phase 6.
      */
     public EstateDashboardDTO getDashboard(UUID estateId) {
         Estate estate = findEstateOrThrow(estateId);
         int totalBuildings = (int) buildingRepository.countByEstateId(estateId);
         int totalUnits = (int) housingUnitRepository.countByBuilding_Estate_Id(estateId);
+        int activeLeases = (int) leaseRepository
+                .countByHousingUnit_Building_Estate_IdAndStatus(estateId, LeaseStatus.ACTIVE);
         return new EstateDashboardDTO(
                 estate.getId(),
                 estate.getName(),
                 totalBuildings,
                 totalUnits,
-                0, // activeLeases — Phase 3
+                activeLeases,
                 new EstatePendingAlertsDTO(0, 0, 0, 0)); // pendingAlerts — Phase 6
     }
 
@@ -117,7 +124,6 @@ public class EstateService {
 
     @Transactional
     public EstateDTO createEstate(CreateEstateRequest req, Long createdByUserId) {
-        // BR-UC016-01: name unique case-insensitively
         if (estateRepository.existsByNameIgnoreCase(req.name())) {
             throw new EstateNameTakenException(req.name());
         }
@@ -130,7 +136,6 @@ public class EstateService {
         estate.setCreatedBy(createdBy);
         estate = estateRepository.save(estate);
 
-        // US096: assign first manager if provided
         if (req.firstManagerId() != null) {
             AppUser manager = userRepository.findById(req.firstManagerId())
                     .orElseThrow(() -> new UserNotFoundException(req.firstManagerId()));
@@ -165,13 +170,10 @@ public class EstateService {
     @Transactional
     public void deleteEstate(UUID id) {
         findEstateOrThrow(id);
-
-        // BR-UC016-09: cannot delete estate with buildings (Phase 2: real count)
         int buildingCount = (int) buildingRepository.countByEstateId(id);
         if (buildingCount > 0) {
             throw new EstateHasBuildingsException(buildingCount);
         }
-
         estateRepository.deleteById(id);
     }
 

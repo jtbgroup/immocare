@@ -1,16 +1,24 @@
 package com.immocare.service;
 
+import java.util.List;
+import java.util.UUID;
+
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import com.immocare.exception.EstateAccessDeniedException;
+import com.immocare.exception.PersonNotFoundException;
 import com.immocare.model.dto.PersonBankAccountDTO;
 import com.immocare.model.dto.SavePersonBankAccountRequest;
 import com.immocare.model.entity.Person;
 import com.immocare.model.entity.PersonBankAccount;
 import com.immocare.repository.PersonBankAccountRepository;
 import com.immocare.repository.PersonRepository;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
-import java.util.List;
-
+/**
+ * Service for PersonBankAccount management.
+ * UC016 Phase 3: operations verify that the person belongs to the active estate.
+ */
 @Service
 @Transactional(readOnly = true)
 public class PersonBankAccountService {
@@ -25,16 +33,17 @@ public class PersonBankAccountService {
     }
 
     /** All IBANs for a person, primary first. */
-    public List<PersonBankAccountDTO> getByPerson(Long personId) {
+    public List<PersonBankAccountDTO> getByPerson(UUID estateId, Long personId) {
+        verifyPersonBelongsToEstate(estateId, personId);
         return repo.findByPersonIdOrderByPrimaryDescCreatedAtAsc(personId)
                 .stream().map(this::toDTO).toList();
     }
 
     /** Add a new IBAN to a person. */
     @Transactional
-    public PersonBankAccountDTO create(Long personId, SavePersonBankAccountRequest req) {
-        Person person = personRepository.findById(personId)
-                .orElseThrow(() -> new IllegalArgumentException("Person not found: " + personId));
+    public PersonBankAccountDTO create(UUID estateId, Long personId, SavePersonBankAccountRequest req) {
+        verifyPersonBelongsToEstate(estateId, personId);
+        Person person = findPersonOrThrow(personId);
 
         String normalized = normalizeIban(req.iban());
         if (repo.existsByIbanIgnoreCase(normalized)) {
@@ -48,8 +57,6 @@ public class PersonBankAccountService {
         pba.setPrimary(req.primary());
 
         PersonBankAccount saved = repo.save(pba);
-
-        // Enforce single primary: clear other primaries if this one is primary
         if (saved.isPrimary()) {
             repo.clearPrimaryExcept(personId, saved.getId());
         }
@@ -59,7 +66,9 @@ public class PersonBankAccountService {
 
     /** Update label / primary flag of an existing IBAN. */
     @Transactional
-    public PersonBankAccountDTO update(Long personId, Long id, SavePersonBankAccountRequest req) {
+    public PersonBankAccountDTO update(UUID estateId, Long personId, Long id,
+                                       SavePersonBankAccountRequest req) {
+        verifyPersonBelongsToEstate(estateId, personId);
         PersonBankAccount pba = repo.findById(id)
                 .orElseThrow(() -> new IllegalArgumentException("Person bank account not found: " + id));
 
@@ -77,7 +86,6 @@ public class PersonBankAccountService {
         pba.setPrimary(req.primary());
 
         PersonBankAccount saved = repo.save(pba);
-
         if (saved.isPrimary()) {
             repo.clearPrimaryExcept(personId, saved.getId());
         }
@@ -87,7 +95,8 @@ public class PersonBankAccountService {
 
     /** Delete an IBAN from a person. */
     @Transactional
-    public void delete(Long personId, Long id) {
+    public void delete(UUID estateId, Long personId, Long id) {
+        verifyPersonBelongsToEstate(estateId, personId);
         PersonBankAccount pba = repo.findById(id)
                 .orElseThrow(() -> new IllegalArgumentException("Person bank account not found: " + id));
         if (!pba.getPerson().getId().equals(personId)) {
@@ -96,9 +105,22 @@ public class PersonBankAccountService {
         repo.delete(pba);
     }
 
-    // ── Helpers ───────────────────────────────────────────────────────────────
+    // ─── Helpers ──────────────────────────────────────────────────────────────
 
-    /** Strips spaces and uppercases the IBAN. */
+    private void verifyPersonBelongsToEstate(UUID estateId, Long personId) {
+        if (!personRepository.existsById(personId)) {
+            throw new PersonNotFoundException(personId);
+        }
+        if (!personRepository.existsByEstateIdAndId(estateId, personId)) {
+            throw new EstateAccessDeniedException();
+        }
+    }
+
+    private Person findPersonOrThrow(Long personId) {
+        return personRepository.findById(personId)
+                .orElseThrow(() -> new PersonNotFoundException(personId));
+    }
+
     private String normalizeIban(String raw) {
         return raw == null ? null : raw.replaceAll("\\s", "").toUpperCase();
     }
