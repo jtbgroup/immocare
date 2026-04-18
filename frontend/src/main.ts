@@ -22,7 +22,6 @@ bootstrapApplication(AppComponent, {
       useClass: AuthInterceptor,
       multi: true,
     },
-    // ─── Load app.date_format before any component renders ────────────────────
     {
       provide: APP_INITIALIZER,
       useFactory: (svc: DateFormatService) => () => svc.load(),
@@ -161,68 +160,68 @@ bootstrapApplication(AppComponent, {
           ),
       },
 
-      // ─── Persons ─────────────────────────────────────────────────────────────
+      // ─── Persons (UC016 Phase 3: estate-scoped) ──────────────────────────────
       {
-        path: "persons",
-        canActivate: [AuthGuard],
+        path: "estates/:estateId/persons",
+        canActivate: [AuthGuard, EstateGuard],
         loadComponent: () =>
           import("./app/features/person/components/person-list/person-list.component").then(
             (m) => m.PersonListComponent,
           ),
       },
       {
-        path: "persons/new",
-        canActivate: [AuthGuard],
+        path: "estates/:estateId/persons/new",
+        canActivate: [AuthGuard, EstateGuard],
         loadComponent: () =>
           import("./app/features/person/components/person-form/person-form.component").then(
             (m) => m.PersonFormComponent,
           ),
       },
       {
-        path: "persons/:id/edit",
-        canActivate: [AuthGuard],
+        path: "estates/:estateId/persons/:id/edit",
+        canActivate: [AuthGuard, EstateGuard],
         loadComponent: () =>
           import("./app/features/person/components/person-form/person-form.component").then(
             (m) => m.PersonFormComponent,
           ),
       },
       {
-        path: "persons/:id",
-        canActivate: [AuthGuard],
+        path: "estates/:estateId/persons/:id",
+        canActivate: [AuthGuard, EstateGuard],
         loadComponent: () =>
           import("./app/features/person/components/person-details/person-details.component").then(
             (m) => m.PersonDetailsComponent,
           ),
       },
 
-      // ─── Leases ──────────────────────────────────────────────────────────────
+      // ─── Leases (UC016 Phase 3: estate-scoped) ───────────────────────────────
       {
-        path: "housing-units/:unitId/leases/new",
-        canActivate: [AuthGuard],
+        path: "estates/:estateId/housing-units/:unitId/leases/new",
+        canActivate: [AuthGuard, EstateGuard],
         loadComponent: () =>
           import("./app/features/lease/components/lease-form/lease-form.component").then(
             (m) => m.LeaseFormComponent,
           ),
       },
       {
-        path: "leases",
-        canActivate: [AuthGuard],
+        path: "estates/:estateId/leases",
+        canActivate: [AuthGuard, EstateGuard],
         loadComponent: () =>
           import("./app/features/lease/components/lease-global-list/lease-global-list.component").then(
             (m) => m.LeaseGlobalListComponent,
           ),
       },
       {
-        path: "leases/:id/edit",
-        canActivate: [AuthGuard],
+        path: "estates/:estateId/leases/:id/edit",
+        canActivate: [AuthGuard, EstateGuard],
         loadComponent: () =>
           import("./app/features/lease/components/lease-form/lease-form.component").then(
             (m) => m.LeaseFormComponent,
           ),
       },
       {
-        path: "leases/:id",
-        canActivate: [AuthGuard],
+        path: "estates/:estateId/leases/:id",
+        canActivate: [AuthGuard, EstateGuard],
         loadComponent: () =>
           import("./app/features/lease/components/lease-details/lease-details.component").then(
             (m) => m.LeaseDetailsComponent,

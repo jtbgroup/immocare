@@ -1,11 +1,12 @@
-// features/lease/components/lease-global-list/lease-global-list.component.ts
+// features/lease/components/lease-global-list/lease-global-list.component.ts — UC016 Phase 3
 import { CommonModule } from "@angular/common";
 import { Component, OnDestroy, OnInit } from "@angular/core";
 import { FormsModule } from "@angular/forms";
-import { Router, RouterLink } from "@angular/router";
+import { Router } from "@angular/router";
 import { Subject } from "rxjs";
 import { takeUntil } from "rxjs/operators";
 
+import { ActiveEstateService } from "../../../../core/services/active-estate.service";
 import { LeaseService } from "../../../../core/services/lease.service";
 import {
   LEASE_TYPE_LABELS,
@@ -29,7 +30,7 @@ export interface LeaseGlobalFilters {
 @Component({
   selector: "app-lease-global-list",
   standalone: true,
-  imports: [CommonModule, FormsModule, RouterLink],
+  imports: [CommonModule, FormsModule],
   templateUrl: "./lease-global-list.component.html",
   styleUrls: ["./lease-global-list.component.scss"],
 })
@@ -38,17 +39,14 @@ export class LeaseGlobalListComponent implements OnInit, OnDestroy {
   loading = false;
   error: string | null = null;
 
-  // ── Pagination ──────────────────────────────────────────────────────────────
   currentPage = 0;
   pageSize = 20;
   totalElements = 0;
   totalPages = 0;
 
-  // ── Sort ────────────────────────────────────────────────────────────────────
   sortField = "startDate";
   sortDirection: "asc" | "desc" = "desc";
 
-  // ── Filters ─────────────────────────────────────────────────────────────────
   readonly allStatuses: LeaseStatus[] = [
     "ACTIVE",
     "DRAFT",
@@ -59,7 +57,7 @@ export class LeaseGlobalListComponent implements OnInit, OnDestroy {
   readonly leaseTypeKeys = Object.keys(LEASE_TYPE_LABELS) as LeaseType[];
 
   filters: LeaseGlobalFilters = {
-    statuses: ["ACTIVE"], // default: active only
+    statuses: ["ACTIVE"],
     leaseType: "",
     startDateFrom: "",
     startDateTo: "",
@@ -74,7 +72,12 @@ export class LeaseGlobalListComponent implements OnInit, OnDestroy {
   constructor(
     private leaseService: LeaseService,
     private router: Router,
+    readonly activeEstateService: ActiveEstateService,
   ) {}
+
+  private get estateId(): string {
+    return this.activeEstateService.activeEstateId()!;
+  }
 
   ngOnInit(): void {
     this.load();
@@ -112,8 +115,6 @@ export class LeaseGlobalListComponent implements OnInit, OnDestroy {
       });
   }
 
-  // ── Filter helpers ──────────────────────────────────────────────────────────
-
   isStatusSelected(status: LeaseStatus): boolean {
     return this.filters.statuses.includes(status);
   }
@@ -149,8 +150,6 @@ export class LeaseGlobalListComponent implements OnInit, OnDestroy {
     this.load();
   }
 
-  // ── Sort ────────────────────────────────────────────────────────────────────
-
   onSortChange(field: string): void {
     if (this.sortField === field) {
       this.sortDirection = this.sortDirection === "asc" ? "desc" : "asc";
@@ -166,8 +165,6 @@ export class LeaseGlobalListComponent implements OnInit, OnDestroy {
     return this.sortDirection === "asc" ? "↑" : "↓";
   }
 
-  // ── Pagination ──────────────────────────────────────────────────────────────
-
   previousPage(): void {
     if (this.currentPage > 0) {
       this.currentPage--;
@@ -182,17 +179,17 @@ export class LeaseGlobalListComponent implements OnInit, OnDestroy {
     }
   }
 
-  // ── Navigation ──────────────────────────────────────────────────────────────
-
   viewLease(id: number): void {
-    this.router.navigate(["/leases", id]);
+    this.router.navigate(["/estates", this.estateId, "leases", id]);
   }
 
   viewUnit(unitId: number): void {
-    this.router.navigate(["/units", unitId]);
+    this.router.navigate(["/estates", this.estateId, "units", unitId]);
   }
 
-  // ── Display helpers ─────────────────────────────────────────────────────────
+  viewBuilding(buildingId: number): void {
+    this.router.navigate(["/estates", this.estateId, "buildings", buildingId]);
+  }
 
   statusClass(status: LeaseStatus): string {
     return (

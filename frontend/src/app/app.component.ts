@@ -88,7 +88,8 @@ export class AppComponent implements OnInit {
 
   isManagementActive(): boolean {
     const url = this.router.url;
-    return url.startsWith("/persons") || url.startsWith("/bank-accounts");
+    // Phase 3: persons are now under /estates/:id/persons
+    return url.includes("/persons") || url.startsWith("/bank-accounts");
   }
 
   @HostListener("document:click", ["$event"])

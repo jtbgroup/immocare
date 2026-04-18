@@ -6,9 +6,16 @@
       >
       Lease
     </h3>
-    @if (canCreateLease) {
+    @if (canCreateLease && activeEstateService.canEdit()) {
       <a
-        [routerLink]="['/housing-units', unitId, 'leases', 'new']"
+        [routerLink]="[
+          '/estates',
+          activeEstateService.activeEstateId(),
+          'housing-units',
+          unitId,
+          'leases',
+          'new',
+        ]"
         class="btn btn-sm btn-primary"
       >
         + New Lease
@@ -86,15 +93,28 @@
         <!-- Actions -->
         <div class="lease-actions">
           <a
-            [routerLink]="['/leases', activeLease.id]"
+            [routerLink]="[
+              '/estates',
+              activeEstateService.activeEstateId(),
+              'leases',
+              activeLease.id,
+            ]"
             class="btn btn-sm btn-secondary"
             >View</a
           >
-          <a
-            [routerLink]="['/leases', activeLease.id, 'edit']"
-            class="btn btn-sm btn-ghost"
-            >Edit</a
-          >
+          @if (activeEstateService.canEdit()) {
+            <a
+              [routerLink]="[
+                '/estates',
+                activeEstateService.activeEstateId(),
+                'leases',
+                activeLease.id,
+                'edit',
+              ]"
+              class="btn btn-sm btn-ghost"
+              >Edit</a
+            >
+          }
         </div>
       </div>
     </div>
@@ -146,7 +166,14 @@
                 {{ lease.startDate | appDate }} → {{ lease.endDate | appDate }}
               </td>
               <td>
-                <a [routerLink]="['/leases', lease.id]" class="btn-link"
+                <a
+                  [routerLink]="[
+                    '/estates',
+                    activeEstateService.activeEstateId(),
+                    'leases',
+                    lease.id,
+                  ]"
+                  class="btn-link"
                   >View</a
                 >
               </td>

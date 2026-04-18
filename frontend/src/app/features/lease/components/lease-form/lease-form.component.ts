@@ -1,4 +1,4 @@
-// features/lease/lease-form/lease-form.component.ts
+// features/lease/lease-form/lease-form.component.ts — UC016 Phase 3
 import { CommonModule } from "@angular/common";
 import { Component, OnInit } from "@angular/core";
 import {
@@ -9,6 +9,7 @@ import {
   Validators,
 } from "@angular/forms";
 import { ActivatedRoute, Router, RouterModule } from "@angular/router";
+import { ActiveEstateService } from "../../../../core/services/active-estate.service";
 import { LeaseService } from "../../../../core/services/lease.service";
 import {
   DEFAULT_NOTICE_MONTHS,
@@ -44,7 +45,6 @@ export class LeaseFormComponent implements OnInit {
   readonly LEASE_TYPES = LEASE_TYPES;
   readonly LEASE_TYPE_LABELS = LEASE_TYPE_LABELS;
 
-  /** Flag to prevent circular updates between endDate ↔ durationMonths */
   private _updatingDates = false;
 
   pendingTenants: {
@@ -52,7 +52,6 @@ export class LeaseFormComponent implements OnInit {
     role: string;
   }[] = [];
 
-  // Tenant picker state
   showTenantPicker = false;
   newTenantRole = "PRIMARY";
   selectedTenantPerson: any = null;
@@ -62,7 +61,12 @@ export class LeaseFormComponent implements OnInit {
     private route: ActivatedRoute,
     private router: Router,
     private leaseService: LeaseService,
+    private activeEstateService: ActiveEstateService,
   ) {}
+
+  private get estateId(): string {
+    return this.activeEstateService.activeEstateId()!;
+  }
 
   ngOnInit(): void {
     this.buildForm();
@@ -103,7 +107,6 @@ export class LeaseFormComponent implements OnInit {
       tenantInsuranceExpiry: [null],
     });
 
-    // When leaseType changes, update defaults for duration and notice
     this.form.get("leaseType")!.valueChanges.subscribe((type) => {
       if (type) {
         this.form.patchValue(
@@ -117,11 +120,6 @@ export class LeaseFormComponent implements OnInit {
     });
   }
 
-  /**
-   * Wire up the bidirectional link between startDate, durationMonths, and endDate.
-   * - startDate or durationMonths changed → recompute endDate
-   * - endDate changed manually → recompute durationMonths
-   */
   private setupBidirectionalDates(): void {
     const startCtrl = this.form.get("startDate")!;
     const durationCtrl = this.form.get("durationMonths")!;
@@ -224,7 +222,6 @@ export class LeaseFormComponent implements OnInit {
 
   confirmAddTenant(): void {
     if (!this.selectedTenantPerson) return;
-    // Prevent duplicate
     if (
       this.pendingTenants.some(
         (t) => t.person.id === this.selectedTenantPerson.id,
@@ -286,7 +283,8 @@ export class LeaseFormComponent implements OnInit {
 
     if (this.isEditMode && this.leaseId) {
       this.leaseService.update(this.leaseId, base).subscribe({
-        next: () => this.router.navigate(["/leases", this.leaseId]),
+        next: () =>
+          this.router.navigate(["/estates", this.estateId, "leases", this.leaseId]),
         error: (err) => {
           this.errorMessage = err.error?.message || "Save failed.";
         },
@@ -300,8 +298,9 @@ export class LeaseFormComponent implements OnInit {
           role: t.role as TenantRole,
         })),
       };
-      this.leaseService.create(createReq).subscribe({
-        next: (lease) => this.router.navigate(["/leases", lease.id]),
+      this.leaseService.create(this.unitId!, createReq).subscribe({
+        next: (lease) =>
+          this.router.navigate(["/estates", this.estateId, "leases", lease.id]),
         error: (err) => {
           this.errorMessage = err.error?.message || "Save failed.";
         },
@@ -311,9 +310,9 @@ export class LeaseFormComponent implements OnInit {
 
   cancel(): void {
     if (this.isEditMode && this.leaseId) {
-      this.router.navigate(["/leases", this.leaseId]);
+      this.router.navigate(["/estates", this.estateId, "leases", this.leaseId]);
     } else {
-      this.router.navigate(["/housing-units", this.unitId]);
+      this.router.navigate(["/estates", this.estateId, "units", this.unitId]);
     }
   }
 }

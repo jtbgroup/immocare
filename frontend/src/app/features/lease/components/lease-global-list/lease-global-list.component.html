@@ -1,4 +1,4 @@
-<!-- features/lease/components/lease-global-list/lease-global-list.component.html -->
+<!-- features/lease/components/lease-global-list/lease-global-list.component.html — UC016 Phase 3 -->
 <div class="lease-global-list-container">
   <!-- Header -->
   <div class="details-content">
@@ -53,14 +53,12 @@
           type="date"
           [(ngModel)]="filters.startDateFrom"
           (change)="onFilterChange()"
-          placeholder="From"
         />
         <span class="range-sep">→</span>
         <input
           type="date"
           [(ngModel)]="filters.startDateTo"
           (change)="onFilterChange()"
-          placeholder="To"
         />
       </div>
     </div>
@@ -73,14 +71,12 @@
           type="date"
           [(ngModel)]="filters.endDateFrom"
           (change)="onFilterChange()"
-          placeholder="From"
         />
         <span class="range-sep">→</span>
         <input
           type="date"
           [(ngModel)]="filters.endDateTo"
           (change)="onFilterChange()"
-          placeholder="To"
         />
       </div>
     </div>
@@ -198,16 +194,16 @@
               </td>
               <td>
                 <a
-                  [routerLink]="['/buildings', lease.buildingId]"
-                  (click)="$event.stopPropagation()"
+                  (click)="viewBuilding(lease.buildingId); $event.stopPropagation()"
+                  class="clickable-link"
                 >
                   {{ lease.buildingName }}
                 </a>
               </td>
               <td>
                 <a
-                  [routerLink]="['/units', lease.housingUnitId]"
-                  (click)="$event.stopPropagation()"
+                  (click)="viewUnit(lease.housingUnitId); $event.stopPropagation()"
+                  class="clickable-link"
                 >
                   {{ lease.housingUnitNumber }}
                 </a>

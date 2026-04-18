@@ -4,7 +4,11 @@
     <div class="header">
       <h1>Persons</h1>
       <div class="actions">
-        <a routerLink="/persons/new" class="btn btn-primary">+ Add Person</a>
+        @if (activeEstateService.canEdit()) {
+          <a [routerLink]="['/estates', estateId, 'persons', 'new']" class="btn btn-primary"
+            >+ Add Person</a
+          >
+        }
       </div>
     </div>
   </div>
@@ -34,7 +38,11 @@
   @if (!isLoading && persons.length === 0) {
     <div class="empty-state">
       <p>No persons yet.</p>
-      <a routerLink="/persons/new" class="btn btn-primary">Add Person</a>
+      @if (activeEstateService.canEdit()) {
+        <a [routerLink]="['/estates', estateId, 'persons', 'new']" class="btn btn-primary"
+          >Add Person</a
+        >
+      }
     </div>
   }
 
@@ -71,7 +79,10 @@
         </thead>
         <tbody>
           @for (person of persons; track person.id) {
-            <tr class="clickable" [routerLink]="['/persons', person.id]">
+            <tr
+              class="clickable"
+              [routerLink]="['/estates', estateId, 'persons', person.id]"
+            >
               <td>
                 <strong>{{ person.lastName }}</strong>
               </td>

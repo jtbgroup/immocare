@@ -1,4 +1,4 @@
-// core/services/lease.service.ts
+// core/services/lease.service.ts — UC016 Phase 3
 import { HttpClient, HttpParams } from "@angular/common/http";
 import { Injectable } from "@angular/core";
 import { Observable } from "rxjs";
@@ -28,9 +28,11 @@ export class LeaseService {
     return this.activeEstateService.activeEstateId()!;
   }
 
-  private base(): string {
-    return `/api/v1/estates/${this.estateId}/leases/`;
+  private get base(): string {
+    return `/api/v1/estates/${this.estateId}/leases`;
   }
+
+  // ── Per-unit endpoint ────────────────────────────────────────────────────
 
   getByUnit(unitId: number): Observable<LeaseSummary[]> {
     return this.http.get<LeaseSummary[]>(
@@ -38,13 +40,19 @@ export class LeaseService {
     );
   }
 
+  // ── CRUD ─────────────────────────────────────────────────────────────────
+
   getById(id: number): Observable<Lease> {
     return this.http.get<Lease>(`${this.base}/${id}`);
   }
 
-  create(req: CreateLeaseRequest, activate = false): Observable<Lease> {
+  create(unitId: number, req: CreateLeaseRequest, activate = false): Observable<Lease> {
     const params = new HttpParams().set("activate", activate);
-    return this.http.post<Lease>(`${this.base}`, req, { params });
+    return this.http.post<Lease>(
+      `/api/v1/estates/${this.estateId}/housing-units/${unitId}/leases`,
+      req,
+      { params },
+    );
   }
 
   update(id: number, req: UpdateLeaseRequest): Observable<Lease> {
@@ -54,6 +62,8 @@ export class LeaseService {
   changeStatus(id: number, req: ChangeLeaseStatusRequest): Observable<Lease> {
     return this.http.patch<Lease>(`${this.base}/${id}/status`, req);
   }
+
+  // ── Tenants ───────────────────────────────────────────────────────────────
 
   addTenant(leaseId: number, req: AddTenantRequest): Observable<Lease> {
     return this.http.post<Lease>(`${this.base}/${leaseId}/tenants`, req);
@@ -65,6 +75,8 @@ export class LeaseService {
     );
   }
 
+  // ── Rent adjustments ──────────────────────────────────────────────────────
+
   adjustRent(leaseId: number, req: AdjustRentRequest): Observable<Lease> {
     return this.http.post<Lease>(
       `${this.base}/${leaseId}/rent-adjustments`,
@@ -72,13 +84,17 @@ export class LeaseService {
     );
   }
 
+  // ── Alerts ────────────────────────────────────────────────────────────────
+
   /**
-   * Returns contextual lease alerts for inline banners (lease-section, lease-details).
+   * Returns contextual lease alerts for inline banners.
    * The global alerts page uses AlertService.getAlerts() instead.
    */
   getAlerts(): Observable<LeaseAlert[]> {
-    return this.http.get<LeaseAlert[]>(`${this.base}/leases/alerts`);
+    return this.http.get<LeaseAlert[]>(`${this.base}/alerts`);
   }
+
+  // ── Global list ───────────────────────────────────────────────────────────
 
   getAll(
     filters: LeaseGlobalFilters,
@@ -109,8 +125,6 @@ export class LeaseService {
     if (filters.rentMax != null)
       params = params.set("rentMax", filters.rentMax);
 
-    return this.http.get<Page<LeaseGlobalSummary>>(`${this.base}/leases`, {
-      params,
-    });
+    return this.http.get<Page<LeaseGlobalSummary>>(this.base, { params });
   }
 }

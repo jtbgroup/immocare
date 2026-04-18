@@ -9,7 +9,7 @@
   @if (person && !isLoading) {
     <!-- Breadcrumb -->
     <nav class="breadcrumb" aria-label="breadcrumb">
-      <a routerLink="/persons">Persons</a>
+      <a [routerLink]="['/estates', estateId, 'persons']">Persons</a>
       <span class="breadcrumb-separator">›</span>
       <span>{{ person.firstName }} {{ person.lastName }}</span>
     </nav>
@@ -28,7 +28,7 @@
         </div>
         <div class="actions">
           <a
-            [routerLink]="['/persons', person.id, 'edit']"
+            [routerLink]="['/estates', estateId, 'persons', person.id, 'edit']"
             class="btn btn-secondary"
             >Edit</a
           >
@@ -146,7 +146,7 @@
         <ul class="related-list">
           @for (b of person.ownedBuildings; track b.id) {
             <li class="related-item">
-              <a [routerLink]="['/buildings', b.id]">{{ b.name }}</a>
+              <a [routerLink]="['/estates', estateId, 'buildings', b.id]">{{ b.name }}</a>
               <span class="related-meta">{{ b.city }}</span>
             </li>
           }
@@ -161,7 +161,7 @@
         <ul class="related-list">
           @for (u of person.ownedUnits; track u.id) {
             <li class="related-item">
-              <a [routerLink]="['/units', u.id]">Unit {{ u.unitNumber }}</a>
+              <a [routerLink]="['/estates', estateId, 'units', u.id]">Unit {{ u.unitNumber }}</a>
               <span class="related-meta">{{ u.buildingName }}</span>
             </li>
           }
@@ -177,7 +177,7 @@
           @for (l of person.leases; track l.leaseId) {
             <li class="related-item">
               <div>
-                <a [routerLink]="['/leases', l.leaseId]"
+                <a [routerLink]="['/estates', estateId, 'leases', l.leaseId]"
                   >Lease #{{ l.leaseId }}</a
                 >
                 <span class="related-meta"

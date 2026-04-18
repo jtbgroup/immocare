@@ -1,4 +1,4 @@
-// features/person/person-form/person-form.component.ts
+// features/person/person-form/person-form.component.ts — UC016 Phase 3
 import { CommonModule } from "@angular/common";
 import { Component, OnInit } from "@angular/core";
 import {
@@ -10,6 +10,7 @@ import {
 import { ActivatedRoute, Router, RouterModule } from "@angular/router";
 import { debounceTime, distinctUntilChanged } from "rxjs/operators";
 
+import { ActiveEstateService } from "../../../../core/services/active-estate.service";
 import { PersonService } from "../../../../core/services/person.service";
 import { Person } from "../../../../models/person.model";
 
@@ -34,7 +35,12 @@ export class PersonFormComponent implements OnInit {
     private route: ActivatedRoute,
     private router: Router,
     private personService: PersonService,
+    private activeEstateService: ActiveEstateService,
   ) {}
+
+  get estateId(): string {
+    return this.activeEstateService.activeEstateId()!;
+  }
 
   ngOnInit(): void {
     this.buildForm();
@@ -132,7 +138,7 @@ export class PersonFormComponent implements OnInit {
 
     operation.subscribe({
       next: (person) => {
-        this.router.navigate(["/persons", person.id]);
+        this.router.navigate(["/estates", this.estateId, "persons", person.id]);
       },
       error: (err) => {
         this.errorMessage =
@@ -144,9 +150,14 @@ export class PersonFormComponent implements OnInit {
 
   cancel(): void {
     if (this.isEditMode) {
-      this.router.navigate(["/persons", this.personId]);
+      this.router.navigate([
+        "/estates",
+        this.estateId,
+        "persons",
+        this.personId,
+      ]);
     } else {
-      this.router.navigate(["/persons"]);
+      this.router.navigate(["/estates", this.estateId, "persons"]);
     }
   }
 

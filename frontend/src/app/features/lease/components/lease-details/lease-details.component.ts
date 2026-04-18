@@ -1,10 +1,11 @@
-// features/lease/components/lease-details/lease-details.component.ts
+// features/lease/components/lease-details/lease-details.component.ts — UC016 Phase 3
 import { CommonModule } from "@angular/common";
 import { Component, OnDestroy, OnInit } from "@angular/core";
 import { FormsModule } from "@angular/forms";
 import { ActivatedRoute, Router, RouterModule } from "@angular/router";
 import { Subject } from "rxjs";
 import { takeUntil } from "rxjs/operators";
+import { ActiveEstateService } from "../../../../core/services/active-estate.service";
 import { LeaseService } from "../../../../core/services/lease.service";
 import { TransactionService } from "../../../../core/services/transaction.service";
 import {
@@ -17,7 +18,6 @@ import { AppDatePipe } from "../../../../shared/pipes/app-date.pipe";
 import { RentAdjustmentSectionComponent } from "../rent-adjustment-section/rent-adjustment-section.component";
 import { TenantSectionComponent } from "../tenant-section/tenant-section.component";
 
-/** Valid status transitions mirroring backend state machine */
 const TRANSITIONS: Record<LeaseStatus, LeaseStatus[]> = {
   DRAFT: ["ACTIVE", "CANCELLED"],
   ACTIVE: ["FINISHED", "CANCELLED"],
@@ -45,12 +45,10 @@ export class LeaseDetailsComponent implements OnInit, OnDestroy {
   errorMessage = "";
   readonly LEASE_TYPE_LABELS = LEASE_TYPE_LABELS;
 
-  // Status change
   selectedStatus: LeaseStatus | "" = "";
   isChangingStatus = false;
   statusError = "";
 
-  // Financial
   leaseStats: TransactionStatistics | null = null;
 
   private destroy$ = new Subject<void>();
@@ -60,7 +58,12 @@ export class LeaseDetailsComponent implements OnInit, OnDestroy {
     private router: Router,
     private leaseService: LeaseService,
     private transactionService: TransactionService,
+    readonly activeEstateService: ActiveEstateService,
   ) {}
+
+  private get estateId(): string {
+    return this.activeEstateService.activeEstateId()!;
+  }
 
   ngOnInit(): void {
     const id = this.route.snapshot.paramMap.get("id");
@@ -90,7 +93,6 @@ export class LeaseDetailsComponent implements OnInit, OnDestroy {
   }
 
   loadLeaseStats(lease: Lease): void {
-    // Filter by unitId scoped to the lease period
     this.transactionService
       .getStatistics({ unitId: lease.housingUnitId })
       .pipe(takeUntil(this.destroy$))

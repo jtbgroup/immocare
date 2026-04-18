@@ -1,4 +1,4 @@
-<!-- features/lease/lease-list/lease-list.component.html -->
+<!-- features/lease/lease-list/lease-list.component.html — UC016 Phase 3 -->
 <div class="info-card">
   <h2>Lease History</h2>
 
@@ -41,7 +41,12 @@
               </td>
               <td>
                 <a
-                  [routerLink]="['/leases', l.id]"
+                  [routerLink]="[
+                    '/estates',
+                    activeEstateService.activeEstateId(),
+                    'leases',
+                    l.id,
+                  ]"
                   class="btn btn-secondary btn-sm"
                   >View</a
                 >

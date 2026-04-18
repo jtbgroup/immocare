@@ -3,6 +3,7 @@ import { Component, OnInit } from "@angular/core";
 import { FormsModule } from "@angular/forms";
 import { RouterModule } from "@angular/router";
 import { debounceTime, distinctUntilChanged, Subject } from "rxjs";
+import { ActiveEstateService } from "../../../../core/services/active-estate.service";
 import { PersonService } from "../../../../core/services/person.service";
 import { PersonSummary } from "../../../../models/person.model";
 import { SortIconPipe } from "../../../../shared/pipes/sort-icon.pipe";
@@ -29,7 +30,14 @@ export class PersonListComponent implements OnInit {
 
   private searchSubject = new Subject<string>();
 
-  constructor(private personService: PersonService) {}
+  constructor(
+    private personService: PersonService,
+    readonly activeEstateService: ActiveEstateService,
+  ) {}
+
+  get estateId(): string {
+    return this.activeEstateService.activeEstateId()!;
+  }
 
   ngOnInit(): void {
     this.searchSubject

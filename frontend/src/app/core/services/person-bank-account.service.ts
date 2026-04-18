@@ -19,7 +19,7 @@ export class PersonBankAccountService {
   }
 
   private base(personId: number): string {
-    return `/api/v1/estates/${this.estateId}/${personId}/bank-accounts`;
+    return `/api/v1/estates/${this.estateId}/persons/${personId}/bank-accounts`;
   }
 
   getAll(personId: number): Observable<PersonBankAccount[]> {

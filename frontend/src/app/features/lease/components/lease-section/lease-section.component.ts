@@ -1,7 +1,8 @@
-// features/lease/lease-section/lease-section.component.ts
+// features/lease/lease-section/lease-section.component.ts — UC016 Phase 3
 import { CommonModule } from "@angular/common";
 import { Component, Input, OnInit } from "@angular/core";
 import { RouterModule } from "@angular/router";
+import { ActiveEstateService } from "../../../../core/services/active-estate.service";
 import { LeaseService } from "../../../../core/services/lease.service";
 import {
   LEASE_TYPE_LABELS,
@@ -26,7 +27,10 @@ export class LeaseSectionComponent implements OnInit {
 
   readonly LEASE_TYPE_LABELS = LEASE_TYPE_LABELS;
 
-  constructor(private leaseService: LeaseService) {}
+  constructor(
+    private leaseService: LeaseService,
+    readonly activeEstateService: ActiveEstateService,
+  ) {}
 
   ngOnInit(): void {
     this.load();

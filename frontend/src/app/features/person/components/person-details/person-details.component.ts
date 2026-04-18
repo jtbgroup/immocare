@@ -1,9 +1,10 @@
-// features/person/person-details/person-details.component.ts
+// features/person/person-details/person-details.component.ts — UC016 Phase 3
 import { CommonModule } from "@angular/common";
 import { Component, OnInit } from "@angular/core";
 import { FormsModule } from "@angular/forms";
 import { ActivatedRoute, Router, RouterModule } from "@angular/router";
 
+import { ActiveEstateService } from "../../../../core/services/active-estate.service";
 import { PersonBankAccountService } from "../../../../core/services/person-bank-account.service";
 import { PersonService } from "../../../../core/services/person.service";
 import {
@@ -53,7 +54,12 @@ export class PersonDetailsComponent implements OnInit {
     private router: Router,
     private personService: PersonService,
     private personBankAccountService: PersonBankAccountService,
+    private activeEstateService: ActiveEstateService,
   ) {}
+
+  get estateId(): string {
+    return this.activeEstateService.activeEstateId()!;
+  }
 
   ngOnInit(): void {
     const id = this.route.snapshot.paramMap.get("id");
@@ -92,7 +98,7 @@ export class PersonDetailsComponent implements OnInit {
     if (!this.person) return;
     this.isDeleting = true;
     this.personService.delete(this.person.id).subscribe({
-      next: () => this.router.navigate(["/persons"]),
+      next: () => this.router.navigate(["/estates", this.estateId, "persons"]),
       error: (err) => {
         this.isDeleting = false;
         if (err.status === 409) {

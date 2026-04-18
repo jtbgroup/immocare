@@ -1,4 +1,4 @@
-<!-- app.component.html — UC016 Phase 2 -->
+<!-- app.component.html — UC016 Phase 3 -->
 <div class="app-container">
   <header class="app-header">
     <!-- Brand -->
@@ -12,10 +12,6 @@
       <div class="header-sep"></div>
       <nav class="app-nav">
 
-        <!--
-          Phase 2: Buildings and Units links are now estate-scoped.
-          Falls back gracefully to /select-estate if no estate is active.
-        -->
         @if (activeEstateService.activeEstateId()) {
           <a
             [routerLink]="['/estates', activeEstateService.activeEstateId(), 'buildings']"
@@ -31,18 +27,19 @@
           >
             🏠 Units
           </a>
+          <a
+            [routerLink]="['/estates', activeEstateService.activeEstateId(), 'leases']"
+            routerLinkActive="app-nav__link--active"
+            class="app-nav__link"
+          >
+            📄 Leases
+          </a>
         } @else {
           <span class="app-nav__link app-nav__link--disabled">🏢 Buildings</span>
           <span class="app-nav__link app-nav__link--disabled">🏠 Units</span>
+          <span class="app-nav__link app-nav__link--disabled">📄 Leases</span>
         }
 
-        <a
-          routerLink="/leases"
-          routerLinkActive="app-nav__link--active"
-          class="app-nav__link"
-        >
-          📄 Leases
-        </a>
         <a
           routerLink="/transactions"
           routerLinkActive="app-nav__link--active"
@@ -61,9 +58,17 @@
             🗂 Management <span class="nav-chevron">▾</span>
           </button>
           <div class="nav-dropdown" [class.open]="managementOpen">
-            <a routerLink="/persons" class="nav-dropdown__item" (click)="closeManagement()">
-              👤 People
-            </a>
+            @if (activeEstateService.activeEstateId()) {
+              <a
+                [routerLink]="['/estates', activeEstateService.activeEstateId(), 'persons']"
+                class="nav-dropdown__item"
+                (click)="closeManagement()"
+              >
+                👤 People
+              </a>
+            } @else {
+              <span class="nav-dropdown__item" style="opacity:0.4;cursor:not-allowed">👤 People</span>
+            }
             <a routerLink="/bank-accounts" class="nav-dropdown__item" (click)="closeManagement()">
               🏦 Bank Accounts
             </a>
