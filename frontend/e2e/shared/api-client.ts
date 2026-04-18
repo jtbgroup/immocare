@@ -65,6 +65,20 @@ async function patch<T>(path: string, body: unknown): Promise<T> {
   return res.json();
 }
 
+// ─── Estates ──────────────────────────────────────────────────────────────────
+
+export interface CreateEstatePayload {
+  name: string;
+  description?: string;
+  firstManagerId?: number;
+}
+
+export async function createEstate(
+  data: CreateEstatePayload,
+): Promise<{ id: string }> {
+  return post("/admin/estates", data);
+}
+
 // ─── Persons ──────────────────────────────────────────────────────────────────
 
 export interface PersonPayload {
@@ -100,7 +114,10 @@ export async function createPersonBankAccount(
   personId: number,
   data: PersonBankAccountPayload,
 ): Promise<{ id: number }> {
-  return post(`/persons/${personId}/bank-accounts`, { primary: false, ...data });
+  return post(`/persons/${personId}/bank-accounts`, {
+    primary: false,
+    ...data,
+  });
 }
 
 // ─── Buildings ────────────────────────────────────────────────────────────────
@@ -294,7 +311,12 @@ export async function createTagSubcategory(
   direction: "INCOME" | "EXPENSE" | "BOTH",
   description?: string,
 ): Promise<{ id: number }> {
-  return post("/tag-subcategories", { categoryId, name, direction, description });
+  return post("/tag-subcategories", {
+    categoryId,
+    name,
+    direction,
+    description,
+  });
 }
 
 // ─── Tag subcategories (read) ─────────────────────────────────────────────────

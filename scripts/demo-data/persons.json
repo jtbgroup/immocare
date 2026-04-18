@@ -10,7 +10,8 @@
     "streetAddress": "Rue de la Loi 42",
     "postalCode": "1000",
     "city": "Bruxelles",
-    "country": "Belgium"
+    "country": "Belgium",
+    "estateName": "Estate Ville"
   },
   {
     "lastName": "Martin",
@@ -23,7 +24,8 @@
     "streetAddress": "Avenue Louise 120",
     "postalCode": "1050",
     "city": "Ixelles",
-    "country": "Belgium"
+    "country": "Belgium",
+    "estateName": "Estate Ville"
   },
   {
     "lastName": "Lecomte",
@@ -36,7 +38,8 @@
     "streetAddress": "Rue du Midi 15",
     "postalCode": "1000",
     "city": "Bruxelles",
-    "country": "Belgium"
+    "country": "Belgium",
+    "estateName": "Estate Ville"
   },
   {
     "lastName": "Bernard",
@@ -49,7 +52,8 @@
     "streetAddress": "Boulevard du Roi Albert 8",
     "postalCode": "1082",
     "city": "Berchem-Sainte-Agathe",
-    "country": "Belgium"
+    "country": "Belgium",
+    "estateName": "Estate Ville"
   },
   {
     "lastName": "Nguyen",
@@ -62,7 +66,8 @@
     "streetAddress": "Chaussée de Wavre 200",
     "postalCode": "1050",
     "city": "Ixelles",
-    "country": "Belgium"
+    "country": "Belgium",
+    "estateName": "Estate Mer"
   },
   {
     "lastName": "Peeters",
@@ -75,7 +80,8 @@
     "streetAddress": "Rue Haute 300",
     "postalCode": "1000",
     "city": "Bruxelles",
-    "country": "Belgium"
+    "country": "Belgium",
+    "estateName": "Estate Mer"
   },
   {
     "lastName": "Maes",
@@ -88,7 +94,8 @@
     "streetAddress": "Rue de Namur 5",
     "postalCode": "1000",
     "city": "Bruxelles",
-    "country": "Belgium"
+    "country": "Belgium",
+    "estateName": "Estate Mer"
   },
   {
     "lastName": "Claes",
@@ -101,7 +108,8 @@
     "streetAddress": "Avenue des Arts 34",
     "postalCode": "1040",
     "city": "Etterbeek",
-    "country": "Belgium"
+    "country": "Belgium",
+    "estateName": "Estate Montagne"
   },
   {
     "lastName": "Rousseau",
@@ -114,7 +122,8 @@
     "streetAddress": "Square des Nations 2",
     "postalCode": "1000",
     "city": "Bruxelles",
-    "country": "Belgium"
+    "country": "Belgium",
+    "estateName": "Estate Montagne"
   },
   {
     "lastName": "Vandenberghe",
@@ -127,7 +136,8 @@
     "streetAddress": "Rue de la Science 10",
     "postalCode": "1040",
     "city": "Etterbeek",
-    "country": "Belgium"
+    "country": "Belgium",
+    "estateName": "Estate Montagne"
   },
   {
     "lastName": "Dumont",
@@ -140,7 +150,8 @@
     "streetAddress": "Rue Belliard 50",
     "postalCode": "1040",
     "city": "Etterbeek",
-    "country": "Belgium"
+    "country": "Belgium",
+    "estateName": "Estate Montagne"
   },
   {
     "lastName": "Simon",
@@ -153,7 +164,8 @@
     "streetAddress": "Avenue de la Toison d'Or 70",
     "postalCode": "1060",
     "city": "Saint-Gilles",
-    "country": "Belgium"
+    "country": "Belgium",
+    "estateName": "Estate Montagne"
   },
   {
     "lastName": "Laurent",
@@ -166,7 +178,8 @@
     "streetAddress": "Chaussée de Charleroi 85",
     "postalCode": "1060",
     "city": "Saint-Gilles",
-    "country": "Belgium"
+    "country": "Belgium",
+    "estateName": "Estate Montagne"
   },
   {
     "lastName": "Willems",
@@ -179,7 +192,8 @@
     "streetAddress": "Rue du Trône 20",
     "postalCode": "1050",
     "city": "Ixelles",
-    "country": "Belgium"
+    "country": "Belgium",
+    "estateName": "Estate Mer"
   },
   {
     "lastName": "Fontaine",
@@ -192,6 +206,7 @@
     "streetAddress": "Rue de la Réforme 3",
     "postalCode": "1050",
     "city": "Ixelles",
-    "country": "Belgium"
+    "country": "Belgium",
+    "estateName": "Estate Mer"
   }
 ]

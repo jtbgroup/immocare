@@ -3,9 +3,11 @@
 # seed.sh — Injects full demo or real data via the REST API
 #
 # Correct routes (from controllers):
+#   POST /api/v1/admin/estates                                  ← EstateAdminController
 #   POST /api/v1/users
 #   POST /api/v1/tag-categories                                 ← TagCategoryController
 #   POST /api/v1/tag-subcategories                              ← TagSubcategoryController
+#   POST /api/v1/bank-accounts                                  ← BankAccountController
 #   POST /api/v1/persons
 #   POST /api/v1/persons/{personId}/bank-accounts               ← PersonBankAccountController
 #   POST /api/v1/buildings
@@ -21,6 +23,7 @@
 #   PATCH /api/v1/leases/{id}/status
 #
 # Seeding order:
+#   0.  Estates
 #   1.  Users
 #   1b. Tag categories & subcategories
 #   2.  Persons (+ bank accounts)
@@ -143,10 +146,62 @@ if [ "$HTTP_STATUS" != "200" ]; then
 fi
 log_ok "Authenticated"
 
+# Get current user ID
+CURRENT_USER_ID=$(curl -s "$BASE_URL/api/v1/auth/me" -b "$COOKIE_JAR" | jq -r '.id')
+if [ -z "$CURRENT_USER_ID" ] || [ "$CURRENT_USER_ID" = "null" ]; then
+  log_error "Failed to get current user ID"
+  exit 1
+fi
+log_info "Current user ID: $CURRENT_USER_ID"
+
+# ─── 0. Estates ───────────────────────────────────────────────────────────────
+ESTATES_FILE="$DATA_DIR/estates.json"
+if [ -f "$ESTATES_FILE" ]; then
+  log_section "0 — Seeding estates"
+  TOTAL=$(jq length "$ESTATES_FILE"); CREATED=0; SKIPPED=0
+  declare -A ESTATE_ID_MAP    # indexed by estate name
+  
+  for i in $(seq 0 $(( TOTAL - 1 ))); do
+    ESTATE=$(jq -c ".[$i]" "$ESTATES_FILE")
+    ENAME=$(echo "$ESTATE" | jq -r '.name')
+    EDESC=$(echo "$ESTATE" | jq -r '.description // empty')
+    
+    # Remove createdByUsername (not part of API request)
+    PAYLOAD=$(echo "$ESTATE" | jq 'del(.createdByUsername)')
+    
+    S=$(curl -s -o /tmp/estate.json -w "%{http_code}" \
+      -X POST "$BASE_URL/api/v1/admin/estates" \
+      -H "Content-Type: application/json" -b "$COOKIE_JAR" \
+      -d "$PAYLOAD")
+    case "$S" in
+      200|201)
+        EID=$(jq -r '.id' /tmp/estate.json)
+        ESTATE_ID_MAP["$ENAME"]="$EID"
+        log_ok "Estate: $ENAME (id=$EID)"
+        CREATED=$(( CREATED+1 ))
+        ;;
+      409)
+        # Recover existing id
+        EID=$(curl -s "$BASE_URL/api/v1/admin/estates?search=$ENAME&size=10" -b "$COOKIE_JAR" \
+          | jq -r '.content[]? | select(.name == "'"$ENAME"'") | .id' | head -1)
+        ESTATE_ID_MAP["$ENAME"]="$EID"
+        log_warn "Estate: $ENAME (already exists${EID:+, id=$EID})"
+        SKIPPED=$(( SKIPPED+1 ))
+        ;;
+      *)
+        log_failure "Estate: $ENAME" "$S" /tmp/estate.json
+        ;;
+    esac
+  done
+  log_info "Estates: $CREATED created, $SKIPPED skipped"
+else
+  log_info "No estates.json found — skipping estates"
+fi
+
 # ─── 1. Users ─────────────────────────────────────────────────────────────────
 USERS_FILE="$DATA_DIR/users.json"
 if [ -f "$USERS_FILE" ]; then
-  log_section "1/8 — Seeding users"
+  log_section "1/9 — Seeding users"
   TOTAL=$(jq length "$USERS_FILE"); CREATED=0; SKIPPED=0
   for i in $(seq 0 $(( TOTAL - 1 ))); do
     USER=$(jq -c ".[$i]" "$USERS_FILE")
@@ -244,7 +299,7 @@ fi
  
 
 # ─── 2. Persons + bank accounts ───────────────────────────────────────────────
-log_section "2/8 — Seeding persons (+ bank accounts)"
+log_section "2/9 — Seeding persons (+ bank accounts)"
 PERSONS_FILE="$DATA_DIR/persons.json"
 TOTAL=$(jq length "$PERSONS_FILE")
 declare -A PERSON_ID_MAP    # indexed by nationalId
@@ -275,12 +330,20 @@ for i in $(seq 0 $(( TOTAL - 1 ))); do
   NID=$(echo "$P"   | jq -r '.nationalId // empty')
   EMAIL=$(echo "$P" | jq -r '.email // empty' | tr '[:upper:]' '[:lower:]')
   NAME=$(echo "$P"  | jq -r '"\(.firstName) \(.lastName)"')
+  ESTATE_NAME=$(echo "$P" | jq -r '.estateName // empty')
 
-  # Strip bankAccounts before POSTing — not part of CreatePersonRequest
-  PAYLOAD=$(echo "$P" | jq 'del(.bankAccounts)')
+  # Get estate ID from map
+  ESTATE_ID="${ESTATE_ID_MAP[$ESTATE_NAME]}"
+  if [ -z "$ESTATE_ID" ]; then
+    log_error "Person: $NAME — estate '$ESTATE_NAME' not found"
+    continue
+  fi
+
+  # Strip bankAccounts and estateName before POSTing — not part of CreatePersonRequest
+  PAYLOAD=$(echo "$P" | jq 'del(.bankAccounts) | del(.estateName)')
 
   S=$(curl -s -o /tmp/sr.json -w "%{http_code}" \
-    -X POST "$BASE_URL/api/v1/persons" -H "Content-Type: application/json" -b "$COOKIE_JAR" -d "$PAYLOAD")
+    -X POST "$BASE_URL/api/v1/estates/$ESTATE_ID/persons" -H "Content-Type: application/json" -b "$COOKIE_JAR" -d "$PAYLOAD")
   case "$S" in
     200|201)
       ID=$(jq -r '.id' /tmp/sr.json)
@@ -293,12 +356,12 @@ for i in $(seq 0 $(( TOTAL - 1 ))); do
       # Recover id: try nationalId search first, then email
       ID=""
       if [ -n "$NID" ]; then
-        SEARCH=$(get_resource "/api/v1/persons?search=$NID&size=5")
+        SEARCH=$(get_resource "/api/v1/estates/$ESTATE_ID/persons?search=$NID&size=5")
         ID=$(echo "$SEARCH" | jq -r '.content[]? | select(.nationalId == "'"$NID"'") | .id' | head -1)
       fi
       if [ -z "$ID" ] && [ -n "$EMAIL" ]; then
         ENC_EMAIL=$(python3 -c "import urllib.parse,sys; print(urllib.parse.quote(sys.argv[1]))" "$EMAIL" 2>/dev/null || echo "$EMAIL")
-        SEARCH=$(get_resource "/api/v1/persons?search=$ENC_EMAIL&size=10")
+        SEARCH=$(get_resource "/api/v1/estates/$ESTATE_ID/persons?search=$ENC_EMAIL&size=10")
         ID=$(echo "$SEARCH" | jq -r --arg em "$EMAIL" '.content[]? | select((.email // "" | ascii_downcase) == $em) | .id' | head -1)
       fi
       [ -n "$NID" ]   && PERSON_ID_MAP["$NID"]="${ID:-}"
@@ -314,7 +377,7 @@ for i in $(seq 0 $(( TOTAL - 1 ))); do
 done
 
 # ─── 3. Buildings ─────────────────────────────────────────────────────────────
-log_section "3/8 — Seeding buildings"
+log_section "3/9 — Seeding buildings"
 BUILDINGS_FILE="$DATA_DIR/buildings.json"
 TOTAL=$(jq length "$BUILDINGS_FILE")
 declare -A BUILDING_ID_MAP
@@ -323,12 +386,21 @@ for i in $(seq 0 $(( TOTAL - 1 ))); do
   B=$(jq -c ".[$i]" "$BUILDINGS_FILE")
   BNAME=$(echo "$B" | jq -r '.name')
   OWNER_NID=$(echo "$B" | jq -r '.ownerPersonNationalId // empty')
-  PAYLOAD=$(echo "$B" | jq 'del(.ownerPersonNationalId)')
+  ESTATE_NAME=$(echo "$B" | jq -r '.estateName // empty')
+  
+  # Get estate ID from map
+  ESTATE_ID="${ESTATE_ID_MAP[$ESTATE_NAME]}"
+  if [ -z "$ESTATE_ID" ]; then
+    log_error "Building: $BNAME — estate '$ESTATE_NAME' not found"
+    continue
+  fi
+  
+  PAYLOAD=$(echo "$B" | jq 'del(.ownerPersonNationalId) | del(.estateName)')
   if [ -n "$OWNER_NID" ] && [ -n "${PERSON_ID_MAP[$OWNER_NID]+_}" ] && [ -n "${PERSON_ID_MAP[$OWNER_NID]}" ]; then
     PAYLOAD=$(echo "$PAYLOAD" | jq --argjson oid "${PERSON_ID_MAP[$OWNER_NID]}" '. + {ownerId: $oid}')
   fi
   S=$(curl -s -o /tmp/sr.json -w "%{http_code}" \
-    -X POST "$BASE_URL/api/v1/buildings" -H "Content-Type: application/json" -b "$COOKIE_JAR" -d "$PAYLOAD")
+    -X POST "$BASE_URL/api/v1/estates/$ESTATE_ID/buildings" -H "Content-Type: application/json" -b "$COOKIE_JAR" -d "$PAYLOAD")
   case "$S" in
     200|201)
       ID=$(jq -r '.id' /tmp/sr.json)
@@ -337,7 +409,7 @@ for i in $(seq 0 $(( TOTAL - 1 ))); do
       ;;
     409)
       ENC=$(python3 -c "import urllib.parse,sys; print(urllib.parse.quote(sys.argv[1]))" "$BNAME" 2>/dev/null || echo "$BNAME")
-      ID=$(get_resource "/api/v1/buildings?search=$ENC&size=20" | jq -r '.content[]? | select(.name == "'"$BNAME"'") | .id' | head -1)
+      ID=$(get_resource "/api/v1/estates/$ESTATE_ID/buildings?search=$ENC&size=20" | jq -r '.content[]? | select(.name == "'"$BNAME"'") | .id' | head -1)
       if [ -z "$ID" ]; then
         log_error "Building: '$BNAME' already exists but id could not be resolved — dependent resources will be skipped"
       else
@@ -352,7 +424,7 @@ for i in $(seq 0 $(( TOTAL - 1 ))); do
 done
 
 # ─── 4. Housing Units ─────────────────────────────────────────────────────────
-log_section "4/8 — Seeding housing units"
+log_section "4/9 — Seeding housing units"
 UNITS_FILE="$DATA_DIR/housing_units.json"
 TOTAL=$(jq length "$UNITS_FILE")
 declare -A UNIT_ID_MAP
@@ -362,17 +434,26 @@ for i in $(seq 0 $(( TOTAL - 1 ))); do
   BNAME=$(echo "$U" | jq -r '.buildingName')
   UNIT_NUM=$(echo "$U" | jq -r '.unitNumber')
   OWNER_NID=$(echo "$U" | jq -r '.ownerPersonNationalId // empty')
+  ESTATE_NAME=$(echo "$U" | jq -r '.estateName // empty')
+  
+  # Get estate ID from map
+  ESTATE_ID="${ESTATE_ID_MAP[$ESTATE_NAME]}"
+  if [ -z "$ESTATE_ID" ]; then
+    log_error "Unit $UNIT_NUM: estate '$ESTATE_NAME' not found"
+    continue
+  fi
+  
   BID="${BUILDING_ID_MAP[$BNAME]:-}"
   if [ -z "$BID" ]; then log_error "Unit $UNIT_NUM: building '$BNAME' not resolved — skipped"; continue; fi
 
-  PAYLOAD=$(echo "$U" | jq 'del(.buildingName) | del(.ownerPersonNationalId)' \
+  PAYLOAD=$(echo "$U" | jq 'del(.buildingName) | del(.ownerPersonNationalId) | del(.estateName)' \
     | jq --argjson bid "$BID" '. + {buildingId: $bid}')
   if [ -n "$OWNER_NID" ] && [ -n "${PERSON_ID_MAP[$OWNER_NID]+_}" ] && [ -n "${PERSON_ID_MAP[$OWNER_NID]}" ]; then
     PAYLOAD=$(echo "$PAYLOAD" | jq --argjson oid "${PERSON_ID_MAP[$OWNER_NID]}" '. + {ownerId: $oid}')
   fi
 
   S=$(curl -s -o /tmp/sr.json -w "%{http_code}" \
-    -X POST "$BASE_URL/api/v1/units" -H "Content-Type: application/json" -b "$COOKIE_JAR" -d "$PAYLOAD")
+    -X POST "$BASE_URL/api/v1/estates/$ESTATE_ID/units" -H "Content-Type: application/json" -b "$COOKIE_JAR" -d "$PAYLOAD")
   KEY="$BNAME|$UNIT_NUM"
   case "$S" in
     200|201)
@@ -381,7 +462,7 @@ for i in $(seq 0 $(( TOTAL - 1 ))); do
       log_ok "Unit: $BNAME/$UNIT_NUM (id=$ID)"
       ;;
     409)
-      ID=$(get_resource "/api/v1/buildings/$BID/units" | jq -r '.[]? | select(.unitNumber == "'"$UNIT_NUM"'") | .id' | head -1)
+      ID=$(get_resource "/api/v1/estates/$ESTATE_ID/buildings/$BID/units" | jq -r '.[]? | select(.unitNumber == "'"$UNIT_NUM"'") | .id' | head -1)
       UNIT_ID_MAP["$KEY"]="${ID:-}"
       log_warn "Unit: $BNAME/$UNIT_NUM (already exists${ID:+, id=$ID})"
       ;;
@@ -392,7 +473,7 @@ for i in $(seq 0 $(( TOTAL - 1 ))); do
 done
 
 # ─── 5. Boilers ───────────────────────────────────────────────────────────────
-log_section "5/8 — Seeding boilers"
+log_section "5/9 — Seeding boilers"
 BOILERS_FILE="$DATA_DIR/boilers.json"
 TOTAL=$(jq length "$BOILERS_FILE")
 
@@ -435,7 +516,7 @@ for i in $(seq 0 $(( TOTAL - 1 ))); do
 done
 
 # ─── 6. Meters ────────────────────────────────────────────────────────────────
-log_section "6/8 — Seeding meters"
+log_section "6/9 — Seeding meters"
 METERS_FILE="$DATA_DIR/meters.json"
 TOTAL=$(jq length "$METERS_FILE")
 
@@ -445,8 +526,16 @@ for i in $(seq 0 $(( TOTAL - 1 ))); do
   OWNER_TYPE=$(echo "$M" | jq -r '.ownerType // "HOUSING_UNIT"')
   MTYPE=$(echo "$M" | jq -r '.type')
   MNUM=$(echo "$M" | jq -r '.meterNumber')
+  ESTATE_NAME=$(echo "$M" | jq -r '.estateName // empty')
+  
+  # Get estate ID from map
+  ESTATE_ID="${ESTATE_ID_MAP[$ESTATE_NAME]}"
+  if [ -z "$ESTATE_ID" ]; then
+    log_error "Meter $MTYPE/$MNUM: estate '$ESTATE_NAME' not found"
+    continue
+  fi
 
-  PAYLOAD=$(echo "$M" | jq 'del(.buildingName) | del(.unitNumber) | del(.ownerType)')
+  PAYLOAD=$(echo "$M" | jq 'del(.buildingName) | del(.unitNumber) | del(.ownerType) | del(.estateName)')
 
   if [ "$OWNER_TYPE" = "BUILDING" ]; then
     BID="${BUILDING_ID_MAP[$BNAME]:-}"
@@ -454,7 +543,7 @@ for i in $(seq 0 $(( TOTAL - 1 ))); do
       log_error "Meter $MTYPE/$MNUM: building '$BNAME' not resolved — skipped"
       continue
     fi
-    ENDPOINT="$BASE_URL/api/v1/buildings/$BID/meters"
+    ENDPOINT="$BASE_URL/api/v1/estates/$ESTATE_ID/buildings/$BID/meters"
   else
     UNIT_NUM=$(echo "$M" | jq -r '.unitNumber')
     KEY="$BNAME|$UNIT_NUM"
@@ -463,7 +552,7 @@ for i in $(seq 0 $(( TOTAL - 1 ))); do
       log_error "Meter $MTYPE/$MNUM: unit '$KEY' not resolved — skipped"
       continue
     fi
-    ENDPOINT="$BASE_URL/api/v1/housing-units/$UNIT_ID/meters"
+    ENDPOINT="$BASE_URL/api/v1/estates/$ESTATE_ID/housing-units/$UNIT_ID/meters"
   fi
 
   S=$(curl -s -o /tmp/sr.json -w "%{http_code}" \
@@ -477,7 +566,7 @@ for i in $(seq 0 $(( TOTAL - 1 ))); do
 done
 
 # ─── 7. Fire Extinguishers ────────────────────────────────────────────────────
-log_section "7/8 — Seeding fire extinguishers"
+log_section "7/9 — Seeding fire extinguishers"
 FE_FILE="$DATA_DIR/fire_extinguishers.json"
 TOTAL=$(jq length "$FE_FILE")
 
@@ -485,12 +574,21 @@ for i in $(seq 0 $(( TOTAL - 1 ))); do
   FE=$(jq -c ".[$i]" "$FE_FILE")
   BNAME=$(echo "$FE" | jq -r '.buildingName')
   FENUM=$(echo "$FE" | jq -r '.identificationNumber')
+  ESTATE_NAME=$(echo "$FE" | jq -r '.estateName // empty')
+  
+  # Get estate ID from map
+  ESTATE_ID="${ESTATE_ID_MAP[$ESTATE_NAME]}"
+  if [ -z "$ESTATE_ID" ]; then
+    log_error "Extinguisher $FENUM: estate '$ESTATE_NAME' not found"
+    continue
+  fi
+  
   BID="${BUILDING_ID_MAP[$BNAME]:-}"
   if [ -z "$BID" ]; then log_error "Extinguisher $FENUM: building '$BNAME' not resolved — skipped"; continue; fi
 
-  PAYLOAD=$(echo "$FE" | jq 'del(.buildingName) | del(.revisions)')
+  PAYLOAD=$(echo "$FE" | jq 'del(.buildingName) | del(.estateName) | del(.revisions)')
   S=$(curl -s -o /tmp/sr.json -w "%{http_code}" \
-    -X POST "$BASE_URL/api/v1/buildings/$BID/fire-extinguishers" \
+    -X POST "$BASE_URL/api/v1/estates/$ESTATE_ID/buildings/$BID/fire-extinguishers" \
     -H "Content-Type: application/json" -b "$COOKIE_JAR" -d "$PAYLOAD")
   case "$S" in
     200|201)
@@ -502,7 +600,7 @@ for i in $(seq 0 $(( TOTAL - 1 ))); do
         REV=$(echo "$REVISIONS" | jq -c ".[$j]")
         REV_DATE=$(echo "$REV" | jq -r '.revisionDate')
         RS=$(curl -s -o /tmp/rr.json -w "%{http_code}" \
-          -X POST "$BASE_URL/api/v1/fire-extinguishers/$FE_ID/revisions" \
+          -X POST "$BASE_URL/api/v1/estates/$ESTATE_ID/fire-extinguishers/$FE_ID/revisions" \
           -H "Content-Type: application/json" -b "$COOKIE_JAR" -d "$REV")
         if [ "$RS" = "200" ] || [ "$RS" = "201" ]; then
           log_ok "  Revision $REV_DATE"
@@ -517,124 +615,151 @@ for i in $(seq 0 $(( TOTAL - 1 ))); do
 done
 
 # ─── 8. Leases ────────────────────────────────────────────────────────────────
-# Strategy to avoid unique constraint on (housing_unit_id, status):
-#   FINISHED → create as DRAFT, PATCH → ACTIVE → PATCH → FINISHED
-#   ACTIVE   → create with ?activate=true (bypasses DRAFT entirely)
-# Each FINISHED lease must be fully committed before the next one starts.
-log_section "8/8 — Seeding leases"
+# Strategy: Group leases by unit and process them chronologically to avoid conflicts.
+# Each unit can only have one ACTIVE/DRAFT lease at a time.
+log_section "8/9 — Seeding leases"
 LEASES_FILE="$DATA_DIR/leases.json"
 TOTAL=$(jq length "$LEASES_FILE")
 CREATED=0; SKIPPED=0; ERRORS=0
 
+# Group leases by unit (buildingName|unitNumber)
+declare -A UNIT_LEASES
 for i in $(seq 0 $(( TOTAL - 1 ))); do
   L=$(jq -c ".[$i]" "$LEASES_FILE")
   BNAME=$(echo "$L" | jq -r '.buildingName // empty')
-  [ -z "$BNAME" ] && continue
-
   UNIT_NUM=$(echo "$L" | jq -r '.unitNumber')
-  STATUS_VAL=$(echo "$L" | jq -r '.status')
-  LABEL="Lease ($STATUS_VAL) $BNAME/$UNIT_NUM"
+  [ -z "$BNAME" ] && continue
+  
   KEY="$BNAME|$UNIT_NUM"
-  UNIT_ID="${UNIT_ID_MAP[$KEY]:-}"
-  if [ -z "$UNIT_ID" ]; then
-    log_error "$LABEL: unit not resolved — skipped"
-    ERRORS=$(( ERRORS+1 )); continue
-  fi
+  UNIT_LEASES["$KEY"]="${UNIT_LEASES[$KEY]:-} $i"
+done
 
-  # ── Resolve tenants ────────────────────────────────────────────────────────
-  # Tenants may use `email` instead of `nationalId`.
-  # Resolution order: nationalId → local email map → live API search.
-  TENANTS_JSON=$(echo "$L" | jq '.tenants // []')
-  TENANT_COUNT=$(echo "$TENANTS_JSON" | jq length)
-  RESOLVED_TENANTS='[]'
-  for j in $(seq 0 $(( TENANT_COUNT - 1 ))); do
-    T=$(echo "$TENANTS_JSON" | jq -c ".[$j]")
-    TNID=$(echo "$T"   | jq -r '.nationalId // empty')
-    TEMAIL=$(echo "$T" | jq -r '.email // empty' | tr '[:upper:]' '[:lower:]')
-    TROLE=$(echo "$T"  | jq -r '.role')
-
-    TID=""
-
-    # 1. Try nationalId
-    if [ -n "$TNID" ] && [ "$TNID" != "null" ]; then
-      TID="${PERSON_ID_MAP[$TNID]:-}"
+# Process each unit's leases in chronological order
+for UNIT_KEY in "${!UNIT_LEASES[@]}"; do
+  IFS='|' read -r BNAME UNIT_NUM <<< "$UNIT_KEY"
+  LEASE_INDICES=${UNIT_LEASES[$UNIT_KEY]}
+  
+  # Sort leases by start date for this unit
+  SORTED_INDICES=$(for idx in $LEASE_INDICES; do
+    START_DATE=$(jq -r ".[$idx].startDate" "$LEASES_FILE")
+    echo "$START_DATE|$idx"
+  done | sort | cut -d'|' -f2)
+  
+  for i in $SORTED_INDICES; do
+    L=$(jq -c ".[$i]" "$LEASES_FILE")
+    STATUS_VAL=$(echo "$L" | jq -r '.status')
+    ESTATE_NAME=$(echo "$L" | jq -r '.estateName // empty')
+    LABEL="Lease ($STATUS_VAL) $BNAME/$UNIT_NUM"
+    
+    # Get estate ID from map
+    ESTATE_ID="${ESTATE_ID_MAP[$ESTATE_NAME]}"
+    if [ -z "$ESTATE_ID" ]; then
+      log_error "$LABEL: estate '$ESTATE_NAME' not found"
+      ERRORS=$(( ERRORS+1 )); continue
+    fi
+    
+    KEY="$BNAME|$UNIT_NUM"
+    UNIT_ID="${UNIT_ID_MAP[$KEY]:-}"
+    if [ -z "$UNIT_ID" ]; then
+      log_error "$LABEL: unit not resolved — skipped"
+      ERRORS=$(( ERRORS+1 )); continue
     fi
 
-    # 2. Fallback: local email map
-    if [ -z "$TID" ] && [ -n "$TEMAIL" ]; then
-      TID="${PERSON_EMAIL_MAP[$TEMAIL]:-}"
+    # ── Resolve tenants ────────────────────────────────────────────────────────
+    # Tenants may use `email` instead of `nationalId`.
+    # Resolution order: nationalId → local email map → live API search.
+    TENANTS_JSON=$(echo "$L" | jq '.tenants // []')
+    TENANT_COUNT=$(echo "$TENANTS_JSON" | jq length)
+    RESOLVED_TENANTS='[]'
+    for j in $(seq 0 $(( TENANT_COUNT - 1 ))); do
+      T=$(echo "$TENANTS_JSON" | jq -c ".[$j]")
+      TNID=$(echo "$T"   | jq -r '.nationalId // empty')
+      TEMAIL=$(echo "$T" | jq -r '.email // empty' | tr '[:upper:]' '[:lower:]')
+      TROLE=$(echo "$T"  | jq -r '.role')
+
+      TID=""
+
+      # 1. Try nationalId
+      if [ -n "$TNID" ] && [ "$TNID" != "null" ]; then
+        TID="${PERSON_ID_MAP[$TNID]:-}"
+      fi
+
+      # 2. Fallback: local email map
+      if [ -z "$TID" ] && [ -n "$TEMAIL" ]; then
+        TID="${PERSON_EMAIL_MAP[$TEMAIL]:-}"
+      fi
+
+      # 3. Fallback: live API search by email, with caching
+      if [ -z "$TID" ] && [ -n "$TEMAIL" ]; then
+        ENC_EMAIL=$(python3 -c "import urllib.parse,sys; print(urllib.parse.quote(sys.argv[1]))" "$TEMAIL" 2>/dev/null || echo "$TEMAIL")
+        SEARCH=$(get_resource "/api/v1/estates/$ESTATE_ID/persons?search=$ENC_EMAIL&size=10")
+        TID=$(echo "$SEARCH" | jq -r --arg em "$TEMAIL" '.content[]? | select((.email // "" | ascii_downcase) == $em) | .id' | head -1)
+        [ -n "$TID" ] && PERSON_EMAIL_MAP["$TEMAIL"]="$TID"
+      fi
+
+      if [ -z "$TID" ]; then
+        log_warn "  Tenant not resolved (nationalId='$TNID', email='$TEMAIL') — skipped"
+        continue
+      fi
+
+      RESOLVED_TENANTS=$(echo "$RESOLVED_TENANTS" | \
+        jq --argjson pid "$TID" --arg role "$TROLE" '. + [{personId: $pid, role: $role}]')
+    done
+
+    PAYLOAD=$(echo "$L" \
+      | jq 'del(.buildingName) | del(.unitNumber) | del(.tenants) | del(._comment) | del(.estateName)' \
+      | jq --argjson uid "$UNIT_ID" '. + {housingUnitId: $uid}' \
+      | jq --argjson tenants "$RESOLVED_TENANTS" '. + {tenants: $tenants}' \
+      | jq '. + {status: "DRAFT"}')
+
+    if [ "$STATUS_VAL" = "ACTIVE" ]; then
+      CREATE_URL="$BASE_URL/api/v1/estates/$ESTATE_ID/housing-units/$UNIT_ID/leases?activate=true"
+    else
+      CREATE_URL="$BASE_URL/api/v1/estates/$ESTATE_ID/housing-units/$UNIT_ID/leases"
     fi
 
-    # 3. Fallback: live API search by email, with caching
-    if [ -z "$TID" ] && [ -n "$TEMAIL" ]; then
-      ENC_EMAIL=$(python3 -c "import urllib.parse,sys; print(urllib.parse.quote(sys.argv[1]))" "$TEMAIL" 2>/dev/null || echo "$TEMAIL")
-      SEARCH=$(get_resource "/api/v1/persons?search=$ENC_EMAIL&size=10")
-      TID=$(echo "$SEARCH" | jq -r --arg em "$TEMAIL" '.content[]? | select((.email // "" | ascii_downcase) == $em) | .id' | head -1)
-      [ -n "$TID" ] && PERSON_EMAIL_MAP["$TEMAIL"]="$TID"
-    fi
+    LS=$(curl -s -o /tmp/sr.json -w "%{http_code}" \
+      -X POST "$CREATE_URL" -H "Content-Type: application/json" -b "$COOKIE_JAR" -d "$PAYLOAD")
 
-    if [ -z "$TID" ]; then
-      log_warn "  Tenant not resolved (nationalId='$TNID', email='$TEMAIL') — skipped"
-      continue
-    fi
+    case "$LS" in
+      200|201)
+        LEASE_ID=$(jq -r '.id' /tmp/sr.json)
+        log_ok "$LABEL (id=$LEASE_ID)"
+        CREATED=$(( CREATED+1 ))
 
-    RESOLVED_TENANTS=$(echo "$RESOLVED_TENANTS" | \
-      jq --argjson pid "$TID" --arg role "$TROLE" '. + [{personId: $pid, role: $role}]')
-  done
-
-  PAYLOAD=$(echo "$L" \
-    | jq 'del(.buildingName) | del(.unitNumber) | del(.tenants) | del(._comment)' \
-    | jq --argjson uid "$UNIT_ID" '. + {housingUnitId: $uid}' \
-    | jq --argjson tenants "$RESOLVED_TENANTS" '. + {tenants: $tenants}' \
-    | jq '. + {status: "DRAFT"}')
-
-  if [ "$STATUS_VAL" = "ACTIVE" ]; then
-    CREATE_URL="$BASE_URL/api/v1/leases?activate=true"
-  else
-    CREATE_URL="$BASE_URL/api/v1/leases"
-  fi
-
-  LS=$(curl -s -o /tmp/sr.json -w "%{http_code}" \
-    -X POST "$CREATE_URL" -H "Content-Type: application/json" -b "$COOKIE_JAR" -d "$PAYLOAD")
-
-  case "$LS" in
-    200|201)
-      LEASE_ID=$(jq -r '.id' /tmp/sr.json)
-      log_ok "$LABEL (id=$LEASE_ID)"
-      CREATED=$(( CREATED+1 ))
-
-      # FINISHED: DRAFT → ACTIVE → FINISHED
-      if [ "$STATUS_VAL" = "FINISHED" ]; then
-        SS=$(curl -s -o /tmp/ss.json -w "%{http_code}" \
-          -X PATCH "$BASE_URL/api/v1/leases/$LEASE_ID/status" \
-          -H "Content-Type: application/json" -b "$COOKIE_JAR" \
-          -d '{"targetStatus":"ACTIVE"}')
-        if [ "$SS" = "200" ] || [ "$SS" = "201" ]; then
-          SS2=$(curl -s -o /tmp/ss2.json -w "%{http_code}" \
-            -X PATCH "$BASE_URL/api/v1/leases/$LEASE_ID/status" \
+        # FINISHED: DRAFT → ACTIVE → FINISHED
+        if [ "$STATUS_VAL" = "FINISHED" ]; then
+          SS=$(curl -s -o /tmp/ss.json -w "%{http_code}" \
+            -X PATCH "$BASE_URL/api/v1/estates/$ESTATE_ID/leases/$LEASE_ID/status" \
             -H "Content-Type: application/json" -b "$COOKIE_JAR" \
-            -d '{"targetStatus":"FINISHED"}')
-          if [ "$SS2" = "200" ] || [ "$SS2" = "201" ]; then
-            log_ok "  Status → FINISHED"
+            -d '{"targetStatus":"ACTIVE"}')
+          if [ "$SS" = "200" ] || [ "$SS" = "201" ]; then
+            SS2=$(curl -s -o /tmp/ss2.json -w "%{http_code}" \
+              -X PATCH "$BASE_URL/api/v1/estates/$ESTATE_ID/leases/$LEASE_ID/status" \
+              -H "Content-Type: application/json" -b "$COOKIE_JAR" \
+              -d '{"targetStatus":"FINISHED"}')
+            if [ "$SS2" = "200" ] || [ "$SS2" = "201" ]; then
+              log_ok "  Status → FINISHED"
+            else
+              log_failure "  Status → FINISHED (step 2)" "$SS2" /tmp/ss2.json
+              log_error "  !! Next lease for $BNAME/$UNIT_NUM may fail (slot still occupied)"
+            fi
           else
-            log_failure "  Status → FINISHED (step 2)" "$SS2" /tmp/ss2.json
+            log_failure "  Status → ACTIVE (step 1 toward FINISHED)" "$SS" /tmp/ss.json
             log_error "  !! Next lease for $BNAME/$UNIT_NUM may fail (slot still occupied)"
           fi
-        else
-          log_failure "  Status → ACTIVE (step 1 toward FINISHED)" "$SS" /tmp/ss.json
-          log_error "  !! Next lease for $BNAME/$UNIT_NUM may fail (slot still occupied)"
         fi
-      fi
-      ;;
-    409)
-      log_warn "$LABEL (already exists)"
-      SKIPPED=$(( SKIPPED+1 ))
-      ;;
-    *)
-      log_failure "$LABEL" "$LS" /tmp/sr.json
-      ERRORS=$(( ERRORS+1 ))
-      ;;
-  esac
+        ;;
+      409)
+        log_warn "$LABEL (already exists)"
+        SKIPPED=$(( SKIPPED+1 ))
+        ;;
+      *)
+        log_failure "$LABEL" "$LS" /tmp/sr.json
+        ERRORS=$(( ERRORS+1 ))
+        ;;
+    esac
+  done
 done
 log_info "Leases: $CREATED created, $SKIPPED skipped, $ERRORS errors"
 
@@ -645,6 +770,7 @@ echo ""
 log_ok "Full seed completed!"
 echo ""
 echo "  Summary:"
+echo "    Estates            : $(jq length "$DATA_DIR/estates.json" 2>/dev/null || echo 0)"
 echo "    Tag categories     : $(jq length "$DATA_DIR/tag_categories.json" 2>/dev/null || echo 0)"
 echo "    Bank accounts      : $(jq length "$DATA_DIR/bank_accounts.json" 2>/dev/null || echo 0)"
 echo "    Buildings          : $(jq length "$DATA_DIR/buildings.json")"

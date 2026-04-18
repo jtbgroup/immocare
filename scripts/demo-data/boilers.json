@@ -10,7 +10,8 @@
     "installationDate": "2019-06-15",
     "lastServiceDate": "2023-06-10",
     "nextServiceDate": "2025-06-10",
-    "notes": "Chaudière murale gaz condensation"
+    "notes": "Chaudière murale gaz condensation",
+    "estateName": "Estate Ville"
   },
   {
     "buildingName": "Résidence Les Acacias",
@@ -23,7 +24,8 @@
     "installationDate": "2020-09-01",
     "lastServiceDate": "2024-09-15",
     "nextServiceDate": "2026-09-15",
-    "notes": "Entretien annuel chez Dalkia"
+    "notes": "Entretien annuel chez Dalkia",
+    "estateName": "Estate Ville"
   },
   {
     "buildingName": "Résidence Les Acacias",
@@ -36,7 +38,8 @@
     "installationDate": "2021-03-20",
     "lastServiceDate": "2024-03-18",
     "nextServiceDate": "2026-03-18",
-    "notes": null
+    "notes": null,
+    "estateName": "Estate Ville"
   },
   {
     "buildingName": "Immeuble Midi",
@@ -49,7 +52,8 @@
     "installationDate": "2018-11-10",
     "lastServiceDate": "2022-11-08",
     "nextServiceDate": "2024-11-08",
-    "notes": "Chaudière haute performance, contrat entretien Viessmann"
+    "notes": "Chaudière haute performance, contrat entretien Viessmann",
+    "estateName": "Estate Ville"
   },
   {
     "buildingName": "Immeuble Midi",
@@ -62,6 +66,7 @@
     "installationDate": "2022-07-05",
     "lastServiceDate": "2024-07-12",
     "nextServiceDate": "2026-07-12",
-    "notes": "Chaudière neuve installée lors de la rénovation"
+    "notes": "Chaudière neuve installée lors de la rénovation",
+    "estateName": "Estate Ville"
   }
 ]

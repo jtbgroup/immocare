@@ -5,11 +5,25 @@ import com.immocare.model.dto.TagCategoryDTO;
 import com.immocare.service.TagCategoryService;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.UUID;
 
+/**
+ * REST controller for TagCategory management.
+ * UC016 Phase 4: all routes are now scoped to an estate.
+ *
+ * Endpoints:
+ *   GET    /api/v1/estates/{estateId}/tag-categories
+ *   POST   /api/v1/estates/{estateId}/tag-categories
+ *   PUT    /api/v1/estates/{estateId}/tag-categories/{id}
+ *   DELETE /api/v1/estates/{estateId}/tag-categories/{id}
+ */
 @RestController
+@RequestMapping("/api/v1/estates/{estateId}/tag-categories")
+@PreAuthorize("@security.isMemberOf(#estateId)")
 public class TagCategoryController {
 
     private final TagCategoryService tagCategoryService;
@@ -18,25 +32,35 @@ public class TagCategoryController {
         this.tagCategoryService = tagCategoryService;
     }
 
-    @GetMapping("/api/v1/tag-categories")
-    public List<TagCategoryDTO> getAll() {
-        return tagCategoryService.getAll();
+    @GetMapping
+    public List<TagCategoryDTO> getAll(@PathVariable UUID estateId) {
+        return tagCategoryService.getAll(estateId);
     }
 
-    @PostMapping("/api/v1/tag-categories")
+    @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
-    public TagCategoryDTO create(@Valid @RequestBody SaveTagCategoryRequest req) {
-        return tagCategoryService.create(req);
+    @PreAuthorize("@security.isManagerOf(#estateId)")
+    public TagCategoryDTO create(
+            @PathVariable UUID estateId,
+            @Valid @RequestBody SaveTagCategoryRequest req) {
+        return tagCategoryService.create(estateId, req);
     }
 
-    @PutMapping("/api/v1/tag-categories/{id}")
-    public TagCategoryDTO update(@PathVariable Long id, @Valid @RequestBody SaveTagCategoryRequest req) {
-        return tagCategoryService.update(id, req);
+    @PutMapping("/{id}")
+    @PreAuthorize("@security.isManagerOf(#estateId)")
+    public TagCategoryDTO update(
+            @PathVariable UUID estateId,
+            @PathVariable Long id,
+            @Valid @RequestBody SaveTagCategoryRequest req) {
+        return tagCategoryService.update(estateId, id, req);
     }
 
-    @DeleteMapping("/api/v1/tag-categories/{id}")
+    @DeleteMapping("/{id}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
-    public void delete(@PathVariable Long id) {
-        tagCategoryService.delete(id);
+    @PreAuthorize("@security.isManagerOf(#estateId)")
+    public void delete(
+            @PathVariable UUID estateId,
+            @PathVariable Long id) {
+        tagCategoryService.delete(estateId, id);
     }
 }

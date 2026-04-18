@@ -1,0 +1,17 @@
+[
+  {
+    "name": "Estate Mer",
+    "description": "Coastal properties along the Belgian coastline",
+    "createdByUsername": "alice_martin"
+  },
+  {
+    "name": "Estate Montagne",
+    "description": "Mountain and alpine properties in the Ardennes",
+    "createdByUsername": "alice_martin"
+  },
+  {
+    "name": "Estate Ville",
+    "description": "Urban properties in major Belgian cities",
+    "createdByUsername": "alice_martin"
+  }
+]

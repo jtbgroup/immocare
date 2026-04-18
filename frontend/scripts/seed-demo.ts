@@ -12,6 +12,7 @@ import {
   changeLeaseStatus,
   createBankAccount,
   createBuilding,
+  createEstate,
   createHousingUnit,
   createLease,
   createPerson,
@@ -22,6 +23,7 @@ import {
 
 import {
   BUILDINGS,
+  ESTATES,
   generateRooms,
   generateUnitMeters,
   generateUnits,
@@ -43,6 +45,21 @@ export async function runDemo({ dryRun }: { dryRun: boolean }) {
     log("🔐", "Logging in as admin...");
     await login();
     log("✅", "Authenticated\n");
+  }
+
+  // ── 0. Create estates ──────────────────────────────────────────────────────
+  log("🏘️ ", `Creating ${ESTATES.length} estates...`);
+  const estateIds: string[] = [];
+
+  for (const e of ESTATES) {
+    if (dryRun) {
+      log("  →", `Estate: ${e.name}`);
+      estateIds.push(`estate-${estateIds.length + 1}`);
+      continue;
+    }
+    const created = await createEstate(e);
+    estateIds.push(created.id);
+    log("  ✓", `${e.name} → id ${created.id}`);
   }
 
   // ── 1. Create persons ──────────────────────────────────────────────────────

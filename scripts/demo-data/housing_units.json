@@ -9,7 +9,8 @@
     "hasGarden": true,
     "gardenSurface": 20.0,
     "gardenOrientation": "S",
-    "ownerPersonNationalId": "75031512345"
+    "ownerPersonNationalId": "75031512345",
+    "estateName": "Estate Ville"
   },
   {
     "buildingName": "Résidence Les Acacias",
@@ -21,7 +22,8 @@
     "terraceSurface": 10.0,
     "terraceOrientation": "SW",
     "hasGarden": false,
-    "ownerPersonNationalId": "75031512345"
+    "ownerPersonNationalId": "75031512345",
+    "estateName": "Estate Ville"
   },
   {
     "buildingName": "Résidence Les Acacias",
@@ -33,7 +35,8 @@
     "terraceSurface": 8.0,
     "terraceOrientation": "NE",
     "hasGarden": false,
-    "ownerPersonNationalId": "75031512345"
+    "ownerPersonNationalId": "75031512345",
+    "estateName": "Estate Ville"
   },
   {
     "buildingName": "Immeuble Midi",
@@ -43,7 +46,8 @@
     "totalSurface": 82.0,
     "hasTerrace": false,
     "hasGarden": false,
-    "ownerPersonNationalId": "75031512345"
+    "ownerPersonNationalId": "75031512345",
+    "estateName": "Estate Ville"
   },
   {
     "buildingName": "Immeuble Midi",
@@ -55,6 +59,7 @@
     "terraceSurface": 15.0,
     "terraceOrientation": "S",
     "hasGarden": false,
-    "ownerPersonNationalId": "75031512345"
+    "ownerPersonNationalId": "75031512345",
+    "estateName": "Estate Ville"
   }
 ]

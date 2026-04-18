@@ -3,10 +3,12 @@ package com.immocare.controller;
 import java.io.IOException;
 import java.time.LocalDate;
 import java.util.Map;
+import java.util.UUID;
 
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -39,7 +41,24 @@ import com.immocare.service.FinancialTransactionService;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 
+/**
+ * REST controller for Financial Transaction management.
+ * UC016 Phase 4: all routes are now scoped to an estate.
+ *
+ * Endpoints:
+ *   GET    /api/v1/estates/{estateId}/transactions
+ *   GET    /api/v1/estates/{estateId}/transactions/{id}
+ *   POST   /api/v1/estates/{estateId}/transactions
+ *   PUT    /api/v1/estates/{estateId}/transactions/{id}
+ *   DELETE /api/v1/estates/{estateId}/transactions/{id}
+ *   PATCH  /api/v1/estates/{estateId}/transactions/{id}/confirm
+ *   POST   /api/v1/estates/{estateId}/transactions/confirm-batch
+ *   PATCH  /api/v1/estates/{estateId}/transactions/bulk
+ *   GET    /api/v1/estates/{estateId}/transactions/statistics
+ *   GET    /api/v1/estates/{estateId}/transactions/export
+ */
 @RestController
+@PreAuthorize("@security.isMemberOf(#estateId)")
 public class TransactionController {
 
     private final FinancialTransactionService transactionService;
@@ -48,8 +67,9 @@ public class TransactionController {
         this.transactionService = transactionService;
     }
 
-    @GetMapping("/api/v1/transactions")
+    @GetMapping("/api/v1/estates/{estateId}/transactions")
     public PagedTransactionResponse getAll(
+            @PathVariable UUID estateId,
             @RequestParam(required = false) TransactionDirection direction,
             @RequestParam(required = false) LocalDate from,
             @RequestParam(required = false) LocalDate to,
@@ -75,65 +95,77 @@ public class TransactionController {
 
         String[] sortParts = sort.split(",");
         Sort.Direction sortDir = sortParts.length > 1 && sortParts[1].equalsIgnoreCase("asc")
-                ? Sort.Direction.ASC
-                : Sort.Direction.DESC;
+                ? Sort.Direction.ASC : Sort.Direction.DESC;
         PageRequest pageable = PageRequest.of(page, size, Sort.by(sortDir, sortParts[0]));
 
-        return transactionService.getAll(filter, pageable);
+        return transactionService.getAll(estateId, filter, pageable);
     }
 
-    @GetMapping("/api/v1/transactions/{id}")
-    public FinancialTransactionDTO getById(@PathVariable Long id) {
-        return transactionService.getById(id);
+    @GetMapping("/api/v1/estates/{estateId}/transactions/{id}")
+    public FinancialTransactionDTO getById(
+            @PathVariable UUID estateId,
+            @PathVariable Long id) {
+        return transactionService.getById(estateId, id);
     }
 
-    @PostMapping("/api/v1/transactions")
+    @PostMapping("/api/v1/estates/{estateId}/transactions")
     @ResponseStatus(HttpStatus.CREATED)
-    public FinancialTransactionDTO create(@Valid @RequestBody CreateTransactionRequest req,
+    @PreAuthorize("@security.isManagerOf(#estateId)")
+    public FinancialTransactionDTO create(
+            @PathVariable UUID estateId,
+            @Valid @RequestBody CreateTransactionRequest req,
             @AuthenticationPrincipal AppUser currentUser) {
-        return transactionService.create(req, currentUser);
+        return transactionService.create(estateId, req, currentUser);
     }
 
-    @PutMapping("/api/v1/transactions/{id}")
-    public FinancialTransactionDTO update(@PathVariable Long id,
+    @PutMapping("/api/v1/estates/{estateId}/transactions/{id}")
+    @PreAuthorize("@security.isManagerOf(#estateId)")
+    public FinancialTransactionDTO update(
+            @PathVariable UUID estateId,
+            @PathVariable Long id,
             @Valid @RequestBody UpdateTransactionRequest req) {
-        return transactionService.update(id, req);
+        return transactionService.update(estateId, id, req);
     }
 
-    @DeleteMapping("/api/v1/transactions/{id}")
+    @DeleteMapping("/api/v1/estates/{estateId}/transactions/{id}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
-    public void delete(@PathVariable Long id) {
-        transactionService.delete(id);
+    @PreAuthorize("@security.isManagerOf(#estateId)")
+    public void delete(
+            @PathVariable UUID estateId,
+            @PathVariable Long id) {
+        transactionService.delete(estateId, id);
     }
 
-    @PatchMapping("/api/v1/transactions/{id}/confirm")
-    public FinancialTransactionDTO confirm(@PathVariable Long id,
+    @PatchMapping("/api/v1/estates/{estateId}/transactions/{id}/confirm")
+    @PreAuthorize("@security.isManagerOf(#estateId)")
+    public FinancialTransactionDTO confirm(
+            @PathVariable UUID estateId,
+            @PathVariable Long id,
             @RequestBody ConfirmTransactionRequest req,
             @AuthenticationPrincipal AppUser currentUser) {
-        return transactionService.confirm(id, req, currentUser);
+        return transactionService.confirm(estateId, id, req, currentUser);
     }
 
-    @PostMapping("/api/v1/transactions/confirm-batch")
-    public Map<String, Integer> confirmBatch(@Valid @RequestBody ConfirmBatchRequest req) {
-        int count = transactionService.confirmBatch(req.batchId());
+    @PostMapping("/api/v1/estates/{estateId}/transactions/confirm-batch")
+    @PreAuthorize("@security.isManagerOf(#estateId)")
+    public Map<String, Integer> confirmBatch(
+            @PathVariable UUID estateId,
+            @Valid @RequestBody ConfirmBatchRequest req) {
+        int count = transactionService.confirmBatch(estateId, req.batchId());
         return Map.of("confirmedCount", count);
     }
 
-    /**
-     * PATCH /api/v1/transactions/bulk
-     *
-     * Apply a partial update (status and/or subcategory) to multiple transactions
-     * at once.
-     * RECONCILED transactions and direction-mismatched subcategories are silently
-     * skipped.
-     */
-    @PatchMapping("/api/v1/transactions/bulk")
-    public BulkPatchTransactionResult bulkPatch(@Valid @RequestBody BulkPatchTransactionRequest req) {
-        return transactionService.bulkPatch(req);
+    @PatchMapping("/api/v1/estates/{estateId}/transactions/bulk")
+    @PreAuthorize("@security.isManagerOf(#estateId)")
+    public BulkPatchTransactionResult bulkPatch(
+            @PathVariable UUID estateId,
+            @Valid @RequestBody BulkPatchTransactionRequest req) {
+        return transactionService.bulkPatch(estateId, req);
     }
 
-    @GetMapping("/api/v1/transactions/statistics")
+    @GetMapping("/api/v1/estates/{estateId}/transactions/statistics")
     public TransactionStatisticsDTO getStatistics(
+            @PathVariable UUID estateId,
             @RequestParam(required = false) LocalDate accountingFrom,
             @RequestParam(required = false) LocalDate accountingTo,
             @RequestParam(required = false) Long buildingId,
@@ -143,11 +175,12 @@ public class TransactionController {
 
         StatisticsFilter filter = new StatisticsFilter(accountingFrom, accountingTo,
                 buildingId, unitId, bankAccountId, direction);
-        return transactionService.getStatistics(filter);
+        return transactionService.getStatistics(estateId, filter);
     }
 
-    @GetMapping("/api/v1/transactions/export")
+    @GetMapping("/api/v1/estates/{estateId}/transactions/export")
     public void exportCsv(
+            @PathVariable UUID estateId,
             @RequestParam(required = false) TransactionDirection direction,
             @RequestParam(required = false) LocalDate from,
             @RequestParam(required = false) LocalDate to,
@@ -168,6 +201,6 @@ public class TransactionController {
         TransactionFilter filter = new TransactionFilter(direction, from, to, accountingFrom, accountingTo,
                 categoryId, subcategoryId, bankAccountId, buildingId, unitId,
                 status, search, importBatchId, assetType, assetId);
-        transactionService.exportCsv(filter, response);
+        transactionService.exportCsv(estateId, filter, response);
     }
 }

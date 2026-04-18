@@ -30,16 +30,19 @@ import com.immocare.model.entity.Estate;
 import com.immocare.model.entity.EstateMember;
 import com.immocare.model.enums.EstateRole;
 import com.immocare.model.enums.LeaseStatus;
+import com.immocare.model.enums.TransactionStatus;
 import com.immocare.repository.BuildingRepository;
 import com.immocare.repository.EstateMemberRepository;
 import com.immocare.repository.EstateRepository;
+import com.immocare.repository.FinancialTransactionRepository;
 import com.immocare.repository.HousingUnitRepository;
 import com.immocare.repository.LeaseRepository;
 import com.immocare.repository.UserRepository;
+import com.immocare.repository.spec.TransactionSpecification;
 
 /**
  * Business logic for UC016 — Manage Estates.
- * Phase 3: getDashboard() now returns the real activeLeases count.
+ * Phase 4: getDashboard() now includes transaction summary counts.
  */
 @Service
 @Transactional(readOnly = true)
@@ -53,19 +56,22 @@ public class EstateService {
     private final BuildingRepository buildingRepository;
     private final HousingUnitRepository housingUnitRepository;
     private final LeaseRepository leaseRepository;
+    private final FinancialTransactionRepository transactionRepository;
 
     public EstateService(EstateRepository estateRepository,
                          EstateMemberRepository estateMemberRepository,
                          UserRepository userRepository,
                          BuildingRepository buildingRepository,
                          HousingUnitRepository housingUnitRepository,
-                         LeaseRepository leaseRepository) {
+                         LeaseRepository leaseRepository,
+                         FinancialTransactionRepository transactionRepository) {
         this.estateRepository = estateRepository;
         this.estateMemberRepository = estateMemberRepository;
         this.userRepository = userRepository;
         this.buildingRepository = buildingRepository;
         this.housingUnitRepository = housingUnitRepository;
         this.leaseRepository = leaseRepository;
+        this.transactionRepository = transactionRepository;
     }
 
     // ─── US095 — List all estates ─────────────────────────────────────────────
@@ -102,7 +108,7 @@ public class EstateService {
 
     /**
      * Returns the estate dashboard.
-     * Phase 3: activeLeases is now populated with the real count of ACTIVE leases.
+     * Phase 4: draft transaction count is now populated.
      * pendingAlerts remain 0 until Phase 6.
      */
     public EstateDashboardDTO getDashboard(UUID estateId) {
@@ -111,6 +117,13 @@ public class EstateService {
         int totalUnits = (int) housingUnitRepository.countByBuilding_Estate_Id(estateId);
         int activeLeases = (int) leaseRepository
                 .countByHousingUnit_Building_Estate_IdAndStatus(estateId, LeaseStatus.ACTIVE);
+
+        // Phase 4: count draft transactions (useful for the "pending review" badge)
+        long draftTransactions = transactionRepository.findAll(
+                TransactionSpecification.hasEstate(estateId)
+                        .and(TransactionSpecification.withStatus(TransactionStatus.DRAFT)),
+                Pageable.unpaged()).getTotalElements();
+
         return new EstateDashboardDTO(
                 estate.getId(),
                 estate.getName(),

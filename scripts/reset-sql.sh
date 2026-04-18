@@ -70,6 +70,7 @@ psql \
 -- Leaf tables first, root tables last.
 -- app_user, platform_config, import_parser,
 -- boiler_service_validity_rule kept (seed/config data).
+-- estate and estate_member will be truncated (not admin-specific).
 -- ============================================================
  
 -- ─── UC014 — Financial transactions (deepest leaves first) ───────────────────
@@ -119,6 +120,11 @@ TRUNCATE TABLE person              CASCADE;
  
 -- ─── UC002 — Users (keep admin) ───────────────────────────────────────────────
 DELETE FROM app_user WHERE username != '$ADMIN_USER';
+UPDATE app_user SET is_platform_admin = true WHERE username = '$ADMIN_USER';
+
+-- ─── UC016 — Estates ──────────────────────────────────────────────────────────
+TRUNCATE TABLE estate_member CASCADE;
+TRUNCATE TABLE estate        CASCADE;
  
 -- ─── Reset sequences ──────────────────────────────────────────────────────────
 ALTER SEQUENCE financial_transaction_ref_seq RESTART WITH 1;

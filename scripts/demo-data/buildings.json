@@ -5,7 +5,8 @@
     "postalCode": "1030",
     "city": "Schaerbeek",
     "country": "Belgium",
-    "ownerPersonNationalId": "75031512345"
+    "ownerPersonNationalId": "75031512345",
+    "estateName": "Estate Ville"
   },
   {
     "name": "Immeuble Midi",
@@ -13,6 +14,7 @@
     "postalCode": "1000",
     "city": "Bruxelles",
     "country": "Belgium",
-    "ownerPersonNationalId": "75031512345"
+    "ownerPersonNationalId": "75031512345",
+    "estateName": "Estate Ville"
   }
 ]

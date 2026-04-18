@@ -4,34 +4,34 @@
     "email": "alice.martin@immocare.com",
     "password": "Demo1234!",
     "confirmPassword": "Demo1234!",
-    "role": "ADMIN"
+    "isPlatformAdmin": true
   },
   {
     "username": "bob_dupont",
     "email": "bob.dupont@immocare.com",
     "password": "Demo1234!",
     "confirmPassword": "Demo1234!",
-    "role": "ADMIN"
+    "isPlatformAdmin": true
   },
   {
     "username": "claire_leroy",
     "email": "claire.leroy@immocare.com",
     "password": "Demo1234!",
     "confirmPassword": "Demo1234!",
-    "role": "ADMIN"
+    "isPlatformAdmin": true
   },
   {
     "username": "david_simon",
     "email": "david.simon@immocare.com",
     "password": "Demo1234!",
     "confirmPassword": "Demo1234!",
-    "role": "ADMIN"
+    "isPlatformAdmin": true
   },
   {
     "username": "emma_dubois",
     "email": "emma.dubois@immocare.com",
     "password": "Demo1234!",
     "confirmPassword": "Demo1234!",
-    "role": "ADMIN"
+    "isPlatformAdmin": true
   }
 ]

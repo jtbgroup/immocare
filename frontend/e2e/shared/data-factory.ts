@@ -3,6 +3,23 @@
  * Used by both the E2E minimal seed and the dev seed script.
  */
 
+// ─── Estates ──────────────────────────────────────────────────────────────────
+
+export const ESTATES = [
+  {
+    name: "Estate Mer",
+    description: "Coastal properties along the Belgian coastline",
+  },
+  {
+    name: "Estate Montagne",
+    description: "Mountain and alpine properties in the Ardennes",
+  },
+  {
+    name: "Estate Ville",
+    description: "Urban properties in major Belgian cities",
+  },
+];
+
 // ─── Buildings ────────────────────────────────────────────────────────────────
 
 export const BUILDINGS = [

@@ -1,6 +1,7 @@
 package com.immocare.repository.spec;
 
 import java.time.LocalDate;
+import java.util.UUID;
 
 import org.springframework.data.jpa.domain.Specification;
 
@@ -12,10 +13,26 @@ import com.immocare.model.enums.TransactionStatus;
 
 import jakarta.persistence.criteria.Subquery;
 
+/**
+ * JPA Specifications for FinancialTransaction queries.
+ * UC016 Phase 4: {@link #hasEstate(UUID)} added for estate-scoped filtering.
+ */
 public class TransactionSpecification {
 
     private TransactionSpecification() {
     }
+
+    // ─── UC016 Phase 4 — estate scope ─────────────────────────────────────────
+
+    /**
+     * Restricts results to transactions belonging to the given estate.
+     * This must be applied to ALL queries — never bypassed.
+     */
+    public static Specification<FinancialTransaction> hasEstate(UUID estateId) {
+        return (root, query, cb) -> cb.equal(root.get("estate").get("id"), estateId);
+    }
+
+    // ─── Existing specifications ──────────────────────────────────────────────
 
     public static Specification<FinancialTransaction> withDirection(TransactionDirection d) {
         return (root, query, cb) -> cb.equal(root.get("direction"), d);

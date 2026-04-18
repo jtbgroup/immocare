@@ -26,6 +26,10 @@ import jakarta.persistence.PrePersist;
 import jakarta.persistence.PreUpdate;
 import jakarta.persistence.Table;
 
+/**
+ * Financial transaction entity.
+ * UC016 Phase 4: estate_id added — transactions are now scoped to an estate.
+ */
 @Entity
 @Table(name = "financial_transaction")
 public class FinancialTransaction {
@@ -69,6 +73,14 @@ public class FinancialTransaction {
     @Enumerated(EnumType.STRING)
     @Column(nullable = false, length = 20)
     private TransactionSource source;
+
+    /**
+     * Estate this transaction belongs to.
+     * UC016 Phase 4 — all transactions are scoped to an estate.
+     */
+    @ManyToOne(fetch = FetchType.LAZY, optional = false)
+    @JoinColumn(name = "estate_id", nullable = false)
+    private Estate estate;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "bank_account_id")
@@ -121,179 +133,72 @@ public class FinancialTransaction {
         updatedAt = LocalDateTime.now();
     }
 
-    public Long getId() {
-        return id;
-    }
+    public Long getId() { return id; }
+    public void setId(Long id) { this.id = id; }
 
-    public void setId(Long id) {
-        this.id = id;
-    }
+    public String getReference() { return reference; }
+    public void setReference(String reference) { this.reference = reference; }
 
-    public String getReference() {
-        return reference;
-    }
+    public String getExternalReference() { return externalReference; }
+    public void setExternalReference(String externalReference) { this.externalReference = externalReference; }
 
-    public void setReference(String reference) {
-        this.reference = reference;
-    }
+    public LocalDate getTransactionDate() { return transactionDate; }
+    public void setTransactionDate(LocalDate transactionDate) { this.transactionDate = transactionDate; }
 
-    public String getExternalReference() {
-        return externalReference;
-    }
+    public LocalDate getValueDate() { return valueDate; }
+    public void setValueDate(LocalDate valueDate) { this.valueDate = valueDate; }
 
-    public void setExternalReference(String externalReference) {
-        this.externalReference = externalReference;
-    }
+    public LocalDate getAccountingMonth() { return accountingMonth; }
+    public void setAccountingMonth(LocalDate accountingMonth) { this.accountingMonth = accountingMonth; }
 
-    public LocalDate getTransactionDate() {
-        return transactionDate;
-    }
+    public BigDecimal getAmount() { return amount; }
+    public void setAmount(BigDecimal amount) { this.amount = amount; }
 
-    public void setTransactionDate(LocalDate transactionDate) {
-        this.transactionDate = transactionDate;
-    }
+    public TransactionDirection getDirection() { return direction; }
+    public void setDirection(TransactionDirection direction) { this.direction = direction; }
 
-    public LocalDate getValueDate() {
-        return valueDate;
-    }
+    public String getDescription() { return description; }
+    public void setDescription(String description) { this.description = description; }
 
-    public void setValueDate(LocalDate valueDate) {
-        this.valueDate = valueDate;
-    }
+    public String getCounterpartyAccount() { return counterpartyAccount; }
+    public void setCounterpartyAccount(String counterpartyAccount) { this.counterpartyAccount = counterpartyAccount; }
 
-    public LocalDate getAccountingMonth() {
-        return accountingMonth;
-    }
+    public TransactionStatus getStatus() { return status; }
+    public void setStatus(TransactionStatus status) { this.status = status; }
 
-    public void setAccountingMonth(LocalDate accountingMonth) {
-        this.accountingMonth = accountingMonth;
-    }
+    public TransactionSource getSource() { return source; }
+    public void setSource(TransactionSource source) { this.source = source; }
 
-    public BigDecimal getAmount() {
-        return amount;
-    }
+    public Estate getEstate() { return estate; }
+    public void setEstate(Estate estate) { this.estate = estate; }
 
-    public void setAmount(BigDecimal amount) {
-        this.amount = amount;
-    }
+    public BankAccount getBankAccount() { return bankAccount; }
+    public void setBankAccount(BankAccount bankAccount) { this.bankAccount = bankAccount; }
 
-    public TransactionDirection getDirection() {
-        return direction;
-    }
+    public TagSubcategory getSubcategory() { return subcategory; }
+    public void setSubcategory(TagSubcategory subcategory) { this.subcategory = subcategory; }
 
-    public void setDirection(TransactionDirection direction) {
-        this.direction = direction;
-    }
+    public Lease getLease() { return lease; }
+    public void setLease(Lease lease) { this.lease = lease; }
 
-    public String getDescription() {
-        return description;
-    }
+    public Lease getSuggestedLease() { return suggestedLease; }
+    public void setSuggestedLease(Lease suggestedLease) { this.suggestedLease = suggestedLease; }
 
-    public void setDescription(String description) {
-        this.description = description;
-    }
+    public HousingUnit getHousingUnit() { return housingUnit; }
+    public void setHousingUnit(HousingUnit housingUnit) { this.housingUnit = housingUnit; }
 
-    public String getCounterpartyAccount() {
-        return counterpartyAccount;
-    }
+    public Building getBuilding() { return building; }
+    public void setBuilding(Building building) { this.building = building; }
 
-    public void setCounterpartyAccount(String counterpartyAccount) {
-        this.counterpartyAccount = counterpartyAccount;
-    }
+    public ImportBatch getImportBatch() { return importBatch; }
+    public void setImportBatch(ImportBatch importBatch) { this.importBatch = importBatch; }
 
-    public TransactionStatus getStatus() {
-        return status;
-    }
+    public List<TransactionAssetLink> getAssetLinks() { return assetLinks; }
+    public void setAssetLinks(List<TransactionAssetLink> assetLinks) { this.assetLinks = assetLinks; }
 
-    public void setStatus(TransactionStatus status) {
-        this.status = status;
-    }
+    public String getImportFingerprint() { return importFingerprint; }
+    public void setImportFingerprint(String importFingerprint) { this.importFingerprint = importFingerprint; }
 
-    public TransactionSource getSource() {
-        return source;
-    }
-
-    public void setSource(TransactionSource source) {
-        this.source = source;
-    }
-
-    public BankAccount getBankAccount() {
-        return bankAccount;
-    }
-
-    public void setBankAccount(BankAccount bankAccount) {
-        this.bankAccount = bankAccount;
-    }
-
-    public TagSubcategory getSubcategory() {
-        return subcategory;
-    }
-
-    public void setSubcategory(TagSubcategory subcategory) {
-        this.subcategory = subcategory;
-    }
-
-    public Lease getLease() {
-        return lease;
-    }
-
-    public void setLease(Lease lease) {
-        this.lease = lease;
-    }
-
-    public Lease getSuggestedLease() {
-        return suggestedLease;
-    }
-
-    public void setSuggestedLease(Lease suggestedLease) {
-        this.suggestedLease = suggestedLease;
-    }
-
-    public HousingUnit getHousingUnit() {
-        return housingUnit;
-    }
-
-    public void setHousingUnit(HousingUnit housingUnit) {
-        this.housingUnit = housingUnit;
-    }
-
-    public Building getBuilding() {
-        return building;
-    }
-
-    public void setBuilding(Building building) {
-        this.building = building;
-    }
-
-    public ImportBatch getImportBatch() {
-        return importBatch;
-    }
-
-    public void setImportBatch(ImportBatch importBatch) {
-        this.importBatch = importBatch;
-    }
-
-    public List<TransactionAssetLink> getAssetLinks() {
-        return assetLinks;
-    }
-
-    public void setAssetLinks(List<TransactionAssetLink> assetLinks) {
-        this.assetLinks = assetLinks;
-    }
-
-    public String getImportFingerprint() {
-        return importFingerprint;
-    }
-
-    public void setImportFingerprint(String importFingerprint) {
-        this.importFingerprint = importFingerprint;
-    }
-
-    public LocalDateTime getCreatedAt() {
-        return createdAt;
-    }
-
-    public LocalDateTime getUpdatedAt() {
-        return updatedAt;
-    }
+    public LocalDateTime getCreatedAt() { return createdAt; }
+    public LocalDateTime getUpdatedAt() { return updatedAt; }
 }

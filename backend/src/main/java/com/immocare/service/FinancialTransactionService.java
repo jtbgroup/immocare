@@ -1,6 +1,8 @@
 package com.immocare.service;
 
 import com.immocare.exception.AssetLinkValidationException;
+import com.immocare.exception.EstateAccessDeniedException;
+import com.immocare.exception.EstateNotFoundException;
 import com.immocare.exception.SubcategoryDirectionMismatchException;
 import com.immocare.exception.SubcategoryNotFoundException;
 import com.immocare.exception.TransactionNotEditableException;
@@ -22,6 +24,7 @@ import com.immocare.model.dto.UpdateTransactionRequest;
 import com.immocare.model.entity.AppUser;
 import com.immocare.model.entity.Boiler;
 import com.immocare.model.entity.Building;
+import com.immocare.model.entity.Estate;
 import com.immocare.model.entity.FinancialTransaction;
 import com.immocare.model.entity.FireExtinguisher;
 import com.immocare.model.entity.HousingUnit;
@@ -37,6 +40,7 @@ import com.immocare.model.enums.TransactionStatus;
 import com.immocare.repository.BankAccountRepository;
 import com.immocare.repository.BoilerRepository;
 import com.immocare.repository.BuildingRepository;
+import com.immocare.repository.EstateRepository;
 import com.immocare.repository.FinancialTransactionRepository;
 import com.immocare.repository.FireExtinguisherRepository;
 import com.immocare.repository.HousingUnitRepository;
@@ -58,8 +62,13 @@ import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
+/**
+ * Service for FinancialTransaction management.
+ * UC016 Phase 4: all operations are now scoped to an estate.
+ */
 @Service
 @Transactional(readOnly = true)
 public class FinancialTransactionService {
@@ -75,6 +84,7 @@ public class FinancialTransactionService {
     private final HousingUnitRepository housingUnitRepository;
     private final BuildingRepository buildingRepository;
     private final LeaseRepository leaseRepository;
+    private final EstateRepository estateRepository;
 
     public FinancialTransactionService(FinancialTransactionRepository transactionRepository,
             TagSubcategoryRepository tagSubcategoryRepository,
@@ -86,7 +96,8 @@ public class FinancialTransactionService {
             MeterRepository meterRepository,
             HousingUnitRepository housingUnitRepository,
             BuildingRepository buildingRepository,
-            LeaseRepository leaseRepository) {
+            LeaseRepository leaseRepository,
+            EstateRepository estateRepository) {
         this.transactionRepository = transactionRepository;
         this.tagSubcategoryRepository = tagSubcategoryRepository;
         this.bankAccountRepository = bankAccountRepository;
@@ -98,12 +109,13 @@ public class FinancialTransactionService {
         this.housingUnitRepository = housingUnitRepository;
         this.buildingRepository = buildingRepository;
         this.leaseRepository = leaseRepository;
+        this.estateRepository = estateRepository;
     }
 
     // ─── Read ─────────────────────────────────────────────────────────────────
 
-    public PagedTransactionResponse getAll(TransactionFilter filter, Pageable pageable) {
-        Specification<FinancialTransaction> spec = buildSpec(filter);
+    public PagedTransactionResponse getAll(UUID estateId, TransactionFilter filter, Pageable pageable) {
+        Specification<FinancialTransaction> spec = buildSpec(estateId, filter);
         Page<FinancialTransaction> page = transactionRepository.findAll(spec, pageable);
 
         BigDecimal totalIncome = computeTotal(spec, TransactionDirection.INCOME);
@@ -117,18 +129,21 @@ public class FinancialTransactionService {
                 page.getTotalElements(), page.getTotalPages(), totalIncome, totalExpenses, netBalance);
     }
 
-    public FinancialTransactionDTO getById(Long id) {
-        return toDTO(findOrThrow(id));
+    public FinancialTransactionDTO getById(UUID estateId, Long id) {
+        return toDTO(findInEstate(estateId, id));
     }
 
     // ─── Create ───────────────────────────────────────────────────────────────
 
     @Transactional
-    public FinancialTransactionDTO create(CreateTransactionRequest req, AppUser currentUser) {
-        validateTransactionRequest(req.direction(), req.leaseId(), req.subcategoryId(),
-                req.housingUnitId(), req.assetLinks(), null);
+    public FinancialTransactionDTO create(UUID estateId, CreateTransactionRequest req, AppUser currentUser) {
+        Estate estate = findEstateOrThrow(estateId);
+
+        validateTransactionRequest(estateId, req.direction(), req.leaseId(), req.subcategoryId(),
+                req.housingUnitId(), req.assetLinks());
 
         FinancialTransaction tx = new FinancialTransaction();
+        tx.setEstate(estate);
         tx.setDirection(req.direction());
         tx.setTransactionDate(req.transactionDate());
         tx.setValueDate(req.valueDate());
@@ -162,13 +177,13 @@ public class FinancialTransactionService {
     // ─── Update ───────────────────────────────────────────────────────────────
 
     @Transactional
-    public FinancialTransactionDTO update(Long id, UpdateTransactionRequest req) {
-        FinancialTransaction tx = findOrThrow(id);
+    public FinancialTransactionDTO update(UUID estateId, Long id, UpdateTransactionRequest req) {
+        FinancialTransaction tx = findInEstate(estateId, id);
         if (tx.getStatus() == TransactionStatus.RECONCILED) {
             throw new TransactionNotEditableException("Reconciled transactions cannot be modified");
         }
-        validateTransactionRequest(req.direction(), req.leaseId(), req.subcategoryId(),
-                req.housingUnitId(), req.assetLinks(), null);
+        validateTransactionRequest(estateId, req.direction(), req.leaseId(), req.subcategoryId(),
+                req.housingUnitId(), req.assetLinks());
 
         tx.setDirection(req.direction());
         tx.setTransactionDate(req.transactionDate());
@@ -197,8 +212,8 @@ public class FinancialTransactionService {
     // ─── Delete ───────────────────────────────────────────────────────────────
 
     @Transactional
-    public void delete(Long id) {
-        FinancialTransaction tx = findOrThrow(id);
+    public void delete(UUID estateId, Long id) {
+        FinancialTransaction tx = findInEstate(estateId, id);
         if (tx.getStatus() == TransactionStatus.RECONCILED) {
             throw new TransactionNotEditableException("Reconciled transactions cannot be modified");
         }
@@ -208,12 +223,13 @@ public class FinancialTransactionService {
     // ─── Confirm ──────────────────────────────────────────────────────────────
 
     @Transactional
-    public FinancialTransactionDTO confirm(Long id, ConfirmTransactionRequest req, AppUser currentUser) {
-        FinancialTransaction tx = findOrThrow(id);
+    public FinancialTransactionDTO confirm(UUID estateId, Long id, ConfirmTransactionRequest req, AppUser currentUser) {
+        FinancialTransaction tx = findInEstate(estateId, id);
         if (tx.getStatus() == TransactionStatus.RECONCILED) {
             throw new TransactionNotEditableException("Reconciled transactions cannot be modified");
         }
         if (req.subcategoryId() != null) {
+            verifySubcategoryBelongsToEstate(estateId, req.subcategoryId());
             tx.setSubcategory(tagSubcategoryRepository.getReferenceById(req.subcategoryId()));
         }
         if (req.accountingMonth() != null) {
@@ -241,11 +257,15 @@ public class FinancialTransactionService {
     // ─── Confirm batch ────────────────────────────────────────────────────────
 
     @Transactional
-    public int confirmBatch(Long batchId) {
+    public int confirmBatch(UUID estateId, Long batchId) {
         Page<FinancialTransaction> drafts = transactionRepository.findByImportBatchId(
                 batchId, Pageable.unpaged());
         int count = 0;
         for (FinancialTransaction tx : drafts) {
+            // Only confirm transactions belonging to this estate
+            if (tx.getEstate() != null && !tx.getEstate().getId().equals(estateId)) {
+                continue;
+            }
             if (tx.getStatus() == TransactionStatus.DRAFT) {
                 tx.setStatus(TransactionStatus.CONFIRMED);
                 transactionRepository.save(tx);
@@ -259,13 +279,14 @@ public class FinancialTransactionService {
     // ─── Bulk patch ───────────────────────────────────────────────────────────
 
     @Transactional
-    public BulkPatchTransactionResult bulkPatch(BulkPatchTransactionRequest req) {
+    public BulkPatchTransactionResult bulkPatch(UUID estateId, BulkPatchTransactionRequest req) {
         if (req.status() == null && req.subcategoryId() == null) {
             throw new IllegalArgumentException("At least one patch field (status or subcategoryId) must be provided");
         }
 
         TagSubcategory subcategory = null;
         if (req.subcategoryId() != null && req.subcategoryId() != 0) {
+            verifySubcategoryBelongsToEstate(estateId, req.subcategoryId());
             subcategory = tagSubcategoryRepository.findById(req.subcategoryId())
                     .orElseThrow(() -> new SubcategoryNotFoundException(
                             "Subcategory not found: " + req.subcategoryId()));
@@ -277,6 +298,11 @@ public class FinancialTransactionService {
         int updated = 0, skipped = 0;
 
         for (FinancialTransaction tx : transactions) {
+            // Skip transactions belonging to a different estate
+            if (tx.getEstate() == null || !tx.getEstate().getId().equals(estateId)) {
+                skipped++;
+                continue;
+            }
             if (tx.getStatus() == TransactionStatus.RECONCILED) {
                 skipped++;
                 continue;
@@ -324,8 +350,10 @@ public class FinancialTransactionService {
 
     // ─── Statistics ───────────────────────────────────────────────────────────
 
-    public TransactionStatisticsDTO getStatistics(StatisticsFilter filter) {
-        Specification<FinancialTransaction> base = TransactionSpecification.confirmedOrReconciled();
+    public TransactionStatisticsDTO getStatistics(UUID estateId, StatisticsFilter filter) {
+        Specification<FinancialTransaction> base = TransactionSpecification.hasEstate(estateId)
+                .and(TransactionSpecification.confirmedOrReconciled());
+
         if (filter.accountingFrom() != null)
             base = base.and(TransactionSpecification.withAccountingFrom(filter.accountingFrom()));
         if (filter.accountingTo() != null)
@@ -432,10 +460,10 @@ public class FinancialTransactionService {
 
     // ─── Export ───────────────────────────────────────────────────────────────
 
-    public void exportCsv(TransactionFilter filter, HttpServletResponse response) throws IOException {
+    public void exportCsv(UUID estateId, TransactionFilter filter, HttpServletResponse response) throws IOException {
         response.setContentType("text/csv; charset=UTF-8");
         response.setHeader("Content-Disposition", "attachment; filename=\"transactions.csv\"");
-        Specification<FinancialTransaction> spec = buildSpec(filter);
+        Specification<FinancialTransaction> spec = buildSpec(estateId, filter);
         List<FinancialTransaction> all = transactionRepository.findAll(spec);
 
         PrintWriter writer = response.getWriter();
@@ -471,13 +499,33 @@ public class FinancialTransactionService {
 
     // ─── Private helpers ──────────────────────────────────────────────────────
 
-    private FinancialTransaction findOrThrow(Long id) {
-        return transactionRepository.findById(id)
+    /**
+     * Finds a transaction and verifies it belongs to the given estate.
+     */
+    private FinancialTransaction findInEstate(UUID estateId, Long id) {
+        FinancialTransaction tx = transactionRepository.findById(id)
                 .orElseThrow(() -> new TransactionNotFoundException("Financial transaction not found: " + id));
+        if (tx.getEstate() == null || !tx.getEstate().getId().equals(estateId)) {
+            throw new EstateAccessDeniedException();
+        }
+        return tx;
     }
 
-    private Specification<FinancialTransaction> buildSpec(TransactionFilter f) {
-        Specification<FinancialTransaction> spec = (root, query, cb) -> null;
+    private Estate findEstateOrThrow(UUID estateId) {
+        return estateRepository.findById(estateId)
+                .orElseThrow(() -> new EstateNotFoundException(estateId));
+    }
+
+    private void verifySubcategoryBelongsToEstate(UUID estateId, Long subcategoryId) {
+        if (!tagSubcategoryRepository.existsByCategory_EstateIdAndId(estateId, subcategoryId)) {
+            throw new EstateAccessDeniedException();
+        }
+    }
+
+    private Specification<FinancialTransaction> buildSpec(UUID estateId, TransactionFilter f) {
+        // Always scope to the estate
+        Specification<FinancialTransaction> spec = TransactionSpecification.hasEstate(estateId);
+
         if (f.direction() != null)
             spec = spec.and(TransactionSpecification.withDirection(f.direction()));
         if (f.from() != null)
@@ -506,6 +554,7 @@ public class FinancialTransactionService {
             spec = spec.and(TransactionSpecification.withImportBatchId(f.importBatchId()));
         if (f.assetType() != null && f.assetId() != null)
             spec = spec.and(TransactionSpecification.withAssetLink(f.assetType(), f.assetId()));
+
         return spec;
     }
 
@@ -530,15 +579,8 @@ public class FinancialTransactionService {
         tx.setBuilding(buildingId != null ? buildingRepository.getReferenceById(buildingId) : null);
     }
 
-    /**
-     * Build and attach asset links to a transaction.
-     * Resolves housing_unit and building server-side (BR-UC014-14).
-     * Validates that the sum of non-null amounts does not exceed the transaction total (BR-UC014-15).
-     * Validates that a BOILER belongs to the same building as the transaction (BR-UC014-09).
-     */
     private void applyAssetLinks(FinancialTransaction tx, List<SaveAssetLinkRequest> linkRequests,
             BigDecimal txAmount) {
-        // BR-UC014-15: validate sum of partial amounts
         BigDecimal partialSum = linkRequests.stream()
                 .map(SaveAssetLinkRequest::amount)
                 .filter(a -> a != null)
@@ -549,7 +591,6 @@ public class FinancialTransactionService {
         }
 
         for (SaveAssetLinkRequest linkReq : linkRequests) {
-            // BR-UC014-09: BOILER must belong to the same building when building is set
             if (linkReq.assetType() == AssetType.BOILER && tx.getBuilding() != null) {
                 boilerRepository.findById(linkReq.assetId()).ifPresent(boiler -> {
                     Long boilerBuildingId = resolveBuildingIdFromBoiler(boiler);
@@ -567,20 +608,11 @@ public class FinancialTransactionService {
             link.setAssetId(linkReq.assetId());
             link.setAmount(linkReq.amount());
             link.setNotes(linkReq.notes());
-
-            // BR-UC014-14: resolve housing_unit and building server-side
             resolveAssetLinkContext(link);
-
             tx.getAssetLinks().add(link);
         }
     }
 
-    /**
-     * Resolves housing_unit and building on an asset link from the asset's ownership.
-     * BOILER: ownerType + ownerId → unit or building
-     * FIRE_EXTINGUISHER: building FK + optional unit FK
-     * METER: ownerType + ownerId → unit or building
-     */
     private void resolveAssetLinkContext(TransactionAssetLink link) {
         switch (link.getAssetType()) {
             case BOILER -> boilerRepository.findById(link.getAssetId()).ifPresent(boiler -> {
@@ -624,15 +656,11 @@ public class FinancialTransactionService {
         return null;
     }
 
-    private void validateTransactionRequest(TransactionDirection direction, Long leaseId,
-            Long subcategoryId, Long housingUnitId,
-            List<SaveAssetLinkRequest> assetLinks,
-            BigDecimal amount) {
-        // BR-UC014-02: lease link only for income
+    private void validateTransactionRequest(UUID estateId, TransactionDirection direction, Long leaseId,
+            Long subcategoryId, Long housingUnitId, List<SaveAssetLinkRequest> assetLinks) {
         if (direction == TransactionDirection.EXPENSE && leaseId != null) {
             throw new TransactionValidationException("Lease link is only allowed for income transactions");
         }
-        // BR-UC014-06: subcategory direction compatibility
         if (subcategoryId != null) {
             TagSubcategory sub = tagSubcategoryRepository.findById(subcategoryId)
                     .orElseThrow(() -> new SubcategoryNotFoundException("Subcategory not found: " + subcategoryId));
@@ -641,6 +669,8 @@ public class FinancialTransactionService {
                 throw new SubcategoryDirectionMismatchException(
                         "Subcategory '" + sub.getName() + "' is not compatible with direction " + direction);
             }
+            // Verify subcategory belongs to this estate
+            verifySubcategoryBelongsToEstate(estateId, subcategoryId);
         }
     }
 
@@ -655,7 +685,6 @@ public class FinancialTransactionService {
             learningService.reinforceAccountingMonthRule(
                     tx.getSubcategory().getId(), tx.getCounterpartyAccount(), offset);
         }
-        // BR-UC014-19: reinforce ASSET_TYPE rule for each distinct asset type in links
         if (tx.getSubcategory() != null) {
             tx.getAssetLinks().stream()
                     .map(l -> l.getAssetType().name())

@@ -7,20 +7,26 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
+import java.util.UUID;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
+import com.immocare.exception.EstateNotFoundException;
 import com.immocare.exception.ParseException;
 import com.immocare.model.dto.ImportBatchResultDTO;
+import com.immocare.model.dto.ImportBatchSummaryDTO;
 import com.immocare.model.dto.ImportPreviewRowDTO;
 import com.immocare.model.dto.ImportRowEnrichmentDTO;
 import com.immocare.model.dto.SubcategorySuggestionDTO;
 import com.immocare.model.entity.AppUser;
 import com.immocare.model.entity.BankAccount;
+import com.immocare.model.entity.Estate;
 import com.immocare.model.entity.FinancialTransaction;
 import com.immocare.model.entity.ImportBatch;
 import com.immocare.model.entity.ParsedTransaction;
@@ -32,6 +38,7 @@ import com.immocare.model.enums.TransactionDirection;
 import com.immocare.model.enums.TransactionSource;
 import com.immocare.model.enums.TransactionStatus;
 import com.immocare.repository.BankAccountRepository;
+import com.immocare.repository.EstateRepository;
 import com.immocare.repository.FinancialTransactionRepository;
 import com.immocare.repository.HousingUnitRepository;
 import com.immocare.repository.ImportBatchRepository;
@@ -45,12 +52,12 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
 /**
- * Service handling the 3-step transaction import flow:
- * 1. preview — parse only, no persistence, returns rows with suggestions
- * 2. import — parse + apply enrichments + persist
+ * Service handling the 3-step transaction import flow.
+ * UC016 Phase 4: all operations are now scoped to an estate.
  *
- * Direction is always determined by the parser (sign of amount in CSV).
- * There is no manual direction assignment step for CSV imports.
+ * Duplicate detection is now per-estate:
+ *   A transaction with the same fingerprint in estate A does not block
+ *   import of the same transaction in estate B.
  */
 @Slf4j
 @Service
@@ -66,32 +73,54 @@ public class TransactionImportService {
     private final PersonBankAccountRepository personBankAccountRepository;
     private final LeaseRepository leaseRepository;
     private final HousingUnitRepository housingUnitRepository;
+    private final EstateRepository estateRepository;
+
+    // ─── Import history ───────────────────────────────────────────────────────
+
+    public List<ImportBatchSummaryDTO> getImportBatches(UUID estateId, int page, int size) {
+        return importBatchRepository
+                .findByEstateIdOrderByImportedAtDesc(
+                        estateId,
+                        PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "importedAt")))
+                .getContent()
+                .stream()
+                .map(b -> new ImportBatchSummaryDTO(
+                        b.getId(),
+                        b.getFilename(),
+                        b.getTotalRows(),
+                        b.getImportedCount(),
+                        b.getDuplicateCount(),
+                        b.getErrorCount(),
+                        b.getImportedAt(),
+                        b.getCreatedBy() != null ? b.getCreatedBy().getUsername() : null))
+                .toList();
+    }
 
     // ─── Preview ──────────────────────────────────────────────────────────────
 
     /**
      * Parse the file and return enriched preview rows without persisting anything.
+     * Duplicate detection is now estate-scoped.
      */
-    public List<ImportPreviewRowDTO> previewFile(MultipartFile file, String parserCode)
+    public List<ImportPreviewRowDTO> previewFile(UUID estateId, MultipartFile file, String parserCode)
             throws ParseException {
 
         TransactionParser parser = parserRegistry.getOrThrow(parserCode);
         List<ParsedTransaction> parsed = parseFile(file, parser);
 
         return parsed.stream()
-                .map(this::toPreviewRow)
+                .map(row -> toPreviewRow(estateId, row))
                 .collect(Collectors.toList());
     }
 
     // ─── Import ───────────────────────────────────────────────────────────────
 
     /**
-     * Parse the file, apply enrichments, and persist transactions.
-     * Rows with a matching enrichment are saved as CONFIRMED; others as DRAFT.
-     * Duplicate fingerprints are skipped silently.
+     * Parse the file, apply enrichments, and persist transactions — all scoped to the estate.
      */
     @Transactional
     public ImportBatchResultDTO importFile(
+            UUID estateId,
             MultipartFile file,
             String parserCode,
             Long bankAccountId,
@@ -99,24 +128,27 @@ public class TransactionImportService {
             Set<String> selectedFingerprints,
             AppUser currentUser) throws ParseException {
 
+        Estate estate = findEstateOrThrow(estateId);
         TransactionParser parser = parserRegistry.getOrThrow(parserCode);
         List<ParsedTransaction> parsed = parseFile(file, parser);
 
-        // Build enrichment lookup by fingerprint
         Map<String, ImportRowEnrichmentDTO> enrichmentMap = enrichments.stream()
                 .collect(Collectors.toMap(ImportRowEnrichmentDTO::fingerprint, Function.identity(),
                         (a, b) -> b));
 
-        // Resolve bank account
-        BankAccount bankAccount = bankAccountId != null
-                ? bankAccountRepository.findById(bankAccountId).orElse(null)
-                : null;
+        // Resolve bank account — must belong to this estate
+        BankAccount bankAccount = null;
+        if (bankAccountId != null) {
+            bankAccount = bankAccountRepository.findById(bankAccountId)
+                    .filter(ba -> ba.getEstate().getId().equals(estateId))
+                    .orElse(null);
+        }
 
-        // Create import batch
         ImportBatch batch = new ImportBatch();
         batch.setFilename(file.getOriginalFilename());
         batch.setTotalRows(parsed.size());
         batch.setCreatedBy(currentUser);
+        batch.setEstate(estate);
         importBatchRepository.save(batch);
 
         int importedCount = 0;
@@ -126,24 +158,22 @@ public class TransactionImportService {
 
         for (ParsedTransaction row : parsed) {
 
-            // Skip if not in selected fingerprints (when selection is provided)
             if (!selectedFingerprints.isEmpty() && !selectedFingerprints.contains(row.getFingerprint())) {
                 continue;
             }
 
-            // Duplicate detection
-            if (transactionRepository.existsByImportFingerprint(row.getFingerprint())) {
-                log.debug("Duplicate fingerprint skipped: {}", row.getFingerprint());
+            // Estate-scoped duplicate detection
+            if (transactionRepository.existsByImportFingerprintAndEstateId(row.getFingerprint(), estateId)) {
+                log.debug("Duplicate fingerprint skipped for estate {}: {}", estateId, row.getFingerprint());
                 duplicateCount++;
                 continue;
             }
 
             try {
                 ImportRowEnrichmentDTO enrichment = enrichmentMap.get(row.getFingerprint());
-                FinancialTransaction tx = buildTransaction(row, enrichment, bankAccount, batch, currentUser);
+                FinancialTransaction tx = buildTransaction(estate, row, enrichment, bankAccount, batch, currentUser);
                 transactionRepository.save(tx);
 
-                // Update learning rules if subcategory was assigned
                 if (tx.getSubcategory() != null) {
                     updateLearningRules(row, tx.getSubcategory());
                 }
@@ -158,7 +188,6 @@ public class TransactionImportService {
             }
         }
 
-        // Update batch counters
         batch.setImportedCount(importedCount);
         batch.setDuplicateCount(duplicateCount);
         batch.setErrorCount(errorCount);
@@ -180,20 +209,21 @@ public class TransactionImportService {
     }
 
     /**
-     * Convert a parsed row to a preview DTO with suggestions.
+     * Convert a parsed row to a preview DTO with estate-scoped suggestions.
      */
-    private ImportPreviewRowDTO toPreviewRow(ParsedTransaction row) {
+    private ImportPreviewRowDTO toPreviewRow(UUID estateId, ParsedTransaction row) {
 
-        boolean duplicate = transactionRepository.existsByImportFingerprint(row.getFingerprint());
+        // Estate-scoped duplicate detection
+        boolean duplicate = transactionRepository.existsByImportFingerprintAndEstateId(
+                row.getFingerprint(), estateId);
 
         Long duplicateTransactionId = duplicate
-                ? transactionRepository.findIdByImportFingerprint(row.getFingerprint())
+                ? transactionRepository.findIdByImportFingerprintAndEstateId(row.getFingerprint(), estateId)
                 : null;
 
         SubcategorySuggestionDTO suggestion = suggestSubcategory(row);
-        ImportPreviewRowDTO.SuggestedLeaseDTO leaseSuggestion = suggestLease(row);
+        ImportPreviewRowDTO.SuggestedLeaseDTO leaseSuggestion = suggestLease(estateId, row);
 
-        // Direction is always known from the CSV sign — convert to API enum
         TransactionDirection direction = toApiDirection(row.getDirection());
 
         return new ImportPreviewRowDTO(
@@ -209,17 +239,14 @@ public class TransactionImportService {
                 duplicateTransactionId,
                 suggestion,
                 leaseSuggestion,
-                null // no parse error
-        );
+                null);
     }
 
     /**
-     * Build a FinancialTransaction entity from a parsed row and optional
-     * enrichment.
-     * Direction comes from the parser (sign of CSV amount) — enrichment may
-     * override it.
+     * Build a FinancialTransaction entity from a parsed row, bound to the given estate.
      */
     private FinancialTransaction buildTransaction(
+            Estate estate,
             ParsedTransaction row,
             ImportRowEnrichmentDTO enrichment,
             BankAccount bankAccount,
@@ -228,38 +255,24 @@ public class TransactionImportService {
 
         FinancialTransaction tx = new FinancialTransaction();
 
-        // Reference
+        tx.setEstate(estate);
         tx.setReference(generateReference(currentUser));
-
-        // Dates
         tx.setTransactionDate(row.getTransactionDate());
-        tx.setValueDate(row.getValueDate()); // populated from "Date valeur" column
+        tx.setValueDate(row.getValueDate());
         tx.setAccountingMonth(computeAccountingMonth(row, enrichment));
-
-        // Amount and direction — direction from CSV sign, overridable via enrichment
         tx.setAmount(row.getAmount());
         tx.setDirection(resolveDirection(row, enrichment));
-
-        // Counterparty
         tx.setDescription(row.getDescription());
         tx.setCounterpartyAccount(row.getCounterpartyAccount());
-
-        // External reference from Keytrade "Extrait" column
         tx.setExternalReference(row.getExternalReference());
-
-        // Deduplication fingerprint
         tx.setImportFingerprint(row.getFingerprint());
-
-        // Source
         tx.setSource(TransactionSource.IMPORT);
         tx.setImportBatch(batch);
         tx.setBankAccount(bankAccount);
 
-        // Status: CONFIRMED if enrichment provided, DRAFT otherwise
         boolean hasEnrichment = enrichment != null;
         tx.setStatus(hasEnrichment ? TransactionStatus.CONFIRMED : TransactionStatus.DRAFT);
 
-        // Apply enrichment
         if (hasEnrichment) {
             applyEnrichment(tx, enrichment);
         } else {
@@ -269,8 +282,8 @@ public class TransactionImportService {
                 subcategoryRepository.findById(suggestion.subcategoryId())
                         .ifPresent(tx::setSubcategory);
             }
-            // Auto-apply lease suggestion
-            ImportPreviewRowDTO.SuggestedLeaseDTO leaseSuggestion = suggestLease(row);
+            // Auto-apply lease suggestion (scoped to estate)
+            ImportPreviewRowDTO.SuggestedLeaseDTO leaseSuggestion = suggestLease(estate.getId(), row);
             if (leaseSuggestion != null) {
                 leaseRepository.findById(leaseSuggestion.leaseId())
                         .ifPresent(tx::setSuggestedLease);
@@ -282,10 +295,6 @@ public class TransactionImportService {
         return tx;
     }
 
-    /**
-     * Resolve direction: enrichment override takes precedence over parser-detected
-     * direction.
-     */
     private TransactionDirection resolveDirection(ParsedTransaction row, ImportRowEnrichmentDTO enrichment) {
         if (enrichment != null && enrichment.directionOverride() != null) {
             return TransactionDirection.valueOf(enrichment.directionOverride());
@@ -293,16 +302,10 @@ public class TransactionImportService {
         return toApiDirection(row.getDirection());
     }
 
-    /**
-     * Convert internal ParsedTransaction.Direction to API TransactionDirection
-     * enum.
-     * Direction is always set by the CSV parser — this should never return null.
-     */
     private TransactionDirection toApiDirection(ParsedTransaction.Direction direction) {
         if (direction == null) {
             throw new IllegalStateException(
-                    "Parser produced a transaction with null direction. "
-                            + "The Keytrade CSV parser always determines direction from the amount sign.");
+                    "Parser produced a transaction with null direction.");
         }
         return switch (direction) {
             case INCOME -> TransactionDirection.INCOME;
@@ -323,29 +326,19 @@ public class TransactionImportService {
             housingUnitRepository.findById(enrichment.housingUnitId())
                     .ifPresent(tx::setHousingUnit);
         }
-        if (enrichment.buildingId() != null) {
-            // building is set indirectly — service resolves from housingUnit when present
-        }
     }
 
-    /**
-     * Compute accounting month from transaction date.
-     * Always the first day of the transaction month.
-     * Enrichment can override this.
-     */
     private LocalDate computeAccountingMonth(ParsedTransaction row, ImportRowEnrichmentDTO enrichment) {
-        // TODO: apply AccountingMonthRule learning if subcategory is known
         return row.getTransactionDate().withDayOfMonth(1);
     }
 
     /**
-     * Suggest best subcategory using learning rules.
-     * Tries counterparty account first (most reliable), then description.
+     * Suggests a subcategory using learning rules (not yet estate-scoped — global rules for now).
+     * Learning rules will be estate-scoped in Phase 5.
      */
     private SubcategorySuggestionDTO suggestSubcategory(ParsedTransaction row) {
         int minConf = 1;
 
-        // Try counterparty IBAN
         if (row.getCounterpartyAccount() != null) {
             var rules = learningRuleRepository.findSuggestions(
                     TagMatchField.COUNTERPARTY_ACCOUNT, row.getCounterpartyAccount(), minConf);
@@ -359,7 +352,6 @@ public class TransactionImportService {
             }
         }
 
-        // Try description
         if (row.getDescription() != null && !row.getDescription().isBlank()) {
             var rules = learningRuleRepository.findSuggestions(
                     TagMatchField.DESCRIPTION, row.getDescription(), minConf);
@@ -377,10 +369,10 @@ public class TransactionImportService {
     }
 
     /**
-     * Suggest a lease by matching the counterparty IBAN against known person bank
-     * accounts.
+     * Suggests a lease by matching the counterparty IBAN against person bank accounts
+     * that belong to the same estate (scoped in Phase 4).
      */
-    private ImportPreviewRowDTO.SuggestedLeaseDTO suggestLease(ParsedTransaction row) {
+    private ImportPreviewRowDTO.SuggestedLeaseDTO suggestLease(UUID estateId, ParsedTransaction row) {
         if (row.getCounterpartyAccount() == null) {
             return null;
         }
@@ -392,6 +384,12 @@ public class TransactionImportService {
         }
 
         var person = pba.get().getPerson();
+
+        // Estate scope check: only suggest if the person belongs to this estate
+        if (person.getEstate() == null || !person.getEstate().getId().equals(estateId)) {
+            return null;
+        }
+
         var leases = leaseRepository.findAllByTenantPersonIdOrderByStartDateDesc(person.getId());
 
         if (leases.isEmpty()) {
@@ -401,6 +399,11 @@ public class TransactionImportService {
         var lease = leases.get(0);
         var unit = lease.getHousingUnit();
         var building = unit.getBuilding();
+
+        // Additional estate scope check on the lease side
+        if (!building.getEstate().getId().equals(estateId)) {
+            return null;
+        }
 
         return new ImportPreviewRowDTO.SuggestedLeaseDTO(
                 lease.getId(),
@@ -412,10 +415,6 @@ public class TransactionImportService {
                 person.getFirstName() + " " + person.getLastName());
     }
 
-    /**
-     * Reinforce or create a learning rule when a subcategory is confirmed at import
-     * time.
-     */
     private void updateLearningRules(ParsedTransaction row, TagSubcategory subcategory) {
         if (row.getCounterpartyAccount() != null) {
             upsertRule(TagMatchField.COUNTERPARTY_ACCOUNT, row.getCounterpartyAccount(), subcategory);
@@ -445,5 +444,10 @@ public class TransactionImportService {
     private String generateReference(AppUser currentUser) {
         long seq = transactionRepository.nextRefSequence();
         return "TXN-" + seq;
+    }
+
+    private Estate findEstateOrThrow(UUID estateId) {
+        return estateRepository.findById(estateId)
+                .orElseThrow(() -> new EstateNotFoundException(estateId));
     }
 }

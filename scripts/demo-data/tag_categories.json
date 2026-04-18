@@ -1,76 +1,81 @@
 [
   {
     "name": "Administration",
+    "estateName": "Estate Ville",
     "subcategories": [
       { "name": "Assurance habitation", "direction": "EXPENSE" },
-      { "name": "PEB",                  "direction": "EXPENSE" },
-      { "name": "Petits frais",         "direction": "EXPENSE" }
+      { "name": "PEB", "direction": "EXPENSE" },
+      { "name": "Petits frais", "direction": "EXPENSE" }
     ]
   },
   {
     "name": "Consommables",
+    "estateName": "Estate Ville",
     "subcategories": [
       { "name": "Adoucisseur", "direction": "EXPENSE" },
-      { "name": "Eau",         "direction": "EXPENSE" },
+      { "name": "Eau", "direction": "EXPENSE" },
       { "name": "Electricité", "direction": "EXPENSE" },
-      { "name": "Gaz",         "direction": "EXPENSE" }
+      { "name": "Gaz", "direction": "EXPENSE" }
     ]
   },
   {
     "name": "Dépôt",
-    "subcategories": [
-      { "name": "Garantie Locative", "direction": "BOTH" }
-    ]
+    "estateName": "Estate Ville",
+    "subcategories": [{ "name": "Garantie Locative", "direction": "BOTH" }]
   },
   {
     "name": "Location",
+    "estateName": "Estate Ville",
     "subcategories": [
-      { "name": "Annonce",           "direction": "EXPENSE" },
-      { "name": "Etat des lieux",    "direction": "EXPENSE" },
+      { "name": "Annonce", "direction": "EXPENSE" },
+      { "name": "Etat des lieux", "direction": "EXPENSE" },
       { "name": "Garantie Locative", "direction": "EXPENSE" },
-      { "name": "Loyer",             "direction": "INCOME"  },
-      { "name": "Petits travaux",    "direction": "EXPENSE" }
+      { "name": "Loyer", "direction": "INCOME" },
+      { "name": "Petits travaux", "direction": "EXPENSE" }
     ]
   },
   {
     "name": "Maintenance",
+    "estateName": "Estate Ville",
     "subcategories": [
-      { "name": "Adoucisseur",        "direction": "EXPENSE" },
-      { "name": "Chaudière",          "direction": "EXPENSE" },
-      { "name": "Electricité",        "direction": "EXPENSE" },
-      { "name": "Extincteurs",        "direction": "EXPENSE" },
-      { "name": "Insert",             "direction": "EXPENSE" },
-      { "name": "Matériel",           "direction": "EXPENSE" },
-      { "name": "Nettoyage communs",  "direction": "EXPENSE" },
-      { "name": "Petits travaux",     "direction": "EXPENSE" },
-      { "name": "Plomberie",          "direction": "EXPENSE" }
+      { "name": "Adoucisseur", "direction": "EXPENSE" },
+      { "name": "Chaudière", "direction": "EXPENSE" },
+      { "name": "Electricité", "direction": "EXPENSE" },
+      { "name": "Extincteurs", "direction": "EXPENSE" },
+      { "name": "Insert", "direction": "EXPENSE" },
+      { "name": "Matériel", "direction": "EXPENSE" },
+      { "name": "Nettoyage communs", "direction": "EXPENSE" },
+      { "name": "Petits travaux", "direction": "EXPENSE" },
+      { "name": "Plomberie", "direction": "EXPENSE" }
     ]
   },
   {
     "name": "Prime",
+    "estateName": "Estate Ville",
     "subcategories": [
-      { "name": "Banque",  "direction": "INCOME" },
-      { "name": "Retour",  "direction": "INCOME" },
-      { "name": "Usufruit","direction": "INCOME" }
+      { "name": "Banque", "direction": "INCOME" },
+      { "name": "Retour", "direction": "INCOME" },
+      { "name": "Usufruit", "direction": "INCOME" }
     ]
   },
   {
     "name": "Rente",
-    "subcategories": [
-      { "name": "Usufruit", "direction": "EXPENSE" }
-    ]
+    "estateName": "Estate Ville",
+    "subcategories": [{ "name": "Usufruit", "direction": "EXPENSE" }]
   },
   {
     "name": "Taxes",
+    "estateName": "Estate Ville",
     "subcategories": [
       { "name": "Précompte immobilier", "direction": "EXPENSE" }
     ]
   },
   {
     "name": "Travaux",
+    "estateName": "Estate Ville",
     "subcategories": [
       { "name": "Structure", "direction": "EXPENSE" },
-      { "name": "Toiture",   "direction": "EXPENSE" }
+      { "name": "Toiture", "direction": "EXPENSE" }
     ]
   }
 ]
