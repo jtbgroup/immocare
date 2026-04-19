@@ -93,8 +93,10 @@ dev-logs:
 	docker compose -f docker-compose.dev.yml logs -f
 
 dev-clean:
-	@echo "🧹 Cleaning development environment (removes volumes)..."
-	docker compose -f docker-compose.dev.yml --profile postgres down -v
+	@echo "🧹 Cleaning development environment (removes volumes and orphan containers)..."
+	docker compose -f docker-compose.dev.yml --profile postgres down -v --remove-orphans
+	@docker volume rm immocare-dev_maven_cache immocare-dev_node_modules immocare-dev_postgres_data_dev \
+		immocare_maven_cache immocare_node_modules immocare_postgres_data_dev 2>/dev/null || true
 	@echo "✅ Development environment cleaned"
 
 

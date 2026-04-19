@@ -92,6 +92,16 @@ bootstrapApplication(AppComponent, {
           ),
       },
 
+      // ─── Estate settings (UC016 Phase 5) ────────────────────────────────────
+      {
+        path: "estates/:estateId/admin/platform-settings",
+        canActivate: [AuthGuard, EstateGuard],
+        loadComponent: () =>
+          import("./app/features/estate/components/estate-platform-settings/estate-platform-settings.component").then(
+            (m) => m.EstatePlatformSettingsComponent,
+          ),
+      },
+
       // ─── Buildings (UC016 Phase 2: estate-scoped) ────────────────────────────
       {
         path: "estates/:estateId/buildings",
@@ -314,7 +324,7 @@ bootstrapApplication(AppComponent, {
           ),
       },
 
-      // ─── Settings ────────────────────────────────────────────────────────────
+      // ─── Legacy global settings (kept for PLATFORM_ADMIN without estate) ─────
       {
         path: "settings",
         canActivate: [AuthGuard],

@@ -6,98 +6,99 @@ import java.util.UUID;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
-import org.springframework.stereotype.Repository;
 
 import com.immocare.model.entity.HousingUnit;
 
 /**
  * Repository for HousingUnit entity.
- * UC016 Phase 2: estate-scoped queries added via building join.
  */
-@Repository
 public interface HousingUnitRepository extends JpaRepository<HousingUnit, Long> {
 
-    // ─── Estate-scoped queries (Phase 2) ─────────────────────────────────────
+        // ─── Building-scoped queries ──────────────────────────────────────────────
 
-    /**
-     * Find all units belonging to a specific building within a given estate,
-     * ordered by floor then unit number.
-     */
-    @Query("""
-            SELECT u FROM HousingUnit u
-            WHERE u.building.estate.id = :estateId
-            AND u.building.id = :buildingId
-            ORDER BY u.floor ASC, u.unitNumber ASC
-            """)
-    List<HousingUnit> findByEstateIdAndBuildingId(
-            @Param("estateId") UUID estateId,
-            @Param("buildingId") Long buildingId);
+        List<HousingUnit> findByBuildingIdOrderByFloorAscUnitNumberAsc(Long buildingId);
 
-    /**
-     * Checks that a housing unit exists and belongs to a building in the given estate.
-     */
-    boolean existsByBuilding_Estate_IdAndId(UUID estateId, Long unitId);
+        long countByBuildingId(Long buildingId);
 
-    /**
-     * Counts all housing units in a given estate (via building join).
-     * Used by EstateService.getDashboard() (Phase 2).
-     */
-    long countByBuilding_Estate_Id(UUID estateId);
+        /**
+         * Check if a unit number already exists in a building (case-insensitive).
+         * Used by HousingUnitService.createUnit() to enforce unique unit numbers.
+         */
+        @Query("""
+                        SELECT COUNT(u) > 0 FROM HousingUnit u
+                        WHERE u.building.id = :buildingId
+                        AND LOWER(u.unitNumber) = LOWER(:unitNumber)
+                        """)
+        boolean existsByBuildingIdAndUnitNumberIgnoreCase(
+                        @Param("buildingId") Long buildingId,
+                        @Param("unitNumber") String unitNumber);
 
-    /**
-     * Find all units across all buildings of a given estate,
-     * ordered by building id, floor, and unit number.
-     */
-    @Query("""
-            SELECT u FROM HousingUnit u
-            WHERE u.building.estate.id = :estateId
-            ORDER BY u.building.id ASC, u.floor ASC, u.unitNumber ASC
-            """)
-    List<HousingUnit> findAllByEstateIdOrdered(@Param("estateId") UUID estateId);
+        /**
+         * Check if a unit number exists in a building, excluding a specific unit
+         * (case-insensitive).
+         * Used by HousingUnitService.updateUnit() to enforce unique unit numbers during
+         * updates.
+         */
+        @Query("""
+                        SELECT COUNT(u) > 0 FROM HousingUnit u
+                        WHERE u.building.id = :buildingId
+                        AND LOWER(u.unitNumber) = LOWER(:unitNumber)
+                        AND u.id != :excludeUnitId
+                        """)
+        boolean existsByBuildingIdAndUnitNumberIgnoreCaseExcluding(
+                        @Param("buildingId") Long buildingId,
+                        @Param("unitNumber") String unitNumber,
+                        @Param("excludeUnitId") Long excludeUnitId);
 
-    // ─── Existing queries (non-estate-scoped, kept for internal use) ──────────
+        // ─── Estate-scoped queries (Phase 2+) ────────────────────────────────────
 
-    /**
-     * Find all units belonging to a building, ordered by floor then unit number.
-     */
-    List<HousingUnit> findByBuildingIdOrderByFloorAscUnitNumberAsc(Long buildingId);
+        /**
+         * All units within a building that belongs to the given estate.
+         * Used by BuildingController, HousingUnitController.
+         */
+        @Query("""
+                        SELECT u FROM HousingUnit u
+                        WHERE u.building.estate.id = :estateId
+                        AND u.building.id = :buildingId
+                        ORDER BY u.floor ASC, u.unitNumber ASC
+                        """)
+        List<HousingUnit> findByEstateIdAndBuildingId(
+                        @Param("estateId") UUID estateId,
+                        @Param("buildingId") Long buildingId);
 
-    /**
-     * Count units in a building — used by BuildingService to guard against deletion.
-     */
-    long countByBuildingId(Long buildingId);
+        /**
+         * Verifies that a unit belongs to the given estate (via building → estate
+         * chain).
+         */
+        boolean existsByBuilding_Estate_IdAndId(UUID estateId, Long unitId);
 
-    /**
-     * Check for duplicate unit number within a building, excluding a given unit ID.
-     */
-    @Query("""
-            SELECT COUNT(u) > 0
-            FROM HousingUnit u
-            WHERE u.building.id = :buildingId
-              AND LOWER(u.unitNumber) = LOWER(:unitNumber)
-              AND u.id <> :excludeId
-            """)
-    boolean existsByBuildingIdAndUnitNumberIgnoreCaseExcluding(
-            @Param("buildingId") Long buildingId,
-            @Param("unitNumber") String unitNumber,
-            @Param("excludeId") Long excludeId);
+        /**
+         * All units within the given estate, ordered by building, floor, and unit
+         * number.
+         * Used by HousingUnitService.getAllUnits().
+         */
+        @Query("""
+                        SELECT u FROM HousingUnit u
+                        WHERE u.building.estate.id = :estateId
+                        ORDER BY u.building.id ASC, u.floor ASC, u.unitNumber ASC
+                        """)
+        List<HousingUnit> findAllByEstateIdOrdered(@Param("estateId") UUID estateId);
 
-    /**
-     * Check for duplicate unit number within a building (used during creation).
-     */
-    boolean existsByBuildingIdAndUnitNumberIgnoreCase(Long buildingId, String unitNumber);
+        // ─── Owner-based queries — used by PersonService ──────────────────────────
 
-    /** True if any housing unit references this person as direct owner. */
-    boolean existsByOwnerId(Long ownerId);
+        /**
+         * All housing units owned by the given person.
+         * Used by PersonService to check referential integrity before deletion
+         * and to populate PersonDTO.ownedUnits.
+         */
+        List<HousingUnit> findByOwnerId(Long ownerId);
 
-    /** List all housing units owned by a given person (direct, not inherited). */
-    List<HousingUnit> findByOwnerId(Long ownerId);
+        /**
+         * Count units for a given owner — used in PersonDTO summary.
+         */
+        long countByOwnerId(Long ownerId);
 
-    /** Find all units for a given building. */
-    List<HousingUnit> findByBuildingId(Long buildingId);
+        // ─── PEB / rent / delete guard ────────────────────────────────────────────
 
-    /** True if a building has any housing units (used for delete check). */
-    boolean existsByBuildingId(Long buildingId);
-
-    List<HousingUnit> findAllByOrderByBuildingIdAscFloorAscUnitNumberAsc();
+        boolean existsByBuildingId(Long buildingId);
 }

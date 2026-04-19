@@ -1,11 +1,14 @@
-import { CommonModule } from "@angular/common";
-import { Component, OnInit } from "@angular/core";
-import { FormsModule } from "@angular/forms";
-import { Router, RouterModule } from "@angular/router";
-import { BankAccountService } from "../../../../core/services/bank-account.service";
-import { TagCategoryService } from "../../../../core/services/tag-category.service";
-import { TagSubcategoryService } from "../../../../core/services/tag-subcategory.service";
-import { TransactionService } from "../../../../core/services/transaction.service";
+// features/transaction/components/transaction-list/transaction-list.component.ts — UC016 Phase 4
+// Routes updated to use estateId from ActiveEstateService.
+import { CommonModule } from '@angular/common';
+import { Component, OnInit } from '@angular/core';
+import { FormsModule } from '@angular/forms';
+import { Router, RouterModule } from '@angular/router';
+import { BankAccountService } from '../../../../core/services/bank-account.service';
+import { TagCategoryService } from '../../../../core/services/tag-category.service';
+import { TagSubcategoryService } from '../../../../core/services/tag-subcategory.service';
+import { TransactionService } from '../../../../core/services/transaction.service';
+import { ActiveEstateService } from '../../../../core/services/active-estate.service';
 import {
   DIRECTION_LABELS,
   FinancialTransactionSummary,
@@ -14,34 +17,28 @@ import {
   TransactionDirection,
   TransactionFilter,
   TransactionStatus,
-} from "../../../../models/transaction.model";
-import { BelgianCurrencyPipe } from "../../../../shared/pipes/belgian-currency.pipe";
-import { SortIconPipe } from "../../../../shared/pipes/sort-icon.pipe";
+} from '../../../../models/transaction.model';
+import { BelgianCurrencyPipe } from '../../../../shared/pipes/belgian-currency.pipe';
+import { SortIconPipe } from '../../../../shared/pipes/sort-icon.pipe';
 
 @Component({
-  selector: "app-transaction-list",
+  selector: 'app-transaction-list',
   standalone: true,
-  imports: [
-    CommonModule,
-    FormsModule,
-    RouterModule,
-    SortIconPipe,
-    BelgianCurrencyPipe,
-  ],
-  templateUrl: "./transaction-list.component.html",
-  styleUrls: ["./transaction-list.component.scss"],
+  imports: [CommonModule, FormsModule, RouterModule, SortIconPipe, BelgianCurrencyPipe],
+  templateUrl: './transaction-list.component.html',
+  styleUrls: ['./transaction-list.component.scss'],
 })
 export class TransactionListComponent implements OnInit {
   response: PagedTransactionResponse | null = null;
   loading = false;
 
-  sortField = "transactionDate";
-  sortDirection: "asc" | "desc" = "desc";
+  sortField = 'transactionDate';
+  sortDirection: 'asc' | 'desc' = 'desc';
 
   filter: TransactionFilter = {
     page: 0,
     size: 20,
-    sort: "transactionDate,desc",
+    sort: 'transactionDate,desc',
   };
   showFilters = false;
 
@@ -53,33 +50,16 @@ export class TransactionListComponent implements OnInit {
   readonly DIRECTION_LABELS = DIRECTION_LABELS;
   readonly STATUS_LABELS = STATUS_LABELS;
 
-  /** All statuses available in the filter dropdown — including CANCELLED. */
-  readonly statuses: TransactionStatus[] = [
-    "DRAFT",
-    "CONFIRMED",
-    "RECONCILED",
-    "CANCELLED",
-  ];
-
-  /**
-   * Statuses available in the bulk-edit picker.
-   * CANCELLED is excluded: it is a server-side transition, not a manual one.
-   */
-  readonly bulkStatuses: TransactionStatus[] = [
-    "DRAFT",
-    "CONFIRMED",
-    "RECONCILED",
-  ];
-
-  readonly directions: TransactionDirection[] = ["INCOME", "EXPENSE"];
+  readonly statuses: TransactionStatus[] = ['DRAFT', 'CONFIRMED', 'RECONCILED', 'CANCELLED'];
+  readonly bulkStatuses: TransactionStatus[] = ['DRAFT', 'CONFIRMED', 'RECONCILED'];
+  readonly directions: TransactionDirection[] = ['INCOME', 'EXPENSE'];
 
   // ── Selection state ──────────────────────────────────────────────────────────
   selectedIds = new Set<number>();
   showBulkPanel = false;
 
-  // Bulk edit fields
-  bulkStatus: TransactionStatus | "" = "";
-  bulkSubcategoryId: number | "" = "";
+  bulkStatus: TransactionStatus | '' = '';
+  bulkSubcategoryId: number | '' = '';
   bulkApplying = false;
   bulkResult: { updatedCount: number; skippedCount: number } | null = null;
 
@@ -89,15 +69,14 @@ export class TransactionListComponent implements OnInit {
     private tagSubcategoryService: TagSubcategoryService,
     private bankAccountService: BankAccountService,
     private router: Router,
+    readonly activeEstateService: ActiveEstateService,
   ) {}
 
   ngOnInit(): void {
     this.load();
     this.tagCategoryService.getAll().subscribe((c) => (this.categories = c));
     this.bankAccountService.getAll().subscribe((b) => (this.bankAccounts = b));
-    this.tagSubcategoryService
-      .getAll()
-      .subscribe((s) => (this.allSubcategories = s));
+    this.tagSubcategoryService.getAll().subscribe((s) => (this.allSubcategories = s));
   }
 
   load(): void {
@@ -127,18 +106,18 @@ export class TransactionListComponent implements OnInit {
   }
 
   clearFilters(): void {
-    this.filter = { page: 0, size: 20, sort: "transactionDate,desc" };
-    this.sortField = "transactionDate";
-    this.sortDirection = "desc";
+    this.filter = { page: 0, size: 20, sort: 'transactionDate,desc' };
+    this.sortField = 'transactionDate';
+    this.sortDirection = 'desc';
     this.load();
   }
 
   sortBy(field: string): void {
     if (this.sortField === field) {
-      this.sortDirection = this.sortDirection === "asc" ? "desc" : "asc";
+      this.sortDirection = this.sortDirection === 'asc' ? 'desc' : 'asc';
     } else {
       this.sortField = field;
-      this.sortDirection = "asc";
+      this.sortDirection = 'asc';
     }
     this.filter = {
       ...this.filter,
@@ -192,12 +171,11 @@ export class TransactionListComponent implements OnInit {
 
   applyBulk(): void {
     if (!this.someSelected) return;
-    if (!this.bulkStatus && this.bulkSubcategoryId === "") return;
+    if (!this.bulkStatus && this.bulkSubcategoryId === '') return;
 
     const req: any = { ids: Array.from(this.selectedIds) };
     if (this.bulkStatus) req.status = this.bulkStatus;
-    if (this.bulkSubcategoryId !== "")
-      req.subcategoryId = this.bulkSubcategoryId;
+    if (this.bulkSubcategoryId !== '') req.subcategoryId = this.bulkSubcategoryId;
 
     this.bulkApplying = true;
     this.bulkResult = null;
@@ -205,8 +183,8 @@ export class TransactionListComponent implements OnInit {
       next: (r) => {
         this.bulkResult = r;
         this.bulkApplying = false;
-        this.bulkStatus = "";
-        this.bulkSubcategoryId = "";
+        this.bulkStatus = '';
+        this.bulkSubcategoryId = '';
         this.load();
       },
       error: () => {
@@ -217,39 +195,55 @@ export class TransactionListComponent implements OnInit {
 
   clearBulkSelection(): void {
     this.selectedIds.clear();
-    this.bulkStatus = "";
-    this.bulkSubcategoryId = "";
+    this.bulkStatus = '';
+    this.bulkSubcategoryId = '';
     this.bulkResult = null;
   }
 
-  // ── Navigation ───────────────────────────────────────────────────────────────
+  // ── Navigation — estate-scoped routes ────────────────────────────────────────
+
+  private get estateId(): string | null {
+    return this.activeEstateService.activeEstateId();
+  }
 
   navigateToNew(): void {
-    this.router.navigate(["/transactions/new"]);
+    if (this.estateId) {
+      this.router.navigate(['/estates', this.estateId, 'transactions', 'new']);
+    } else {
+      this.router.navigate(['/transactions/new']);
+    }
   }
 
   navigateToDetail(tx: FinancialTransactionSummary): void {
     if (this.someSelected) return;
-    this.router.navigate(["/transactions", tx.id]);
+    if (this.estateId) {
+      this.router.navigate(['/estates', this.estateId, 'transactions', tx.id]);
+    } else {
+      this.router.navigate(['/transactions', tx.id]);
+    }
   }
 
   navigateToEdit(tx: FinancialTransactionSummary, event: Event): void {
     event.stopPropagation();
-    this.router.navigate(["/transactions", tx.id, "edit"]);
+    if (this.estateId) {
+      this.router.navigate(['/estates', this.estateId, 'transactions', tx.id, 'edit']);
+    } else {
+      this.router.navigate(['/transactions', tx.id, 'edit']);
+    }
   }
 
   deleteTransaction(tx: FinancialTransactionSummary, event: Event): void {
     event.stopPropagation();
-    if (!confirm("Delete transaction " + tx.reference + "?")) return;
+    if (!confirm('Delete transaction ' + tx.reference + '?')) return;
     this.transactionService.delete(tx.id).subscribe(() => this.load());
   }
 
   exportCsv(): void {
     this.transactionService.exportCsv(this.filter).subscribe((blob) => {
       const url = URL.createObjectURL(blob);
-      const a = document.createElement("a");
+      const a = document.createElement('a');
       a.href = url;
-      a.download = "transactions.csv";
+      a.download = 'transactions.csv';
       a.click();
       URL.revokeObjectURL(url);
     });
@@ -258,10 +252,10 @@ export class TransactionListComponent implements OnInit {
   get activeFilterCount(): number {
     return Object.entries(this.filter).filter(
       ([k, v]) =>
-        !["page", "size", "sort"].includes(k) &&
+        !['page', 'size', 'sort'].includes(k) &&
         v !== null &&
         v !== undefined &&
-        v !== "",
+        v !== '',
     ).length;
   }
 }

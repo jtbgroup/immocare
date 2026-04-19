@@ -12,6 +12,7 @@ import com.immocare.exception.BoilerNotFoundException;
 import com.immocare.exception.BuildingNotFoundException;
 import com.immocare.exception.HousingUnitNotFoundException;
 import com.immocare.model.dto.BoilerDTO;
+import com.immocare.model.dto.EstatePlatformConfigDTOs;
 import com.immocare.model.dto.SaveBoilerRequest;
 import com.immocare.model.entity.Boiler;
 import com.immocare.repository.BoilerRepository;
@@ -22,6 +23,7 @@ import lombok.RequiredArgsConstructor;
 
 /**
  * Business logic for UC011 — Manage Boilers.
+ * UC016 Phase 5: alert threshold is now read from estate-scoped platform config.
  */
 @Service
 @RequiredArgsConstructor
@@ -30,6 +32,7 @@ public class BoilerService {
 
     private static final String HOUSING_UNIT = "HOUSING_UNIT";
     private static final String BUILDING = "BUILDING";
+    private static final int DEFAULT_WARNING_MONTHS = 3;
 
     private final BoilerRepository boilerRepository;
     private final HousingUnitRepository housingUnitRepository;
@@ -40,34 +43,36 @@ public class BoilerService {
 
     public List<BoilerDTO> getBoilers(String ownerType, Long ownerId) {
         validateOwnerExists(ownerType, ownerId);
-        int warningDays = platformConfigService.getInt(
-                com.immocare.model.dto.PlatformConfigDTOs.KEY_BOILER_SERVICE_WARNING_DAYS, 30);
+        UUID estateId = resolveEstateId(ownerType, ownerId);
+        int warningMonths = getWarningMonths(estateId);
         return boilerRepository
                 .findByOwnerTypeAndOwnerIdOrderByInstallationDateDesc(ownerType, ownerId)
                 .stream()
-                .map(b -> toDTO(b, warningDays))
+                .map(b -> toDTO(b, warningMonths))
                 .toList();
     }
 
     public BoilerDTO getById(Long id) {
-        int warningDays = platformConfigService.getInt(
-                com.immocare.model.dto.PlatformConfigDTOs.KEY_BOILER_SERVICE_WARNING_DAYS, 30);
-        return boilerRepository.findById(id)
-                .map(b -> toDTO(b, warningDays))
+        Boiler boiler = boilerRepository.findById(id)
                 .orElseThrow(() -> new BoilerNotFoundException(id));
+        UUID estateId = resolveEstateIdFromBoiler(boiler);
+        int warningMonths = getWarningMonths(estateId);
+        return toDTO(boiler, warningMonths);
     }
 
     /**
      * Returns all boilers with service due within the configured warning window
-     * (for alerts page).
+     * for the given estate.
+     * UC016 Phase 5: estate-scoped threshold replaces global config.
      */
     public List<BoilerDTO> getServiceAlerts(UUID estateId) {
-        int warningDays = platformConfigService.getInt(
-                com.immocare.model.dto.PlatformConfigDTOs.KEY_BOILER_SERVICE_WARNING_DAYS, 30);
-        LocalDate threshold = LocalDate.now().plusDays(warningDays);
+        int warningMonths = getWarningMonths(estateId);
+        LocalDate threshold = LocalDate.now().plusMonths(warningMonths);
         return boilerRepository.findBoilersWithServiceDueBefore(threshold)
                 .stream()
-                .map(b -> toDTO(b, warningDays))
+                // Filter to estate if provided
+                .filter(b -> estateId == null || estateId.equals(resolveEstateIdFromBoiler(b)))
+                .map(b -> toDTO(b, warningMonths))
                 .toList();
     }
 
@@ -84,9 +89,9 @@ public class BoilerService {
         boiler.setOwnerId(ownerId);
         applyRequest(boiler, req);
 
-        int warningDays = platformConfigService.getInt(
-                com.immocare.model.dto.PlatformConfigDTOs.KEY_BOILER_SERVICE_WARNING_DAYS, 30);
-        return toDTO(boilerRepository.save(boiler), warningDays);
+        UUID estateId = resolveEstateId(ownerType, ownerId);
+        int warningMonths = getWarningMonths(estateId);
+        return toDTO(boilerRepository.save(boiler), warningMonths);
     }
 
     // ─── UPDATE ──────────────────────────────────────────────────────────────
@@ -99,9 +104,9 @@ public class BoilerService {
         validateDates(req.installationDate(), req.lastServiceDate(), req.nextServiceDate());
         applyRequest(boiler, req);
 
-        int warningDays = platformConfigService.getInt(
-                com.immocare.model.dto.PlatformConfigDTOs.KEY_BOILER_SERVICE_WARNING_DAYS, 30);
-        return toDTO(boilerRepository.save(boiler), warningDays);
+        UUID estateId = resolveEstateIdFromBoiler(boiler);
+        int warningMonths = getWarningMonths(estateId);
+        return toDTO(boilerRepository.save(boiler), warningMonths);
     }
 
     // ─── DELETE ──────────────────────────────────────────────────────────────
@@ -114,7 +119,35 @@ public class BoilerService {
         boilerRepository.deleteById(id);
     }
 
-    // ─── HELPERS ─────────────────────────────────────────────────────────────
+    // ─── Helpers ─────────────────────────────────────────────────────────────
+
+    private int getWarningMonths(UUID estateId) {
+        if (estateId == null) return DEFAULT_WARNING_MONTHS;
+        return platformConfigService.getIntValue(
+                estateId,
+                EstatePlatformConfigDTOs.KEY_BOILER_ALERT_THRESHOLD_MONTHS,
+                DEFAULT_WARNING_MONTHS);
+    }
+
+    private UUID resolveEstateId(String ownerType, Long ownerId) {
+        try {
+            if (HOUSING_UNIT.equals(ownerType)) {
+                return housingUnitRepository.findById(ownerId)
+                        .map(u -> u.getBuilding().getEstate().getId())
+                        .orElse(null);
+            }
+            if (BUILDING.equals(ownerType)) {
+                return buildingRepository.findById(ownerId)
+                        .map(b -> b.getEstate().getId())
+                        .orElse(null);
+            }
+        } catch (Exception ignored) {}
+        return null;
+    }
+
+    private UUID resolveEstateIdFromBoiler(Boiler boiler) {
+        return resolveEstateId(boiler.getOwnerType(), boiler.getOwnerId());
+    }
 
     private void applyRequest(Boiler boiler, SaveBoilerRequest req) {
         boiler.setFuelType(req.fuelType());
@@ -127,12 +160,12 @@ public class BoilerService {
         boiler.setNotes(req.notes());
     }
 
-    private BoilerDTO toDTO(Boiler b, int warningDays) {
+    private BoilerDTO toDTO(Boiler b, int warningMonths) {
         Long daysUntilNextService = null;
         boolean serviceAlert = false;
         if (b.getNextServiceDate() != null) {
             daysUntilNextService = ChronoUnit.DAYS.between(LocalDate.now(), b.getNextServiceDate());
-            serviceAlert = daysUntilNextService <= warningDays;
+            serviceAlert = b.getNextServiceDate().isBefore(LocalDate.now().plusMonths(warningMonths));
         }
         return new BoilerDTO(
                 b.getId(),

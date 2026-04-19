@@ -30,11 +30,11 @@ import com.immocare.repository.PersonBankAccountRepository;
 import com.immocare.repository.PersonRepository;
 
 /**
- * Service for Person management.
- * UC016 Phase 3: all operations are now scoped to an estate.
+ * Business logic for Person management.
+ * UC016 Phase 3: all operations are scoped to an estate.
  */
 @Service
-@Transactional
+@Transactional(readOnly = true)
 public class PersonService {
 
     private final PersonRepository personRepository;
@@ -63,202 +63,195 @@ public class PersonService {
 
     // ─── Queries ──────────────────────────────────────────────────────────────
 
-    @Transactional(readOnly = true)
+    /**
+     * Returns a paginated list of persons within the estate.
+     * Supports optional full-text search across name, email, and national ID.
+     */
     public Page<PersonSummaryDTO> getAll(UUID estateId, String search, Pageable pageable) {
         Page<Person> page = (search != null && !search.isBlank())
-                ? personRepository.searchByEstate(estateId, search.trim(), pageable)
+                ? personRepository.searchByEstate(estateId, search, pageable)
                 : personRepository.findByEstateIdOrderByLastNameAsc(estateId, pageable);
 
         return page.map(p -> {
             PersonSummaryDTO dto = personMapper.toSummaryDTO(p);
-            enrichSummaryFlags(dto, p.getId());
+            dto.setOwner(isOwner(p.getId()));
+            dto.setTenant(leaseTenantRepository.existsByPersonId(p.getId()));
             return dto;
         });
     }
 
-    @Transactional(readOnly = true)
-    public List<PersonSummaryDTO> searchForPicker(UUID estateId, String q) {
-        if (q == null || q.trim().length() < 2) return List.of();
-        List<PersonSummaryDTO> results = personRepository
-                .searchForPickerByEstate(estateId, q.trim(), PageRequest.of(0, 10));
-        results.forEach(dto -> enrichSummaryFlags(dto, dto.getId()));
-        return results;
+    /**
+     * Person picker — returns up to 10 matches for autocomplete fields.
+     * Requires at least 2 characters.
+     */
+    public List<PersonSummaryDTO> searchForPicker(UUID estateId, String query) {
+        if (query == null || query.trim().length() < 2) {
+            return List.of();
+        }
+        return personRepository.searchForPickerByEstate(
+                estateId, query.trim(), PageRequest.of(0, 10));
     }
 
-    @Transactional(readOnly = true)
+    /**
+     * Returns the full person detail DTO including owned buildings, owned units,
+     * active leases, and registered IBANs.
+     */
     public PersonDTO getById(UUID estateId, Long id) {
-        verifyPersonBelongsToEstate(estateId, id);
-        Person person = findOrThrow(id);
+        Person person = findPersonInEstate(estateId, id);
         return buildFullDTO(person);
     }
 
     // ─── Commands ─────────────────────────────────────────────────────────────
 
+    @Transactional
     public PersonDTO create(UUID estateId, CreatePersonRequest request) {
-        Estate estate = findEstateOrThrow(estateId);
-        normalizeCountry(request);
-        normalizeNationalId(request);
-        validateNationalIdUniqueness(estateId, request.getNationalId(), null);
+        Estate estate = estateRepository.findById(estateId)
+                .orElseThrow(() -> new EstateNotFoundException(estateId));
+
+        // National ID uniqueness within estate (if provided)
+        if (request.getNationalId() != null && !request.getNationalId().isBlank()) {
+            if (personRepository.existsByEstateIdAndNationalIdIgnoreCase(
+                    estateId, request.getNationalId())) {
+                throw new IllegalArgumentException(
+                        "A person with this national ID already exists in this estate: "
+                                + request.getNationalId());
+            }
+        }
 
         Person person = personMapper.toEntity(request);
         person.setEstate(estate);
-        person = personRepository.save(person);
-        return buildFullDTO(person);
+        return buildFullDTO(personRepository.save(person));
     }
 
+    @Transactional
     public PersonDTO update(UUID estateId, Long id, UpdatePersonRequest request) {
-        verifyPersonBelongsToEstate(estateId, id);
-        Person person = findOrThrow(id);
+        Person person = findPersonInEstate(estateId, id);
 
-        normalizeCountryOnUpdate(request);
-        normalizeNationalIdOnUpdate(request);
-        validateNationalIdUniquenessOnUpdate(estateId, request.getNationalId(), id);
+        // National ID uniqueness within estate, excluding self
+        if (request.getNationalId() != null && !request.getNationalId().isBlank()) {
+            if (personRepository.existsByEstateIdAndNationalIdIgnoreCaseAndIdNot(
+                    estateId, request.getNationalId(), id)) {
+                throw new IllegalArgumentException(
+                        "A person with this national ID already exists in this estate: "
+                                + request.getNationalId());
+            }
+        }
 
         personMapper.updateEntity(request, person);
-        person = personRepository.save(person);
-        return buildFullDTO(person);
+        return buildFullDTO(personRepository.save(person));
     }
 
+    @Transactional
     public void delete(UUID estateId, Long id) {
-        verifyPersonBelongsToEstate(estateId, id);
-        Person person = findOrThrow(id);
+        Person person = findPersonInEstate(estateId, id);
 
-        List<String> buildings = buildingRepository.findByOwnerId(id).stream()
+        // Collect referencing entities
+        List<String> ownedBuildings = buildingRepository.findByOwnerId(id)
+                .stream()
                 .map(b -> b.getName() + " (" + b.getCity() + ")")
                 .collect(Collectors.toList());
 
-        List<String> units = housingUnitRepository.findByOwnerId(id).stream()
+        List<String> ownedUnits = housingUnitRepository.findByOwnerId(id)
+                .stream()
                 .map(u -> u.getUnitNumber() + " — " + u.getBuilding().getName())
                 .collect(Collectors.toList());
 
-        if (!buildings.isEmpty() || !units.isEmpty()) {
-            throw new PersonReferencedException(id, buildings, units, List.of());
+        List<String> activeLeases = leaseTenantRepository.findByPersonId(id)
+                .stream()
+                .filter(lt -> {
+                    var status = lt.getLease().getStatus();
+                    return status == com.immocare.model.enums.LeaseStatus.ACTIVE
+                            || status == com.immocare.model.enums.LeaseStatus.DRAFT;
+                })
+                .map(lt -> "Lease #" + lt.getLease().getId()
+                        + " — " + lt.getLease().getHousingUnit().getUnitNumber())
+                .collect(Collectors.toList());
+
+        if (!ownedBuildings.isEmpty() || !ownedUnits.isEmpty() || !activeLeases.isEmpty()) {
+            throw new PersonReferencedException(id, ownedBuildings, ownedUnits, activeLeases);
         }
 
         personRepository.delete(person);
     }
 
-    // ─── Private helpers ──────────────────────────────────────────────────────
+    // ─── Helpers ──────────────────────────────────────────────────────────────
 
     /**
-     * Verifies that the person belongs to the given estate.
-     * Throws {@link PersonNotFoundException} if the person does not exist,
-     * or {@link EstateAccessDeniedException} if it exists but belongs to another estate.
+     * Loads a person and verifies they belong to the given estate.
+     * Throws {@link PersonNotFoundException} if the person does not exist at all,
+     * or {@link EstateAccessDeniedException} if they belong to a different estate.
      */
-    private void verifyPersonBelongsToEstate(UUID estateId, Long personId) {
-        if (!personRepository.existsById(personId)) {
-            throw new PersonNotFoundException(personId);
-        }
-        if (!personRepository.existsByEstateIdAndId(estateId, personId)) {
+    private Person findPersonInEstate(UUID estateId, Long personId) {
+        Person person = personRepository.findById(personId)
+                .orElseThrow(() -> new PersonNotFoundException(personId));
+        if (!person.getEstate().getId().equals(estateId)) {
             throw new EstateAccessDeniedException();
         }
+        return person;
     }
 
-    private Person findOrThrow(Long id) {
-        return personRepository.findById(id)
-                .orElseThrow(() -> new PersonNotFoundException(id));
+    private boolean isOwner(Long personId) {
+        return buildingRepository.findByOwnerId(personId).size() > 0
+                || housingUnitRepository.countByOwnerId(personId) > 0;
     }
 
-    private Estate findEstateOrThrow(UUID estateId) {
-        return estateRepository.findById(estateId)
-                .orElseThrow(() -> new EstateNotFoundException(estateId));
-    }
-
+    /**
+     * Builds the full {@link PersonDTO} with all related data populated.
+     */
     private PersonDTO buildFullDTO(Person person) {
         PersonDTO dto = personMapper.toDTO(person);
 
-        boolean isOwner = buildingRepository.existsByOwnerId(person.getId())
-                || housingUnitRepository.existsByOwnerId(person.getId());
-        boolean isTenant = leaseTenantRepository.existsByPersonId(person.getId());
-        dto.setOwner(isOwner);
-        dto.setTenant(isTenant);
+        // Derived flags
+        dto.setOwner(isOwner(person.getId()));
+        dto.setTenant(leaseTenantRepository.existsByPersonId(person.getId()));
 
-        List<PersonDTO.OwnedBuildingDTO> buildings = buildingRepository.findByOwnerId(person.getId())
+        // Owned buildings
+        List<PersonDTO.OwnedBuildingDTO> ownedBuildings = buildingRepository
+                .findByOwnerId(person.getId())
                 .stream()
                 .map(b -> new PersonDTO.OwnedBuildingDTO(b.getId(), b.getName(), b.getCity()))
                 .collect(Collectors.toList());
-        dto.setOwnedBuildings(buildings);
+        dto.setOwnedBuildings(ownedBuildings);
 
-        List<PersonDTO.OwnedUnitDTO> units = housingUnitRepository.findByOwnerId(person.getId())
+        // Owned units
+        List<PersonDTO.OwnedUnitDTO> ownedUnits = housingUnitRepository
+                .findByOwnerId(person.getId())
                 .stream()
                 .map(u -> new PersonDTO.OwnedUnitDTO(
-                        u.getId(), u.getUnitNumber(),
-                        u.getBuilding().getId(), u.getBuilding().getName()))
+                        u.getId(),
+                        u.getUnitNumber(),
+                        u.getBuilding().getId(),
+                        u.getBuilding().getName()))
                 .collect(Collectors.toList());
-        dto.setOwnedUnits(units);
+        dto.setOwnedUnits(ownedUnits);
 
+        // Lease memberships
         List<PersonDTO.TenantLeaseDTO> leases = leaseTenantRepository
                 .findByPersonId(person.getId())
                 .stream()
-                .map(lt -> {
-                    var lease = lt.getLease();
-                    var unit = lease.getHousingUnit();
-                    return new PersonDTO.TenantLeaseDTO(
-                            lease.getId(), unit.getId(), unit.getUnitNumber(),
-                            unit.getBuilding().getName(), lease.getStatus().name());
-                })
+                .map(lt -> new PersonDTO.TenantLeaseDTO(
+                        lt.getLease().getId(),
+                        lt.getLease().getHousingUnit().getId(),
+                        lt.getLease().getHousingUnit().getUnitNumber(),
+                        lt.getLease().getHousingUnit().getBuilding().getName(),
+                        lt.getLease().getStatus().name()))
                 .collect(Collectors.toList());
         dto.setLeases(leases);
 
+        // Registered IBANs
         List<PersonBankAccountDTO> bankAccounts = personBankAccountRepository
                 .findByPersonIdOrderByPrimaryDescCreatedAtAsc(person.getId())
                 .stream()
                 .map(pba -> new PersonBankAccountDTO(
-                        pba.getId(), pba.getPerson().getId(),
-                        pba.getIban(), pba.getLabel(),
-                        pba.isPrimary(), pba.getCreatedAt()))
+                        pba.getId(),
+                        person.getId(),
+                        pba.getIban(),
+                        pba.getLabel(),
+                        pba.isPrimary(),
+                        pba.getCreatedAt()))
                 .collect(Collectors.toList());
         dto.setBankAccounts(bankAccounts);
 
         return dto;
-    }
-
-    private void enrichSummaryFlags(PersonSummaryDTO dto, Long personId) {
-        boolean isOwner = buildingRepository.existsByOwnerId(personId)
-                || housingUnitRepository.existsByOwnerId(personId);
-        boolean isTenant = leaseTenantRepository.existsByPersonId(personId);
-        dto.setOwner(isOwner);
-        dto.setTenant(isTenant);
-    }
-
-    private void normalizeNationalId(CreatePersonRequest request) {
-        if (request.getNationalId() != null && request.getNationalId().isBlank()) {
-            request.setNationalId(null);
-        }
-    }
-
-    private void normalizeNationalIdOnUpdate(UpdatePersonRequest request) {
-        if (request.getNationalId() != null && request.getNationalId().isBlank()) {
-            request.setNationalId(null);
-        }
-    }
-
-    private void validateNationalIdUniqueness(UUID estateId, String nationalId, Long excludeId) {
-        if (nationalId == null || nationalId.isBlank()) return;
-        if (personRepository.existsByEstateIdAndNationalIdIgnoreCase(estateId, nationalId.trim())) {
-            throw new IllegalArgumentException(
-                    "A person with national ID '" + nationalId + "' already exists.");
-        }
-    }
-
-    private void validateNationalIdUniquenessOnUpdate(UUID estateId, String nationalId, Long currentId) {
-        if (nationalId == null || nationalId.isBlank()) return;
-        if (personRepository.existsByEstateIdAndNationalIdIgnoreCaseAndIdNot(
-                estateId, nationalId.trim(), currentId)) {
-            throw new IllegalArgumentException(
-                    "A person with national ID '" + nationalId + "' already exists.");
-        }
-    }
-
-    private void normalizeCountry(CreatePersonRequest request) {
-        if (request.getCountry() == null || request.getCountry().isBlank()) {
-            request.setCountry("Belgium");
-        }
-    }
-
-    private void normalizeCountryOnUpdate(UpdatePersonRequest request) {
-        if (request.getCountry() == null || request.getCountry().isBlank()) {
-            request.setCountry("Belgium");
-        }
     }
 }

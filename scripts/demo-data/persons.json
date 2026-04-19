@@ -11,7 +11,14 @@
     "postalCode": "1000",
     "city": "Bruxelles",
     "country": "Belgium",
-    "estateName": "Estate Ville"
+    "estateName": "Estate Ville",
+    "bankAccounts": [
+      {
+        "iban": "BE67826045518487",
+        "label": "Compte principal",
+        "primary": true
+      }
+    ]
   },
   {
     "lastName": "Martin",

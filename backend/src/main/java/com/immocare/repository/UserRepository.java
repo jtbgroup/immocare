@@ -1,15 +1,17 @@
 package com.immocare.repository;
 
-import com.immocare.model.entity.AppUser;
-import org.springframework.data.jpa.repository.JpaRepository;
-
 import java.util.Optional;
 
+import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.stereotype.Repository;
+
+import com.immocare.model.entity.AppUser;
+
 /**
- * Spring Data JPA repository for {@link AppUser}.
- *
- * UC016 Phase 1: replaced {@code countByRole} with {@code countByIsPlatformAdminTrue}.
+ * Repository for {@link AppUser}.
+ * UC016 Phase 1: role-based methods replaced by isPlatformAdmin queries.
  */
+@Repository
 public interface UserRepository extends JpaRepository<AppUser, Long> {
 
     Optional<AppUser> findByUsername(String username);
@@ -18,5 +20,6 @@ public interface UserRepository extends JpaRepository<AppUser, Long> {
 
     boolean existsByEmailIgnoreCase(String email);
 
+    /** BR-UC007-06: guard against deleting the last platform admin. */
     long countByIsPlatformAdminTrue();
 }

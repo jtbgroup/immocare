@@ -1,23 +1,25 @@
-import { CommonModule, DecimalPipe } from "@angular/common";
-import { Component, OnInit } from "@angular/core";
-import { FormsModule } from "@angular/forms";
-import { ActivatedRoute, RouterModule } from "@angular/router";
-import { TagSubcategoryService } from "../../../../core/services/tag-subcategory.service";
-import { TransactionService } from "../../../../core/services/transaction.service";
+// features/transaction/components/transaction-review/transaction-review.component.ts — UC016 Phase 4
+import { CommonModule, DecimalPipe } from '@angular/common';
+import { Component, OnInit } from '@angular/core';
+import { FormsModule } from '@angular/forms';
+import { ActivatedRoute, RouterModule } from '@angular/router';
+import { ActiveEstateService } from '../../../../core/services/active-estate.service';
+import { TagSubcategoryService } from '../../../../core/services/tag-subcategory.service';
+import { TransactionService } from '../../../../core/services/transaction.service';
 import {
   DIRECTION_LABELS,
   FinancialTransactionSummary,
   PagedTransactionResponse,
   STATUS_LABELS,
-} from "../../../../models/transaction.model";
-import { SortIconPipe } from "../../../../shared/pipes/sort-icon.pipe";
+} from '../../../../models/transaction.model';
+import { SortIconPipe } from '../../../../shared/pipes/sort-icon.pipe';
 
 @Component({
-  selector: "app-transaction-review",
+  selector: 'app-transaction-review',
   standalone: true,
   imports: [CommonModule, FormsModule, RouterModule, DecimalPipe, SortIconPipe],
-  templateUrl: "./transaction-review.component.html",
-  styleUrls: ["./transaction-review.component.scss"],
+  templateUrl: './transaction-review.component.html',
+  styleUrls: ['./transaction-review.component.scss'],
 })
 export class TransactionReviewComponent implements OnInit {
   batchId!: number;
@@ -28,27 +30,28 @@ export class TransactionReviewComponent implements OnInit {
   readonly DIRECTION_LABELS = DIRECTION_LABELS;
   readonly STATUS_LABELS = STATUS_LABELS;
 
+  sortField = 'transactionDate';
+  sortDirection: 'asc' | 'desc' = 'asc';
+
   constructor(
     private route: ActivatedRoute,
     private transactionService: TransactionService,
     private tagSubcategoryService: TagSubcategoryService,
+    readonly activeEstateService: ActiveEstateService,
   ) {}
-
-  sortField = "transactionDate";
-  sortDirection: "asc" | "desc" = "asc";
 
   sortBy(field: string): void {
     if (this.sortField === field) {
-      this.sortDirection = this.sortDirection === "asc" ? "desc" : "asc";
+      this.sortDirection = this.sortDirection === 'asc' ? 'desc' : 'asc';
     } else {
       this.sortField = field;
-      this.sortDirection = "asc";
+      this.sortDirection = 'asc';
     }
     this.load();
   }
 
   ngOnInit(): void {
-    this.batchId = Number(this.route.snapshot.paramMap.get("batchId"));
+    this.batchId = Number(this.route.snapshot.paramMap.get('batchId'));
     this.load();
   }
 
@@ -68,7 +71,6 @@ export class TransactionReviewComponent implements OnInit {
   }
 
   confirmRow(tx: FinancialTransactionSummary): void {
-    // Pre-fill confirm request with suggested lease/unit/building if not already set
     this.transactionService
       .confirm(tx.id, {
         leaseId: tx.leaseId ?? tx.suggestedLeaseId,
@@ -92,14 +94,18 @@ export class TransactionReviewComponent implements OnInit {
   }
 
   get draftCount(): number {
-    return (
-      this.response?.content.filter((t) => t.status === "DRAFT").length ?? 0
-    );
+    return this.response?.content.filter((t) => t.status === 'DRAFT').length ?? 0;
   }
 
   get confirmedCount(): number {
-    return (
-      this.response?.content.filter((t) => t.status === "CONFIRMED").length ?? 0
-    );
+    return this.response?.content.filter((t) => t.status === 'CONFIRMED').length ?? 0;
+  }
+
+  /** Route link for a transaction — estate-scoped if estate is active */
+  txRoute(id: number): any[] {
+    const estateId = this.activeEstateService.activeEstateId();
+    return estateId
+      ? ['/estates', estateId, 'transactions', id, 'edit']
+      : ['/transactions', id, 'edit'];
   }
 }

@@ -19,72 +19,67 @@ import com.immocare.exception.UserNotFoundException;
 import com.immocare.model.dto.EstateDTOs.AddEstateMemberRequest;
 import com.immocare.model.dto.EstateDTOs.CreateEstateRequest;
 import com.immocare.model.dto.EstateDTOs.EstateDashboardDTO;
-import com.immocare.model.dto.EstateDTOs.EstateDTO;
 import com.immocare.model.dto.EstateDTOs.EstateMemberDTO;
 import com.immocare.model.dto.EstateDTOs.EstatePendingAlertsDTO;
+import com.immocare.model.dto.EstateDTOs.EstateDTO;
 import com.immocare.model.dto.EstateDTOs.EstateSummaryDTO;
 import com.immocare.model.dto.EstateDTOs.UpdateEstateMemberRoleRequest;
 import com.immocare.model.dto.EstateDTOs.UpdateEstateRequest;
+import com.immocare.model.dto.EstatePlatformConfigDTOs;
 import com.immocare.model.entity.AppUser;
 import com.immocare.model.entity.Estate;
 import com.immocare.model.entity.EstateMember;
 import com.immocare.model.enums.EstateRole;
-import com.immocare.model.enums.LeaseStatus;
-import com.immocare.model.enums.TransactionStatus;
 import com.immocare.repository.BuildingRepository;
 import com.immocare.repository.EstateMemberRepository;
 import com.immocare.repository.EstateRepository;
-import com.immocare.repository.FinancialTransactionRepository;
-import com.immocare.repository.HousingUnitRepository;
 import com.immocare.repository.LeaseRepository;
 import com.immocare.repository.UserRepository;
-import com.immocare.repository.spec.TransactionSpecification;
 
 /**
  * Business logic for UC016 — Manage Estates.
- * Phase 4: getDashboard() now includes transaction summary counts.
+ * UC016 Phase 5: createEstate() now seeds default platform config and boiler
+ * service validity rule for every new estate in the same transaction.
  */
 @Service
-@Transactional(readOnly = true)
+@Transactional
 public class EstateService {
-
-    private static final String ROLE_MANAGER = "MANAGER";
 
     private final EstateRepository estateRepository;
     private final EstateMemberRepository estateMemberRepository;
-    private final UserRepository userRepository;
     private final BuildingRepository buildingRepository;
-    private final HousingUnitRepository housingUnitRepository;
+    private final UserRepository userRepository;
     private final LeaseRepository leaseRepository;
-    private final FinancialTransactionRepository transactionRepository;
+    private final PlatformConfigService platformConfigService;
+    private final BoilerServiceValidityRuleService validityRuleService;
 
     public EstateService(EstateRepository estateRepository,
-                         EstateMemberRepository estateMemberRepository,
-                         UserRepository userRepository,
-                         BuildingRepository buildingRepository,
-                         HousingUnitRepository housingUnitRepository,
-                         LeaseRepository leaseRepository,
-                         FinancialTransactionRepository transactionRepository) {
+            EstateMemberRepository estateMemberRepository,
+            BuildingRepository buildingRepository,
+            UserRepository userRepository,
+            LeaseRepository leaseRepository,
+            PlatformConfigService platformConfigService,
+            BoilerServiceValidityRuleService validityRuleService) {
         this.estateRepository = estateRepository;
         this.estateMemberRepository = estateMemberRepository;
-        this.userRepository = userRepository;
         this.buildingRepository = buildingRepository;
-        this.housingUnitRepository = housingUnitRepository;
+        this.userRepository = userRepository;
         this.leaseRepository = leaseRepository;
-        this.transactionRepository = transactionRepository;
+        this.platformConfigService = platformConfigService;
+        this.validityRuleService = validityRuleService;
     }
 
-    // ─── US095 — List all estates ─────────────────────────────────────────────
+    // ─── Queries ──────────────────────────────────────────────────────────────
 
+    @Transactional(readOnly = true)
     public Page<EstateDTO> getAllEstates(String search, Pageable pageable) {
         Page<Estate> page = (search != null && !search.isBlank())
-                ? estateRepository.searchByName(search.trim(), pageable)
+                ? estateRepository.searchByName(search, pageable)
                 : estateRepository.findAllByOrderByNameAsc(pageable);
         return page.map(this::toDTO);
     }
 
-    // ─── US103 — View my estates ──────────────────────────────────────────────
-
+    @Transactional(readOnly = true)
     public List<EstateSummaryDTO> getMyEstates(Long currentUserId, boolean isPlatformAdmin) {
         if (isPlatformAdmin) {
             return estateRepository.findAllByOrderByNameAsc(Pageable.unpaged())
@@ -98,45 +93,48 @@ public class EstateService {
                 .toList();
     }
 
-    // ─── US092 — Get by ID ────────────────────────────────────────────────────
-
+    @Transactional(readOnly = true)
     public EstateDTO getEstateById(UUID id) {
         return toDTO(findEstateOrThrow(id));
     }
 
-    // ─── US102 — Dashboard ────────────────────────────────────────────────────
-
-    /**
-     * Returns the estate dashboard.
-     * Phase 4: draft transaction count is now populated.
-     * pendingAlerts remain 0 until Phase 6.
-     */
+    @Transactional(readOnly = true)
     public EstateDashboardDTO getDashboard(UUID estateId) {
         Estate estate = findEstateOrThrow(estateId);
-        int totalBuildings = (int) buildingRepository.countByEstateId(estateId);
-        int totalUnits = (int) housingUnitRepository.countByBuilding_Estate_Id(estateId);
-        int activeLeases = (int) leaseRepository
-                .countByHousingUnit_Building_Estate_IdAndStatus(estateId, LeaseStatus.ACTIVE);
 
-        // Phase 4: count draft transactions (useful for the "pending review" badge)
-        long draftTransactions = transactionRepository.findAll(
-                TransactionSpecification.hasEstate(estateId)
-                        .and(TransactionSpecification.withStatus(TransactionStatus.DRAFT)),
-                Pageable.unpaged()).getTotalElements();
+        int totalBuildings = (int) buildingRepository.countByEstateId(estateId);
+        int totalUnits = 0; // populated in Phase 6
+        int activeLeases = (int) leaseRepository.countByHousingUnit_Building_Estate_IdAndStatus(
+                estateId, com.immocare.model.enums.LeaseStatus.ACTIVE);
+
+        EstatePendingAlertsDTO alerts = new EstatePendingAlertsDTO(0, 0, 0, 0);
 
         return new EstateDashboardDTO(
-                estate.getId(),
+                estateId,
                 estate.getName(),
                 totalBuildings,
                 totalUnits,
                 activeLeases,
-                new EstatePendingAlertsDTO(0, 0, 0, 0)); // pendingAlerts — Phase 6
+                alerts);
     }
 
-    // ─── US092 — Create estate ────────────────────────────────────────────────
+    @Transactional(readOnly = true)
+    public List<EstateMemberDTO> getMembers(UUID estateId) {
+        findEstateOrThrow(estateId);
+        return estateMemberRepository.findByEstateIdOrderByUserUsernameAsc(estateId)
+                .stream()
+                .map(this::toMemberDTO)
+                .toList();
+    }
 
-    @Transactional
+    // ─── Commands ─────────────────────────────────────────────────────────────
+
+    /**
+     * Creates a new estate and seeds all default configuration atomically.
+     * UC016 Phase 5: seeds platform config entries and default boiler validity rule.
+     */
     public EstateDTO createEstate(CreateEstateRequest req, Long createdByUserId) {
+        // BR-UC016-01: name uniqueness (case-insensitive)
         if (estateRepository.existsByNameIgnoreCase(req.name())) {
             throw new EstateNameTakenException(req.name());
         }
@@ -149,27 +147,31 @@ public class EstateService {
         estate.setCreatedBy(createdBy);
         estate = estateRepository.save(estate);
 
+        // ── Phase 5: seed default platform config ─────────────────────────────
+        platformConfigService.seedDefaultConfig(estate, EstatePlatformConfigDTOs.DEFAULT_CONFIG);
+
+        // ── Phase 5: seed default boiler service validity rule ────────────────
+        validityRuleService.seedDefaultRule(estate);
+
+        // ── Optionally assign first manager (US096) ───────────────────────────
         if (req.firstManagerId() != null) {
-            AppUser manager = userRepository.findById(req.firstManagerId())
+            AppUser firstManager = userRepository.findById(req.firstManagerId())
                     .orElseThrow(() -> new UserNotFoundException(req.firstManagerId()));
             EstateMember member = new EstateMember();
             member.setEstate(estate);
-            member.setUser(manager);
+            member.setUser(firstManager);
             member.setRole(EstateRole.MANAGER);
             estateMemberRepository.save(member);
         }
 
-        return toDTO(estateRepository.findById(estate.getId()).orElseThrow());
+        return toDTO(estate);
     }
 
-    // ─── US093 — Update estate ────────────────────────────────────────────────
-
-    @Transactional
     public EstateDTO updateEstate(UUID id, UpdateEstateRequest req) {
         Estate estate = findEstateOrThrow(id);
 
-        if (!estate.getName().equalsIgnoreCase(req.name())
-                && estateRepository.existsByNameIgnoreCaseAndIdNot(req.name(), id)) {
+        // BR-UC016-01: name uniqueness excluding self
+        if (estateRepository.existsByNameIgnoreCaseAndIdNot(req.name(), id)) {
             throw new EstateNameTakenException(req.name());
         }
 
@@ -178,9 +180,10 @@ public class EstateService {
         return toDTO(estateRepository.save(estate));
     }
 
-    // ─── US094 — Delete estate ────────────────────────────────────────────────
-
-    @Transactional
+    /**
+     * Deletes an estate.
+     * BR-UC016-09: blocked if the estate contains buildings.
+     */
     public void deleteEstate(UUID id) {
         findEstateOrThrow(id);
         int buildingCount = (int) buildingRepository.countByEstateId(id);
@@ -190,19 +193,6 @@ public class EstateService {
         estateRepository.deleteById(id);
     }
 
-    // ─── US097 — Get members ──────────────────────────────────────────────────
-
-    public List<EstateMemberDTO> getMembers(UUID estateId) {
-        findEstateOrThrow(estateId);
-        return estateMemberRepository.findByEstateIdOrderByUserUsernameAsc(estateId)
-                .stream()
-                .map(this::toMemberDTO)
-                .toList();
-    }
-
-    // ─── US098 — Add member ───────────────────────────────────────────────────
-
-    @Transactional
     public EstateMemberDTO addMember(UUID estateId, AddEstateMemberRequest req, Long currentUserId) {
         findEstateOrThrow(estateId);
 
@@ -213,24 +203,19 @@ public class EstateService {
             throw new EstateMemberAlreadyExistsException();
         }
 
-        Estate estate = estateRepository.getReferenceById(estateId);
+        Estate estate = findEstateOrThrow(estateId);
         EstateMember member = new EstateMember();
         member.setEstate(estate);
         member.setUser(user);
         member.setRole(req.role());
-
         return toMemberDTO(estateMemberRepository.save(member));
     }
 
-    // ─── US099 — Update member role ───────────────────────────────────────────
-
-    @Transactional
-    public EstateMemberDTO updateMemberRole(UUID estateId,
-                                            Long userId,
-                                            UpdateEstateMemberRoleRequest req,
-                                            Long currentUserId) {
+    public EstateMemberDTO updateMemberRole(UUID estateId, Long userId,
+            UpdateEstateMemberRoleRequest req, Long currentUserId) {
         findEstateOrThrow(estateId);
 
+        // BR-UC016-04: cannot change own role
         if (userId.equals(currentUserId)) {
             throw new EstateSelfOperationException("You cannot change your own role");
         }
@@ -238,9 +223,10 @@ public class EstateService {
         EstateMember member = estateMemberRepository.findByEstateIdAndUserId(estateId, userId)
                 .orElseThrow(EstateMemberNotFoundException::new);
 
+        // BR-UC016-02: cannot demote last MANAGER
         if (member.getRole() == EstateRole.MANAGER
-                && req.role() == EstateRole.VIEWER
-                && estateMemberRepository.countByEstateIdAndRole(estateId, ROLE_MANAGER) <= 1) {
+                && req.role() != EstateRole.MANAGER
+                && estateMemberRepository.countByEstateIdAndRole(estateId, "MANAGER") <= 1) {
             throw new EstateLastManagerException();
         }
 
@@ -248,12 +234,10 @@ public class EstateService {
         return toMemberDTO(estateMemberRepository.save(member));
     }
 
-    // ─── US100 — Remove member ────────────────────────────────────────────────
-
-    @Transactional
     public void removeMember(UUID estateId, Long userId, Long currentUserId) {
         findEstateOrThrow(estateId);
 
+        // BR-UC016-03: cannot remove self
         if (userId.equals(currentUserId)) {
             throw new EstateSelfOperationException("You cannot remove yourself from an estate");
         }
@@ -261,15 +245,16 @@ public class EstateService {
         EstateMember member = estateMemberRepository.findByEstateIdAndUserId(estateId, userId)
                 .orElseThrow(EstateMemberNotFoundException::new);
 
+        // BR-UC016-02: cannot remove last MANAGER
         if (member.getRole() == EstateRole.MANAGER
-                && estateMemberRepository.countByEstateIdAndRole(estateId, ROLE_MANAGER) <= 1) {
+                && estateMemberRepository.countByEstateIdAndRole(estateId, "MANAGER") <= 1) {
             throw new EstateLastManagerException();
         }
 
         estateMemberRepository.delete(member);
     }
 
-    // ─── Private helpers ──────────────────────────────────────────────────────
+    // ─── Helpers ──────────────────────────────────────────────────────────────
 
     private Estate findEstateOrThrow(UUID id) {
         return estateRepository.findById(id)
@@ -291,14 +276,13 @@ public class EstateService {
 
     private EstateSummaryDTO toSummaryDTO(Estate estate, EstateRole myRole) {
         int buildingCount = (int) buildingRepository.countByEstateId(estate.getId());
-        int unitCount = (int) housingUnitRepository.countByBuilding_Estate_Id(estate.getId());
         return new EstateSummaryDTO(
                 estate.getId(),
                 estate.getName(),
                 estate.getDescription(),
                 myRole,
                 buildingCount,
-                unitCount);
+                0); // unitCount populated in Phase 6
     }
 
     private EstateMemberDTO toMemberDTO(EstateMember member) {

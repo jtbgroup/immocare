@@ -1,19 +1,21 @@
-import { CommonModule } from "@angular/common";
-import { Component, OnInit } from "@angular/core";
-import { FormsModule } from "@angular/forms";
-import { BankAccountService } from "../../../../core/services/bank-account.service";
+// features/management/components/bank-accounts/bank-accounts.component.ts — UC016 Phase 4
+// No changes to component logic — BankAccountService now handles estate scoping.
+import { CommonModule } from '@angular/common';
+import { Component, OnInit } from '@angular/core';
+import { FormsModule } from '@angular/forms';
+import { BankAccountService } from '../../../../core/services/bank-account.service';
 import {
   BankAccount,
   BankAccountType,
   SaveBankAccountRequest,
-} from "../../../../models/transaction.model";
+} from '../../../../models/transaction.model';
 
 @Component({
-  selector: "app-bank-accounts",
+  selector: 'app-bank-accounts',
   standalone: true,
   imports: [CommonModule, FormsModule],
-  templateUrl: "./bank-accounts.component.html",
-  styleUrls: ["./bank-accounts.component.scss"],
+  templateUrl: './bank-accounts.component.html',
+  styleUrls: ['./bank-accounts.component.scss'],
 })
 export class BankAccountsComponent implements OnInit {
   accounts: BankAccount[] = [];
@@ -25,13 +27,13 @@ export class BankAccountsComponent implements OnInit {
   editingAccount?: BankAccount;
 
   formData: SaveBankAccountRequest = {
-    label: "",
-    accountNumber: "",
-    type: "CURRENT",
+    label: '',
+    accountNumber: '',
+    type: 'CURRENT',
     isActive: true,
   };
 
-  readonly accountTypes: BankAccountType[] = ["CURRENT", "SAVINGS"];
+  readonly accountTypes: BankAccountType[] = ['CURRENT', 'SAVINGS'];
 
   constructor(private bankAccountService: BankAccountService) {}
 
@@ -47,19 +49,24 @@ export class BankAccountsComponent implements OnInit {
         this.loading = false;
       },
       error: () => {
-        this.error = "Failed to load bank accounts.";
+        this.error = 'Failed to load bank accounts.';
         this.loading = false;
       },
     });
   }
 
   resetForm(): void {
-    this.formData = { label: "", accountNumber: "", type: "CURRENT", isActive: true };
+    this.formData = { label: '', accountNumber: '', type: 'CURRENT', isActive: true };
   }
 
   edit(ba: BankAccount): void {
     this.editingAccount = ba;
-    this.formData = { label: ba.label, accountNumber: ba.accountNumber, type: ba.type, isActive: ba.isActive };
+    this.formData = {
+      label: ba.label,
+      accountNumber: ba.accountNumber,
+      type: ba.type,
+      isActive: ba.isActive,
+    };
     this.showForm = false;
   }
 
@@ -74,11 +81,11 @@ export class BankAccountsComponent implements OnInit {
         this.editingAccount = undefined;
         this.showForm = false;
         this.resetForm();
-        this.successMessage = "Bank account saved.";
+        this.successMessage = 'Bank account saved.';
         setTimeout(() => (this.successMessage = null), 3000);
         this.load();
       },
-      error: (err) => (this.error = err?.error?.message || "Failed to save."),
+      error: (err) => (this.error = err?.error?.message || 'Failed to save.'),
     });
   }
 }

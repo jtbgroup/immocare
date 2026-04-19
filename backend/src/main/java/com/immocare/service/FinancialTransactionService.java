@@ -1,5 +1,20 @@
 package com.immocare.service;
 
+import java.io.IOException;
+import java.io.PrintWriter;
+import java.math.BigDecimal;
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
+import java.util.List;
+import java.util.UUID;
+import java.util.stream.Collectors;
+
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.domain.Specification;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
 import com.immocare.exception.AssetLinkValidationException;
 import com.immocare.exception.EstateAccessDeniedException;
 import com.immocare.exception.EstateNotFoundException;
@@ -49,21 +64,8 @@ import com.immocare.repository.MeterRepository;
 import com.immocare.repository.TagSubcategoryRepository;
 import com.immocare.repository.TransactionAssetLinkRepository;
 import com.immocare.repository.spec.TransactionSpecification;
-import jakarta.servlet.http.HttpServletResponse;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
-import org.springframework.data.jpa.domain.Specification;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
-import java.io.IOException;
-import java.io.PrintWriter;
-import java.math.BigDecimal;
-import java.time.LocalDate;
-import java.time.format.DateTimeFormatter;
-import java.util.List;
-import java.util.UUID;
-import java.util.stream.Collectors;
+import jakarta.servlet.http.HttpServletResponse;
 
 /**
  * Service for FinancialTransaction management.
@@ -470,7 +472,7 @@ public class FinancialTransactionService {
         writer.write('\uFEFF');
         writer.println(
                 "Reference;ExternalReference;Date;AccountingMonth;Direction;Amount;Category;Subcategory;" +
-                "Status;BankAccount;CounterpartyAccount;Description;Building;Unit;Lease;Source");
+                        "Status;BankAccount;CounterpartyAccount;Description;Building;Unit;Lease;Source");
         DateTimeFormatter monthFmt = DateTimeFormatter.ofPattern("yyyy-MM");
         for (FinancialTransaction tx : all) {
             BigDecimal signedAmount = tx.getDirection() == TransactionDirection.INCOME
@@ -478,21 +480,21 @@ public class FinancialTransactionService {
                     : tx.getAmount().negate();
             writer.println(
                     csv(tx.getReference()) + ";" +
-                    csv(tx.getExternalReference()) + ";" +
-                    csv(tx.getTransactionDate()) + ";" +
-                    csv(tx.getAccountingMonth().format(monthFmt)) + ";" +
-                    csv(tx.getDirection().name()) + ";" +
-                    signedAmount + ";" +
-                    csv(tx.getSubcategory() != null ? tx.getSubcategory().getCategory().getName() : "") + ";" +
-                    csv(tx.getSubcategory() != null ? tx.getSubcategory().getName() : "") + ";" +
-                    csv(tx.getStatus().name()) + ";" +
-                    csv(tx.getBankAccount() != null ? tx.getBankAccount().getLabel() : "") + ";" +
-                    csv(tx.getCounterpartyAccount()) + ";" +
-                    csv(tx.getDescription()) + ";" +
-                    csv(tx.getBuilding() != null ? tx.getBuilding().getName() : "") + ";" +
-                    csv(tx.getHousingUnit() != null ? tx.getHousingUnit().getUnitNumber() : "") + ";" +
-                    csv(tx.getLease() != null ? String.valueOf(tx.getLease().getId()) : "") + ";" +
-                    csv(tx.getSource().name()));
+                            csv(tx.getExternalReference()) + ";" +
+                            csv(tx.getTransactionDate()) + ";" +
+                            csv(tx.getAccountingMonth().format(monthFmt)) + ";" +
+                            csv(tx.getDirection().name()) + ";" +
+                            signedAmount + ";" +
+                            csv(tx.getSubcategory() != null ? tx.getSubcategory().getCategory().getName() : "") + ";" +
+                            csv(tx.getSubcategory() != null ? tx.getSubcategory().getName() : "") + ";" +
+                            csv(tx.getStatus().name()) + ";" +
+                            csv(tx.getBankAccount() != null ? tx.getBankAccount().getLabel() : "") + ";" +
+                            csv(tx.getCounterpartyAccount()) + ";" +
+                            csv(tx.getDescription()) + ";" +
+                            csv(tx.getBuilding() != null ? tx.getBuilding().getName() : "") + ";" +
+                            csv(tx.getHousingUnit() != null ? tx.getHousingUnit().getUnitNumber() : "") + ";" +
+                            csv(tx.getLease() != null ? String.valueOf(tx.getLease().getId()) : "") + ";" +
+                            csv(tx.getSource().name()));
         }
         writer.flush();
     }
@@ -697,7 +699,8 @@ public class FinancialTransactionService {
     private String resolveAssetLabel(AssetType type, Long assetId) {
         return switch (type) {
             case BOILER -> boilerRepository.findById(assetId)
-                    .map(b -> (b.getBrand() != null ? b.getBrand() : "") + " " + (b.getModel() != null ? b.getModel() : ""))
+                    .map(b -> (b.getBrand() != null ? b.getBrand() : "") + " "
+                            + (b.getModel() != null ? b.getModel() : ""))
                     .map(String::trim)
                     .filter(s -> !s.isBlank())
                     .orElse("Boiler #" + assetId);
@@ -776,7 +779,8 @@ public class FinancialTransactionService {
     }
 
     private String csv(Object value) {
-        if (value == null) return "";
+        if (value == null)
+            return "";
         String s = value.toString().replace("\"", "\"\"");
         return s.contains(";") || s.contains("\"") ? "\"" + s + "\"" : s;
     }

@@ -1,47 +1,50 @@
-// features/estate/components/estate-dashboard/estate-dashboard.component.ts — UC016 US102
-import { CommonModule } from "@angular/common";
-import { Component, OnDestroy, OnInit } from "@angular/core";
-import { ActivatedRoute, Router, RouterModule } from "@angular/router";
-import { Subject } from "rxjs";
-import { takeUntil } from "rxjs/operators";
-import { ActiveEstateService } from "../../../../core/services/active-estate.service";
-import { EstateService } from "../../../../core/services/estate.service";
-import { EstateDashboard } from "../../../../models/estate.model";
+// features/estate/components/estate-dashboard/estate-dashboard.component.ts — UC016 Phase 4
+// Quick access cards now route to estate-scoped transaction and alerts paths.
+import { CommonModule } from '@angular/common';
+import { Component, OnDestroy, OnInit } from '@angular/core';
+import { ActivatedRoute, Router, RouterModule } from '@angular/router';
+import { Subject } from 'rxjs';
+import { takeUntil } from 'rxjs/operators';
+import { ActiveEstateService } from '../../../../core/services/active-estate.service';
+import { EstateService } from '../../../../core/services/estate.service';
+import { EstateDashboard } from '../../../../models/estate.model';
 
 interface QuickAccessCard {
   icon: string;
   label: string;
-  route: string[];
+  route: any[];
   description: string;
 }
 
 @Component({
-  selector: "app-estate-dashboard",
+  selector: 'app-estate-dashboard',
   standalone: true,
   imports: [CommonModule, RouterModule],
-  templateUrl: "./estate-dashboard.component.html",
-  styleUrls: ["./estate-dashboard.component.scss"],
+  templateUrl: './estate-dashboard.component.html',
+  styleUrls: ['./estate-dashboard.component.scss'],
 })
 export class EstateDashboardComponent implements OnInit, OnDestroy {
   dashboard: EstateDashboard | null = null;
   loading = true;
   error: string | null = null;
-  estateId = "";
+  estateId = '';
 
   private destroy$ = new Subject<void>();
 
   constructor(
     private estateService: EstateService,
-    private activeEstateService: ActiveEstateService,
+    readonly activeEstateService: ActiveEstateService,
     private route: ActivatedRoute,
     private router: Router,
   ) {}
 
   ngOnInit(): void {
-    this.route.paramMap.pipe(takeUntil(this.destroy$)).subscribe((params) => {
-      this.estateId = params.get("estateId") ?? "";
-      this.loadDashboard();
-    });
+    this.route.paramMap
+      .pipe(takeUntil(this.destroy$))
+      .subscribe((params) => {
+        this.estateId = params.get('estateId') ?? '';
+        this.loadDashboard();
+      });
   }
 
   ngOnDestroy(): void {
@@ -60,7 +63,7 @@ export class EstateDashboardComponent implements OnInit, OnDestroy {
           this.loading = false;
         },
         error: () => {
-          this.error = "Failed to load dashboard.";
+          this.error = 'Failed to load dashboard.';
           this.loading = false;
         },
       });
@@ -79,40 +82,44 @@ export class EstateDashboardComponent implements OnInit, OnDestroy {
     );
   }
 
+  /**
+   * Phase 4: transactions and alerts now routed under the estate.
+   * Buildings and persons were already estate-scoped in Phases 2 & 3.
+   */
   get quickAccessCards(): QuickAccessCard[] {
     const cards: QuickAccessCard[] = [
       {
-        icon: "🏢",
-        label: "Buildings",
-        route: ["/estates/", this.estateId, "buildings"],
-        description: "Manage buildings and housing units",
+        icon: '🏢',
+        label: 'Buildings',
+        route: ['/estates', this.estateId, 'buildings'],
+        description: 'Manage buildings and housing units',
       },
       {
-        icon: "💶",
-        label: "Transactions",
-        route: ["/transactions"],
-        description: "Track income and expenses",
+        icon: '💶',
+        label: 'Transactions',
+        route: ['/estates', this.estateId, 'transactions'],
+        description: 'Track income and expenses',
       },
       {
-        icon: "👤",
-        label: "Persons",
-        route: ["/persons"],
-        description: "Owners, tenants and contacts",
+        icon: '👤',
+        label: 'Persons',
+        route: ['/estates', this.estateId, 'persons'],
+        description: 'Owners, tenants and contacts',
       },
       {
-        icon: "🔔",
-        label: "Alerts",
-        route: ["/alerts"],
-        description: "Pending actions and deadlines",
+        icon: '🔔',
+        label: 'Alerts',
+        route: ['/estates', this.estateId, 'alerts'],
+        description: 'Pending actions and deadlines',
       },
     ];
 
     if (this.canManageMembers) {
       cards.push({
-        icon: "👥",
-        label: "Members",
-        route: ["/estates", this.estateId, "members"],
-        description: "Manage estate access",
+        icon: '👥',
+        label: 'Members',
+        route: ['/estates', this.estateId, 'members'],
+        description: 'Manage estate access',
       });
     }
 

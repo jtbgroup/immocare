@@ -166,8 +166,8 @@ if [ -f "$ESTATES_FILE" ]; then
     ENAME=$(echo "$ESTATE" | jq -r '.name')
     EDESC=$(echo "$ESTATE" | jq -r '.description // empty')
     
-    # Remove createdByUsername (not part of API request)
-    PAYLOAD=$(echo "$ESTATE" | jq 'del(.createdByUsername)')
+    # Remove createdByUsername and members (not part of API request)
+    PAYLOAD=$(echo "$ESTATE" | jq 'del(.createdByUsername) | del(.members)')
     
     S=$(curl -s -o /tmp/estate.json -w "%{http_code}" \
       -X POST "$BASE_URL/api/v1/admin/estates" \
@@ -203,18 +203,69 @@ USERS_FILE="$DATA_DIR/users.json"
 if [ -f "$USERS_FILE" ]; then
   log_section "1/9 — Seeding users"
   TOTAL=$(jq length "$USERS_FILE"); CREATED=0; SKIPPED=0
+  declare -A USER_ID_MAP    # indexed by username
   for i in $(seq 0 $(( TOTAL - 1 ))); do
     USER=$(jq -c ".[$i]" "$USERS_FILE")
     USERNAME=$(echo "$USER" | jq -r '.username')
     S=$(curl -s -o /tmp/sr.json -w "%{http_code}" \
       -X POST "$BASE_URL/api/v1/users" -H "Content-Type: application/json" -b "$COOKIE_JAR" -d "$USER")
     case "$S" in
-      200|201) log_ok "User: $USERNAME"; CREATED=$(( CREATED+1 ));;
-      409)     log_warn "User: $USERNAME (already exists)"; SKIPPED=$(( SKIPPED+1 ));;
-      *)       log_failure "User: $USERNAME" "$S" /tmp/sr.json;;
+      200|201)
+        ID=$(jq -r '.id' /tmp/sr.json)
+        USER_ID_MAP["$USERNAME"]="$ID"
+        log_ok "User: $USERNAME (id=$ID)"
+        CREATED=$(( CREATED+1 ))
+        ;;
+      409)
+        # Recover existing id
+        ID=$(curl -s "$BASE_URL/api/v1/users?search=$USERNAME&size=5" -b "$COOKIE_JAR" \
+          | jq -r '.content[]? | select(.username == "'"$USERNAME"'") | .id' | head -1)
+        USER_ID_MAP["$USERNAME"]="${ID:-}"
+        log_warn "User: $USERNAME (already exists${ID:+, id=$ID})"
+        SKIPPED=$(( SKIPPED+1 ))
+        ;;
+      *)
+        log_failure "User: $USERNAME" "$S" /tmp/sr.json
+        ;;
     esac
   done
   log_info "Users: $CREATED created, $SKIPPED skipped"
+fi
+
+# ─── 1a. Estate Members ──────────────────────────────────────────────────────
+if [ -f "$ESTATES_FILE" ]; then
+  log_section "1a — Seeding estate members"
+  TOTAL=$(jq length "$ESTATES_FILE")
+  for i in $(seq 0 $(( TOTAL - 1 ))); do
+    ESTATE=$(jq -c ".[$i]" "$ESTATES_FILE")
+    ENAME=$(echo "$ESTATE" | jq -r '.name')
+    ESTATE_ID="${ESTATE_ID_MAP[$ENAME]}"
+    if [ -z "$ESTATE_ID" ]; then
+      log_error "Estate members: estate '$ENAME' not found"
+      continue
+    fi
+    MEMBERS=$(echo "$ESTATE" | jq '.members // []')
+    MEMBER_COUNT=$(echo "$MEMBERS" | jq length)
+    for j in $(seq 0 $(( MEMBER_COUNT - 1 ))); do
+      MEMBER=$(echo "$MEMBERS" | jq -c ".[$j]")
+      MUSERNAME=$(echo "$MEMBER" | jq -r '.username')
+      MROLE=$(echo "$MEMBER" | jq -r '.role')
+      MUSER_ID="${USER_ID_MAP[$MUSERNAME]}"
+      if [ -z "$MUSER_ID" ]; then
+        log_error "Estate member: user '$MUSERNAME' not found"
+        continue
+      fi
+      PAYLOAD="{\"userId\":$MUSER_ID,\"role\":\"$MROLE\"}"
+      MS=$(curl -s -o /tmp/ms.json -w "%{http_code}" \
+        -X POST "$BASE_URL/api/v1/estates/$ESTATE_ID/members" \
+        -H "Content-Type: application/json" -b "$COOKIE_JAR" -d "$PAYLOAD")
+      case "$MS" in
+        200|201) log_ok "  Member: $MUSERNAME ($MROLE)";;
+        409)     log_warn "  Member: $MUSERNAME ($MROLE) (already exists)";;
+        *)       log_failure "  Member: $MUSERNAME ($MROLE)" "$MS" /tmp/ms.json;;
+      esac
+    done
+  done
 fi
 
 # ─── 1b. Tag Categories & Subcategories ──────────────────────────────────────
@@ -226,12 +277,19 @@ if [ -f "$TAGS_FILE" ]; then
   for i in $(seq 0 $(( TOTAL - 1 ))); do
     CAT=$(jq -c ".[$i]" "$TAGS_FILE")
     CNAME=$(echo "$CAT" | jq -r '.name')
+    ESTATE_NAME=$(echo "$CAT" | jq -r '.estateName')
+    ESTATE_ID="${ESTATE_ID_MAP[$ESTATE_NAME]}"
+    if [ -z "$ESTATE_ID" ]; then
+      log_error "Category: $CNAME — estate '$ESTATE_NAME' not found"
+      continue
+    fi
 
     # Create category
+    PAYLOAD=$(echo "$CAT" | jq 'del(.estateName, .subcategories)')
     CS=$(curl -s -o /tmp/cr.json -w "%{http_code}" \
-      -X POST "$BASE_URL/api/v1/tag-categories" \
+      -X POST "$BASE_URL/api/v1/estates/$ESTATE_ID/tag-categories" \
       -H "Content-Type: application/json" -b "$COOKIE_JAR" \
-      -d "$(echo "$CAT" | jq '{name, description}')")
+      -d "$PAYLOAD")
 
     case "$CS" in
       200|201)
@@ -241,7 +299,7 @@ if [ -f "$TAGS_FILE" ]; then
         ;;
       409)
         # Recover existing id
-        CAT_ID=$(curl -s "$BASE_URL/api/v1/tag-categories" -b "$COOKIE_JAR" \
+        CAT_ID=$(curl -s "$BASE_URL/api/v1/estates/$ESTATE_ID/tag-categories" -b "$COOKIE_JAR" \
           | jq -r --arg n "$CNAME" '.[] | select(.name == $n) | .id' | head -1)
         log_warn "Category: $CNAME (already exists${CAT_ID:+, id=$CAT_ID})"
         SKIPPED=$(( SKIPPED+1 ))
@@ -261,7 +319,7 @@ if [ -f "$TAGS_FILE" ]; then
       PAYLOAD=$(echo "$SUB" | jq --argjson cid "$CAT_ID" '. + {categoryId: $cid}')
 
       SS=$(curl -s -o /tmp/sr2.json -w "%{http_code}" \
-        -X POST "$BASE_URL/api/v1/tag-subcategories" \
+        -X POST "$BASE_URL/api/v1/estates/$ESTATE_ID/tag-subcategories" \
         -H "Content-Type: application/json" -b "$COOKIE_JAR" \
         -d "$PAYLOAD")
       case "$SS" in
@@ -284,10 +342,17 @@ if [ -f "$BANK_ACCOUNTS_FILE" ]; then
     BA=$(jq -c ".[$i]" "$BANK_ACCOUNTS_FILE")
     LABEL=$(echo "$BA" | jq -r '.label')
     ACCOUNT_NUMBER=$(echo "$BA" | jq -r '.accountNumber')
+    ESTATE_NAME=$(echo "$BA" | jq -r '.estateName')
+    ESTATE_ID="${ESTATE_ID_MAP[$ESTATE_NAME]}"
+    if [ -z "$ESTATE_ID" ]; then
+      log_error "Bank account: $LABEL — estate '$ESTATE_NAME' not found"
+      continue
+    fi
+    PAYLOAD=$(echo "$BA" | jq 'del(.estateName)')
     S=$(curl -s -o /tmp/ba.json -w "%{http_code}" \
-      -X POST "$BASE_URL/api/v1/bank-accounts" \
+      -X POST "$BASE_URL/api/v1/estates/$ESTATE_ID/bank-accounts" \
       -H "Content-Type: application/json" -b "$COOKIE_JAR" \
-      -d "$BA")
+      -d "$PAYLOAD")
     case "$S" in
       200|201) log_ok "Bank account: $LABEL ($ACCOUNT_NUMBER)"; CREATED=$(( CREATED+1 ));;
       409)     log_warn "Bank account: $LABEL ($ACCOUNT_NUMBER) (already exists)"; SKIPPED=$(( SKIPPED+1 ));;
@@ -308,6 +373,7 @@ declare -A PERSON_EMAIL_MAP # indexed by email (lowercase)
 seed_bank_accounts() {
   local person_id="$1"
   local person_json="$2"
+  local estate_id="$3"
   local BANK_ACCOUNTS BA_COUNT BA IBAN BAS
   BANK_ACCOUNTS=$(echo "$person_json" | jq '.bankAccounts // []')
   BA_COUNT=$(echo "$BANK_ACCOUNTS" | jq length)
@@ -315,7 +381,7 @@ seed_bank_accounts() {
     BA=$(echo "$BANK_ACCOUNTS" | jq -c ".[$k]")
     IBAN=$(echo "$BA" | jq -r '.iban')
     BAS=$(curl -s -o /tmp/ba.json -w "%{http_code}" \
-      -X POST "$BASE_URL/api/v1/persons/$person_id/bank-accounts" \
+      -X POST "$BASE_URL/api/v1/estates/$estate_id/persons/$person_id/bank-accounts" \
       -H "Content-Type: application/json" -b "$COOKIE_JAR" -d "$BA")
     case "$BAS" in
       200|201) log_ok "  Bank account: $IBAN";;
@@ -350,7 +416,7 @@ for i in $(seq 0 $(( TOTAL - 1 ))); do
       [ -n "$NID" ]   && PERSON_ID_MAP["$NID"]="$ID"
       [ -n "$EMAIL" ] && PERSON_EMAIL_MAP["$EMAIL"]="$ID"
       log_ok "Person: $NAME (id=$ID)"
-      seed_bank_accounts "$ID" "$P"
+      seed_bank_accounts "$ID" "$P" "$ESTATE_ID"
       ;;
     409)
       # Recover id: try nationalId search first, then email
@@ -368,7 +434,7 @@ for i in $(seq 0 $(( TOTAL - 1 ))); do
       [ -n "$EMAIL" ] && PERSON_EMAIL_MAP["$EMAIL"]="${ID:-}"
       log_warn "Person: $NAME (already exists${ID:+, id=$ID})"
       # Attempt bank accounts in case they were missed on a previous run
-      [ -n "$ID" ] && seed_bank_accounts "$ID" "$P"
+        [ -n "$ID" ] && seed_bank_accounts "$ID" "$P" "$ESTATE_ID"
       ;;
     *)
       log_failure "Person: $NAME" "$S" /tmp/sr.json

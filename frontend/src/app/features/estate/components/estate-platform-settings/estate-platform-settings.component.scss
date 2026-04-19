@@ -1,0 +1,216 @@
+// features/settings/components/estate-platform-settings/estate-platform-settings.component.scss
+// Shared: info-card, section-header, form-group, btn, alert, loading
+// from global styles.scss partials.
+
+// ─── Layout ───────────────────────────────────────────────────────────────────
+
+.estate-settings-container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 1.5rem 2rem;
+}
+
+.settings-layout {
+  display: grid;
+  grid-template-columns: 220px 1fr;
+  gap: 1.5rem;
+  align-items: start;
+}
+
+// ─── Viewer notice ────────────────────────────────────────────────────────────
+
+.viewer-notice {
+  background: #e3f2fd;
+  border: 1px solid #90caf9;
+  color: #1565c0;
+  margin-bottom: 1rem;
+}
+
+// ─── Sidebar nav ─────────────────────────────────────────────────────────────
+
+.settings-nav {
+  background: white;
+  border-radius: 10px;
+  border: 1px solid #e5e7eb;
+  padding: 0.5rem;
+  position: sticky;
+  top: 76px;
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
+}
+
+.settings-nav__item {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.6rem 0.85rem;
+  border: none;
+  background: none;
+  border-radius: 6px;
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: #374151;
+  cursor: pointer;
+  text-align: left;
+  width: 100%;
+  transition: background 0.14s, color 0.14s;
+
+  &:hover {
+    background: #f3f4f6;
+    color: #1e1b4b;
+  }
+
+  &--active {
+    background: #ede9fe;
+    color: #4f46e5;
+    border-left: 3px solid #4f46e5;
+    padding-left: calc(0.85rem - 3px);
+  }
+}
+
+// ─── Content ─────────────────────────────────────────────────────────────────
+
+.settings-content {
+  min-width: 0;
+}
+
+.section-desc {
+  font-size: 0.875rem;
+  color: #6b7280;
+  margin: -0.5rem 0 1.25rem;
+  line-height: 1.5;
+}
+
+// ─── Fields ──────────────────────────────────────────────────────────────────
+
+.settings-fields {
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+}
+
+.input-with-unit {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+
+  input { width: 120px; }
+
+  .unit {
+    font-size: 0.875rem;
+    color: #6b7280;
+  }
+}
+
+.field-hint {
+  font-size: 0.78rem;
+  color: #9ca3af;
+  margin-top: 0.3rem;
+  display: block;
+}
+
+.field-error {
+  font-size: 0.8rem;
+  color: #dc2626;
+  margin-top: 0.25rem;
+}
+
+.mt-2 { margin-top: 0.5rem; }
+
+// ─── Boiler rule form panel ───────────────────────────────────────────────────
+
+.rule-form-panel {
+  background: #f8f9fa;
+  border: 1px solid #e0e0e0;
+  border-radius: 6px;
+  padding: 1rem 1.25rem;
+  margin-bottom: 1rem;
+}
+
+// ─── Asset mappings ───────────────────────────────────────────────────────────
+
+.asset-mappings-list {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.asset-mapping-row {
+  display: grid;
+  grid-template-columns: 200px 1fr auto;
+  align-items: center;
+  gap: 1rem;
+  padding: 0.75rem 1rem;
+  background: #f8f9fa;
+  border: 1px solid #e9ecef;
+  border-radius: 6px;
+}
+
+.asset-mapping-label {
+  font-weight: 600;
+  font-size: 0.9rem;
+  color: #374151;
+}
+
+.asset-mapping-select {
+  select {
+    width: 100%;
+    padding: 0.45rem 0.65rem;
+    border: 1px solid #dee2e6;
+    border-radius: 4px;
+    font-size: 0.875rem;
+    font-family: inherit;
+    background: #fff;
+    cursor: pointer;
+
+    &:disabled {
+      background: #f5f5f5;
+      color: #888;
+      cursor: default;
+    }
+
+    &:focus {
+      outline: none;
+      border-color: #80bdff;
+    }
+  }
+}
+
+.asset-mapping-current {
+  white-space: nowrap;
+}
+
+.badge-current {
+  display: inline-block;
+  padding: 0.2em 0.6em;
+  background: #e3f2fd;
+  color: #1565c0;
+  border-radius: 4px;
+  font-size: 0.75rem;
+  font-weight: 600;
+}
+
+// ─── Responsive ───────────────────────────────────────────────────────────────
+
+@media (max-width: 768px) {
+  .settings-layout {
+    grid-template-columns: 1fr;
+  }
+
+  .settings-nav {
+    flex-direction: row;
+    position: static;
+    flex-wrap: wrap;
+  }
+
+  .settings-nav__item {
+    flex: 1;
+    justify-content: center;
+    min-width: 120px;
+  }
+
+  .asset-mapping-row {
+    grid-template-columns: 1fr;
+  }
+}

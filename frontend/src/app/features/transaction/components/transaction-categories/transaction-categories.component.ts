@@ -1,39 +1,45 @@
-import { CommonModule } from "@angular/common";
-import { Component, OnInit } from "@angular/core";
-import { FormsModule } from "@angular/forms";
-import { TagCategoryService } from "../../../../core/services/tag-category.service";
-import { TagSubcategoryService } from "../../../../core/services/tag-subcategory.service";
+// features/transaction/components/transaction-categories/transaction-categories.component.ts — UC016 Phase 4
+// No changes to component logic — TagCategoryService and TagSubcategoryService handle estate scoping.
+import { CommonModule } from '@angular/common';
+import { Component, OnInit } from '@angular/core';
+import { FormsModule } from '@angular/forms';
+import { TagCategoryService } from '../../../../core/services/tag-category.service';
+import { TagSubcategoryService } from '../../../../core/services/tag-subcategory.service';
 import {
   SaveTagCategoryRequest,
   SaveTagSubcategoryRequest,
   SubcategoryDirection,
   TagCategory,
   TagSubcategory,
-} from "../../../../models/transaction.model";
+} from '../../../../models/transaction.model';
 
 @Component({
-  selector: "app-transaction-categories",
+  selector: 'app-transaction-categories',
   standalone: true,
   imports: [CommonModule, FormsModule],
-  templateUrl: "./transaction-categories.component.html",
-  styleUrls: ["./transaction-categories.component.scss"],
+  templateUrl: './transaction-categories.component.html',
+  styleUrls: ['./transaction-categories.component.scss'],
 })
 export class TransactionCategoriesComponent implements OnInit {
   categories: TagCategory[] = [];
   subcategories: TagSubcategory[] = [];
 
   editingCategory?: TagCategory;
-  newCategory: SaveTagCategoryRequest = { name: "" };
+  newCategory: SaveTagCategoryRequest = { name: '' };
   showNewCategory = false;
 
   editingSubcategory?: TagSubcategory;
-  newSubcategory: SaveTagSubcategoryRequest = { categoryId: 0, name: "", direction: "EXPENSE" };
+  newSubcategory: SaveTagSubcategoryRequest = {
+    categoryId: 0,
+    name: '',
+    direction: 'EXPENSE',
+  };
   showNewSubcategory = false;
 
   categoryError: string | null = null;
   subcategoryError: string | null = null;
 
-  readonly directions: SubcategoryDirection[] = ["INCOME", "EXPENSE", "BOTH"];
+  readonly directions: SubcategoryDirection[] = ['INCOME', 'EXPENSE', 'BOTH'];
 
   constructor(
     private tagCategoryService: TagCategoryService,
@@ -54,7 +60,7 @@ export class TransactionCategoriesComponent implements OnInit {
   }
 
   resetSubForm(): void {
-    this.newSubcategory = { categoryId: 0, name: "", direction: "EXPENSE" };
+    this.newSubcategory = { categoryId: 0, name: '', direction: 'EXPENSE' };
   }
 
   saveCategory(): void {
@@ -66,10 +72,10 @@ export class TransactionCategoriesComponent implements OnInit {
       next: () => {
         this.editingCategory = undefined;
         this.showNewCategory = false;
-        this.newCategory = { name: "" };
+        this.newCategory = { name: '' };
         this.loadCategories();
       },
-      error: (err) => (this.categoryError = err?.error?.message || "Error"),
+      error: (err) => (this.categoryError = err?.error?.message || 'Error'),
     });
   }
 
@@ -83,7 +89,7 @@ export class TransactionCategoriesComponent implements OnInit {
     if (!confirm(`Delete category "${cat.name}"?`)) return;
     this.tagCategoryService.delete(cat.id).subscribe({
       next: () => this.loadCategories(),
-      error: (err) => (this.categoryError = err?.error?.message || "Cannot delete"),
+      error: (err) => (this.categoryError = err?.error?.message || 'Cannot delete'),
     });
   }
 
@@ -99,7 +105,7 @@ export class TransactionCategoriesComponent implements OnInit {
         this.resetSubForm();
         this.loadSubcategories();
       },
-      error: (err) => (this.subcategoryError = err?.error?.message || "Error"),
+      error: (err) => (this.subcategoryError = err?.error?.message || 'Error'),
     });
   }
 
@@ -118,7 +124,7 @@ export class TransactionCategoriesComponent implements OnInit {
     if (!confirm(`Delete subcategory "${sub.name}"?`)) return;
     this.tagSubcategoryService.delete(sub.id).subscribe({
       next: () => this.loadSubcategories(),
-      error: (err) => (this.subcategoryError = err?.error?.message || "Cannot delete"),
+      error: (err) => (this.subcategoryError = err?.error?.message || 'Cannot delete'),
     });
   }
 }

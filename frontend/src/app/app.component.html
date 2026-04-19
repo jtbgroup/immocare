@@ -1,4 +1,4 @@
-<!-- app.component.html — UC016 Phase 3 -->
+<!-- app.component.html — UC016 Phase 5 -->
 <div class="app-container">
   <header class="app-header">
     <!-- Brand -->
@@ -11,31 +11,44 @@
     <ng-container *ngIf="currentUser$ | async as user">
       <div class="header-sep"></div>
       <nav class="app-nav">
-
         @if (activeEstateService.activeEstateId()) {
           <a
-            [routerLink]="['/estates', activeEstateService.activeEstateId(), 'buildings']"
+            [routerLink]="[
+              '/estates',
+              activeEstateService.activeEstateId(),
+              'buildings',
+            ]"
             routerLinkActive="app-nav__link--active"
             class="app-nav__link"
           >
             🏢 Buildings
           </a>
           <a
-            [routerLink]="['/estates', activeEstateService.activeEstateId(), 'units']"
+            [routerLink]="[
+              '/estates',
+              activeEstateService.activeEstateId(),
+              'units',
+            ]"
             routerLinkActive="app-nav__link--active"
             class="app-nav__link"
           >
             🏠 Units
           </a>
           <a
-            [routerLink]="['/estates', activeEstateService.activeEstateId(), 'leases']"
+            [routerLink]="[
+              '/estates',
+              activeEstateService.activeEstateId(),
+              'leases',
+            ]"
             routerLinkActive="app-nav__link--active"
             class="app-nav__link"
           >
             📄 Leases
           </a>
         } @else {
-          <span class="app-nav__link app-nav__link--disabled">🏢 Buildings</span>
+          <span class="app-nav__link app-nav__link--disabled"
+            >🏢 Buildings</span
+          >
           <span class="app-nav__link app-nav__link--disabled">🏠 Units</span>
           <span class="app-nav__link app-nav__link--disabled">📄 Leases</span>
         }
@@ -52,7 +65,9 @@
         <div class="nav-dropdown-wrapper" #managementWrapper>
           <button
             class="app-nav__link app-nav__link--dropdown"
-            [class.app-nav__link--active]="managementOpen || isManagementActive()"
+            [class.app-nav__link--active]="
+              managementOpen || isManagementActive()
+            "
             (click)="toggleManagement()"
           >
             🗂 Management <span class="nav-chevron">▾</span>
@@ -60,21 +75,32 @@
           <div class="nav-dropdown" [class.open]="managementOpen">
             @if (activeEstateService.activeEstateId()) {
               <a
-                [routerLink]="['/estates', activeEstateService.activeEstateId(), 'persons']"
+                [routerLink]="[
+                  '/estates',
+                  activeEstateService.activeEstateId(),
+                  'persons',
+                ]"
                 class="nav-dropdown__item"
                 (click)="closeManagement()"
               >
                 👤 People
               </a>
             } @else {
-              <span class="nav-dropdown__item" style="opacity:0.4;cursor:not-allowed">👤 People</span>
+              <span
+                class="nav-dropdown__item"
+                style="opacity: 0.4; cursor: not-allowed"
+                >👤 People</span
+              >
             }
-            <a routerLink="/bank-accounts" class="nav-dropdown__item" (click)="closeManagement()">
+            <a
+              routerLink="/bank-accounts"
+              class="nav-dropdown__item"
+              (click)="closeManagement()"
+            >
               🏦 Bank Accounts
             </a>
           </div>
         </div>
-
       </nav>
 
       <app-estate-header></app-estate-header>
@@ -89,7 +115,9 @@
           title="Alerts"
         >
           🔔
-          <span *ngIf="alertCount > 0" class="bell-badge">{{ alertCount }}</span>
+          <span *ngIf="alertCount > 0" class="bell-badge">{{
+            alertCount
+          }}</span>
         </a>
 
         <!-- Avatar dropdown -->
@@ -107,27 +135,62 @@
             <div class="dropdown-header">
               <div class="dropdown-username">{{ user.username }}</div>
               <div class="dropdown-role">
-                {{ user.isPlatformAdmin ? 'Platform Admin' : 'User' }}
+                {{ user.isPlatformAdmin ? "Platform Admin" : "User" }}
               </div>
             </div>
-            <a routerLink="/users" class="dropdown-item" (click)="closeDropdown()">
+
+            <a
+              routerLink="/users"
+              class="dropdown-item"
+              (click)="closeDropdown()"
+            >
               <span class="di-icon">👥</span> Manage Users
             </a>
+
             @if (
               activeEstateService.activeEstate()?.myRole === null ||
               !activeEstateService.activeEstate()
             ) {
-              <a routerLink="/admin/estates" class="dropdown-item" (click)="closeDropdown()">
+              <a
+                routerLink="/admin/estates"
+                class="dropdown-item"
+                (click)="closeDropdown()"
+              >
                 <span class="di-icon">🏛️</span> Manage Estates
               </a>
-              <div class="dropdown-divider"></div>
             }
+
             <div class="dropdown-divider"></div>
-            <a routerLink="/settings" class="dropdown-item" (click)="closeDropdown()">
-              <span class="di-icon">⚙️</span> Settings
-            </a>
+
+            <!-- Phase 5: estate-scoped settings when an estate is active -->
+            @if (activeEstateService.activeEstateId()) {
+              <a
+                [routerLink]="[
+                  '/estates',
+                  activeEstateService.activeEstateId(),
+                  'admin/platform-settings',
+                ]"
+                class="dropdown-item"
+                (click)="closeDropdown()"
+              >
+                <span class="di-icon">⚙️</span> Paramètres
+              </a>
+            } @else {
+              <!-- Fallback for PLATFORM_ADMIN without active estate -->
+              <a
+                routerLink="/settings"
+                class="dropdown-item"
+                (click)="closeDropdown()"
+              >
+                <span class="di-icon">⚙️</span> Paramètres
+              </a>
+            }
+
             <div class="dropdown-divider"></div>
-            <button class="dropdown-item dropdown-item--logout" (click)="logout()">
+            <button
+              class="dropdown-item dropdown-item--logout"
+              (click)="logout()"
+            >
               <span class="di-icon">↩</span> Logout
             </button>
           </div>

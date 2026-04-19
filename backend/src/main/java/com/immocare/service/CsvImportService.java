@@ -10,6 +10,7 @@ import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
+import java.util.UUID;
 
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -17,6 +18,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import com.immocare.model.dto.AccountingMonthSuggestionDTO;
 import com.immocare.model.dto.CsvMappingConfig;
+import com.immocare.model.dto.EstatePlatformConfigDTOs;
 import com.immocare.model.dto.ImportBatchResultDTO;
 import com.immocare.model.dto.ParsedCsvRow;
 import com.immocare.model.dto.SubcategorySuggestionDTO;
@@ -34,6 +36,11 @@ import com.immocare.repository.ImportBatchRepository;
 import com.immocare.repository.LeaseRepository;
 import com.immocare.repository.PersonBankAccountRepository;
 
+/**
+ * Legacy CSV import service.
+ * UC016 Phase 5: loadMappingConfig() now accepts an estateId and reads
+ * all CSV import settings from the estate-scoped platform config.
+ */
 @Service
 public class CsvImportService {
 
@@ -61,19 +68,34 @@ public class CsvImportService {
         this.personBankAccountRepository = personBankAccountRepository;
     }
 
-    public CsvMappingConfig loadMappingConfig() {
+    /**
+     * Loads CSV mapping configuration from estate-scoped platform config.
+     * UC016 Phase 5: reads from estate config rather than global keys.
+     */
+    public CsvMappingConfig loadMappingConfig(UUID estateId) {
         return new CsvMappingConfig(
-                platformConfigService.getString("csv.import.delimiter", ";"),
-                platformConfigService.getString("csv.import.date_format", "dd/MM/yyyy"),
-                platformConfigService.getInt("csv.import.skip_header_rows", 1),
-                platformConfigService.getInt("csv.import.col.date", 0),
-                platformConfigService.getInt("csv.import.col.amount", 1),
-                platformConfigService.getInt("csv.import.col.description", 2),
-                platformConfigService.getInt("csv.import.col.counterparty_account", 4),
-                platformConfigService.getInt("csv.import.col.external_reference", 5),
-                platformConfigService.getInt("csv.import.col.bank_account", 6),
-                platformConfigService.getInt("csv.import.col.value_date", -1),
-                platformConfigService.getInt("csv.import.suggestion.confidence.threshold", 3));
+                platformConfigService.getStringValue(estateId,
+                        EstatePlatformConfigDTOs.KEY_CSV_DELIMITER, ";"),
+                platformConfigService.getStringValue(estateId,
+                        EstatePlatformConfigDTOs.KEY_CSV_DATE_FORMAT, "dd/MM/yyyy"),
+                platformConfigService.getIntValue(estateId,
+                        EstatePlatformConfigDTOs.KEY_CSV_SKIP_HEADER_ROWS, 1),
+                platformConfigService.getIntValue(estateId,
+                        EstatePlatformConfigDTOs.KEY_CSV_COL_DATE, 0),
+                platformConfigService.getIntValue(estateId,
+                        EstatePlatformConfigDTOs.KEY_CSV_COL_AMOUNT, 1),
+                platformConfigService.getIntValue(estateId,
+                        EstatePlatformConfigDTOs.KEY_CSV_COL_DESCRIPTION, 2),
+                platformConfigService.getIntValue(estateId,
+                        EstatePlatformConfigDTOs.KEY_CSV_COL_COUNTERPARTY_ACCOUNT, 3),
+                platformConfigService.getIntValue(estateId,
+                        EstatePlatformConfigDTOs.KEY_CSV_COL_EXTERNAL_REFERENCE, 4),
+                platformConfigService.getIntValue(estateId,
+                        EstatePlatformConfigDTOs.KEY_CSV_COL_BANK_ACCOUNT, 5),
+                platformConfigService.getIntValue(estateId,
+                        EstatePlatformConfigDTOs.KEY_CSV_COL_VALUE_DATE, -1),
+                platformConfigService.getIntValue(estateId,
+                        EstatePlatformConfigDTOs.KEY_CSV_SUGGESTION_CONFIDENCE, 3));
     }
 
     public List<ParsedCsvRow> parsePreview(MultipartFile file, CsvMappingConfig config) {
@@ -128,8 +150,8 @@ public class CsvImportService {
     }
 
     @Transactional
-    public ImportBatchResultDTO importBatch(List<ParsedCsvRow> rows, AppUser currentUser) {
-        CsvMappingConfig config = loadMappingConfig();
+    public ImportBatchResultDTO importBatch(UUID estateId, List<ParsedCsvRow> rows, AppUser currentUser) {
+        CsvMappingConfig config = loadMappingConfig(estateId);
         int minConfidence = config.suggestionConfidenceThreshold();
 
         ImportBatch batch = new ImportBatch();
@@ -150,7 +172,7 @@ public class CsvImportService {
                 continue;
             }
 
-            // Deduplication
+            // Deduplication — estate-scoped
             if (row.externalReference() != null && !row.externalReference().isBlank()) {
                 if (transactionRepository.existsByExternalReferenceAndTransactionDateAndAmount(
                         row.externalReference(), row.transactionDate(), row.amount())) {
@@ -172,20 +194,16 @@ public class CsvImportService {
                 tx.setSource(TransactionSource.IMPORT);
                 tx.setImportBatch(batch);
 
-                // Resolve bank account
+                // Resolve bank account (estate-scoped)
                 if (row.bankAccountIban() != null && !row.bankAccountIban().isBlank()) {
-                    bankAccountRepository.findByAccountNumber(row.bankAccountIban())
+                    bankAccountRepository.findByEstateIdAndAccountNumber(estateId, row.bankAccountIban())
                             .ifPresent(tx::setBankAccount);
                 }
 
                 // Suggest subcategory
                 List<SubcategorySuggestionDTO> suggestions = learningService.suggestSubcategory(
-                        row.counterpartyAccount(),
-                        row.description(), row.direction(), minConfidence);
-                Long subcategoryId = null;
-                if (!suggestions.isEmpty()) {
-                    subcategoryId = suggestions.get(0).subcategoryId();
-                }
+                        row.counterpartyAccount(), row.description(), row.direction(), minConfidence);
+                Long subcategoryId = suggestions.isEmpty() ? null : suggestions.get(0).subcategoryId();
 
                 // Set accounting_month
                 AccountingMonthSuggestionDTO monthSuggestion = learningService.suggestAccountingMonth(
@@ -199,7 +217,7 @@ public class CsvImportService {
                 long seq = transactionRepository.nextRefSequence();
                 tx.setReference("TXN-" + year + "-" + String.format("%05d", seq));
 
-                // Suggest lease via counterparty IBAN (all statuses, historical-aware)
+                // Suggest lease via counterparty IBAN
                 suggestLease(tx, row.counterpartyAccount(), row.transactionDate());
 
                 transactionRepository.save(tx);
@@ -221,34 +239,14 @@ public class CsvImportService {
 
     // ─── Private helpers ──────────────────────────────────────────────────────
 
-    /**
-     * Attempts to resolve a lease suggestion from the counterparty IBAN.
-     *
-     * Algorithm:
-     * 1. Look up the IBAN in person_bank_account.
-     * 2. Find all leases where that person is a tenant (any role, any status).
-     * 3. Among those leases:
-     * a. If exactly one covers the transaction date → perfect match.
-     * b. If several cover it → prefer ACTIVE, then most recent start.
-     * c. If none covers it → pick the lease whose endDate is closest
-     * to the transaction date (historical import scenario).
-     * 4. Store in suggested_lease_id only — user confirms during review.
-     * Also pre-populate housing_unit and building for convenience.
-     */
-    private void suggestLease(FinancialTransaction tx,
-            String counterpartyIban,
-            LocalDate transactionDate) {
-        if (counterpartyIban == null || counterpartyIban.isBlank())
-            return;
+    private void suggestLease(FinancialTransaction tx, String counterpartyIban, LocalDate transactionDate) {
+        if (counterpartyIban == null || counterpartyIban.isBlank()) return;
 
         personBankAccountRepository.findByIban(counterpartyIban).ifPresent(pba -> {
             List<Lease> leases = leaseRepository
                     .findAllByTenantPersonIdOrderByStartDateDesc(pba.getPerson().getId());
+            if (leases.isEmpty()) return;
 
-            if (leases.isEmpty())
-                return;
-
-            // Leases whose period covers the transaction date
             List<Lease> covering = leases.stream()
                     .filter(l -> !transactionDate.isBefore(l.getStartDate())
                             && !transactionDate.isAfter(l.getEndDate()))
@@ -258,24 +256,19 @@ public class CsvImportService {
             if (covering.size() == 1) {
                 best = covering.get(0);
             } else if (covering.size() > 1) {
-                // Prefer ACTIVE, then most recent startDate
                 best = covering.stream()
                         .filter(l -> l.getStatus() == LeaseStatus.ACTIVE)
                         .findFirst()
                         .orElse(covering.get(0));
             } else {
-                // No covering lease — closest endDate (typical for historical imports)
                 best = leases.stream()
                         .min(Comparator.comparingLong(
-                                l -> Math.abs(ChronoUnit.DAYS.between(
-                                        l.getEndDate(), transactionDate))))
+                                l -> Math.abs(ChronoUnit.DAYS.between(l.getEndDate(), transactionDate))))
                         .orElse(leases.get(0));
             }
 
             tx.setSuggestedLease(best);
-            if (tx.getHousingUnit() == null) {
-                tx.setHousingUnit(best.getHousingUnit());
-            }
+            if (tx.getHousingUnit() == null) tx.setHousingUnit(best.getHousingUnit());
             if (tx.getBuilding() == null && best.getHousingUnit() != null) {
                 tx.setBuilding(best.getHousingUnit().getBuilding());
             }

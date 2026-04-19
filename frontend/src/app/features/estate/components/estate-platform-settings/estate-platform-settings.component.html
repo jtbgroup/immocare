@@ -1,0 +1,501 @@
+<!-- features/settings/components/estate-platform-settings/estate-platform-settings.component.html -->
+<!-- UC016 Phase 5 — Per-estate platform settings -->
+<div class="estate-settings-container">
+  <div class="details-content">
+    <div class="header">
+      <h1>⚙️ Paramètres de l'estate</h1>
+    </div>
+  </div>
+
+  @if (!canEdit) {
+    <div class="alert alert-info viewer-notice">
+      👁 Mode lecture seule — vous êtes VIEWER sur cette estate.
+    </div>
+  }
+
+  @if (error) {
+    <div class="alert alert-error">{{ error }}</div>
+  }
+  @if (successMessage) {
+    <div class="alert alert-success">✅ {{ successMessage }}</div>
+  }
+
+  @if (!loading && form) {
+    <div class="settings-layout">
+      <!-- Sidebar nav -->
+      <aside class="settings-nav">
+        @for (section of sections; track section.id) {
+          <button
+            class="settings-nav__item"
+            [class.settings-nav__item--active]="activeSection === section.id"
+            (click)="setSection(section.id)"
+          >
+            {{ section.icon }} {{ section.label }}
+          </button>
+        }
+      </aside>
+
+      <!-- Main content -->
+      <div class="settings-content">
+        <form [formGroup]="form" (ngSubmit)="save()">
+          <!-- ═══ GÉNÉRAL ══════════════════════════════════════════════════ -->
+          @if (activeSection === "general") {
+            <div class="info-card">
+              <div class="section-header">
+                <h2>🌐 Général</h2>
+              </div>
+              <div class="settings-fields">
+                @for (config of generalConfigs; track config.configKey) {
+                  @if (isDateFormatKey(config.configKey)) {
+                    <div class="form-group">
+                      <label [for]="config.configKey">{{
+                        labelFor(config.configKey)
+                      }}</label>
+                      <select
+                        [id]="config.configKey + '_preset'"
+                        [value]="presetOrCustom(config.configKey)"
+                        (change)="
+                          onDateFormatSelectChange(config.configKey, $event)
+                        "
+                        [disabled]="!canEdit"
+                      >
+                        @for (p of DATE_FORMAT_PRESETS; track p.value) {
+                          <option [value]="p.value">{{ p.label }}</option>
+                        }
+                        <option value="__custom__">Personnalisé…</option>
+                      </select>
+                      @if (presetOrCustom(config.configKey) === "__custom__") {
+                        <input
+                          [id]="config.configKey"
+                          type="text"
+                          [formControlName]="config.configKey"
+                          placeholder="ex: dd-MM-yyyy"
+                          class="mt-2"
+                        />
+                      }
+                      @if (fieldError(config.configKey)) {
+                        <div class="field-error">
+                          {{ fieldError(config.configKey) }}
+                        </div>
+                      }
+                    </div>
+                  }
+
+                  @if (!isDateFormatKey(config.configKey)) {
+                    <div class="form-group">
+                      <label [for]="config.configKey">{{
+                        labelFor(config.configKey)
+                      }}</label>
+                      <input
+                        [id]="config.configKey"
+                        type="text"
+                        [formControlName]="config.configKey"
+                      />
+                      @if (fieldError(config.configKey)) {
+                        <div class="field-error">
+                          {{ fieldError(config.configKey) }}
+                        </div>
+                      }
+                    </div>
+                  }
+                }
+              </div>
+              @if (canEdit) {
+                <div class="form-actions">
+                  <button
+                    type="submit"
+                    class="btn btn-primary"
+                    [disabled]="saving"
+                  >
+                    {{ saving ? "Enregistrement…" : "Enregistrer" }}
+                  </button>
+                </div>
+              }
+            </div>
+          }
+
+          <!-- ═══ ALERTES ══════════════════════════════════════════════════ -->
+          @if (activeSection === "alerts") {
+            <div class="info-card">
+              <div class="section-header">
+                <h2>🔔 Seuils d'alertes</h2>
+              </div>
+              <p class="section-desc">
+                Délais (en jours) avant lesquels une alerte est générée pour
+                cette estate.
+              </p>
+              <div class="settings-fields">
+                @for (config of alertConfigs; track config.configKey) {
+                  <div class="form-group">
+                    <label [for]="config.configKey">{{
+                      labelFor(config.configKey)
+                    }}</label>
+                    <div class="input-with-unit">
+                      <input
+                        [id]="config.configKey"
+                        type="number"
+                        min="1"
+                        [formControlName]="config.configKey"
+                      />
+                      <span class="unit">jours</span>
+                    </div>
+                    @if (fieldError(config.configKey)) {
+                      <div class="field-error">
+                        {{ fieldError(config.configKey) }}
+                      </div>
+                    }
+                  </div>
+                }
+              </div>
+              @if (canEdit) {
+                <div class="form-actions">
+                  <button
+                    type="submit"
+                    class="btn btn-primary"
+                    [disabled]="saving"
+                  >
+                    {{ saving ? "Enregistrement…" : "Enregistrer" }}
+                  </button>
+                </div>
+              }
+            </div>
+          }
+
+          <!-- ═══ IMPORT CSV ════════════════════════════════════════════════ -->
+          @if (activeSection === "import") {
+            <div class="info-card">
+              <div class="section-header">
+                <h2>📥 Import de transactions</h2>
+              </div>
+              <p class="section-desc">
+                Configuration de l'import CSV propre à cette estate. Les
+                parseurs restent globaux (gérés par le Platform Admin).
+              </p>
+              <div class="settings-fields">
+                @for (config of importConfigs; track config.configKey) {
+                  @if (isSelectKey(config.configKey)) {
+                    <div class="form-group">
+                      <label [for]="config.configKey">{{
+                        labelFor(config.configKey)
+                      }}</label>
+                      <select
+                        [id]="config.configKey"
+                        [formControlName]="config.configKey"
+                      >
+                        @for (opt of ON_DUPLICATE_OPTIONS; track opt.value) {
+                          <option [value]="opt.value">{{ opt.label }}</option>
+                        }
+                      </select>
+                    </div>
+                  }
+
+                  @if (
+                    !isSelectKey(config.configKey) &&
+                    isIntegerKey(config.configKey)
+                  ) {
+                    <div class="form-group">
+                      <label [for]="config.configKey">{{
+                        labelFor(config.configKey)
+                      }}</label>
+                      <input
+                        [id]="config.configKey"
+                        type="number"
+                        [formControlName]="config.configKey"
+                      />
+                      @if (config.description) {
+                        <span class="field-hint">{{ config.description }}</span>
+                      }
+                      @if (fieldError(config.configKey)) {
+                        <div class="field-error">
+                          {{ fieldError(config.configKey) }}
+                        </div>
+                      }
+                    </div>
+                  }
+
+                  @if (
+                    !isSelectKey(config.configKey) &&
+                    !isIntegerKey(config.configKey)
+                  ) {
+                    <div class="form-group">
+                      <label [for]="config.configKey">{{
+                        labelFor(config.configKey)
+                      }}</label>
+                      <input
+                        [id]="config.configKey"
+                        type="text"
+                        [formControlName]="config.configKey"
+                      />
+                      @if (config.description) {
+                        <span class="field-hint">{{ config.description }}</span>
+                      }
+                      @if (fieldError(config.configKey)) {
+                        <div class="field-error">
+                          {{ fieldError(config.configKey) }}
+                        </div>
+                      }
+                    </div>
+                  }
+                }
+              </div>
+              @if (canEdit) {
+                <div class="form-actions">
+                  <button
+                    type="submit"
+                    class="btn btn-primary"
+                    [disabled]="saving"
+                  >
+                    {{ saving ? "Enregistrement…" : "Enregistrer" }}
+                  </button>
+                </div>
+              }
+            </div>
+          }
+
+          <!-- ═══ CHAUDIÈRES ════════════════════════════════════════════════ -->
+          @if (activeSection === "boiler") {
+            <!-- Threshold config -->
+            <div class="info-card">
+              <div class="section-header">
+                <h2>🔥 Configuration chaudières</h2>
+              </div>
+              <div class="settings-fields">
+                @for (config of boilerConfigs; track config.configKey) {
+                  <div class="form-group">
+                    <label [for]="config.configKey">{{
+                      labelFor(config.configKey)
+                    }}</label>
+                    <div class="input-with-unit">
+                      <input
+                        [id]="config.configKey"
+                        type="number"
+                        min="1"
+                        [formControlName]="config.configKey"
+                      />
+                      <span class="unit">mois</span>
+                    </div>
+                    <span class="field-hint">
+                      Nombre de mois avant l'expiration du service à partir
+                      duquel une alerte est générée.
+                    </span>
+                    @if (fieldError(config.configKey)) {
+                      <div class="field-error">
+                        {{ fieldError(config.configKey) }}
+                      </div>
+                    }
+                  </div>
+                }
+              </div>
+              @if (canEdit) {
+                <div class="form-actions">
+                  <button
+                    type="submit"
+                    class="btn btn-primary"
+                    [disabled]="saving"
+                  >
+                    {{ saving ? "Enregistrement…" : "Enregistrer" }}
+                  </button>
+                </div>
+              }
+            </div>
+
+            <!-- Validity rules -->
+            <div class="info-card">
+              <div class="section-header">
+                <h2>📋 Règles de validité du service</h2>
+                @if (canEdit) {
+                  <button
+                    type="button"
+                    class="btn btn-sm btn-primary"
+                    (click)="openAddRuleForm()"
+                  >
+                    + Ajouter
+                  </button>
+                }
+              </div>
+              <p class="section-desc">
+                Ces règles définissent la durée de validité d'un entretien
+                chaudière selon sa date. La règle applicable est la plus récente
+                dont la date de départ ≤ date du service.
+              </p>
+
+              @if (ruleError) {
+                <div class="alert alert-error">{{ ruleError }}</div>
+              }
+
+              @if (showAddRuleForm) {
+                <div class="rule-form-panel">
+                  <div class="form-row">
+                    <div class="form-group">
+                      <label
+                        >Valable à partir du
+                        <span class="required">*</span></label
+                      >
+                      <input
+                        type="date"
+                        [formControl]="$any(ruleForm.controls['validFrom'])"
+                      />
+                      @if (ruleFieldError("validFrom")) {
+                        <div class="field-error">
+                          {{ ruleFieldError("validFrom") }}
+                        </div>
+                      }
+                    </div>
+                    <div class="form-group">
+                      <label
+                        >Durée de validité (mois)
+                        <span class="required">*</span></label
+                      >
+                      <input
+                        type="number"
+                        min="1"
+                        [formControl]="
+                          $any(ruleForm.controls['validityDurationMonths'])
+                        "
+                      />
+                      @if (ruleFieldError("validityDurationMonths")) {
+                        <div class="field-error">
+                          {{ ruleFieldError("validityDurationMonths") }}
+                        </div>
+                      }
+                    </div>
+                    <div class="form-group">
+                      <label>Description</label>
+                      <input
+                        type="text"
+                        [formControl]="$any(ruleForm.controls['description'])"
+                        placeholder="ex: Règle standard 2 ans"
+                      />
+                    </div>
+                  </div>
+                  <div class="form-actions">
+                    <button
+                      type="button"
+                      class="btn btn-secondary btn-sm"
+                      (click)="cancelAddRule()"
+                    >
+                      Annuler
+                    </button>
+                    <button
+                      type="button"
+                      class="btn btn-primary btn-sm"
+                      (click)="saveRule()"
+                      [disabled]="ruleSaving"
+                    >
+                      {{ ruleSaving ? "Sauvegarde…" : "Sauvegarder" }}
+                    </button>
+                  </div>
+                </div>
+              }
+
+              @if (rulesLoading) {
+                <div class="loading">Chargement…</div>
+              }
+
+              @if (!rulesLoading && validityRules.length === 0) {
+                <p class="empty-message">
+                  Aucune règle définie. La règle par défaut (2 ans) s'applique.
+                </p>
+              }
+
+              @if (!rulesLoading && validityRules.length > 0) {
+                <div class="data-table">
+                  <table>
+                    <thead>
+                      <tr>
+                        <th>Valable depuis</th>
+                        <th>Durée (mois)</th>
+                        <th>Description</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      @for (rule of validityRules; track rule.id) {
+                        <tr>
+                          <td>{{ rule.validFrom | date: "dd/MM/yyyy" }}</td>
+                          <td>{{ rule.validityDurationMonths }}</td>
+                          <td>{{ rule.description || "—" }}</td>
+                        </tr>
+                      }
+                    </tbody>
+                  </table>
+                </div>
+              }
+            </div>
+          }
+        </form>
+
+        <!-- ═══ ASSET MAPPINGS (hors form principal) ═════════════════════════ -->
+        @if (activeSection === "assets") {
+          <div class="info-card">
+            <div class="section-header">
+              <h2>🔗 Sous-catégories automatiques par type d'actif</h2>
+            </div>
+            <p class="section-desc">
+              Lorsqu'un lien vers un actif est ajouté à une transaction, la
+              sous-catégorie configurée ici est pré-remplie automatiquement (si
+              aucune n'est déjà saisie). Laisser vide pour désactiver le
+              pré-remplissage.
+            </p>
+
+            @if (mappingError) {
+              <div class="alert alert-error">{{ mappingError }}</div>
+            }
+            @if (mappingSuccess) {
+              <div class="alert alert-success">✅ {{ mappingSuccess }}</div>
+            }
+            @if (mappingsLoading) {
+              <div class="loading">Chargement…</div>
+            }
+
+            @if (!mappingsLoading) {
+              <div class="asset-mappings-list">
+                @for (mapping of assetMappings; track mapping.assetType) {
+                  <div class="asset-mapping-row">
+                    <div class="asset-mapping-label">
+                      {{ assetTypeLabel(mapping.assetType) }}
+                    </div>
+                    <div class="asset-mapping-select">
+                      <select
+                        [disabled]="!canEdit"
+                        [value]="mapping.subcategoryId ?? ''"
+                        (change)="
+                          updateMapping(
+                            mapping.assetType,
+                            $any($event.target).value
+                              ? +$any($event.target).value
+                              : null
+                          )
+                        "
+                      >
+                        <option value="">— Aucune —</option>
+                        @for (sub of subcategories; track sub.id) {
+                          <option [value]="sub.id">
+                            {{ sub.categoryName }} / {{ sub.name }}
+                          </option>
+                        }
+                      </select>
+                    </div>
+                    @if (mapping.subcategoryName) {
+                      <div class="asset-mapping-current">
+                        <span class="badge badge-current">{{
+                          mapping.subcategoryName
+                        }}</span>
+                      </div>
+                    }
+                  </div>
+                }
+                @if (assetMappings.length === 0) {
+                  <p class="empty-message">Aucun mapping configuré.</p>
+                }
+              </div>
+            }
+          </div>
+        }
+      </div>
+    </div>
+  }
+
+  @if (loading) {
+    <div class="loading">Chargement des paramètres…</div>
+  }
+</div>

@@ -1,33 +1,29 @@
-import { CommonModule } from "@angular/common";
-import { Component, OnInit } from "@angular/core";
-import { FormsModule } from "@angular/forms";
-import { Router, RouterModule } from "@angular/router";
-
-import { BankAccountService } from "../../../../core/services/bank-account.service";
-import { ImportParserService } from "../../../../core/services/import-parser.service";
-import { TransactionService } from "../../../../core/services/transaction.service";
+// features/transaction/components/transaction-import/transaction-import.component.ts — UC016 Phase 4
+import { CommonModule } from '@angular/common';
+import { Component, OnInit } from '@angular/core';
+import { FormsModule } from '@angular/forms';
+import { Router, RouterModule } from '@angular/router';
+import { ActiveEstateService } from '../../../../core/services/active-estate.service';
+import { BankAccountService } from '../../../../core/services/bank-account.service';
+import { ImportParserService } from '../../../../core/services/import-parser.service';
+import { TransactionService } from '../../../../core/services/transaction.service';
 import {
   BankAccount,
   ImportBatchResult,
   ImportParser,
   ImportPreviewRow,
   ImportRowEnrichment,
-} from "../../../../models/transaction.model";
-import { ImportRowDetailPanelComponent } from "./import-row-detail-panel.component";
+} from '../../../../models/transaction.model';
+import { ImportRowDetailPanelComponent } from './import-row-detail-panel.component';
 
-type Step = "form" | "preview" | "result";
+type Step = 'form' | 'preview' | 'result';
 
 @Component({
-  selector: "app-transaction-import",
+  selector: 'app-transaction-import',
   standalone: true,
-  imports: [
-    CommonModule,
-    FormsModule,
-    RouterModule,
-    ImportRowDetailPanelComponent,
-  ],
-  templateUrl: "./transaction-import.component.html",
-  styleUrls: ["./transaction-import.component.scss"],
+  imports: [CommonModule, FormsModule, RouterModule, ImportRowDetailPanelComponent],
+  templateUrl: './transaction-import.component.html',
+  styleUrls: ['./transaction-import.component.scss'],
 })
 export class TransactionImportComponent implements OnInit {
   // ── Reference data ────────────────────────────────────────────────────────
@@ -35,13 +31,13 @@ export class TransactionImportComponent implements OnInit {
   bankAccounts: BankAccount[] = [];
 
   // ── Form state ────────────────────────────────────────────────────────────
-  selectedParserCode = "";
+  selectedParserCode = '';
   selectedBankAccountId: number | null = null;
   selectedFile: File | null = null;
   isDragging = false;
 
   // ── Flow state ────────────────────────────────────────────────────────────
-  step: Step = "form";
+  step: Step = 'form';
   loading = false;
   error: string | null = null;
 
@@ -57,13 +53,16 @@ export class TransactionImportComponent implements OnInit {
     private importParserService: ImportParserService,
     private bankAccountService: BankAccountService,
     private router: Router,
+    readonly activeEstateService: ActiveEstateService,
   ) {}
 
   ngOnInit(): void {
+    // Import parsers remain global (BR-UC016-10)
     this.importParserService.getAll().subscribe((p) => {
       this.parsers = p;
       if (p.length === 1) this.selectedParserCode = p[0].code;
     });
+    // Bank accounts are now estate-scoped
     this.bankAccountService.getAll().subscribe((accounts) => {
       this.bankAccounts = accounts.filter((a) => a.isActive);
       if (this.bankAccounts.length === 1) {
@@ -72,15 +71,13 @@ export class TransactionImportComponent implements OnInit {
     });
   }
 
-  // ── Computed ──────────────────────────────────────────────────────────────
-
   get selectedParser(): ImportParser | undefined {
     return this.parsers.find((p) => p.code === this.selectedParserCode);
   }
 
   get acceptedFileTypes(): string {
-    if (!this.selectedParser) return ".csv,.pdf";
-    return this.selectedParser.format === "PDF" ? ".pdf" : ".csv";
+    if (!this.selectedParser) return '.csv,.pdf';
+    return this.selectedParser.format === 'PDF' ? '.pdf' : '.csv';
   }
 
   get canPreview(): boolean {
@@ -110,8 +107,6 @@ export class TransactionImportComponent implements OnInit {
     return selectable.length > 0 && selectable.every((r) => r.selected);
   }
 
-  // ── File selection ────────────────────────────────────────────────────────
-
   onDragOver(e: DragEvent): void {
     e.preventDefault();
     this.isDragging = true;
@@ -135,7 +130,7 @@ export class TransactionImportComponent implements OnInit {
   selectFile(file: File): void {
     this.error = null;
     if (this.selectedParser) {
-      const ext = file.name.split(".").pop()?.toLowerCase();
+      const ext = file.name.split('.').pop()?.toLowerCase();
       const expected = this.selectedParser.format.toLowerCase();
       if (ext !== expected) {
         this.error = `This parser expects a ${this.selectedParser.format} file. Got: .${ext}`;
@@ -151,10 +146,8 @@ export class TransactionImportComponent implements OnInit {
     this.selectedRow = null;
     this.result = null;
     this.error = null;
-    this.step = "form";
+    this.step = 'form';
   }
-
-  // ── Step 1: Preview ───────────────────────────────────────────────────────
 
   preview(): void {
     if (!this.canPreview) return;
@@ -170,20 +163,18 @@ export class TransactionImportComponent implements OnInit {
             ...r,
             selected: !r.duplicateInDb && !r.parseError,
           }));
-          this.step = "preview";
+          this.step = 'preview';
           this.loading = false;
         },
         error: (err) => {
           this.error =
             err?.error?.errors?.[0]?.errorMessage ||
             err?.error?.message ||
-            "Preview failed";
+            'Preview failed';
           this.loading = false;
         },
       });
   }
-
-  // ── Detail panel ──────────────────────────────────────────────────────────
 
   openPanel(row: ImportPreviewRow): void {
     this.selectedRow = row;
@@ -194,16 +185,12 @@ export class TransactionImportComponent implements OnInit {
   }
 
   onRowChanged(updated: ImportPreviewRow): void {
-    const idx = this.previewRows.findIndex(
-      (r) => r.rowNumber === updated.rowNumber,
-    );
+    const idx = this.previewRows.findIndex((r) => r.rowNumber === updated.rowNumber);
     if (idx >= 0) {
       this.previewRows[idx] = updated;
       this.selectedRow = updated;
     }
   }
-
-  // ── Selection helpers ─────────────────────────────────────────────────────
 
   toggleAll(checked: boolean): void {
     this.validRows
@@ -211,14 +198,11 @@ export class TransactionImportComponent implements OnInit {
       .forEach((r) => (r.selected = checked));
   }
 
-  // ── Step 2: Import ────────────────────────────────────────────────────────
-
   import(): void {
     if (this.selectedRows.length === 0) return;
     this.loading = true;
     this.error = null;
 
-    // Build per-row enrichment list from selected rows that have been enriched
     const enrichments: ImportRowEnrichment[] = this.selectedRows
       .filter(
         (r) =>
@@ -226,7 +210,7 @@ export class TransactionImportComponent implements OnInit {
           (r.enrichedSubcategoryId ||
             r.enrichedLeaseId ||
             r.enrichedUnitId ||
-            r.direction), // direction may have been overridden
+            r.direction),
       )
       .map((r) => ({
         fingerprint: r.fingerprint!,
@@ -237,7 +221,6 @@ export class TransactionImportComponent implements OnInit {
         directionOverride: r.direction ?? undefined,
       }));
 
-    // Fingerprints of rows the user actually selected — backend will ignore all others
     const selectedFingerprints: string[] = this.selectedRows
       .filter((r) => r.fingerprint)
       .map((r) => r.fingerprint!);
@@ -253,21 +236,21 @@ export class TransactionImportComponent implements OnInit {
       .subscribe({
         next: (r) => {
           this.result = r;
-          this.step = "result";
+          this.step = 'result';
           this.loading = false;
         },
         error: (err) => {
           this.error =
             err?.error?.errors?.[0]?.errorMessage ||
             err?.error?.message ||
-            "Import failed";
+            'Import failed';
           this.loading = false;
         },
       });
   }
 
   backToForm(): void {
-    this.step = "form";
+    this.step = 'form';
     this.previewRows = [];
     this.selectedRow = null;
     this.error = null;
@@ -275,7 +258,12 @@ export class TransactionImportComponent implements OnInit {
 
   reviewBatch(): void {
     if (this.result?.batchId) {
-      this.router.navigate(["/transactions/import", this.result.batchId]);
+      const estateId = this.activeEstateService.activeEstateId();
+      if (estateId) {
+        this.router.navigate(['/estates', estateId, 'transactions', 'import', this.result.batchId]);
+      } else {
+        this.router.navigate(['/transactions/import', this.result.batchId]);
+      }
     }
   }
 }

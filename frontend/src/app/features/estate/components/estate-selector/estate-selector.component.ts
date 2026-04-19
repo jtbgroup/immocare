@@ -1,20 +1,24 @@
 // features/estate/components/estate-selector/estate-selector.component.ts — UC016 US101
-import { CommonModule } from '@angular/common';
-import { Component, OnDestroy, OnInit } from '@angular/core';
-import { Router } from '@angular/router';
-import { Subject } from 'rxjs';
-import { takeUntil } from 'rxjs/operators';
-import { ActiveEstateService } from '../../../../core/services/active-estate.service';
-import { AuthService } from '../../../../core/auth/auth.service';
-import { EstateService } from '../../../../core/services/estate.service';
-import { ESTATE_ROLE_COLORS, ESTATE_ROLE_LABELS, EstateSummary } from '../../../../models/estate.model';
+import { CommonModule } from "@angular/common";
+import { Component, OnDestroy, OnInit } from "@angular/core";
+import { Router } from "@angular/router";
+import { Subject } from "rxjs";
+import { takeUntil } from "rxjs/operators";
+import { AuthService } from "../../../../core/auth/auth.service";
+import { ActiveEstateService } from "../../../../core/services/active-estate.service";
+import { EstateService } from "../../../../core/services/estate.service";
+import {
+  ESTATE_ROLE_COLORS,
+  ESTATE_ROLE_LABELS,
+  EstateSummary,
+} from "../../../../models/estate.model";
 
 @Component({
-  selector: 'app-estate-selector',
+  selector: "app-estate-selector",
   standalone: true,
   imports: [CommonModule],
-  templateUrl: './estate-selector.component.html',
-  styleUrls: ['./estate-selector.component.scss'],
+  templateUrl: "./estate-selector.component.html",
+  styleUrls: ["./estate-selector.component.scss"],
 })
 export class EstateSelectorComponent implements OnInit, OnDestroy {
   estates: EstateSummary[] = [];
@@ -22,8 +26,8 @@ export class EstateSelectorComponent implements OnInit, OnDestroy {
   error: string | null = null;
   isPlatformAdmin = false;
 
-  readonly ESTATE_ROLE_LABELS  = ESTATE_ROLE_LABELS;
-  readonly ESTATE_ROLE_COLORS  = ESTATE_ROLE_COLORS;
+  readonly ESTATE_ROLE_LABELS = ESTATE_ROLE_LABELS;
+  readonly ESTATE_ROLE_COLORS = ESTATE_ROLE_COLORS;
 
   private destroy$ = new Subject<void>();
 
@@ -35,22 +39,19 @@ export class EstateSelectorComponent implements OnInit, OnDestroy {
   ) {}
 
   ngOnInit(): void {
-    this.authService.getCurrentUser()
+    this.authService
+      .getCurrentUser()
       .pipe(takeUntil(this.destroy$))
-      .subscribe(user => {
+      .subscribe((user) => {
         this.isPlatformAdmin = user?.isPlatformAdmin ?? false;
       });
 
-    this.estateService.getMyEstates()
+    this.estateService
+      .getMyEstates()
       .pipe(takeUntil(this.destroy$))
       .subscribe({
-        next: estates => {
+        next: (estates) => {
           this.loading = false;
-
-          if (estates.length === 0 && this.isPlatformAdmin) {
-            this.router.navigate(['/admin/estates']);
-            return;
-          }
 
           // Auto-select if exactly one estate (US101 AC1)
           if (estates.length === 1) {
@@ -62,7 +63,7 @@ export class EstateSelectorComponent implements OnInit, OnDestroy {
         },
         error: () => {
           this.loading = false;
-          this.error = 'Failed to load estates. Please try again.';
+          this.error = "Failed to load estates. Please try again.";
         },
       });
   }
@@ -74,11 +75,11 @@ export class EstateSelectorComponent implements OnInit, OnDestroy {
 
   selectEstate(estate: EstateSummary): void {
     this.activeEstateService.setActiveEstate(estate);
-    this.router.navigate(['/estates', estate.id, 'dashboard']);
+    this.router.navigate(["/estates", estate.id, "dashboard"]);
   }
 
   goToAdmin(): void {
-    this.router.navigate(['/admin/estates']);
+    this.router.navigate(["/admin/estates"]);
   }
 
   totalAlerts(estate: EstateSummary): number {
@@ -87,12 +88,13 @@ export class EstateSelectorComponent implements OnInit, OnDestroy {
   }
 
   roleLabel(estate: EstateSummary): string {
-    if (estate.myRole === null) return 'Platform Admin';
+    if (estate.myRole === null) return "Platform Admin";
     return ESTATE_ROLE_LABELS[estate.myRole];
   }
 
   roleStyle(estate: EstateSummary): { background: string; color: string } {
-    if (estate.myRole === null) return { background: '#e3f2fd', color: '#1565c0' };
+    if (estate.myRole === null)
+      return { background: "#e3f2fd", color: "#1565c0" };
     const c = ESTATE_ROLE_COLORS[estate.myRole];
     return { background: c.bg, color: c.text };
   }

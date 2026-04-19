@@ -20,32 +20,21 @@
 - [ ] bug dans dans le format des dates et les settings des dates (pas visible)
 - [ ] revenir à une implémenttion postgres only
 - [ ] reprendre le système des versions du boilerplate
+- [ ] ordre de création des objets: esates doit venir avant tout le reste --> flyway à adapter et rassembler
+- [ ] rendre l'application multilingue
 
 
-
-
-
-
-2. Rassemble les flyway 13-15
 
 3. Vérifie la documentation des UC de transaction par rapport au code
 
-
-
-
-
 6. une fois importées, j'ai le bouton Réviser les transactions importées, mais cela ne mène à rien. je n'ai pas non plus d'avertissement sur les doublons potentiel avec une décision à prendre.
 
-7. les écrans d'import des transactions sont en FR et devraient être en anglais.
+7. revois les formats des montants en pattern europe et pas US.
 
-8. rend l'application multilingue avec une architecture simple pour les traductions
+8.  dans les app components "Financial" des loyers , je voudrais aussi le montant "expected" entre le début du contrat et maintenant et ce qui a été réellement payé. Dans les units ou buildings, les dépenses et recettes doivent couvrir tout ce qui est lié à chaque appartement. attention qu'il y a parfois des factures groupées. COmment gérer ça?
 
-9. revois les formats des montants en pattern europe et pas US.
-
-10. dans les app components "Financial" des loyers , je voudrais aussi le montant "expected" entre le début du contrat et maintenant et ce qui a été réellement payé. Dans les units ou buildings, les dépenses et recettes doivent couvrir tout ce qui est lié à chaque appartement. attention qu'il y a parfois des factures groupées. COmment gérer ça?
-
-11. Le financial dashboard ne fonctionne pas
-12.  Si je veux faire des modifications plus tard, je dois avoir une possiblilité de le faire simplement. Par exemple avec des checkboxes dans la liste et changer le statut des sélectionnées. idem pour un delete.
+9.  Le financial dashboard ne fonctionne pas
+10.  Si je veux faire des modifications plus tard, je dois avoir une possiblilité de le faire simplement. Par exemple avec des checkboxes dans la liste et changer le statut des sélectionnées. idem pour un delete.
 
 
 # DONE

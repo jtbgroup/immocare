@@ -325,6 +325,13 @@ public class GlobalExceptionHandler {
         .body(new ErrorResponse(403, "ESTATE_ACCESS_DENIED", ex.getMessage(), LocalDateTime.now()));
   }
 
+  @ExceptionHandler(BoilerValidityRuleDuplicateException.class)
+  public ResponseEntity<ErrorResponse> handleBoilerValidityRuleDuplicate(
+      BoilerValidityRuleDuplicateException ex) {
+    return ResponseEntity.status(HttpStatus.CONFLICT)
+        .body(new ErrorResponse(409, "BOILER_VALIDITY_RULE_DUPLICATE",
+            ex.getMessage(), LocalDateTime.now()));
+  }
   // ─── Generic ──────────────────────────────────────────────────────────────
 
   @ExceptionHandler(IllegalArgumentException.class)
@@ -389,5 +396,6 @@ public class GlobalExceptionHandler {
     return ResponseEntity.status(status).body(body);
   }
 
-  public record ErrorResponse(int status, String error, String message, LocalDateTime timestamp) {}
+  public record ErrorResponse(int status, String error, String message, LocalDateTime timestamp) {
+  }
 }

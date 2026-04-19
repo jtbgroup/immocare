@@ -1,12 +1,13 @@
+// core/services/asset-search.service.ts — UC016 Phase 4
+// Asset search endpoints are estate-scoped via buildings/units within the estate.
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
-
-// ─── Search result DTOs ───────────────────────────────────────────────────────
+import { ActiveEstateService } from './active-estate.service';
 
 export interface BoilerSearchResult {
   id: number;
-  label: string;       // brand + model
+  label: string;
   unitNumber: string | null;
   buildingName: string;
   buildingId: number | null;
@@ -15,7 +16,7 @@ export interface BoilerSearchResult {
 
 export interface FireExtinguisherSearchResult {
   id: number;
-  label: string;       // identificationNumber
+  label: string;
   unitNumber: string | null;
   buildingName: string;
   buildingId: number | null;
@@ -24,7 +25,7 @@ export interface FireExtinguisherSearchResult {
 
 export interface MeterSearchResult {
   id: number;
-  label: string;       // meterNumber + type
+  label: string;
   unitNumber: string | null;
   buildingName: string;
   buildingId: number | null;
@@ -36,29 +37,33 @@ export type AssetSearchResult =
   | FireExtinguisherSearchResult
   | MeterSearchResult;
 
-// ─── Service ──────────────────────────────────────────────────────────────────
-
 @Injectable({ providedIn: 'root' })
 export class AssetSearchService {
-  private readonly api = '/api/v1';
+  constructor(
+    private http: HttpClient,
+    private activeEstateService: ActiveEstateService,
+  ) {}
 
-  constructor(private http: HttpClient) {}
+  private get estatePrefix(): string {
+    const estateId = this.activeEstateService.activeEstateId();
+    return estateId ? `/api/v1/estates/${estateId}` : '/api/v1';
+  }
 
   searchBoilers(q: string, buildingId?: number | null): Observable<BoilerSearchResult[]> {
     let params = new HttpParams().set('q', q);
     if (buildingId != null) params = params.set('buildingId', buildingId);
-    return this.http.get<BoilerSearchResult[]>(`${this.api}/boilers/search`, { params });
+    return this.http.get<BoilerSearchResult[]>(`${this.estatePrefix}/boilers/search`, { params });
   }
 
   searchFireExtinguishers(q: string, buildingId?: number | null): Observable<FireExtinguisherSearchResult[]> {
     let params = new HttpParams().set('q', q);
     if (buildingId != null) params = params.set('buildingId', buildingId);
-    return this.http.get<FireExtinguisherSearchResult[]>(`${this.api}/fire-extinguishers/search`, { params });
+    return this.http.get<FireExtinguisherSearchResult[]>(`${this.estatePrefix}/fire-extinguishers/search`, { params });
   }
 
   searchMeters(q: string, buildingId?: number | null): Observable<MeterSearchResult[]> {
     let params = new HttpParams().set('q', q);
     if (buildingId != null) params = params.set('buildingId', buildingId);
-    return this.http.get<MeterSearchResult[]>(`${this.api}/meters/search`, { params });
+    return this.http.get<MeterSearchResult[]>(`${this.estatePrefix}/meters/search`, { params });
   }
 }

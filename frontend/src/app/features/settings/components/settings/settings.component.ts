@@ -1,20 +1,23 @@
-import { CommonModule } from "@angular/common";
-import { Component, OnDestroy, OnInit } from "@angular/core";
-import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from "@angular/forms";
-import { ActivatedRoute, Router } from "@angular/router";
-import { Subject } from "rxjs";
-import { takeUntil } from "rxjs/operators";
-import { DateFormatService } from "../../../../core/services/date-format.service";
-import { PlatformConfigService } from "../../../../core/services/platform-config.service";
+// features/settings/components/settings/settings.component.ts — UC016 Phase 5
+// PlatformConfigService now uses estate-scoped endpoints.
+// Each key is saved individually via updateOne() (no bulk endpoint in Phase 5).
+import { CommonModule } from '@angular/common';
+import { Component, OnDestroy, OnInit } from '@angular/core';
+import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
+import { ActivatedRoute, Router } from '@angular/router';
+import { Subject, forkJoin } from 'rxjs';
+import { takeUntil, finalize } from 'rxjs/operators';
+import { DateFormatService } from '../../../../core/services/date-format.service';
+import { PlatformConfigService } from '../../../../core/services/platform-config.service';
 import {
   CONFIG_KEYS,
   CONFIG_LABELS,
   DATE_FORMAT_PRESETS,
   ON_DUPLICATE_OPTIONS,
   PlatformConfigDTO,
-} from "../../../../models/platform-config.model";
+} from '../../../../models/platform-config.model';
 
-type Section = "general" | "alerts" | "import";
+type Section = 'general' | 'alerts' | 'import';
 
 const INTEGER_KEYS = new Set<string>([
   CONFIG_KEYS.PEB_EXPIRY_WARNING_DAYS,
@@ -43,11 +46,11 @@ const IMPORT_KEYS = new Set<string>([
 ]);
 
 @Component({
-  selector: "app-settings",
+  selector: 'app-settings',
   standalone: true,
   imports: [CommonModule, ReactiveFormsModule],
-  templateUrl: "./settings.component.html",
-  styleUrls: ["./settings.component.scss"],
+  templateUrl: './settings.component.html',
+  styleUrls: ['./settings.component.scss'],
 })
 export class SettingsComponent implements OnInit, OnDestroy {
   configs: PlatformConfigDTO[] = [];
@@ -56,7 +59,7 @@ export class SettingsComponent implements OnInit, OnDestroy {
   error: string | null = null;
   successMessage: string | null = null;
   form!: FormGroup;
-  activeSection: Section = "general";
+  activeSection: Section = 'general';
 
   readonly CONFIG_LABELS = CONFIG_LABELS;
   readonly DATE_FORMAT_PRESETS = DATE_FORMAT_PRESETS;
@@ -75,8 +78,8 @@ export class SettingsComponent implements OnInit, OnDestroy {
   ) {}
 
   ngOnInit(): void {
-    const s = this.route.snapshot.queryParamMap.get("section") as Section;
-    if (s && ["general", "alerts", "import"].includes(s)) this.activeSection = s;
+    const s = this.route.snapshot.queryParamMap.get('section') as Section;
+    if (s && ['general', 'alerts', 'import'].includes(s)) this.activeSection = s;
     this.load();
   }
 
@@ -99,7 +102,7 @@ export class SettingsComponent implements OnInit, OnDestroy {
         this.loading = false;
       },
       error: () => {
-        this.error = "Impossible de charger les paramètres.";
+        this.error = 'Impossible de charger les paramètres.';
         this.loading = false;
       },
     });
@@ -125,29 +128,41 @@ export class SettingsComponent implements OnInit, OnDestroy {
     return this.configs.filter((c) => IMPORT_KEYS.has(c.configKey));
   }
 
+  /**
+   * Phase 5: Save each config key individually via PUT
+   * /api/v1/estates/{estateId}/config/settings/{key}
+   */
   save(): void {
-    if (this.form.invalid) { this.form.markAllAsTouched(); return; }
+    if (this.form.invalid) {
+      this.form.markAllAsTouched();
+      return;
+    }
     this.saving = true;
     this.error = null;
     this.successMessage = null;
 
-    const entries = Object.entries(this.form.value).map(([configKey, configValue]) => ({
-      configKey,
-      configValue: String(configValue).trim(),
-    }));
+    // Build one PUT observable per changed key
+    const updates = Object.entries(this.form.value).map(([configKey, configValue]) =>
+      this.configService.updateOne(configKey, { configValue: String(configValue).trim() }),
+    );
 
-    this.configService.bulkUpdate({ entries }).pipe(takeUntil(this.destroy$)).subscribe({
-      next: () => {
-        this.saving = false;
-        this.successMessage = "Paramètres enregistrés.";
-        setTimeout(() => (this.successMessage = null), 3000);
-        this.dateFormatService.reload();
-      },
-      error: (err) => {
-        this.saving = false;
-        this.error = err?.error?.message ?? "Erreur lors de l'enregistrement.";
-      },
-    });
+    forkJoin(updates)
+      .pipe(
+        takeUntil(this.destroy$),
+        finalize(() => (this.saving = false)),
+      )
+      .subscribe({
+        next: () => {
+          this.successMessage = 'Paramètres enregistrés.';
+          setTimeout(() => (this.successMessage = null), 3000);
+          this.dateFormatService.reload();
+          // Refresh local configs to reflect updatedAt
+          this.load();
+        },
+        error: (err) => {
+          this.error = err?.error?.message ?? "Erreur lors de l'enregistrement.";
+        },
+      });
   }
 
   labelFor(key: string): string { return CONFIG_LABELS[key] ?? key; }
@@ -157,19 +172,19 @@ export class SettingsComponent implements OnInit, OnDestroy {
 
   presetOrCustom(key: string): string {
     const val = this.form?.get(key)?.value as string;
-    return this.DATE_FORMAT_PRESETS.some((p) => p.value === val) ? val : "__custom__";
+    return this.DATE_FORMAT_PRESETS.some((p) => p.value === val) ? val : '__custom__';
   }
 
   onDateFormatSelectChange(key: string, event: Event): void {
     const selected = (event.target as HTMLSelectElement).value;
-    if (selected !== "__custom__") this.form.get(key)?.setValue(selected);
+    if (selected !== '__custom__') this.form.get(key)?.setValue(selected);
   }
 
   fieldError(key: string): string | null {
     const ctrl = this.form?.get(key);
     if (!ctrl || !ctrl.invalid || !ctrl.touched) return null;
-    if (ctrl.hasError("required")) return "Ce champ est obligatoire.";
-    if (ctrl.hasError("pattern")) return "Doit être un entier positif.";
-    return "Valeur invalide.";
+    if (ctrl.hasError('required')) return 'Ce champ est obligatoire.';
+    if (ctrl.hasError('pattern')) return 'Doit être un entier positif.';
+    return 'Valeur invalide.';
   }
 }
