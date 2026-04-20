@@ -1,5 +1,6 @@
 package com.immocare.service;
 
+import java.time.LocalDate;
 import java.util.List;
 import java.util.UUID;
 
@@ -8,6 +9,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.immocare.exception.EstateAccessDeniedException;
 import com.immocare.exception.EstateHasBuildingsException;
 import com.immocare.exception.EstateLastManagerException;
 import com.immocare.exception.EstateMemberAlreadyExistsException;
@@ -26,52 +28,71 @@ import com.immocare.model.dto.EstateDTOs.EstateSummaryDTO;
 import com.immocare.model.dto.EstateDTOs.UpdateEstateMemberRoleRequest;
 import com.immocare.model.dto.EstateDTOs.UpdateEstateRequest;
 import com.immocare.model.dto.EstatePlatformConfigDTOs;
+import com.immocare.model.dto.LeaseAlertDTO;
 import com.immocare.model.entity.AppUser;
 import com.immocare.model.entity.Estate;
 import com.immocare.model.entity.EstateMember;
+import com.immocare.model.entity.FireExtinguisher;
 import com.immocare.model.enums.EstateRole;
+import com.immocare.model.enums.LeaseStatus;
+import com.immocare.repository.BoilerRepository;
 import com.immocare.repository.BuildingRepository;
 import com.immocare.repository.EstateMemberRepository;
 import com.immocare.repository.EstateRepository;
+import com.immocare.repository.FireExtinguisherRepository;
+import com.immocare.repository.HousingUnitRepository;
 import com.immocare.repository.LeaseRepository;
 import com.immocare.repository.UserRepository;
 
 /**
- * Business logic for UC016 — Manage Estates.
- * UC016 Phase 5: createEstate() now seeds default platform config and boiler
- * service validity rule for every new estate in the same transaction.
+ * Service for Estate management.
+ * UC016 Phase 6: getDashboard() now returns real counts and alert data.
  */
 @Service
-@Transactional
+@Transactional(readOnly = true)
 public class EstateService {
 
     private final EstateRepository estateRepository;
     private final EstateMemberRepository estateMemberRepository;
-    private final BuildingRepository buildingRepository;
     private final UserRepository userRepository;
+    private final BuildingRepository buildingRepository;
+    private final HousingUnitRepository housingUnitRepository;
     private final LeaseRepository leaseRepository;
+    private final BoilerRepository boilerRepository;
+    private final FireExtinguisherRepository fireExtinguisherRepository;
+    private final LeaseService leaseService;
     private final PlatformConfigService platformConfigService;
     private final BoilerServiceValidityRuleService validityRuleService;
+    private final PlatformConfigService platformConfig;
 
     public EstateService(EstateRepository estateRepository,
             EstateMemberRepository estateMemberRepository,
-            BuildingRepository buildingRepository,
             UserRepository userRepository,
+            BuildingRepository buildingRepository,
+            HousingUnitRepository housingUnitRepository,
             LeaseRepository leaseRepository,
+            BoilerRepository boilerRepository,
+            FireExtinguisherRepository fireExtinguisherRepository,
+            LeaseService leaseService,
             PlatformConfigService platformConfigService,
-            BoilerServiceValidityRuleService validityRuleService) {
+            BoilerServiceValidityRuleService validityRuleService,
+            PlatformConfigService platformConfig) {
         this.estateRepository = estateRepository;
         this.estateMemberRepository = estateMemberRepository;
-        this.buildingRepository = buildingRepository;
         this.userRepository = userRepository;
+        this.buildingRepository = buildingRepository;
+        this.housingUnitRepository = housingUnitRepository;
         this.leaseRepository = leaseRepository;
+        this.boilerRepository = boilerRepository;
+        this.fireExtinguisherRepository = fireExtinguisherRepository;
+        this.leaseService = leaseService;
         this.platformConfigService = platformConfigService;
         this.validityRuleService = validityRuleService;
+        this.platformConfig = platformConfig;
     }
 
-    // ─── Queries ──────────────────────────────────────────────────────────────
+    // ─── Admin queries ────────────────────────────────────────────────────────
 
-    @Transactional(readOnly = true)
     public Page<EstateDTO> getAllEstates(String search, Pageable pageable) {
         Page<Estate> page = (search != null && !search.isBlank())
                 ? estateRepository.searchByName(search, pageable)
@@ -79,123 +100,65 @@ public class EstateService {
         return page.map(this::toDTO);
     }
 
-    @Transactional(readOnly = true)
-    public List<EstateSummaryDTO> getMyEstates(Long currentUserId, boolean isPlatformAdmin) {
+    public EstateDTO getEstateById(UUID id) {
+        return toDTO(findOrThrow(id));
+    }
+
+    // ─── User queries ─────────────────────────────────────────────────────────
+
+    public List<EstateSummaryDTO> getMyEstates(Long userId, boolean isPlatformAdmin) {
         if (isPlatformAdmin) {
-            return estateRepository.findAllByOrderByNameAsc(Pageable.unpaged())
+            return estateRepository.findAll()
                     .stream()
                     .map(e -> toSummaryDTO(e, null))
                     .toList();
         }
-        return estateMemberRepository.findByUserId(currentUserId)
+        return estateMemberRepository.findByUserId(userId)
                 .stream()
                 .map(m -> toSummaryDTO(m.getEstate(), m.getRole()))
                 .toList();
     }
 
-    @Transactional(readOnly = true)
-    public EstateDTO getEstateById(UUID id) {
-        return toDTO(findEstateOrThrow(id));
-    }
+    // ─── Dashboard ────────────────────────────────────────────────────────────
 
-    @Transactional(readOnly = true)
+    /**
+     * UC016 Phase 6: returns fully populated dashboard with real counts and alerts.
+     */
     public EstateDashboardDTO getDashboard(UUID estateId) {
-        Estate estate = findEstateOrThrow(estateId);
+        Estate estate = findOrThrow(estateId);
 
         int totalBuildings = (int) buildingRepository.countByEstateId(estateId);
-        int totalUnits = 0; // populated in Phase 6
-        int activeLeases = (int) leaseRepository.countByHousingUnit_Building_Estate_IdAndStatus(
-                estateId, com.immocare.model.enums.LeaseStatus.ACTIVE);
+        int totalUnits     = (int) housingUnitRepository.countByBuilding_Estate_Id(estateId);
+        int activeLeases   = (int) leaseRepository
+                .countByHousingUnit_Building_Estate_IdAndStatus(estateId, LeaseStatus.ACTIVE);
 
-        EstatePendingAlertsDTO alerts = new EstatePendingAlertsDTO(0, 0, 0, 0);
+        int boilerAlerts         = computeBoilerAlerts(estateId);
+        int fireExtAlerts        = computeFireExtinguisherAlerts(estateId);
+        int leaseEndAlerts       = computeLeaseEndAlerts(estateId);
+        int indexationAlerts     = computeIndexationAlerts(estateId);
 
         return new EstateDashboardDTO(
-                estateId,
+                estate.getId(),
                 estate.getName(),
                 totalBuildings,
                 totalUnits,
                 activeLeases,
-                alerts);
+                new EstatePendingAlertsDTO(boilerAlerts, fireExtAlerts, leaseEndAlerts, indexationAlerts));
     }
 
-    @Transactional(readOnly = true)
+    // ─── Member management ────────────────────────────────────────────────────
+
     public List<EstateMemberDTO> getMembers(UUID estateId) {
-        findEstateOrThrow(estateId);
+        findOrThrow(estateId);
         return estateMemberRepository.findByEstateIdOrderByUserUsernameAsc(estateId)
                 .stream()
                 .map(this::toMemberDTO)
                 .toList();
     }
 
-    // ─── Commands ─────────────────────────────────────────────────────────────
-
-    /**
-     * Creates a new estate and seeds all default configuration atomically.
-     * UC016 Phase 5: seeds platform config entries and default boiler validity rule.
-     */
-    public EstateDTO createEstate(CreateEstateRequest req, Long createdByUserId) {
-        // BR-UC016-01: name uniqueness (case-insensitive)
-        if (estateRepository.existsByNameIgnoreCase(req.name())) {
-            throw new EstateNameTakenException(req.name());
-        }
-
-        AppUser createdBy = userRepository.findById(createdByUserId).orElse(null);
-
-        Estate estate = new Estate();
-        estate.setName(req.name().trim());
-        estate.setDescription(req.description());
-        estate.setCreatedBy(createdBy);
-        estate = estateRepository.save(estate);
-
-        // ── Phase 5: seed default platform config ─────────────────────────────
-        platformConfigService.seedDefaultConfig(estate, EstatePlatformConfigDTOs.DEFAULT_CONFIG);
-
-        // ── Phase 5: seed default boiler service validity rule ────────────────
-        validityRuleService.seedDefaultRule(estate);
-
-        // ── Optionally assign first manager (US096) ───────────────────────────
-        if (req.firstManagerId() != null) {
-            AppUser firstManager = userRepository.findById(req.firstManagerId())
-                    .orElseThrow(() -> new UserNotFoundException(req.firstManagerId()));
-            EstateMember member = new EstateMember();
-            member.setEstate(estate);
-            member.setUser(firstManager);
-            member.setRole(EstateRole.MANAGER);
-            estateMemberRepository.save(member);
-        }
-
-        return toDTO(estate);
-    }
-
-    public EstateDTO updateEstate(UUID id, UpdateEstateRequest req) {
-        Estate estate = findEstateOrThrow(id);
-
-        // BR-UC016-01: name uniqueness excluding self
-        if (estateRepository.existsByNameIgnoreCaseAndIdNot(req.name(), id)) {
-            throw new EstateNameTakenException(req.name());
-        }
-
-        estate.setName(req.name().trim());
-        estate.setDescription(req.description());
-        return toDTO(estateRepository.save(estate));
-    }
-
-    /**
-     * Deletes an estate.
-     * BR-UC016-09: blocked if the estate contains buildings.
-     */
-    public void deleteEstate(UUID id) {
-        findEstateOrThrow(id);
-        int buildingCount = (int) buildingRepository.countByEstateId(id);
-        if (buildingCount > 0) {
-            throw new EstateHasBuildingsException(buildingCount);
-        }
-        estateRepository.deleteById(id);
-    }
-
+    @Transactional
     public EstateMemberDTO addMember(UUID estateId, AddEstateMemberRequest req, Long currentUserId) {
-        findEstateOrThrow(estateId);
-
+        Estate estate = findOrThrow(estateId);
         AppUser user = userRepository.findById(req.userId())
                 .orElseThrow(() -> new UserNotFoundException(req.userId()));
 
@@ -203,19 +166,19 @@ public class EstateService {
             throw new EstateMemberAlreadyExistsException();
         }
 
-        Estate estate = findEstateOrThrow(estateId);
         EstateMember member = new EstateMember();
         member.setEstate(estate);
         member.setUser(user);
         member.setRole(req.role());
-        return toMemberDTO(estateMemberRepository.save(member));
+        estateMemberRepository.save(member);
+        return toMemberDTO(member);
     }
 
+    @Transactional
     public EstateMemberDTO updateMemberRole(UUID estateId, Long userId,
             UpdateEstateMemberRoleRequest req, Long currentUserId) {
-        findEstateOrThrow(estateId);
+        findOrThrow(estateId);
 
-        // BR-UC016-04: cannot change own role
         if (userId.equals(currentUserId)) {
             throw new EstateSelfOperationException("You cannot change your own role");
         }
@@ -223,21 +186,22 @@ public class EstateService {
         EstateMember member = estateMemberRepository.findByEstateIdAndUserId(estateId, userId)
                 .orElseThrow(EstateMemberNotFoundException::new);
 
-        // BR-UC016-02: cannot demote last MANAGER
-        if (member.getRole() == EstateRole.MANAGER
-                && req.role() != EstateRole.MANAGER
-                && estateMemberRepository.countByEstateIdAndRole(estateId, "MANAGER") <= 1) {
-            throw new EstateLastManagerException();
+        if (member.getRole() == EstateRole.MANAGER && req.role() != EstateRole.MANAGER) {
+            long managerCount = estateMemberRepository.countByEstateIdAndRole(estateId, "MANAGER");
+            if (managerCount <= 1) {
+                throw new EstateLastManagerException();
+            }
         }
 
         member.setRole(req.role());
-        return toMemberDTO(estateMemberRepository.save(member));
+        estateMemberRepository.save(member);
+        return toMemberDTO(member);
     }
 
+    @Transactional
     public void removeMember(UUID estateId, Long userId, Long currentUserId) {
-        findEstateOrThrow(estateId);
+        findOrThrow(estateId);
 
-        // BR-UC016-03: cannot remove self
         if (userId.equals(currentUserId)) {
             throw new EstateSelfOperationException("You cannot remove yourself from an estate");
         }
@@ -245,18 +209,129 @@ public class EstateService {
         EstateMember member = estateMemberRepository.findByEstateIdAndUserId(estateId, userId)
                 .orElseThrow(EstateMemberNotFoundException::new);
 
-        // BR-UC016-02: cannot remove last MANAGER
-        if (member.getRole() == EstateRole.MANAGER
-                && estateMemberRepository.countByEstateIdAndRole(estateId, "MANAGER") <= 1) {
-            throw new EstateLastManagerException();
+        if (member.getRole() == EstateRole.MANAGER) {
+            long managerCount = estateMemberRepository.countByEstateIdAndRole(estateId, "MANAGER");
+            if (managerCount <= 1) {
+                throw new EstateLastManagerException();
+            }
         }
 
         estateMemberRepository.delete(member);
     }
 
+    // ─── Admin mutations ──────────────────────────────────────────────────────
+
+    @Transactional
+    public EstateDTO createEstate(CreateEstateRequest req, Long createdByUserId) {
+        if (estateRepository.existsByNameIgnoreCase(req.name())) {
+            throw new EstateNameTakenException(req.name());
+        }
+
+        AppUser createdBy = userRepository.findById(createdByUserId).orElse(null);
+
+        Estate estate = new Estate();
+        estate.setName(req.name());
+        estate.setDescription(req.description());
+        estate.setCreatedBy(createdBy);
+        Estate saved = estateRepository.save(estate);
+
+        // Seed default platform config and boiler validity rule
+        platformConfigService.seedDefaultConfig(saved, EstatePlatformConfigDTOs.DEFAULT_CONFIG);
+        validityRuleService.seedDefaultRule(saved);
+
+        if (req.firstManagerId() != null) {
+            AppUser firstManager = userRepository.findById(req.firstManagerId())
+                    .orElseThrow(() -> new UserNotFoundException(req.firstManagerId()));
+            EstateMember member = new EstateMember();
+            member.setEstate(saved);
+            member.setUser(firstManager);
+            member.setRole(EstateRole.MANAGER);
+            estateMemberRepository.save(member);
+        }
+
+        return toDTO(saved);
+    }
+
+    @Transactional
+    public EstateDTO updateEstate(UUID id, UpdateEstateRequest req) {
+        Estate estate = findOrThrow(id);
+        if (estateRepository.existsByNameIgnoreCaseAndIdNot(req.name(), id)) {
+            throw new EstateNameTakenException(req.name());
+        }
+        estate.setName(req.name());
+        estate.setDescription(req.description());
+        return toDTO(estateRepository.save(estate));
+    }
+
+    @Transactional
+    public void deleteEstate(UUID id) {
+        findOrThrow(id);
+        int buildingCount = (int) buildingRepository.countByEstateId(id);
+        if (buildingCount > 0) {
+            throw new EstateHasBuildingsException(buildingCount);
+        }
+        estateRepository.deleteById(id);
+    }
+
+    // ─── Phase 6: Alert computation ───────────────────────────────────────────
+
+    /**
+     * Counts boilers with EXPIRED or EXPIRING_SOON service status within the estate.
+     */
+    private int computeBoilerAlerts(UUID estateId) {
+        int warningMonths = platformConfigService.getIntValue(
+                estateId,
+                EstatePlatformConfigDTOs.KEY_BOILER_ALERT_THRESHOLD_MONTHS,
+                3);
+        LocalDate threshold = LocalDate.now().plusMonths(warningMonths);
+
+        return (int) boilerRepository.findActiveByEstateId(estateId)
+                .stream()
+                .filter(b -> {
+                    if (b.getNextServiceDate() == null) return false;
+                    return b.getNextServiceDate().isBefore(threshold);
+                })
+                .count();
+    }
+
+    /**
+     * Counts fire extinguishers with no revisions or last revision older than 1 year.
+     */
+    private int computeFireExtinguisherAlerts(UUID estateId) {
+        LocalDate oneYearAgo = LocalDate.now().minusYears(1);
+        return (int) fireExtinguisherRepository.findByBuildingEstateId(estateId)
+                .stream()
+                .filter(ext -> {
+                    if (ext.getRevisions().isEmpty()) return true;
+                    LocalDate latest = ext.getRevisions().get(0).getRevisionDate();
+                    return latest.isBefore(oneYearAgo);
+                })
+                .count();
+    }
+
+    /**
+     * Counts active leases with an active end-notice alert.
+     */
+    private int computeLeaseEndAlerts(UUID estateId) {
+        return (int) leaseService.getAlerts(estateId)
+                .stream()
+                .filter(LeaseAlertDTO::isEndNoticeAlertActive)
+                .count();
+    }
+
+    /**
+     * Counts active leases with an active indexation alert.
+     */
+    private int computeIndexationAlerts(UUID estateId) {
+        return (int) leaseService.getAlerts(estateId)
+                .stream()
+                .filter(LeaseAlertDTO::isIndexationAlertActive)
+                .count();
+    }
+
     // ─── Helpers ──────────────────────────────────────────────────────────────
 
-    private Estate findEstateOrThrow(UUID id) {
+    private Estate findOrThrow(UUID id) {
         return estateRepository.findById(id)
                 .orElseThrow(() -> new EstateNotFoundException(id));
     }
@@ -264,6 +339,9 @@ public class EstateService {
     private EstateDTO toDTO(Estate estate) {
         int memberCount = (int) estateMemberRepository.countByEstateId(estate.getId());
         int buildingCount = (int) buildingRepository.countByEstateId(estate.getId());
+        String createdByUsername = estate.getCreatedBy() != null
+                ? estate.getCreatedBy().getUsername()
+                : null;
         return new EstateDTO(
                 estate.getId(),
                 estate.getName(),
@@ -271,26 +349,27 @@ public class EstateService {
                 memberCount,
                 buildingCount,
                 estate.getCreatedAt(),
-                estate.getCreatedBy() != null ? estate.getCreatedBy().getUsername() : null);
+                createdByUsername);
     }
 
     private EstateSummaryDTO toSummaryDTO(Estate estate, EstateRole myRole) {
         int buildingCount = (int) buildingRepository.countByEstateId(estate.getId());
+        int unitCount = (int) housingUnitRepository.countByBuilding_Estate_Id(estate.getId());
         return new EstateSummaryDTO(
                 estate.getId(),
                 estate.getName(),
                 estate.getDescription(),
                 myRole,
                 buildingCount,
-                0); // unitCount populated in Phase 6
+                unitCount);
     }
 
-    private EstateMemberDTO toMemberDTO(EstateMember member) {
+    private EstateMemberDTO toMemberDTO(EstateMember m) {
         return new EstateMemberDTO(
-                member.getUser().getId(),
-                member.getUser().getUsername(),
-                member.getUser().getEmail(),
-                member.getRole(),
-                member.getAddedAt());
+                m.getUser().getId(),
+                m.getUser().getUsername(),
+                m.getUser().getEmail(),
+                m.getRole(),
+                m.getAddedAt());
     }
 }
