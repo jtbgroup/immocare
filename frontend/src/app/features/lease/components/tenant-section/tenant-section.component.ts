@@ -1,30 +1,35 @@
-// features/lease/tenant-section/tenant-section.component.ts
-import { CommonModule } from "@angular/common";
-import { Component, EventEmitter, Input, Output } from "@angular/core";
-import { FormsModule } from "@angular/forms";
-import { LeaseService } from "../../../../core/services/lease.service";
-import { Lease, LeaseTenant } from "../../../../models/lease.model";
-import { PersonPickerComponent } from "../../../../shared/components/person-picker/person-picker.component";
+// features/lease/tenant-section/tenant-section.component.ts — UC016 Phase 6
+// canEdit() injected from ActiveEstateService
+import { CommonModule } from '@angular/common';
+import { Component, EventEmitter, Input, Output } from '@angular/core';
+import { FormsModule } from '@angular/forms';
+import { ActiveEstateService } from '../../../../core/services/active-estate.service';
+import { LeaseService } from '../../../../core/services/lease.service';
+import { Lease, LeaseTenant } from '../../../../models/lease.model';
+import { PersonPickerComponent } from '../../../../shared/components/person-picker/person-picker.component';
 
 @Component({
-  selector: "app-tenant-section",
+  selector: 'app-tenant-section',
   standalone: true,
   imports: [CommonModule, FormsModule, PersonPickerComponent],
-  templateUrl: "./tenant-section.component.html",
-  styleUrls: ["./tenant-section.component.scss"],
+  templateUrl: './tenant-section.component.html',
+  styleUrls: ['./tenant-section.component.scss'],
 })
 export class TenantSectionComponent {
   @Input() lease!: Lease;
   @Output() leaseUpdated = new EventEmitter<void>();
 
   showPicker = false;
-  newRole = "PRIMARY";
+  newRole = 'PRIMARY';
   selectedPerson: any = null;
-  errorMessage = "";
+  errorMessage = '';
   isAdding = false;
   isRemoving = false;
 
-  constructor(private leaseService: LeaseService) {}
+  constructor(
+    private leaseService: LeaseService,
+    readonly activeEstateService: ActiveEstateService,
+  ) {}
 
   onPersonSelected(person: any): void {
     this.selectedPerson = person;
@@ -33,7 +38,7 @@ export class TenantSectionComponent {
   confirmAdd(): void {
     if (!this.selectedPerson) return;
     this.isAdding = true;
-    this.errorMessage = "";
+    this.errorMessage = '';
     this.leaseService
       .addTenant(this.lease.id, {
         personId: this.selectedPerson.id,
@@ -47,7 +52,7 @@ export class TenantSectionComponent {
           this.leaseUpdated.emit();
         },
         error: (err) => {
-          this.errorMessage = err.error?.message || "Failed to add tenant.";
+          this.errorMessage = err.error?.message || 'Failed to add tenant.';
           this.isAdding = false;
         },
       });
@@ -55,28 +60,28 @@ export class TenantSectionComponent {
 
   remove(personId: number): void {
     this.isRemoving = true;
-    this.errorMessage = "";
+    this.errorMessage = '';
     this.leaseService.removeTenant(this.lease.id, personId).subscribe({
       next: () => {
         this.isRemoving = false;
         this.leaseUpdated.emit();
       },
       error: (err) => {
-        this.errorMessage = err.error?.message || "Failed to remove tenant.";
+        this.errorMessage = err.error?.message || 'Failed to remove tenant.';
         this.isRemoving = false;
       },
     });
   }
 
   canRemove(t: LeaseTenant): boolean {
-    return this.lease.status === "DRAFT" || this.lease.status === "ACTIVE";
+    return this.lease.status === 'DRAFT' || this.lease.status === 'ACTIVE';
   }
 
   roleClass(role: string): string {
-    return role === "PRIMARY"
-      ? "bg-primary"
-      : role === "CO_TENANT"
-        ? "bg-secondary"
-        : "bg-warning text-dark";
+    return role === 'PRIMARY'
+      ? 'bg-primary'
+      : role === 'CO_TENANT'
+        ? 'bg-secondary'
+        : 'bg-warning text-dark';
   }
 }

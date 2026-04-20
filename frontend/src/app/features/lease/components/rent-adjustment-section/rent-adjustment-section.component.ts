@@ -1,7 +1,8 @@
-// features/lease/components/rent-adjustment-section/rent-adjustment-section.component.ts
+// features/lease/components/rent-adjustment-section/rent-adjustment-section.component.ts — UC016 Phase 6
 import { CommonModule } from '@angular/common';
 import { Component, EventEmitter, Input, OnInit, Output } from '@angular/core';
 import { FormsModule } from '@angular/forms';
+import { ActiveEstateService } from '../../../../core/services/active-estate.service';
 import { LeaseService } from '../../../../core/services/lease.service';
 import { AdjustRentRequest, Lease, RentField } from '../../../../models/lease.model';
 
@@ -22,10 +23,14 @@ export class RentAdjustmentSectionComponent implements OnInit {
 
   req: Partial<AdjustRentRequest> = { field: 'RENT' };
 
-  /** Pre-fill new value when user picks a field */
   get currentValue(): number {
     return this.req.field === 'RENT' ? this.lease.monthlyRent : this.lease.monthlyCharges;
   }
+
+  constructor(
+    private leaseService: LeaseService,
+    readonly activeEstateService: ActiveEstateService,
+  ) {}
 
   ngOnInit(): void {
     this.resetForm();
@@ -38,7 +43,6 @@ export class RentAdjustmentSectionComponent implements OnInit {
   }
 
   onFieldChange(): void {
-    // Pre-fill newValue with the current value of the selected field
     this.req.newValue = this.currentValue;
   }
 
@@ -69,6 +73,4 @@ export class RentAdjustmentSectionComponent implements OnInit {
   private resetForm(): void {
     this.req = { field: 'RENT', newValue: this.lease?.monthlyRent };
   }
-
-  constructor(private leaseService: LeaseService) {}
 }

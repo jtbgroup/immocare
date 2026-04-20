@@ -42,6 +42,86 @@
       </div>
     </div>
 
+    <!-- Pending alerts breakdown -->
+    @if (totalAlerts > 0) {
+      <div class="info-card">
+        <h2>Alert Details</h2>
+        <div class="alerts-grid">
+          <!-- Boiler alerts -->
+          <div class="alert-card"
+               [class.alert-card--warning]="dashboard.pendingAlerts.boiler > 0"
+               [class.alert-card--neutral]="dashboard.pendingAlerts.boiler === 0"
+               [title]="dashboard.pendingAlerts.boiler > 0 ? 'View in Housing Units' : ''"
+          >
+            <div class="alert-card__icon">🔥</div>
+            <div class="alert-card__count"
+                 [class.count--warning]="dashboard.pendingAlerts.boiler > 0"
+                 [class.count--neutral]="dashboard.pendingAlerts.boiler === 0">
+              {{ dashboard.pendingAlerts.boiler }}
+            </div>
+            <div class="alert-card__label">Boiler Service</div>
+            @if (dashboard.pendingAlerts.boiler > 0) {
+              <div class="alert-card__hint">View in Housing Units</div>
+            }
+          </div>
+
+          <!-- Fire extinguisher alerts -->
+          <div class="alert-card"
+               [class.alert-card--warning]="dashboard.pendingAlerts.fireExtinguisher > 0"
+               [class.alert-card--neutral]="dashboard.pendingAlerts.fireExtinguisher === 0"
+               [title]="dashboard.pendingAlerts.fireExtinguisher > 0 ? 'View in Buildings' : ''"
+          >
+            <div class="alert-card__icon">🧯</div>
+            <div class="alert-card__count"
+                 [class.count--warning]="dashboard.pendingAlerts.fireExtinguisher > 0"
+                 [class.count--neutral]="dashboard.pendingAlerts.fireExtinguisher === 0">
+              {{ dashboard.pendingAlerts.fireExtinguisher }}
+            </div>
+            <div class="alert-card__label">Fire Extinguisher</div>
+            @if (dashboard.pendingAlerts.fireExtinguisher > 0) {
+              <div class="alert-card__hint">View in Buildings</div>
+            }
+          </div>
+
+          <!-- Lease end alerts -->
+          <a class="alert-card alert-card--clickable"
+             [class.alert-card--danger]="dashboard.pendingAlerts.leaseEnd > 0"
+             [class.alert-card--neutral]="dashboard.pendingAlerts.leaseEnd === 0"
+             [routerLink]="dashboard.pendingAlerts.leaseEnd > 0 ? ['/estates', estateId, 'alerts'] : null"
+          >
+            <div class="alert-card__icon">📅</div>
+            <div class="alert-card__count"
+                 [class.count--danger]="dashboard.pendingAlerts.leaseEnd > 0"
+                 [class.count--neutral]="dashboard.pendingAlerts.leaseEnd === 0">
+              {{ dashboard.pendingAlerts.leaseEnd }}
+            </div>
+            <div class="alert-card__label">Lease End Notice</div>
+            @if (dashboard.pendingAlerts.leaseEnd > 0) {
+              <div class="alert-card__hint">View alerts →</div>
+            }
+          </a>
+
+          <!-- Indexation alerts -->
+          <a class="alert-card alert-card--clickable"
+             [class.alert-card--warning]="dashboard.pendingAlerts.indexation > 0"
+             [class.alert-card--neutral]="dashboard.pendingAlerts.indexation === 0"
+             [routerLink]="dashboard.pendingAlerts.indexation > 0 ? ['/estates', estateId, 'alerts'] : null"
+          >
+            <div class="alert-card__icon">📋</div>
+            <div class="alert-card__count"
+                 [class.count--warning]="dashboard.pendingAlerts.indexation > 0"
+                 [class.count--neutral]="dashboard.pendingAlerts.indexation === 0">
+              {{ dashboard.pendingAlerts.indexation }}
+            </div>
+            <div class="alert-card__label">Indexation</div>
+            @if (dashboard.pendingAlerts.indexation > 0) {
+              <div class="alert-card__hint">View alerts →</div>
+            }
+          </a>
+        </div>
+      </div>
+    }
+
     <!-- Quick access -->
     <div class="info-card">
       <h2>Quick Access</h2>
@@ -58,5 +138,13 @@
         }
       </div>
     </div>
+
+    <!-- VIEWER notice -->
+    @if (activeEstateService.isViewer()) {
+      <div class="info-card viewer-banner">
+        <span class="viewer-banner__icon">👁</span>
+        <span>You have <strong>read-only</strong> access to this estate. Contact a Manager to request write access.</span>
+      </div>
+    }
   }
 </div>

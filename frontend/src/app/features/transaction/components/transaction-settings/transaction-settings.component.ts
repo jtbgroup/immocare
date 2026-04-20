@@ -1,8 +1,8 @@
-// features/transaction/components/transaction-settings/transaction-settings.component.ts — UC016 Phase 4
-// Services are now estate-scoped; component logic unchanged.
+// features/transaction/components/transaction-settings/transaction-settings.component.ts — UC016 Phase 6
 import { CommonModule } from '@angular/common';
 import { Component, OnInit } from '@angular/core';
 import { FormsModule } from '@angular/forms';
+import { ActiveEstateService } from '../../../../core/services/active-estate.service';
 import { BankAccountService } from '../../../../core/services/bank-account.service';
 import { TagCategoryService } from '../../../../core/services/tag-category.service';
 import { TagSubcategoryService } from '../../../../core/services/tag-subcategory.service';
@@ -33,20 +33,11 @@ export class TransactionSettingsComponent implements OnInit {
   showNewCategory = false;
 
   editingSubcategory?: TagSubcategory;
-  newSubcategory: SaveTagSubcategoryRequest = {
-    categoryId: 0,
-    name: '',
-    direction: 'EXPENSE',
-  };
+  newSubcategory: SaveTagSubcategoryRequest = { categoryId: 0, name: '', direction: 'EXPENSE' };
   showNewSubcategory = false;
 
   editingBankAccount?: BankAccount;
-  newBankAccount: SaveBankAccountRequest = {
-    label: '',
-    accountNumber: '',
-    type: 'CURRENT',
-    isActive: true,
-  };
+  newBankAccount: SaveBankAccountRequest = { label: '', accountNumber: '', type: 'CURRENT', isActive: true };
   showNewBankAccount = false;
 
   categoryError: string | null = null;
@@ -60,6 +51,7 @@ export class TransactionSettingsComponent implements OnInit {
     private tagCategoryService: TagCategoryService,
     private tagSubcategoryService: TagSubcategoryService,
     private bankAccountService: BankAccountService,
+    readonly activeEstateService: ActiveEstateService,
   ) {}
 
   ngOnInit(): void {
@@ -82,32 +74,28 @@ export class TransactionSettingsComponent implements OnInit {
 
   saveCategory(): void {
     this.categoryError = null;
-    if (this.editingCategory) {
-      this.tagCategoryService
-        .update(this.editingCategory.id, this.newCategory)
-        .subscribe({
-          next: () => { this.editingCategory = undefined; this.loadCategories(); },
-          error: (err) => (this.categoryError = err?.error?.message || 'Error'),
-        });
-    } else {
-      this.tagCategoryService.create(this.newCategory).subscribe({
-        next: () => {
-          this.showNewCategory = false;
-          this.newCategory = { name: '' };
-          this.loadCategories();
-        },
-        error: (err) => (this.categoryError = err?.error?.message || 'Error'),
-      });
-    }
+    const obs = this.editingCategory
+      ? this.tagCategoryService.update(this.editingCategory.id, this.newCategory)
+      : this.tagCategoryService.create(this.newCategory);
+    obs.subscribe({
+      next: () => {
+        this.editingCategory = undefined;
+        this.showNewCategory = false;
+        this.newCategory = { name: '' };
+        this.loadCategories();
+      },
+      error: (err) => (this.categoryError = err?.error?.message || 'Error'),
+    });
   }
 
   editCategory(cat: TagCategory): void {
     this.editingCategory = cat;
     this.newCategory = { name: cat.name, description: cat.description };
+    this.showNewCategory = true;
   }
 
   deleteCategory(cat: TagCategory): void {
-    if (!confirm('Delete category "' + cat.name + '"?')) return;
+    if (!confirm(`Delete category "${cat.name}"?`)) return;
     this.tagCategoryService.delete(cat.id).subscribe({
       next: () => this.loadCategories(),
       error: (err) => (this.categoryError = err?.error?.message || 'Cannot delete'),
@@ -116,37 +104,28 @@ export class TransactionSettingsComponent implements OnInit {
 
   saveSubcategory(): void {
     this.subcategoryError = null;
-    if (this.editingSubcategory) {
-      this.tagSubcategoryService
-        .update(this.editingSubcategory.id, this.newSubcategory)
-        .subscribe({
-          next: () => { this.editingSubcategory = undefined; this.loadSubcategories(); },
-          error: (err) => (this.subcategoryError = err?.error?.message || 'Error'),
-        });
-    } else {
-      this.tagSubcategoryService.create(this.newSubcategory).subscribe({
-        next: () => {
-          this.showNewSubcategory = false;
-          this.newSubcategory = { categoryId: 0, name: '', direction: 'EXPENSE' };
-          this.loadSubcategories();
-        },
-        error: (err) => (this.subcategoryError = err?.error?.message || 'Error'),
-      });
-    }
+    const obs = this.editingSubcategory
+      ? this.tagSubcategoryService.update(this.editingSubcategory.id, this.newSubcategory)
+      : this.tagSubcategoryService.create(this.newSubcategory);
+    obs.subscribe({
+      next: () => {
+        this.editingSubcategory = undefined;
+        this.showNewSubcategory = false;
+        this.newSubcategory = { categoryId: 0, name: '', direction: 'EXPENSE' };
+        this.loadSubcategories();
+      },
+      error: (err) => (this.subcategoryError = err?.error?.message || 'Error'),
+    });
   }
 
   editSubcategory(sub: TagSubcategory): void {
     this.editingSubcategory = sub;
-    this.newSubcategory = {
-      categoryId: sub.categoryId,
-      name: sub.name,
-      direction: sub.direction,
-      description: sub.description,
-    };
+    this.newSubcategory = { categoryId: sub.categoryId, name: sub.name, direction: sub.direction, description: sub.description };
+    this.showNewSubcategory = true;
   }
 
   deleteSubcategory(sub: TagSubcategory): void {
-    if (!confirm('Delete subcategory "' + sub.name + '"?')) return;
+    if (!confirm(`Delete subcategory "${sub.name}"?`)) return;
     this.tagSubcategoryService.delete(sub.id).subscribe({
       next: () => this.loadSubcategories(),
       error: (err) => (this.subcategoryError = err?.error?.message || 'Cannot delete'),
@@ -155,32 +134,22 @@ export class TransactionSettingsComponent implements OnInit {
 
   saveBankAccount(): void {
     this.bankAccountError = null;
-    if (this.editingBankAccount) {
-      this.bankAccountService
-        .update(this.editingBankAccount.id, this.newBankAccount)
-        .subscribe({
-          next: () => { this.editingBankAccount = undefined; this.loadBankAccounts(); },
-          error: (err) => (this.bankAccountError = err?.error?.message || 'Error'),
-        });
-    } else {
-      this.bankAccountService.create(this.newBankAccount).subscribe({
-        next: () => {
-          this.showNewBankAccount = false;
-          this.newBankAccount = { label: '', accountNumber: '', type: 'CURRENT', isActive: true };
-          this.loadBankAccounts();
-        },
-        error: (err) => (this.bankAccountError = err?.error?.message || 'Error'),
-      });
-    }
+    const obs = this.editingBankAccount
+      ? this.bankAccountService.update(this.editingBankAccount.id, this.newBankAccount)
+      : this.bankAccountService.create(this.newBankAccount);
+    obs.subscribe({
+      next: () => {
+        this.editingBankAccount = undefined;
+        this.showNewBankAccount = false;
+        this.newBankAccount = { label: '', accountNumber: '', type: 'CURRENT', isActive: true };
+        this.loadBankAccounts();
+      },
+      error: (err) => (this.bankAccountError = err?.error?.message || 'Error'),
+    });
   }
 
   editBankAccount(ba: BankAccount): void {
     this.editingBankAccount = ba;
-    this.newBankAccount = {
-      label: ba.label,
-      accountNumber: ba.accountNumber,
-      type: ba.type,
-      isActive: ba.isActive,
-    };
+    this.newBankAccount = { label: ba.label, accountNumber: ba.accountNumber, type: ba.type, isActive: ba.isActive };
   }
 }

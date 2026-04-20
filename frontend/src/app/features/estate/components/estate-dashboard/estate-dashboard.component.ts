@@ -1,5 +1,5 @@
-// features/estate/components/estate-dashboard/estate-dashboard.component.ts — UC016 Phase 4
-// Quick access cards now route to estate-scoped transaction and alerts paths.
+// features/estate/components/estate-dashboard/estate-dashboard.component.ts — UC016 Phase 6
+// Dashboard fully populated with real counts. Alert cards navigate to alert list.
 import { CommonModule } from '@angular/common';
 import { Component, OnDestroy, OnInit } from '@angular/core';
 import { ActivatedRoute, Router, RouterModule } from '@angular/router';
@@ -82,10 +82,6 @@ export class EstateDashboardComponent implements OnInit, OnDestroy {
     );
   }
 
-  /**
-   * Phase 4: transactions and alerts now routed under the estate.
-   * Buildings and persons were already estate-scoped in Phases 2 & 3.
-   */
   get quickAccessCards(): QuickAccessCard[] {
     const cards: QuickAccessCard[] = [
       {

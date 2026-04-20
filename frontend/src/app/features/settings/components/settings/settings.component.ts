@@ -1,12 +1,12 @@
-// features/settings/components/settings/settings.component.ts — UC016 Phase 5
-// PlatformConfigService now uses estate-scoped endpoints.
-// Each key is saved individually via updateOne() (no bulk endpoint in Phase 5).
+// features/settings/components/settings/settings.component.ts — UC016 Phase 6
+// ActiveEstateService injected; save() blocked for VIEWERs.
 import { CommonModule } from '@angular/common';
 import { Component, OnDestroy, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
 import { Subject, forkJoin } from 'rxjs';
 import { takeUntil, finalize } from 'rxjs/operators';
+import { ActiveEstateService } from '../../../../core/services/active-estate.service';
 import { DateFormatService } from '../../../../core/services/date-format.service';
 import { PlatformConfigService } from '../../../../core/services/platform-config.service';
 import {
@@ -75,6 +75,7 @@ export class SettingsComponent implements OnInit, OnDestroy {
     private route: ActivatedRoute,
     private router: Router,
     private fb: FormBuilder,
+    readonly activeEstateService: ActiveEstateService,
   ) {}
 
   ngOnInit(): void {
@@ -116,6 +117,11 @@ export class SettingsComponent implements OnInit, OnDestroy {
       group[c.configKey] = [c.configValue, validators];
     }
     this.form = this.fb.group(group);
+
+    // Disable form for VIEWERs (BR-UC016-08)
+    if (!this.activeEstateService.canEdit()) {
+      this.form.disable();
+    }
   }
 
   get generalConfigs(): PlatformConfigDTO[] {
@@ -128,11 +134,10 @@ export class SettingsComponent implements OnInit, OnDestroy {
     return this.configs.filter((c) => IMPORT_KEYS.has(c.configKey));
   }
 
-  /**
-   * Phase 5: Save each config key individually via PUT
-   * /api/v1/estates/{estateId}/config/settings/{key}
-   */
   save(): void {
+    // Block save for VIEWERs (BR-UC016-08)
+    if (!this.activeEstateService.canEdit()) return;
+
     if (this.form.invalid) {
       this.form.markAllAsTouched();
       return;
@@ -141,22 +146,17 @@ export class SettingsComponent implements OnInit, OnDestroy {
     this.error = null;
     this.successMessage = null;
 
-    // Build one PUT observable per changed key
     const updates = Object.entries(this.form.value).map(([configKey, configValue]) =>
       this.configService.updateOne(configKey, { configValue: String(configValue).trim() }),
     );
 
     forkJoin(updates)
-      .pipe(
-        takeUntil(this.destroy$),
-        finalize(() => (this.saving = false)),
-      )
+      .pipe(takeUntil(this.destroy$), finalize(() => (this.saving = false)))
       .subscribe({
         next: () => {
           this.successMessage = 'Paramètres enregistrés.';
           setTimeout(() => (this.successMessage = null), 3000);
           this.dateFormatService.reload();
-          // Refresh local configs to reflect updatedAt
           this.load();
         },
         error: (err) => {
@@ -176,6 +176,7 @@ export class SettingsComponent implements OnInit, OnDestroy {
   }
 
   onDateFormatSelectChange(key: string, event: Event): void {
+    if (!this.activeEstateService.canEdit()) return;
     const selected = (event.target as HTMLSelectElement).value;
     if (selected !== '__custom__') this.form.get(key)?.setValue(selected);
   }

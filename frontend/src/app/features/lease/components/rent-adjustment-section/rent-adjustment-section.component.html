@@ -1,8 +1,9 @@
-<!-- features/lease/components/rent-adjustment-section/rent-adjustment-section.component.html -->
+<!-- features/lease/components/rent-adjustment-section/rent-adjustment-section.component.html — UC016 Phase 6 -->
+<!-- canEdit() guard on Adjust Rent button -->
 <div class="info-card">
   <div class="info-card-title">
     <h2>Rent History</h2>
-    @if ((lease.status === "ACTIVE" || lease.status === "DRAFT") && !showForm) {
+    @if ((lease.status === 'ACTIVE' || lease.status === 'DRAFT') && !showForm && activeEstateService.canEdit()) {
       <button class="btn btn-primary btn-sm" (click)="openForm()">
         Adjust Rent
       </button>
@@ -13,30 +14,22 @@
   <div class="rent-summary">
     <div class="rent-summary-item">
       <span class="rent-label">Rent</span>
-      <span class="rent-value">{{
-        lease.monthlyRent | currency: "EUR" : "symbol" : "1.2-2"
-      }}</span>
+      <span class="rent-value">{{ lease.monthlyRent | currency:'EUR':'symbol':'1.2-2' }}</span>
     </div>
     <div class="rent-summary-sep">+</div>
     <div class="rent-summary-item">
-      <span class="rent-label"
-        >Charges <em>({{ lease.chargesType }})</em></span
-      >
-      <span class="rent-value">{{
-        lease.monthlyCharges | currency: "EUR" : "symbol" : "1.2-2"
-      }}</span>
+      <span class="rent-label">Charges <em>({{ lease.chargesType }})</em></span>
+      <span class="rent-value">{{ lease.monthlyCharges | currency:'EUR':'symbol':'1.2-2' }}</span>
     </div>
     <div class="rent-summary-sep">=</div>
     <div class="rent-summary-item rent-summary-total">
       <span class="rent-label">Total</span>
-      <span class="rent-value">{{
-        lease.totalRent | currency: "EUR" : "symbol" : "1.2-2"
-      }}</span>
+      <span class="rent-value">{{ lease.totalRent | currency:'EUR':'symbol':'1.2-2' }}</span>
     </div>
   </div>
 
   <!-- Adjustment form -->
-  @if (showForm) {
+  @if (showForm && activeEstateService.canEdit()) {
     <div class="picker-panel">
       @if (formError) {
         <div class="alert alert-error">{{ formError }}</div>
@@ -55,19 +48,14 @@
           <input
             type="text"
             class="current-value-readonly"
-            [value]="currentValue | currency: 'EUR' : 'symbol' : '1.2-2'"
+            [value]="currentValue | currency:'EUR':'symbol':'1.2-2'"
             readonly
             tabindex="-1"
           />
         </div>
         <div class="form-group">
           <label>New amount (€) <span class="required">*</span></label>
-          <input
-            type="number"
-            [(ngModel)]="req.newValue"
-            step="0.01"
-            min="0.01"
-          />
+          <input type="number" [(ngModel)]="req.newValue" step="0.01" min="0.01" />
         </div>
       </div>
       <div class="form-row">
@@ -77,23 +65,13 @@
         </div>
         <div class="form-group">
           <label>Reason <span class="required">*</span></label>
-          <input
-            type="text"
-            [(ngModel)]="req.reason"
-            placeholder="e.g. Annual indexation, Market adjustment…"
-          />
+          <input type="text" [(ngModel)]="req.reason" placeholder="e.g. Annual indexation, Market adjustment…" />
         </div>
       </div>
       <div class="picker-panel-actions">
-        <button class="btn btn-secondary btn-sm" (click)="showForm = false">
-          Cancel
-        </button>
-        <button
-          class="btn btn-primary btn-sm"
-          (click)="save()"
-          [disabled]="isSaving"
-        >
-          {{ isSaving ? "Saving…" : "Save adjustment" }}
+        <button class="btn btn-secondary btn-sm" (click)="showForm = false">Cancel</button>
+        <button class="btn btn-primary btn-sm" (click)="save()" [disabled]="isSaving">
+          {{ isSaving ? 'Saving…' : 'Save adjustment' }}
         </button>
       </div>
     </div>
@@ -116,31 +94,21 @@
         <tbody>
           @for (adj of lease.rentAdjustments; track adj.effectiveDate) {
             <tr>
-              <td>{{ adj.effectiveDate | date: "dd/MM/yyyy" }}</td>
+              <td>{{ adj.effectiveDate | date:'dd/MM/yyyy' }}</td>
               <td>
-                <span
-                  class="field-badge"
-                  [class.field-rent]="adj.field === 'RENT'"
-                  [class.field-charges]="adj.field === 'CHARGES'"
-                >
+                <span class="field-badge"
+                      [class.field-rent]="adj.field === 'RENT'"
+                      [class.field-charges]="adj.field === 'CHARGES'">
                   {{ adj.field }}
                 </span>
               </td>
-              <td>{{ adj.oldValue | currency: "EUR" : "symbol" : "1.2-2" }}</td>
-              <td>
-                <strong>{{
-                  adj.newValue | currency: "EUR" : "symbol" : "1.2-2"
-                }}</strong>
-              </td>
+              <td>{{ adj.oldValue | currency:'EUR':'symbol':'1.2-2' }}</td>
+              <td><strong>{{ adj.newValue | currency:'EUR':'symbol':'1.2-2' }}</strong></td>
               <td
                 [class.delta-up]="adj.newValue > adj.oldValue"
                 [class.delta-down]="adj.newValue < adj.oldValue"
               >
-                {{ adj.newValue > adj.oldValue ? "+" : ""
-                }}{{
-                  adj.newValue - adj.oldValue
-                    | currency: "EUR" : "symbol" : "1.2-2"
-                }}
+                {{ adj.newValue > adj.oldValue ? '+' : '' }}{{ adj.newValue - adj.oldValue | currency:'EUR':'symbol':'1.2-2' }}
               </td>
               <td>{{ adj.reason }}</td>
             </tr>

@@ -1,4 +1,5 @@
-// features/transaction/components/transaction-import/transaction-import.component.ts — UC016 Phase 4
+// features/transaction/components/transaction-import/transaction-import.component.ts — UC016 Phase 6
+// activeEstateService.canEdit() checked before allowing upload/import actions.
 import { CommonModule } from '@angular/common';
 import { Component, OnInit } from '@angular/core';
 import { FormsModule } from '@angular/forms';
@@ -26,26 +27,21 @@ type Step = 'form' | 'preview' | 'result';
   styleUrls: ['./transaction-import.component.scss'],
 })
 export class TransactionImportComponent implements OnInit {
-  // ── Reference data ────────────────────────────────────────────────────────
   parsers: ImportParser[] = [];
   bankAccounts: BankAccount[] = [];
 
-  // ── Form state ────────────────────────────────────────────────────────────
   selectedParserCode = '';
   selectedBankAccountId: number | null = null;
   selectedFile: File | null = null;
   isDragging = false;
 
-  // ── Flow state ────────────────────────────────────────────────────────────
   step: Step = 'form';
   loading = false;
   error: string | null = null;
 
-  // ── Preview state ─────────────────────────────────────────────────────────
   previewRows: ImportPreviewRow[] = [];
   selectedRow: ImportPreviewRow | null = null;
 
-  // ── Result state ──────────────────────────────────────────────────────────
   result: ImportBatchResult | null = null;
 
   constructor(
@@ -57,12 +53,10 @@ export class TransactionImportComponent implements OnInit {
   ) {}
 
   ngOnInit(): void {
-    // Import parsers remain global (BR-UC016-10)
     this.importParserService.getAll().subscribe((p) => {
       this.parsers = p;
       if (p.length === 1) this.selectedParserCode = p[0].code;
     });
-    // Bank accounts are now estate-scoped
     this.bankAccountService.getAll().subscribe((accounts) => {
       this.bankAccounts = accounts.filter((a) => a.isActive);
       if (this.bankAccounts.length === 1) {
@@ -81,7 +75,7 @@ export class TransactionImportComponent implements OnInit {
   }
 
   get canPreview(): boolean {
-    return !!this.selectedFile && !!this.selectedParserCode;
+    return !!this.selectedFile && !!this.selectedParserCode && this.activeEstateService.canEdit();
   }
 
   get selectedRows(): ImportPreviewRow[] {
@@ -97,9 +91,7 @@ export class TransactionImportComponent implements OnInit {
   }
 
   get enrichedCount(): number {
-    return this.previewRows.filter(
-      (r) => r.enrichedSubcategoryId || r.enrichedLeaseId,
-    ).length;
+    return this.previewRows.filter((r) => r.enrichedSubcategoryId || r.enrichedLeaseId).length;
   }
 
   get allSelected(): boolean {
@@ -108,9 +100,11 @@ export class TransactionImportComponent implements OnInit {
   }
 
   onDragOver(e: DragEvent): void {
+    if (!this.activeEstateService.canEdit()) return;
     e.preventDefault();
     this.isDragging = true;
   }
+
   onDragLeave(): void {
     this.isDragging = false;
   }
@@ -118,6 +112,7 @@ export class TransactionImportComponent implements OnInit {
   onDrop(e: DragEvent): void {
     e.preventDefault();
     this.isDragging = false;
+    if (!this.activeEstateService.canEdit()) return;
     const file = e.dataTransfer?.files?.[0];
     if (file) this.selectFile(file);
   }
@@ -167,10 +162,7 @@ export class TransactionImportComponent implements OnInit {
           this.loading = false;
         },
         error: (err) => {
-          this.error =
-            err?.error?.errors?.[0]?.errorMessage ||
-            err?.error?.message ||
-            'Preview failed';
+          this.error = err?.error?.errors?.[0]?.errorMessage || err?.error?.message || 'Preview failed';
           this.loading = false;
         },
       });
@@ -193,25 +185,17 @@ export class TransactionImportComponent implements OnInit {
   }
 
   toggleAll(checked: boolean): void {
-    this.validRows
-      .filter((r) => !r.duplicateInDb)
-      .forEach((r) => (r.selected = checked));
+    if (!this.activeEstateService.canEdit()) return;
+    this.validRows.filter((r) => !r.duplicateInDb).forEach((r) => (r.selected = checked));
   }
 
   import(): void {
-    if (this.selectedRows.length === 0) return;
+    if (!this.activeEstateService.canEdit() || this.selectedRows.length === 0) return;
     this.loading = true;
     this.error = null;
 
     const enrichments: ImportRowEnrichment[] = this.selectedRows
-      .filter(
-        (r) =>
-          r.fingerprint &&
-          (r.enrichedSubcategoryId ||
-            r.enrichedLeaseId ||
-            r.enrichedUnitId ||
-            r.direction),
-      )
+      .filter((r) => r.fingerprint && (r.enrichedSubcategoryId || r.enrichedLeaseId || r.enrichedUnitId || r.direction))
       .map((r) => ({
         fingerprint: r.fingerprint!,
         subcategoryId: r.enrichedSubcategoryId,
@@ -226,13 +210,7 @@ export class TransactionImportComponent implements OnInit {
       .map((r) => r.fingerprint!);
 
     this.transactionService
-      .importFile(
-        this.selectedFile!,
-        this.selectedParserCode,
-        this.selectedBankAccountId,
-        enrichments,
-        selectedFingerprints,
-      )
+      .importFile(this.selectedFile!, this.selectedParserCode, this.selectedBankAccountId, enrichments, selectedFingerprints)
       .subscribe({
         next: (r) => {
           this.result = r;
@@ -240,10 +218,7 @@ export class TransactionImportComponent implements OnInit {
           this.loading = false;
         },
         error: (err) => {
-          this.error =
-            err?.error?.errors?.[0]?.errorMessage ||
-            err?.error?.message ||
-            'Import failed';
+          this.error = err?.error?.errors?.[0]?.errorMessage || err?.error?.message || 'Import failed';
           this.loading = false;
         },
       });

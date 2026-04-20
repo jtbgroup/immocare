@@ -1,10 +1,11 @@
-<!-- features/lease/tenant-section/tenant-section.component.html -->
+<!-- features/lease/tenant-section/tenant-section.component.html — UC016 Phase 6 -->
+<!-- canEdit() guards applied to Add Tenant and Remove Tenant buttons -->
 <div class="info-card">
   <div class="info-card-title">
     <h2>Tenants</h2>
-    @if (lease.status === "DRAFT" || lease.status === "ACTIVE") {
+    @if ((lease.status === 'DRAFT' || lease.status === 'ACTIVE') && activeEstateService.canEdit()) {
       <button class="btn btn-primary btn-sm" (click)="showPicker = !showPicker">
-        {{ showPicker ? "Cancel" : "+ Add Tenant" }}
+        {{ showPicker ? 'Cancel' : '+ Add Tenant' }}
       </button>
     }
   </div>
@@ -27,7 +28,7 @@
             <span class="tenant-contact">📱 {{ t.gsm }}</span>
           }
         </div>
-        @if (canRemove(t)) {
+        @if (canRemove(t) && activeEstateService.canEdit()) {
           <button
             class="btn btn-danger btn-sm"
             (click)="remove(t.personId)"
@@ -44,7 +45,7 @@
   </ul>
 
   <!-- Add picker -->
-  @if (showPicker) {
+  @if (showPicker && activeEstateService.canEdit()) {
     <div class="picker-panel">
       <app-person-picker
         label="Select Person"
@@ -65,7 +66,7 @@
           (click)="confirmAdd()"
           [disabled]="isAdding"
         >
-          {{ isAdding ? "Adding…" : "Add Tenant" }}
+          {{ isAdding ? 'Adding…' : 'Add Tenant' }}
         </button>
       }
     </div>

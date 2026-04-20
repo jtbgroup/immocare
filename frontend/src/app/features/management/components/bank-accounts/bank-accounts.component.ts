@@ -1,8 +1,8 @@
-// features/management/components/bank-accounts/bank-accounts.component.ts — UC016 Phase 4
-// No changes to component logic — BankAccountService now handles estate scoping.
+// features/management/components/bank-accounts/bank-accounts.component.ts — UC016 Phase 6
 import { CommonModule } from '@angular/common';
 import { Component, OnInit } from '@angular/core';
 import { FormsModule } from '@angular/forms';
+import { ActiveEstateService } from '../../../../core/services/active-estate.service';
 import { BankAccountService } from '../../../../core/services/bank-account.service';
 import {
   BankAccount,
@@ -35,7 +35,10 @@ export class BankAccountsComponent implements OnInit {
 
   readonly accountTypes: BankAccountType[] = ['CURRENT', 'SAVINGS'];
 
-  constructor(private bankAccountService: BankAccountService) {}
+  constructor(
+    private bankAccountService: BankAccountService,
+    readonly activeEstateService: ActiveEstateService,
+  ) {}
 
   ngOnInit(): void {
     this.load();
