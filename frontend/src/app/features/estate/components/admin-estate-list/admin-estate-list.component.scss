@@ -7,3 +7,23 @@
   max-width: 1200px;
   margin: 0 auto;
 }
+
+// ─── Actions ──────────────────────────────────────────────────────────────────
+
+.actions-cell {
+  white-space: nowrap;
+  text-align: right;
+}
+
+.icon-btn {
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-size: 1rem;
+  padding: 0.1rem 0.3rem;
+  border-radius: 4px;
+  opacity: 0.75;
+  transition: opacity 0.15s;
+
+  &:hover { opacity: 1; }
+}

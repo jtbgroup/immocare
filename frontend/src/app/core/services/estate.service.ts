@@ -3,14 +3,14 @@ import { HttpClient, HttpParams } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
 import {
-  AddEstateMemberRequest,
-  CreateEstateRequest,
-  Estate,
-  EstateDashboard,
-  EstateMember,
-  EstateSummary,
-  UpdateEstateMemberRoleRequest,
-  UpdateEstateRequest,
+    AddEstateMemberRequest,
+    CreateEstateRequest,
+    Estate,
+    EstateDashboard,
+    EstateMember,
+    EstateSummary,
+    UpdateEstateMemberRoleRequest,
+    UpdateEstateRequest,
 } from '../../models/estate.model';
 import { Page } from '../../models/page.model';
 
@@ -27,6 +27,10 @@ export class EstateService {
     let params = new HttpParams().set('page', page).set('size', size);
     if (search?.trim()) params = params.set('search', search.trim());
     return this.http.get<Page<Estate>>(this.adminBase, { params });
+  }
+
+  getEstateById(id: string): Observable<Estate> {
+    return this.http.get<Estate>(`${this.adminBase}/${id}`);
   }
 
   createEstate(req: CreateEstateRequest): Observable<Estate> {

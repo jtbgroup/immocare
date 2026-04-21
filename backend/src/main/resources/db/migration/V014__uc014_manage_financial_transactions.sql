@@ -150,8 +150,8 @@ CREATE TABLE transaction_asset_link (
     CONSTRAINT uq_asset_link UNIQUE (transaction_id, asset_type, asset_id)
 );
 
-CREATE INDEX idx_tal_transaction ON transaction_asset_link (transaction_id);
-CREATE INDEX idx_tal_asset       ON transaction_asset_link (asset_type, asset_id);
+CREATE INDEX idx_tal_transaction  ON transaction_asset_link (transaction_id);
+CREATE INDEX idx_tal_asset        ON transaction_asset_link (asset_type, asset_id);
 CREATE INDEX idx_tal_housing_unit ON transaction_asset_link (housing_unit_id);
 CREATE INDEX idx_tal_building     ON transaction_asset_link (building_id);
 
@@ -187,47 +187,3 @@ CREATE TABLE accounting_month_rule (
 );
 
 CREATE INDEX idx_amr_subcategory ON accounting_month_rule (subcategory_id);
-
--- ─── Seeds: tag categories ────────────────────────────────────────────────────
-INSERT INTO tag_category (name) VALUES
-    ('Administration'), ('Consommables'), ('Dépôt'), ('Location'),
-    ('Maintenance'), ('Prime'), ('Rente'), ('Taxes'), ('Travaux');
-
--- ─── Seeds: tag subcategories ─────────────────────────────────────────────────
-INSERT INTO tag_subcategory (category_id, name, direction) VALUES
-    ((SELECT id FROM tag_category WHERE name = 'Administration'), 'Assurance habitation', 'EXPENSE'),
-    ((SELECT id FROM tag_category WHERE name = 'Administration'), 'PEB',                  'EXPENSE'),
-    ((SELECT id FROM tag_category WHERE name = 'Administration'), 'Petits frais',         'BOTH'),
-    ((SELECT id FROM tag_category WHERE name = 'Consommables'),   'Adoucisseur',          'EXPENSE'),
-    ((SELECT id FROM tag_category WHERE name = 'Consommables'),   'Eau',                  'EXPENSE'),
-    ((SELECT id FROM tag_category WHERE name = 'Consommables'),   'Electricité',          'EXPENSE'),
-    ((SELECT id FROM tag_category WHERE name = 'Consommables'),   'Gaz',                  'EXPENSE'),
-    ((SELECT id FROM tag_category WHERE name = 'Dépôt'),          'Garantie locative',    'BOTH'),
-    ((SELECT id FROM tag_category WHERE name = 'Location'),       'Annonce',              'EXPENSE'),
-    ((SELECT id FROM tag_category WHERE name = 'Location'),       'Etat des lieux',       'EXPENSE'),
-    ((SELECT id FROM tag_category WHERE name = 'Location'),       'Garantie locative',    'BOTH'),
-    ((SELECT id FROM tag_category WHERE name = 'Location'),       'Loyer',                'INCOME'),
-    ((SELECT id FROM tag_category WHERE name = 'Location'),       'Petits travaux',       'EXPENSE'),
-    ((SELECT id FROM tag_category WHERE name = 'Maintenance'),    'Adoucisseur',          'EXPENSE'),
-    ((SELECT id FROM tag_category WHERE name = 'Maintenance'),    'Chaudière',            'EXPENSE'),
-    ((SELECT id FROM tag_category WHERE name = 'Maintenance'),    'Electricité',          'EXPENSE'),
-    ((SELECT id FROM tag_category WHERE name = 'Maintenance'),    'Extincteurs',          'EXPENSE'),
-    ((SELECT id FROM tag_category WHERE name = 'Maintenance'),    'Insert',               'EXPENSE'),
-    ((SELECT id FROM tag_category WHERE name = 'Maintenance'),    'Matériel',             'EXPENSE'),
-    ((SELECT id FROM tag_category WHERE name = 'Maintenance'),    'Nettoyage communs',    'EXPENSE'),
-    ((SELECT id FROM tag_category WHERE name = 'Maintenance'),    'Petits travaux',       'EXPENSE'),
-    ((SELECT id FROM tag_category WHERE name = 'Maintenance'),    'Plomberie',            'EXPENSE'),
-    ((SELECT id FROM tag_category WHERE name = 'Prime'),          'Banque',               'INCOME'),
-    ((SELECT id FROM tag_category WHERE name = 'Rente'),          'Retour',               'INCOME'),
-    ((SELECT id FROM tag_category WHERE name = 'Rente'),          'Usufruit',             'EXPENSE'),
-    ((SELECT id FROM tag_category WHERE name = 'Taxes'),          'Précompte immobilier', 'EXPENSE'),
-    ((SELECT id FROM tag_category WHERE name = 'Travaux'),        'Structure',            'EXPENSE'),
-    ((SELECT id FROM tag_category WHERE name = 'Travaux'),        'Toiture',              'EXPENSE');
-
--- ─── Seeds: platform_config additions for CSV import (UC013 extension) ────────
-INSERT INTO platform_config (config_key, config_value, value_type, description) VALUES
-    ('csv.import.suggestion.confidence.threshold', '3', 'INTEGER',
-        'Min confidence score to display a tag suggestion on import'),
-    ('import.on_duplicate', 'WARN', 'STRING',
-        'Behaviour on duplicate detected: WARN, SKIP or IMPORT')
-ON CONFLICT (config_key) DO NOTHING;

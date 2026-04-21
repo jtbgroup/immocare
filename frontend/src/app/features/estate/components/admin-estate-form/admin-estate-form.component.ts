@@ -3,18 +3,18 @@
 import { CommonModule } from "@angular/common";
 import { Component, OnDestroy, OnInit } from "@angular/core";
 import {
-  FormBuilder,
-  FormGroup,
-  ReactiveFormsModule,
-  Validators,
+    FormBuilder,
+    FormGroup,
+    ReactiveFormsModule,
+    Validators,
 } from "@angular/forms";
 import { ActivatedRoute, Router } from "@angular/router";
 import { Subject, of } from "rxjs";
 import {
-  catchError,
-  debounceTime,
-  distinctUntilChanged,
-  takeUntil,
+    catchError,
+    debounceTime,
+    distinctUntilChanged,
+    takeUntil,
 } from "rxjs/operators";
 import { EstateService } from "../../../../core/services/estate.service";
 import { UserService } from "../../../../core/services/user.service";
@@ -64,12 +64,14 @@ export class AdminEstateFormComponent implements OnInit, OnDestroy {
     if (this.isEdit && this.estateId) {
       this.loading = true;
       this.estateService
-        .getAllEstates(0, 1) // We fetch via getById if available
+        .getEstateById(this.estateId)
         .pipe(takeUntil(this.destroy$))
         .subscribe({
-          next: (page) => {
-            // Since there's no direct getById, find from list or rely on form
-            // In practice the backend service should expose getById
+          next: (estate) => {
+            this.form.patchValue({
+              name: estate.name,
+              description: estate.description,
+            });
             this.loading = false;
           },
           error: () => {

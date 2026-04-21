@@ -9,7 +9,6 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.immocare.exception.EstateAccessDeniedException;
 import com.immocare.exception.EstateHasBuildingsException;
 import com.immocare.exception.EstateLastManagerException;
 import com.immocare.exception.EstateMemberAlreadyExistsException;
@@ -20,10 +19,10 @@ import com.immocare.exception.EstateSelfOperationException;
 import com.immocare.exception.UserNotFoundException;
 import com.immocare.model.dto.EstateDTOs.AddEstateMemberRequest;
 import com.immocare.model.dto.EstateDTOs.CreateEstateRequest;
+import com.immocare.model.dto.EstateDTOs.EstateDTO;
 import com.immocare.model.dto.EstateDTOs.EstateDashboardDTO;
 import com.immocare.model.dto.EstateDTOs.EstateMemberDTO;
 import com.immocare.model.dto.EstateDTOs.EstatePendingAlertsDTO;
-import com.immocare.model.dto.EstateDTOs.EstateDTO;
 import com.immocare.model.dto.EstateDTOs.EstateSummaryDTO;
 import com.immocare.model.dto.EstateDTOs.UpdateEstateMemberRoleRequest;
 import com.immocare.model.dto.EstateDTOs.UpdateEstateRequest;
@@ -32,7 +31,6 @@ import com.immocare.model.dto.LeaseAlertDTO;
 import com.immocare.model.entity.AppUser;
 import com.immocare.model.entity.Estate;
 import com.immocare.model.entity.EstateMember;
-import com.immocare.model.entity.FireExtinguisher;
 import com.immocare.model.enums.EstateRole;
 import com.immocare.model.enums.LeaseStatus;
 import com.immocare.repository.BoilerRepository;
@@ -128,14 +126,14 @@ public class EstateService {
         Estate estate = findOrThrow(estateId);
 
         int totalBuildings = (int) buildingRepository.countByEstateId(estateId);
-        int totalUnits     = (int) housingUnitRepository.countByBuilding_Estate_Id(estateId);
-        int activeLeases   = (int) leaseRepository
+        int totalUnits = (int) housingUnitRepository.countByBuilding_Estate_Id(estateId);
+        int activeLeases = (int) leaseRepository
                 .countByHousingUnit_Building_Estate_IdAndStatus(estateId, LeaseStatus.ACTIVE);
 
-        int boilerAlerts         = computeBoilerAlerts(estateId);
-        int fireExtAlerts        = computeFireExtinguisherAlerts(estateId);
-        int leaseEndAlerts       = computeLeaseEndAlerts(estateId);
-        int indexationAlerts     = computeIndexationAlerts(estateId);
+        int boilerAlerts = computeBoilerAlerts(estateId);
+        int fireExtAlerts = computeFireExtinguisherAlerts(estateId);
+        int leaseEndAlerts = computeLeaseEndAlerts(estateId);
+        int indexationAlerts = computeIndexationAlerts(estateId);
 
         return new EstateDashboardDTO(
                 estate.getId(),
@@ -276,7 +274,8 @@ public class EstateService {
     // ─── Phase 6: Alert computation ───────────────────────────────────────────
 
     /**
-     * Counts boilers with EXPIRED or EXPIRING_SOON service status within the estate.
+     * Counts boilers with EXPIRED or EXPIRING_SOON service status within the
+     * estate.
      */
     private int computeBoilerAlerts(UUID estateId) {
         int warningMonths = platformConfigService.getIntValue(
@@ -288,21 +287,24 @@ public class EstateService {
         return (int) boilerRepository.findActiveByEstateId(estateId)
                 .stream()
                 .filter(b -> {
-                    if (b.getNextServiceDate() == null) return false;
+                    if (b.getNextServiceDate() == null)
+                        return false;
                     return b.getNextServiceDate().isBefore(threshold);
                 })
                 .count();
     }
 
     /**
-     * Counts fire extinguishers with no revisions or last revision older than 1 year.
+     * Counts fire extinguishers with no revisions or last revision older than 1
+     * year.
      */
     private int computeFireExtinguisherAlerts(UUID estateId) {
         LocalDate oneYearAgo = LocalDate.now().minusYears(1);
         return (int) fireExtinguisherRepository.findByBuildingEstateId(estateId)
                 .stream()
                 .filter(ext -> {
-                    if (ext.getRevisions().isEmpty()) return true;
+                    if (ext.getRevisions().isEmpty())
+                        return true;
                     LocalDate latest = ext.getRevisions().get(0).getRevisionDate();
                     return latest.isBefore(oneYearAgo);
                 })

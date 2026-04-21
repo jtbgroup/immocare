@@ -40,6 +40,7 @@ bootstrapApplication(AppComponent, {
       // ─── Estate selector ─────────────────────────────────────────────────────
       {
         path: "select-estate",
+        canActivate: [AuthGuard],
         loadComponent: () =>
           import("./app/features/estate/components/estate-selector/estate-selector.component").then(
             (m) => m.EstateSelectorComponent,
@@ -345,8 +346,8 @@ bootstrapApplication(AppComponent, {
       },
 
       // ─── Fallback ────────────────────────────────────────────────────────────
-      { path: "", redirectTo: "/select-estate", pathMatch: "full" },
-      { path: "**", redirectTo: "/select-estate" },
+      { path: "", redirectTo: "/login", pathMatch: "full" },
+      { path: "**", redirectTo: "/login" },
     ]),
   ],
 }).catch((err) => console.error(err));

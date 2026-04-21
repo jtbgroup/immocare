@@ -1,7 +1,6 @@
 package com.immocare.model.entity;
 
 import java.time.LocalDateTime;
-import java.util.UUID;
 
 import com.immocare.model.enums.EstateRole;
 
@@ -51,14 +50,31 @@ public class EstateMember {
 
     // ─── Getters & Setters ────────────────────────────────────────────────────
 
-    public Estate getEstate() { return estate; }
-    public void setEstate(Estate estate) { this.estate = estate; }
+    public Estate getEstate() {
+        return estate;
+    }
 
-    public AppUser getUser() { return user; }
-    public void setUser(AppUser user) { this.user = user; }
+    public void setEstate(Estate estate) {
+        this.estate = estate;
+    }
 
-    public EstateRole getRole() { return role; }
-    public void setRole(EstateRole role) { this.role = role; }
+    public AppUser getUser() {
+        return user;
+    }
 
-    public LocalDateTime getAddedAt() { return addedAt; }
+    public void setUser(AppUser user) {
+        this.user = user;
+    }
+
+    public EstateRole getRole() {
+        return role;
+    }
+
+    public void setRole(EstateRole role) {
+        this.role = role;
+    }
+
+    public LocalDateTime getAddedAt() {
+        return addedAt;
+    }
 }

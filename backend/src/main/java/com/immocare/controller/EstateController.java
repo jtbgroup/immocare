@@ -15,37 +15,44 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.immocare.model.dto.AlertDTO;
 import com.immocare.model.dto.EstateDTOs.AddEstateMemberRequest;
 import com.immocare.model.dto.EstateDTOs.EstateDashboardDTO;
 import com.immocare.model.dto.EstateDTOs.EstateMemberDTO;
 import com.immocare.model.dto.EstateDTOs.EstateSummaryDTO;
 import com.immocare.model.dto.EstateDTOs.UpdateEstateMemberRoleRequest;
 import com.immocare.model.entity.AppUser;
+import com.immocare.service.AlertService;
 import com.immocare.service.EstateService;
 
 import jakarta.validation.Valid;
 
 /**
- * REST controller for estate-scoped endpoints (members, dashboard, "my estates").
+ * REST controller for estate-scoped endpoints (members, dashboard, "my
+ * estates").
  * Fine-grained access control is handled per method via {@code @PreAuthorize}.
  *
  * UC016 — Manage Estates (Phase 1).
  *
  * Endpoints:
- *   GET    /api/v1/estates/mine                        → US103 my estates
- *   GET    /api/v1/estates/{id}/dashboard              → US102 estate dashboard
- *   GET    /api/v1/estates/{id}/members                → US097 view members
- *   POST   /api/v1/estates/{id}/members                → US098 add member
- *   PATCH  /api/v1/estates/{id}/members/{userId}       → US099 edit member role
- *   DELETE /api/v1/estates/{id}/members/{userId}       → US100 remove member
+ * GET /api/v1/estates/mine → US103 my estates
+ * GET /api/v1/estates/{id}/dashboard → US102 estate dashboard
+ * GET /api/v1/estates/{id}/members → US097 view members
+ * POST /api/v1/estates/{id}/members → US098 add member
+ * PATCH /api/v1/estates/{id}/members/{userId} → US099 edit member role
+ * DELETE /api/v1/estates/{id}/members/{userId} → US100 remove member
+ * GET /api/v1/estates/{id}/alerts/count → estate alerts count
+ * GET /api/v1/estates/{id}/alerts → estate alerts list
  */
 @RestController
 public class EstateController {
 
     private final EstateService estateService;
+    private final AlertService alertService;
 
-    public EstateController(EstateService estateService) {
+    public EstateController(EstateService estateService, AlertService alertService) {
         this.estateService = estateService;
+        this.alertService = alertService;
     }
 
     /**
@@ -108,7 +115,7 @@ public class EstateController {
     }
 
     /**
-     * US100 — Remove a member from the estate.
+     * USXXX — Remove a member from the estate.
      */
     @DeleteMapping("/api/v1/estates/{id}/members/{userId}")
     @PreAuthorize("@security.isManagerOf(#id)")
@@ -118,5 +125,23 @@ public class EstateController {
             @AuthenticationPrincipal AppUser currentUser) {
         estateService.removeMember(id, userId, currentUser.getId());
         return ResponseEntity.noContent().build();
+    }
+
+    /**
+     * Get estate alerts count.
+     */
+    @GetMapping("/api/v1/estates/{id}/alerts/count")
+    @PreAuthorize("@security.isMemberOf(#id)")
+    public ResponseEntity<Integer> getAlertCount(@PathVariable UUID id) {
+        return ResponseEntity.ok(alertService.getCount(id));
+    }
+
+    /**
+     * Get estate alerts list.
+     */
+    @GetMapping("/api/v1/estates/{id}/alerts")
+    @PreAuthorize("@security.isMemberOf(#id)")
+    public ResponseEntity<List<AlertDTO>> getAlerts(@PathVariable UUID id) {
+        return ResponseEntity.ok(alertService.getAll(id));
     }
 }

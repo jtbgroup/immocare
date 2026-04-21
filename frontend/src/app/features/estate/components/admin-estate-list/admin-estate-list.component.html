@@ -60,7 +60,7 @@
         </thead>
         <tbody>
           @for (estate of estates; track estate.id) {
-            <tr class="clickable" (click)="edit(estate)">
+            <tr>
               <td>
                 <strong>{{ estate.name }}</strong>
               </td>
@@ -69,25 +69,15 @@
               <td>{{ estate.buildingCount }}</td>
               <td>{{ estate.createdAt | date: "dd/MM/yyyy" }}</td>
               <td>{{ estate.createdByUsername || "—" }}</td>
-              <td>
-                <button
-                  class="btn btn-sm btn-info"
-                  (click)="viewDashboard(estate); $event.stopPropagation()"
-                >
-                  Dashboard
+              <td class="actions-cell">
+                <button class="icon-btn" title="Dashboard" (click)="viewDashboard(estate)">
+                  📊
                 </button>
-                <button
-                  class="btn btn-sm btn-secondary"
-                  (click)="edit(estate); $event.stopPropagation()"
-                >
-                  Edit
+                <button class="icon-btn" title="Edit" (click)="edit(estate)">
+                  ✏️
                 </button>
-
-                <button
-                  class="btn btn-sm btn-danger"
-                  (click)="requestDelete(estate); $event.stopPropagation()"
-                >
-                  Delete
+                <button class="icon-btn" title="Delete" (click)="requestDelete(estate)">
+                  🗑️
                 </button>
               </td>
             </tr>

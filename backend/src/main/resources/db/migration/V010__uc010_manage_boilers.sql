@@ -55,7 +55,3 @@ CREATE TABLE boiler_service_validity_rule (
     created_at               TIMESTAMP NOT NULL DEFAULT NOW(),
     created_by               BIGINT    REFERENCES app_user (id) ON DELETE SET NULL
 );
-
--- Seed: default rule — 2 years validity (current regulation)
-INSERT INTO boiler_service_validity_rule (valid_from, validity_duration_months, description)
-VALUES ('1900-01-01', 24, 'Default — 2 years (current regulation)');

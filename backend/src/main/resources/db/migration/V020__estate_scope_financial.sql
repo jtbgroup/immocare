@@ -11,6 +11,9 @@
 --
 -- The placeholder estate (if created) is named 'Default Estate'
 -- and can be renamed via the admin UI after the migration runs.
+-- Note: tag_category is intentionally excluded from the placeholder
+--       condition — its rows are seeds with no estate dependency
+--       at this stage; backfill happens only when an estate exists.
 -- ============================================================
 
 DO $$
@@ -19,12 +22,11 @@ DECLARE
 BEGIN
 
     -- Resolve the existing estate used for backfilling, or create a placeholder
-    -- only if there are orphan rows that actually need it.
+    -- only if there are orphan financial rows that actually need it.
     SELECT id INTO v_estate_id FROM estate ORDER BY created_at LIMIT 1;
 
     IF v_estate_id IS NULL THEN
         IF EXISTS (SELECT 1 FROM bank_account)
-           OR EXISTS (SELECT 1 FROM tag_category)
            OR EXISTS (SELECT 1 FROM financial_transaction) THEN
             INSERT INTO estate (id, name, created_at)
             VALUES (gen_random_uuid(), 'Default Estate', NOW())

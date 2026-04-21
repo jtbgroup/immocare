@@ -5,10 +5,16 @@
 --
 -- Strategy for existing data:
 --   1. Add columns as nullable
---   2. Backfill existing rows with the first available estate
---   3. Enforce NOT NULL
---   4. Add FK constraints and indexes
+--   2. Create default estate if none exists
+--   3. Backfill existing rows with the first available estate
+--   4. Enforce NOT NULL
+--   5. Add FK constraints and indexes
 -- ============================================================
+
+-- Ensure at least one estate exists for backfilling
+INSERT INTO estate (name, description, created_by)
+SELECT 'Default Estate', 'Automatically created default estate', (SELECT id FROM app_user WHERE username = 'admin' LIMIT 1)
+WHERE NOT EXISTS (SELECT 1 FROM estate LIMIT 1);
 
 -- 1. Add estate_id to boiler_service_validity_rule
 ALTER TABLE boiler_service_validity_rule
