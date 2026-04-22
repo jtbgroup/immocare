@@ -5,6 +5,7 @@ import { FormsModule } from "@angular/forms";
 import { Router } from "@angular/router";
 import { Subject } from "rxjs";
 import { debounceTime, distinctUntilChanged, takeUntil } from "rxjs/operators";
+import { ActiveEstateService } from "../../../../core/services/active-estate.service";
 import { EstateService } from "../../../../core/services/estate.service";
 import { Estate } from "../../../../models/estate.model";
 import { Page } from "../../../../models/page.model";
@@ -36,6 +37,7 @@ export class AdminEstateListComponent implements OnInit, OnDestroy {
 
   constructor(
     private estateService: EstateService,
+    private activeEstateService: ActiveEstateService,
     private router: Router,
   ) {}
 
@@ -94,6 +96,7 @@ export class AdminEstateListComponent implements OnInit, OnDestroy {
   }
 
   viewDashboard(estate: Estate): void {
+    this.activeEstateService.setActiveEstate(estate as any);
     this.router.navigate(["/estates", estate.id, "dashboard"]);
   }
 

@@ -1,5 +1,6 @@
 package com.immocare.repository;
 
+import java.util.Optional;
 import java.util.UUID;
 
 import org.springframework.data.domain.Page;
@@ -22,10 +23,23 @@ public interface EstateRepository extends JpaRepository<Estate, UUID> {
 
     boolean existsByNameIgnoreCaseAndIdNot(String name, UUID id);
 
+    @Query("""
+            SELECT e FROM Estate e
+            LEFT JOIN FETCH e.createdBy
+            WHERE e.id = :id
+            """)
+    Optional<Estate> findById(@Param("id") UUID id);
+
+    @Query("""
+            SELECT e FROM Estate e
+            LEFT JOIN FETCH e.createdBy
+            ORDER BY e.name ASC
+            """)
     Page<Estate> findAllByOrderByNameAsc(Pageable pageable);
 
     @Query("""
             SELECT e FROM Estate e
+            LEFT JOIN FETCH e.createdBy
             WHERE LOWER(e.name) LIKE LOWER(CONCAT('%', :term, '%'))
             ORDER BY e.name ASC
             """)

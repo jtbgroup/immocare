@@ -35,10 +35,10 @@ import jakarta.validation.Valid;
  * UC016 — Manage Estates (Phase 1).
  *
  * Endpoints:
- *   GET    /api/v1/admin/estates          → US095 list all estates
- *   POST   /api/v1/admin/estates          → US092 create estate
- *   PUT    /api/v1/admin/estates/{id}     → US093 edit estate
- *   DELETE /api/v1/admin/estates/{id}     → US094 delete estate
+ * GET /api/v1/admin/estates → US095 list all estates
+ * POST /api/v1/admin/estates → US092 create estate
+ * PUT /api/v1/admin/estates/{id} → US093 edit estate
+ * DELETE /api/v1/admin/estates/{id} → US094 delete estate
  */
 @RestController
 @RequestMapping("/api/v1/admin/estates")
@@ -68,15 +68,25 @@ public class EstateAdminController {
 
         String[] sortParts = sort.split(",");
         Sort.Direction direction = sortParts.length > 1 && sortParts[1].equalsIgnoreCase("desc")
-                ? Sort.Direction.DESC : Sort.Direction.ASC;
+                ? Sort.Direction.DESC
+                : Sort.Direction.ASC;
         Pageable pageable = PageRequest.of(page, size, Sort.by(direction, sortParts[0]));
 
         return ResponseEntity.ok(estateService.getAllEstates(search, pageable));
     }
 
     /**
+     * Get a single estate by ID.
+     */
+    @GetMapping("/{id}")
+    public ResponseEntity<EstateDTO> getEstate(@PathVariable UUID id) {
+        return ResponseEntity.ok(estateService.getEstateById(id));
+    }
+
+    /**
      * US092 — Create a new estate.
-     * Optional {@code firstManagerId} assigns a MANAGER role at creation time (US096).
+     * Optional {@code firstManagerId} assigns a MANAGER role at creation time
+     * (US096).
      */
     @PostMapping
     public ResponseEntity<EstateDTO> createEstate(

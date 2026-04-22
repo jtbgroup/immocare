@@ -11,6 +11,13 @@
     <ng-container *ngIf="currentUser$ | async as user">
       <div class="header-sep"></div>
       <nav class="app-nav">
+        <a
+          routerLink="/select-estate"
+          class="app-nav__link"
+          routerLinkActive="app-nav__link--active"
+        >
+          🏛️ My Estates
+        </a>
         @if (activeEstateService.activeEstateId()) {
           <a
             [routerLink]="[
@@ -45,62 +52,67 @@
           >
             📄 Leases
           </a>
+          <a
+            routerLink="/transactions"
+            routerLinkActive="app-nav__link--active"
+            class="app-nav__link"
+          >
+            💶 Transactions
+          </a>
+
+          <!-- Management dropdown -->
+          <div class="nav-dropdown-wrapper" #managementWrapper>
+            <button
+              class="app-nav__link app-nav__link--dropdown"
+              [class.app-nav__link--active]="
+                managementOpen || isManagementActive()
+              "
+              (click)="toggleManagement()"
+            >
+              🗂 Management <span class="nav-chevron">▾</span>
+            </button>
+            <div class="nav-dropdown" [class.open]="managementOpen">
+              @if (activeEstateService.activeEstateId()) {
+                <a
+                  [routerLink]="[
+                    '/estates',
+                    activeEstateService.activeEstateId(),
+                    'persons',
+                  ]"
+                  class="nav-dropdown__item"
+                  (click)="closeManagement()"
+                >
+                  👤 People
+                </a>
+              } @else {
+                <span
+                  class="nav-dropdown__item"
+                  style="opacity: 0.4; cursor: not-allowed"
+                  >👤 People</span
+                >
+              }
+              <a
+                routerLink="/bank-accounts"
+                class="nav-dropdown__item"
+                (click)="closeManagement()"
+              >
+                🏦 Bank Accounts
+              </a>
+            </div>
+          </div>
         } @else {
           <span class="app-nav__link app-nav__link--disabled"
             >🏢 Buildings</span
           >
           <span class="app-nav__link app-nav__link--disabled">🏠 Units</span>
           <span class="app-nav__link app-nav__link--disabled">📄 Leases</span>
-        }
-
-        <a
-          routerLink="/transactions"
-          routerLinkActive="app-nav__link--active"
-          class="app-nav__link"
-        >
-          💶 Transactions
-        </a>
-
-        <!-- Management dropdown -->
-        <div class="nav-dropdown-wrapper" #managementWrapper>
-          <button
-            class="app-nav__link app-nav__link--dropdown"
-            [class.app-nav__link--active]="
-              managementOpen || isManagementActive()
-            "
-            (click)="toggleManagement()"
+          <span class="app-nav__link app-nav__link--disabled"
+            >💶 Transactions</span
           >
-            🗂 Management <span class="nav-chevron">▾</span>
-          </button>
-          <div class="nav-dropdown" [class.open]="managementOpen">
-            @if (activeEstateService.activeEstateId()) {
-              <a
-                [routerLink]="[
-                  '/estates',
-                  activeEstateService.activeEstateId(),
-                  'persons',
-                ]"
-                class="nav-dropdown__item"
-                (click)="closeManagement()"
-              >
-                👤 People
-              </a>
-            } @else {
-              <span
-                class="nav-dropdown__item"
-                style="opacity: 0.4; cursor: not-allowed"
-                >👤 People</span
-              >
-            }
-            <a
-              routerLink="/bank-accounts"
-              class="nav-dropdown__item"
-              (click)="closeManagement()"
-            >
-              🏦 Bank Accounts
-            </a>
-          </div>
-        </div>
+          <span class="app-nav__link app-nav__link--disabled"
+            >🗂 Management</span
+          >
+        }
       </nav>
 
       <app-estate-header></app-estate-header>
@@ -147,10 +159,7 @@
               <span class="di-icon">👥</span> Manage Users
             </a>
 
-            @if (
-              activeEstateService.activeEstate()?.myRole === null ||
-              !activeEstateService.activeEstate()
-            ) {
+            @if (user.isPlatformAdmin) {
               <a
                 routerLink="/admin/estates"
                 class="dropdown-item"

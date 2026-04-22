@@ -49,14 +49,6 @@ bootstrapApplication(AppComponent, {
 
       // ─── Admin: Estates (PLATFORM_ADMIN only) ────────────────────────────────
       {
-        path: "admin/estates",
-        canActivate: [AuthGuard, PlatformAdminGuard],
-        loadComponent: () =>
-          import("./app/features/estate/components/admin-estate-list/admin-estate-list.component").then(
-            (m) => m.AdminEstateListComponent,
-          ),
-      },
-      {
         path: "admin/estates/new",
         canActivate: [AuthGuard, PlatformAdminGuard],
         loadComponent: () =>
@@ -70,6 +62,15 @@ bootstrapApplication(AppComponent, {
         loadComponent: () =>
           import("./app/features/estate/components/admin-estate-form/admin-estate-form.component").then(
             (m) => m.AdminEstateFormComponent,
+          ),
+      },
+      {
+        path: "admin/estates",
+        pathMatch: "full",
+        canActivate: [AuthGuard, PlatformAdminGuard],
+        loadComponent: () =>
+          import("./app/features/estate/components/admin-estate-list/admin-estate-list.component").then(
+            (m) => m.AdminEstateListComponent,
           ),
       },
 
