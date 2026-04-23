@@ -28,18 +28,18 @@ import lombok.RequiredArgsConstructor;
 
 /**
  * REST controller for per-estate platform configuration and boiler validity rules.
- * UC016 Phase 5 — replaces the global PlatformConfigController for all estate-scoped routes.
+ * UC004_ESTATE_PLACEHOLDER Phase 5 — replaces the global PlatformConfigController for all estate-scoped routes.
  *
  * All endpoints are under /api/v1/estates/{estateId}/config/.
  * VIEWER access on GET endpoints; MANAGER required for mutations.
  *
  * Endpoints:
- *   GET    /api/v1/estates/{estateId}/config/settings                         → US067
- *   PUT    /api/v1/estates/{estateId}/config/settings/{key}                   → US070
- *   GET    /api/v1/estates/{estateId}/config/boiler-validity-rules            → US069
- *   POST   /api/v1/estates/{estateId}/config/boiler-validity-rules            → US068
- *   GET    /api/v1/estates/{estateId}/config/asset-type-mappings              → US071
- *   PUT    /api/v1/estates/{estateId}/config/asset-type-mappings/{assetType}  → US071
+ *   GET    /api/v1/estates/{estateId}/config/settings                         → UC013.001
+ *   PUT    /api/v1/estates/{estateId}/config/settings/{key}                   → UC013.004
+ *   GET    /api/v1/estates/{estateId}/config/boiler-validity-rules            → UC013.003
+ *   POST   /api/v1/estates/{estateId}/config/boiler-validity-rules            → UC013.002
+ *   GET    /api/v1/estates/{estateId}/config/asset-type-mappings              → UC012.001
+ *   PUT    /api/v1/estates/{estateId}/config/asset-type-mappings/{assetType}  → UC012.001
  */
 @RestController
 @RequestMapping("/api/v1/estates/{estateId}/config")

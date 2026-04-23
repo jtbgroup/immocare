@@ -6,7 +6,7 @@ import java.time.LocalDateTime;
  * Read-only DTO returned by all user endpoints.
  * {@code passwordHash} is intentionally excluded.
  *
- * UC016 Phase 1: replaced {@code role} with {@code isPlatformAdmin}.
+ * UC004_ESTATE_PLACEHOLDER Phase 1: replaced {@code role} with {@code isPlatformAdmin}.
  */
 public record UserDTO(
         Long id,

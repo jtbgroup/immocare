@@ -1,6 +1,6 @@
 package com.immocare.exception;
 
-/** Thrown when attempting to delete an estate that still contains buildings. UC016 BR-UC016-09. */
+/** Thrown when attempting to delete an estate that still contains buildings. UC004_ESTATE_PLACEHOLDER BR-UC004_ESTATE_PLACEHOLDER-09. */
 public class EstateHasBuildingsException extends RuntimeException {
     private final int buildingCount;
 

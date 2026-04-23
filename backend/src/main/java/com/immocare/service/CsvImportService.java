@@ -38,7 +38,7 @@ import com.immocare.repository.PersonBankAccountRepository;
 
 /**
  * Legacy CSV import service.
- * UC016 Phase 5: loadMappingConfig() now accepts an estateId and reads
+ * UC004_ESTATE_PLACEHOLDER Phase 5: loadMappingConfig() now accepts an estateId and reads
  * all CSV import settings from the estate-scoped platform config.
  */
 @Service
@@ -70,7 +70,7 @@ public class CsvImportService {
 
     /**
      * Loads CSV mapping configuration from estate-scoped platform config.
-     * UC016 Phase 5: reads from estate config rather than global keys.
+     * UC004_ESTATE_PLACEHOLDER Phase 5: reads from estate config rather than global keys.
      */
     public CsvMappingConfig loadMappingConfig(UUID estateId) {
         return new CsvMappingConfig(

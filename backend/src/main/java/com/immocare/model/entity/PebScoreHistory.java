@@ -17,13 +17,13 @@ import java.time.LocalDateTime;
 
 /**
  * Append-only PEB energy certificate history for a housing unit.
- * UC004 - Manage PEB Scores.
+ * UC005 - Manage PEB Scores.
  *
  * Business rules:
- * - No updates or deletes (BR-UC004-01)
- * - Current score = record with most recent score_date (BR-UC004-02)
- * - score_date cannot be in the future (enforced in service) (BR-UC004-03)
- * - valid_until must be after score_date if provided (enforced in service) (BR-UC004-04)
+ * - No updates or deletes (BR-UC005-01)
+ * - Current score = record with most recent score_date (BR-UC005-02)
+ * - score_date cannot be in the future (enforced in service) (BR-UC005-03)
+ * - valid_until must be after score_date if provided (enforced in service) (BR-UC005-04)
  */
 @Entity
 @Table(name = "peb_score_history")

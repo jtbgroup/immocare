@@ -5,7 +5,7 @@ import java.util.UUID;
 
 /**
  * Data Transfer Object for Building entity.
- * UC016 Phase 2: estateId added.
+ * UC004_ESTATE_PLACEHOLDER Phase 2: estateId added.
  */
 public record BuildingDTO(
     Long id,

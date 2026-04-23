@@ -32,7 +32,7 @@ import lombok.extern.slf4j.Slf4j;
 
 /**
  * REST controller for the 3-step transaction import flow.
- * UC016 Phase 4: all routes are now scoped to an estate.
+ * UC004_ESTATE_PLACEHOLDER Phase 4: all routes are now scoped to an estate.
  *
  * Endpoints:
  *   POST /api/v1/estates/{estateId}/transactions/preview  — parse only, no persistence

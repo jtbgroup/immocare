@@ -10,7 +10,7 @@ import java.time.LocalDate;
 /**
  * Request DTO for adding a PEB score.
  * Cross-field validation (validUntil > scoreDate) is enforced in the service layer.
- * UC004 - US017 Add PEB Score.
+ * UC005 - UC008.001 Add PEB Score.
  */
 public class CreatePebScoreRequest {
 

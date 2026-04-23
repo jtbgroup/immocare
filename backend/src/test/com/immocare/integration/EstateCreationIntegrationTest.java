@@ -35,7 +35,7 @@ import com.immocare.service.EstateService;
 
 /**
  * Integration tests verifying estate creation, config seeding, and deletion.
- * UC016 Phase 6.
+ * UC004_ESTATE_PLACEHOLDER Phase 6.
  */
 @SpringBootTest
 @ActiveProfiles("test")

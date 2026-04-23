@@ -7,7 +7,7 @@ import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 
 /**
- * Request body for creating or updating a boiler — UC011.
+ * Request body for creating or updating a boiler — UC012.
  * Used for both POST (create) and PUT (update).
  */
 public record SaveBoilerRequest(

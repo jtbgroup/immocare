@@ -9,7 +9,7 @@ import java.math.BigDecimal;
 
 /**
  * Request DTO for creating a single room.
- * UC003 - US012 Add Room to Housing Unit.
+ * UC004 - UC007.001 Add Room to Housing Unit.
  */
 public class CreateRoomRequest {
 

@@ -1,4 +1,4 @@
-// core/services/tag-subcategory.service.ts — UC016 Phase 4
+// core/services/tag-subcategory.service.ts — UC004_ESTATE_PLACEHOLDER Phase 4
 // Tag subcategories are now estate-scoped (via tag_category.estate_id).
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { Injectable } from '@angular/core';

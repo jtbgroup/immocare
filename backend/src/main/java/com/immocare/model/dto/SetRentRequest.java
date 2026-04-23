@@ -7,8 +7,8 @@ import java.math.BigDecimal;
 import java.time.LocalDate;
 
 /**
- * Request DTO for setting the initial rent on a housing unit (US021).
- * Also used for updating rent (US022) — the service decides which flow applies.
+ * Request DTO for setting the initial rent on a housing unit (UC010.001).
+ * Also used for updating rent (UC010.002) — the service decides which flow applies.
  */
 public record SetRentRequest(
 

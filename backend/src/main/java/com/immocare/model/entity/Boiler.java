@@ -15,7 +15,7 @@ import lombok.Getter;
 import lombok.Setter;
 
 /**
- * Boiler entity — UC011.
+ * Boiler entity — UC012.
  *
  * <p>Polymorphic ownership: {@code ownerType} is either {@code HOUSING_UNIT}
  * or {@code BUILDING}; {@code ownerId} references the PK of that table.

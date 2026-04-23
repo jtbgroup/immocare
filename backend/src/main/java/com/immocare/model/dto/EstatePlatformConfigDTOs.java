@@ -11,7 +11,7 @@ import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.PastOrPresent;
 
 /**
- * DTOs for UC016 Phase 5 — per-estate Platform Configuration and Boiler
+ * DTOs for UC004_ESTATE_PLACEHOLDER Phase 5 — per-estate Platform Configuration and Boiler
  * Validity Rules.
  * Replaces the global PlatformConfigDTOs for estate-scoped operations.
  */

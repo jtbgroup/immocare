@@ -7,7 +7,7 @@ import { HousingUnit } from '../../../../models/housing-unit.model';
 
 /**
  * Housing unit detail page.
- * UC016 Phase 2: all navigation includes estateId.
+ * UC004_ESTATE_PLACEHOLDER Phase 2: all navigation includes estateId.
  */
 @Component({
   selector: 'app-housing-unit-details',

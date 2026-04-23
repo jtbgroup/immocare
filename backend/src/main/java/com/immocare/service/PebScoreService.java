@@ -26,7 +26,7 @@ import com.immocare.repository.PebScoreRepository;
 
 /**
  * Service layer for PEB score management.
- * Implements business logic for UC004 - Manage PEB Scores (US017-US020).
+ * Implements business logic for UC005 - Manage PEB Scores (UC008.001-UC008.004).
  */
 @Service
 @Transactional(readOnly = true)
@@ -50,7 +50,7 @@ public class PebScoreService {
 
     /**
      * Add a new PEB score record for a housing unit.
-     * Implements US017 - Add PEB Score.
+     * Implements UC008.001 - Add PEB Score.
      */
     @Transactional
     public PebScoreDTO addScore(Long unitId, CreatePebScoreRequest request) {
@@ -129,7 +129,7 @@ public class PebScoreService {
 
     /**
      * Get full history for a unit, newest first.
-     * Implements US018 - View PEB Score History.
+     * Implements UC008.002 - View PEB Score History.
      */
     public List<PebScoreDTO> getHistory(Long unitId) {
         if (!housingUnitRepository.existsById(unitId)) {
@@ -147,7 +147,7 @@ public class PebScoreService {
 
     /**
      * Get the current (most recent) score for a unit.
-     * Implements US018 - current score badge.
+     * Implements UC008.002 - current score badge.
      */
     public Optional<PebScoreDTO> getCurrentScore(Long unitId) {
         if (!housingUnitRepository.existsById(unitId)) {
@@ -159,7 +159,7 @@ public class PebScoreService {
 
     /**
      * Get improvement summary for a unit.
-     * Implements US020 - Track PEB Score Improvements.
+     * Implements UC008.004 - Track PEB Score Improvements.
      */
     public Optional<PebImprovementDTO> getImprovementSummary(Long unitId) {
         if (!housingUnitRepository.existsById(unitId)) {

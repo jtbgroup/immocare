@@ -62,7 +62,7 @@ psql \
   --port="$DB_PORT" \
   --username="$DB_USER" \
   --dbname="$DB_NAME" \
-  --set ON_ERROR_STOP=1 \
+  --set ON_ERROR_STOP=0 \
   <<SQL
 
 -- ============================================================
@@ -71,63 +71,61 @@ psql \
 -- app_user, platform_config, import_parser,
 -- boiler_service_validity_rule kept (seed/config data).
 -- estate and estate_member will be truncated (not admin-specific).
+-- Uses exception handling for non-existent tables.
 -- ============================================================
  
--- ─── UC014 — Financial transactions (deepest leaves first) ───────────────────
-TRUNCATE TABLE transaction_asset_link CASCADE;
-TRUNCATE TABLE accounting_month_rule  CASCADE;
-TRUNCATE TABLE tag_learning_rule      CASCADE;
-TRUNCATE TABLE financial_transaction  CASCADE;
-TRUNCATE TABLE import_batch           CASCADE;
-TRUNCATE TABLE bank_account           CASCADE;
-TRUNCATE TABLE tag_subcategory        CASCADE;
-TRUNCATE TABLE tag_category           CASCADE;
+-- ─── UC015 — Financial transactions (deepest leaves first) ───────────────────
+DO $$ BEGIN TRUNCATE TABLE transaction_asset_link CASCADE; EXCEPTION WHEN UNDEFINED_TABLE THEN NULL; END $$;
+DO $$ BEGIN TRUNCATE TABLE accounting_month_rule  CASCADE; EXCEPTION WHEN UNDEFINED_TABLE THEN NULL; END $$;
+DO $$ BEGIN TRUNCATE TABLE tag_learning_rule      CASCADE; EXCEPTION WHEN UNDEFINED_TABLE THEN NULL; END $$;
+DO $$ BEGIN TRUNCATE TABLE financial_transaction  CASCADE; EXCEPTION WHEN UNDEFINED_TABLE THEN NULL; END $$;
+DO $$ BEGIN TRUNCATE TABLE import_batch           CASCADE; EXCEPTION WHEN UNDEFINED_TABLE THEN NULL; END $$;
+DO $$ BEGIN TRUNCATE TABLE bank_account           CASCADE; EXCEPTION WHEN UNDEFINED_TABLE THEN NULL; END $$;
+DO $$ BEGIN TRUNCATE TABLE tag_subcategory        CASCADE; EXCEPTION WHEN UNDEFINED_TABLE THEN NULL; END $$;
+DO $$ BEGIN TRUNCATE TABLE tag_category           CASCADE; EXCEPTION WHEN UNDEFINED_TABLE THEN NULL; END $$;
  
--- ─── UC011 — Fire extinguishers ───────────────────────────────────────────────
-TRUNCATE TABLE fire_extinguisher_revision CASCADE;
-TRUNCATE TABLE fire_extinguisher          CASCADE;
+-- ─── UC012 — Fire extinguishers ───────────────────────────────────────────────
+DO $$ BEGIN TRUNCATE TABLE fire_extinguisher_revision CASCADE; EXCEPTION WHEN UNDEFINED_TABLE THEN NULL; END $$;
+DO $$ BEGIN TRUNCATE TABLE fire_extinguisher          CASCADE; EXCEPTION WHEN UNDEFINED_TABLE THEN NULL; END $$;
  
--- ─── UC010 — Boilers ──────────────────────────────────────────────────────────
-TRUNCATE TABLE boiler_service CASCADE;
-TRUNCATE TABLE boiler         CASCADE;
+-- ─── UC011 — Boilers ──────────────────────────────────────────────────────────
+DO $$ BEGIN TRUNCATE TABLE boiler_service CASCADE; EXCEPTION WHEN UNDEFINED_TABLE THEN NULL; END $$;
+DO $$ BEGIN TRUNCATE TABLE boiler         CASCADE; EXCEPTION WHEN UNDEFINED_TABLE THEN NULL; END $$;
  
--- ─── UC008 — Meters ───────────────────────────────────────────────────────────
-TRUNCATE TABLE meter CASCADE;
+-- ─── UC009 — Meters ───────────────────────────────────────────────────────────
+DO $$ BEGIN TRUNCATE TABLE meter CASCADE; EXCEPTION WHEN UNDEFINED_TABLE THEN NULL; END $$;
  
--- ─── UC012 — Leases ───────────────────────────────────────────────────────────
-TRUNCATE TABLE lease_rent_adjustment CASCADE;
-TRUNCATE TABLE lease_tenant          CASCADE;
-TRUNCATE TABLE lease                 CASCADE;
+-- ─── UC014 — Leases ───────────────────────────────────────────────────────────
+DO $$ BEGIN TRUNCATE TABLE lease_rent_adjustment CASCADE; EXCEPTION WHEN UNDEFINED_TABLE THEN NULL; END $$;
+DO $$ BEGIN TRUNCATE TABLE lease_tenant          CASCADE; EXCEPTION WHEN UNDEFINED_TABLE THEN NULL; END $$;
+DO $$ BEGIN TRUNCATE TABLE lease                 CASCADE; EXCEPTION WHEN UNDEFINED_TABLE THEN NULL; END $$;
  
--- ─── UC009 — Rent history ─────────────────────────────────────────────────────
-TRUNCATE TABLE rent_history CASCADE;
+-- ─── UC010 — Rent history ─────────────────────────────────────────────────────
+DO $$ BEGIN TRUNCATE TABLE rent_history CASCADE; EXCEPTION WHEN UNDEFINED_TABLE THEN NULL; END $$;
  
--- ─── UC007 — PEB scores ───────────────────────────────────────────────────────
-TRUNCATE TABLE peb_score_history CASCADE;
+-- ─── UC008 — PEB scores ───────────────────────────────────────────────────────
+DO $$ BEGIN TRUNCATE TABLE peb_score_history CASCADE; EXCEPTION WHEN UNDEFINED_TABLE THEN NULL; END $$;
  
--- ─── UC006 — Rooms ────────────────────────────────────────────────────────────
-TRUNCATE TABLE room CASCADE;
+-- ─── UC007 — Rooms ────────────────────────────────────────────────────────────
+DO $$ BEGIN TRUNCATE TABLE room CASCADE; EXCEPTION WHEN UNDEFINED_TABLE THEN NULL; END $$;
  
--- ─── UC005 — Housing units ────────────────────────────────────────────────────
-TRUNCATE TABLE housing_unit CASCADE;
+-- ─── UC006 — Housing units ────────────────────────────────────────────────────
+DO $$ BEGIN TRUNCATE TABLE housing_unit CASCADE; EXCEPTION WHEN UNDEFINED_TABLE THEN NULL; END $$;
  
--- ─── UC004 — Buildings ────────────────────────────────────────────────────────
-TRUNCATE TABLE building CASCADE;
+-- ─── UC005 — Buildings ────────────────────────────────────────────────────────
+DO $$ BEGIN TRUNCATE TABLE building CASCADE; EXCEPTION WHEN UNDEFINED_TABLE THEN NULL; END $$;
  
--- ─── UC003 — Persons & bank accounts ─────────────────────────────────────────
-TRUNCATE TABLE person_bank_account CASCADE;
-TRUNCATE TABLE person              CASCADE;
+-- ─── UC004 — Persons & bank accounts ─────────────────────────────────────────
+DO $$ BEGIN TRUNCATE TABLE person_bank_account CASCADE; EXCEPTION WHEN UNDEFINED_TABLE THEN NULL; END $$;
+DO $$ BEGIN TRUNCATE TABLE person              CASCADE; EXCEPTION WHEN UNDEFINED_TABLE THEN NULL; END $$;
  
 -- ─── UC002 — Users (keep admin) ───────────────────────────────────────────────
 DELETE FROM app_user WHERE username != '$ADMIN_USER';
 UPDATE app_user SET is_platform_admin = true WHERE username = '$ADMIN_USER';
 
--- ─── UC016 — Estates ──────────────────────────────────────────────────────────
-TRUNCATE TABLE estate_member CASCADE;
-TRUNCATE TABLE estate        CASCADE;
- 
--- ─── Reset sequences ──────────────────────────────────────────────────────────
-ALTER SEQUENCE financial_transaction_ref_seq RESTART WITH 1;
+-- ─── UC004_ESTATE_PLACEHOLDER — Estates ──────────────────────────────────────────────────────────
+DO $$ BEGIN TRUNCATE TABLE estate_member CASCADE; EXCEPTION WHEN UNDEFINED_TABLE THEN NULL; END $$;
+DO $$ BEGIN TRUNCATE TABLE estate        CASCADE; EXCEPTION WHEN UNDEFINED_TABLE THEN NULL; END $$;
 
 SQL
 

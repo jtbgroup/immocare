@@ -10,7 +10,7 @@ import com.immocare.model.entity.AppUser;
  * MapStruct mapper for {@link AppUser} ↔ {@link UserDTO}.
  * {@code passwordHash} is explicitly ignored and will never appear in any DTO.
  *
- * UC016 Phase 1: replaced {@code role} mapping with {@code isPlatformAdmin}.
+ * UC004_ESTATE_PLACEHOLDER Phase 1: replaced {@code role} mapping with {@code isPlatformAdmin}.
  *
  * Note: MapStruct derives property names from getters by stripping the prefix.
  * For boolean getters, {@code isPlatformAdmin()} → property name

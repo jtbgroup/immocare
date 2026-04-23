@@ -14,7 +14,7 @@ import com.immocare.model.entity.FinancialTransaction;
 
 /**
  * Repository for FinancialTransaction entity.
- * UC016 Phase 4: estate-scoped queries added.
+ * UC004_ESTATE_PLACEHOLDER Phase 4: estate-scoped queries added.
  */
 public interface FinancialTransactionRepository
         extends JpaRepository<FinancialTransaction, Long>, JpaSpecificationExecutor<FinancialTransaction> {
@@ -27,7 +27,7 @@ public interface FinancialTransactionRepository
 
     /**
      * Returns the id of the existing transaction with the given fingerprint, or null.
-     * UC016 Phase 4: check is now estate-scoped to avoid cross-estate dedup conflicts.
+     * UC004_ESTATE_PLACEHOLDER Phase 4: check is now estate-scoped to avoid cross-estate dedup conflicts.
      */
     @Query("SELECT t.id FROM FinancialTransaction t WHERE t.importFingerprint = :fingerprint")
     Long findIdByImportFingerprint(

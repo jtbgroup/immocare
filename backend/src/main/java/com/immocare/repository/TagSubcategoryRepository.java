@@ -11,7 +11,7 @@ import com.immocare.model.entity.TagSubcategory;
 
 /**
  * Repository for TagSubcategory entity.
- * UC016 Phase 4: all queries are now scoped to an estate via
+ * UC004_ESTATE_PLACEHOLDER Phase 4: all queries are now scoped to an estate via
  * tag_category.estate_id.
  */
 public interface TagSubcategoryRepository extends JpaRepository<TagSubcategory, Long> {

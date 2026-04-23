@@ -1,4 +1,4 @@
-// core/services/alert.service.ts — UC016 Phase 4
+// core/services/alert.service.ts — UC004_ESTATE_PLACEHOLDER Phase 4
 // Alerts are now estate-scoped.
 import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';

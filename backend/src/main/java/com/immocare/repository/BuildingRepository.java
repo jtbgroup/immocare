@@ -13,8 +13,8 @@ import com.immocare.model.entity.Building;
 
 /**
  * Repository for Building entity.
- * UC016 Phase 2+: all queries scoped to an estate.
- * UC016 Phase 6: countByEstateId used by dashboard.
+ * UC004_ESTATE_PLACEHOLDER Phase 2+: all queries scoped to an estate.
+ * UC004_ESTATE_PLACEHOLDER Phase 6: countByEstateId used by dashboard.
  */
 public interface BuildingRepository extends JpaRepository<Building, Long> {
 

@@ -1,7 +1,7 @@
 package com.immocare.model.dto;
 
 /**
- * Legacy placeholder — UC016 Phase 5.
+ * Legacy placeholder — UC004_ESTATE_PLACEHOLDER Phase 5.
  *
  * All platform configuration is now per-estate.
  * Use {@link EstatePlatformConfigDTOs} for all config operations.
@@ -11,7 +11,7 @@ package com.immocare.model.dto;
  *
  * @deprecated Use {@link EstatePlatformConfigDTOs} instead.
  */
-@Deprecated(since = "UC016-Phase5", forRemoval = true)
+@Deprecated(since = "UC004_ESTATE_PLACEHOLDER-Phase5", forRemoval = true)
 public final class PlatformConfigDTOs {
 
         private PlatformConfigDTOs() {

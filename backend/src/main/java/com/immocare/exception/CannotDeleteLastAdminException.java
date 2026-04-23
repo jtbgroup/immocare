@@ -1,7 +1,7 @@
 package com.immocare.exception;
 
 /**
- * Thrown when deleting the target user would leave the system with no ADMIN (BR-UC007-06).
+ * Thrown when deleting the target user would leave the system with no ADMIN (BR-UC008-06).
  */
 public class CannotDeleteLastAdminException extends RuntimeException {
 

@@ -1,5 +1,5 @@
 // features/settings/components/estate-platform-settings/estate-platform-settings.component.ts
-// UC016 Phase 5 — Per-estate platform settings page
+// UC004_ESTATE_PLACEHOLDER Phase 5 — Per-estate platform settings page
 // Route: /estates/:estateId/admin/platform-settings
 import { CommonModule } from '@angular/common';
 import { Component, OnDestroy, OnInit } from '@angular/core';

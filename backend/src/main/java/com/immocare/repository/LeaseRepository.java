@@ -16,7 +16,7 @@ import com.immocare.model.enums.LeaseStatus;
 
 /**
  * Repository for Lease entity.
- * UC016 Phase 3: estate-scoped queries added via housing_unit → building join.
+ * UC004_ESTATE_PLACEHOLDER Phase 3: estate-scoped queries added via housing_unit → building join.
  */
 public interface LeaseRepository extends JpaRepository<Lease, Long>, JpaSpecificationExecutor<Lease> {
 

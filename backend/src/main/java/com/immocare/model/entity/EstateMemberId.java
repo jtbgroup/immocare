@@ -6,7 +6,7 @@ import java.util.UUID;
 
 /**
  * Composite primary key for {@link EstateMember}.
- * UC016 — Manage Estates (Phase 1).
+ * UC004_ESTATE_PLACEHOLDER — Manage Estates (Phase 1).
  */
 public class EstateMemberId implements Serializable {
 

@@ -1,4 +1,4 @@
-// features/settings/components/settings/settings.component.ts — UC016 Phase 6
+// features/settings/components/settings/settings.component.ts — UC004_ESTATE_PLACEHOLDER Phase 6
 // ActiveEstateService injected; save() blocked for VIEWERs.
 import { CommonModule } from '@angular/common';
 import { Component, OnDestroy, OnInit } from '@angular/core';
@@ -118,7 +118,7 @@ export class SettingsComponent implements OnInit, OnDestroy {
     }
     this.form = this.fb.group(group);
 
-    // Disable form for VIEWERs (BR-UC016-08)
+    // Disable form for VIEWERs (BR-UC004_ESTATE_PLACEHOLDER-08)
     if (!this.activeEstateService.canEdit()) {
       this.form.disable();
     }
@@ -135,7 +135,7 @@ export class SettingsComponent implements OnInit, OnDestroy {
   }
 
   save(): void {
-    // Block save for VIEWERs (BR-UC016-08)
+    // Block save for VIEWERs (BR-UC004_ESTATE_PLACEHOLDER-08)
     if (!this.activeEstateService.canEdit()) return;
 
     if (this.form.invalid) {

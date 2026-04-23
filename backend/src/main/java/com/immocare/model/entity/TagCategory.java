@@ -7,7 +7,7 @@ import java.util.List;
 
 /**
  * Tag category entity.
- * UC016 Phase 4: estate_id added — tag categories are now scoped to an estate.
+ * UC004_ESTATE_PLACEHOLDER Phase 4: estate_id added — tag categories are now scoped to an estate.
  */
 @Entity
 @Table(name = "tag_category")
@@ -31,7 +31,7 @@ public class TagCategory {
 
     /**
      * Estate this tag category belongs to.
-     * UC016 Phase 4 — all tag categories are scoped to an estate.
+     * UC004_ESTATE_PLACEHOLDER Phase 4 — all tag categories are scoped to an estate.
      */
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "estate_id", nullable = false)

@@ -1,7 +1,7 @@
 package com.immocare.exception;
 
 /**
- * Thrown when an admin attempts to delete their own account (BR-UC007-05).
+ * Thrown when an admin attempts to delete their own account (BR-UC008-05).
  */
 public class CannotDeleteSelfException extends RuntimeException {
 

@@ -20,7 +20,7 @@ import com.immocare.repository.TagSubcategoryRepository;
 import lombok.RequiredArgsConstructor;
 
 /**
- * Business logic for UC016 Phase 5 — per-estate Platform Configuration.
+ * Business logic for UC004_ESTATE_PLACEHOLDER Phase 5 — per-estate Platform Configuration.
  * All operations require an estateId — there are no global config reads.
  */
 @Service

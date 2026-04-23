@@ -9,7 +9,7 @@ import java.util.UUID;
 
 /**
  * Repository for ImportBatch entity.
- * UC016 Phase 4: estate-scoped queries added.
+ * UC004_ESTATE_PLACEHOLDER Phase 4: estate-scoped queries added.
  */
 public interface ImportBatchRepository extends JpaRepository<ImportBatch, Long> {
 

@@ -1,4 +1,4 @@
-// features/lease/lease-list/lease-list.component.ts — UC016 Phase 3
+// features/lease/lease-list/lease-list.component.ts — UC004_ESTATE_PLACEHOLDER Phase 3
 import { CommonModule } from "@angular/common";
 import { Component, Input, OnInit } from "@angular/core";
 import { RouterModule } from "@angular/router";

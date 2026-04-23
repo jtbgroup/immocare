@@ -17,7 +17,7 @@ import jakarta.persistence.criteria.Predicate;
 
 /**
  * JPA Specifications for Lease queries.
- * UC016 Phase 3: {@link #hasEstate(UUID)} added for estate-scoped filtering.
+ * UC004_ESTATE_PLACEHOLDER Phase 3: {@link #hasEstate(UUID)} added for estate-scoped filtering.
  */
 public class LeaseSpecification {
 
@@ -45,7 +45,7 @@ public class LeaseSpecification {
 
     /**
      * Restricts results to leases whose housing unit belongs to the given estate.
-     * UC016 Phase 3 — used by LeaseService.getAll() to enforce estate scope.
+     * UC004_ESTATE_PLACEHOLDER Phase 3 — used by LeaseService.getAll() to enforce estate scope.
      */
     public static Specification<Lease> hasEstate(UUID estateId) {
         return (root, query, cb) ->

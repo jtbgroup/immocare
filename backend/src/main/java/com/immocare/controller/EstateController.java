@@ -32,15 +32,15 @@ import jakarta.validation.Valid;
  * estates").
  * Fine-grained access control is handled per method via {@code @PreAuthorize}.
  *
- * UC016 — Manage Estates (Phase 1).
+ * UC004_ESTATE_PLACEHOLDER — Manage Estates (Phase 1).
  *
  * Endpoints:
- * GET /api/v1/estates/mine → US103 my estates
- * GET /api/v1/estates/{id}/dashboard → US102 estate dashboard
- * GET /api/v1/estates/{id}/members → US097 view members
- * POST /api/v1/estates/{id}/members → US098 add member
- * PATCH /api/v1/estates/{id}/members/{userId} → US099 edit member role
- * DELETE /api/v1/estates/{id}/members/{userId} → US100 remove member
+ * GET /api/v1/estates/mine → UC003.012 my estates
+ * GET /api/v1/estates/{id}/dashboard → UC003.011 estate dashboard
+ * GET /api/v1/estates/{id}/members → UC003.006 view members
+ * POST /api/v1/estates/{id}/members → UC003.007 add member
+ * PATCH /api/v1/estates/{id}/members/{userId} → UC003.008 edit member role
+ * DELETE /api/v1/estates/{id}/members/{userId} → UC003.009 remove member
  * GET /api/v1/estates/{id}/alerts/count → estate alerts count
  * GET /api/v1/estates/{id}/alerts → estate alerts list
  */
@@ -56,7 +56,7 @@ public class EstateController {
     }
 
     /**
-     * US103 — View my estates.
+     * UC003.012 — View my estates.
      * Returns all estates where the current user is a member (with their role),
      * or all estates if the user is PLATFORM_ADMIN (myRole = null).
      */
@@ -69,7 +69,7 @@ public class EstateController {
     }
 
     /**
-     * US102 — View estate dashboard.
+     * UC003.011 — View estate dashboard.
      * All counts are 0 in Phase 1.
      */
     @GetMapping("/api/v1/estates/{id}/dashboard")
@@ -79,7 +79,7 @@ public class EstateController {
     }
 
     /**
-     * US097 — View estate members.
+     * UC003.006 — View estate members.
      * Accessible to MANAGER and PLATFORM_ADMIN only (not VIEWER).
      */
     @GetMapping("/api/v1/estates/{id}/members")
@@ -89,7 +89,7 @@ public class EstateController {
     }
 
     /**
-     * US098 — Add a member to the estate.
+     * UC003.007 — Add a member to the estate.
      */
     @PostMapping("/api/v1/estates/{id}/members")
     @PreAuthorize("@security.isManagerOf(#id)")
@@ -102,7 +102,7 @@ public class EstateController {
     }
 
     /**
-     * US099 — Edit a member's role.
+     * UC003.008 — Edit a member's role.
      */
     @PatchMapping("/api/v1/estates/{id}/members/{userId}")
     @PreAuthorize("@security.isManagerOf(#id)")

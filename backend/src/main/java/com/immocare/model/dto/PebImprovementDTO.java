@@ -6,7 +6,7 @@ import java.util.List;
 
 /**
  * Summary of PEB score improvements over time for a housing unit.
- * UC004 - US020 Track PEB Score Improvements.
+ * UC005 - UC008.004 Track PEB Score Improvements.
  */
 public class PebImprovementDTO {
 

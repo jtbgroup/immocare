@@ -32,13 +32,13 @@ import jakarta.validation.Valid;
  * REST controller for platform-level estate management.
  * All endpoints require PLATFORM_ADMIN access.
  *
- * UC016 — Manage Estates (Phase 1).
+ * UC004_ESTATE_PLACEHOLDER — Manage Estates (Phase 1).
  *
  * Endpoints:
- * GET /api/v1/admin/estates → US095 list all estates
- * POST /api/v1/admin/estates → US092 create estate
- * PUT /api/v1/admin/estates/{id} → US093 edit estate
- * DELETE /api/v1/admin/estates/{id} → US094 delete estate
+ * GET /api/v1/admin/estates → UC003.004 list all estates
+ * POST /api/v1/admin/estates → UC003.001 create estate
+ * PUT /api/v1/admin/estates/{id} → UC003.002 edit estate
+ * DELETE /api/v1/admin/estates/{id} → UC003.003 delete estate
  */
 @RestController
 @RequestMapping("/api/v1/admin/estates")
@@ -52,7 +52,7 @@ public class EstateAdminController {
     }
 
     /**
-     * US095 — List all estates.
+     * UC003.004 — List all estates.
      *
      * @param search optional name filter (case-insensitive, partial match)
      * @param page   zero-based page number (default 0)
@@ -84,9 +84,9 @@ public class EstateAdminController {
     }
 
     /**
-     * US092 — Create a new estate.
+     * UC003.001 — Create a new estate.
      * Optional {@code firstManagerId} assigns a MANAGER role at creation time
-     * (US096).
+     * (UC003.005).
      */
     @PostMapping
     public ResponseEntity<EstateDTO> createEstate(
@@ -97,7 +97,7 @@ public class EstateAdminController {
     }
 
     /**
-     * US093 — Edit an existing estate.
+     * UC003.002 — Edit an existing estate.
      */
     @PutMapping("/{id}")
     public ResponseEntity<EstateDTO> updateEstate(
@@ -107,8 +107,8 @@ public class EstateAdminController {
     }
 
     /**
-     * US094 — Delete an estate.
-     * Blocked if the estate contains buildings (BR-UC016-09).
+     * UC003.003 — Delete an estate.
+     * Blocked if the estate contains buildings (BR-UC004_ESTATE_PLACEHOLDER-09).
      */
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteEstate(@PathVariable UUID id) {

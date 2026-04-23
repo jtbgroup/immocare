@@ -1,4 +1,4 @@
-// core/services/platform-config.service.ts — UC016 Phase 5
+// core/services/platform-config.service.ts — UC004_ESTATE_PLACEHOLDER Phase 5
 // All endpoints migrated to /api/v1/estates/{estateId}/config/**
 import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
@@ -32,7 +32,7 @@ export class PlatformConfigService {
 
   /**
    * GET /api/v1/estates/{estateId}/config/settings
-   * US067 — List all config entries for the active estate.
+   * UC013.001 — List all config entries for the active estate.
    */
   getAll(): Observable<PlatformConfigDTO[]> {
     return this.http.get<PlatformConfigDTO[]>(`${this.base}/settings`);
@@ -47,7 +47,7 @@ export class PlatformConfigService {
 
   /**
    * PUT /api/v1/estates/{estateId}/config/settings/{key}
-   * US070 — Update a single config entry.
+   * UC013.004 — Update a single config entry.
    */
   updateOne(key: string, req: UpdateConfigRequest): Observable<PlatformConfigDTO> {
     return this.http.put<PlatformConfigDTO>(`${this.base}/settings/${key}`, req);
@@ -70,7 +70,7 @@ export class PlatformConfigService {
 
   /**
    * GET /api/v1/estates/{estateId}/config/boiler-validity-rules
-   * US069 — List validity rules for the active estate.
+   * UC013.003 — List validity rules for the active estate.
    */
   getValidityRules(): Observable<any[]> {
     return this.http.get<any[]>(`${this.base}/boiler-validity-rules`);
@@ -78,7 +78,7 @@ export class PlatformConfigService {
 
   /**
    * POST /api/v1/estates/{estateId}/config/boiler-validity-rules
-   * US068 — Add a boiler validity rule.
+   * UC013.002 — Add a boiler validity rule.
    */
   addValidityRule(req: any): Observable<any> {
     return this.http.post<any>(`${this.base}/boiler-validity-rules`, req);
@@ -88,7 +88,7 @@ export class PlatformConfigService {
 
   /**
    * GET /api/v1/estates/{estateId}/config/asset-type-mappings
-   * US071 — List asset type → subcategory mappings.
+   * UC012.001 — List asset type → subcategory mappings.
    */
   getAssetTypeMappings(): Observable<any[]> {
     return this.http.get<any[]>(`${this.base}/asset-type-mappings`);
@@ -96,7 +96,7 @@ export class PlatformConfigService {
 
   /**
    * PUT /api/v1/estates/{estateId}/config/asset-type-mappings/{assetType}
-   * US071 — Update a mapping.
+   * UC012.001 — Update a mapping.
    */
   updateAssetTypeMapping(assetType: string, req: any): Observable<any> {
     return this.http.put<any>(`${this.base}/asset-type-mappings/${assetType}`, req);

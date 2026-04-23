@@ -44,7 +44,7 @@ public class Building {
 
     /**
      * Estate this building belongs to.
-     * UC016 Phase 2 — all buildings must be scoped to an estate.
+     * UC004_ESTATE_PLACEHOLDER Phase 2 — all buildings must be scoped to an estate.
      */
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "estate_id", nullable = false)

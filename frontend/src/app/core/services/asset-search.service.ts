@@ -1,4 +1,4 @@
-// core/services/asset-search.service.ts — UC016 Phase 4
+// core/services/asset-search.service.ts — UC004_ESTATE_PLACEHOLDER Phase 4
 // Asset search endpoints are estate-scoped via buildings/units within the estate.
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { Injectable } from '@angular/core';

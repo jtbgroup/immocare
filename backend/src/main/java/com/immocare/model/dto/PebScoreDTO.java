@@ -7,7 +7,7 @@ import java.time.LocalDateTime;
 /**
  * Response DTO for a PEB score history record.
  * Computed fields (status, expiryWarning) are set by the service layer.
- * UC004 - Manage PEB Scores.
+ * UC005 - Manage PEB Scores.
  */
 public class PebScoreDTO {
 

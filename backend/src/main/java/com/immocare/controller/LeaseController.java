@@ -43,7 +43,7 @@ import lombok.RequiredArgsConstructor;
 
 /**
  * REST controller for Lease management.
- * UC016 Phase 3: all routes are now scoped to an estate.
+ * UC004_ESTATE_PLACEHOLDER Phase 3: all routes are now scoped to an estate.
  *
  * Endpoints:
  *   GET    /api/v1/estates/{estateId}/housing-units/{unitId}/leases          - leases by unit

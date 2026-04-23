@@ -5,7 +5,7 @@ import java.time.LocalDate;
 
 /**
  * Represents a single transition between two consecutive PEB scores.
- * UC004 - US020 Track PEB Score Improvements.
+ * UC005 - UC008.004 Track PEB Score Improvements.
  */
 public class PebScoreStepDTO {
 

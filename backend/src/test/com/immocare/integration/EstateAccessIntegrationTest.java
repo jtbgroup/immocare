@@ -35,7 +35,7 @@ import com.immocare.repository.UserRepository;
 
 /**
  * Integration tests verifying cross-estate data isolation.
- * UC016 Phase 6.
+ * UC004_ESTATE_PLACEHOLDER Phase 6.
  *
  * Setup: 2 estates (A and B), 1 MANAGER per estate, 1 VIEWER in estate A.
  * A PLATFORM_ADMIN user has access to all estates without membership.

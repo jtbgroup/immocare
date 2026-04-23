@@ -9,7 +9,7 @@ import com.immocare.model.entity.AppUser;
 
 /**
  * Repository for {@link AppUser}.
- * UC016 Phase 1: role-based methods replaced by isPlatformAdmin queries.
+ * UC004_ESTATE_PLACEHOLDER Phase 1: role-based methods replaced by isPlatformAdmin queries.
  */
 @Repository
 public interface UserRepository extends JpaRepository<AppUser, Long> {
@@ -20,6 +20,6 @@ public interface UserRepository extends JpaRepository<AppUser, Long> {
 
     boolean existsByEmailIgnoreCase(String email);
 
-    /** BR-UC007-06: guard against deleting the last platform admin. */
+    /** BR-UC008-06: guard against deleting the last platform admin. */
     long countByIsPlatformAdminTrue();
 }

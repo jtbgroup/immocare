@@ -11,8 +11,8 @@ import org.springframework.data.repository.query.Param;
 import com.immocare.model.entity.Boiler;
 
 /**
- * Repository for UC011 — Manage Boilers.
- * UC016 Phase 6: findActiveByEstateId added for dashboard alert computation.
+ * Repository for UC012 — Manage Boilers.
+ * UC004_ESTATE_PLACEHOLDER Phase 6: findActiveByEstateId added for dashboard alert computation.
  */
 public interface BoilerRepository extends JpaRepository<Boiler, Long> {
 
@@ -25,7 +25,7 @@ public interface BoilerRepository extends JpaRepository<Boiler, Long> {
 
     /**
      * All active (non-removed) boilers across all buildings in the given estate.
-     * Used by EstateService.getDashboard() — UC016 Phase 6.
+     * Used by EstateService.getDashboard() — UC004_ESTATE_PLACEHOLDER Phase 6.
      */
     @Query("""
             SELECT b FROM Boiler b

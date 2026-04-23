@@ -40,10 +40,10 @@ ImmoCare is designed to manage:
 |----------|-------------|--------|
 | [UC001-manage-buildings.md](./use-cases/UC001-manage-buildings.md) | CRUD operations for buildings | ✅ Ready |
 | UC002-manage-housing-units.md | CRUD operations for housing units | 📋 TODO |
-| UC003-manage-rooms.md | CRUD operations for rooms | 📋 TODO |
-| UC004-manage-peb-scores.md | Manage PEB score history | 📋 TODO |
-| UC005-manage-rents.md | Manage rent history | 📋 TODO |
-| UC006-manage-water-meters.md | Manage water meter history | 📋 TODO |
+| UC004-manage-rooms.md | CRUD operations for rooms | 📋 TODO |
+| UC005-manage-peb-scores.md | Manage PEB score history | 📋 TODO |
+| UC006-manage-rents.md | Manage rent history | 📋 TODO |
+| UC007-manage-water-meters.md | Manage water meter history | 📋 TODO |
 
 ### User Stories
 
@@ -51,9 +51,9 @@ Located in `user-stories/` directory (to be created)
 
 | Story | Description | Status |
 |-------|-------------|--------|
-| US001-create-building.md | Create a new building | 📋 TODO |
-| US002-edit-building.md | Edit building information | 📋 TODO |
-| US003-delete-building.md | Delete a building | 📋 TODO |
+| UC005.001-create-building.md | Create a new building | 📋 TODO |
+| UC005.002-edit-building.md | Edit building information | 📋 TODO |
+| UC005.003-delete-building.md | Delete a building | 📋 TODO |
 | ... | (More to be defined) | 📋 TODO |
 
 ---

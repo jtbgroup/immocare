@@ -9,7 +9,7 @@ import jakarta.validation.constraints.Pattern;
  * Request body for POST /api/v1/users.
  * Password complexity and confirmation are validated in {@code UserService}.
  *
- * UC016 Phase 1: replaced {@code role} with {@code isPlatformAdmin}.
+ * UC004_ESTATE_PLACEHOLDER Phase 1: replaced {@code role} with {@code isPlatformAdmin}.
  */
 public record CreateUserRequest(
 

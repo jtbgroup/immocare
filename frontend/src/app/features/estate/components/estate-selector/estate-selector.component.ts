@@ -1,4 +1,4 @@
-// features/estate/components/estate-selector/estate-selector.component.ts — UC016 US101
+// features/estate/components/estate-selector/estate-selector.component.ts — UC004_ESTATE_PLACEHOLDER UC003.010
 import { CommonModule } from "@angular/common";
 import { Component, OnDestroy, OnInit } from "@angular/core";
 import { Router } from "@angular/router";
@@ -53,7 +53,7 @@ export class EstateSelectorComponent implements OnInit, OnDestroy {
         next: (estates) => {
           this.loading = false;
 
-          // Auto-select if exactly one estate (US101 AC1)
+          // Auto-select if exactly one estate (UC003.010 AC1)
           if (estates.length === 1) {
             this.selectEstate(estates[0]);
             return;

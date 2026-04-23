@@ -19,7 +19,7 @@ import com.immocare.repository.EstateRepository;
 import lombok.RequiredArgsConstructor;
 
 /**
- * Business logic for boiler service validity rules — UC016 Phase 5.
+ * Business logic for boiler service validity rules — UC004_ESTATE_PLACEHOLDER Phase 5.
  * All operations are scoped to an estate.
  * Rules are append-only: once added, they are never modified or deleted.
  */

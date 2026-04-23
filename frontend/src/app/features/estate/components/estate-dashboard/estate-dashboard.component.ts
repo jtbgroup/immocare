@@ -1,4 +1,4 @@
-// features/estate/components/estate-dashboard/estate-dashboard.component.ts — UC016 Phase 6
+// features/estate/components/estate-dashboard/estate-dashboard.component.ts — UC004_ESTATE_PLACEHOLDER Phase 6
 // Dashboard fully populated with real counts. Alert cards navigate to alert list.
 import { CommonModule } from '@angular/common';
 import { Component, OnDestroy, OnInit } from '@angular/core';

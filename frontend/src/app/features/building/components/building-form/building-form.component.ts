@@ -15,7 +15,7 @@ import { PersonSummary } from '../../../../models/person.model';
 
 /**
  * Create / Edit building form.
- * UC016 Phase 2: breadcrumb and cancel navigation include estateId.
+ * UC004_ESTATE_PLACEHOLDER Phase 2: breadcrumb and cancel navigation include estateId.
  */
 @Component({
   selector: 'app-building-form',

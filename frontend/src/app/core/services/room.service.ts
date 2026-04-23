@@ -12,7 +12,7 @@ import {
 
 /**
  * Angular service for Room API calls.
- * UC003 - Manage Rooms.
+ * UC004 - Manage Rooms.
  */
 @Injectable({ providedIn: 'root' })
 export class RoomService {
@@ -22,7 +22,7 @@ export class RoomService {
 
   /**
    * GET /api/v1/housing-units/{unitId}/rooms
-   * US016 - View Room Composition
+   * UC007.005 - View Room Composition
    */
   getRooms(unitId: number): Observable<RoomListResponse> {
     return this.http.get<RoomListResponse>(`${this.base}/${unitId}/rooms`);
@@ -30,7 +30,7 @@ export class RoomService {
 
   /**
    * POST /api/v1/housing-units/{unitId}/rooms
-   * US012 - Add Room
+   * UC007.001 - Add Room
    */
   createRoom(unitId: number, request: CreateRoomRequest): Observable<Room> {
     return this.http.post<Room>(`${this.base}/${unitId}/rooms`, request);
@@ -38,7 +38,7 @@ export class RoomService {
 
   /**
    * PUT /api/v1/housing-units/{unitId}/rooms/{id}
-   * US013 - Edit Room
+   * UC007.002 - Edit Room
    */
   updateRoom(unitId: number, id: number, request: UpdateRoomRequest): Observable<Room> {
     return this.http.put<Room>(`${this.base}/${unitId}/rooms/${id}`, request);
@@ -46,7 +46,7 @@ export class RoomService {
 
   /**
    * DELETE /api/v1/housing-units/{unitId}/rooms/{id}
-   * US014 - Delete Room
+   * UC007.003 - Delete Room
    */
   deleteRoom(unitId: number, id: number): Observable<{ message: string }> {
     return this.http.delete<{ message: string }>(`${this.base}/${unitId}/rooms/${id}`);
@@ -54,7 +54,7 @@ export class RoomService {
 
   /**
    * POST /api/v1/housing-units/{unitId}/rooms/batch
-   * US015 - Quick Add Multiple Rooms
+   * UC007.004 - Quick Add Multiple Rooms
    */
   batchCreateRooms(unitId: number, request: BatchCreateRoomsRequest): Observable<Room[]> {
     return this.http.post<Room[]>(`${this.base}/${unitId}/rooms/batch`, request);

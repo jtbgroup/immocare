@@ -1,4 +1,4 @@
-// UC003 - Manage Rooms
+// UC004 - Manage Rooms
 
 export type RoomType =
   | 'LIVING_ROOM'

@@ -21,7 +21,7 @@ import com.immocare.service.RentHistoryService;
 import jakarta.validation.Valid;
 
 /**
- * REST controller for UC005 — Manage Rents. Full CRUD.
+ * REST controller for UC006 — Manage Rents. Full CRUD.
  *
  * GET /api/v1/housing-units/{unitId}/rents → history
  * GET /api/v1/housing-units/{unitId}/rents/current → current rent

@@ -1,5 +1,5 @@
 /**
- * Building model — UC016 Phase 2: estateId added.
+ * Building model — UC004_ESTATE_PLACEHOLDER Phase 2: estateId added.
  * Matches BuildingDTO from backend after V018 migration.
  */
 export interface Building {

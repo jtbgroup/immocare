@@ -22,7 +22,7 @@ import com.immocare.repository.MeterRepository;
 import lombok.RequiredArgsConstructor;
 
 /**
- * Business logic for UC008 - Manage Meters.
+ * Business logic for UC009 - Manage Meters.
  *
  * <h3>Append-only pattern</h3>
  * <ul>
@@ -53,7 +53,7 @@ public class MeterService {
     /**
      * Returns active meters for the given owner, sorted by type then startDate
      * DESC.
-     * US036, US037.
+     * UC009.001, UC009.002.
      */
     public List<MeterDTO> getActiveMeters(String ownerType, Long ownerId) {
         validateOwnerExists(ownerType, ownerId);
@@ -70,7 +70,7 @@ public class MeterService {
 
     /**
      * Returns full meter history (active + closed), sorted by startDate DESC.
-     * US042.
+     * UC009.007.
      */
     public List<MeterDTO> getMeterHistory(String ownerType, Long ownerId) {
         validateOwnerExists(ownerType, ownerId);
@@ -87,7 +87,7 @@ public class MeterService {
 
     /**
      * Adds a new meter for the given owner.
-     * US038, US039.
+     * UC009.003, UC009.004.
      *
      * <p>
      * Business rules enforced:
@@ -128,7 +128,7 @@ public class MeterService {
 
     /**
      * Atomically closes the current meter and creates a new one.
-     * US040.
+     * UC009.005.
      *
      * <p>
      * Business rules enforced:
@@ -180,7 +180,7 @@ public class MeterService {
 
     /**
      * Closes an active meter without creating a replacement.
-     * US041.
+     * UC009.006.
      *
      * <p>
      * Business rules enforced:

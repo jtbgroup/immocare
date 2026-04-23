@@ -8,7 +8,7 @@ import java.util.UUID;
 
 /**
  * Repository for TagCategory entity.
- * UC016 Phase 4: all queries are now scoped to an estate.
+ * UC004_ESTATE_PLACEHOLDER Phase 4: all queries are now scoped to an estate.
  */
 public interface TagCategoryRepository extends JpaRepository<TagCategory, Long> {
 

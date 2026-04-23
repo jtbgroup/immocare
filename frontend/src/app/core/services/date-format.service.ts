@@ -1,4 +1,4 @@
-// core/services/date-format.service.ts — UC016 Phase 5
+// core/services/date-format.service.ts — UC004_ESTATE_PLACEHOLDER Phase 5
 // Updated to load date format from estate-scoped config endpoint.
 // Falls back to default if no active estate is set (e.g. at login time).
 import { Injectable } from '@angular/core';

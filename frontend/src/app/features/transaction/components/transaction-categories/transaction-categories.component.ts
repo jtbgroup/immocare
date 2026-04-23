@@ -1,4 +1,4 @@
-// features/transaction/components/transaction-categories/transaction-categories.component.ts — UC016 Phase 4
+// features/transaction/components/transaction-categories/transaction-categories.component.ts — UC004_ESTATE_PLACEHOLDER Phase 4
 // No changes to component logic — TagCategoryService and TagSubcategoryService handle estate scoping.
 import { CommonModule } from '@angular/common';
 import { Component, OnInit } from '@angular/core';

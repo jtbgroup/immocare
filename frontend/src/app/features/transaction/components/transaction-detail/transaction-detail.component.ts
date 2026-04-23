@@ -1,4 +1,4 @@
-// features/transaction/components/transaction-detail/transaction-detail.component.ts — UC016 Phase 4
+// features/transaction/components/transaction-detail/transaction-detail.component.ts — UC004_ESTATE_PLACEHOLDER Phase 4
 import { CommonModule } from '@angular/common';
 import { Component, OnInit } from '@angular/core';
 import { ActivatedRoute, Router, RouterModule } from '@angular/router';

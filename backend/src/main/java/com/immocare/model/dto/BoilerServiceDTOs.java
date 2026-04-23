@@ -5,7 +5,7 @@ import java.time.LocalDateTime;
 
 import jakarta.validation.constraints.NotNull;
 
-/** DTOs for boiler service records — UC011 (US064/US065/US066). */
+/** DTOs for boiler service records — UC012 (UC011.005/UC011.006/UC011.007). */
 public final class BoilerServiceDTOs {
 
     private BoilerServiceDTOs() {

@@ -20,7 +20,7 @@
 - [ ] bug dans dans le format des dates et les settings des dates (pas visible)
 - [ ] revenir à une implémenttion postgres only
 - [ ] reprendre le système des versions du boilerplate
-- [ ] ordre de création des objets: esates doit venir avant tout le reste --> flyway à adapter et rassembler
+- [x] ordre de création des objets: esates doit venir avant tout le reste --> flyway à adapter et rassembler
 - [ ] rendre l'application multilingue
 
 

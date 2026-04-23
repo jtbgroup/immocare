@@ -23,7 +23,7 @@ import jakarta.persistence.Table;
  * Implements {@link UserDetails} so Spring Security can use it directly.
  * Mapped to the {@code app_user} table (avoids PostgreSQL reserved keyword).
  *
- * UC016 Phase 1: replaced {@code role} string field with
+ * UC004_ESTATE_PLACEHOLDER Phase 1: replaced {@code role} string field with
  * {@code isPlatformAdmin} boolean.
  * Fine-grained access within an estate is handled via
  * {@code estate_member.role}.

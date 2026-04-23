@@ -29,7 +29,7 @@ import lombok.RequiredArgsConstructor;
 
 /**
  * REST controller for Fire Extinguisher management.
- * UC016 Phase 2: all routes are now scoped to an estate.
+ * UC004_ESTATE_PLACEHOLDER Phase 2: all routes are now scoped to an estate.
  *
  * Endpoints:
  * GET    /api/v1/estates/{estateId}/buildings/{buildingId}/fire-extinguishers

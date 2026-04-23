@@ -22,9 +22,9 @@ import com.immocare.model.entity.AppUser;
 import com.immocare.repository.UserRepository;
 
 /**
- * Business logic for UC007 — Manage Users.
+ * Business logic for UC008 — Manage Users.
  *
- * UC016 Phase 1: removed role-based logic; users are now identified as
+ * UC004_ESTATE_PLACEHOLDER Phase 1: removed role-based logic; users are now identified as
  * PLATFORM_ADMIN (boolean) or regular users. The "last admin" guard now
  * checks {@code isPlatformAdmin} rather than a string role.
  */
@@ -32,7 +32,7 @@ import com.immocare.repository.UserRepository;
 @Transactional
 public class UserService {
 
-    /** BR-UC007-04: password complexity — 8+ chars, 1 upper, 1 lower, 1 digit. */
+    /** BR-UC008-04: password complexity — 8+ chars, 1 upper, 1 lower, 1 digit. */
     private static final Pattern PASSWORD_COMPLEXITY = Pattern.compile("^(?=.*[a-z])(?=.*[A-Z])(?=.*\\d).{8,}$");
 
     private final UserRepository userRepository;
@@ -48,7 +48,7 @@ public class UserService {
     }
 
     // -------------------------------------------------------------------------
-    // US031 — List / Get
+    // UC002.001 — List / Get
     // -------------------------------------------------------------------------
 
     @Transactional(readOnly = true)
@@ -65,19 +65,19 @@ public class UserService {
     }
 
     // -------------------------------------------------------------------------
-    // US032 — Create
+    // UC002.002 — Create
     // -------------------------------------------------------------------------
 
     public UserDTO createUser(CreateUserRequest req) {
-        // BR-UC007-02: username uniqueness (case-insensitive)
+        // BR-UC008-02: username uniqueness (case-insensitive)
         if (userRepository.existsByUsernameIgnoreCase(req.username())) {
             throw new UsernameTakenException(req.username());
         }
-        // BR-UC007-03: email uniqueness
+        // BR-UC008-03: email uniqueness
         if (userRepository.existsByEmailIgnoreCase(req.email())) {
             throw new EmailTakenException(req.email());
         }
-        // BR-UC007-04: password confirmation + complexity
+        // BR-UC008-04: password confirmation + complexity
         validatePassword(req.password(), req.confirmPassword());
 
         AppUser user = new AppUser();
@@ -90,18 +90,18 @@ public class UserService {
     }
 
     // -------------------------------------------------------------------------
-    // US033 — Update
+    // UC002.003 — Update
     // -------------------------------------------------------------------------
 
     public UserDTO updateUser(Long id, UpdateUserRequest req) {
         AppUser user = findOrThrow(id);
 
-        // BR-UC007-02: username uniqueness — exclude current user
+        // BR-UC008-02: username uniqueness — exclude current user
         if (!user.getUsername().equalsIgnoreCase(req.username())
                 && userRepository.existsByUsernameIgnoreCase(req.username())) {
             throw new UsernameTakenException(req.username());
         }
-        // BR-UC007-03: email uniqueness — exclude current user
+        // BR-UC008-03: email uniqueness — exclude current user
         if (!user.getEmail().equalsIgnoreCase(req.email())
                 && userRepository.existsByEmailIgnoreCase(req.email())) {
             throw new EmailTakenException(req.email());
@@ -115,7 +115,7 @@ public class UserService {
     }
 
     // -------------------------------------------------------------------------
-    // US034 — Change password
+    // UC002.004 — Change password
     // -------------------------------------------------------------------------
 
     public void changePassword(Long id, ChangePasswordRequest req) {
@@ -126,18 +126,18 @@ public class UserService {
     }
 
     // -------------------------------------------------------------------------
-    // US035 — Delete
+    // UC002.005 — Delete
     // -------------------------------------------------------------------------
 
     public void deleteUser(Long id, Long currentUserId) {
         AppUser user = findOrThrow(id);
 
-        // BR-UC007-05: cannot delete own account
+        // BR-UC008-05: cannot delete own account
         if (id.equals(currentUserId)) {
             throw new CannotDeleteSelfException();
         }
 
-        // BR-UC007-06: cannot delete last PLATFORM_ADMIN
+        // BR-UC008-06: cannot delete last PLATFORM_ADMIN
         if (user.isPlatformAdmin() && userRepository.countByIsPlatformAdminTrue() <= 1) {
             throw new CannotDeleteLastAdminException();
         }
@@ -156,7 +156,7 @@ public class UserService {
 
     /**
      * Validates that passwords match and meet complexity requirements.
-     * BR-UC007-04: min 8 chars, 1 uppercase, 1 lowercase, 1 digit.
+     * BR-UC008-04: min 8 chars, 1 uppercase, 1 lowercase, 1 digit.
      */
     private void validatePassword(String password, String confirm) {
         if (!password.equals(confirm)) {

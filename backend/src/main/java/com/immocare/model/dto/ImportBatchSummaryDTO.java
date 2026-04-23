@@ -4,7 +4,7 @@ import java.time.LocalDateTime;
 
 /**
  * Lightweight summary of an import batch — used for the import history list.
- * UC016 Phase 4.
+ * UC004_ESTATE_PLACEHOLDER Phase 4.
  */
 public record ImportBatchSummaryDTO(
         Long id,

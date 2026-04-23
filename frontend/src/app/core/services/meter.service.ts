@@ -9,7 +9,7 @@ import {
 } from "../../models/meter.model";
 
 /**
- * HTTP service for UC008 - Manage Meters.
+ * HTTP service for UC009 - Manage Meters.
  *
  * Mirrors two symmetric sets of endpoints:
  *   /api/v1/housing-units/{unitId}/meters

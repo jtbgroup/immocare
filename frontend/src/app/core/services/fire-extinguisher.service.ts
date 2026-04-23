@@ -10,7 +10,7 @@ import {
 
 /**
  * HTTP service for Fire Extinguisher API calls.
- * UC016 Phase 2: all endpoints scoped to the active estate.
+ * UC004_ESTATE_PLACEHOLDER Phase 2: all endpoints scoped to the active estate.
  *
  * Routes:
  *   GET/POST  /api/v1/estates/{estateId}/buildings/{buildingId}/fire-extinguishers

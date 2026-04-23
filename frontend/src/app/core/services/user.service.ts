@@ -11,7 +11,7 @@ import {
 const API = "/api/v1/users";
 
 /**
- * Service for UC007 — Manage Users.
+ * Service for UC008 — Manage Users.
  * All methods require ROLE_ADMIN (enforced server-side).
  */
 @Injectable({ providedIn: "root" })

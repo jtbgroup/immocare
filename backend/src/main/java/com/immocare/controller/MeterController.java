@@ -31,8 +31,8 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 
 /**
- * REST controller for UC008 - Manage Meters.
- * UC016 Phase 2: building and housing unit meter routes now scoped to an estate.
+ * REST controller for UC009 - Manage Meters.
+ * UC004_ESTATE_PLACEHOLDER Phase 2: building and housing unit meter routes now scoped to an estate.
  */
 @RestController
 @RequiredArgsConstructor

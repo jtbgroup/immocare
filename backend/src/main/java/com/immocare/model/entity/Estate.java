@@ -18,7 +18,7 @@ import jakarta.persistence.Table;
  * Root container entity for all business data in ImmoCare.
  * Every building, housing unit, person, and transaction will eventually
  * belong to exactly one estate (scoped in subsequent phases).
- * UC016 — Manage Estates (Phase 1).
+ * UC004_ESTATE_PLACEHOLDER — Manage Estates (Phase 1).
  */
 @Entity
 @Table(name = "estate")

@@ -47,8 +47,8 @@ import com.immocare.repository.PersonRepository;
 import com.immocare.repository.spec.LeaseSpecification;
 
 /**
- * Business logic for UC010 — Manage Leases.
- * UC016 Phase 3: all operations are now scoped to an estate.
+ * Business logic for UC011 — Manage Leases.
+ * UC004_ESTATE_PLACEHOLDER Phase 3: all operations are now scoped to an estate.
  */
 @Service
 public class LeaseService {

@@ -8,7 +8,7 @@ import { Building } from "../../../../models/building.model";
 
 /**
  * Displays the paginated list of buildings scoped to the active estate.
- * UC016 Phase 2: navigation includes estateId in all routerLink / router.navigate calls.
+ * UC004_ESTATE_PLACEHOLDER Phase 2: navigation includes estateId in all routerLink / router.navigate calls.
  */
 @Component({
   selector: "app-building-list",

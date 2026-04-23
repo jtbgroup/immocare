@@ -1,4 +1,4 @@
-// models/estate.model.ts — UC016 Phase 1
+// models/estate.model.ts — UC004_ESTATE_PLACEHOLDER Phase 1
 
 export type EstateRole = 'MANAGER' | 'VIEWER';
 

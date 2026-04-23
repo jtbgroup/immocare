@@ -373,7 +373,7 @@ See [POSTGRESQL_SETUP.md](./POSTGRESQL_SETUP.md) for local PostgreSQL setup.
 - View buildings list (pagination, search, filter)
 - Search by name/address
 
-**User Stories**: US001, US002, US003, US004, US005
+**User Stories**: UC005.001, UC005.002, UC005.003, UC005.004, UC005.005
 
 ---
 

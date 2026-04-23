@@ -11,7 +11,7 @@ import com.immocare.model.entity.FireExtinguisher;
 
 /**
  * Repository for FireExtinguisher entity.
- * UC016 Phase 6: findByBuildingEstateId added for dashboard alert computation.
+ * UC004_ESTATE_PLACEHOLDER Phase 6: findByBuildingEstateId added for dashboard alert computation.
  */
 public interface FireExtinguisherRepository extends JpaRepository<FireExtinguisher, Long> {
 
@@ -31,7 +31,7 @@ public interface FireExtinguisherRepository extends JpaRepository<FireExtinguish
     /**
      * All fire extinguishers in buildings belonging to the given estate,
      * with revisions eagerly fetched (needed for alert computation without N+1).
-     * Used by EstateService.getDashboard() — UC016 Phase 6.
+     * Used by EstateService.getDashboard() — UC004_ESTATE_PLACEHOLDER Phase 6.
      */
     @Query("""
             SELECT DISTINCT e FROM FireExtinguisher e

@@ -17,7 +17,7 @@ import lombok.Setter;
 
 /**
  * Platform-wide configuration entry scoped to an estate.
- * UC016 Phase 5: PK changed from configKey alone to (estate_id, config_key).
+ * UC004_ESTATE_PLACEHOLDER Phase 5: PK changed from configKey alone to (estate_id, config_key).
  * Each estate holds its own independent set of configuration entries.
  */
 @Entity

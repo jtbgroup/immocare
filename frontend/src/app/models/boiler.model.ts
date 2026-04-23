@@ -1,4 +1,4 @@
-// models/boiler.model.ts — UC011
+// models/boiler.model.ts — UC012
 
 export type FuelType = "GAS" | "OIL" | "ELECTRIC" | "HEAT_PUMP";
 export type BoilerOwnerType = "HOUSING_UNIT" | "BUILDING";

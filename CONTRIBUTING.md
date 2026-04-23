@@ -50,7 +50,7 @@ git checkout -b feature/US###-short-description
 ```
 
 **Branch naming convention:**
-- `feature/US001-create-building` - New features
+- `feature/UC005.001-create-building` - New features
 - `bugfix/fix-validation-error` - Bug fixes
 - `hotfix/critical-security-patch` - Urgent fixes
 - `refactor/improve-service-layer` - Code improvements
@@ -425,7 +425,7 @@ Follow [Conventional Commits](https://www.conventionalcommits.org/):
 ```
 feat(building): add create building endpoint
 
-Implements US001 - Create Building.
+Implements UC005.001 - Create Building.
 - Add BuildingController with POST /api/v1/buildings
 - Add BuildingService.create() method
 - Add validation for required fields

@@ -12,7 +12,7 @@ import com.immocare.model.entity.Building;
 
 /**
  * MapStruct mapper for Building entity conversions.
- * UC016 Phase 2: estate field is set manually in BuildingService — never mapped here.
+ * UC004_ESTATE_PLACEHOLDER Phase 2: estate field is set manually in BuildingService — never mapped here.
  */
 @Mapper(componentModel = "spring", nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE)
 public interface BuildingMapper {

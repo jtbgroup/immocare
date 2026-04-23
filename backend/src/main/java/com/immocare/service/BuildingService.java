@@ -27,7 +27,7 @@ import com.immocare.repository.PersonRepository;
 
 /**
  * Service layer for Building management.
- * UC016 Phase 2: all operations are now scoped to an estate.
+ * UC004_ESTATE_PLACEHOLDER Phase 2: all operations are now scoped to an estate.
  */
 @Service
 @Transactional(readOnly = true)

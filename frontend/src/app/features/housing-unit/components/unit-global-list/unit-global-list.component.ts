@@ -10,7 +10,7 @@ import { HousingUnit } from "../../../../models/housing-unit.model";
 
 /**
  * Cross-building unit list scoped to the active estate.
- * UC016 Phase 2: loads units per building within the estate.
+ * UC004_ESTATE_PLACEHOLDER Phase 2: loads units per building within the estate.
  */
 @Component({
   selector: "app-unit-global-list",

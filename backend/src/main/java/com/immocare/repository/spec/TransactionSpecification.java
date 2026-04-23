@@ -15,14 +15,14 @@ import jakarta.persistence.criteria.Subquery;
 
 /**
  * JPA Specifications for FinancialTransaction queries.
- * UC016 Phase 4: {@link #hasEstate(UUID)} added for estate-scoped filtering.
+ * UC004_ESTATE_PLACEHOLDER Phase 4: {@link #hasEstate(UUID)} added for estate-scoped filtering.
  */
 public class TransactionSpecification {
 
     private TransactionSpecification() {
     }
 
-    // ─── UC016 Phase 4 — estate scope ─────────────────────────────────────────
+    // ─── UC004_ESTATE_PLACEHOLDER Phase 4 — estate scope ─────────────────────────────────────────
 
     /**
      * Restricts results to transactions belonging to the given estate.

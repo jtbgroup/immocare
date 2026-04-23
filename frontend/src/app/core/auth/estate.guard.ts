@@ -1,4 +1,4 @@
-// core/auth/estate.guard.ts — UC016 Phase 1
+// core/auth/estate.guard.ts — UC004_ESTATE_PLACEHOLDER Phase 1
 import { Injectable } from "@angular/core";
 import { ActivatedRouteSnapshot, CanActivate, Router } from "@angular/router";
 import { Observable, of } from "rxjs";

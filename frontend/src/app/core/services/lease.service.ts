@@ -1,4 +1,4 @@
-// core/services/lease.service.ts — UC016 Phase 3
+// core/services/lease.service.ts — UC004_ESTATE_PLACEHOLDER Phase 3
 import { HttpClient, HttpParams } from "@angular/common/http";
 import { Injectable } from "@angular/core";
 import { Observable } from "rxjs";

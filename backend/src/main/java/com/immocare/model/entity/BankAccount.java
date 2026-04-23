@@ -6,7 +6,7 @@ import java.time.LocalDateTime;
 
 /**
  * Bank account entity.
- * UC016 Phase 4: estate_id added — bank accounts are now scoped to an estate.
+ * UC004_ESTATE_PLACEHOLDER Phase 4: estate_id added — bank accounts are now scoped to an estate.
  */
 @Entity
 @Table(name = "bank_account")
@@ -31,7 +31,7 @@ public class BankAccount {
 
     /**
      * Estate this bank account belongs to.
-     * UC016 Phase 4 — all bank accounts are scoped to an estate.
+     * UC004_ESTATE_PLACEHOLDER Phase 4 — all bank accounts are scoped to an estate.
      */
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "estate_id", nullable = false)

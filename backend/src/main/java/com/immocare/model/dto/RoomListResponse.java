@@ -6,7 +6,7 @@ import java.util.List;
 /**
  * Response DTO wrapping the list of rooms for a housing unit,
  * including the computed total surface.
- * UC003 - US016 View Room Composition.
+ * UC004 - UC007.005 View Room Composition.
  */
 public class RoomListResponse {
 

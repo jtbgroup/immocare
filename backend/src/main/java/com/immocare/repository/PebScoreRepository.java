@@ -8,12 +8,12 @@ import org.springframework.stereotype.Repository;
 
 /**
  * Repository for PEB score history.
- * UC004 - Manage PEB Scores.
+ * UC005 - Manage PEB Scores.
  */
 @Repository
 public interface PebScoreRepository extends JpaRepository<PebScoreHistory, Long> {
 
-    /** All scores for a unit, newest first (BR-UC004-02). */
+    /** All scores for a unit, newest first (BR-UC005-02). */
     List<PebScoreHistory> findByHousingUnitIdOrderByScoreDateDesc(Long housingUnitId);
 
     /** The single most recent score for a unit (current score). */

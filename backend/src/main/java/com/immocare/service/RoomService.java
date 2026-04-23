@@ -21,7 +21,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 /**
  * Service layer for Room management.
- * Implements business logic for UC003 - Manage Rooms (US012–US016).
+ * Implements business logic for UC004 - Manage Rooms (UC007.001–UC007.005).
  */
 @Service
 @Transactional(readOnly = true)
@@ -43,7 +43,7 @@ public class RoomService {
 
   /**
    * Get all rooms for a housing unit, with computed total surface.
-   * Implements US016 - View Room Composition.
+   * Implements UC007.005 - View Room Composition.
    *
    * @param unitId the housing unit ID
    * @return list of rooms + total surface
@@ -63,7 +63,7 @@ public class RoomService {
 
   /**
    * Create a single room inside a housing unit.
-   * Implements US012 - Add Room to Housing Unit.
+   * Implements UC007.001 - Add Room to Housing Unit.
    *
    * @param unitId  the housing unit ID
    * @param request the room creation data
@@ -80,7 +80,7 @@ public class RoomService {
 
   /**
    * Update an existing room.
-   * Implements US013 - Edit Room.
+   * Implements UC007.002 - Edit Room.
    *
    * @param unitId  the housing unit ID (for security / ownership check)
    * @param roomId  the room ID
@@ -99,7 +99,7 @@ public class RoomService {
 
   /**
    * Delete a room from a housing unit.
-   * Implements US014 - Delete Room.
+   * Implements UC007.003 - Delete Room.
    *
    * @param unitId the housing unit ID (ownership check)
    * @param roomId the room ID
@@ -114,7 +114,7 @@ public class RoomService {
 
   /**
    * Batch-create multiple rooms inside a housing unit.
-   * Implements US015 - Quick Add Multiple Rooms.
+   * Implements UC007.004 - Quick Add Multiple Rooms.
    *
    * @param unitId  the housing unit ID
    * @param request list of room entries (max 20)

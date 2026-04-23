@@ -1,4 +1,4 @@
-// features/lease/components/rent-adjustment-section/rent-adjustment-section.component.ts — UC016 Phase 6
+// features/lease/components/rent-adjustment-section/rent-adjustment-section.component.ts — UC004_ESTATE_PLACEHOLDER Phase 6
 import { CommonModule } from '@angular/common';
 import { Component, EventEmitter, Input, OnInit, Output } from '@angular/core';
 import { FormsModule } from '@angular/forms';

@@ -29,15 +29,15 @@ import jakarta.validation.Valid;
 
 /**
  * REST controller for Building management.
- * UC016 Phase 2: all routes are now scoped to an estate.
+ * UC004_ESTATE_PLACEHOLDER Phase 2: all routes are now scoped to an estate.
  *
  * API Endpoints:
- * - GET    /api/v1/estates/{estateId}/buildings         - List buildings (US004, US005)
+ * - GET    /api/v1/estates/{estateId}/buildings         - List buildings (UC005.004, UC005.005)
  * - GET    /api/v1/estates/{estateId}/buildings/{id}    - Get building details
  * - GET    /api/v1/estates/{estateId}/buildings/cities  - Get distinct cities
- * - POST   /api/v1/estates/{estateId}/buildings         - Create building (US001)
- * - PUT    /api/v1/estates/{estateId}/buildings/{id}    - Update building (US002)
- * - DELETE /api/v1/estates/{estateId}/buildings/{id}    - Delete building (US003)
+ * - POST   /api/v1/estates/{estateId}/buildings         - Create building (UC005.001)
+ * - PUT    /api/v1/estates/{estateId}/buildings/{id}    - Update building (UC005.002)
+ * - DELETE /api/v1/estates/{estateId}/buildings/{id}    - Delete building (UC005.003)
  */
 @RestController
 @RequestMapping("/api/v1/estates/{estateId}/buildings")
@@ -51,7 +51,7 @@ public class BuildingController {
 
     /**
      * Get all buildings within an estate with optional filtering and search.
-     * US004 - View Buildings List, US005 - Search Buildings.
+     * UC005.004 - View Buildings List, UC005.005 - Search Buildings.
      */
     @GetMapping
     @PreAuthorize("@security.isMemberOf(#estateId)")
@@ -88,7 +88,7 @@ public class BuildingController {
 
     /**
      * Create a new building within the estate.
-     * US001 - Create Building.
+     * UC005.001 - Create Building.
      */
     @PostMapping
     @PreAuthorize("@security.isManagerOf(#estateId)")
@@ -101,7 +101,7 @@ public class BuildingController {
 
     /**
      * Update an existing building within the estate.
-     * US002 - Edit Building.
+     * UC005.002 - Edit Building.
      */
     @PutMapping("/{id}")
     @PreAuthorize("@security.isManagerOf(#estateId)")
@@ -115,7 +115,7 @@ public class BuildingController {
 
     /**
      * Delete a building within the estate.
-     * US003 - Delete Building.
+     * UC005.003 - Delete Building.
      */
     @DeleteMapping("/{id}")
     @PreAuthorize("@security.isManagerOf(#estateId)")

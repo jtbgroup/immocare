@@ -16,7 +16,7 @@ export interface SetRentRequest {
   notes?: string | null;
 }
 
-/** Computed change between two rent records (US022 AC3, US024). */
+/** Computed change between two rent records (UC010.002 AC3, UC010.004). */
 export interface RentChange {
   amount: number;         // absolute € change
   percentage: number;     // % change rounded to 2 decimals

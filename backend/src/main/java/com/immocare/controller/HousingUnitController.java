@@ -24,7 +24,7 @@ import jakarta.validation.Valid;
 
 /**
  * REST controller for Housing Unit management.
- * UC016 Phase 2: all routes are now scoped to an estate.
+ * UC004_ESTATE_PLACEHOLDER Phase 2: all routes are now scoped to an estate.
  *
  * Endpoints:
  * GET    /api/v1/estates/{estateId}/buildings/{buildingId}/units  - list units in a building
@@ -45,7 +45,7 @@ public class HousingUnitController {
 
     /**
      * Get all units in a specific building within the estate.
-     * US009 - View Housing Unit Details (list view).
+     * UC006.004 - View Housing Unit Details (list view).
      */
     @GetMapping("/api/v1/estates/{estateId}/buildings/{buildingId}/units")
     @PreAuthorize("@security.isMemberOf(#estateId)")
@@ -67,7 +67,7 @@ public class HousingUnitController {
 
     /**
      * Get a single unit by ID within the estate.
-     * US009.
+     * UC006.004.
      */
     @GetMapping("/api/v1/estates/{estateId}/units/{id}")
     @PreAuthorize("@security.isMemberOf(#estateId)")
@@ -80,7 +80,7 @@ public class HousingUnitController {
 
     /**
      * Create a new housing unit within the estate.
-     * US006 - Create Housing Unit.
+     * UC006.001 - Create Housing Unit.
      */
     @PostMapping("/api/v1/estates/{estateId}/units")
     @PreAuthorize("@security.isManagerOf(#estateId)")
@@ -93,7 +93,7 @@ public class HousingUnitController {
 
     /**
      * Update an existing housing unit within the estate.
-     * US007 - Edit Housing Unit.
+     * UC006.002 - Edit Housing Unit.
      */
     @PutMapping("/api/v1/estates/{estateId}/units/{id}")
     @PreAuthorize("@security.isManagerOf(#estateId)")
@@ -107,7 +107,7 @@ public class HousingUnitController {
 
     /**
      * Delete a housing unit within the estate.
-     * US008 - Delete Housing Unit.
+     * UC006.003 - Delete Housing Unit.
      */
     @DeleteMapping("/api/v1/estates/{estateId}/units/{id}")
     @PreAuthorize("@security.isManagerOf(#estateId)")

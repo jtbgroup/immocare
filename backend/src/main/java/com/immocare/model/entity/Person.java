@@ -47,7 +47,7 @@ public class Person {
 
     /**
      * Estate this person belongs to.
-     * UC016 Phase 3 — all persons must be scoped to an estate.
+     * UC004_ESTATE_PLACEHOLDER Phase 3 — all persons must be scoped to an estate.
      */
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "estate_id", nullable = false)

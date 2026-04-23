@@ -16,7 +16,7 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
  * Global exception handler for REST controllers.
  * Provides consistent error response format across the application.
  *
- * UC016 Phase 1: added handlers for all estate-related exceptions.
+ * UC004_ESTATE_PLACEHOLDER Phase 1: added handlers for all estate-related exceptions.
  */
 @RestControllerAdvice
 public class GlobalExceptionHandler {
@@ -55,7 +55,7 @@ public class GlobalExceptionHandler {
     return ResponseEntity.status(HttpStatus.CONFLICT).body(body);
   }
 
-  // ─── UC003 - Persons ─────────────────────────────────────────────────────
+  // ─── UC004 - Persons ─────────────────────────────────────────────────────
 
   @ExceptionHandler(PersonNotFoundException.class)
   public ResponseEntity<Map<String, Object>> handlePersonNotFound(PersonNotFoundException ex) {
@@ -80,7 +80,7 @@ public class GlobalExceptionHandler {
     return ResponseEntity.status(HttpStatus.CONFLICT).body(body);
   }
 
-  // ─── UC004 - PEB Scores ───────────────────────────────────────────────────
+  // ─── UC005 - PEB Scores ───────────────────────────────────────────────────
 
   @ExceptionHandler(InvalidPebScoreDateException.class)
   public ResponseEntity<ErrorResponse> handleInvalidPebScoreDate(InvalidPebScoreDateException ex) {
@@ -97,7 +97,7 @@ public class GlobalExceptionHandler {
     return notFound("PEB score not found", ex.getMessage());
   }
 
-  // ─── UC008 - Meters ───────────────────────────────────────────────────────
+  // ─── UC009 - Meters ───────────────────────────────────────────────────────
 
   @ExceptionHandler(MeterNotFoundException.class)
   public ResponseEntity<ErrorResponse> handleMeterNotFound(MeterNotFoundException ex) {
@@ -113,7 +113,7 @@ public class GlobalExceptionHandler {
     return ResponseEntity.status(HttpStatus.CONFLICT).body(error);
   }
 
-  // ─── UC010 - Leases ───────────────────────────────────────────────────────
+  // ─── UC011 - Leases ───────────────────────────────────────────────────────
 
   @ExceptionHandler(LeaseNotFoundException.class)
   public ResponseEntity<Map<String, Object>> handleLeaseNotFound(LeaseNotFoundException ex) {
@@ -135,14 +135,14 @@ public class GlobalExceptionHandler {
     return mapError(422, "INVALID_STATUS_TRANSITION", ex.getMessage());
   }
 
-  // ─── UC011 - Boilers ─────────────────────────────────────────────────────
+  // ─── UC012 - Boilers ─────────────────────────────────────────────────────
 
   @ExceptionHandler(BoilerNotFoundException.class)
   public ResponseEntity<ErrorResponse> handleBoilerNotFound(BoilerNotFoundException ex) {
     return notFound("Boiler not found", ex.getMessage());
   }
 
-  // ─── UC012 - Platform Configuration ──────────────────────────────────────
+  // ─── UC014 - Platform Configuration ──────────────────────────────────────
 
   @ExceptionHandler(PlatformConfigNotFoundException.class)
   public ResponseEntity<ErrorResponse> handlePlatformConfigNotFound(PlatformConfigNotFoundException ex) {
@@ -168,7 +168,7 @@ public class GlobalExceptionHandler {
         .body(new ErrorResponse(409, "DUPLICATE", ex.getMessage(), LocalDateTime.now()));
   }
 
-  // ─── UC014 - Financial Transactions ──────────────────────────────────────
+  // ─── UC015 - Financial Transactions ──────────────────────────────────────
 
   @ExceptionHandler(TransactionNotFoundException.class)
   public ResponseEntity<ErrorResponse> handleTransactionNotFound(TransactionNotFoundException ex) {
@@ -271,7 +271,7 @@ public class GlobalExceptionHandler {
         .body(new ErrorResponse(403, "CANNOT_DELETE_SELF", ex.getMessage(), LocalDateTime.now()));
   }
 
-  // ─── UC016 - Estates ──────────────────────────────────────────────────────
+  // ─── UC004_ESTATE_PLACEHOLDER - Estates ──────────────────────────────────────────────────────
 
   @ExceptionHandler(EstateNotFoundException.class)
   public ResponseEntity<ErrorResponse> handleEstateNotFound(EstateNotFoundException ex) {

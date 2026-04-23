@@ -1,4 +1,4 @@
-// core/services/active-estate.service.ts — UC016 Phase 1
+// core/services/active-estate.service.ts — UC004_ESTATE_PLACEHOLDER Phase 1
 import { computed, Injectable, signal } from '@angular/core';
 import { EstateSummary } from '../../models/estate.model';
 
@@ -7,8 +7,8 @@ import { EstateSummary } from '../../models/estate.model';
  * The estateId is always explicit in the URL — this service provides
  * convenience accessors for role checks throughout the UI.
  *
- * BR-UC016-06: estateId always explicit in URL — never stored server-side.
- * BR-UC016-08: VIEWER cannot mutate — checked via canEdit().
+ * BR-UC004_ESTATE_PLACEHOLDER-06: estateId always explicit in URL — never stored server-side.
+ * BR-UC004_ESTATE_PLACEHOLDER-08: VIEWER cannot mutate — checked via canEdit().
  */
 @Injectable({ providedIn: 'root' })
 export class ActiveEstateService {
@@ -21,13 +21,13 @@ export class ActiveEstateService {
 
   /**
    * Returns true when myRole is null — PLATFORM_ADMIN has transversal access
-   * without being a member (BR-UC016-05).
+   * without being a member (BR-UC004_ESTATE_PLACEHOLDER-05).
    */
   readonly isPlatformAdmin = computed(() => this._activeEstate()?.myRole === null);
 
   /**
    * Returns true if the current user can create/edit/delete resources.
-   * VIEWER cannot mutate (BR-UC016-08).
+   * VIEWER cannot mutate (BR-UC004_ESTATE_PLACEHOLDER-08).
    */
   readonly canEdit = computed(() => this.isManager() || this.isPlatformAdmin());
 

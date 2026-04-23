@@ -1,4 +1,4 @@
-// features/estate/components/admin-estate-list/admin-estate-list.component.ts — UC016 US092-US095
+// features/estate/components/admin-estate-list/admin-estate-list.component.ts — UC004_ESTATE_PLACEHOLDER UC003.001-UC003.004
 import { CommonModule } from "@angular/common";
 import { Component, OnDestroy, OnInit } from "@angular/core";
 import { FormsModule } from "@angular/forms";

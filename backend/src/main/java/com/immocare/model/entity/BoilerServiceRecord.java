@@ -17,7 +17,7 @@ import lombok.Getter;
 import lombok.Setter;
 
 /**
- * One maintenance/service entry for a boiler — UC011 (US064/US065).
+ * One maintenance/service entry for a boiler — UC012 (UC011.005/UC011.006).
  * Records are append-only: never updated or deleted.
  * Named BoilerServiceRecord to avoid collision with Spring @Service.
  */

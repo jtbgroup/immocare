@@ -1,7 +1,7 @@
 package com.immocare.controller;
 
 /**
- * UC016 Phase 5 — this controller has been removed.
+ * UC004_ESTATE_PLACEHOLDER Phase 5 — this controller has been removed.
  *
  * <p>
  * All global {@code /api/v1/platform-config/**} endpoints are replaced by
@@ -22,9 +22,9 @@ package com.immocare.controller;
  * It is a non-functional placeholder that compiles cleanly so the build
  * does not break during the migration step.
  *
- * @deprecated Removed in UC016 Phase 5. Use {@link EstateConfigController}.
+ * @deprecated Removed in UC004_ESTATE_PLACEHOLDER Phase 5. Use {@link EstateConfigController}.
  */
-@Deprecated(since = "UC016-Phase5", forRemoval = true)
+@Deprecated(since = "UC004_ESTATE_PLACEHOLDER-Phase5", forRemoval = true)
 public class PlatformConfigController {
     // Intentionally empty — see EstateConfigController
 }

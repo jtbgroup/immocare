@@ -10,7 +10,7 @@ import org.springframework.stereotype.Repository;
 
 /**
  * Spring Data JPA repository for Room entity.
- * UC003 - Manage Rooms.
+ * UC004 - Manage Rooms.
  */
 @Repository
 public interface RoomRepository extends JpaRepository<Room, Long> {

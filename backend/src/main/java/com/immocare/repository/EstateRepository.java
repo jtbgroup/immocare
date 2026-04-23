@@ -14,7 +14,7 @@ import com.immocare.model.entity.Estate;
 
 /**
  * Repository for {@link Estate}.
- * UC016 — Manage Estates (Phase 1+).
+ * UC004_ESTATE_PLACEHOLDER — Manage Estates (Phase 1+).
  */
 @Repository
 public interface EstateRepository extends JpaRepository<Estate, UUID> {

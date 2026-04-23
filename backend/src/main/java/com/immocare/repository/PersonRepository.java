@@ -16,7 +16,7 @@ import com.immocare.model.entity.Person;
 
 /**
  * Repository for Person entity.
- * UC016 Phase 3: all queries are now scoped to an estate.
+ * UC004_ESTATE_PLACEHOLDER Phase 3: all queries are now scoped to an estate.
  */
 public interface PersonRepository extends JpaRepository<Person, Long>, JpaSpecificationExecutor<Person> {
 

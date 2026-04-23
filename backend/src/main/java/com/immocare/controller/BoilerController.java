@@ -28,7 +28,7 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 
 /**
- * REST controller for UC011 — Manage Boilers.
+ * REST controller for UC012 — Manage Boilers.
  */
 @RestController
 @RequiredArgsConstructor

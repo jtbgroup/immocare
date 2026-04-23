@@ -18,7 +18,7 @@ import lombok.Setter;
 
 /**
  * Temporal rule governing boiler service validity duration for an estate.
- * UC016 Phase 5: estate_id added — rules are now per-estate.
+ * UC004_ESTATE_PLACEHOLDER Phase 5: estate_id added — rules are now per-estate.
  *
  * <p>Append-only: one rule per (estate_id, valid_from). The applicable rule
  * for a given service_date is the most recent rule whose valid_from <= service_date.
@@ -35,7 +35,7 @@ public class BoilerServiceValidityRule {
 
     /**
      * Estate this validity rule belongs to.
-     * UC016 Phase 5 — rules are scoped to an estate.
+     * UC004_ESTATE_PLACEHOLDER Phase 5 — rules are scoped to an estate.
      */
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "estate_id", nullable = false)

@@ -1,4 +1,4 @@
-// features/lease/components/lease-details/lease-details.component.ts — UC016 Phase 3
+// features/lease/components/lease-details/lease-details.component.ts — UC004_ESTATE_PLACEHOLDER Phase 3
 import { CommonModule } from "@angular/common";
 import { Component, OnDestroy, OnInit } from "@angular/core";
 import { FormsModule } from "@angular/forms";

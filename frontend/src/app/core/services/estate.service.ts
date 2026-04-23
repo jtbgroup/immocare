@@ -1,4 +1,4 @@
-// core/services/estate.service.ts — UC016 Phase 1
+// core/services/estate.service.ts — UC004_ESTATE_PLACEHOLDER Phase 1
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs';

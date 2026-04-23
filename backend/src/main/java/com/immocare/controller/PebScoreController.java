@@ -23,7 +23,7 @@ import jakarta.validation.Valid;
 
 /**
  * REST controller for PEB score management.
- * UC004 - Manage PEB Scores (US017-US020).
+ * UC005 - Manage PEB Scores (UC008.001-UC008.004).
  *
  * Endpoints:
  * POST /api/v1/housing-units/{unitId}/peb-scores → addScore
@@ -45,7 +45,7 @@ public class PebScoreController {
         this.pebScoreService = pebScoreService;
     }
 
-    /** US017 - Add PEB Score */
+    /** UC008.001 - Add PEB Score */
     @PostMapping
     public ResponseEntity<PebScoreDTO> addScore(
             @PathVariable Long unitId,
@@ -73,13 +73,13 @@ public class PebScoreController {
         return ResponseEntity.ok().build();
     }
 
-    /** US018 - View PEB Score History */
+    /** UC008.002 - View PEB Score History */
     @GetMapping
     public ResponseEntity<List<PebScoreDTO>> getHistory(@PathVariable Long unitId) {
         return ResponseEntity.ok(pebScoreService.getHistory(unitId));
     }
 
-    /** US018 - Current score badge */
+    /** UC008.002 - Current score badge */
     @GetMapping("/current")
     public ResponseEntity<PebScoreDTO> getCurrentScore(@PathVariable Long unitId) {
         return pebScoreService.getCurrentScore(unitId)
@@ -87,7 +87,7 @@ public class PebScoreController {
                 .orElse(ResponseEntity.noContent().build());
     }
 
-    /** US020 - Track PEB Score Improvements */
+    /** UC008.004 - Track PEB Score Improvements */
     @GetMapping("/improvements")
     public ResponseEntity<PebImprovementDTO> getImprovementSummary(@PathVariable Long unitId) {
         return pebScoreService.getImprovementSummary(unitId)

@@ -11,7 +11,7 @@ import org.mapstruct.NullValuePropertyMappingStrategy;
 
 /**
  * MapStruct mapper for Room entity conversions.
- * UC003 - Manage Rooms.
+ * UC004 - Manage Rooms.
  */
 @Mapper(
     componentModel = "spring",

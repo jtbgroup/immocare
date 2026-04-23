@@ -17,7 +17,8 @@ import com.immocare.repository.PersonRepository;
 
 /**
  * Service for PersonBankAccount management.
- * UC016 Phase 3: operations verify that the person belongs to the active estate.
+ * UC004_ESTATE_PLACEHOLDER Phase 3: operations verify that the person belongs
+ * to the active estate.
  */
 @Service
 @Transactional(readOnly = true)
@@ -27,7 +28,7 @@ public class PersonBankAccountService {
     private final PersonRepository personRepository;
 
     public PersonBankAccountService(PersonBankAccountRepository repo,
-                                    PersonRepository personRepository) {
+            PersonRepository personRepository) {
         this.repo = repo;
         this.personRepository = personRepository;
     }
@@ -52,6 +53,7 @@ public class PersonBankAccountService {
 
         PersonBankAccount pba = new PersonBankAccount();
         pba.setPerson(person);
+        pba.setEstateId(estateId);
         pba.setIban(normalized);
         pba.setLabel(req.label());
         pba.setPrimary(req.primary());
@@ -67,7 +69,7 @@ public class PersonBankAccountService {
     /** Update label / primary flag of an existing IBAN. */
     @Transactional
     public PersonBankAccountDTO update(UUID estateId, Long personId, Long id,
-                                       SavePersonBankAccountRequest req) {
+            SavePersonBankAccountRequest req) {
         verifyPersonBelongsToEstate(estateId, personId);
         PersonBankAccount pba = repo.findById(id)
                 .orElseThrow(() -> new IllegalArgumentException("Person bank account not found: " + id));
@@ -132,7 +134,6 @@ public class PersonBankAccountService {
                 pba.getIban(),
                 pba.getLabel(),
                 pba.isPrimary(),
-                pba.getCreatedAt()
-        );
+                pba.getCreatedAt());
     }
 }

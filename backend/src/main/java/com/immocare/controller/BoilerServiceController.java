@@ -18,7 +18,7 @@ import com.immocare.service.BoilerServiceHistoryService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 
-/** REST endpoints for boiler maintenance history — UC011 (US064/US065). */
+/** REST endpoints for boiler maintenance history — UC012 (UC011.005/UC011.006). */
 @RestController
 @RequiredArgsConstructor
 @PreAuthorize("isAuthenticated()")
@@ -26,14 +26,14 @@ public class BoilerServiceController {
 
     private final BoilerServiceHistoryService historyService;
 
-    /** GET /api/v1/boilers/{boilerId}/services — US065 */
+    /** GET /api/v1/boilers/{boilerId}/services — UC011.006 */
     @GetMapping("/api/v1/boilers/{boilerId}/services")
     public ResponseEntity<List<BoilerServiceRecordDTO>> getHistory(
             @PathVariable Long boilerId) {
         return ResponseEntity.ok(historyService.getHistory(boilerId));
     }
 
-    /** POST /api/v1/boilers/{boilerId}/services — US064 */
+    /** POST /api/v1/boilers/{boilerId}/services — UC011.005 */
     @PostMapping("/api/v1/boilers/{boilerId}/services")
     public ResponseEntity<BoilerServiceRecordDTO> addRecord(
             @PathVariable Long boilerId,

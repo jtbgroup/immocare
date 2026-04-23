@@ -1,4 +1,4 @@
-// features/transaction/components/transaction-list/transaction-list.component.ts — UC016 Phase 4
+// features/transaction/components/transaction-list/transaction-list.component.ts — UC004_ESTATE_PLACEHOLDER Phase 4
 // Routes updated to use estateId from ActiveEstateService.
 import { CommonModule } from '@angular/common';
 import { Component, OnInit } from '@angular/core';

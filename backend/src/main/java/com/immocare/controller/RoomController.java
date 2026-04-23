@@ -22,14 +22,14 @@ import org.springframework.web.bind.annotation.RestController;
 
 /**
  * REST controller for Room management.
- * Implements UC003 - Manage Rooms (US012–US016).
+ * Implements UC004 - Manage Rooms (UC007.001–UC007.005).
  *
  * Endpoints:
- *   GET    /api/v1/housing-units/{unitId}/rooms          → list rooms + total (US016)
- *   POST   /api/v1/housing-units/{unitId}/rooms          → create room (US012)
- *   PUT    /api/v1/housing-units/{unitId}/rooms/{id}     → update room (US013)
- *   DELETE /api/v1/housing-units/{unitId}/rooms/{id}     → delete room (US014)
- *   POST   /api/v1/housing-units/{unitId}/rooms/batch    → batch create (US015)
+ *   GET    /api/v1/housing-units/{unitId}/rooms          → list rooms + total (UC007.005)
+ *   POST   /api/v1/housing-units/{unitId}/rooms          → create room (UC007.001)
+ *   PUT    /api/v1/housing-units/{unitId}/rooms/{id}     → update room (UC007.002)
+ *   DELETE /api/v1/housing-units/{unitId}/rooms/{id}     → delete room (UC007.003)
+ *   POST   /api/v1/housing-units/{unitId}/rooms/batch    → batch create (UC007.004)
  */
 @RestController
 @RequestMapping("/api/v1/housing-units/{unitId}/rooms")
@@ -43,7 +43,7 @@ public class RoomController {
 
   /**
    * List all rooms for a housing unit, with total surface.
-   * Implements US016 - View Room Composition.
+   * Implements UC007.005 - View Room Composition.
    */
   @GetMapping
   public ResponseEntity<RoomListResponse> getRooms(@PathVariable Long unitId) {
@@ -52,7 +52,7 @@ public class RoomController {
 
   /**
    * Create a single room inside a housing unit.
-   * Implements US012 - Add Room to Housing Unit.
+   * Implements UC007.001 - Add Room to Housing Unit.
    */
   @PostMapping
   public ResponseEntity<RoomDTO> createRoom(
@@ -64,7 +64,7 @@ public class RoomController {
 
   /**
    * Update an existing room.
-   * Implements US013 - Edit Room.
+   * Implements UC007.002 - Edit Room.
    */
   @PutMapping("/{id}")
   public ResponseEntity<RoomDTO> updateRoom(
@@ -77,7 +77,7 @@ public class RoomController {
 
   /**
    * Delete a room.
-   * Implements US014 - Delete Room.
+   * Implements UC007.003 - Delete Room.
    */
   @DeleteMapping("/{id}")
   public ResponseEntity<Map<String, String>> deleteRoom(
@@ -89,7 +89,7 @@ public class RoomController {
 
   /**
    * Batch-create multiple rooms.
-   * Implements US015 - Quick Add Multiple Rooms.
+   * Implements UC007.004 - Quick Add Multiple Rooms.
    */
   @PostMapping("/batch")
   public ResponseEntity<List<RoomDTO>> batchCreateRooms(

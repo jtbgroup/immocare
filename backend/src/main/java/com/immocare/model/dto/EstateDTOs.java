@@ -10,7 +10,7 @@ import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 
 /**
- * All DTOs for UC016 — Manage Estates.
+ * All DTOs for UC004_ESTATE_PLACEHOLDER — Manage Estates.
  */
 public final class EstateDTOs {
 

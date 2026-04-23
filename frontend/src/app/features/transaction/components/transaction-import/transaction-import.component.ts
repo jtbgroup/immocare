@@ -1,4 +1,4 @@
-// features/transaction/components/transaction-import/transaction-import.component.ts — UC016 Phase 6
+// features/transaction/components/transaction-import/transaction-import.component.ts — UC004_ESTATE_PLACEHOLDER Phase 6
 // activeEstateService.canEdit() checked before allowing upload/import actions.
 import { CommonModule } from '@angular/common';
 import { Component, OnInit } from '@angular/core';

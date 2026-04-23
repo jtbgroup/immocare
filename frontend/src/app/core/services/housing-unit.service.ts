@@ -10,7 +10,7 @@ import {
 
 /**
  * Angular service for Housing Unit API calls.
- * UC016 Phase 2: all endpoints scoped to the active estate.
+ * UC004_ESTATE_PLACEHOLDER Phase 2: all endpoints scoped to the active estate.
  *
  * Routes:
  *   GET    /api/v1/estates/{estateId}/buildings/{buildingId}/units

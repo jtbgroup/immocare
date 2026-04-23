@@ -22,8 +22,8 @@ import com.immocare.repository.HousingUnitRepository;
 import lombok.RequiredArgsConstructor;
 
 /**
- * Business logic for UC011 — Manage Boilers.
- * UC016 Phase 5: alert threshold is now read from estate-scoped platform config.
+ * Business logic for UC012 — Manage Boilers.
+ * UC004_ESTATE_PLACEHOLDER Phase 5: alert threshold is now read from estate-scoped platform config.
  */
 @Service
 @RequiredArgsConstructor
@@ -63,7 +63,7 @@ public class BoilerService {
     /**
      * Returns all boilers with service due within the configured warning window
      * for the given estate.
-     * UC016 Phase 5: estate-scoped threshold replaces global config.
+     * UC004_ESTATE_PLACEHOLDER Phase 5: estate-scoped threshold replaces global config.
      */
     public List<BoilerDTO> getServiceAlerts(UUID estateId) {
         int warningMonths = getWarningMonths(estateId);

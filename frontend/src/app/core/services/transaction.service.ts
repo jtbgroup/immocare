@@ -1,4 +1,4 @@
-// core/services/transaction.service.ts — UC016 Phase 4
+// core/services/transaction.service.ts — UC004_ESTATE_PLACEHOLDER Phase 4
 // All transaction endpoints are now estate-scoped via ActiveEstateService.
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { Injectable } from '@angular/core';

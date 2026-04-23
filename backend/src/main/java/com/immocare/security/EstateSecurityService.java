@@ -14,7 +14,7 @@ import com.immocare.repository.EstateMemberRepository;
  * Spring Security helper used in {@code @PreAuthorize} SpEL expressions.
  * Registered as {@code "security"} so expressions can use {@code @security.isPlatformAdmin()}, etc.
  *
- * UC016 — Manage Estates (Phase 1).
+ * UC004_ESTATE_PLACEHOLDER — Manage Estates (Phase 1).
  */
 @Service("security")
 public class EstateSecurityService {

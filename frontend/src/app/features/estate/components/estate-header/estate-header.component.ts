@@ -1,4 +1,4 @@
-// shared/components/estate-header/estate-header.component.ts — UC016 US101 AC4
+// shared/components/estate-header/estate-header.component.ts — UC004_ESTATE_PLACEHOLDER UC003.010 AC4
 import { CommonModule } from '@angular/common';
 import { Component } from '@angular/core';
 import { Router } from '@angular/router';

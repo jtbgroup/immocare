@@ -1,4 +1,4 @@
-// models/platform-config.model.ts — UC016 Phase 5
+// models/platform-config.model.ts — UC004_ESTATE_PLACEHOLDER Phase 5
 // PK changed server-side to (estate_id, config_key).
 // Frontend model is unchanged — configKey is still the unique key per estate.
 

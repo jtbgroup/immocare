@@ -5,7 +5,7 @@ import java.time.LocalDateTime;
 
 /**
  * Import batch entity.
- * UC016 Phase 4: estate_id added — import batches are now scoped to an estate.
+ * UC004_ESTATE_PLACEHOLDER Phase 4: estate_id added — import batches are now scoped to an estate.
  */
 @Entity
 @Table(name = "import_batch")
@@ -39,7 +39,7 @@ public class ImportBatch {
 
     /**
      * Estate this import batch belongs to.
-     * UC016 Phase 4 — import batches are scoped to an estate.
+     * UC004_ESTATE_PLACEHOLDER Phase 4 — import batches are scoped to an estate.
      * Nullable for backward compatibility with existing data.
      */
     @ManyToOne(fetch = FetchType.LAZY)

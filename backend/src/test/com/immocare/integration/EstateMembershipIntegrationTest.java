@@ -39,7 +39,7 @@ import com.immocare.service.EstateService;
 
 /**
  * Integration tests for estate membership business rules.
- * UC016 Phase 6.
+ * UC004_ESTATE_PLACEHOLDER Phase 6.
  */
 @SpringBootTest
 @AutoConfigureMockMvc

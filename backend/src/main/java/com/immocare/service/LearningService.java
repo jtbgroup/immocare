@@ -40,7 +40,7 @@ public class LearningService {
 
     /**
      * Suggest a subcategory based on transaction fields.
-     * Priority order (BR-UC014-18/19):
+     * Priority order (BR-UC015-18/19):
      * 1. ASSET_TYPE (if assetType non-null) — exact match on match_value
      * 2. COUNTERPARTY_ACCOUNT (if non-blank) — exact match
      * 3. DESCRIPTION (if non-blank) — contains match

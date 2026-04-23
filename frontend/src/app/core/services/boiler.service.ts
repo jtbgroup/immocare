@@ -1,4 +1,4 @@
-// core/services/boiler.service.ts — UC011
+// core/services/boiler.service.ts — UC012
 import { HttpClient } from "@angular/common/http";
 import { Injectable } from "@angular/core";
 import { Observable } from "rxjs";

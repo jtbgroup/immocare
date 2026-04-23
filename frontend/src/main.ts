@@ -94,7 +94,7 @@ bootstrapApplication(AppComponent, {
           ),
       },
 
-      // ─── Estate settings (UC016 Phase 5) ────────────────────────────────────
+      // ─── Estate settings (UC004_ESTATE_PLACEHOLDER Phase 5) ────────────────────────────────────
       {
         path: "estates/:estateId/admin/platform-settings",
         canActivate: [AuthGuard, EstateGuard],
@@ -104,7 +104,7 @@ bootstrapApplication(AppComponent, {
           ),
       },
 
-      // ─── Buildings (UC016 Phase 2: estate-scoped) ────────────────────────────
+      // ─── Buildings (UC004_ESTATE_PLACEHOLDER Phase 2: estate-scoped) ────────────────────────────
       {
         path: "estates/:estateId/buildings",
         canActivate: [AuthGuard, EstateGuard],
@@ -138,7 +138,7 @@ bootstrapApplication(AppComponent, {
           ),
       },
 
-      // ─── Housing Units (UC016 Phase 2: estate-scoped) ────────────────────────
+      // ─── Housing Units (UC004_ESTATE_PLACEHOLDER Phase 2: estate-scoped) ────────────────────────
       {
         path: "estates/:estateId/units",
         canActivate: [AuthGuard, EstateGuard],
@@ -172,7 +172,7 @@ bootstrapApplication(AppComponent, {
           ),
       },
 
-      // ─── Persons (UC016 Phase 3: estate-scoped) ──────────────────────────────
+      // ─── Persons (UC004_ESTATE_PLACEHOLDER Phase 3: estate-scoped) ──────────────────────────────
       {
         path: "estates/:estateId/persons",
         canActivate: [AuthGuard, EstateGuard],
@@ -206,7 +206,7 @@ bootstrapApplication(AppComponent, {
           ),
       },
 
-      // ─── Leases (UC016 Phase 3: estate-scoped) ───────────────────────────────
+      // ─── Leases (UC004_ESTATE_PLACEHOLDER Phase 3: estate-scoped) ───────────────────────────────
       {
         path: "estates/:estateId/housing-units/:unitId/leases/new",
         canActivate: [AuthGuard, EstateGuard],

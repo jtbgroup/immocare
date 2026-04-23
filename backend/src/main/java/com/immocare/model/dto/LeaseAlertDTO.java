@@ -5,7 +5,7 @@ import java.util.List;
 
 /**
  * Alert DTO for lease-level alerts (end notice and indexation).
- * UC016 Phase 6: added boolean flag accessors needed by EstateService dashboard computation.
+ * UC004_ESTATE_PLACEHOLDER Phase 6: added boolean flag accessors needed by EstateService dashboard computation.
  */
 public class LeaseAlertDTO {
     private Long leaseId;

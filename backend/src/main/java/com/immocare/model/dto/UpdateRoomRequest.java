@@ -9,7 +9,7 @@ import java.math.BigDecimal;
 
 /**
  * Request DTO for updating an existing room.
- * UC003 - US013 Edit Room.
+ * UC004 - UC007.002 Edit Room.
  */
 public class UpdateRoomRequest {
 

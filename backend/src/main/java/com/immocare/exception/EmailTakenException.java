@@ -1,7 +1,7 @@
 package com.immocare.exception;
 
 /**
- * Thrown when an email address is already in use (BR-UC007-03).
+ * Thrown when an email address is already in use (BR-UC008-03).
  */
 public class EmailTakenException extends RuntimeException {
 

@@ -3,7 +3,7 @@ package com.immocare.model.entity;
 /**
  * Energy Performance Certificate (PEB) score values.
  * Ordered from best (A_PLUS_PLUS) to worst (G).
- * UC004 - Manage PEB Scores.
+ * UC005 - Manage PEB Scores.
  */
 public enum PebScore {
     A_PLUS_PLUS,

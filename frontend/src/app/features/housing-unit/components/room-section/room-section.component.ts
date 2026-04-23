@@ -22,7 +22,7 @@ import {
 
 /**
  * Room section embedded inside HousingUnitDetailsComponent.
- * UC003 - Manage Rooms (US012–US016).
+ * UC004 - Manage Rooms (UC007.001–UC007.005).
  */
 @Component({
   selector: "app-room-section",

@@ -9,7 +9,7 @@ import org.mapstruct.NullValuePropertyMappingStrategy;
 /**
  * MapStruct mapper for PebScoreHistory entity conversions.
  * Computed fields (status, expiryWarning) are set in the service layer, not here.
- * UC004 - Manage PEB Scores.
+ * UC005 - Manage PEB Scores.
  */
 @Mapper(
     componentModel = "spring",

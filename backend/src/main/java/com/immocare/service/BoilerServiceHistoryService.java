@@ -22,8 +22,8 @@ import com.immocare.repository.HousingUnitRepository;
 import lombok.RequiredArgsConstructor;
 
 /**
- * Business logic for boiler maintenance history — UC011 (US064/US065/US066).
- * UC016 Phase 5: valid_until calculation now uses estate-scoped validity rules.
+ * Business logic for boiler maintenance history — UC012 (UC011.005/UC011.006/UC011.007).
+ * UC004_ESTATE_PLACEHOLDER Phase 5: valid_until calculation now uses estate-scoped validity rules.
  * Alert threshold is now read from estate-scoped platform config.
  */
 @Service
@@ -40,7 +40,7 @@ public class BoilerServiceHistoryService {
 
     // ─── READ ─────────────────────────────────────────────────────────────────
 
-    /** US065 — full history, newest first. */
+    /** UC011.006 — full history, newest first. */
     public List<BoilerServiceRecordDTO> getHistory(Long boilerId) {
         Boiler boiler = requireBoiler(boilerId);
         UUID estateId = resolveEstateIdFromBoiler(boiler);
@@ -51,7 +51,7 @@ public class BoilerServiceHistoryService {
                 .toList();
     }
 
-    /** US066 — status of the latest record (for badge on boiler card). */
+    /** UC011.007 — status of the latest record (for badge on boiler card). */
     public ServiceStatus getLatestStatus(Long boilerId) {
         Boiler boiler = requireBoiler(boilerId);
         UUID estateId = resolveEstateIdFromBoiler(boiler);
@@ -63,7 +63,7 @@ public class BoilerServiceHistoryService {
 
     // ─── WRITE ────────────────────────────────────────────────────────────────
 
-    /** US064 — record a new service entry. */
+    /** UC011.005 — record a new service entry. */
     @Transactional
     public BoilerServiceRecordDTO addRecord(Long boilerId, AddBoilerServiceRecordRequest req) {
         if (req.serviceDate().isAfter(LocalDate.now())) {

@@ -17,7 +17,7 @@ import com.immocare.repository.HousingUnitRepository;
 import com.immocare.repository.RentHistoryRepository;
 
 /**
- * Business logic for UC005 — Manage Rents (US021 → US025).
+ * Business logic for UC006 — Manage Rents (UC010.001 → UC010.005).
  * Full CRUD with automatic recalculation of adjacent effectiveTo dates.
  */
 @Service

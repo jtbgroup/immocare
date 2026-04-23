@@ -1,4 +1,4 @@
-// core/auth/auth.service.ts — updated for UC016 Phase 1
+// core/auth/auth.service.ts — updated for UC004_ESTATE_PLACEHOLDER Phase 1
 // CHANGE: AuthUser.role (string) replaced by AuthUser.isPlatformAdmin (boolean)
 // The backend V017 migration drops app_user.role and adds is_platform_admin.
 import { HttpClient } from '@angular/common/http';
@@ -18,7 +18,7 @@ export interface AuthUser {
 /**
  * Handles authentication state and communication with the backend.
  *
- * Post-login redirect logic (US101):
+ * Post-login redirect logic (UC003.010):
  *   - 1 estate          → /estates/{id}/dashboard
  *   - Multiple estates  → /select-estate
  *   - 0 + platformAdmin → /admin/estates
@@ -78,7 +78,7 @@ export class AuthService {
   }
 
   /**
-   * Post-login redirect — US101 AC1-AC3.
+   * Post-login redirect — UC003.010 AC1-AC3.
    */
   private redirectAfterLogin(user: AuthUser): Observable<void> {
     return this.estateService.getMyEstates().pipe(

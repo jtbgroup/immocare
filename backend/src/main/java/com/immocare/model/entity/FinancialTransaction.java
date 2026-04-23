@@ -28,7 +28,7 @@ import jakarta.persistence.Table;
 
 /**
  * Financial transaction entity.
- * UC016 Phase 4: estate_id added — transactions are now scoped to an estate.
+ * UC004_ESTATE_PLACEHOLDER Phase 4: estate_id added — transactions are now scoped to an estate.
  */
 @Entity
 @Table(name = "financial_transaction")
@@ -76,7 +76,7 @@ public class FinancialTransaction {
 
     /**
      * Estate this transaction belongs to.
-     * UC016 Phase 4 — all transactions are scoped to an estate.
+     * UC004_ESTATE_PLACEHOLDER Phase 4 — all transactions are scoped to an estate.
      */
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "estate_id", nullable = false)

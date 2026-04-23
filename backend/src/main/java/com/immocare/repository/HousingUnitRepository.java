@@ -11,8 +11,8 @@ import com.immocare.model.entity.HousingUnit;
 
 /**
  * Repository for HousingUnit entity.
- * UC016 Phase 2+: all queries scoped to an estate.
- * UC016 Phase 6: countByBuilding_Estate_Id used by dashboard.
+ * UC004_ESTATE_PLACEHOLDER Phase 2+: all queries scoped to an estate.
+ * UC004_ESTATE_PLACEHOLDER Phase 6: countByBuilding_Estate_Id used by dashboard.
  */
 public interface HousingUnitRepository extends JpaRepository<HousingUnit, Long> {
 
@@ -24,7 +24,7 @@ public interface HousingUnitRepository extends JpaRepository<HousingUnit, Long> 
 
     /**
      * Counts all housing units across all buildings in the given estate.
-     * Used by EstateService.getDashboard() — UC016 Phase 6.
+     * Used by EstateService.getDashboard() — UC004_ESTATE_PLACEHOLDER Phase 6.
      */
     long countByBuilding_Estate_Id(UUID estateId);
 

@@ -1,4 +1,4 @@
-// core/auth/platform-admin.guard.ts — UC016 Phase 1
+// core/auth/platform-admin.guard.ts — UC004_ESTATE_PLACEHOLDER Phase 1
 import { Injectable } from '@angular/core';
 import { CanActivate, Router } from '@angular/router';
 import { Observable } from 'rxjs';

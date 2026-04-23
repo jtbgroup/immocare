@@ -21,7 +21,7 @@ import { PersonSummary } from '../../../../models/person.model';
 
 /**
  * Create / Edit housing unit form.
- * UC016 Phase 2: buildingId may come from query param; navigation includes estateId.
+ * UC004_ESTATE_PLACEHOLDER Phase 2: buildingId may come from query param; navigation includes estateId.
  */
 @Component({
   selector: 'app-housing-unit-form',

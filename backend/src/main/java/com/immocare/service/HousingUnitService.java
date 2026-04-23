@@ -31,7 +31,7 @@ import com.immocare.repository.RoomRepository;
 
 /**
  * Service layer for Housing Unit management.
- * UC016 Phase 2: all operations are now scoped to an estate.
+ * UC004_ESTATE_PLACEHOLDER Phase 2: all operations are now scoped to an estate.
  */
 @Service
 @Transactional(readOnly = true)

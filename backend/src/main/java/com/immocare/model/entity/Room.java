@@ -16,7 +16,7 @@ import java.time.LocalDateTime;
 
 /**
  * JPA entity representing a room within a housing unit.
- * UC003 - Manage Rooms.
+ * UC004 - Manage Rooms.
  */
 @Entity
 @Table(name = "room")

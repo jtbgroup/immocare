@@ -26,7 +26,7 @@ import jakarta.validation.Valid;
 /**
  * Authentication controller — login, logout, and current user endpoint.
  *
- * UC016 Phase 1: GET /me now returns {@code isPlatformAdmin} instead of {@code role}.
+ * UC004_ESTATE_PLACEHOLDER Phase 1: GET /me now returns {@code isPlatformAdmin} instead of {@code role}.
  */
 @RestController
 @RequestMapping("/api/v1/auth")

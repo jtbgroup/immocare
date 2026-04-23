@@ -10,7 +10,7 @@ import java.math.BigDecimal;
  * provided directly by the client.
  * amount is optional: null = full transaction amount attributed to this asset.
  * When multiple links exist, partial amounts can be entered and their sum must not
- * exceed the transaction total (BR-UC014-15).
+ * exceed the transaction total (BR-UC015-15).
  */
 @Entity
 @Table(name = "transaction_asset_link")

@@ -19,7 +19,7 @@ import jakarta.persistence.Table;
 /**
  * Join table entity between {@link Estate} and {@link AppUser}.
  * Each row grants a user a specific role (MANAGER or VIEWER) within an estate.
- * UC016 — Manage Estates (Phase 1).
+ * UC004_ESTATE_PLACEHOLDER — Manage Estates (Phase 1).
  */
 @Entity
 @Table(name = "estate_member")

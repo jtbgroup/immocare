@@ -6,7 +6,7 @@ import java.util.UUID;
 
 /**
  * Composite primary key for {@link PlatformConfig}.
- * UC016 Phase 5: PK changed from configKey alone to (estate_id, config_key).
+ * UC004_ESTATE_PLACEHOLDER Phase 5: PK changed from configKey alone to (estate_id, config_key).
  */
 public class PlatformConfigId implements Serializable {
 

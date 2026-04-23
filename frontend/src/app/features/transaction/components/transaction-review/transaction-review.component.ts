@@ -1,4 +1,4 @@
-// features/transaction/components/transaction-review/transaction-review.component.ts — UC016 Phase 4
+// features/transaction/components/transaction-review/transaction-review.component.ts — UC004_ESTATE_PLACEHOLDER Phase 4
 import { CommonModule, DecimalPipe } from '@angular/common';
 import { Component, OnInit } from '@angular/core';
 import { FormsModule } from '@angular/forms';

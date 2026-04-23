@@ -19,7 +19,7 @@ import com.immocare.repository.TagSubcategoryRepository;
 
 /**
  * Service for TagSubcategory management.
- * UC016 Phase 4: all operations are now estate-scoped via category.
+ * UC004_ESTATE_PLACEHOLDER Phase 4: all operations are now estate-scoped via category.
  */
 @Service
 @Transactional(readOnly = true)
@@ -72,7 +72,7 @@ public class TagSubcategoryService {
             throw new IllegalArgumentException("A subcategory with this name already exists in the category.");
         }
 
-        // BR-US086-AC9: direction change safety — only allowed if no usage
+        // BR-UC015.009-AC9: direction change safety — only allowed if no usage
         if (!sub.getDirection().equals(req.direction()) && tagSubcategoryRepository.countUsage(id) > 0) {
             throw new IllegalArgumentException("Cannot change direction: subcategory is already in use.");
         }

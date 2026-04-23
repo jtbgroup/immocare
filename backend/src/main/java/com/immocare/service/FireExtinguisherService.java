@@ -27,7 +27,7 @@ import com.immocare.repository.HousingUnitRepository;
 
 /**
  * Service for Fire Extinguisher management.
- * UC016 Phase 2: estate ownership verification added.
+ * UC004_ESTATE_PLACEHOLDER Phase 2: estate ownership verification added.
  */
 @Service
 @Transactional(readOnly = true)

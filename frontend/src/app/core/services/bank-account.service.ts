@@ -1,4 +1,4 @@
-// core/services/bank-account.service.ts — UC016 Phase 4
+// core/services/bank-account.service.ts — UC004_ESTATE_PLACEHOLDER Phase 4
 // Bank accounts are now estate-scoped.
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { Injectable } from '@angular/core';

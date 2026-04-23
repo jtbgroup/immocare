@@ -44,7 +44,7 @@ import com.immocare.repository.UserRepository;
 
 /**
  * Service for Estate management.
- * UC016 Phase 6: getDashboard() now returns real counts and alert data.
+ * UC004_ESTATE_PLACEHOLDER Phase 6: getDashboard() now returns real counts and alert data.
  */
 @Service
 @Transactional(readOnly = true)
@@ -120,7 +120,7 @@ public class EstateService {
     // ─── Dashboard ────────────────────────────────────────────────────────────
 
     /**
-     * UC016 Phase 6: returns fully populated dashboard with real counts and alerts.
+     * UC004_ESTATE_PLACEHOLDER Phase 6: returns fully populated dashboard with real counts and alerts.
      */
     public EstateDashboardDTO getDashboard(UUID estateId) {
         Estate estate = findOrThrow(estateId);

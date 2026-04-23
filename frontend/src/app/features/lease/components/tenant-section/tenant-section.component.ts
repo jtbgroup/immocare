@@ -1,4 +1,4 @@
-// features/lease/tenant-section/tenant-section.component.ts — UC016 Phase 6
+// features/lease/tenant-section/tenant-section.component.ts — UC004_ESTATE_PLACEHOLDER Phase 6
 // canEdit() injected from ActiveEstateService
 import { CommonModule } from '@angular/common';
 import { Component, EventEmitter, Input, Output } from '@angular/core';

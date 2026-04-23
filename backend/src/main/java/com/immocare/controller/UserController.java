@@ -24,10 +24,10 @@ import org.springframework.web.bind.annotation.RestController;
 import java.util.List;
 
 /**
- * REST controller for user management (UC007 — US031 → US035).
+ * REST controller for user management (UC008 — UC002.001 → UC002.005).
  * All endpoints require PLATFORM_ADMIN access.
  *
- * UC016 Phase 1: replaced {@code hasRole('ADMIN')} with {@code @security.isPlatformAdmin()}.
+ * UC004_ESTATE_PLACEHOLDER Phase 1: replaced {@code hasRole('ADMIN')} with {@code @security.isPlatformAdmin()}.
  */
 @RestController
 @RequestMapping("/api/v1/users")
@@ -40,33 +40,33 @@ public class UserController {
         this.userService = userService;
     }
 
-    // US031 — List all users
+    // UC002.001 — List all users
     @GetMapping
     public ResponseEntity<List<UserDTO>> getAllUsers() {
         return ResponseEntity.ok(userService.getAllUsers());
     }
 
-    // US031 — Get one user
+    // UC002.001 — Get one user
     @GetMapping("/{id}")
     public ResponseEntity<UserDTO> getUserById(@PathVariable Long id) {
         return ResponseEntity.ok(userService.getUserById(id));
     }
 
-    // US032 — Create user
+    // UC002.002 — Create user
     @PostMapping
     public ResponseEntity<UserDTO> createUser(@Valid @RequestBody CreateUserRequest req) {
         UserDTO created = userService.createUser(req);
         return ResponseEntity.status(HttpStatus.CREATED).body(created);
     }
 
-    // US033 — Edit user
+    // UC002.003 — Edit user
     @PutMapping("/{id}")
     public ResponseEntity<UserDTO> updateUser(@PathVariable Long id,
                                               @Valid @RequestBody UpdateUserRequest req) {
         return ResponseEntity.ok(userService.updateUser(id, req));
     }
 
-    // US034 — Change password
+    // UC002.004 — Change password
     @PatchMapping("/{id}/password")
     public ResponseEntity<Void> changePassword(@PathVariable Long id,
                                                @Valid @RequestBody ChangePasswordRequest req) {
@@ -74,7 +74,7 @@ public class UserController {
         return ResponseEntity.noContent().build();
     }
 
-    // US035 — Delete user
+    // UC002.005 — Delete user
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteUser(@PathVariable Long id,
                                            @AuthenticationPrincipal AppUser currentUser) {

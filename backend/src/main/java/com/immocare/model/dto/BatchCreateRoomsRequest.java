@@ -13,7 +13,7 @@ import java.util.List;
 
 /**
  * Request DTO for batch-creating multiple rooms at once.
- * UC003 - US015 Quick Add Multiple Rooms.
+ * UC004 - UC007.004 Quick Add Multiple Rooms.
  */
 public class BatchCreateRoomsRequest {
 

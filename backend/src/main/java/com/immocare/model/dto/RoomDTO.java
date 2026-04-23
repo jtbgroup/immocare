@@ -5,7 +5,7 @@ import java.time.LocalDateTime;
 
 /**
  * Response DTO for Room data.
- * UC003 - Manage Rooms.
+ * UC004 - Manage Rooms.
  */
 public class RoomDTO {
 

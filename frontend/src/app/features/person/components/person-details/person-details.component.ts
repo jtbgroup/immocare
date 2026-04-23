@@ -1,4 +1,4 @@
-// features/person/person-details/person-details.component.ts — UC016 Phase 6
+// features/person/person-details/person-details.component.ts — UC004_ESTATE_PLACEHOLDER Phase 6
 import { CommonModule } from '@angular/common';
 import { Component, OnInit } from '@angular/core';
 import { FormsModule } from '@angular/forms';

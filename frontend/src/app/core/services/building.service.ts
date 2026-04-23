@@ -11,7 +11,7 @@ import {
 
 /**
  * Service for Building API operations.
- * UC016 Phase 2: all endpoints scoped to the active estate.
+ * UC004_ESTATE_PLACEHOLDER Phase 2: all endpoints scoped to the active estate.
  * Base URL: /api/v1/estates/{estateId}/buildings
  */
 @Injectable({ providedIn: 'root' })
@@ -34,7 +34,7 @@ export class BuildingService {
 
   /**
    * GET /api/v1/estates/{estateId}/buildings
-   * US004 — View Buildings List / US005 — Search Buildings.
+   * UC005.004 — View Buildings List / UC005.005 — Search Buildings.
    */
   getAllBuildings(
     page = 0,
@@ -68,7 +68,7 @@ export class BuildingService {
 
   /**
    * POST /api/v1/estates/{estateId}/buildings
-   * US001 — Create Building.
+   * UC005.001 — Create Building.
    */
   createBuilding(request: CreateBuildingRequest): Observable<Building> {
     return this.http.post<Building>(this.base, request);
@@ -76,7 +76,7 @@ export class BuildingService {
 
   /**
    * PUT /api/v1/estates/{estateId}/buildings/{id}
-   * US002 — Edit Building.
+   * UC005.002 — Edit Building.
    */
   updateBuilding(id: number, request: UpdateBuildingRequest): Observable<Building> {
     return this.http.put<Building>(`${this.base}/${id}`, request);
@@ -84,7 +84,7 @@ export class BuildingService {
 
   /**
    * DELETE /api/v1/estates/{estateId}/buildings/{id}
-   * US003 — Delete Building.
+   * UC005.003 — Delete Building.
    */
   deleteBuilding(id: number): Observable<{ message: string }> {
     return this.http.delete<{ message: string }>(`${this.base}/${id}`);

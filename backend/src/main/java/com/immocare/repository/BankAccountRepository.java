@@ -9,7 +9,7 @@ import java.util.UUID;
 
 /**
  * Repository for BankAccount entity.
- * UC016 Phase 4: all queries are now scoped to an estate.
+ * UC004_ESTATE_PLACEHOLDER Phase 4: all queries are now scoped to an estate.
  */
 public interface BankAccountRepository extends JpaRepository<BankAccount, Long> {
 

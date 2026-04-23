@@ -14,7 +14,7 @@ import java.util.UUID;
 
 /**
  * REST controller for TagSubcategory management.
- * UC016 Phase 4: all routes are now scoped to an estate.
+ * UC004_ESTATE_PLACEHOLDER Phase 4: all routes are now scoped to an estate.
  *
  * Endpoints:
  *   GET    /api/v1/estates/{estateId}/tag-subcategories

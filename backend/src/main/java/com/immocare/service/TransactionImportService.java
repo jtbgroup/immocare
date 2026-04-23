@@ -53,7 +53,7 @@ import lombok.extern.slf4j.Slf4j;
 
 /**
  * Service handling the 3-step transaction import flow.
- * UC016 Phase 4: all operations are now scoped to an estate.
+ * UC004_ESTATE_PLACEHOLDER Phase 4: all operations are now scoped to an estate.
  *
  * Duplicate detection is now per-estate:
  *   A transaction with the same fingerprint in estate A does not block

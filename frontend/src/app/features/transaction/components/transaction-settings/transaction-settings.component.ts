@@ -1,4 +1,4 @@
-// features/transaction/components/transaction-settings/transaction-settings.component.ts — UC016 Phase 6
+// features/transaction/components/transaction-settings/transaction-settings.component.ts — UC004_ESTATE_PLACEHOLDER Phase 6
 import { CommonModule } from '@angular/common';
 import { Component, OnInit } from '@angular/core';
 import { FormsModule } from '@angular/forms';

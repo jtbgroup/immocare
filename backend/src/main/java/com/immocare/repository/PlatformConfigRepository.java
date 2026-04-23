@@ -10,7 +10,7 @@ import com.immocare.model.entity.PlatformConfig;
 import com.immocare.model.entity.PlatformConfigId;
 
 /**
- * Repository for UC016 Phase 5 — per-estate Platform Configuration.
+ * Repository for UC004_ESTATE_PLACEHOLDER Phase 5 — per-estate Platform Configuration.
  * All queries are scoped to an estate via the composite PK (estate_id,
  * config_key).
  */

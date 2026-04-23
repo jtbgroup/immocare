@@ -11,7 +11,7 @@ import com.immocare.model.entity.BoilerServiceValidityRule;
 
 /**
  * Repository for BoilerServiceValidityRule.
- * UC016 Phase 5: all queries are now scoped to an estate.
+ * UC004_ESTATE_PLACEHOLDER Phase 5: all queries are now scoped to an estate.
  */
 public interface BoilerServiceValidityRuleRepository extends JpaRepository<BoilerServiceValidityRule, Long> {
 

@@ -4,7 +4,7 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 
 /**
- * Response DTO for a boiler — UC011.
+ * Response DTO for a boiler — UC012.
  *
  * <p>{@code daysUntilNextService} is negative when the service date is overdue.
  * {@code serviceAlert} is true when service is due within the configured warning window.

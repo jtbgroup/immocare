@@ -69,7 +69,7 @@ import jakarta.servlet.http.HttpServletResponse;
 
 /**
  * Service for FinancialTransaction management.
- * UC016 Phase 4: all operations are now scoped to an estate.
+ * UC004_ESTATE_PLACEHOLDER Phase 4: all operations are now scoped to an estate.
  */
 @Service
 @Transactional(readOnly = true)

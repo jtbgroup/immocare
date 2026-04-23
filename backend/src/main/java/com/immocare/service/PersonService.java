@@ -31,7 +31,7 @@ import com.immocare.repository.PersonRepository;
 
 /**
  * Business logic for Person management.
- * UC016 Phase 3: all operations are scoped to an estate.
+ * UC004_ESTATE_PLACEHOLDER Phase 3: all operations are scoped to an estate.
  */
 @Service
 @Transactional(readOnly = true)
