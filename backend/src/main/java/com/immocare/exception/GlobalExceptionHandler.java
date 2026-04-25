@@ -16,7 +16,8 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
  * Global exception handler for REST controllers.
  * Provides consistent error response format across the application.
  *
- * UC004_ESTATE_PLACEHOLDER Phase 1: added handlers for all estate-related exceptions.
+ * UC004_ESTATE_PLACEHOLDER Phase 1: added handlers for all estate-related
+ * exceptions.
  */
 @RestControllerAdvice
 public class GlobalExceptionHandler {
@@ -271,7 +272,8 @@ public class GlobalExceptionHandler {
         .body(new ErrorResponse(403, "CANNOT_DELETE_SELF", ex.getMessage(), LocalDateTime.now()));
   }
 
-  // ─── UC004_ESTATE_PLACEHOLDER - Estates ──────────────────────────────────────────────────────
+  // ─── UC004_ESTATE_PLACEHOLDER - Estates
+  // ──────────────────────────────────────────────────────
 
   @ExceptionHandler(EstateNotFoundException.class)
   public ResponseEntity<ErrorResponse> handleEstateNotFound(EstateNotFoundException ex) {
@@ -332,6 +334,17 @@ public class GlobalExceptionHandler {
         .body(new ErrorResponse(409, "BOILER_VALIDITY_RULE_DUPLICATE",
             ex.getMessage(), LocalDateTime.now()));
   }
+
+  // HTTP 422 is used here rather than 409 because the estate does not yet exist —
+  // this is a request validation failure, not a state conflict.
+  // If your project uses 409 consistently for all estate errors, change to
+  // CONFLICT.
+  @ExceptionHandler(NoManagerInMembersException.class)
+  public ResponseEntity<ErrorResponse> handleNoManagerInMembers(NoManagerInMembersException ex) {
+    return ResponseEntity.status(HttpStatus.PRECONDITION_FAILED)
+        .body(new ErrorResponse(422, "NO_MANAGER_IN_MEMBERS", ex.getMessage(), LocalDateTime.now()));
+  }
+
   // ─── Generic ──────────────────────────────────────────────────────────────
 
   @ExceptionHandler(IllegalArgumentException.class)

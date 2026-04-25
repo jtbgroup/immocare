@@ -1,5 +1,5 @@
-// features/estate/components/estate-dashboard/estate-dashboard.component.ts — UC004_ESTATE_PLACEHOLDER Phase 6
-// Dashboard fully populated with real counts. Alert cards navigate to alert list.
+// features/estate/components/estate-dashboard/estate-dashboard.component.ts
+// UC003 — Manage Estates (Phase 6 + estate-manager edit button)
 import { CommonModule } from '@angular/common';
 import { Component, OnDestroy, OnInit } from '@angular/core';
 import { ActivatedRoute, Router, RouterModule } from '@angular/router';
@@ -75,11 +75,32 @@ export class EstateDashboardComponent implements OnInit, OnDestroy {
     return p.boiler + p.fireExtinguisher + p.leaseEnd + p.indexation;
   }
 
-  get canManageMembers(): boolean {
+  /**
+   * True when the current user can edit the estate metadata and manage members.
+   * MANAGER and PLATFORM_ADMIN have this capability; VIEWERs do not.
+   */
+  get canManageEstate(): boolean {
     return (
       this.activeEstateService.isManager() ||
       this.activeEstateService.isPlatformAdmin()
     );
+  }
+
+  get canManageMembers(): boolean {
+    return this.canManageEstate;
+  }
+
+  /**
+   * Navigates to the estate edit form.
+   * PLATFORM_ADMIN uses the admin route; estate MANAGERs use the estate-scoped route.
+   * Both land on the same AdminEstateFormComponent (isEdit = true).
+   */
+  goToEstateEdit(): void {
+    if (this.activeEstateService.isPlatformAdmin()) {
+      this.router.navigate(['/admin/estates', this.estateId, 'edit']);
+    } else {
+      this.router.navigate(['/estates', this.estateId, 'edit']);
+    }
   }
 
   get quickAccessCards(): QuickAccessCard[] {

@@ -13,6 +13,7 @@ import { AuthInterceptor } from "./app/core/auth/auth.interceptor";
 import { EstateGuard } from "./app/core/auth/estate.guard";
 import { PlatformAdminGuard } from "./app/core/auth/platform-admin.guard";
 import { DateFormatService } from "./app/core/services/date-format.service";
+import { AdminEstateFormComponent } from "./app/features/estate/components/admin-estate-form/admin-estate-form.component";
 
 bootstrapApplication(AppComponent, {
   providers: [
@@ -64,6 +65,13 @@ bootstrapApplication(AppComponent, {
             (m) => m.AdminEstateFormComponent,
           ),
       },
+      {
+        path: "estates/:estateId/edit",
+        component: AdminEstateFormComponent,
+        canActivate: [EstateGuard],
+        data: { requiresManager: true },
+      },
+
       {
         path: "admin/estates",
         pathMatch: "full",

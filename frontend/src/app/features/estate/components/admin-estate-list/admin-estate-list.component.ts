@@ -96,7 +96,16 @@ export class AdminEstateListComponent implements OnInit, OnDestroy {
   }
 
   viewDashboard(estate: Estate): void {
-    this.activeEstateService.setActiveEstate(estate as any);
+    // PLATFORM_ADMIN has transversal access (myRole = null)
+    const estateSummary = {
+      id: estate.id,
+      name: estate.name,
+      description: estate.description,
+      myRole: null as any, // null means PLATFORM_ADMIN
+      buildingCount: estate.buildingCount,
+      unitCount: 0, // Not available in Estate model, but not used in dashboard
+    };
+    this.activeEstateService.setActiveEstate(estateSummary);
     this.router.navigate(["/estates", estate.id, "dashboard"]);
   }
 

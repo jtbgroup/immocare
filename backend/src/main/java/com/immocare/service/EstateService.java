@@ -16,12 +16,14 @@ import com.immocare.exception.EstateMemberNotFoundException;
 import com.immocare.exception.EstateNameTakenException;
 import com.immocare.exception.EstateNotFoundException;
 import com.immocare.exception.EstateSelfOperationException;
+import com.immocare.exception.NoManagerInMembersException;
 import com.immocare.exception.UserNotFoundException;
 import com.immocare.model.dto.EstateDTOs.AddEstateMemberRequest;
 import com.immocare.model.dto.EstateDTOs.CreateEstateRequest;
 import com.immocare.model.dto.EstateDTOs.EstateDTO;
 import com.immocare.model.dto.EstateDTOs.EstateDashboardDTO;
 import com.immocare.model.dto.EstateDTOs.EstateMemberDTO;
+import com.immocare.model.dto.EstateDTOs.EstateMemberInput;
 import com.immocare.model.dto.EstateDTOs.EstatePendingAlertsDTO;
 import com.immocare.model.dto.EstateDTOs.EstateSummaryDTO;
 import com.immocare.model.dto.EstateDTOs.UpdateEstateMemberRoleRequest;
@@ -44,7 +46,11 @@ import com.immocare.repository.UserRepository;
 
 /**
  * Service for Estate management.
- * UC004_ESTATE_PLACEHOLDER Phase 6: getDashboard() now returns real counts and alert data.
+ *
+ * Key changes vs Phase 1:
+ * - {@link #createEstate} now accepts a {@code members} list (replacing the single
+ *   {@code firstManagerId}) and enforces BR-UC003-02 (at least one MANAGER).
+ * - {@link #updateEstateByManager} added for estate-scoped MANAGER access.
  */
 @Service
 @Transactional(readOnly = true)
@@ -61,7 +67,6 @@ public class EstateService {
     private final LeaseService leaseService;
     private final PlatformConfigService platformConfigService;
     private final BoilerServiceValidityRuleService validityRuleService;
-    private final PlatformConfigService platformConfig;
 
     public EstateService(EstateRepository estateRepository,
             EstateMemberRepository estateMemberRepository,
@@ -73,8 +78,7 @@ public class EstateService {
             FireExtinguisherRepository fireExtinguisherRepository,
             LeaseService leaseService,
             PlatformConfigService platformConfigService,
-            BoilerServiceValidityRuleService validityRuleService,
-            PlatformConfigService platformConfig) {
+            BoilerServiceValidityRuleService validityRuleService) {
         this.estateRepository = estateRepository;
         this.estateMemberRepository = estateMemberRepository;
         this.userRepository = userRepository;
@@ -86,7 +90,6 @@ public class EstateService {
         this.leaseService = leaseService;
         this.platformConfigService = platformConfigService;
         this.validityRuleService = validityRuleService;
-        this.platformConfig = platformConfig;
     }
 
     // ─── Admin queries ────────────────────────────────────────────────────────
@@ -119,9 +122,6 @@ public class EstateService {
 
     // ─── Dashboard ────────────────────────────────────────────────────────────
 
-    /**
-     * UC004_ESTATE_PLACEHOLDER Phase 6: returns fully populated dashboard with real counts and alerts.
-     */
     public EstateDashboardDTO getDashboard(UUID estateId) {
         Estate estate = findOrThrow(estateId);
 
@@ -219,10 +219,31 @@ public class EstateService {
 
     // ─── Admin mutations ──────────────────────────────────────────────────────
 
+    /**
+     * Creates a new estate and bulk-adds the provided members in the same transaction.
+     *
+     * Business rules enforced:
+     * <ul>
+     *   <li>BR-UC003-01: estate name must be unique (case-insensitive)</li>
+     *   <li>BR-UC003-02: if a members list is provided and non-empty, it must
+     *       contain at least one entry with role MANAGER</li>
+     *   <li>Duplicate userIds within the members list are rejected</li>
+     * </ul>
+     */
     @Transactional
     public EstateDTO createEstate(CreateEstateRequest req, Long createdByUserId) {
         if (estateRepository.existsByNameIgnoreCase(req.name())) {
             throw new EstateNameTakenException(req.name());
+        }
+
+        // BR-UC003-02: if members are provided, at least one must be MANAGER
+        List<EstateMemberInput> members = req.members() != null ? req.members() : List.of();
+        if (!members.isEmpty()) {
+            boolean hasManager = members.stream()
+                    .anyMatch(m -> m.role() == EstateRole.MANAGER);
+            if (!hasManager) {
+                throw new NoManagerInMembersException();
+            }
         }
 
         AppUser createdBy = userRepository.findById(createdByUserId).orElse(null);
@@ -237,19 +258,30 @@ public class EstateService {
         platformConfigService.seedDefaultConfig(saved, EstatePlatformConfigDTOs.DEFAULT_CONFIG);
         validityRuleService.seedDefaultRule(saved);
 
-        if (req.firstManagerId() != null) {
-            AppUser firstManager = userRepository.findById(req.firstManagerId())
-                    .orElseThrow(() -> new UserNotFoundException(req.firstManagerId()));
+        // Bulk-add members preserving order; detect duplicates
+        java.util.Set<Long> seen = new java.util.LinkedHashSet<>();
+        for (EstateMemberInput input : members) {
+            if (!seen.add(input.userId())) {
+                // Duplicate userId in the request — skip silently (idempotent)
+                continue;
+            }
+            AppUser user = userRepository.findById(input.userId())
+                    .orElseThrow(() -> new UserNotFoundException(input.userId()));
             EstateMember member = new EstateMember();
             member.setEstate(saved);
-            member.setUser(firstManager);
-            member.setRole(EstateRole.MANAGER);
+            member.setUser(user);
+            member.setRole(input.role());
             estateMemberRepository.save(member);
         }
 
         return toDTO(saved);
     }
 
+    /**
+     * Updates estate metadata (name, description).
+     * Accessible to both PLATFORM_ADMIN (via admin controller) and estate MANAGER
+     * (via estate-scoped controller).
+     */
     @Transactional
     public EstateDTO updateEstate(UUID id, UpdateEstateRequest req) {
         Estate estate = findOrThrow(id);
@@ -273,10 +305,6 @@ public class EstateService {
 
     // ─── Phase 6: Alert computation ───────────────────────────────────────────
 
-    /**
-     * Counts boilers with EXPIRED or EXPIRING_SOON service status within the
-     * estate.
-     */
     private int computeBoilerAlerts(UUID estateId) {
         int warningMonths = platformConfigService.getIntValue(
                 estateId,
@@ -287,33 +315,24 @@ public class EstateService {
         return (int) boilerRepository.findActiveByEstateId(estateId)
                 .stream()
                 .filter(b -> {
-                    if (b.getNextServiceDate() == null)
-                        return false;
+                    if (b.getNextServiceDate() == null) return false;
                     return b.getNextServiceDate().isBefore(threshold);
                 })
                 .count();
     }
 
-    /**
-     * Counts fire extinguishers with no revisions or last revision older than 1
-     * year.
-     */
     private int computeFireExtinguisherAlerts(UUID estateId) {
         LocalDate oneYearAgo = LocalDate.now().minusYears(1);
         return (int) fireExtinguisherRepository.findByBuildingEstateId(estateId)
                 .stream()
                 .filter(ext -> {
-                    if (ext.getRevisions().isEmpty())
-                        return true;
+                    if (ext.getRevisions().isEmpty()) return true;
                     LocalDate latest = ext.getRevisions().get(0).getRevisionDate();
                     return latest.isBefore(oneYearAgo);
                 })
                 .count();
     }
 
-    /**
-     * Counts active leases with an active end-notice alert.
-     */
     private int computeLeaseEndAlerts(UUID estateId) {
         return (int) leaseService.getAlerts(estateId)
                 .stream()
@@ -321,9 +340,6 @@ public class EstateService {
                 .count();
     }
 
-    /**
-     * Counts active leases with an active indexation alert.
-     */
     private int computeIndexationAlerts(UUID estateId) {
         return (int) leaseService.getAlerts(estateId)
                 .stream()

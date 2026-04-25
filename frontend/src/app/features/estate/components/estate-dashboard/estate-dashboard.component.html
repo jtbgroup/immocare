@@ -12,6 +12,13 @@
     <div class="details-content">
       <div class="header">
         <h1>{{ dashboard.estateName }}</h1>
+        <div class="actions">
+          @if (canManageEstate) {
+            <button class="btn btn-secondary" (click)="goToEstateEdit()">
+              ✏️ Edit Estate
+            </button>
+          }
+        </div>
       </div>
     </div>
 

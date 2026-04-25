@@ -1,16 +1,18 @@
 package com.immocare.model.dto;
 
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.UUID;
 
 import com.immocare.model.enums.EstateRole;
 
+import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 
 /**
- * All DTOs for UC004_ESTATE_PLACEHOLDER — Manage Estates.
+ * All DTOs for UC003 — Manage Estates.
  */
 public final class EstateDTOs {
 
@@ -45,8 +47,7 @@ public final class EstateDTOs {
     ) {}
 
     /**
-     * Estate dashboard — counts are all 0 in Phase 1.
-     * Will be enriched in Phase 6 when all entities are estate-scoped.
+     * Estate dashboard — populated in Phase 6.
      */
     public record EstateDashboardDTO(
             UUID estateId,
@@ -58,7 +59,7 @@ public final class EstateDTOs {
     ) {}
 
     /**
-     * Pending alert counts per category — all 0 in Phase 1.
+     * Pending alert counts per category.
      */
     public record EstatePendingAlertsDTO(
             int boiler,
@@ -81,7 +82,21 @@ public final class EstateDTOs {
     // ─── Request DTOs ─────────────────────────────────────────────────────────
 
     /**
+     * A single member entry within a create or update request.
+     */
+    public record EstateMemberInput(
+            @NotNull(message = "User ID is required")
+            Long userId,
+
+            @NotNull(message = "Role is required")
+            EstateRole role
+    ) {}
+
+    /**
      * Request body for POST /api/v1/admin/estates.
+     *
+     * The {@code members} list is optional but, if provided, must contain at
+     * least one entry with role MANAGER (BR-UC003-02).
      */
     public record CreateEstateRequest(
             @NotBlank(message = "Estate name is required")
@@ -90,11 +105,13 @@ public final class EstateDTOs {
 
             String description,
 
-            Long firstManagerId
+            @Valid
+            List<EstateMemberInput> members
     ) {}
 
     /**
-     * Request body for PUT /api/v1/admin/estates/{id}.
+     * Request body for PUT /api/v1/admin/estates/{id}
+     * and PUT /api/v1/estates/{id} (estate-manager route).
      */
     public record UpdateEstateRequest(
             @NotBlank(message = "Estate name is required")

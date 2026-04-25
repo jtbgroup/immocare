@@ -12,6 +12,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -21,6 +22,7 @@ import com.immocare.model.dto.EstateDTOs.EstateDashboardDTO;
 import com.immocare.model.dto.EstateDTOs.EstateMemberDTO;
 import com.immocare.model.dto.EstateDTOs.EstateSummaryDTO;
 import com.immocare.model.dto.EstateDTOs.UpdateEstateMemberRoleRequest;
+import com.immocare.model.dto.EstateDTOs.UpdateEstateRequest;
 import com.immocare.model.entity.AppUser;
 import com.immocare.service.AlertService;
 import com.immocare.service.EstateService;
@@ -32,11 +34,12 @@ import jakarta.validation.Valid;
  * estates").
  * Fine-grained access control is handled per method via {@code @PreAuthorize}.
  *
- * UC004_ESTATE_PLACEHOLDER — Manage Estates (Phase 1).
+ * UC003 — Manage Estates.
  *
  * Endpoints:
  * GET /api/v1/estates/mine → UC003.012 my estates
  * GET /api/v1/estates/{id}/dashboard → UC003.011 estate dashboard
+ * PUT /api/v1/estates/{id} → UC003.002 edit estate (MANAGER route)
  * GET /api/v1/estates/{id}/members → UC003.006 view members
  * POST /api/v1/estates/{id}/members → UC003.007 add member
  * PATCH /api/v1/estates/{id}/members/{userId} → UC003.008 edit member role
@@ -70,12 +73,24 @@ public class EstateController {
 
     /**
      * UC003.011 — View estate dashboard.
-     * All counts are 0 in Phase 1.
      */
     @GetMapping("/api/v1/estates/{id}/dashboard")
     @PreAuthorize("@security.isMemberOf(#id)")
     public ResponseEntity<EstateDashboardDTO> getDashboard(@PathVariable UUID id) {
         return ResponseEntity.ok(estateService.getDashboard(id));
+    }
+
+    /**
+     * UC003.002 (MANAGER route) — Edit estate metadata.
+     * Accessible to the estate MANAGER and to PLATFORM_ADMIN.
+     * The PLATFORM_ADMIN also has the admin route in {@link EstateAdminController}.
+     */
+    @PutMapping("/api/v1/estates/{id}")
+    @PreAuthorize("@security.isManagerOf(#id)")
+    public ResponseEntity<com.immocare.model.dto.EstateDTOs.EstateDTO> updateEstate(
+            @PathVariable UUID id,
+            @Valid @RequestBody UpdateEstateRequest req) {
+        return ResponseEntity.ok(estateService.updateEstate(id, req));
     }
 
     /**
@@ -115,7 +130,7 @@ public class EstateController {
     }
 
     /**
-     * USXXX — Remove a member from the estate.
+     * UC003.009 — Remove a member from the estate.
      */
     @DeleteMapping("/api/v1/estates/{id}/members/{userId}")
     @PreAuthorize("@security.isManagerOf(#id)")
