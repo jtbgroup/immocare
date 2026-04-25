@@ -18,6 +18,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.immocare.model.dto.AlertDTO;
 import com.immocare.model.dto.EstateDTOs.AddEstateMemberRequest;
+import com.immocare.model.dto.EstateDTOs.EstateDTO;
 import com.immocare.model.dto.EstateDTOs.EstateDashboardDTO;
 import com.immocare.model.dto.EstateDTOs.EstateMemberDTO;
 import com.immocare.model.dto.EstateDTOs.EstateSummaryDTO;
@@ -78,6 +79,17 @@ public class EstateController {
     @PreAuthorize("@security.isMemberOf(#id)")
     public ResponseEntity<EstateDashboardDTO> getDashboard(@PathVariable UUID id) {
         return ResponseEntity.ok(estateService.getDashboard(id));
+    }
+
+    /**
+     * UC003.002 — Get a single estate by ID.
+     * Used by AdminEstateFormComponent in edit mode for both MANAGER and
+     * PLATFORM_ADMIN.
+     */
+    @GetMapping("/api/v1/estates/{id}")
+    @PreAuthorize("@security.isManagerOf(#id)")
+    public ResponseEntity<EstateDTO> getEstate(@PathVariable UUID id) {
+        return ResponseEntity.ok(estateService.getEstateById(id));
     }
 
     /**

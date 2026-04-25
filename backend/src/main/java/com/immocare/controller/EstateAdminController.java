@@ -14,7 +14,6 @@ import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -22,7 +21,6 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.immocare.model.dto.EstateDTOs.CreateEstateRequest;
 import com.immocare.model.dto.EstateDTOs.EstateDTO;
-import com.immocare.model.dto.EstateDTOs.UpdateEstateRequest;
 import com.immocare.model.entity.AppUser;
 import com.immocare.service.EstateService;
 
@@ -32,13 +30,15 @@ import jakarta.validation.Valid;
  * REST controller for platform-level estate management.
  * All endpoints require PLATFORM_ADMIN access.
  *
- * UC004_ESTATE_PLACEHOLDER — Manage Estates (Phase 1).
+ * UC003 — Manage Estates.
  *
  * Endpoints:
  * GET /api/v1/admin/estates → UC003.004 list all estates
  * POST /api/v1/admin/estates → UC003.001 create estate
- * PUT /api/v1/admin/estates/{id} → UC003.002 edit estate
  * DELETE /api/v1/admin/estates/{id} → UC003.003 delete estate
+ *
+ * Edit (PUT) and single-get (GET /{id}) are handled by EstateController
+ * at /api/v1/estates/{id}, accessible to both PLATFORM_ADMIN and MANAGER.
  */
 @RestController
 @RequestMapping("/api/v1/admin/estates")
@@ -76,17 +76,9 @@ public class EstateAdminController {
     }
 
     /**
-     * Get a single estate by ID.
-     */
-    @GetMapping("/{id}")
-    public ResponseEntity<EstateDTO> getEstate(@PathVariable UUID id) {
-        return ResponseEntity.ok(estateService.getEstateById(id));
-    }
-
-    /**
      * UC003.001 — Create a new estate.
-     * Optional {@code firstManagerId} assigns a MANAGER role at creation time
-     * (UC003.005).
+     * The optional {@code members} list assigns roles at creation time (UC003.005).
+     * At least one entry must have role MANAGER if the list is non-empty.
      */
     @PostMapping
     public ResponseEntity<EstateDTO> createEstate(
@@ -97,18 +89,8 @@ public class EstateAdminController {
     }
 
     /**
-     * UC003.002 — Edit an existing estate.
-     */
-    @PutMapping("/{id}")
-    public ResponseEntity<EstateDTO> updateEstate(
-            @PathVariable UUID id,
-            @Valid @RequestBody UpdateEstateRequest req) {
-        return ResponseEntity.ok(estateService.updateEstate(id, req));
-    }
-
-    /**
      * UC003.003 — Delete an estate.
-     * Blocked if the estate contains buildings (BR-UC004_ESTATE_PLACEHOLDER-09).
+     * Blocked if the estate contains buildings (BR-UC003-09).
      */
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteEstate(@PathVariable UUID id) {
