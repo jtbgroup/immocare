@@ -2,7 +2,8 @@
 .PHONY: help build up up-postgres down restart logs shell db-shell backup restore \
         clean clean-all rebuild dev prod health install update \
         backend-test nginx-reload nginx-test \
-        start stop dev-build logs-dev
+        start stop dev-build logs-dev \
+		release-patch release-beta promote-to-prod \
 
 # Variables
 APP_NAME = immocare
@@ -22,18 +23,44 @@ help: ## Affiche les commandes disponibles
 # ============================================
 # VERSION MANAGEMENT
 # ============================================
-show-version:
-	@echo "📌 Current version: $(VERSION)"
+# 1. Incrémenter pour une version stable (ex: 1.0.1)
+release-patch:
+	@$(eval NEXT_V := $(MAJOR).$(MINOR).$$(($(PATCH) + 1)))
+	@$(MAKE) set-version V=$(NEXT_V)
+	@$(MAKE) git-tag V=$(NEXT_V)
+
+# 2. Incrémenter pour une version beta (ex: 1.0.2-beta.1)
+release-beta:
+	@$(eval NEXT_PATCH := $$(($(PATCH) + 1)))
+	@read -p "Numéro de la beta pour v$(MAJOR).$(MINOR).$(NEXT_PATCH) ? (défaut: 1) " b; \
+	b=$${b:-1}; \
+	NEXT_V="$(MAJOR).$(MINOR).$(NEXT_PATCH)-beta.$$b"; \
+	$(MAKE) set-version V=$$NEXT_V; \
+	$(MAKE) git-tag V=$$NEXT_V
+
+# 3. Passer d'une beta à la production (ex: 1.0.2-beta.1 -> 1.0.2)
+promote-to-prod:
+	@if [[ "$(CURRENT_VERSION)" != *"-beta"* ]]; then \
+		echo "❌ La version actuelle $(CURRENT_VERSION) est déjà une version de production."; exit 1; \
+	fi
+	@$(eval NEXT_V := $(MAJOR).$(MINOR).$(PATCH))
+	@echo "🚀 Promotion de la beta vers la production : $(NEXT_V)"
+	@$(MAKE) set-version V=$(NEXT_V)
+	@$(MAKE) git-tag V=$(NEXT_V)
 
 set-version:
-	@if [ -z "$(V)" ]; then \
-		echo "❌ Usage: make set-version V=x.y.z"; \
-		exit 1; \
-	fi
-	@echo "$(V)" > VERSION
-	@mvn -f backend/pom.xml versions:set -DnewVersion=$(V) -DgenerateBackupPoms=false -q 2>/dev/null || echo "⚠️  Maven version update skipped"
-	@cd frontend && npm version $(V) --no-git-tag-version --allow-same-version > /dev/null 2>&1 || echo "⚠️  npm version update skipped"
-	@echo "✅ Version set to $(V) (VERSION file updated)"
+	@echo "$(V)" > $(VERSION_FILE)
+	@mvn -f backend/pom.xml versions:set -DnewVersion=$(V) -DgenerateBackupPoms=false -q 2>/dev/null || echo "⚠️  Maven skipped"
+	@cd frontend && npm version $(V) --no-git-tag-version --allow-same-version > /dev/null 2>&1 || echo "⚠️  npm skipped"
+	@echo "✅ Version set to $(V)"
+
+git-tag:
+	@git add .
+	@git commit -m "chore: bump version to $(V)"
+	@git tag -a v$(V) -m "Release v$(V)"
+	@git push origin main           # Pousse le commit sur la branche
+	@git push origin v$(V)          # Pousse précisément le tag créé
+	@echo "✅ Code and tag v$(V) pushed to origin"
 
 # ── Production — H2 (défaut) ──────────────────────────────────────────────────
 
