@@ -25,43 +25,54 @@ help: ## Affiche les commandes disponibles
 # ============================================
 # VERSION MANAGEMENT
 # ============================================
-# 1. Incrémenter pour une version stable (ex: 1.0.1)
+# 1. Incrémenter le Patch (ex: 1.0.0 -> 1.0.1)
 release-patch:
-	@$(eval NEXT_V := $(MAJOR).$(MINOR).$$(($(PATCH) + 1)))
-	@$(MAKE) set-version V=$(NEXT_V)
-	@$(MAKE) git-tag V=$(NEXT_V)
-
-# 2. Incrémenter pour une version beta (ex: 1.0.2-beta.1)
-release-beta:
-	@$(eval NEXT_PATCH := $$(($(PATCH) + 1)))
-	@read -p "Numéro de la beta pour v$(MAJOR).$(MINOR).$(NEXT_PATCH) ? (défaut: 1) " b; \
-	b=$${b:-1}; \
-	NEXT_V="$(MAJOR).$(MINOR).$(NEXT_PATCH)-beta.$$b"; \
+	@V=$(CURRENT_VERSION); \
+	BASE=$${V%-*}; \
+	MAJOR=$$(echo $$BASE | cut -d. -f1); \
+	MINOR=$$(echo $$BASE | cut -d. -f2); \
+	PATCH=$$(echo $$BASE | cut -d. -f3); \
+	NEXT_V="$$MAJOR.$$MINOR.$$(($$PATCH + 1))"; \
 	$(MAKE) set-version V=$$NEXT_V; \
 	$(MAKE) git-tag V=$$NEXT_V
 
-# 3. Passer d'une beta à la production (ex: 1.0.2-beta.1 -> 1.0.2)
+# 2. Créer une Beta (ex: 1.0.0 -> 1.0.1-beta.1)
+release-beta:
+	@V=$(CURRENT_VERSION); \
+	BASE=$${V%-*}; \
+	MAJOR=$$(echo $$BASE | cut -d. -f1); \
+	MINOR=$$(echo $$BASE | cut -d. -f2); \
+	PATCH=$$(echo $$BASE | cut -d. -f3); \
+	NEXT_PATCH=$$(($$PATCH + 1)); \
+	read -p "Numéro de la beta pour v$$MAJOR.$$MINOR.$$NEXT_PATCH ? (défaut: 1) " b; \
+	BETA=$${b:-1}; \
+	NEXT_V="$$MAJOR.$$MINOR.$$NEXT_PATCH-beta.$$BETA"; \
+	$(MAKE) set-version V=$$NEXT_V; \
+	$(MAKE) git-tag V=$$NEXT_V
+
+# 3. Passer de Beta à Prod (ex: 1.0.1-beta.1 -> 1.0.1)
 promote-to-prod:
-	@if [[ "$(CURRENT_VERSION)" != *"-beta"* ]]; then \
-		echo "❌ La version actuelle $(CURRENT_VERSION) est déjà une version de production."; exit 1; \
-	fi
-	@$(eval NEXT_V := $(MAJOR).$(MINOR).$(PATCH))
-	@echo "🚀 Promotion de la beta vers la production : $(NEXT_V)"
-	@$(MAKE) set-version V=$(NEXT_V)
-	@$(MAKE) git-tag V=$(NEXT_V)
+	@V=$(CURRENT_VERSION); \
+	if [[ "$$V" != *"-beta"* ]]; then \
+		echo "❌ La version $$V est déjà une version de production."; exit 1; \
+	fi; \
+	NEXT_V=$${V%-*}; \
+	echo "🚀 Promotion vers : $$NEXT_V"; \
+	$(MAKE) set-version V=$$NEXT_V; \
+	$(MAKE) git-tag V=$$NEXT_V
 
 set-version:
 	@echo "$(V)" > $(VERSION_FILE)
-	@mvn -f backend/pom.xml versions:set -DnewVersion=$(V) -DgenerateBackupPoms=false -q 2>/dev/null || echo "⚠️  Maven skipped"
-	@cd frontend && npm version $(V) --no-git-tag-version --allow-same-version > /dev/null 2>&1 || echo "⚠️  npm skipped"
-	@echo "✅ Version set to $(V)"
+	@mvn -f backend/pom.xml versions:set -DnewVersion=$(V) -DgenerateBackupPoms=false -q 2>/dev/null || echo "⚠️ Maven skipped"
+	@cd frontend && npm version $(V) --no-git-tag-version --allow-same-version > /dev/null 2>&1 || echo "⚠️ npm skipped"
+	@echo "✅ VERSION file, Maven and NPM updated to $(V)"
 
 git-tag:
 	@git add .
 	@git commit -m "chore: bump version to $(V)"
 	@git tag -a v$(V) -m "Release v$(V)"
-	@git push origin main           # Pousse le commit sur la branche
-	@git push origin v$(V)          # Pousse précisément le tag créé
+	@git push origin $$(git rev-parse --abbrev-ref HEAD)
+	@git push origin v$(V)
 	@echo "✅ Code and tag v$(V) pushed to origin"
 
 # ── Production — H2 (défaut) ──────────────────────────────────────────────────
