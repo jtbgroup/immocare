@@ -1,6 +1,6 @@
 {
   "name": "immocare-frontend",
-  "version": "1.0.1-beta.2",
+  "version": "1.0.1-beta.3",
   "description": "Property management system - Frontend",
   "engines": {
     "node": ">=22.0.0",
