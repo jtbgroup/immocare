@@ -13,7 +13,7 @@
 
   <groupId>com.immocare</groupId>
   <artifactId>immocare-backend</artifactId>
-  <version>1.1.0-beta.1</version>
+  <version>2.0.0-beta.1</version>
   <name>ImmoCare Backend</name>
   <description>Property management system - Backend API</description>
 
