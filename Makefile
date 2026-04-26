@@ -1,16 +1,16 @@
 # ImmoCare - Makefile
-.PHONY: help build up up-postgres down restart logs shell db-shell backup restore \
-        clean clean-all rebuild dev prod health install update \
-        backend-test nginx-reload nginx-test \
-        start stop dev-build logs-dev \
-		increment_version increment_beta release_version \
-
+SHELL := /bin/bash
 # Variables
 APP_NAME = immocare
 BACKUP_DIR = ./backups
 VERSION_FILE := VERSION
 CURRENT_VERSION := $(shell cat $(VERSION_FILE))
 
+.PHONY: help build up up-postgres down restart logs shell db-shell backup restore \
+        clean clean-all rebuild dev prod health install update \
+        backend-test nginx-reload nginx-test \
+        start stop dev-build logs-dev \
+		increment_version increment_beta release_version \
 
 help: ## Affiche les commandes disponibles
 	@echo "ImmoCare v$(VERSION) — Commandes disponibles :"
@@ -25,14 +25,14 @@ help: ## Affiche les commandes disponibles
 # ============================================
 # VERSION MANAGEMENT
 # ============================================
-# 1. Choisir le type d'incrément et passer en beta.1
+# 1. Choisir l'incrément et passer en beta.1
 increment_version:
 	@V=$(CURRENT_VERSION); \
 	BASE=$${V%-*}; \
 	MAJOR=$$(echo $$BASE | cut -d. -f1); \
 	MINOR=$$(echo $$BASE | cut -d. -f2); \
 	PATCH=$$(echo $$BASE | cut -d. -f3); \
-	echo "Current version : \033[1;32m$$V\033[0m"; \
+	echo -e "Version actuelle : \033[1;32m$$V\033[0m"; \
 	echo "Which segment do you want to increment ?"; \
 	echo "1) Major ($$(($$MAJOR + 1)).0.0-beta.1)"; \
 	echo "2) Minor ($$MAJOR.$$(($$MINOR + 1)).0-beta.1)"; \
@@ -47,11 +47,11 @@ increment_version:
 	$(MAKE) set-version V=$$NEXT; \
 	$(MAKE) git-tag V=$$NEXT
 
-# 2. Incrémenter juste le numéro de beta (ex: -beta.1 -> -beta.2)
+# 2. Incrémenter la beta (ex: -beta.1 -> -beta.2)
 increment_beta:
 	@V=$(CURRENT_VERSION); \
 	if [[ "$$V" != *"-beta."* ]]; then \
-		echo "❌ Error: The current version $$V is not a beta version."; exit 1; \
+		echo "❌ Error: Version $$V is not a beta."; exit 1; \
 	fi; \
 	BASE=$${V%-beta.*}; \
 	NUM=$${V##*-beta.}; \
@@ -59,16 +59,15 @@ increment_beta:
 	$(MAKE) set-version V=$$NEXT; \
 	$(MAKE) git-tag V=$$NEXT
 
-# 3. Supprimer le tag beta pour la release finale
+# 3. Release finale (supprime le suffixe beta)
 release_version:
 	@V=$(CURRENT_VERSION); \
 	if [[ "$$V" != *"-beta."* ]]; then \
-		echo "❌ Error: The current version $$V is not a beta version."; exit 1; \
+		echo "❌ Error: No beta version to release."; exit 1; \
 	fi; \
 	NEXT=$${V%-beta.*}; \
 	echo "--- ATTENTION ---"; \
-	echo "You are about to release the stable version : \033[1;31m$$NEXT\033[0m"; \
-	echo "Consequences : Update Maven/NPM, Commit, Tag Git and Push origin."; \
+	echo -e "You are about to release the stable version : \033[1;31m$$NEXT\033[0m"; \
 	read -p "Confirm the release ? (y/n) " ans; \
 	if [ "$$ans" != "y" ]; then echo "Cancelled."; exit 1; fi; \
 	$(MAKE) set-version V=$$NEXT; \
