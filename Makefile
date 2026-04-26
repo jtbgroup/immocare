@@ -7,9 +7,10 @@
 
 # Variables
 APP_NAME = immocare
-VERSION := $(shell cat VERSION 2>/dev/null || echo "0.0.1")
 BACKUP_DIR = ./backups
 VERSION_FILE := VERSION
+CURRENT_VERSION := $(shell cat $(VERSION_FILE))
+
 
 help: ## Affiche les commandes disponibles
 	@echo "ImmoCare v$(VERSION) — Commandes disponibles :"
