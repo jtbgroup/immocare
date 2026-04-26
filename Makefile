@@ -3,7 +3,7 @@
         clean clean-all rebuild dev prod health install update \
         backend-test nginx-reload nginx-test \
         start stop dev-build logs-dev \
-		release-patch release-beta promote-to-prod \
+		increment_version increment_beta release_version \
 
 # Variables
 APP_NAME = immocare
@@ -25,47 +25,60 @@ help: ## Affiche les commandes disponibles
 # ============================================
 # VERSION MANAGEMENT
 # ============================================
-# 1. Incrémenter le Patch (ex: 1.0.0 -> 1.0.1)
-release-patch:
+# 1. Choisir le type d'incrément et passer en beta.1
+increment_version:
 	@V=$(CURRENT_VERSION); \
 	BASE=$${V%-*}; \
 	MAJOR=$$(echo $$BASE | cut -d. -f1); \
 	MINOR=$$(echo $$BASE | cut -d. -f2); \
 	PATCH=$$(echo $$BASE | cut -d. -f3); \
-	NEXT_V="$$MAJOR.$$MINOR.$$(($$PATCH + 1))"; \
-	$(MAKE) set-version V=$$NEXT_V; \
-	$(MAKE) git-tag V=$$NEXT_V
+	echo "Current version : \033[1;32m$$V\033[0m"; \
+	echo "Which segment do you want to increment ?"; \
+	echo "1) Major ($$(($$MAJOR + 1)).0.0-beta.1)"; \
+	echo "2) Minor ($$MAJOR.$$(($$MINOR + 1)).0-beta.1)"; \
+	echo "3) Patch ($$MAJOR.$$MINOR.$$(($$PATCH + 1))-beta.1)"; \
+	read -p "Your choice (1-3) : " choice; \
+	case $$choice in \
+		1) NEXT="$$(($$MAJOR + 1)).0.0-beta.1" ;; \
+		2) NEXT="$$MAJOR.$$(($$MINOR + 1)).0-beta.1" ;; \
+		3) NEXT="$$MAJOR.$$MINOR.$$(($$PATCH + 1))-beta.1" ;; \
+		*) echo "❌ Invalid choice"; exit 1 ;; \
+	esac; \
+	$(MAKE) set-version V=$$NEXT; \
+	$(MAKE) git-tag V=$$NEXT
 
-# 2. Créer une Beta (ex: 1.0.0 -> 1.0.1-beta.1)
-release-beta:
+# 2. Incrémenter juste le numéro de beta (ex: -beta.1 -> -beta.2)
+increment_beta:
 	@V=$(CURRENT_VERSION); \
-	BASE=$${V%-*}; \
-	MAJOR=$$(echo $$BASE | cut -d. -f1); \
-	MINOR=$$(echo $$BASE | cut -d. -f2); \
-	PATCH=$$(echo $$BASE | cut -d. -f3); \
-	NEXT_PATCH=$$(($$PATCH + 1)); \
-	read -p "Numéro de la beta pour v$$MAJOR.$$MINOR.$$NEXT_PATCH ? (défaut: 1) " b; \
-	BETA=$${b:-1}; \
-	NEXT_V="$$MAJOR.$$MINOR.$$NEXT_PATCH-beta.$$BETA"; \
-	$(MAKE) set-version V=$$NEXT_V; \
-	$(MAKE) git-tag V=$$NEXT_V
-
-# 3. Passer de Beta à Prod (ex: 1.0.1-beta.1 -> 1.0.1)
-promote-to-prod:
-	@V=$(CURRENT_VERSION); \
-	if [[ "$$V" != *"-beta"* ]]; then \
-		echo "❌ La version $$V est déjà une version de production."; exit 1; \
+	if [[ "$$V" != *"-beta."* ]]; then \
+		echo "❌ Error: The current version $$V is not a beta version."; exit 1; \
 	fi; \
-	NEXT_V=$${V%-*}; \
-	echo "🚀 Promotion vers : $$NEXT_V"; \
-	$(MAKE) set-version V=$$NEXT_V; \
-	$(MAKE) git-tag V=$$NEXT_V
+	BASE=$${V%-beta.*}; \
+	NUM=$${V##*-beta.}; \
+	NEXT="$$BASE-beta.$$(($$NUM + 1))"; \
+	$(MAKE) set-version V=$$NEXT; \
+	$(MAKE) git-tag V=$$NEXT
+
+# 3. Supprimer le tag beta pour la release finale
+release_version:
+	@V=$(CURRENT_VERSION); \
+	if [[ "$$V" != *"-beta."* ]]; then \
+		echo "❌ Error: The current version $$V is not a beta version."; exit 1; \
+	fi; \
+	NEXT=$${V%-beta.*}; \
+	echo "--- ATTENTION ---"; \
+	echo "You are about to release the stable version : \033[1;31m$$NEXT\033[0m"; \
+	echo "Consequences : Update Maven/NPM, Commit, Tag Git and Push origin."; \
+	read -p "Confirm the release ? (y/n) " ans; \
+	if [ "$$ans" != "y" ]; then echo "Cancelled."; exit 1; fi; \
+	$(MAKE) set-version V=$$NEXT; \
+	$(MAKE) git-tag V=$$NEXT
 
 set-version:
 	@echo "$(V)" > $(VERSION_FILE)
 	@mvn -f backend/pom.xml versions:set -DnewVersion=$(V) -DgenerateBackupPoms=false -q 2>/dev/null || echo "⚠️ Maven skipped"
 	@cd frontend && npm version $(V) --no-git-tag-version --allow-same-version > /dev/null 2>&1 || echo "⚠️ npm skipped"
-	@echo "✅ VERSION file, Maven and NPM updated to $(V)"
+	@echo "✅ Files updated to $(V)"
 
 git-tag:
 	@git add .
@@ -73,7 +86,6 @@ git-tag:
 	@git tag -a v$(V) -m "Release v$(V)"
 	@git push origin $$(git rev-parse --abbrev-ref HEAD)
 	@git push origin v$(V)
-	@echo "✅ Code and tag v$(V) pushed to origin"
 
 # ── Production — H2 (défaut) ──────────────────────────────────────────────────
 
