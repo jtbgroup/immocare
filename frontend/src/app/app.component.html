@@ -98,6 +98,13 @@
               >
                 🏦 Bank Accounts
               </a>
+               <a
+                routerLink="/settings"
+                class="dropdown-item"
+                (click)="closeDropdown()"
+              >
+                ⚙️ Paramètres
+              </a>
             </div>
           </div>
         } @else {
@@ -151,15 +158,17 @@
               </div>
             </div>
 
-            <a
+           
+
+            @if (user.isPlatformAdmin) {
+               <a
               routerLink="/users"
               class="dropdown-item"
               (click)="closeDropdown()"
             >
               <span class="di-icon">👥</span> Manage Users
             </a>
-
-            @if (user.isPlatformAdmin) {
+              <div class="dropdown-divider"></div>
               <a
                 routerLink="/admin/estates"
                 class="dropdown-item"
@@ -167,26 +176,10 @@
               >
                 <span class="di-icon">🏛️</span> Manage Estates
               </a>
-            }
 
-            <div class="dropdown-divider"></div>
+  <div class="dropdown-divider"></div>
 
-            <!-- Phase 5: estate-scoped settings when an estate is active -->
-            @if (activeEstateService.activeEstateId()) {
-              <a
-                [routerLink]="[
-                  '/estates',
-                  activeEstateService.activeEstateId(),
-                  'admin/platform-settings',
-                ]"
-                class="dropdown-item"
-                (click)="closeDropdown()"
-              >
-                <span class="di-icon">⚙️</span> Paramètres
-              </a>
-            } @else {
-              <!-- Fallback for PLATFORM_ADMIN without active estate -->
-              <a
+               <a
                 routerLink="/settings"
                 class="dropdown-item"
                 (click)="closeDropdown()"
@@ -194,6 +187,7 @@
                 <span class="di-icon">⚙️</span> Paramètres
               </a>
             }
+
 
             <div class="dropdown-divider"></div>
             <button
