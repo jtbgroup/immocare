@@ -143,14 +143,67 @@
                   (change)="toggleAll($any($event.target).checked)"
                 />
               </th>
-              <th>Date</th>
-              <th>Amount</th>
-              <th>Dir.</th>
-              <th>Counterparty</th>
-              <th>Subcategory</th>
-              <th>Lease / Unit</th>
-              <th>Status</th>
-              <th></th>
+              <th class="col-date sortable" (click)="sortBy('transactionDate')">
+                Date
+                <span
+                  class="sort-icon"
+                  [class.active]="sortField === 'transactionDate'"
+                >
+                  {{ sortIcon("transactionDate") }}
+                </span>
+              </th>
+              <th class="col-amount sortable" (click)="sortBy('amount')">
+                Amount
+                <span class="sort-icon" [class.active]="sortField === 'amount'">
+                  {{ sortIcon("amount") }}
+                </span>
+              </th>
+              <th class="col-dir sortable" (click)="sortBy('direction')">
+                Dir.
+                <span
+                  class="sort-icon"
+                  [class.active]="sortField === 'direction'"
+                >
+                  {{ sortIcon("direction") }}
+                </span>
+              </th>
+              <th
+                class="col-cp sortable"
+                (click)="sortBy('counterpartyAccount')"
+              >
+                Counterparty
+                <span
+                  class="sort-icon"
+                  [class.active]="sortField === 'counterpartyAccount'"
+                >
+                  {{ sortIcon("counterpartyAccount") }}
+                </span>
+              </th>
+              <th class="col-subcat sortable" (click)="sortBy('subcategory')">
+                Subcategory
+                <span
+                  class="sort-icon"
+                  [class.active]="sortField === 'subcategory'"
+                >
+                  {{ sortIcon("subcategory") }}
+                </span>
+              </th>
+              <th class="col-lease sortable" (click)="sortBy('lease')">
+                Lease / Unit
+                <span class="sort-icon" [class.active]="sortField === 'lease'">
+                  {{ sortIcon("lease") }}
+                </span>
+              </th>
+              <th class="col-status sortable" (click)="sortBy('duplicateInDb')">
+                Status
+                <span
+                  class="sort-icon"
+                  [class.active]="sortField === 'duplicateInDb'"
+                >
+                  {{ sortIcon("duplicateInDb") }}
+                </span>
+              </th>
+              <th class="col-actions"></th>
             </tr>
           </thead>
           <tbody>
@@ -168,9 +221,9 @@
                     [disabled]="!!row.parseError"
                   />
                 </td>
-                <td>{{ row.transactionDate ?? "—" }}</td>
+                <td class="col-date">{{ row.transactionDate ?? "—" }}</td>
                 <td
-                  class="amount"
+                  class="col-amount amount"
                   [class.income]="row.direction === 'INCOME'"
                   [class.expense]="row.direction === 'EXPENSE'"
                 >
@@ -186,7 +239,7 @@
                     —
                   }
                 </td>
-                <td>
+                <td class="col-dir">
                   @if (row.direction) {
                     <span
                       class="badge"
@@ -199,14 +252,14 @@
                     <span class="badge badge--neutral">?</span>
                   }
                 </td>
-                <td>
+                <td class="col-cp">
                   @if (row.counterpartyAccount) {
                     <span class="text-muted monospace">{{
                       row.counterpartyAccount
                     }}</span>
                   }
                 </td>
-                <td>
+                <td class="col-subcat">
                   @if (row.enrichedSubcategoryName) {
                     <span class="enriched-badge"
                       >✏️ {{ row.enrichedSubcategoryName }}</span
@@ -220,7 +273,7 @@
                     <span class="no-suggestion">—</span>
                   }
                 </td>
-                <td>
+                <td class="col-lease">
                   @if (row.enrichedUnitNumber) {
                     <span class="enriched-badge enriched-badge--lease">
                       ✏️ {{ row.enrichedUnitNumber }} ·
@@ -235,7 +288,7 @@
                     <span class="no-suggestion">—</span>
                   }
                 </td>
-                <td>
+                <td class="col-status">
                   @if (row.parseError) {
                     <span class="badge badge--error" [title]="row.parseError"
                       >❌ Error</span

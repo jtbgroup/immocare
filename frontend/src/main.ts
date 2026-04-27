@@ -71,7 +71,6 @@ bootstrapApplication(AppComponent, {
         canActivate: [EstateGuard],
         data: { requiresManager: true },
       },
-
       {
         path: "admin/estates",
         pathMatch: "full",
@@ -102,7 +101,7 @@ bootstrapApplication(AppComponent, {
           ),
       },
 
-      // ─── Estate settings (UC004_ESTATE_PLACEHOLDER Phase 5) ────────────────────────────────────
+      // ─── Estate settings (Phase 5) ───────────────────────────────────────────
       {
         path: "estates/:estateId/admin/platform-settings",
         canActivate: [AuthGuard, EstateGuard],
@@ -112,7 +111,7 @@ bootstrapApplication(AppComponent, {
           ),
       },
 
-      // ─── Buildings (UC004_ESTATE_PLACEHOLDER Phase 2: estate-scoped) ────────────────────────────
+      // ─── Buildings (Phase 2: estate-scoped) ──────────────────────────────────
       {
         path: "estates/:estateId/buildings",
         canActivate: [AuthGuard, EstateGuard],
@@ -146,7 +145,7 @@ bootstrapApplication(AppComponent, {
           ),
       },
 
-      // ─── Housing Units (UC004_ESTATE_PLACEHOLDER Phase 2: estate-scoped) ────────────────────────
+      // ─── Housing Units (Phase 2: estate-scoped) ───────────────────────────────
       {
         path: "estates/:estateId/units",
         canActivate: [AuthGuard, EstateGuard],
@@ -180,7 +179,7 @@ bootstrapApplication(AppComponent, {
           ),
       },
 
-      // ─── Persons (UC004_ESTATE_PLACEHOLDER Phase 3: estate-scoped) ──────────────────────────────
+      // ─── Persons (Phase 3: estate-scoped) ────────────────────────────────────
       {
         path: "estates/:estateId/persons",
         canActivate: [AuthGuard, EstateGuard],
@@ -214,7 +213,7 @@ bootstrapApplication(AppComponent, {
           ),
       },
 
-      // ─── Leases (UC004_ESTATE_PLACEHOLDER Phase 3: estate-scoped) ───────────────────────────────
+      // ─── Leases (Phase 3: estate-scoped) ─────────────────────────────────────
       {
         path: "estates/:estateId/housing-units/:unitId/leases/new",
         canActivate: [AuthGuard, EstateGuard],
@@ -248,7 +247,50 @@ bootstrapApplication(AppComponent, {
           ),
       },
 
-      // ─── Transactions ────────────────────────────────────────────────────────
+      // ─── Transactions (Phase 4: estate-scoped) ───────────────────────────────
+      // IMPORTANT: routes with static segments (new, import) must come BEFORE :id
+      {
+        path: "estates/:estateId/transactions",
+        canActivate: [AuthGuard, EstateGuard],
+        loadComponent: () =>
+          import("./app/features/transaction/components/transactions-page/transactions-page.component").then(
+            (m) => m.TransactionsPageComponent,
+          ),
+      },
+      {
+        path: "estates/:estateId/transactions/new",
+        canActivate: [AuthGuard, EstateGuard],
+        loadComponent: () =>
+          import("./app/features/transaction/components/transaction-form/transaction-form.component").then(
+            (m) => m.TransactionFormComponent,
+          ),
+      },
+      {
+        path: "estates/:estateId/transactions/import/:batchId",
+        canActivate: [AuthGuard, EstateGuard],
+        loadComponent: () =>
+          import("./app/features/transaction/components/transaction-review/transaction-review.component").then(
+            (m) => m.TransactionReviewComponent,
+          ),
+      },
+      {
+        path: "estates/:estateId/transactions/:id/edit",
+        canActivate: [AuthGuard, EstateGuard],
+        loadComponent: () =>
+          import("./app/features/transaction/components/transaction-form/transaction-form.component").then(
+            (m) => m.TransactionFormComponent,
+          ),
+      },
+      {
+        path: "estates/:estateId/transactions/:id",
+        canActivate: [AuthGuard, EstateGuard],
+        loadComponent: () =>
+          import("./app/features/transaction/components/transaction-detail/transaction-detail.component").then(
+            (m) => m.TransactionDetailComponent,
+          ),
+      },
+
+      // ─── Transactions (legacy flat routes — kept for compatibility) ───────────
       {
         path: "transactions",
         canActivate: [AuthGuard],

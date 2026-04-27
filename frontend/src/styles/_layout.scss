@@ -6,6 +6,7 @@
 .user-details-container,
 .lease-details-container,
 .lease-form-container,
+.lease-global-list-container,
 .person-details-container,
 .building-details-container,
 .building-list-container,
@@ -22,7 +23,7 @@
 .transaction-detail-container,
 .bank-accounts-page {
   padding: $spacing-xl;
-  max-width: 1200px;
+  max-width: 1400px;
   margin: 0 auto;
 }
 

@@ -56,8 +56,8 @@ import lombok.extern.slf4j.Slf4j;
  * UC004_ESTATE_PLACEHOLDER Phase 4: all operations are now scoped to an estate.
  *
  * Duplicate detection is now per-estate:
- *   A transaction with the same fingerprint in estate A does not block
- *   import of the same transaction in estate B.
+ * A transaction with the same fingerprint in estate A does not block
+ * import of the same transaction in estate B.
  */
 @Slf4j
 @Service
@@ -116,7 +116,8 @@ public class TransactionImportService {
     // ─── Import ───────────────────────────────────────────────────────────────
 
     /**
-     * Parse the file, apply enrichments, and persist transactions — all scoped to the estate.
+     * Parse the file, apply enrichments, and persist transactions — all scoped to
+     * the estate.
      */
     @Transactional
     public ImportBatchResultDTO importFile(
@@ -243,7 +244,8 @@ public class TransactionImportService {
     }
 
     /**
-     * Build a FinancialTransaction entity from a parsed row, bound to the given estate.
+     * Build a FinancialTransaction entity from a parsed row, bound to the given
+     * estate.
      */
     private FinancialTransaction buildTransaction(
             Estate estate,
@@ -256,7 +258,7 @@ public class TransactionImportService {
         FinancialTransaction tx = new FinancialTransaction();
 
         tx.setEstate(estate);
-        tx.setReference(generateReference(currentUser));
+        tx.setReference(generateReference(estate.getId()));
         tx.setTransactionDate(row.getTransactionDate());
         tx.setValueDate(row.getValueDate());
         tx.setAccountingMonth(computeAccountingMonth(row, enrichment));
@@ -333,7 +335,8 @@ public class TransactionImportService {
     }
 
     /**
-     * Suggests a subcategory using learning rules (not yet estate-scoped — global rules for now).
+     * Suggests a subcategory using learning rules (not yet estate-scoped — global
+     * rules for now).
      * Learning rules will be estate-scoped in Phase 5.
      */
     private SubcategorySuggestionDTO suggestSubcategory(ParsedTransaction row) {
@@ -369,7 +372,8 @@ public class TransactionImportService {
     }
 
     /**
-     * Suggests a lease by matching the counterparty IBAN against person bank accounts
+     * Suggests a lease by matching the counterparty IBAN against person bank
+     * accounts
      * that belong to the same estate (scoped in Phase 4).
      */
     private ImportPreviewRowDTO.SuggestedLeaseDTO suggestLease(UUID estateId, ParsedTransaction row) {
@@ -441,9 +445,11 @@ public class TransactionImportService {
                         });
     }
 
-    private String generateReference(AppUser currentUser) {
-        long seq = transactionRepository.nextRefSequence();
-        return "TXN-" + seq;
+    private String generateReference(UUID estateId) {
+        int year = java.time.LocalDate.now().getYear();
+        String prefix = "TXN-" + year + "-";
+        int seq = transactionRepository.nextSequenceForYear(prefix + "%", estateId);
+        return prefix + String.format("%05d", seq);
     }
 
     private Estate findEstateOrThrow(UUID estateId) {

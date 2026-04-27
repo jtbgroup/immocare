@@ -89,7 +89,7 @@ git-tag:
 # ── Production — H2 (défaut) ──────────────────────────────────────────────────
 
 build: ## Build l'image Docker
-	@echo "Build $(APP_NAME):$(VERSION)..."
+	@echo "Build $(APP_NAME):$(CURRENT_VERSION)..."
 	docker compose build
 
 up: ## ▶  Démarrer avec H2 (base embarquée, recommandé)
@@ -166,17 +166,6 @@ dev-start: ## ▶  Démarrer l'env de dev avec PostgreSQL (sans rebuild)
 dev-clean-start:
 	make dev-clean
 	make dev-start
-
-dev-stop: ## ⏹  Arrêter l'env de dev
-	@echo "Arrêt env de dev..."
-	docker compose -f docker-compose.dev.yml --profile postgres down
-	@echo "✓ Dev arrêté"
-
-dev-build-postgres: ## 🔨 Rebuild les images de dev (PostgreSQL)
-	@echo "Rebuild images dev (PostgreSQL)..."
-	DB_PROFILE=postgres docker compose -f docker-compose.dev.yml --profile postgres up -d --build
-	@echo "✓ Images dev rebuildées (PostgreSQL)"
-
 
 # ── Logs ─────────────────────────────────────────────────────────────────────
 

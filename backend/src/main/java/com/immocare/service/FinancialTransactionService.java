@@ -163,9 +163,11 @@ public class FinancialTransactionService {
             tx.setBuilding(tx.getHousingUnit().getBuilding());
         }
 
-        String year = String.valueOf(req.transactionDate().getYear());
-        long seq = transactionRepository.nextRefSequence();
-        tx.setReference("TXN-" + year + "-" + String.format("%05d", seq));
+        int year = java.time.LocalDate.now().getYear();
+        String prefix = "TXN-" + year + "-";
+        int seq = transactionRepository.nextSequenceForYear(prefix + "%", estateId);
+        String reference = prefix + String.format("%05d", seq);
+        tx.setReference(reference);
 
         if (req.assetLinks() != null && !req.assetLinks().isEmpty()) {
             applyAssetLinks(tx, req.assetLinks(), req.amount());
