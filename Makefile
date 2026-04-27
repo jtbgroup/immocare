@@ -11,6 +11,7 @@ CURRENT_VERSION := $(shell cat $(VERSION_FILE))
         backend-test nginx-reload nginx-test \
         start stop dev-build logs-dev \
 		increment_version increment_beta release_version \
+		seed-demo seed-cleandata-demo seed-real seed-cleandata-real
 
 help: ## Affiche les commandes disponibles
 	@echo "ImmoCare v$(VERSION) — Commandes disponibles :"
@@ -25,7 +26,7 @@ help: ## Affiche les commandes disponibles
 # ============================================
 # VERSION MANAGEMENT
 # ============================================
-# 1. Choisir l'incrément et passer en beta.1
+# 1. choose the increment and pass to beta.1
 increment_version:
 	@V=$(CURRENT_VERSION); \
 	BASE=$${V%-*}; \
@@ -47,7 +48,7 @@ increment_version:
 	$(MAKE) set-version V=$$NEXT; \
 	$(MAKE) git-tag V=$$NEXT
 
-# 2. Incrémenter la beta (ex: -beta.1 -> -beta.2)
+# 2. Increment the beta (ex: -beta.1 -> -beta.2)
 increment_beta:
 	@V=$(CURRENT_VERSION); \
 	if [[ "$$V" != *"-beta."* ]]; then \
@@ -59,7 +60,7 @@ increment_beta:
 	$(MAKE) set-version V=$$NEXT; \
 	$(MAKE) git-tag V=$$NEXT
 
-# 3. Release finale (supprime le suffixe beta)
+# 3. Final release (removes the beta suffix)
 release_version:
 	@V=$(CURRENT_VERSION); \
 	if [[ "$$V" != *"-beta."* ]]; then \
@@ -311,17 +312,6 @@ update: ## Mettre à jour l'application (pull + rebuild + redémarrer)
 #   make seed-demo                   → demo data, dev (localhost:8081)
 #   make seed-real                   → real data, prod (localhost:8090)
 
-seed-demo: ## 🌱 Seed demo data (dev)
-	@echo "🌱 Seeding demo data"
-	@chmod +x scripts/seed.sh
-	@scripts/seed.sh http://localhost:8081 admin admin123 scripts/demo-data
-
-
-seed-real: ## 🌱 Seed real data (prod)
-	@echo "🌱 Seeding real data"
-	@chmod +x scripts/seed.sh
-	@scripts/seed.sh $${URL:-http://localhost:8081} admin admin123 scripts/real-data
-
 reset-postgres: ## 🗑  Reset via SQL direct (requiert psql + PostgreSQL)
 	@echo "🌱 Resetting data"
 	@chmod +x scripts/reset-sql.sh
@@ -333,6 +323,21 @@ reset-postgres: ## 🗑  Reset via SQL direct (requiert psql + PostgreSQL)
 		$${DB_PASS:-immocare} \
 		$${ADMIN:-admin}
 
+seed-demo: ## 🌱 Seed demo data (dev)
+	@echo "🌱 Seeding demo data"
+	@chmod +x scripts/seed.sh
+	@scripts/seed.sh http://localhost:8081 admin admin123 scripts/demo-data
+
+
+seed-real: ## 🌱 Seed real data (prod)
+	@echo "🌱 Seeding real data"
+	@chmod +x scripts/seed.sh
+	@scripts/seed.sh $${URL:-http://localhost:8081} admin admin123 scripts/real-data
+
 seed-cleandata-real: ## 🌱 Seed real data after reset (dev)
 	@$(MAKE) reset-postgres
 	@$(MAKE) seed-real
+
+seed-cleandata-demo: ## 🌱 Seed demo data after reset (dev)
+	@$(MAKE) reset-postgres
+	@$(MAKE) seed-demo

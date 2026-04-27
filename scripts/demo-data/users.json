@@ -1,37 +1,37 @@
 [
   {
-    "username": "alice_martin",
-    "email": "alice.martin@immocare.com",
+    "username": "user1",
+    "email": "user1@immocare.com",
     "password": "Demo1234!",
     "confirmPassword": "Demo1234!",
-    "isPlatformAdmin": true
+    "isPlatformAdmin": false
   },
   {
-    "username": "bob_dupont",
-    "email": "bob.dupont@immocare.com",
+    "username": "user2",
+    "email": "user2@immocare.com",
     "password": "Demo1234!",
     "confirmPassword": "Demo1234!",
-    "isPlatformAdmin": true
+    "isPlatformAdmin": false
   },
   {
-    "username": "claire_leroy",
-    "email": "claire.leroy@immocare.com",
+    "username": "user3",
+    "email": "user3@immocare.com",
     "password": "Demo1234!",
     "confirmPassword": "Demo1234!",
-    "isPlatformAdmin": true
+    "isPlatformAdmin": false
   },
   {
     "username": "david_simon",
     "email": "david.simon@immocare.com",
     "password": "Demo1234!",
     "confirmPassword": "Demo1234!",
-    "isPlatformAdmin": true
+    "isPlatformAdmin": false
   },
   {
     "username": "emma_dubois",
     "email": "emma.dubois@immocare.com",
     "password": "Demo1234!",
     "confirmPassword": "Demo1234!",
-    "isPlatformAdmin": true
+    "isPlatformAdmin": false
   }
 ]

@@ -532,7 +532,7 @@ export class AdminEstateFormComponent implements OnInit, OnDestroy {
       next: () => {
         this.submitting = false;
         this.form.markAsPristine();
-        this.router.navigate(["/admin/estates"]);
+        this.router.navigate(['/estates', this.estateId, 'dashboard']);
       },
       error: (err) => {
         this.submitting = false;
@@ -547,6 +547,6 @@ export class AdminEstateFormComponent implements OnInit, OnDestroy {
       !confirm("You have unsaved changes. Are you sure you want to cancel?")
     )
       return;
-    this.router.navigate(["/admin/estates"]);
+      this.router.navigate(['/estates', this.estateId, 'dashboard']);
   }
 }

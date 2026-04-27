@@ -2,25 +2,25 @@
   {
     "name": "Estate Mer",
     "description": "Coastal properties along the Belgian coastline",
-    "createdByUsername": "alice_martin",
+    "createdByUsername": "user1",
     "members": [
-      { "username": "bob_dupont", "role": "MANAGER" },
-      { "username": "claire_leroy", "role": "VIEWER" }
+      { "username": "user1", "role": "MANAGER" },
+      { "username": "user3", "role": "VIEWER" }
     ]
   },
   {
     "name": "Estate Montagne",
     "description": "Mountain and alpine properties in the Ardennes",
-    "createdByUsername": "alice_martin",
-    "members": [{ "username": "david_simon", "role": "MANAGER" }]
+    "createdByUsername": "user1",
+    "members": [{ "username": "user1", "role": "MANAGER" }]
   },
   {
     "name": "Estate Ville",
     "description": "Urban properties in major Belgian cities",
-    "createdByUsername": "alice_martin",
+    "createdByUsername": "user2",
     "members": [
-      { "username": "emma_dubois", "role": "MANAGER" },
-      { "username": "bob_dupont", "role": "VIEWER" }
+      { "username": "user2", "role": "MANAGER" },
+      { "username": "user3", "role": "VIEWER" }
     ]
   }
 ]

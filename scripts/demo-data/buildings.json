@@ -16,5 +16,51 @@
     "country": "Belgium",
     "ownerPersonNationalId": "75031512345",
     "estateName": "Estate Ville"
+  },
+  {
+    "name": "Immeuble Grande Tourismo",
+    "streetAddress": "Rue du Duc 25",
+    "postalCode": "1000",
+    "city": "Bruxelles",
+    "country": "Belgium",
+    "ownerPersonNationalId": "75031512345",
+    "estateName": "Estate Ville"
+  },
+  {
+    "name": "Immeuble Village dans les nuages",
+    "streetAddress": "Avenue de l'arc en ciel 335A",
+    "postalCode": "6930",
+    "city": "Enghien",
+    "country": "Belgium",
+    "ownerPersonNationalId": "75031512345",
+    "estateName": "Estate Mer"
+  },
+  {
+    "name": "Résidence du Littoral",
+    "streetAddress": "Boulevard de la Mer 10",
+    "postalCode": "8300",
+    "city": "Knokke-Heist",
+    "country": "Belgium",
+    "ownerPersonNationalId": "75031512345",
+    "estateName": "Estate Mer"
+  },
+  {
+    "name": "Chalet des Ardennes",
+    "streetAddress": "Route de la Forêt 7",
+    "postalCode": "6980",
+    "city": "La Roche-en-Ardenne",
+    "country": "Belgium",
+    "ownerPersonNationalId": "75031512345",
+    "estateName": "Estate Montagne"
+  },
+  {
+    "name": "Maison du Sommet",
+    "streetAddress": "Chemin du Col 22",
+    "postalCode": "6950",
+    "city": "Spa",
+    "country": "Belgium",
+    "ownerPersonNationalId": "75031512345",
+    "estateName": "Estate Montagne"
   }
 ]
+
