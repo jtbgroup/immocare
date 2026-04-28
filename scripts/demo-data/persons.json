@@ -21,6 +21,27 @@
     ]
   },
   {
+    "lastName": "Dupont",
+    "firstName": "Jean",
+    "birthDate": "1975-03-15",
+    "birthPlace": "Bruxelles",
+    "nationalId": "75031512345",
+    "gsm": "+32471123456",
+    "email": "jean.dupont@gmail.com",
+    "streetAddress": "Rue de la Loi 42",
+    "postalCode": "1000",
+    "city": "Bruxelles",
+    "country": "Belgium",
+    "estateName": "Estate Mer",
+    "bankAccounts": [
+      {
+        "iban": "BE67826045518487",
+        "label": "Compte principal",
+        "primary": true
+      }
+    ]
+  },
+  {
     "lastName": "Martin",
     "firstName": "Sophie",
     "birthDate": "1988-07-22",
@@ -33,6 +54,20 @@
     "city": "Ixelles",
     "country": "Belgium",
     "estateName": "Estate Ville"
+  },
+  {
+    "lastName": "Martin",
+    "firstName": "Sophie",
+    "birthDate": "1988-07-22",
+    "birthPlace": "Liège",
+    "nationalId": "88072234567",
+    "gsm": "+32472234567",
+    "email": "sophie.martin@gmail.com",
+    "streetAddress": "Avenue Louise 120",
+    "postalCode": "1050",
+    "city": "Ixelles",
+    "country": "Belgium",
+    "estateName": "Estate Mer"
   },
   {
     "lastName": "Lecomte",
@@ -49,6 +84,20 @@
     "estateName": "Estate Ville"
   },
   {
+    "lastName": "Lecomte",
+    "firstName": "Pierre",
+    "birthDate": "1982-11-08",
+    "birthPlace": "Namur",
+    "nationalId": "82110845678",
+    "gsm": "+32473345678",
+    "email": "pierre.lecomte@hotmail.com",
+    "streetAddress": "Rue du Midi 15",
+    "postalCode": "1000",
+    "city": "Bruxelles",
+    "country": "Belgium",
+    "estateName": "Estate Mer"
+  },
+  {
     "lastName": "Bernard",
     "firstName": "Marie",
     "birthDate": "1990-05-30",
@@ -59,6 +108,34 @@
     "streetAddress": "Boulevard du Roi Albert 8",
     "postalCode": "1082",
     "city": "Berchem-Sainte-Agathe",
+    "country": "Belgium",
+    "estateName": "Estate Ville"
+  },
+  {
+    "lastName": "Bernard",
+    "firstName": "Marie",
+    "birthDate": "1990-05-30",
+    "birthPlace": "Gand",
+    "nationalId": "90053056789",
+    "gsm": "+32474456789",
+    "email": "marie.bernard@outlook.com",
+    "streetAddress": "Boulevard du Roi Albert 8",
+    "postalCode": "1082",
+    "city": "Berchem-Sainte-Agathe",
+    "country": "Belgium",
+    "estateName": "Estate Montagne"
+  },
+  {
+    "lastName": "Nguyen",
+    "firstName": "Thuy",
+    "birthDate": "1985-09-14",
+    "birthPlace": "Bruxelles",
+    "nationalId": "85091467890",
+    "gsm": "+32475567890",
+    "email": "thuy.nguyen@gmail.com",
+    "streetAddress": "Chaussée de Wavre 200",
+    "postalCode": "1050",
+    "city": "Ixelles",
     "country": "Belgium",
     "estateName": "Estate Ville"
   },
@@ -102,6 +179,20 @@
     "postalCode": "1000",
     "city": "Bruxelles",
     "country": "Belgium",
+    "estateName": "Estate Ville"
+  },
+  {
+    "lastName": "Maes",
+    "firstName": "Laura",
+    "birthDate": "1993-06-18",
+    "birthPlace": "Leuven",
+    "nationalId": "93061889012",
+    "gsm": "+32477789012",
+    "email": "laura.maes@gmail.com",
+    "streetAddress": "Rue de Namur 5",
+    "postalCode": "1000",
+    "city": "Bruxelles",
+    "country": "Belgium",
     "estateName": "Estate Mer"
   },
   {
@@ -119,6 +210,20 @@
     "estateName": "Estate Montagne"
   },
   {
+    "lastName": "Claes",
+    "firstName": "Julien",
+    "birthDate": "1987-04-02",
+    "birthPlace": "Charleroi",
+    "nationalId": "87040290123",
+    "gsm": "+32478890123",
+    "email": "julien.claes@proximus.be",
+    "streetAddress": "Avenue des Arts 34",
+    "postalCode": "1040",
+    "city": "Etterbeek",
+    "country": "Belgium",
+    "estateName": "Estate Mer"
+  },
+  {
     "lastName": "Rousseau",
     "firstName": "Isabelle",
     "birthDate": "1970-12-01",
@@ -133,6 +238,21 @@
     "estateName": "Estate Montagne"
   },
   {
+    "lastName": "Rousseau",
+    "firstName": "Isabelle",
+    "birthDate": "1970-12-01",
+    "birthPlace": "Bruxelles",
+    "nationalId": "70120101234",
+    "gsm": "+32479901234",
+    "email": "isabelle.rousseau@gmail.com",
+    "streetAddress": "Square des Nations 2",
+    "postalCode": "1000",
+    "city": "Bruxelles",
+    "country": "Belgium",
+    "estateName": "Estate Ville"
+  },
+
+  {
     "lastName": "Vandenberghe",
     "firstName": "Kevin",
     "birthDate": "1995-08-11",
@@ -141,6 +261,34 @@
     "gsm": "+32470012345",
     "email": "kevin.vandenberghe@student.be",
     "streetAddress": "Rue de la Science 10",
+    "postalCode": "1040",
+    "city": "Etterbeek",
+    "country": "Belgium",
+    "estateName": "Estate Montagne"
+  },
+  {
+    "lastName": "Vandenberghe",
+    "firstName": "Kevin",
+    "birthDate": "1995-08-11",
+    "birthPlace": "Bruges",
+    "nationalId": "95081112345",
+    "gsm": "+32470012345",
+    "email": "kevin.vandenberghe@student.be",
+    "streetAddress": "Rue de la Science 10",
+    "postalCode": "1040",
+    "city": "Etterbeek",
+    "country": "Belgium",
+    "estateName": "Estate Mer"
+  },
+  {
+    "lastName": "Dumont",
+    "firstName": "Caroline",
+    "birthDate": "1968-02-28",
+    "birthPlace": "Mons",
+    "nationalId": "68022823456",
+    "gsm": "+32471023456",
+    "email": "caroline.dumont@skynet.be",
+    "streetAddress": "Rue Belliard 50",
     "postalCode": "1040",
     "city": "Etterbeek",
     "country": "Belgium",
@@ -158,6 +306,20 @@
     "postalCode": "1040",
     "city": "Etterbeek",
     "country": "Belgium",
+    "estateName": "Estate Ville"
+  },
+  {
+    "lastName": "Simon",
+    "firstName": "Alexandre",
+    "birthDate": "1983-10-17",
+    "birthPlace": "Liège",
+    "nationalId": "83101734567",
+    "gsm": "+32472034567",
+    "email": "alexandre.simon@gmail.com",
+    "streetAddress": "Avenue de la Toison d'Or 70",
+    "postalCode": "1060",
+    "city": "Saint-Gilles",
+    "country": "Belgium",
     "estateName": "Estate Montagne"
   },
   {
@@ -169,6 +331,20 @@
     "gsm": "+32472034567",
     "email": "alexandre.simon@gmail.com",
     "streetAddress": "Avenue de la Toison d'Or 70",
+    "postalCode": "1060",
+    "city": "Saint-Gilles",
+    "country": "Belgium",
+    "estateName": "Estate Ville"
+  },
+  {
+    "lastName": "Laurent",
+    "firstName": "Nathalie",
+    "birthDate": "1977-03-05",
+    "birthPlace": "Bruxelles",
+    "nationalId": "77030545678",
+    "gsm": "+32473045678",
+    "email": "nathalie.laurent@outlook.com",
+    "streetAddress": "Chaussée de Charleroi 85",
     "postalCode": "1060",
     "city": "Saint-Gilles",
     "country": "Belgium",
@@ -186,7 +362,21 @@
     "postalCode": "1060",
     "city": "Saint-Gilles",
     "country": "Belgium",
-    "estateName": "Estate Montagne"
+    "estateName": "Estate Mer"
+  },
+  {
+    "lastName": "Laurent",
+    "firstName": "Nathalie",
+    "birthDate": "1977-03-05",
+    "birthPlace": "Bruxelles",
+    "nationalId": "77030545678",
+    "gsm": "+32473045678",
+    "email": "nathalie.laurent@outlook.com",
+    "streetAddress": "Chaussée de Charleroi 85",
+    "postalCode": "1060",
+    "city": "Saint-Gilles",
+    "country": "Belgium",
+    "estateName": "Estate Ville"
   },
   {
     "lastName": "Willems",
@@ -201,6 +391,20 @@
     "city": "Ixelles",
     "country": "Belgium",
     "estateName": "Estate Mer"
+  },
+  {
+    "lastName": "Willems",
+    "firstName": "François",
+    "birthDate": "1991-07-29",
+    "birthPlace": "Namur",
+    "nationalId": "91072956789",
+    "gsm": "+32474056789",
+    "email": "francois.willems@gmail.com",
+    "streetAddress": "Rue du Trône 20",
+    "postalCode": "1050",
+    "city": "Ixelles",
+    "country": "Belgium",
+    "estateName": "Estate Ville"
   },
   {
     "lastName": "Fontaine",
@@ -231,6 +435,34 @@
     "estateName": "Estate Ville"
   },
   {
+    "lastName": "Vandekerckhove",
+    "firstName": "David",
+    "birthDate": "1976-05-01",
+    "birthPlace": "Bruxelles",
+    "nationalId": "76050123456",
+    "gsm": "+32476123456",
+    "email": "david.vandekerckhove@gmail.com",
+    "streetAddress": "Rue Royale 20",
+    "postalCode": "1000",
+    "city": "Bruxelles",
+    "country": "Belgium",
+    "estateName": "Estate Mer"
+  },
+  {
+    "lastName": "Vandekerckhove",
+    "firstName": "David",
+    "birthDate": "1976-05-01",
+    "birthPlace": "Bruxelles",
+    "nationalId": "76050123456",
+    "gsm": "+32476123456",
+    "email": "david.vandekerckhove@gmail.com",
+    "streetAddress": "Rue Royale 20",
+    "postalCode": "1000",
+    "city": "Bruxelles",
+    "country": "Belgium",
+    "estateName": "Estate Montagne"
+  },
+  {
     "lastName": "De Wilde",
     "firstName": "Elise",
     "birthDate": "1978-09-12",
@@ -243,6 +475,20 @@
     "city": "Ixelles",
     "country": "Belgium",
     "estateName": "Estate Ville"
+  },
+  {
+    "lastName": "Moens",
+    "firstName": "Kevin",
+    "birthDate": "1982-03-01",
+    "birthPlace": "Anvers",
+    "nationalId": "82030123456",
+    "gsm": "+32478123456",
+    "email": "kevin.moens@hotmail.com",
+    "streetAddress": "Rue du Prince 8",
+    "postalCode": "2000",
+    "city": "Anvers",
+    "country": "Belgium",
+    "estateName": "Estate Mer"
   },
   {
     "lastName": "Moens",
@@ -273,6 +519,20 @@
     "estateName": "Estate Mer"
   },
   {
+    "lastName": "Belkacem",
+    "firstName": "Amina",
+    "birthDate": "1988-07-15",
+    "birthPlace": "Bruxelles",
+    "nationalId": "88071543210",
+    "gsm": "+32479123456",
+    "email": "amina.belkacem@gmail.com",
+    "streetAddress": "Rue des Fleurs 12",
+    "postalCode": "1050",
+    "city": "Ixelles",
+    "country": "Belgium",
+    "estateName": "Estate Ville"
+  },
+  {
     "lastName": "Lefèvre",
     "firstName": "Hugo",
     "birthDate": "1991-04-16",
@@ -285,6 +545,20 @@
     "city": "Charleroi",
     "country": "Belgium",
     "estateName": "Estate Mer"
+  },
+  {
+    "lastName": "Lefèvre",
+    "firstName": "Hugo",
+    "birthDate": "1991-04-16",
+    "birthPlace": "Charleroi",
+    "nationalId": "91041654321",
+    "gsm": "+32472123456",
+    "email": "hugo.lefevre@gmail.com",
+    "streetAddress": "Rue de la Montagne 5",
+    "postalCode": "6000",
+    "city": "Charleroi",
+    "country": "Belgium",
+    "estateName": "Estate Montagne"
   },
   {
     "lastName": "Janssen",
@@ -326,7 +600,7 @@
     "postalCode": "5000",
     "city": "Namur",
     "country": "Belgium",
-    "estateName": "Estate Mer"
+    "estateName": "Estate Ville"
   },
   {
     "lastName": "Desmet",
@@ -340,7 +614,21 @@
     "postalCode": "3000",
     "city": "Leuven",
     "country": "Belgium",
-    "estateName": "Estate Montagne"
+    "estateName": "Estate Ville"
+  },
+  {
+    "lastName": "Desmet",
+    "firstName": "Mathieu",
+    "birthDate": "1980-05-08",
+    "birthPlace": "Leuven",
+    "nationalId": "80050876543",
+    "gsm": "+32476123457",
+    "email": "mathieu.desmet@gmail.com",
+    "streetAddress": "Tiensestraat 25",
+    "postalCode": "3000",
+    "city": "Leuven",
+    "country": "Belgium",
+    "estateName": "Estate Mer"
   },
   {
     "lastName": "Reniers",
@@ -357,6 +645,34 @@
     "estateName": "Estate Montagne"
   },
   {
+    "lastName": "Reniers",
+    "firstName": "Laura",
+    "birthDate": "1984-01-27",
+    "birthPlace": "Spa",
+    "nationalId": "84012765432",
+    "gsm": "+32477123457",
+    "email": "laura.reniers@gmail.com",
+    "streetAddress": "Rue du Parc 3",
+    "postalCode": "4900",
+    "city": "Spa",
+    "country": "Belgium",
+    "estateName": "Estate Mer"
+  },
+  {
+    "lastName": "Reniers",
+    "firstName": "Laura",
+    "birthDate": "1984-01-27",
+    "birthPlace": "Spa",
+    "nationalId": "84012765432",
+    "gsm": "+32477123457",
+    "email": "laura.reniers@gmail.com",
+    "streetAddress": "Rue du Parc 3",
+    "postalCode": "4900",
+    "city": "Spa",
+    "country": "Belgium",
+    "estateName": "Estate Ville"
+  },
+  {
     "lastName": "Van Damme",
     "firstName": "Olivier",
     "birthDate": "1986-03-19",
@@ -368,7 +684,21 @@
     "postalCode": "7000",
     "city": "Mons",
     "country": "Belgium",
-    "estateName": "Estate Montagne"
+    "estateName": "Estate Ville"
+  },
+  {
+    "lastName": "Van Damme",
+    "firstName": "Olivier",
+    "birthDate": "1986-03-19",
+    "birthPlace": "Mons",
+    "nationalId": "86031987654",
+    "gsm": "+32478123457",
+    "email": "olivier.vandamme@gmail.com",
+    "streetAddress": "Rue de la Station 11",
+    "postalCode": "7000",
+    "city": "Mons",
+    "country": "Belgium",
+    "estateName": "Estate Mer"
   },
   {
     "lastName": "Dupuis",
@@ -382,6 +712,20 @@
     "postalCode": "1410",
     "city": "Waterloo",
     "country": "Belgium",
-    "estateName": "Estate Montagne"
+    "estateName": "Estate Ville"
+  },
+  {
+    "lastName": "Dupuis",
+    "firstName": "Marion",
+    "birthDate": "1990-02-13",
+    "birthPlace": "Waterloo",
+    "nationalId": "90021376542",
+    "gsm": "+32479123457",
+    "email": "marion.dupuis@gmail.com",
+    "streetAddress": "Chaussée de Bruxelles 45",
+    "postalCode": "1410",
+    "city": "Waterloo",
+    "country": "Belgium",
+    "estateName": "Estate Mer"
   }
 ]

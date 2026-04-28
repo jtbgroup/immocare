@@ -18,8 +18,7 @@ CREATE TABLE person (
     country        VARCHAR(100) NULL DEFAULT 'Belgium',
     estate_id      UUID NOT NULL REFERENCES estate(id),
     created_at     TIMESTAMP    NOT NULL DEFAULT NOW(),
-    updated_at     TIMESTAMP    NOT NULL DEFAULT NOW(),
-    CONSTRAINT uq_person_national_id UNIQUE (national_id)
+    updated_at     TIMESTAMP    NOT NULL DEFAULT NOW()
 );
 
 -- ─── person_bank_account ──────────────────────────────────────────────────────
@@ -35,7 +34,7 @@ CREATE TABLE person_bank_account (
     is_primary BOOLEAN      NOT NULL DEFAULT FALSE,
     estate_id  UUID NOT NULL REFERENCES estate(id),
     created_at TIMESTAMP    NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    CONSTRAINT uq_person_bank_account_iban UNIQUE (iban)
+    CONSTRAINT uq_person_bank_account_iban UNIQUE (iban, estate_id)
 );
 
 CREATE INDEX idx_pba_person ON person_bank_account (person_id);
