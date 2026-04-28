@@ -312,7 +312,7 @@ update: ## Mettre à jour l'application (pull + rebuild + redémarrer)
 #   make seed-demo                   → demo data, dev (localhost:8081)
 #   make seed-real                   → real data, prod (localhost:8090)
 
-reset-postgres: ## 🗑  Reset via SQL direct (requiert psql + PostgreSQL)
+seed-reset-postgres: ## 🗑  Reset via SQL direct (requiert psql + PostgreSQL)
 	@echo "🌱 Resetting data"
 	@chmod +x scripts/reset-sql.sh
 	@scripts/reset-sql.sh \
@@ -339,5 +339,5 @@ seed-cleandata-real: ## 🌱 Seed real data after reset (dev)
 	@$(MAKE) seed-real
 
 seed-cleandata-demo: ## 🌱 Seed demo data after reset (dev)
-	@$(MAKE) reset-postgres
+	@$(MAKE) seed-reset-postgres
 	@$(MAKE) seed-demo

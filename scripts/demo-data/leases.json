@@ -1,25 +1,29 @@
 [
   {
-    "_comment": "=== Résidence Les Acacias — Unité 01 ===",
+    "_comment": "=== Ref 001 — Appt 1 — Mathieu Minjoulat — FINISHED ===",
     "buildingName": "Résidence Les Acacias",
     "unitNumber": "01",
     "status": "FINISHED",
-    "signatureDate": "2017-08-01",
-    "startDate": "2017-09-01",
-    "endDate": "2020-08-31",
+    "signatureDate": "2022-09-01",
+    "startDate": "2022-09-05",
+    "endDate": "2023-05-09",
     "leaseType": "MAIN_RESIDENCE_3Y",
     "durationMonths": 36,
     "noticePeriodMonths": 3,
-    "indexationAnniversaryMonth": 9,
-    "monthlyRent": 850.0,
-    "monthlyCharges": 80.0,
+    "monthlyRent": 1500.0,
+    "monthlyCharges": 0.0,
     "chargesType": "FORFAIT",
-    "depositAmount": 1700.0,
-    "depositType": "BLOCKED_ACCOUNT",
-    "tenantInsuranceConfirmed": true,
+    "tenantInsuranceConfirmed": false,
+    "notes": "Location non meubléz",
     "tenants": [
       {
-        "nationalId": "79012578901",
+        "nationalId": null,
+        "email": "jean.dupont@gmail.com",
+        "role": "CO_TENANT"
+      },
+      {
+        "nationalId": null,
+        "email": "sophie.martin@gmail.com",
         "role": "PRIMARY"
       }
     ],
