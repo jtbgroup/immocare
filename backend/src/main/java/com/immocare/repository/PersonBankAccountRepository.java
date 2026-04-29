@@ -1,12 +1,14 @@
 package com.immocare.repository;
 
-import com.immocare.model.entity.PersonBankAccount;
+import java.util.List;
+import java.util.Optional;
+import java.util.UUID;
+
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
-import java.util.List;
-import java.util.Optional;
+import com.immocare.model.entity.PersonBankAccount;
 
 public interface PersonBankAccountRepository extends JpaRepository<PersonBankAccount, Long> {
 
@@ -18,9 +20,13 @@ public interface PersonBankAccountRepository extends JpaRepository<PersonBankAcc
     Optional<PersonBankAccount> findByIban(@Param("iban") String iban);
 
     /** Check uniqueness before create/update. */
-    boolean existsByIbanIgnoreCaseAndIdNot(String iban, Long excludeId);
+    // boolean existsByIbanIgnoreCaseAndIdNot(String iban, Long excludeId);
 
-    boolean existsByIbanIgnoreCase(String iban);
+    boolean existsByIbanIgnoreCaseAndEstateId(String iban, UUID estateId);
+
+    boolean existsByIbanIgnoreCaseAndEstateIdAndIdNot(String iban, UUID estateId, Long excludeId);
+
+    // boolean existsByIbanIgnoreCase(String iban);
 
     /** Count primary accounts for a person (should never exceed 1). */
     long countByPersonIdAndPrimaryTrue(Long personId);

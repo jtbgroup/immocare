@@ -47,7 +47,7 @@ public class PersonBankAccountService {
         Person person = findPersonOrThrow(personId);
 
         String normalized = normalizeIban(req.iban());
-        if (repo.existsByIbanIgnoreCase(normalized)) {
+        if (repo.existsByIbanIgnoreCaseAndEstateId(normalized, estateId)) {
             throw new IllegalArgumentException("IBAN already registered: " + normalized);
         }
 
@@ -79,7 +79,7 @@ public class PersonBankAccountService {
         }
 
         String normalized = normalizeIban(req.iban());
-        if (repo.existsByIbanIgnoreCaseAndIdNot(normalized, id)) {
+        if (repo.existsByIbanIgnoreCaseAndEstateIdAndIdNot(normalized, estateId, id)) {
             throw new IllegalArgumentException("IBAN already registered: " + normalized);
         }
 

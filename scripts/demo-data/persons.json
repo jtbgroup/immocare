@@ -165,7 +165,7 @@
     "postalCode": "1000",
     "city": "Bruxelles",
     "country": "Belgium",
-    "estateName": "Estate Mer"
+    "estateName": "Estate Ville"
   },
   {
     "lastName": "Maes",
@@ -529,6 +529,20 @@
     "streetAddress": "Rue des Fleurs 12",
     "postalCode": "1050",
     "city": "Ixelles",
+    "country": "Belgium",
+    "estateName": "Estate Ville"
+  },
+  {
+    "lastName": "Lefèvre",
+    "firstName": "Hugo",
+    "birthDate": "1991-04-16",
+    "birthPlace": "Charleroi",
+    "nationalId": "91041654321",
+    "gsm": "+32472123456",
+    "email": "hugo.lefevre@gmail.com",
+    "streetAddress": "Rue de la Montagne 5",
+    "postalCode": "6000",
+    "city": "Charleroi",
     "country": "Belgium",
     "estateName": "Estate Ville"
   },
