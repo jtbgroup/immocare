@@ -12,5 +12,26 @@
     "type": "SAVINGS",
     "isActive": true,
     "estateName": "Estate Ville"
+  },
+  {
+    "label": "Compte courant",
+    "accountNumber": "BE45363543072869",
+    "type": "CURRENT",
+    "isActive": true,
+    "estateName": "Estate Mer"
+  },
+  {
+    "label": "Compte épargne",
+    "accountNumber": "BE71096156885761",
+    "type": "SAVINGS",
+    "isActive": true,
+    "estateName": "Estate Mer"
+  },
+  {
+    "label": "Compte courant",
+    "accountNumber": "BE83798455682461",
+    "type": "CURRENT",
+    "isActive": true,
+    "estateName": "Estate Montagne"
   }
 ]

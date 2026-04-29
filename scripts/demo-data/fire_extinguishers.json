@@ -5,12 +5,18 @@
     "identificationNumber": "EXT-ACA-001",
     "notes": "Hall d'entrée — rez-de-chaussée",
     "revisions": [
-      { "revisionDate": "2021-03-15", "notes": "Contrôle annuel OK" },
+      {
+        "revisionDate": "2021-03-15",
+        "notes": "Contrôle annuel OK"
+      },
       {
         "revisionDate": "2022-03-10",
         "notes": "Contrôle annuel OK — pression vérifiée"
       },
-      { "revisionDate": "2023-03-08", "notes": "Contrôle annuel OK" },
+      {
+        "revisionDate": "2023-03-08",
+        "notes": "Contrôle annuel OK"
+      },
       {
         "revisionDate": "2024-03-12",
         "notes": "Contrôle annuel OK — goupille remplacée"
@@ -23,10 +29,22 @@
     "identificationNumber": "EXT-ACA-002",
     "notes": "Palier 1er étage",
     "revisions": [
-      { "revisionDate": "2021-03-15", "notes": "Contrôle annuel OK" },
-      { "revisionDate": "2022-03-10", "notes": "Contrôle annuel OK" },
-      { "revisionDate": "2023-03-08", "notes": "Contrôle annuel OK" },
-      { "revisionDate": "2024-03-12", "notes": "Contrôle annuel OK" }
+      {
+        "revisionDate": "2021-03-15",
+        "notes": "Contrôle annuel OK"
+      },
+      {
+        "revisionDate": "2022-03-10",
+        "notes": "Contrôle annuel OK"
+      },
+      {
+        "revisionDate": "2023-03-08",
+        "notes": "Contrôle annuel OK"
+      },
+      {
+        "revisionDate": "2024-03-12",
+        "notes": "Contrôle annuel OK"
+      }
     ]
   },
   {
@@ -39,7 +57,10 @@
         "revisionDate": "2022-04-05",
         "notes": "Nouveau extincteur — premier contrôle"
       },
-      { "revisionDate": "2023-04-03", "notes": "Contrôle annuel OK" },
+      {
+        "revisionDate": "2023-04-03",
+        "notes": "Contrôle annuel OK"
+      },
       {
         "revisionDate": "2024-04-08",
         "notes": "Contrôle annuel OK — manomètre vérifié"
@@ -52,13 +73,22 @@
     "identificationNumber": "EXT-MID-001",
     "notes": "Hall principal — entrée rue du Midi",
     "revisions": [
-      { "revisionDate": "2020-06-20", "notes": "Contrôle annuel OK" },
-      { "revisionDate": "2021-06-18", "notes": "Contrôle annuel OK" },
+      {
+        "revisionDate": "2020-06-20",
+        "notes": "Contrôle annuel OK"
+      },
+      {
+        "revisionDate": "2021-06-18",
+        "notes": "Contrôle annuel OK"
+      },
       {
         "revisionDate": "2022-06-15",
         "notes": "Contrôle annuel OK — étiquette mise à jour"
       },
-      { "revisionDate": "2023-06-14", "notes": "Contrôle annuel OK" },
+      {
+        "revisionDate": "2023-06-14",
+        "notes": "Contrôle annuel OK"
+      },
       {
         "revisionDate": "2024-06-10",
         "notes": "Contrôle annuel OK — remplacement prévu 2025"
@@ -71,10 +101,538 @@
     "identificationNumber": "EXT-MID-002",
     "notes": "Local poubelles / chaufferie",
     "revisions": [
-      { "revisionDate": "2021-06-18", "notes": "Contrôle annuel OK" },
-      { "revisionDate": "2022-06-15", "notes": "Contrôle annuel OK" },
-      { "revisionDate": "2023-06-14", "notes": "Contrôle annuel OK" },
-      { "revisionDate": "2024-06-10", "notes": "Contrôle annuel OK" }
+      {
+        "revisionDate": "2021-06-18",
+        "notes": "Contrôle annuel OK"
+      },
+      {
+        "revisionDate": "2022-06-15",
+        "notes": "Contrôle annuel OK"
+      },
+      {
+        "revisionDate": "2023-06-14",
+        "notes": "Contrôle annuel OK"
+      },
+      {
+        "revisionDate": "2024-06-10",
+        "notes": "Contrôle annuel OK"
+      }
+    ]
+  },
+  {
+    "buildingName": "Immeuble Grande Tourismo",
+    "estateName": "Estate Ville",
+    "identificationNumber": "EXT-GTO-001",
+    "notes": "Hall d'entrée — rez-de-chaussée",
+    "revisions": [
+      {
+        "revisionDate": "2020-02-10",
+        "notes": "Contrôle annuel OK"
+      },
+      {
+        "revisionDate": "2021-02-10",
+        "notes": "Contrôle annuel OK — pression vérifiée"
+      },
+      {
+        "revisionDate": "2022-02-10",
+        "notes": "Contrôle annuel OK — étiquette mise à jour"
+      },
+      {
+        "revisionDate": "2023-02-10",
+        "notes": "Contrôle annuel OK — goupille remplacée"
+      },
+      {
+        "revisionDate": "2024-02-10",
+        "notes": "Contrôle annuel OK — manomètre vérifié"
+      }
+    ]
+  },
+  {
+    "buildingName": "Immeuble Grande Tourismo",
+    "estateName": "Estate Ville",
+    "identificationNumber": "EXT-GTO-002",
+    "notes": "Palier 1er étage — cage d'escalier",
+    "revisions": [
+      {
+        "revisionDate": "2020-02-10",
+        "notes": "Contrôle annuel OK — remplacement prévu prochaine visite"
+      },
+      {
+        "revisionDate": "2021-02-10",
+        "notes": "Contrôle annuel OK"
+      },
+      {
+        "revisionDate": "2022-02-10",
+        "notes": "Contrôle annuel OK"
+      },
+      {
+        "revisionDate": "2023-02-10",
+        "notes": "Contrôle annuel OK — pression vérifiée"
+      },
+      {
+        "revisionDate": "2024-02-10",
+        "notes": "Contrôle annuel OK — étiquette mise à jour"
+      }
+    ]
+  },
+  {
+    "buildingName": "Immeuble Grande Tourismo",
+    "estateName": "Estate Ville",
+    "identificationNumber": "EXT-GTO-003",
+    "notes": "Palier 2ème étage",
+    "revisions": [
+      {
+        "revisionDate": "2020-02-10",
+        "notes": "Contrôle annuel OK — goupille remplacée"
+      },
+      {
+        "revisionDate": "2021-02-10",
+        "notes": "Contrôle annuel OK — manomètre vérifié"
+      },
+      {
+        "revisionDate": "2022-02-10",
+        "notes": "Contrôle annuel OK — remplacement prévu prochaine visite"
+      },
+      {
+        "revisionDate": "2023-02-10",
+        "notes": "Contrôle annuel OK"
+      },
+      {
+        "revisionDate": "2024-02-10",
+        "notes": "Contrôle annuel OK"
+      }
+    ]
+  },
+  {
+    "buildingName": "Immeuble Grande Tourismo",
+    "estateName": "Estate Ville",
+    "identificationNumber": "EXT-GTO-004",
+    "notes": "Palier 3ème étage",
+    "revisions": [
+      {
+        "revisionDate": "2020-02-10",
+        "notes": "Contrôle annuel OK — pression vérifiée"
+      },
+      {
+        "revisionDate": "2021-02-10",
+        "notes": "Contrôle annuel OK — étiquette mise à jour"
+      },
+      {
+        "revisionDate": "2022-02-10",
+        "notes": "Contrôle annuel OK — goupille remplacée"
+      },
+      {
+        "revisionDate": "2023-02-10",
+        "notes": "Contrôle annuel OK — manomètre vérifié"
+      },
+      {
+        "revisionDate": "2024-02-10",
+        "notes": "Contrôle annuel OK — remplacement prévu prochaine visite"
+      }
+    ]
+  },
+  {
+    "buildingName": "Immeuble Grande Tourismo",
+    "estateName": "Estate Ville",
+    "identificationNumber": "EXT-GTO-005",
+    "notes": "Local technique / cave",
+    "revisions": [
+      {
+        "revisionDate": "2020-02-10",
+        "notes": "Contrôle annuel OK"
+      },
+      {
+        "revisionDate": "2021-02-10",
+        "notes": "Contrôle annuel OK"
+      },
+      {
+        "revisionDate": "2022-02-10",
+        "notes": "Contrôle annuel OK — pression vérifiée"
+      },
+      {
+        "revisionDate": "2023-02-10",
+        "notes": "Contrôle annuel OK — étiquette mise à jour"
+      },
+      {
+        "revisionDate": "2024-02-10",
+        "notes": "Contrôle annuel OK — goupille remplacée"
+      }
+    ]
+  },
+  {
+    "buildingName": "Immeuble Village dans les nuages",
+    "estateName": "Estate Mer",
+    "identificationNumber": "EXT-VDN-001",
+    "notes": "Hall d'entrée",
+    "revisions": [
+      {
+        "revisionDate": "2019-04-05",
+        "notes": "Contrôle annuel OK — manomètre vérifié"
+      },
+      {
+        "revisionDate": "2020-04-05",
+        "notes": "Contrôle annuel OK — remplacement prévu prochaine visite"
+      },
+      {
+        "revisionDate": "2021-04-05",
+        "notes": "Contrôle annuel OK"
+      },
+      {
+        "revisionDate": "2022-04-05",
+        "notes": "Contrôle annuel OK"
+      },
+      {
+        "revisionDate": "2023-04-05",
+        "notes": "Contrôle annuel OK — pression vérifiée"
+      },
+      {
+        "revisionDate": "2024-04-05",
+        "notes": "Contrôle annuel OK — étiquette mise à jour"
+      }
+    ]
+  },
+  {
+    "buildingName": "Immeuble Village dans les nuages",
+    "estateName": "Estate Mer",
+    "identificationNumber": "EXT-VDN-002",
+    "notes": "Palier 1er étage",
+    "revisions": [
+      {
+        "revisionDate": "2019-04-05",
+        "notes": "Contrôle annuel OK — goupille remplacée"
+      },
+      {
+        "revisionDate": "2020-04-05",
+        "notes": "Contrôle annuel OK — manomètre vérifié"
+      },
+      {
+        "revisionDate": "2021-04-05",
+        "notes": "Contrôle annuel OK — remplacement prévu prochaine visite"
+      },
+      {
+        "revisionDate": "2022-04-05",
+        "notes": "Contrôle annuel OK"
+      },
+      {
+        "revisionDate": "2023-04-05",
+        "notes": "Contrôle annuel OK"
+      },
+      {
+        "revisionDate": "2024-04-05",
+        "notes": "Contrôle annuel OK — pression vérifiée"
+      }
+    ]
+  },
+  {
+    "buildingName": "Immeuble Village dans les nuages",
+    "estateName": "Estate Mer",
+    "identificationNumber": "EXT-VDN-003",
+    "notes": "Cave / local vélos",
+    "revisions": [
+      {
+        "revisionDate": "2019-04-05",
+        "notes": "Contrôle annuel OK — étiquette mise à jour"
+      },
+      {
+        "revisionDate": "2020-04-05",
+        "notes": "Contrôle annuel OK — goupille remplacée"
+      },
+      {
+        "revisionDate": "2021-04-05",
+        "notes": "Contrôle annuel OK — manomètre vérifié"
+      },
+      {
+        "revisionDate": "2022-04-05",
+        "notes": "Contrôle annuel OK — remplacement prévu prochaine visite"
+      },
+      {
+        "revisionDate": "2023-04-05",
+        "notes": "Contrôle annuel OK"
+      },
+      {
+        "revisionDate": "2024-04-05",
+        "notes": "Contrôle annuel OK"
+      }
+    ]
+  },
+  {
+    "buildingName": "Résidence du Littoral",
+    "estateName": "Estate Mer",
+    "identificationNumber": "EXT-LIT-001",
+    "notes": "Hall principal — entrée boulevard",
+    "revisions": [
+      {
+        "revisionDate": "2018-05-20",
+        "notes": "Contrôle annuel OK — pression vérifiée"
+      },
+      {
+        "revisionDate": "2019-05-20",
+        "notes": "Contrôle annuel OK — étiquette mise à jour"
+      },
+      {
+        "revisionDate": "2020-05-20",
+        "notes": "Contrôle annuel OK — goupille remplacée"
+      },
+      {
+        "revisionDate": "2021-05-20",
+        "notes": "Contrôle annuel OK — manomètre vérifié"
+      },
+      {
+        "revisionDate": "2022-05-20",
+        "notes": "Contrôle annuel OK — remplacement prévu prochaine visite"
+      },
+      {
+        "revisionDate": "2023-05-20",
+        "notes": "Contrôle annuel OK"
+      },
+      {
+        "revisionDate": "2024-05-20",
+        "notes": "Contrôle annuel OK"
+      }
+    ]
+  },
+  {
+    "buildingName": "Résidence du Littoral",
+    "estateName": "Estate Mer",
+    "identificationNumber": "EXT-LIT-002",
+    "notes": "Palier 1er étage",
+    "revisions": [
+      {
+        "revisionDate": "2018-05-20",
+        "notes": "Contrôle annuel OK — pression vérifiée"
+      },
+      {
+        "revisionDate": "2019-05-20",
+        "notes": "Contrôle annuel OK — étiquette mise à jour"
+      },
+      {
+        "revisionDate": "2020-05-20",
+        "notes": "Contrôle annuel OK — goupille remplacée"
+      },
+      {
+        "revisionDate": "2021-05-20",
+        "notes": "Contrôle annuel OK — manomètre vérifié"
+      },
+      {
+        "revisionDate": "2022-05-20",
+        "notes": "Contrôle annuel OK — remplacement prévu prochaine visite"
+      },
+      {
+        "revisionDate": "2023-05-20",
+        "notes": "Contrôle annuel OK"
+      },
+      {
+        "revisionDate": "2024-05-20",
+        "notes": "Contrôle annuel OK"
+      }
+    ]
+  },
+  {
+    "buildingName": "Résidence du Littoral",
+    "estateName": "Estate Mer",
+    "identificationNumber": "EXT-LIT-003",
+    "notes": "Palier 2ème étage",
+    "revisions": [
+      {
+        "revisionDate": "2018-05-20",
+        "notes": "Contrôle annuel OK — pression vérifiée"
+      },
+      {
+        "revisionDate": "2019-05-20",
+        "notes": "Contrôle annuel OK — étiquette mise à jour"
+      },
+      {
+        "revisionDate": "2020-05-20",
+        "notes": "Contrôle annuel OK — goupille remplacée"
+      },
+      {
+        "revisionDate": "2021-05-20",
+        "notes": "Contrôle annuel OK — manomètre vérifié"
+      },
+      {
+        "revisionDate": "2022-05-20",
+        "notes": "Contrôle annuel OK — remplacement prévu prochaine visite"
+      },
+      {
+        "revisionDate": "2023-05-20",
+        "notes": "Contrôle annuel OK"
+      },
+      {
+        "revisionDate": "2024-05-20",
+        "notes": "Contrôle annuel OK"
+      }
+    ]
+  },
+  {
+    "buildingName": "Résidence du Littoral",
+    "estateName": "Estate Mer",
+    "identificationNumber": "EXT-LIT-004",
+    "notes": "Local poubelles",
+    "revisions": [
+      {
+        "revisionDate": "2018-05-20",
+        "notes": "Contrôle annuel OK — pression vérifiée"
+      },
+      {
+        "revisionDate": "2019-05-20",
+        "notes": "Contrôle annuel OK — étiquette mise à jour"
+      },
+      {
+        "revisionDate": "2020-05-20",
+        "notes": "Contrôle annuel OK — goupille remplacée"
+      },
+      {
+        "revisionDate": "2021-05-20",
+        "notes": "Contrôle annuel OK — manomètre vérifié"
+      },
+      {
+        "revisionDate": "2022-05-20",
+        "notes": "Contrôle annuel OK — remplacement prévu prochaine visite"
+      },
+      {
+        "revisionDate": "2023-05-20",
+        "notes": "Contrôle annuel OK"
+      },
+      {
+        "revisionDate": "2024-05-20",
+        "notes": "Contrôle annuel OK"
+      }
+    ]
+  },
+  {
+    "buildingName": "Chalet des Ardennes",
+    "estateName": "Estate Montagne",
+    "identificationNumber": "EXT-ARD-001",
+    "notes": "Entrée principale",
+    "revisions": [
+      {
+        "revisionDate": "2019-09-12",
+        "notes": "Contrôle annuel OK — pression vérifiée"
+      },
+      {
+        "revisionDate": "2020-09-12",
+        "notes": "Contrôle annuel OK — étiquette mise à jour"
+      },
+      {
+        "revisionDate": "2021-09-12",
+        "notes": "Contrôle annuel OK — goupille remplacée"
+      },
+      {
+        "revisionDate": "2022-09-12",
+        "notes": "Contrôle annuel OK — manomètre vérifié"
+      },
+      {
+        "revisionDate": "2023-09-12",
+        "notes": "Contrôle annuel OK — remplacement prévu prochaine visite"
+      },
+      {
+        "revisionDate": "2024-09-12",
+        "notes": "Contrôle annuel OK"
+      }
+    ]
+  },
+  {
+    "buildingName": "Chalet des Ardennes",
+    "estateName": "Estate Montagne",
+    "identificationNumber": "EXT-ARD-002",
+    "notes": "Couloir 1er étage",
+    "revisions": [
+      {
+        "revisionDate": "2019-09-12",
+        "notes": "Contrôle annuel OK"
+      },
+      {
+        "revisionDate": "2020-09-12",
+        "notes": "Contrôle annuel OK — pression vérifiée"
+      },
+      {
+        "revisionDate": "2021-09-12",
+        "notes": "Contrôle annuel OK — étiquette mise à jour"
+      },
+      {
+        "revisionDate": "2022-09-12",
+        "notes": "Contrôle annuel OK — goupille remplacée"
+      },
+      {
+        "revisionDate": "2023-09-12",
+        "notes": "Contrôle annuel OK — manomètre vérifié"
+      },
+      {
+        "revisionDate": "2024-09-12",
+        "notes": "Contrôle annuel OK — remplacement prévu prochaine visite"
+      }
+    ]
+  },
+  {
+    "buildingName": "Maison du Sommet",
+    "estateName": "Estate Montagne",
+    "identificationNumber": "EXT-SOM-001",
+    "notes": "Entrée / séjour",
+    "revisions": [
+      {
+        "revisionDate": "2018-07-03",
+        "notes": "Contrôle annuel OK"
+      },
+      {
+        "revisionDate": "2019-07-03",
+        "notes": "Contrôle annuel OK"
+      },
+      {
+        "revisionDate": "2020-07-03",
+        "notes": "Contrôle annuel OK — pression vérifiée"
+      },
+      {
+        "revisionDate": "2021-07-03",
+        "notes": "Contrôle annuel OK — étiquette mise à jour"
+      },
+      {
+        "revisionDate": "2022-07-03",
+        "notes": "Contrôle annuel OK — goupille remplacée"
+      },
+      {
+        "revisionDate": "2023-07-03",
+        "notes": "Contrôle annuel OK — manomètre vérifié"
+      },
+      {
+        "revisionDate": "2024-07-03",
+        "notes": "Contrôle annuel OK — remplacement prévu prochaine visite"
+      }
+    ]
+  },
+  {
+    "buildingName": "Maison du Sommet",
+    "estateName": "Estate Montagne",
+    "identificationNumber": "EXT-SOM-002",
+    "notes": "Garage / local technique",
+    "revisions": [
+      {
+        "revisionDate": "2018-07-03",
+        "notes": "Contrôle annuel OK"
+      },
+      {
+        "revisionDate": "2019-07-03",
+        "notes": "Contrôle annuel OK"
+      },
+      {
+        "revisionDate": "2020-07-03",
+        "notes": "Contrôle annuel OK — pression vérifiée"
+      },
+      {
+        "revisionDate": "2021-07-03",
+        "notes": "Contrôle annuel OK — étiquette mise à jour"
+      },
+      {
+        "revisionDate": "2022-07-03",
+        "notes": "Contrôle annuel OK — goupille remplacée"
+      },
+      {
+        "revisionDate": "2023-07-03",
+        "notes": "Contrôle annuel OK — manomètre vérifié"
+      },
+      {
+        "revisionDate": "2024-07-03",
+        "notes": "Contrôle annuel OK — remplacement prévu prochaine visite"
+      }
     ]
   }
 ]

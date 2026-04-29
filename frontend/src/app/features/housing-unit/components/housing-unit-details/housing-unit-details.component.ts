@@ -1,26 +1,39 @@
-import { CommonModule } from '@angular/common';
-import { Component, OnInit } from '@angular/core';
-import { ActivatedRoute, Router, RouterLink } from '@angular/router';
-import { ActiveEstateService } from '../../../../core/services/active-estate.service';
-import { HousingUnitService } from '../../../../core/services/housing-unit.service';
-import { HousingUnit } from '../../../../models/housing-unit.model';
+import { CommonModule } from "@angular/common";
+import { Component, OnInit } from "@angular/core";
+import { ActivatedRoute, Router, RouterLink } from "@angular/router";
+import { ActiveEstateService } from "../../../../core/services/active-estate.service";
+import { HousingUnitService } from "../../../../core/services/housing-unit.service";
+import { HousingUnit } from "../../../../models/housing-unit.model";
+import { MeterSectionComponent } from "../../../../shared/components/meter-section/meter-section.component";
+import { BoilerSectionComponent } from "../boiler-section/boiler-section.component";
+import { PebSectionComponent } from "../peb-section/peb-section.component";
+import { RentSectionComponent } from "../rent-section/rent-section.component";
+import { RoomSectionComponent } from "../room-section/room-section.component";
 
 /**
  * Housing unit detail page.
  * UC004_ESTATE_PLACEHOLDER Phase 2: all navigation includes estateId.
  */
 @Component({
-  selector: 'app-housing-unit-details',
+  selector: "app-housing-unit-details",
   standalone: true,
-  imports: [CommonModule, RouterLink],
-  templateUrl: './housing-unit-details.component.html',
-  styleUrls: ['./housing-unit-details.component.scss'],
+  imports: [
+    CommonModule,
+    RouterLink,
+    MeterSectionComponent,
+    BoilerSectionComponent,
+    RoomSectionComponent,
+    PebSectionComponent,
+    RentSectionComponent,
+  ],
+  templateUrl: "./housing-unit-details.component.html",
+  styleUrls: ["./housing-unit-details.component.scss"],
 })
 export class HousingUnitDetailsComponent implements OnInit {
   unit?: HousingUnit;
   loading = false;
-  errorMessage = '';
-  deleteError = '';
+  errorMessage = "";
+  deleteError = "";
   deleting = false;
 
   constructor(
@@ -31,7 +44,7 @@ export class HousingUnitDetailsComponent implements OnInit {
   ) {}
 
   ngOnInit(): void {
-    const id = Number(this.route.snapshot.paramMap.get('id'));
+    const id = Number(this.route.snapshot.paramMap.get("id"));
     this.loading = true;
     this.housingUnitService.getUnitById(id).subscribe({
       next: (u) => {
@@ -39,7 +52,7 @@ export class HousingUnitDetailsComponent implements OnInit {
         this.loading = false;
       },
       error: () => {
-        this.errorMessage = 'Unit not found.';
+        this.errorMessage = "Unit not found.";
         this.loading = false;
       },
     });
@@ -50,26 +63,46 @@ export class HousingUnitDetailsComponent implements OnInit {
   }
 
   edit(): void {
-    this.router.navigate(['/estates', this.estateId, 'units', this.unit!.id, 'edit']);
+    this.router.navigate([
+      "/estates",
+      this.estateId,
+      "units",
+      this.unit!.id,
+      "edit",
+    ]);
   }
 
   backToBuilding(): void {
-    this.router.navigate(['/estates', this.estateId, 'buildings', this.unit!.buildingId]);
+    this.router.navigate([
+      "/estates",
+      this.estateId,
+      "buildings",
+      this.unit!.buildingId,
+    ]);
   }
 
   back(): void {
-    this.router.navigate(['/estates', this.estateId, 'units']);
+    this.router.navigate(["/estates", this.estateId, "units"]);
   }
 
   confirmDelete(): void {
     if (!this.unit) return;
-    if (!confirm(`Delete unit "${this.unit.unitNumber}"? This cannot be undone.`)) return;
+    if (
+      !confirm(`Delete unit "${this.unit.unitNumber}"? This cannot be undone.`)
+    )
+      return;
     this.deleting = true;
     this.housingUnitService.delete(this.unit.id).subscribe({
-      next: () => this.router.navigate(['/estates', this.estateId, 'buildings', this.unit!.buildingId]),
+      next: () =>
+        this.router.navigate([
+          "/estates",
+          this.estateId,
+          "buildings",
+          this.unit!.buildingId,
+        ]),
       error: (err) => {
         this.deleting = false;
-        this.deleteError = err.error?.message ?? 'Failed to delete unit.';
+        this.deleteError = err.error?.message ?? "Failed to delete unit.";
       },
     });
   }

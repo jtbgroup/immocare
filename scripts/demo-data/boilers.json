@@ -68,5 +68,453 @@
     "nextServiceDate": "2026-07-12",
     "notes": "Chaudière neuve installée lors de la rénovation",
     "estateName": "Estate Ville"
+  },
+  {
+    "buildingName": "Immeuble Grande Tourismo",
+    "unitNumber": "01",
+    "ownerType": "HOUSING_UNIT",
+    "brand": "Vaillant",
+    "model": "ecoTEC plus VUW 236/5-5",
+    "serialNumber": "VAI-2020-011",
+    "fuelType": "GAS",
+    "installationDate": "2020-04-01",
+    "lastServiceDate": "2024-04-15",
+    "nextServiceDate": "2026-04-15",
+    "notes": null,
+    "estateName": "Estate Ville",
+    "services": [
+      {
+        "serviceDate": "2021-05-10",
+        "notes": "Entretien annuel OK — nettoyage brûleur"
+      },
+      {
+        "serviceDate": "2022-05-14",
+        "notes": "Entretien annuel OK"
+      },
+      {
+        "serviceDate": "2023-05-08",
+        "notes": "Entretien annuel OK — remplacement joint"
+      },
+      {
+        "serviceDate": "2024-05-12",
+        "notes": "Entretien annuel OK"
+      }
+    ]
+  },
+  {
+    "buildingName": "Immeuble Grande Tourismo",
+    "unitNumber": "02",
+    "ownerType": "HOUSING_UNIT",
+    "brand": "Buderus",
+    "model": "Logamax U072-24K",
+    "serialNumber": "BUD-2019-012",
+    "fuelType": "GAS",
+    "installationDate": "2019-05-01",
+    "lastServiceDate": "2023-05-10",
+    "nextServiceDate": "2025-05-10",
+    "notes": null,
+    "estateName": "Estate Ville",
+    "services": [
+      {
+        "serviceDate": "2021-05-10",
+        "notes": "Entretien annuel OK — nettoyage brûleur"
+      },
+      {
+        "serviceDate": "2022-05-14",
+        "notes": "Entretien annuel OK"
+      },
+      {
+        "serviceDate": "2023-05-08",
+        "notes": "Entretien annuel OK — remplacement joint"
+      },
+      {
+        "serviceDate": "2024-05-12",
+        "notes": "Entretien annuel OK"
+      }
+    ]
+  },
+  {
+    "buildingName": "Immeuble Grande Tourismo",
+    "unitNumber": "03",
+    "ownerType": "HOUSING_UNIT",
+    "brand": "Bosch",
+    "model": "Condens 2500 W",
+    "serialNumber": "BOS-2018-013",
+    "fuelType": "GAS",
+    "installationDate": "2018-01-01",
+    "lastServiceDate": "2022-01-20",
+    "nextServiceDate": "2024-01-20",
+    "notes": null,
+    "estateName": "Estate Ville",
+    "services": [
+      {
+        "serviceDate": "2021-05-10",
+        "notes": "Entretien annuel OK — nettoyage brûleur"
+      },
+      {
+        "serviceDate": "2022-05-14",
+        "notes": "Entretien annuel OK"
+      },
+      {
+        "serviceDate": "2023-05-08",
+        "notes": "Entretien annuel OK — remplacement joint"
+      },
+      {
+        "serviceDate": "2024-05-12",
+        "notes": "Entretien annuel OK"
+      }
+    ]
+  },
+  {
+    "buildingName": "Immeuble Village dans les nuages",
+    "unitNumber": "01",
+    "ownerType": "HOUSING_UNIT",
+    "brand": "Viessmann",
+    "model": "Vitodens 100-W",
+    "serialNumber": "VIE-2018-014",
+    "fuelType": "GAS",
+    "installationDate": "2018-08-01",
+    "lastServiceDate": "2022-08-05",
+    "nextServiceDate": "2024-08-05",
+    "notes": null,
+    "estateName": "Estate Mer",
+    "services": [
+      {
+        "serviceDate": "2021-05-10",
+        "notes": "Entretien annuel OK — nettoyage brûleur"
+      },
+      {
+        "serviceDate": "2022-05-14",
+        "notes": "Entretien annuel OK"
+      },
+      {
+        "serviceDate": "2023-05-08",
+        "notes": "Entretien annuel OK — remplacement joint"
+      },
+      {
+        "serviceDate": "2024-05-12",
+        "notes": "Entretien annuel OK"
+      }
+    ]
+  },
+  {
+    "buildingName": "Immeuble Village dans les nuages",
+    "unitNumber": "02",
+    "ownerType": "HOUSING_UNIT",
+    "brand": "De Dietrich",
+    "model": "Innovens MCA 20",
+    "serialNumber": "DE -2019-015",
+    "fuelType": "GAS",
+    "installationDate": "2019-03-01",
+    "lastServiceDate": "2023-03-12",
+    "nextServiceDate": "2025-03-12",
+    "notes": null,
+    "estateName": "Estate Mer",
+    "services": [
+      {
+        "serviceDate": "2021-05-10",
+        "notes": "Entretien annuel OK — nettoyage brûleur"
+      },
+      {
+        "serviceDate": "2022-05-14",
+        "notes": "Entretien annuel OK"
+      },
+      {
+        "serviceDate": "2023-05-08",
+        "notes": "Entretien annuel OK — remplacement joint"
+      },
+      {
+        "serviceDate": "2024-05-12",
+        "notes": "Entretien annuel OK"
+      }
+    ]
+  },
+  {
+    "buildingName": "Résidence du Littoral",
+    "unitNumber": "01",
+    "ownerType": "HOUSING_UNIT",
+    "brand": "Junkers",
+    "model": "Cerapur ZWB 24-3 A",
+    "serialNumber": "JUN-2017-016",
+    "fuelType": "GAS",
+    "installationDate": "2017-06-01",
+    "lastServiceDate": "2021-06-18",
+    "nextServiceDate": "2025-06-18",
+    "notes": null,
+    "estateName": "Estate Mer",
+    "services": [
+      {
+        "serviceDate": "2021-05-10",
+        "notes": "Entretien annuel OK — nettoyage brûleur"
+      },
+      {
+        "serviceDate": "2022-05-14",
+        "notes": "Entretien annuel OK"
+      },
+      {
+        "serviceDate": "2023-05-08",
+        "notes": "Entretien annuel OK — remplacement joint"
+      },
+      {
+        "serviceDate": "2024-05-12",
+        "notes": "Entretien annuel OK"
+      }
+    ]
+  },
+  {
+    "buildingName": "Résidence du Littoral",
+    "unitNumber": "02",
+    "ownerType": "HOUSING_UNIT",
+    "brand": "Baxi",
+    "model": "Luna Platinum+ 24",
+    "serialNumber": "BAX-2018-017",
+    "fuelType": "GAS",
+    "installationDate": "2018-11-01",
+    "lastServiceDate": "2022-11-22",
+    "nextServiceDate": "2024-11-22",
+    "notes": null,
+    "estateName": "Estate Mer",
+    "services": [
+      {
+        "serviceDate": "2021-05-10",
+        "notes": "Entretien annuel OK — nettoyage brûleur"
+      },
+      {
+        "serviceDate": "2022-05-14",
+        "notes": "Entretien annuel OK"
+      },
+      {
+        "serviceDate": "2023-05-08",
+        "notes": "Entretien annuel OK — remplacement joint"
+      },
+      {
+        "serviceDate": "2024-05-12",
+        "notes": "Entretien annuel OK"
+      }
+    ]
+  },
+  {
+    "buildingName": "Résidence du Littoral",
+    "unitNumber": "03",
+    "ownerType": "HOUSING_UNIT",
+    "brand": "Ariston",
+    "model": "Clas One 24 FF",
+    "serialNumber": "ARI-2019-018",
+    "fuelType": "GAS",
+    "installationDate": "2019-07-01",
+    "lastServiceDate": "2023-07-09",
+    "nextServiceDate": "2025-07-09",
+    "notes": null,
+    "estateName": "Estate Mer",
+    "services": [
+      {
+        "serviceDate": "2021-05-10",
+        "notes": "Entretien annuel OK — nettoyage brûleur"
+      },
+      {
+        "serviceDate": "2022-05-14",
+        "notes": "Entretien annuel OK"
+      },
+      {
+        "serviceDate": "2023-05-08",
+        "notes": "Entretien annuel OK — remplacement joint"
+      },
+      {
+        "serviceDate": "2024-05-12",
+        "notes": "Entretien annuel OK"
+      }
+    ]
+  },
+  {
+    "buildingName": "Résidence du Littoral",
+    "unitNumber": "04",
+    "ownerType": "HOUSING_UNIT",
+    "brand": "Remeha",
+    "model": "Calenta Ace 28c",
+    "serialNumber": "REM-2018-019",
+    "fuelType": "GAS",
+    "installationDate": "2018-02-01",
+    "lastServiceDate": "2022-02-14",
+    "nextServiceDate": "2024-02-14",
+    "notes": null,
+    "estateName": "Estate Mer",
+    "services": [
+      {
+        "serviceDate": "2021-05-10",
+        "notes": "Entretien annuel OK — nettoyage brûleur"
+      },
+      {
+        "serviceDate": "2022-05-14",
+        "notes": "Entretien annuel OK"
+      },
+      {
+        "serviceDate": "2023-05-08",
+        "notes": "Entretien annuel OK — remplacement joint"
+      },
+      {
+        "serviceDate": "2024-05-12",
+        "notes": "Entretien annuel OK"
+      }
+    ]
+  },
+  {
+    "buildingName": "Chalet des Ardennes",
+    "unitNumber": "01",
+    "ownerType": "HOUSING_UNIT",
+    "brand": "Atlantic",
+    "model": "Naema 2 Micro 24",
+    "serialNumber": "ATL-2018-020",
+    "fuelType": "GAS",
+    "installationDate": "2018-05-01",
+    "lastServiceDate": "2022-05-20",
+    "nextServiceDate": "2024-05-20",
+    "notes": null,
+    "estateName": "Estate Montagne",
+    "services": [
+      {
+        "serviceDate": "2021-05-10",
+        "notes": "Entretien annuel OK — nettoyage brûleur"
+      },
+      {
+        "serviceDate": "2022-05-14",
+        "notes": "Entretien annuel OK"
+      },
+      {
+        "serviceDate": "2023-05-08",
+        "notes": "Entretien annuel OK — remplacement joint"
+      },
+      {
+        "serviceDate": "2024-05-12",
+        "notes": "Entretien annuel OK"
+      }
+    ]
+  },
+  {
+    "buildingName": "Chalet des Ardennes",
+    "unitNumber": "02",
+    "ownerType": "HOUSING_UNIT",
+    "brand": "Vaillant",
+    "model": "ecoTEC plus VUW 236/5-5",
+    "serialNumber": "VAI-2019-021",
+    "fuelType": "GAS",
+    "installationDate": "2019-10-01",
+    "lastServiceDate": "2023-10-08",
+    "nextServiceDate": "2025-10-08",
+    "notes": null,
+    "estateName": "Estate Montagne",
+    "services": [
+      {
+        "serviceDate": "2021-05-10",
+        "notes": "Entretien annuel OK — nettoyage brûleur"
+      },
+      {
+        "serviceDate": "2022-05-14",
+        "notes": "Entretien annuel OK"
+      },
+      {
+        "serviceDate": "2023-05-08",
+        "notes": "Entretien annuel OK — remplacement joint"
+      },
+      {
+        "serviceDate": "2024-05-12",
+        "notes": "Entretien annuel OK"
+      }
+    ]
+  },
+  {
+    "buildingName": "Maison du Sommet",
+    "unitNumber": "01",
+    "ownerType": "HOUSING_UNIT",
+    "brand": "Buderus",
+    "model": "Logamax U072-24K",
+    "serialNumber": "BUD-2017-022",
+    "fuelType": "GAS",
+    "installationDate": "2017-04-01",
+    "lastServiceDate": "2021-04-22",
+    "nextServiceDate": "2025-04-22",
+    "notes": null,
+    "estateName": "Estate Montagne",
+    "services": [
+      {
+        "serviceDate": "2021-05-10",
+        "notes": "Entretien annuel OK — nettoyage brûleur"
+      },
+      {
+        "serviceDate": "2022-05-14",
+        "notes": "Entretien annuel OK"
+      },
+      {
+        "serviceDate": "2023-05-08",
+        "notes": "Entretien annuel OK — remplacement joint"
+      },
+      {
+        "serviceDate": "2024-05-12",
+        "notes": "Entretien annuel OK"
+      }
+    ]
+  },
+  {
+    "buildingName": "Immeuble Grande Tourismo",
+    "unitNumber": "03",
+    "ownerType": "BUILDING",
+    "brand": "Viessmann",
+    "model": "Vitodens 200-W B3HA 99",
+    "serialNumber": "VIE-BLDG-GTO-001",
+    "fuelType": "GAS",
+    "installationDate": "2018-01-01",
+    "lastServiceDate": "2022-01-10",
+    "nextServiceDate": "2024-01-10",
+    "notes": "Chaudière centrale immeuble — contrat Viessmann",
+    "estateName": "Estate Ville",
+    "services": [
+      {
+        "serviceDate": "2021-05-10",
+        "notes": "Entretien annuel OK — nettoyage brûleur"
+      },
+      {
+        "serviceDate": "2022-05-14",
+        "notes": "Entretien annuel OK"
+      },
+      {
+        "serviceDate": "2023-05-08",
+        "notes": "Entretien annuel OK — remplacement joint"
+      },
+      {
+        "serviceDate": "2024-05-12",
+        "notes": "Entretien annuel OK"
+      }
+    ]
+  },
+  {
+    "buildingName": "Résidence du Littoral",
+    "unitNumber": "04",
+    "ownerType": "BUILDING",
+    "brand": "Remeha",
+    "model": "Gas 220 Ace 115c",
+    "serialNumber": "REM-BLDG-LIT-001",
+    "fuelType": "GAS",
+    "installationDate": "2017-01-01",
+    "lastServiceDate": "2021-01-15",
+    "nextServiceDate": "2025-01-15",
+    "notes": "Chaudière centrale résidence — contrat annuel",
+    "estateName": "Estate Mer",
+    "services": [
+      {
+        "serviceDate": "2021-05-10",
+        "notes": "Entretien annuel OK — nettoyage brûleur"
+      },
+      {
+        "serviceDate": "2022-05-14",
+        "notes": "Entretien annuel OK"
+      },
+      {
+        "serviceDate": "2023-05-08",
+        "notes": "Entretien annuel OK — remplacement joint"
+      },
+      {
+        "serviceDate": "2024-05-12",
+        "notes": "Entretien annuel OK"
+      }
+    ]
   }
 ]

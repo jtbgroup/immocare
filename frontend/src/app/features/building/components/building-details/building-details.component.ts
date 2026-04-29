@@ -1,29 +1,36 @@
-import { CommonModule } from '@angular/common';
-import { Component, OnInit } from '@angular/core';
-import { ActivatedRoute, Router, RouterLink } from '@angular/router';
-import { ActiveEstateService } from '../../../../core/services/active-estate.service';
-import { BuildingService } from '../../../../core/services/building.service';
-import { HousingUnitService } from '../../../../core/services/housing-unit.service';
-import { Building } from '../../../../models/building.model';
-import { HousingUnit } from '../../../../models/housing-unit.model';
+import { CommonModule } from "@angular/common";
+import { Component, OnInit } from "@angular/core";
+import { ActivatedRoute, Router, RouterLink } from "@angular/router";
+import { ActiveEstateService } from "../../../../core/services/active-estate.service";
+import { BuildingService } from "../../../../core/services/building.service";
+import { HousingUnitService } from "../../../../core/services/housing-unit.service";
+import { Building } from "../../../../models/building.model";
+import { HousingUnit } from "../../../../models/housing-unit.model";
+import { MeterSectionComponent } from "../../../../shared/components/meter-section/meter-section.component";
+import { FireExtinguisherSectionComponent } from "../fire-extinguisher-section/fire-extinguisher-section.component";
 
 /**
  * Building detail page with its housing units.
  * UC004_ESTATE_PLACEHOLDER Phase 2: all navigation includes estateId.
  */
 @Component({
-  selector: 'app-building-details',
+  selector: "app-building-details",
   standalone: true,
-  imports: [CommonModule, RouterLink],
-  templateUrl: './building-details.component.html',
-  styleUrls: ['./building-details.component.scss'],
+  imports: [
+    CommonModule,
+    RouterLink,
+    MeterSectionComponent,
+    FireExtinguisherSectionComponent,
+  ],
+  templateUrl: "./building-details.component.html",
+  styleUrls: ["./building-details.component.scss"],
 })
 export class BuildingDetailsComponent implements OnInit {
   building?: Building;
   units: HousingUnit[] = [];
   loading = false;
-  errorMessage = '';
-  deleteError = '';
+  errorMessage = "";
+  deleteError = "";
   deleting = false;
 
   constructor(
@@ -35,7 +42,7 @@ export class BuildingDetailsComponent implements OnInit {
   ) {}
 
   ngOnInit(): void {
-    const id = Number(this.route.snapshot.paramMap.get('id'));
+    const id = Number(this.route.snapshot.paramMap.get("id"));
     this.loading = true;
     this.buildingService.getBuildingById(id).subscribe({
       next: (b) => {
@@ -44,7 +51,7 @@ export class BuildingDetailsComponent implements OnInit {
         this.loadUnits(b.id);
       },
       error: () => {
-        this.errorMessage = 'Building not found.';
+        this.errorMessage = "Building not found.";
         this.loading = false;
       },
     });
@@ -57,37 +64,51 @@ export class BuildingDetailsComponent implements OnInit {
   private loadUnits(buildingId: number): void {
     this.housingUnitService.getUnitsByBuilding(buildingId).subscribe({
       next: (units) => (this.units = units),
-      error: () => { /* non-blocking */ },
+      error: () => {
+        /* non-blocking */
+      },
     });
   }
 
   edit(): void {
-    this.router.navigate(['/estates', this.estateId, 'buildings', this.building!.id, 'edit']);
+    this.router.navigate([
+      "/estates",
+      this.estateId,
+      "buildings",
+      this.building!.id,
+      "edit",
+    ]);
   }
 
   addUnit(): void {
-    this.router.navigate(['/estates', this.estateId, 'units', 'new'], {
+    this.router.navigate(["/estates", this.estateId, "units", "new"], {
       queryParams: { buildingId: this.building!.id },
     });
   }
 
   navigateToUnit(unit: HousingUnit): void {
-    this.router.navigate(['/estates', this.estateId, 'units', unit.id]);
+    this.router.navigate(["/estates", this.estateId, "units", unit.id]);
   }
 
   back(): void {
-    this.router.navigate(['/estates', this.estateId, 'buildings']);
+    this.router.navigate(["/estates", this.estateId, "buildings"]);
   }
 
   confirmDelete(): void {
     if (!this.building) return;
-    if (!confirm(`Delete building "${this.building.name}"? This cannot be undone.`)) return;
+    if (
+      !confirm(
+        `Delete building "${this.building.name}"? This cannot be undone.`,
+      )
+    )
+      return;
     this.deleting = true;
     this.buildingService.deleteBuilding(this.building.id).subscribe({
-      next: () => this.router.navigate(['/estates', this.estateId, 'buildings']),
+      next: () =>
+        this.router.navigate(["/estates", this.estateId, "buildings"]),
       error: (err) => {
         this.deleting = false;
-        this.deleteError = err.error?.message ?? 'Failed to delete building.';
+        this.deleteError = err.error?.message ?? "Failed to delete building.";
       },
     });
   }

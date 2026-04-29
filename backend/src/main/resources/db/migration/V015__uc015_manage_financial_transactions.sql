@@ -20,8 +20,7 @@ CREATE TABLE bank_account (
     created_at     TIMESTAMP    NOT NULL DEFAULT CURRENT_TIMESTAMP,
     updated_at     TIMESTAMP    NOT NULL DEFAULT CURRENT_TIMESTAMP,
 
-    CONSTRAINT uq_bank_account_label  UNIQUE (label),
-    CONSTRAINT uq_bank_account_number UNIQUE (account_number)
+    CONSTRAINT uq_bank_account_number_estate UNIQUE (account_number, estate_id)
 );
 
 CREATE INDEX idx_bank_account_owner ON bank_account (owner_user_id);

@@ -367,8 +367,8 @@ fi
 log_section "2/9 — Seeding persons (+ bank accounts)"
 PERSONS_FILE="$DATA_DIR/persons.json"
 TOTAL=$(jq length "$PERSONS_FILE")
-declare -A PERSON_ID_MAP    # indexed by nationalId
-declare -A PERSON_EMAIL_MAP # indexed by email (lowercase)
+declare -A PERSON_ID_MAP    # indexed by nationalId|estateName
+declare -A PERSON_EMAIL_MAP # indexed by email|estateName (lowercase)
 
 seed_bank_accounts() {
   local person_id="$1"
@@ -413,8 +413,8 @@ for i in $(seq 0 $(( TOTAL - 1 ))); do
   case "$S" in
     200|201)
       ID=$(jq -r '.id' /tmp/sr.json)
-      [ -n "$NID" ]   && PERSON_ID_MAP["$NID"]="$ID"
-      [ -n "$EMAIL" ] && PERSON_EMAIL_MAP["$EMAIL"]="$ID"
+      [ -n "$NID" ]   && PERSON_ID_MAP["$NID|$ESTATE_NAME"]="$ID"
+      [ -n "$EMAIL" ] && PERSON_EMAIL_MAP["$EMAIL|$ESTATE_NAME"]="$ID"
       log_ok "Person: $NAME (id=$ID)"
       seed_bank_accounts "$ID" "$P" "$ESTATE_ID"
       ;;
@@ -430,8 +430,8 @@ for i in $(seq 0 $(( TOTAL - 1 ))); do
         SEARCH=$(get_resource "/api/v1/estates/$ESTATE_ID/persons?search=$ENC_EMAIL&size=10")
         ID=$(echo "$SEARCH" | jq -r --arg em "$EMAIL" '.content[]? | select((.email // "" | ascii_downcase) == $em) | .id' | head -1)
       fi
-      [ -n "$NID" ]   && PERSON_ID_MAP["$NID"]="${ID:-}"
-      [ -n "$EMAIL" ] && PERSON_EMAIL_MAP["$EMAIL"]="${ID:-}"
+      [ -n "$NID" ]   && PERSON_ID_MAP["$NID|$ESTATE_NAME"]="${ID:-}"
+      [ -n "$EMAIL" ] && PERSON_EMAIL_MAP["$EMAIL|$ESTATE_NAME"]="${ID:-}"
       log_warn "Person: $NAME (already exists${ID:+, id=$ID})"
       # Attempt bank accounts in case they were missed on a previous run
         [ -n "$ID" ] && seed_bank_accounts "$ID" "$P" "$ESTATE_ID"
@@ -624,9 +624,10 @@ for i in $(seq 0 $(( TOTAL - 1 ))); do
   S=$(curl -s -o /tmp/sr.json -w "%{http_code}" \
     -X POST "$ENDPOINT" \
     -H "Content-Type: application/json" -b "$COOKIE_JAR" -d "$PAYLOAD")
+ 
   case "$S" in
     200|201) log_ok "Meter: $MTYPE $MNUM (id=$(jq -r '.id' /tmp/sr.json))";;
-    409)     log_warn "Meter: $MTYPE $MNUM (already exists)";;
+    409)     log_warn "Meter: $MTYPE $MNUM (already exists) — body: $(cat /tmp/sr.json)";;  # ← ajoute ça
     *)       log_failure "Meter: $MTYPE/$MNUM" "$S" /tmp/sr.json;;
   esac
 done
@@ -747,12 +748,12 @@ for UNIT_KEY in "${!UNIT_LEASES[@]}"; do
 
       # 1. Try nationalId
       if [ -n "$TNID" ] && [ "$TNID" != "null" ]; then
-        TID="${PERSON_ID_MAP[$TNID]:-}"
+        TID="${PERSON_ID_MAP[$TNID|$ESTATE_NAME]:-}"
       fi
 
       # 2. Fallback: local email map
       if [ -z "$TID" ] && [ -n "$TEMAIL" ]; then
-        TID="${PERSON_EMAIL_MAP[$TEMAIL]:-}"
+        TID="${PERSON_EMAIL_MAP[$TEMAIL|$ESTATE_NAME]:-}"
       fi
 
       # 3. Fallback: live API search by email, with caching
@@ -760,7 +761,7 @@ for UNIT_KEY in "${!UNIT_LEASES[@]}"; do
         ENC_EMAIL=$(python3 -c "import urllib.parse,sys; print(urllib.parse.quote(sys.argv[1]))" "$TEMAIL" 2>/dev/null || echo "$TEMAIL")
         SEARCH=$(get_resource "/api/v1/estates/$ESTATE_ID/persons?search=$ENC_EMAIL&size=10")
         TID=$(echo "$SEARCH" | jq -r --arg em "$TEMAIL" '.content[]? | select((.email // "" | ascii_downcase) == $em) | .id' | head -1)
-        [ -n "$TID" ] && PERSON_EMAIL_MAP["$TEMAIL"]="$TID"
+        [ -n "$TID" ] && PERSON_EMAIL_MAP["$TEMAIL|$ESTATE_NAME"]="$TID"
       fi
 
       if [ -z "$TID" ]; then

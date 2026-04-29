@@ -741,7 +741,7 @@
     "depositAmount": 2360.0,
     "depositType": "BLOCKED_ACCOUNT",
     "tenantInsuranceConfirmed": true,
-    "tenants": [{ "email": "willems.francois@gmail.com", "role": "PRIMARY" }],
+    "tenants": [{ "email": "francois.willems@gmail.com", "role": "PRIMARY" }],
     "estateName": "Estate Mer"
   },
 

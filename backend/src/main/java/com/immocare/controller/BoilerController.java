@@ -1,6 +1,7 @@
 package com.immocare.controller;
 
 import java.util.List;
+import java.util.UUID;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -29,10 +30,24 @@ import lombok.RequiredArgsConstructor;
 
 /**
  * REST controller for UC012 — Manage Boilers.
+ * UC004_ESTATE_PLACEHOLDER Phase 2: all routes are now scoped to an estate.
+ *
+ * Endpoints:
+ * GET /api/v1/estates/{estateId}/housing-units/{unitId}/boilers
+ * POST /api/v1/estates/{estateId}/housing-units/{unitId}/boilers
+ * GET /api/v1/estates/{estateId}/buildings/{buildingId}/boilers
+ * POST /api/v1/estates/{estateId}/buildings/{buildingId}/boilers
+ * GET /api/v1/estates/{estateId}/boilers/alerts
+ * GET /api/v1/estates/{estateId}/boilers/{id}
+ * PUT /api/v1/estates/{estateId}/boilers/{id}
+ * DELETE /api/v1/estates/{estateId}/boilers/{id}
+ *
+ * Kept without estate scope (asset pickers for transaction forms):
+ * GET /api/v1/boilers/search
+ * GET /api/v1/boilers/{boilerId}/transaction-count
  */
 @RestController
 @RequiredArgsConstructor
-@PreAuthorize("isAuthenticated()")
 public class BoilerController {
 
     private static final String HOUSING_UNIT = "HOUSING_UNIT";
@@ -44,18 +59,93 @@ public class BoilerController {
     private final HousingUnitRepository housingUnitRepository;
     private final BuildingRepository buildingRepository;
 
-    @GetMapping("/api/v1/boilers/alerts")
-    public ResponseEntity<List<BoilerDTO>> getServiceAlerts() {
+    // ─── Housing Unit endpoints ───────────────────────────────────────────────
+
+    @GetMapping("/api/v1/estates/{estateId}/housing-units/{unitId}/boilers")
+    @PreAuthorize("@security.isMemberOf(#estateId)")
+    public ResponseEntity<List<BoilerDTO>> getByUnit(
+            @PathVariable UUID estateId,
+            @PathVariable Long unitId) {
+        return ResponseEntity.ok(boilerService.getBoilers(HOUSING_UNIT, unitId));
+    }
+
+    @PostMapping("/api/v1/estates/{estateId}/housing-units/{unitId}/boilers")
+    @PreAuthorize("@security.isManagerOf(#estateId)")
+    public ResponseEntity<BoilerDTO> createForUnit(
+            @PathVariable UUID estateId,
+            @PathVariable Long unitId,
+            @Valid @RequestBody SaveBoilerRequest req) {
+        return ResponseEntity.status(HttpStatus.CREATED)
+                .body(boilerService.create(HOUSING_UNIT, unitId, req));
+    }
+
+    // ─── Building endpoints ───────────────────────────────────────────────────
+
+    @GetMapping("/api/v1/estates/{estateId}/buildings/{buildingId}/boilers")
+    @PreAuthorize("@security.isMemberOf(#estateId)")
+    public ResponseEntity<List<BoilerDTO>> getByBuilding(
+            @PathVariable UUID estateId,
+            @PathVariable Long buildingId) {
+        return ResponseEntity.ok(boilerService.getBoilers(BUILDING, buildingId));
+    }
+
+    @PostMapping("/api/v1/estates/{estateId}/buildings/{buildingId}/boilers")
+    @PreAuthorize("@security.isManagerOf(#estateId)")
+    public ResponseEntity<BoilerDTO> createForBuilding(
+            @PathVariable UUID estateId,
+            @PathVariable Long buildingId,
+            @Valid @RequestBody SaveBoilerRequest req) {
+        return ResponseEntity.status(HttpStatus.CREATED)
+                .body(boilerService.create(BUILDING, buildingId, req));
+    }
+
+    // ─── Owner-agnostic (by boiler id) ───────────────────────────────────────
+
+    @GetMapping("/api/v1/estates/{estateId}/boilers/alerts")
+    @PreAuthorize("@security.isMemberOf(#estateId)")
+    public ResponseEntity<List<BoilerDTO>> getServiceAlerts(
+            @PathVariable UUID estateId) {
         return ResponseEntity.ok(boilerService.getServiceAlerts(null));
     }
+
+    @GetMapping("/api/v1/estates/{estateId}/boilers/{id}")
+    @PreAuthorize("@security.isMemberOf(#estateId)")
+    public ResponseEntity<BoilerDTO> getById(
+            @PathVariable UUID estateId,
+            @PathVariable Long id) {
+        return ResponseEntity.ok(boilerService.getById(id));
+    }
+
+    @PutMapping("/api/v1/estates/{estateId}/boilers/{id}")
+    @PreAuthorize("@security.isManagerOf(#estateId)")
+    public ResponseEntity<BoilerDTO> update(
+            @PathVariable UUID estateId,
+            @PathVariable Long id,
+            @Valid @RequestBody SaveBoilerRequest req) {
+        return ResponseEntity.ok(boilerService.update(id, req));
+    }
+
+    @DeleteMapping("/api/v1/estates/{estateId}/boilers/{id}")
+    @PreAuthorize("@security.isManagerOf(#estateId)")
+    public ResponseEntity<Void> delete(
+            @PathVariable UUID estateId,
+            @PathVariable Long id) {
+        boilerService.delete(id);
+        return ResponseEntity.noContent().build();
+    }
+
+    // ─── Kept without estate scope (asset pickers for transaction forms) ──────
 
     /**
      * GET /api/v1/boilers/search?q=&buildingId=
      * Asset picker endpoint for transaction forms.
      * Searches by brand, model or serial number (case-insensitive, min 2 chars).
      * Optionally filtered by building.
+     * Note: search endpoint kept without estate scope for transaction form pickers,
+     * consistent with MeterController and FireExtinguisherController.
      */
     @GetMapping("/api/v1/boilers/search")
+    @PreAuthorize("isAuthenticated()")
     public ResponseEntity<List<BoilerSearchResultDTO>> search(
             @RequestParam(required = false, defaultValue = "") String q,
             @RequestParam(required = false) Long buildingId) {
@@ -101,48 +191,8 @@ public class BoilerController {
         return ResponseEntity.ok(results);
     }
 
-    @GetMapping("/api/v1/housing-units/{unitId}/boilers")
-    public ResponseEntity<List<BoilerDTO>> getByUnit(@PathVariable Long unitId) {
-        return ResponseEntity.ok(boilerService.getBoilers(HOUSING_UNIT, unitId));
-    }
-
-    @PostMapping("/api/v1/housing-units/{unitId}/boilers")
-    public ResponseEntity<BoilerDTO> createForUnit(@PathVariable Long unitId,
-            @Valid @RequestBody SaveBoilerRequest req) {
-        return ResponseEntity.status(HttpStatus.CREATED)
-                .body(boilerService.create(HOUSING_UNIT, unitId, req));
-    }
-
-    @GetMapping("/api/v1/buildings/{buildingId}/boilers")
-    public ResponseEntity<List<BoilerDTO>> getByBuilding(@PathVariable Long buildingId) {
-        return ResponseEntity.ok(boilerService.getBoilers(BUILDING, buildingId));
-    }
-
-    @PostMapping("/api/v1/buildings/{buildingId}/boilers")
-    public ResponseEntity<BoilerDTO> createForBuilding(@PathVariable Long buildingId,
-            @Valid @RequestBody SaveBoilerRequest req) {
-        return ResponseEntity.status(HttpStatus.CREATED)
-                .body(boilerService.create(BUILDING, buildingId, req));
-    }
-
-    @GetMapping("/api/v1/boilers/{id}")
-    public ResponseEntity<BoilerDTO> getById(@PathVariable Long id) {
-        return ResponseEntity.ok(boilerService.getById(id));
-    }
-
-    @PutMapping("/api/v1/boilers/{id}")
-    public ResponseEntity<BoilerDTO> update(@PathVariable Long id,
-            @Valid @RequestBody SaveBoilerRequest req) {
-        return ResponseEntity.ok(boilerService.update(id, req));
-    }
-
-    @DeleteMapping("/api/v1/boilers/{id}")
-    public ResponseEntity<Void> delete(@PathVariable Long id) {
-        boilerService.delete(id);
-        return ResponseEntity.noContent().build();
-    }
-
     @GetMapping("/api/v1/boilers/{boilerId}/transaction-count")
+    @PreAuthorize("isAuthenticated()")
     public long getTransactionCount(@PathVariable Long boilerId) {
         return transactionAssetLinkRepository.countByAssetTypeAndAssetId(AssetType.BOILER, boilerId);
     }

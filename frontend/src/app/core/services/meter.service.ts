@@ -7,19 +7,35 @@ import {
   RemoveMeterRequest,
   ReplaceMeterRequest,
 } from "../../models/meter.model";
+import { ActiveEstateService } from "./active-estate.service";
 
 /**
  * HTTP service for UC009 - Manage Meters.
+ * UC004_ESTATE_PLACEHOLDER Phase 2: all endpoints scoped to the active estate.
  *
  * Mirrors two symmetric sets of endpoints:
- *   /api/v1/housing-units/{unitId}/meters
- *   /api/v1/buildings/{buildingId}/meters
+ *   /api/v1/estates/{estateId}/housing-units/{unitId}/meters
+ *   /api/v1/estates/{estateId}/buildings/{buildingId}/meters
  */
 @Injectable({ providedIn: "root" })
 export class MeterService {
-  private readonly api = "/api/v1";
+  constructor(
+    private readonly http: HttpClient,
+    private readonly activeEstateService: ActiveEstateService,
+  ) {}
 
-  constructor(private readonly http: HttpClient) {}
+  private get estateId(): string {
+    const id = this.activeEstateService.activeEstateId();
+    if (!id)
+      throw new Error(
+        "No active estate — cannot call MeterService without an estate context.",
+      );
+    return id;
+  }
+
+  private get api(): string {
+    return `/api/v1/estates/${this.estateId}`;
+  }
 
   // ─── Housing Unit endpoints ───────────────────────────────────────────────
 

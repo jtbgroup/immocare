@@ -1,5 +1,4 @@
 <div class="building-details-container">
-
   <!-- Loading -->
   @if (loading) {
     <div class="loading">Loading…</div>
@@ -9,15 +8,23 @@
   @if (errorMessage && !loading) {
     <div class="error-container">
       <p class="error">{{ errorMessage }}</p>
-      <button class="btn btn-primary" (click)="back()">Back to Buildings</button>
+      <button class="btn btn-primary" (click)="back()">
+        Back to Buildings
+      </button>
     </div>
   }
 
   @if (building && !loading) {
-
     <!-- Breadcrumb -->
     <nav class="breadcrumb" aria-label="breadcrumb">
-      <a [routerLink]="['/estates', activeEstateService.activeEstateId(), 'buildings']">Buildings</a>
+      <a
+        [routerLink]="[
+          '/estates',
+          activeEstateService.activeEstateId(),
+          'buildings',
+        ]"
+        >Buildings</a
+      >
       <span class="breadcrumb-separator">›</span>
       <span>{{ building.name }}</span>
     </nav>
@@ -33,7 +40,7 @@
             [disabled]="deleting"
             (click)="confirmDelete()"
           >
-            {{ deleting ? 'Deleting…' : 'Delete' }}
+            {{ deleting ? "Deleting…" : "Delete" }}
           </button>
         }
       </div>
@@ -66,7 +73,7 @@
         </div>
         <div class="info-item">
           <label>Owner</label>
-          <p>{{ building.ownerName ?? '—' }}</p>
+          <p>{{ building.ownerName ?? "—" }}</p>
         </div>
         <div class="info-item">
           <label>Units</label>
@@ -80,7 +87,9 @@
       <div class="section-header">
         <h2 class="section-heading">🏠 Housing Units</h2>
         @if (activeEstateService.canEdit()) {
-          <button class="btn btn-primary btn-sm" (click)="addUnit()">+ Add Unit</button>
+          <button class="btn btn-primary btn-sm" (click)="addUnit()">
+            + Add Unit
+          </button>
         }
       </div>
 
@@ -104,16 +113,30 @@
                 <tr class="clickable" (click)="navigateToUnit(unit)">
                   <td>{{ unit.unitNumber }}</td>
                   <td>{{ unit.floor }}</td>
-                  <td>{{ unit.totalSurface ?? '—' }}</td>
-                  <td>{{ unit.roomCount ?? '—' }}</td>
-                  <td>{{ unit.currentMonthlyRent != null ? (unit.currentMonthlyRent | number:'1.0-0') + ' €' : '—' }}</td>
+                  <td>{{ unit.totalSurface ?? "—" }}</td>
+                  <td>{{ unit.roomCount ?? "—" }}</td>
                   <td>
-                    @if (unit.activeLeaseStatus === 'ACTIVE') {
-                      <span class="lease-status-badge lease-status-badge--active">Active</span>
-                    } @else if (unit.activeLeaseStatus === 'DRAFT') {
-                      <span class="lease-status-badge lease-status-badge--draft">Draft</span>
+                    {{
+                      unit.currentMonthlyRent != null
+                        ? (unit.currentMonthlyRent | number: "1.0-0") + " €"
+                        : "—"
+                    }}
+                  </td>
+                  <td>
+                    @if (unit.activeLeaseStatus === "ACTIVE") {
+                      <span
+                        class="lease-status-badge lease-status-badge--active"
+                        >Active</span
+                      >
+                    } @else if (unit.activeLeaseStatus === "DRAFT") {
+                      <span class="lease-status-badge lease-status-badge--draft"
+                        >Draft</span
+                      >
                     } @else {
-                      <span class="lease-status-badge lease-status-badge--finished">Vacant</span>
+                      <span
+                        class="lease-status-badge lease-status-badge--finished"
+                        >Vacant</span
+                      >
                     }
                   </td>
                 </tr>
@@ -123,6 +146,14 @@
         </div>
       }
     </div>
-
+    <div class="info-card">
+      <app-meter-section ownerType="BUILDING" [ownerId]="building.id" />
+    </div>
+    <div class="info-card">
+      <app-fire-extinguisher-section
+        [buildingId]="building.id"
+        [buildingUnits]="units"
+      />
+    </div>
   }
 </div>

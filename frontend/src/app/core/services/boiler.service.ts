@@ -1,4 +1,5 @@
-// core/services/boiler.service.ts — UC012
+// core/services/boiler.service.ts — UC004_ESTATE_PLACEHOLDER Phase 2
+// All endpoints scoped to the active estate.
 import { HttpClient } from "@angular/common/http";
 import { Injectable } from "@angular/core";
 import { Observable } from "rxjs";
@@ -8,16 +9,33 @@ import {
   BoilerServiceRecordDTO,
   SaveBoilerRequest,
 } from "../../models/boiler.model";
+import { ActiveEstateService } from "./active-estate.service";
 
 @Injectable({ providedIn: "root" })
 export class BoilerService {
-  constructor(private http: HttpClient) {}
+  constructor(
+    private http: HttpClient,
+    private activeEstateService: ActiveEstateService,
+  ) {}
+
+  private get estateId(): string {
+    const id = this.activeEstateService.activeEstateId();
+    if (!id)
+      throw new Error(
+        "No active estate — cannot call BoilerService without an estate context.",
+      );
+    return id;
+  }
+
+  private get api(): string {
+    return `/api/v1/estates/${this.estateId}`;
+  }
 
   // ─── Housing Unit ─────────────────────────────────────────────────────────
 
   getUnitBoilers(unitId: number): Observable<BoilerDTO[]> {
     return this.http.get<BoilerDTO[]>(
-      `/api/v1/housing-units/${unitId}/boilers`,
+      `${this.api}/housing-units/${unitId}/boilers`,
     );
   }
 
@@ -26,7 +44,7 @@ export class BoilerService {
     req: SaveBoilerRequest,
   ): Observable<BoilerDTO> {
     return this.http.post<BoilerDTO>(
-      `/api/v1/housing-units/${unitId}/boilers`,
+      `${this.api}/housing-units/${unitId}/boilers`,
       req,
     );
   }
@@ -35,7 +53,7 @@ export class BoilerService {
 
   getBuildingBoilers(buildingId: number): Observable<BoilerDTO[]> {
     return this.http.get<BoilerDTO[]>(
-      `/api/v1/buildings/${buildingId}/boilers`,
+      `${this.api}/buildings/${buildingId}/boilers`,
     );
   }
 
@@ -44,7 +62,7 @@ export class BoilerService {
     req: SaveBoilerRequest,
   ): Observable<BoilerDTO> {
     return this.http.post<BoilerDTO>(
-      `/api/v1/buildings/${buildingId}/boilers`,
+      `${this.api}/buildings/${buildingId}/boilers`,
       req,
     );
   }
@@ -52,15 +70,15 @@ export class BoilerService {
   // ─── Owner-agnostic (by boiler id) ───────────────────────────────────────
 
   getById(id: number): Observable<BoilerDTO> {
-    return this.http.get<BoilerDTO>(`/api/v1/boilers/${id}`);
+    return this.http.get<BoilerDTO>(`${this.api}/boilers/${id}`);
   }
 
   update(id: number, req: SaveBoilerRequest): Observable<BoilerDTO> {
-    return this.http.put<BoilerDTO>(`/api/v1/boilers/${id}`, req);
+    return this.http.put<BoilerDTO>(`${this.api}/boilers/${id}`, req);
   }
 
   delete(id: number): Observable<void> {
-    return this.http.delete<void>(`/api/v1/boilers/${id}`);
+    return this.http.delete<void>(`${this.api}/boilers/${id}`);
   }
 
   /**
@@ -68,7 +86,7 @@ export class BoilerService {
    * The global alerts page uses AlertService.getAlerts() instead.
    */
   getServiceAlerts(): Observable<BoilerDTO[]> {
-    return this.http.get<BoilerDTO[]>("/api/v1/boilers/alerts");
+    return this.http.get<BoilerDTO[]>(`${this.api}/boilers/alerts`);
   }
 
   getServiceHistory(boilerId: number): Observable<BoilerServiceRecordDTO[]> {

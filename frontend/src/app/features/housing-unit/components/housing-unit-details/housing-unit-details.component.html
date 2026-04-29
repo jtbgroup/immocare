@@ -1,5 +1,4 @@
 <div class="unit-details-container">
-
   @if (loading) {
     <div class="loading">Loading…</div>
   }
@@ -12,12 +11,25 @@
   }
 
   @if (unit && !loading) {
-
     <!-- Breadcrumb -->
     <nav class="breadcrumb" aria-label="breadcrumb">
-      <a [routerLink]="['/estates', activeEstateService.activeEstateId(), 'buildings']">Buildings</a>
+      <a
+        [routerLink]="[
+          '/estates',
+          activeEstateService.activeEstateId(),
+          'buildings',
+        ]"
+        >Buildings</a
+      >
       <span class="breadcrumb-separator">›</span>
-      <a [routerLink]="['/estates', activeEstateService.activeEstateId(), 'buildings', unit.buildingId]">
+      <a
+        [routerLink]="[
+          '/estates',
+          activeEstateService.activeEstateId(),
+          'buildings',
+          unit.buildingId,
+        ]"
+      >
         {{ unit.buildingName }}
       </a>
       <span class="breadcrumb-separator">›</span>
@@ -30,8 +42,12 @@
       <div class="actions">
         @if (activeEstateService.canEdit()) {
           <button class="btn btn-secondary" (click)="edit()">Edit</button>
-          <button class="btn btn-danger" [disabled]="deleting" (click)="confirmDelete()">
-            {{ deleting ? 'Deleting…' : 'Delete' }}
+          <button
+            class="btn btn-danger"
+            [disabled]="deleting"
+            (click)="confirmDelete()"
+          >
+            {{ deleting ? "Deleting…" : "Delete" }}
           </button>
         }
       </div>
@@ -52,7 +68,14 @@
         <div class="info-item">
           <label>Building</label>
           <p>
-            <a [routerLink]="['/estates', activeEstateService.activeEstateId(), 'buildings', unit.buildingId]">
+            <a
+              [routerLink]="[
+                '/estates',
+                activeEstateService.activeEstateId(),
+                'buildings',
+                unit.buildingId,
+              ]"
+            >
               {{ unit.buildingName }}
             </a>
           </p>
@@ -69,28 +92,36 @@
         }
         <div class="info-item">
           <label>Total Surface</label>
-          <p>{{ unit.totalSurface != null ? unit.totalSurface + ' m²' : '—' }}</p>
+          <p>
+            {{ unit.totalSurface != null ? unit.totalSurface + " m²" : "—" }}
+          </p>
         </div>
         <div class="info-item">
           <label>Owner</label>
-          <p>{{ unit.effectiveOwnerName ?? unit.ownerName ?? '—' }}</p>
+          <p>{{ unit.effectiveOwnerName ?? unit.ownerName ?? "—" }}</p>
         </div>
         <div class="info-item">
           <label>Lease Status</label>
           <p>
-            @if (unit.activeLeaseStatus === 'ACTIVE') {
-              <span class="lease-status-badge lease-status-badge--active">Active</span>
-            } @else if (unit.activeLeaseStatus === 'DRAFT') {
-              <span class="lease-status-badge lease-status-badge--draft">Draft</span>
+            @if (unit.activeLeaseStatus === "ACTIVE") {
+              <span class="lease-status-badge lease-status-badge--active"
+                >Active</span
+              >
+            } @else if (unit.activeLeaseStatus === "DRAFT") {
+              <span class="lease-status-badge lease-status-badge--draft"
+                >Draft</span
+              >
             } @else {
-              <span class="lease-status-badge lease-status-badge--finished">Vacant</span>
+              <span class="lease-status-badge lease-status-badge--finished"
+                >Vacant</span
+              >
             }
           </p>
         </div>
         @if (unit.currentMonthlyRent != null) {
           <div class="info-item">
             <label>Current Rent</label>
-            <p>{{ unit.currentMonthlyRent | number:'1.0-0' }} €/month</p>
+            <p>{{ unit.currentMonthlyRent | number: "1.0-0" }} €/month</p>
           </div>
         }
         @if (unit.currentPebScore) {
@@ -104,18 +135,39 @@
       <!-- Terrace -->
       @if (unit.hasTerrace) {
         <div class="card-footer">
-          🏡 Terrace{{ unit.terraceSurface ? ' — ' + unit.terraceSurface + ' m²' : '' }}
-          {{ unit.terraceOrientation ? '(' + unit.terraceOrientation + ')' : '' }}
+          🏡 Terrace{{
+            unit.terraceSurface ? " — " + unit.terraceSurface + " m²" : ""
+          }}
+          {{
+            unit.terraceOrientation ? "(" + unit.terraceOrientation + ")" : ""
+          }}
         </div>
       }
       <!-- Garden -->
       @if (unit.hasGarden) {
         <div class="card-footer">
-          🌿 Garden{{ unit.gardenSurface ? ' — ' + unit.gardenSurface + ' m²' : '' }}
-          {{ unit.gardenOrientation ? '(' + unit.gardenOrientation + ')' : '' }}
+          🌿 Garden{{
+            unit.gardenSurface ? " — " + unit.gardenSurface + " m²" : ""
+          }}
+          {{ unit.gardenOrientation ? "(" + unit.gardenOrientation + ")" : "" }}
         </div>
       }
     </div>
 
+    <div class="info-card">
+      <app-room-section [unitId]="unit.id" />
+    </div>
+    <div class="info-card">
+      <app-peb-section [unitId]="unit.id" />
+    </div>
+    <div class="info-card">
+      <app-rent-section [unitId]="unit.id" />
+    </div>
+    <div class="info-card">
+      <app-boiler-section ownerType="HOUSING_UNIT" [ownerId]="unit.id" />
+    </div>
+    <div class="info-card">
+      <app-meter-section ownerType="HOUSING_UNIT" [ownerId]="unit.id" />
+    </div>
   }
 </div>
