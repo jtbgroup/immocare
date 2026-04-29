@@ -548,18 +548,43 @@ for i in $(seq 0 $(( TOTAL - 1 ))); do
   BNAME=$(echo "$B" | jq -r '.buildingName')
   UNIT_NUM=$(echo "$B" | jq -r '.unitNumber')
   BRAND=$(echo "$B" | jq -r '.brand // "?"')
-  KEY="$BNAME|$UNIT_NUM"
-  UNIT_ID="${UNIT_ID_MAP[$KEY]:-}"
-  if [ -z "$UNIT_ID" ]; then log_error "Boiler $BRAND: unit '$KEY' not resolved — skipped"; continue; fi
+  OWNER_TYPE=$(echo "$B" | jq -r '.ownerType // "HOUSING_UNIT"')
+  ESTATE_NAME=$(echo "$B" | jq -r '.estateName // empty')
 
-  PAYLOAD=$(echo "$B" | jq 'del(.buildingName) | del(.unitNumber) | del(.ownerType) | del(.services)')
+  ESTATE_ID="${ESTATE_ID_MAP[$ESTATE_NAME]}"
+  if [ -z "$ESTATE_ID" ]; then
+    log_error "Boiler $BRAND: estate '$ESTATE_NAME' not found — skipped"
+    continue
+  fi
+
+  PAYLOAD=$(echo "$B" | jq 'del(.buildingName) | del(.unitNumber) | del(.ownerType) | del(.services) | del(.estateName)')
+
+  if [ "$OWNER_TYPE" = "BUILDING" ]; then
+    BID="${BUILDING_ID_MAP[$BNAME]:-}"
+    if [ -z "$BID" ]; then
+      log_error "Boiler $BRAND: building '$BNAME' not resolved — skipped"
+      continue
+    fi
+    ENDPOINT="$BASE_URL/api/v1/estates/$ESTATE_ID/buildings/$BID/boilers"
+    LABEL="$BRAND @ $BNAME (building)"
+  else
+    KEY="$BNAME|$UNIT_NUM"
+    UNIT_ID="${UNIT_ID_MAP[$KEY]:-}"
+    if [ -z "$UNIT_ID" ]; then
+      log_error "Boiler $BRAND: unit '$KEY' not resolved — skipped"
+      continue
+    fi
+    ENDPOINT="$BASE_URL/api/v1/estates/$ESTATE_ID/housing-units/$UNIT_ID/boilers"
+    LABEL="$BRAND @ $BNAME/$UNIT_NUM"
+  fi
+
   S=$(curl -s -o /tmp/sr.json -w "%{http_code}" \
-    -X POST "$BASE_URL/api/v1/housing-units/$UNIT_ID/boilers" \
+    -X POST "$ENDPOINT" \
     -H "Content-Type: application/json" -b "$COOKIE_JAR" -d "$PAYLOAD")
   case "$S" in
     200|201)
       BOILER_ID=$(jq -r '.id' /tmp/sr.json)
-      log_ok "Boiler: $BRAND @ $BNAME/$UNIT_NUM (id=$BOILER_ID)"
+      log_ok "Boiler: $LABEL (id=$BOILER_ID)"
 
       SERVICES=$(echo "$B" | jq '.services // []')
       SVC_COUNT=$(echo "$SERVICES" | jq length)
@@ -576,8 +601,8 @@ for i in $(seq 0 $(( TOTAL - 1 ))); do
         fi
       done
       ;;
-    409) log_warn "Boiler: $BRAND @ $BNAME/$UNIT_NUM (already exists)";;
-    *)   log_failure "Boiler: $BRAND @ $BNAME/$UNIT_NUM" "$S" /tmp/sr.json;;
+    409) log_warn "Boiler: $LABEL (already exists)";;
+    *)   log_failure "Boiler: $LABEL" "$S" /tmp/sr.json;;
   esac
 done
 

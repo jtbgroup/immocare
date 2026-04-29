@@ -6,19 +6,36 @@ import {
   PebImprovementDTO,
   PebScoreDTO,
 } from "../../models/peb-score.model";
+import { ActiveEstateService } from "./active-estate.service";
 
 @Injectable({ providedIn: "root" })
 export class PebScoreService {
-  private base = "/api/v1/housing-units";
+  // private base = "/api/v1/housing-units";
 
-  constructor(private http: HttpClient) {}
+  constructor(
+    private http: HttpClient,
+    private readonly activeEstateService: ActiveEstateService,
+  ) {}
+
+  private get estateId(): string {
+    const id = this.activeEstateService.activeEstateId();
+    if (!id)
+      throw new Error(
+        "No active estate — cannot call MeterService without an estate context.",
+      );
+    return id;
+  }
+
+  private get api(): string {
+    return `/api/v1/estates/${this.estateId}`;
+  }
 
   addScore(
     unitId: number,
     request: CreatePebScoreRequest,
   ): Observable<PebScoreDTO> {
     return this.http.post<PebScoreDTO>(
-      `${this.base}/${unitId}/peb-scores`,
+      `${this.api}/${unitId}/peb-scores`,
       request,
     );
   }
@@ -29,30 +46,30 @@ export class PebScoreService {
     request: CreatePebScoreRequest,
   ): Observable<PebScoreDTO> {
     return this.http.put<PebScoreDTO>(
-      `${this.base}/${unitId}/peb-scores/${scoreId}`,
+      `${this.api}/${unitId}/peb-scores/${scoreId}`,
       request,
     );
   }
 
   deleteScore(unitId: number, scoreId: number): Observable<void> {
     return this.http.delete<void>(
-      `${this.base}/${unitId}/peb-scores/${scoreId}`,
+      `${this.api}/${unitId}/peb-scores/${scoreId}`,
     );
   }
 
   getHistory(unitId: number): Observable<PebScoreDTO[]> {
-    return this.http.get<PebScoreDTO[]>(`${this.base}/${unitId}/peb-scores`);
+    return this.http.get<PebScoreDTO[]>(`${this.api}/${unitId}/peb-scores`);
   }
 
   getCurrentScore(unitId: number): Observable<PebScoreDTO> {
     return this.http.get<PebScoreDTO>(
-      `${this.base}/${unitId}/peb-scores/current`,
+      `${this.api}/${unitId}/peb-scores/current`,
     );
   }
 
   getImprovements(unitId: number): Observable<PebImprovementDTO> {
     return this.http.get<PebImprovementDTO>(
-      `${this.base}/${unitId}/peb-scores/improvements`,
+      `${this.api}/${unitId}/peb-scores/improvements`,
     );
   }
 }

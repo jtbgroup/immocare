@@ -41,7 +41,7 @@ qu'en penses tu?
 
 - [] Le financial dashboard ne fonctionne pas
 - [] Si je veux faire des modifications plus tard, je dois avoir une possiblilité de le faire simplement. Par exemple avec des checkboxes dans la liste et changer le statut des sélectionnées. idem pour un delete.
-
+- [] Script seeds: ajouter les rooms et les scores PEB
 
 ## To maturate
 

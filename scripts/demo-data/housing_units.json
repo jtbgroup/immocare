@@ -110,7 +110,8 @@
     "terraceOrientation": "SE",
     "hasGarden": false,
     "ownerPersonNationalId": "75031512345",
-    "estateName": "Estate Mer"
+    "estateName": "Estate Mer",
+    "_peb": "G"
   },
   {
     "buildingName": "Immeuble Village dans les nuages",
@@ -121,7 +122,8 @@
     "hasTerrace": false,
     "hasGarden": false,
     "ownerPersonNationalId": "75031512345",
-    "estateName": "Estate Mer"
+    "estateName": "Estate Mer",
+    "_peb": "F"
   },
   {
     "buildingName": "Résidence du Littoral",
@@ -136,7 +138,8 @@
     "gardenSurface": 25.0,
     "gardenOrientation": "W",
     "ownerPersonNationalId": "75031512345",
-    "estateName": "Estate Mer"
+    "estateName": "Estate Mer",
+    "_peb": "D"
   },
   {
     "buildingName": "Résidence du Littoral",
@@ -149,7 +152,8 @@
     "terraceOrientation": "E",
     "hasGarden": false,
     "ownerPersonNationalId": "75031512345",
-    "estateName": "Estate Mer"
+    "estateName": "Estate Mer",
+    "_peb": "B"
   },
   {
     "buildingName": "Résidence du Littoral",
@@ -160,7 +164,8 @@
     "hasTerrace": false,
     "hasGarden": false,
     "ownerPersonNationalId": "75031512345",
-    "estateName": "Estate Mer"
+    "estateName": "Estate Mer",
+    "_peb": "A"
   },
   {
     "buildingName": "Résidence du Littoral",
@@ -173,7 +178,8 @@
     "terraceOrientation": "N",
     "hasGarden": false,
     "ownerPersonNationalId": "75031512345",
-    "estateName": "Estate Mer"
+    "estateName": "Estate Mer",
+    "_peb": "C"
   },
   {
     "buildingName": "Chalet des Ardennes",
@@ -186,7 +192,8 @@
     "gardenSurface": 35.0,
     "gardenOrientation": "E",
     "ownerPersonNationalId": "75031512345",
-    "estateName": "Estate Montagne"
+    "estateName": "Estate Montagne",
+    "_peb": "F"
   },
   {
     "buildingName": "Chalet des Ardennes",
@@ -199,7 +206,8 @@
     "terraceOrientation": "N",
     "hasGarden": false,
     "ownerPersonNationalId": "75031512345",
-    "estateName": "Estate Montagne"
+    "estateName": "Estate Montagne",
+    "_peb": "A"
   },
   {
     "buildingName": "Maison du Sommet",
@@ -214,7 +222,7 @@
     "gardenSurface": 40.0,
     "gardenOrientation": "SE",
     "ownerPersonNationalId": "75031512345",
-    "estateName": "Estate Montagne"
+    "estateName": "Estate Montagne",
+    "_peb": "E"
   }
 ]
-
