@@ -41,6 +41,8 @@ qu'en penses tu?
 - [] générer la doc des api type swagger
 - [] revoir la structure des components dans le front pour rendre ça plus cohérent
 - [] revoir les settings depuis que les estates ont entrés en jeu
+- [] revoir les actions en fonction des release number
+- [] revoir comment afficher la version
  
 ## To maturate
 
