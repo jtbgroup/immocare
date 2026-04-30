@@ -32,13 +32,9 @@ Les Transaction Categories doivent venir dans les settings (menu supplémentaire
 qu'en penses tu?
 - [x] quand j'importe des transactions, je veux pouvoir revoir avant l'import. Je veux pouvoir ne sélectionner que certains imports éventuellement, je veux pouvoir valider directement, je veux directement faire le lien avec un unit ou building ou people. je veux voir les doublons potentiels et les écarter. Il faut aussi que sur base soit d'apprentissage, soit de donnéesconnues (ex bank account des personnes), le lien soit directement fait (ex: vers un lease et donc le unit et le building, un compteur d'eau)
 - [] Vérifie la documentation des UC de transaction par rapport au code
-
 - [] une fois importées, j'ai le bouton Réviser les transactions importées, mais cela ne mène à rien. je n'ai pas non plus d'avertissement sur les doublons potentiel avec une décision à prendre.
-
 - [] revois les formats des montants en pattern europe et pas US.
-
 - [] dans les app components "Financial" des loyers , je voudrais aussi le montant "expected" entre le début du contrat et maintenant et ce qui a été réellement payé. Dans les units ou buildings, les dépenses et recettes doivent couvrir tout ce qui est lié à chaque appartement. attention qu'il y a parfois des factures groupées. COmment gérer ça?
-
 - [] Le financial dashboard ne fonctionne pas
 - [] Si je veux faire des modifications plus tard, je dois avoir une possiblilité de le faire simplement. Par exemple avec des checkboxes dans la liste et changer le statut des sélectionnées. idem pour un delete.
 - [] Script seeds: ajouter les rooms et les scores PEB

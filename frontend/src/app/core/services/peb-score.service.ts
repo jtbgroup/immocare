@@ -25,9 +25,8 @@ export class PebScoreService {
       );
     return id;
   }
-
   private get api(): string {
-    return `/api/v1/estates/${this.estateId}`;
+    return `/api/v1/estates/${this.estateId}/housing-units`;
   }
 
   addScore(

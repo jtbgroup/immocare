@@ -1,0 +1,295 @@
+[
+  {
+    "buildingName": "Immeuble Village dans les nuages",
+    "unitNumber": "01",
+    "estateName": "Estate Mer",
+    "scores": [
+      {
+        "pebScore": "G",
+        "scoreDate": "2018-09-01",
+        "certificateNumber": "PEB-2018-VDN-01",
+        "validUntil": "2028-09-01"
+      }
+    ]
+  },
+  {
+    "buildingName": "Immeuble Village dans les nuages",
+    "unitNumber": "02",
+    "estateName": "Estate Mer",
+    "scores": [
+      {
+        "pebScore": "F",
+        "scoreDate": "2019-04-01",
+        "certificateNumber": "PEB-2019-VDN-02",
+        "validUntil": "2029-04-01"
+      }
+    ]
+  },
+  {
+    "buildingName": "Résidence du Littoral",
+    "unitNumber": "01",
+    "estateName": "Estate Mer",
+    "scores": [
+      {
+        "pebScore": "F",
+        "scoreDate": "2017-07-01",
+        "certificateNumber": "PEB-2017-LIT-01",
+        "validUntil": "2027-07-01"
+      },
+      {
+        "pebScore": "D",
+        "scoreDate": "2021-06-15",
+        "certificateNumber": "PEB-2021-LIT-01",
+        "validUntil": "2031-06-15"
+      }
+    ]
+  },
+  {
+    "buildingName": "Résidence du Littoral",
+    "unitNumber": "02",
+    "estateName": "Estate Mer",
+    "scores": [
+      {
+        "pebScore": "D",
+        "scoreDate": "2018-12-01",
+        "certificateNumber": "PEB-2018-LIT-02",
+        "validUntil": "2028-12-01"
+      },
+      {
+        "pebScore": "B",
+        "scoreDate": "2022-03-10",
+        "certificateNumber": "PEB-2022-LIT-02",
+        "validUntil": "2032-03-10"
+      }
+    ]
+  },
+  {
+    "buildingName": "Résidence du Littoral",
+    "unitNumber": "03",
+    "estateName": "Estate Mer",
+    "scores": [
+      {
+        "pebScore": "C",
+        "scoreDate": "2019-08-01",
+        "certificateNumber": "PEB-2019-LIT-03",
+        "validUntil": "2029-08-01"
+      },
+      {
+        "pebScore": "A",
+        "scoreDate": "2023-05-20",
+        "certificateNumber": "PEB-2023-LIT-03",
+        "validUntil": "2033-05-20"
+      }
+    ]
+  },
+  {
+    "buildingName": "Résidence du Littoral",
+    "unitNumber": "04",
+    "estateName": "Estate Mer",
+    "scores": [
+      {
+        "pebScore": "C",
+        "scoreDate": "2018-03-01",
+        "certificateNumber": "PEB-2018-LIT-04",
+        "validUntil": "2028-03-01"
+      }
+    ]
+  },
+  {
+    "buildingName": "Chalet des Ardennes",
+    "unitNumber": "01",
+    "estateName": "Estate Montagne",
+    "scores": [
+      {
+        "pebScore": "G",
+        "scoreDate": "2018-06-01",
+        "certificateNumber": "PEB-2018-ARD-01",
+        "validUntil": "2028-06-01"
+      },
+      {
+        "pebScore": "F",
+        "scoreDate": "2022-04-10",
+        "certificateNumber": "PEB-2022-ARD-01",
+        "validUntil": "2032-04-10"
+      }
+    ]
+  },
+  {
+    "buildingName": "Chalet des Ardennes",
+    "unitNumber": "02",
+    "estateName": "Estate Montagne",
+    "scores": [
+      {
+        "pebScore": "B",
+        "scoreDate": "2020-01-15",
+        "certificateNumber": "PEB-2020-ARD-02",
+        "validUntil": "2030-01-15"
+      },
+      {
+        "pebScore": "A",
+        "scoreDate": "2023-11-01",
+        "certificateNumber": "PEB-2023-ARD-02",
+        "validUntil": "2033-11-01"
+      }
+    ]
+  },
+  {
+    "buildingName": "Maison du Sommet",
+    "unitNumber": "01",
+    "estateName": "Estate Montagne",
+    "scores": [
+      {
+        "pebScore": "F",
+        "scoreDate": "2017-05-01",
+        "certificateNumber": "PEB-2017-SOM-01",
+        "validUntil": "2027-05-01"
+      },
+      {
+        "pebScore": "E",
+        "scoreDate": "2021-09-15",
+        "certificateNumber": "PEB-2021-SOM-01",
+        "validUntil": "2031-09-15"
+      }
+    ]
+  },
+  {
+    "buildingName": "Résidence Les Acacias",
+    "unitNumber": "01",
+    "estateName": "Estate Ville",
+    "scores": [
+      {
+        "pebScore": "E",
+        "scoreDate": "2019-07-01",
+        "certificateNumber": "PEB-2019-ACA-01",
+        "validUntil": "2029-07-01"
+      }
+    ]
+  },
+  {
+    "buildingName": "Résidence Les Acacias",
+    "unitNumber": "02",
+    "estateName": "Estate Ville",
+    "scores": [
+      {
+        "pebScore": "F",
+        "scoreDate": "2020-10-01",
+        "certificateNumber": "PEB-2020-ACA-02",
+        "validUntil": "2030-10-01"
+      },
+      {
+        "pebScore": "D",
+        "scoreDate": "2023-02-15",
+        "certificateNumber": "PEB-2023-ACA-02",
+        "validUntil": "2033-02-15"
+      }
+    ]
+  },
+  {
+    "buildingName": "Résidence Les Acacias",
+    "unitNumber": "03",
+    "estateName": "Estate Ville",
+    "scores": [
+      {
+        "pebScore": "G",
+        "scoreDate": "2021-04-01",
+        "certificateNumber": "PEB-2021-ACA-03",
+        "validUntil": "2031-04-01"
+      }
+    ]
+  },
+  {
+    "buildingName": "Immeuble Midi",
+    "unitNumber": "01",
+    "estateName": "Estate Ville",
+    "scores": [
+      {
+        "pebScore": "D",
+        "scoreDate": "2018-12-01",
+        "certificateNumber": "PEB-2018-MID-01",
+        "validUntil": "2028-12-01"
+      },
+      {
+        "pebScore": "C",
+        "scoreDate": "2022-10-10",
+        "certificateNumber": "PEB-2022-MID-01",
+        "validUntil": "2032-10-10"
+      }
+    ]
+  },
+  {
+    "buildingName": "Immeuble Midi",
+    "unitNumber": "02",
+    "estateName": "Estate Ville",
+    "scores": [
+      {
+        "pebScore": "B",
+        "scoreDate": "2022-08-01",
+        "certificateNumber": "PEB-2022-MID-02",
+        "validUntil": "2032-08-01"
+      }
+    ]
+  },
+  {
+    "buildingName": "Immeuble Grande Tourismo",
+    "unitNumber": "01",
+    "estateName": "Estate Ville",
+    "scores": [
+      {
+        "pebScore": "E",
+        "scoreDate": "2020-05-01",
+        "certificateNumber": "PEB-2020-GTO-01",
+        "validUntil": "2030-05-01"
+      },
+      {
+        "pebScore": "C",
+        "scoreDate": "2023-06-20",
+        "certificateNumber": "PEB-2023-GTO-01",
+        "validUntil": "2033-06-20"
+      }
+    ]
+  },
+  {
+    "buildingName": "Immeuble Grande Tourismo",
+    "unitNumber": "02",
+    "estateName": "Estate Ville",
+    "scores": [
+      {
+        "pebScore": "F",
+        "scoreDate": "2019-06-01",
+        "certificateNumber": "PEB-2019-GTO-02",
+        "validUntil": "2029-06-01"
+      },
+      {
+        "pebScore": "E",
+        "scoreDate": "2022-07-15",
+        "certificateNumber": "PEB-2022-GTO-02",
+        "validUntil": "2032-07-15"
+      }
+    ]
+  },
+  {
+    "buildingName": "Immeuble Grande Tourismo",
+    "unitNumber": "03",
+    "estateName": "Estate Ville",
+    "scores": [
+      {
+        "pebScore": "G",
+        "scoreDate": "2018-02-01",
+        "certificateNumber": "PEB-2018-GTO-03",
+        "validUntil": "2028-02-01"
+      },
+      {
+        "pebScore": "E",
+        "scoreDate": "2021-03-10",
+        "certificateNumber": "PEB-2021-GTO-03",
+        "validUntil": "2031-03-10"
+      },
+      {
+        "pebScore": "C",
+        "scoreDate": "2024-03-05",
+        "certificateNumber": "PEB-2024-GTO-03",
+        "validUntil": "2034-03-05"
+      }
+    ]
+  }
+]

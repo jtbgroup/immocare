@@ -1,16 +1,12 @@
 package com.immocare.controller;
 
-import com.immocare.model.dto.BatchCreateRoomsRequest;
-import com.immocare.model.dto.CreateRoomRequest;
-import com.immocare.model.dto.RoomDTO;
-import com.immocare.model.dto.RoomListResponse;
-import com.immocare.model.dto.UpdateRoomRequest;
-import com.immocare.service.RoomService;
-import jakarta.validation.Valid;
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
+
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -20,19 +16,30 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.immocare.model.dto.BatchCreateRoomsRequest;
+import com.immocare.model.dto.CreateRoomRequest;
+import com.immocare.model.dto.RoomDTO;
+import com.immocare.model.dto.RoomListResponse;
+import com.immocare.model.dto.UpdateRoomRequest;
+import com.immocare.service.RoomService;
+
+import jakarta.validation.Valid;
+
 /**
  * REST controller for Room management.
- * Implements UC004 - Manage Rooms (UC007.001–UC007.005).
+ * UC004 - Manage Rooms (UC007.001–UC007.005).
+ * UC004_ESTATE_PLACEHOLDER: all routes are now scoped to an estate.
  *
  * Endpoints:
- *   GET    /api/v1/housing-units/{unitId}/rooms          → list rooms + total (UC007.005)
- *   POST   /api/v1/housing-units/{unitId}/rooms          → create room (UC007.001)
- *   PUT    /api/v1/housing-units/{unitId}/rooms/{id}     → update room (UC007.002)
- *   DELETE /api/v1/housing-units/{unitId}/rooms/{id}     → delete room (UC007.003)
- *   POST   /api/v1/housing-units/{unitId}/rooms/batch    → batch create (UC007.004)
+ * GET /api/v1/estates/{estateId}/housing-units/{unitId}/rooms
+ * POST /api/v1/estates/{estateId}/housing-units/{unitId}/rooms
+ * PUT /api/v1/estates/{estateId}/housing-units/{unitId}/rooms/{id}
+ * DELETE /api/v1/estates/{estateId}/housing-units/{unitId}/rooms/{id}
+ * POST /api/v1/estates/{estateId}/housing-units/{unitId}/rooms/batch
  */
 @RestController
-@RequestMapping("/api/v1/housing-units/{unitId}/rooms")
+@RequestMapping("/api/v1/estates/{estateId}/housing-units/{unitId}/rooms")
+@PreAuthorize("@security.isMemberOf(#estateId)")
 public class RoomController {
 
   private final RoomService roomService;
@@ -41,61 +48,55 @@ public class RoomController {
     this.roomService = roomService;
   }
 
-  /**
-   * List all rooms for a housing unit, with total surface.
-   * Implements UC007.005 - View Room Composition.
-   */
+  /** UC007.005 - View Room Composition */
   @GetMapping
-  public ResponseEntity<RoomListResponse> getRooms(@PathVariable Long unitId) {
+  public ResponseEntity<RoomListResponse> getRooms(
+      @PathVariable UUID estateId,
+      @PathVariable Long unitId) {
     return ResponseEntity.ok(roomService.getRoomsByUnit(unitId));
   }
 
-  /**
-   * Create a single room inside a housing unit.
-   * Implements UC007.001 - Add Room to Housing Unit.
-   */
+  /** UC007.001 - Add Room */
   @PostMapping
+  @PreAuthorize("@security.isManagerOf(#estateId)")
   public ResponseEntity<RoomDTO> createRoom(
+      @PathVariable UUID estateId,
       @PathVariable Long unitId,
       @Valid @RequestBody CreateRoomRequest request) {
-    RoomDTO created = roomService.createRoom(unitId, request);
-    return ResponseEntity.status(HttpStatus.CREATED).body(created);
+    return ResponseEntity.status(HttpStatus.CREATED)
+        .body(roomService.createRoom(unitId, request));
   }
 
-  /**
-   * Update an existing room.
-   * Implements UC007.002 - Edit Room.
-   */
+  /** UC007.002 - Edit Room */
   @PutMapping("/{id}")
+  @PreAuthorize("@security.isManagerOf(#estateId)")
   public ResponseEntity<RoomDTO> updateRoom(
+      @PathVariable UUID estateId,
       @PathVariable Long unitId,
       @PathVariable Long id,
       @Valid @RequestBody UpdateRoomRequest request) {
-    RoomDTO updated = roomService.updateRoom(unitId, id, request);
-    return ResponseEntity.ok(updated);
+    return ResponseEntity.ok(roomService.updateRoom(unitId, id, request));
   }
 
-  /**
-   * Delete a room.
-   * Implements UC007.003 - Delete Room.
-   */
+  /** UC007.003 - Delete Room */
   @DeleteMapping("/{id}")
+  @PreAuthorize("@security.isManagerOf(#estateId)")
   public ResponseEntity<Map<String, String>> deleteRoom(
+      @PathVariable UUID estateId,
       @PathVariable Long unitId,
       @PathVariable Long id) {
     roomService.deleteRoom(unitId, id);
     return ResponseEntity.ok(Map.of("message", "Room deleted successfully"));
   }
 
-  /**
-   * Batch-create multiple rooms.
-   * Implements UC007.004 - Quick Add Multiple Rooms.
-   */
+  /** UC007.004 - Quick Add Multiple Rooms */
   @PostMapping("/batch")
+  @PreAuthorize("@security.isManagerOf(#estateId)")
   public ResponseEntity<List<RoomDTO>> batchCreateRooms(
+      @PathVariable UUID estateId,
       @PathVariable Long unitId,
       @Valid @RequestBody BatchCreateRoomsRequest request) {
-    List<RoomDTO> created = roomService.batchCreateRooms(unitId, request);
-    return ResponseEntity.status(HttpStatus.CREATED).body(created);
+    return ResponseEntity.status(HttpStatus.CREATED)
+        .body(roomService.batchCreateRooms(unitId, request));
   }
 }

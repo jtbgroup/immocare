@@ -1,0 +1,245 @@
+[
+  {
+    "buildingName": "Résidence Les Acacias",
+    "unitNumber": "01",
+    "estateName": "Estate Ville",
+    "rooms": [
+      { "roomType": "LIVING_ROOM", "approximateSurface": 22.0 },
+      { "roomType": "KITCHEN", "approximateSurface": 10.0 },
+      { "roomType": "BEDROOM", "approximateSurface": 14.0 },
+      { "roomType": "BEDROOM", "approximateSurface": 12.0 },
+      { "roomType": "BATHROOM", "approximateSurface": 6.5 },
+      { "roomType": "TOILET", "approximateSurface": 2.0 },
+      { "roomType": "HALLWAY", "approximateSurface": 9.0 }
+    ]
+  },
+  {
+    "buildingName": "Résidence Les Acacias",
+    "unitNumber": "02",
+    "estateName": "Estate Ville",
+    "rooms": [
+      { "roomType": "LIVING_ROOM", "approximateSurface": 20.0 },
+      { "roomType": "KITCHEN", "approximateSurface": 9.0 },
+      { "roomType": "BEDROOM", "approximateSurface": 14.0 },
+      { "roomType": "BEDROOM", "approximateSurface": 11.0 },
+      { "roomType": "BATHROOM", "approximateSurface": 6.0 },
+      { "roomType": "TOILET", "approximateSurface": 2.0 },
+      { "roomType": "HALLWAY", "approximateSurface": 6.0 }
+    ]
+  },
+  {
+    "buildingName": "Résidence Les Acacias",
+    "unitNumber": "03",
+    "estateName": "Estate Ville",
+    "rooms": [
+      { "roomType": "LIVING_ROOM", "approximateSurface": 18.0 },
+      { "roomType": "KITCHEN", "approximateSurface": 8.0 },
+      { "roomType": "BEDROOM", "approximateSurface": 13.0 },
+      { "roomType": "BATHROOM", "approximateSurface": 6.0 },
+      { "roomType": "TOILET", "approximateSurface": 2.0 },
+      { "roomType": "HALLWAY", "approximateSurface": 8.0 }
+    ]
+  },
+  {
+    "buildingName": "Immeuble Midi",
+    "unitNumber": "01",
+    "estateName": "Estate Ville",
+    "rooms": [
+      { "roomType": "LIVING_ROOM", "approximateSurface": 24.0 },
+      { "roomType": "KITCHEN", "approximateSurface": 11.0 },
+      { "roomType": "BEDROOM", "approximateSurface": 15.0 },
+      { "roomType": "BEDROOM", "approximateSurface": 13.0 },
+      { "roomType": "BATHROOM", "approximateSurface": 7.0 },
+      { "roomType": "TOILET", "approximateSurface": 2.0 },
+      { "roomType": "HALLWAY", "approximateSurface": 10.0 }
+    ]
+  },
+  {
+    "buildingName": "Immeuble Midi",
+    "unitNumber": "02",
+    "estateName": "Estate Ville",
+    "rooms": [
+      { "roomType": "LIVING_ROOM", "approximateSurface": 26.0 },
+      { "roomType": "DINING_ROOM", "approximateSurface": 12.0 },
+      { "roomType": "KITCHEN", "approximateSurface": 12.0 },
+      { "roomType": "BEDROOM", "approximateSurface": 16.0 },
+      { "roomType": "BEDROOM", "approximateSurface": 13.0 },
+      { "roomType": "BATHROOM", "approximateSurface": 7.0 },
+      { "roomType": "TOILET", "approximateSurface": 2.0 },
+      { "roomType": "HALLWAY", "approximateSurface": 2.0 }
+    ]
+  },
+  {
+    "buildingName": "Immeuble Grande Tourismo",
+    "unitNumber": "01",
+    "estateName": "Estate Ville",
+    "rooms": [
+      { "roomType": "LIVING_ROOM", "approximateSurface": 30.0 },
+      { "roomType": "DINING_ROOM", "approximateSurface": 14.0 },
+      { "roomType": "KITCHEN", "approximateSurface": 14.0 },
+      { "roomType": "BEDROOM", "approximateSurface": 18.0 },
+      { "roomType": "BEDROOM", "approximateSurface": 15.0 },
+      { "roomType": "BATHROOM", "approximateSurface": 8.0 },
+      { "roomType": "TOILET", "approximateSurface": 2.0 },
+      { "roomType": "HALLWAY", "approximateSurface": 9.0 }
+    ]
+  },
+  {
+    "buildingName": "Immeuble Grande Tourismo",
+    "unitNumber": "02",
+    "estateName": "Estate Ville",
+    "rooms": [
+      { "roomType": "LIVING_ROOM", "approximateSurface": 28.0 },
+      { "roomType": "KITCHEN", "approximateSurface": 12.0 },
+      { "roomType": "BEDROOM", "approximateSurface": 16.0 },
+      { "roomType": "BEDROOM", "approximateSurface": 14.0 },
+      { "roomType": "BATHROOM", "approximateSurface": 7.0 },
+      { "roomType": "TOILET", "approximateSurface": 2.0 },
+      { "roomType": "HALLWAY", "approximateSurface": 16.0 }
+    ]
+  },
+  {
+    "buildingName": "Immeuble Grande Tourismo",
+    "unitNumber": "03",
+    "estateName": "Estate Ville",
+    "rooms": [
+      { "roomType": "LIVING_ROOM", "approximateSurface": 35.0 },
+      { "roomType": "DINING_ROOM", "approximateSurface": 16.0 },
+      { "roomType": "KITCHEN", "approximateSurface": 15.0 },
+      { "roomType": "BEDROOM", "approximateSurface": 20.0 },
+      { "roomType": "BEDROOM", "approximateSurface": 16.0 },
+      { "roomType": "BEDROOM", "approximateSurface": 12.0 },
+      { "roomType": "BATHROOM", "approximateSurface": 8.0 },
+      { "roomType": "TOILET", "approximateSurface": 2.0 },
+      { "roomType": "HALLWAY", "approximateSurface": 16.0 }
+    ]
+  },
+  {
+    "buildingName": "Immeuble Village dans les nuages",
+    "unitNumber": "01",
+    "estateName": "Estate Mer",
+    "rooms": [
+      { "roomType": "LIVING_ROOM", "approximateSurface": 22.0 },
+      { "roomType": "KITCHEN", "approximateSurface": 10.0 },
+      { "roomType": "BEDROOM", "approximateSurface": 14.0 },
+      { "roomType": "BEDROOM", "approximateSurface": 12.0 },
+      { "roomType": "BATHROOM", "approximateSurface": 6.0 },
+      { "roomType": "TOILET", "approximateSurface": 2.0 },
+      { "roomType": "HALLWAY", "approximateSurface": 9.0 }
+    ]
+  },
+  {
+    "buildingName": "Immeuble Village dans les nuages",
+    "unitNumber": "02",
+    "estateName": "Estate Mer",
+    "rooms": [
+      { "roomType": "LIVING_ROOM", "approximateSurface": 20.0 },
+      { "roomType": "KITCHEN", "approximateSurface": 9.0 },
+      { "roomType": "BEDROOM", "approximateSurface": 14.0 },
+      { "roomType": "BEDROOM", "approximateSurface": 11.0 },
+      { "roomType": "BATHROOM", "approximateSurface": 6.0 },
+      { "roomType": "TOILET", "approximateSurface": 2.0 },
+      { "roomType": "HALLWAY", "approximateSurface": 6.0 }
+    ]
+  },
+  {
+    "buildingName": "Résidence du Littoral",
+    "unitNumber": "01",
+    "estateName": "Estate Mer",
+    "rooms": [
+      { "roomType": "LIVING_ROOM", "approximateSurface": 25.0 },
+      { "roomType": "DINING_ROOM", "approximateSurface": 12.0 },
+      { "roomType": "KITCHEN", "approximateSurface": 12.0 },
+      { "roomType": "BEDROOM", "approximateSurface": 16.0 },
+      { "roomType": "BEDROOM", "approximateSurface": 13.0 },
+      { "roomType": "BATHROOM", "approximateSurface": 7.0 }
+    ]
+  },
+  {
+    "buildingName": "Résidence du Littoral",
+    "unitNumber": "02",
+    "estateName": "Estate Mer",
+    "rooms": [
+      { "roomType": "LIVING_ROOM", "approximateSurface": 20.0 },
+      { "roomType": "KITCHEN", "approximateSurface": 10.0 },
+      { "roomType": "BEDROOM", "approximateSurface": 14.0 },
+      { "roomType": "BEDROOM", "approximateSurface": 12.0 },
+      { "roomType": "BATHROOM", "approximateSurface": 6.0 },
+      { "roomType": "TOILET", "approximateSurface": 2.0 },
+      { "roomType": "HALLWAY", "approximateSurface": 6.0 }
+    ]
+  },
+  {
+    "buildingName": "Résidence du Littoral",
+    "unitNumber": "03",
+    "estateName": "Estate Mer",
+    "rooms": [
+      { "roomType": "LIVING_ROOM", "approximateSurface": 19.0 },
+      { "roomType": "KITCHEN", "approximateSurface": 9.0 },
+      { "roomType": "BEDROOM", "approximateSurface": 14.0 },
+      { "roomType": "BEDROOM", "approximateSurface": 11.0 },
+      { "roomType": "BATHROOM", "approximateSurface": 6.0 },
+      { "roomType": "TOILET", "approximateSurface": 2.0 },
+      { "roomType": "HALLWAY", "approximateSurface": 4.0 }
+    ]
+  },
+  {
+    "buildingName": "Résidence du Littoral",
+    "unitNumber": "04",
+    "estateName": "Estate Mer",
+    "rooms": [
+      { "roomType": "LIVING_ROOM", "approximateSurface": 28.0 },
+      { "roomType": "DINING_ROOM", "approximateSurface": 14.0 },
+      { "roomType": "KITCHEN", "approximateSurface": 13.0 },
+      { "roomType": "BEDROOM", "approximateSurface": 18.0 },
+      { "roomType": "BEDROOM", "approximateSurface": 14.0 },
+      { "roomType": "BATHROOM", "approximateSurface": 8.0 },
+      { "roomType": "TOILET", "approximateSurface": 2.0 },
+      { "roomType": "HALLWAY", "approximateSurface": 5.0 }
+    ]
+  },
+  {
+    "buildingName": "Chalet des Ardennes",
+    "unitNumber": "01",
+    "estateName": "Estate Montagne",
+    "rooms": [
+      { "roomType": "LIVING_ROOM", "approximateSurface": 24.0 },
+      { "roomType": "KITCHEN", "approximateSurface": 11.0 },
+      { "roomType": "BEDROOM", "approximateSurface": 16.0 },
+      { "roomType": "BEDROOM", "approximateSurface": 14.0 },
+      { "roomType": "BATHROOM", "approximateSurface": 7.0 },
+      { "roomType": "TOILET", "approximateSurface": 2.0 },
+      { "roomType": "HALLWAY", "approximateSurface": 6.0 }
+    ]
+  },
+  {
+    "buildingName": "Chalet des Ardennes",
+    "unitNumber": "02",
+    "estateName": "Estate Montagne",
+    "rooms": [
+      { "roomType": "LIVING_ROOM", "approximateSurface": 19.0 },
+      { "roomType": "KITCHEN", "approximateSurface": 9.0 },
+      { "roomType": "BEDROOM", "approximateSurface": 14.0 },
+      { "roomType": "BEDROOM", "approximateSurface": 11.0 },
+      { "roomType": "BATHROOM", "approximateSurface": 6.0 },
+      { "roomType": "TOILET", "approximateSurface": 2.0 },
+      { "roomType": "HALLWAY", "approximateSurface": 4.0 }
+    ]
+  },
+  {
+    "buildingName": "Maison du Sommet",
+    "unitNumber": "01",
+    "estateName": "Estate Montagne",
+    "rooms": [
+      { "roomType": "LIVING_ROOM", "approximateSurface": 32.0 },
+      { "roomType": "DINING_ROOM", "approximateSurface": 16.0 },
+      { "roomType": "KITCHEN", "approximateSurface": 14.0 },
+      { "roomType": "OFFICE", "approximateSurface": 10.0 },
+      { "roomType": "BEDROOM", "approximateSurface": 18.0 },
+      { "roomType": "BEDROOM", "approximateSurface": 15.0 },
+      { "roomType": "BATHROOM", "approximateSurface": 8.0 },
+      { "roomType": "TOILET", "approximateSurface": 2.0 },
+      { "roomType": "HALLWAY", "approximateSurface": 10.0 }
+    ]
+  }
+]

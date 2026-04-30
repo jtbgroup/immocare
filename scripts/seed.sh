@@ -201,7 +201,7 @@ fi
 # ─── 1. Users ─────────────────────────────────────────────────────────────────
 USERS_FILE="$DATA_DIR/users.json"
 if [ -f "$USERS_FILE" ]; then
-  log_section "1/9 — Seeding users"
+  log_section "1/10 — Seeding users"
   TOTAL=$(jq length "$USERS_FILE"); CREATED=0; SKIPPED=0
   declare -A USER_ID_MAP    # indexed by username
   for i in $(seq 0 $(( TOTAL - 1 ))); do
@@ -364,7 +364,7 @@ fi
  
 
 # ─── 2. Persons + bank accounts ───────────────────────────────────────────────
-log_section "2/9 — Seeding persons (+ bank accounts)"
+log_section "2/10 — Seeding persons (+ bank accounts)"
 PERSONS_FILE="$DATA_DIR/persons.json"
 TOTAL=$(jq length "$PERSONS_FILE")
 declare -A PERSON_ID_MAP    # indexed by nationalId|estateName
@@ -443,7 +443,7 @@ for i in $(seq 0 $(( TOTAL - 1 ))); do
 done
 
 # ─── 3. Buildings ─────────────────────────────────────────────────────────────
-log_section "3/9 — Seeding buildings"
+log_section "3/10 — Seeding buildings"
 BUILDINGS_FILE="$DATA_DIR/buildings.json"
 TOTAL=$(jq length "$BUILDINGS_FILE")
 declare -A BUILDING_ID_MAP
@@ -490,7 +490,7 @@ for i in $(seq 0 $(( TOTAL - 1 ))); do
 done
 
 # ─── 4. Housing Units ─────────────────────────────────────────────────────────
-log_section "4/9 — Seeding housing units"
+log_section "4/10 — Seeding housing units"
 UNITS_FILE="$DATA_DIR/housing_units.json"
 TOTAL=$(jq length "$UNITS_FILE")
 declare -A UNIT_ID_MAP
@@ -539,7 +539,7 @@ for i in $(seq 0 $(( TOTAL - 1 ))); do
 done
 
 # ─── 5. Boilers ───────────────────────────────────────────────────────────────
-log_section "5/9 — Seeding boilers"
+log_section "5/10 — Seeding boilers"
 BOILERS_FILE="$DATA_DIR/boilers.json"
 TOTAL=$(jq length "$BOILERS_FILE")
 
@@ -607,7 +607,7 @@ for i in $(seq 0 $(( TOTAL - 1 ))); do
 done
 
 # ─── 6. Meters ────────────────────────────────────────────────────────────────
-log_section "6/9 — Seeding meters"
+log_section "6/10 — Seeding meters"
 METERS_FILE="$DATA_DIR/meters.json"
 TOTAL=$(jq length "$METERS_FILE")
 
@@ -657,8 +657,110 @@ for i in $(seq 0 $(( TOTAL - 1 ))); do
   esac
 done
 
-# ─── 7. Fire Extinguishers ────────────────────────────────────────────────────
-log_section "7/9 — Seeding fire extinguishers"
+
+# ─── 7. PEB Scores ────────────────────────────────────────────────────────────
+PEB_FILE="$DATA_DIR/peb_scores.json"
+if [ -f "$PEB_FILE" ]; then
+  log_section "7/10 — Seeding PEB scores"
+  TOTAL=$(jq length "$PEB_FILE"); CREATED=0; SKIPPED=0; ERRORS=0
+
+  for i in $(seq 0 $(( TOTAL - 1 ))); do
+    ENTRY=$(jq -c ".[$i]" "$PEB_FILE")
+    BNAME=$(echo "$ENTRY"      | jq -r '.buildingName')
+    UNIT_NUM=$(echo "$ENTRY"   | jq -r '.unitNumber')
+    ESTATE_NAME=$(echo "$ENTRY" | jq -r '.estateName')
+
+    KEY="$BNAME|$UNIT_NUM"
+    UNIT_ID="${UNIT_ID_MAP[$KEY]:-}"
+    if [ -z "$UNIT_ID" ]; then
+      log_error "PEB $BNAME/$UNIT_NUM: unit not resolved — skipped"
+      ERRORS=$(( ERRORS+1 )); continue
+    fi
+
+    SCORES=$(echo "$ENTRY" | jq '.scores // []')
+    SCORE_COUNT=$(echo "$SCORES" | jq length)
+
+    for j in $(seq 0 $(( SCORE_COUNT - 1 ))); do
+      SCORE=$(echo "$SCORES" | jq -c ".[$j]")
+      SCORE_VAL=$(echo "$SCORE" | jq -r '.pebScore')
+      SCORE_DATE=$(echo "$SCORE" | jq -r '.scoreDate')
+
+    PS=$(curl -s -o /tmp/peb.json -w "%{http_code}" \
+      -X POST "$BASE_URL/api/v1/estates/$ESTATE_ID/housing-units/$UNIT_ID/peb-scores" \
+      -H "Content-Type: application/json" -b "$COOKIE_JAR" \
+      -d "$SCORE")
+      case "$PS" in
+        200|201)
+          log_ok "PEB: $BNAME/$UNIT_NUM — $SCORE_VAL ($SCORE_DATE)"
+          CREATED=$(( CREATED+1 ))
+          ;;
+        409)
+          log_warn "PEB: $BNAME/$UNIT_NUM — $SCORE_VAL ($SCORE_DATE) (already exists)"
+          SKIPPED=$(( SKIPPED+1 ))
+          ;;
+        *)
+          log_failure "PEB: $BNAME/$UNIT_NUM — $SCORE_VAL ($SCORE_DATE)" "$PS" /tmp/peb.json
+          ERRORS=$(( ERRORS+1 ))
+          ;;
+      esac
+    done
+  done
+  log_info "PEB scores: $CREATED created, $SKIPPED skipped, $ERRORS errors"
+fi
+
+# ─── 8. Rooms ─────────────────────────────────────────────────────────────────
+ROOMS_FILE="$DATA_DIR/rooms.json"
+if [ -f "$ROOMS_FILE" ]; then
+  log_section "8/10 — Seeding rooms"
+  TOTAL=$(jq length "$ROOMS_FILE"); CREATED=0; SKIPPED=0; ERRORS=0
+
+  for i in $(seq 0 $(( TOTAL - 1 ))); do
+    ENTRY=$(jq -c ".[$i]" "$ROOMS_FILE")
+    BNAME=$(echo "$ENTRY"       | jq -r '.buildingName')
+    UNIT_NUM=$(echo "$ENTRY"    | jq -r '.unitNumber')
+    ESTATE_NAME=$(echo "$ENTRY" | jq -r '.estateName')
+
+    ESTATE_ID="${ESTATE_ID_MAP[$ESTATE_NAME]}"
+    if [ -z "$ESTATE_ID" ]; then
+      log_error "Rooms $BNAME/$UNIT_NUM: estate '$ESTATE_NAME' not found — skipped"
+      ERRORS=$(( ERRORS+1 )); continue
+    fi
+
+    KEY="$BNAME|$UNIT_NUM"
+    UNIT_ID="${UNIT_ID_MAP[$KEY]:-}"
+    if [ -z "$UNIT_ID" ]; then
+      log_error "Rooms $BNAME/$UNIT_NUM: unit not resolved — skipped"
+      ERRORS=$(( ERRORS+1 )); continue
+    fi
+
+    ROOMS=$(echo "$ENTRY" | jq '.rooms // []')
+    PAYLOAD=$(jq -n --argjson rooms "$ROOMS" '{rooms: $rooms}')
+
+    RS=$(curl -s -o /tmp/room.json -w "%{http_code}" \
+      -X POST "$BASE_URL/api/v1/estates/$ESTATE_ID/housing-units/$UNIT_ID/rooms/batch" \
+      -H "Content-Type: application/json" -b "$COOKIE_JAR" \
+      -d "$PAYLOAD")
+    case "$RS" in
+      200|201)
+        COUNT=$(jq length /tmp/room.json)
+        log_ok "Rooms: $BNAME/$UNIT_NUM — $COUNT rooms created"
+        CREATED=$(( CREATED+COUNT ))
+        ;;
+      409)
+        log_warn "Rooms: $BNAME/$UNIT_NUM (already exists)"
+        SKIPPED=$(( SKIPPED+1 ))
+        ;;
+      *)
+        log_failure "Rooms: $BNAME/$UNIT_NUM" "$RS" /tmp/room.json
+        ERRORS=$(( ERRORS+1 ))
+        ;;
+    esac
+  done
+  log_info "Rooms: $CREATED created, $SKIPPED skipped, $ERRORS errors"
+fi
+
+# ─── 9. Fire Extinguishers ────────────────────────────────────────────────────
+log_section "9/10 — Seeding fire extinguishers"
 FE_FILE="$DATA_DIR/fire_extinguishers.json"
 TOTAL=$(jq length "$FE_FILE")
 
@@ -706,10 +808,10 @@ for i in $(seq 0 $(( TOTAL - 1 ))); do
   esac
 done
 
-# ─── 8. Leases ────────────────────────────────────────────────────────────────
+# ─── 10. Leases ────────────────────────────────────────────────────────────────
 # Strategy: Group leases by unit and process them chronologically to avoid conflicts.
 # Each unit can only have one ACTIVE/DRAFT lease at a time.
-log_section "8/9 — Seeding leases"
+log_section "10/10 — Seeding leases"
 LEASES_FILE="$DATA_DIR/leases.json"
 TOTAL=$(jq length "$LEASES_FILE")
 CREATED=0; SKIPPED=0; ERRORS=0
@@ -870,5 +972,7 @@ echo "    Housing units      : $(jq length "$DATA_DIR/housing_units.json")"
 echo "    Persons            : $(jq length "$DATA_DIR/persons.json")"
 echo "    Boilers            : $(jq length "$DATA_DIR/boilers.json")"
 echo "    Meters             : $(jq length "$DATA_DIR/meters.json")"
+echo "    PEB scores         : $(jq '[.[].scores[]] | length' "$DATA_DIR/peb_scores.json" 2>/dev/null || echo 0)"
+echo "    Rooms              : $(jq '[.[].rooms[]] | length' "$DATA_DIR/rooms.json" 2>/dev/null || echo 0)"
 echo "    Fire extinguishers : $(jq length "$DATA_DIR/fire_extinguishers.json")"
 echo "    Leases             : $(jq 'map(select(.buildingName)) | length' "$DATA_DIR/leases.json")"
