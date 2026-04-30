@@ -1,82 +1,90 @@
-// features/lease/lease-section/lease-section.component.ts — UC004_ESTATE_PLACEHOLDER Phase 3
-import { CommonModule } from "@angular/common";
-import { Component, Input, OnInit } from "@angular/core";
-import { RouterModule } from "@angular/router";
-import { ActiveEstateService } from "../../../../core/services/active-estate.service";
-import { LeaseService } from "../../../../core/services/lease.service";
 import {
-  LEASE_TYPE_LABELS,
-  LeaseSummary,
-} from "../../../../models/lease.model";
-import { AppDatePipe } from "../../../../shared/pipes/app-date.pipe";
+  Component,
+  Input,
+  OnChanges,
+  OnDestroy,
+  SimpleChanges,
+} from "@angular/core";
+import { DecimalPipe, LowerCasePipe } from "@angular/common";
+import { RouterLink } from "@angular/router";
+import { Subject } from "rxjs";
+import { takeUntil } from "rxjs/operators";
+import { ActiveEstateService } from "../../../../core/services/active-estate.service";
+import { LeaseService, LeaseSummary } from "../../../../core/services/lease.service";
 
 @Component({
   selector: "app-lease-section",
   standalone: true,
-  imports: [CommonModule, RouterModule, AppDatePipe],
+  imports: [DecimalPipe, LowerCasePipe, RouterLink],
   templateUrl: "./lease-section.component.html",
   styleUrls: ["./lease-section.component.scss"],
 })
-export class LeaseSectionComponent implements OnInit {
+export class LeaseSectionComponent implements OnChanges, OnDestroy {
   @Input() unitId!: number;
 
   leases: LeaseSummary[] = [];
-  activeLease?: LeaseSummary;
-  isLoading = false;
-  showHistory = false;
+  loading = false;
+  showFinished = false;
 
-  readonly LEASE_TYPE_LABELS = LEASE_TYPE_LABELS;
+  private destroy$ = new Subject<void>();
 
   constructor(
     private leaseService: LeaseService,
     readonly activeEstateService: ActiveEstateService,
   ) {}
 
-  ngOnInit(): void {
-    this.load();
+  ngOnChanges(changes: SimpleChanges): void {
+    if (changes["unitId"] && this.unitId) {
+      this.load();
+    }
+  }
+
+  ngOnDestroy(): void {
+    this.destroy$.next();
+    this.destroy$.complete();
   }
 
   load(): void {
-    this.isLoading = true;
-    this.leaseService.getByUnit(this.unitId).subscribe({
-      next: (leases) => {
-        this.leases = leases;
-        this.activeLease = leases.find(
-          (l) => l.status === "ACTIVE" || l.status === "DRAFT",
-        );
-        this.isLoading = false;
-      },
-      error: () => {
-        this.isLoading = false;
-      },
-    });
+    this.loading = true;
+    this.leaseService
+      .getByUnit(this.unitId)
+      .pipe(takeUntil(this.destroy$))
+      .subscribe({
+        next: (leases) => {
+          const order: Record<string, number> = { ACTIVE: 0, DRAFT: 1, FINISHED: 2 };
+          this.leases = leases.sort((a, b) => {
+            const diff = (order[a.status] ?? 3) - (order[b.status] ?? 3);
+            if (diff !== 0) return diff;
+            return b.startDate.localeCompare(a.startDate);
+          });
+          this.loading = false;
+        },
+        error: () => {
+          this.loading = false;
+        },
+      });
   }
 
-  get pastLeases(): LeaseSummary[] {
-    return this.leases.filter(
-      (l) => l.status !== "ACTIVE" && l.status !== "DRAFT",
-    );
+  get activeOrDraftLeases(): LeaseSummary[] {
+    return this.leases.filter((l) => l.status !== "FINISHED");
   }
 
-  statusClass(lease: LeaseSummary): string {
-    const map: Record<string, string> = {
-      ACTIVE: "badge-active",
-      DRAFT: "badge-draft",
-      FINISHED: "badge-finished",
-      CANCELLED: "badge-cancelled",
-    };
-    return map[lease.status] || "badge-draft";
+  get finishedLeases(): LeaseSummary[] {
+    return this.leases.filter((l) => l.status === "FINISHED");
   }
 
-  get activeStatusClass(): string {
-    return this.activeLease ? this.statusClass(this.activeLease) : "";
+  statusLabel(status: string): string {
+    return { ACTIVE: "Active", DRAFT: "Draft", FINISHED: "Finished" }[status] ?? status;
   }
 
-  get canCreateLease(): boolean {
-    return !this.activeLease;
+  leaseTypeLabel(type: string): string {
+    return type
+      .replace(/_/g, " ")
+      .toLowerCase()
+      .replace(/\b\w/g, (c) => c.toUpperCase());
   }
 
-  toggleHistory(): void {
-    this.showHistory = !this.showHistory;
+  tenantNames(lease: LeaseSummary): string {
+    return lease.tenants.map((t) => t.fullName).join(", ") || "—";
   }
 }

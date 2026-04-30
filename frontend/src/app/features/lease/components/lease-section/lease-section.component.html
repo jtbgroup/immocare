@@ -1,186 +1,124 @@
 <section class="lease-section">
+  <!-- Header -->
   <div class="section-header">
     <h3 class="section-heading">
-      <span class="material-icons section-title-icon" style="color: #1565c0"
-        >description</span
-      >
-      Lease
+      <span class="material-icons section-icon">description</span> Leases
     </h3>
-    @if (canCreateLease && activeEstateService.canEdit()) {
+    @if (activeEstateService.canEdit()) {
       <a
+        class="btn btn-sm btn-primary"
         [routerLink]="[
           '/estates',
           activeEstateService.activeEstateId(),
-          'housing-units',
-          unitId,
-          'leases',
-          'new',
+          'leases'
         ]"
-        class="btn btn-sm btn-primary"
+        [queryParams]="{ unitId: unitId }"
       >
         + New Lease
       </a>
     }
   </div>
 
-  @if (isLoading) {
-    <div class="loading-placeholder">Loading…</div>
+  @if (loading) {
+    <div class="loading">Loading…</div>
   }
 
-  @if (!isLoading && !activeLease && pastLeases.length === 0) {
-    <div class="no-data">No lease registered for this unit.</div>
+  @if (!loading && leases.length === 0) {
+    <p class="no-data">No leases recorded.</p>
   }
 
-  <!-- Active lease card -->
-  @if (!isLoading && activeLease) {
-    <div class="lease-card">
-      <!-- Alert banners -->
-      @if (activeLease.indexationAlertActive) {
-        <div class="alert-banner alert-banner-warning">
-          🔔 Indexation due — anniversary
-          {{ activeLease.indexationAlertDate | appDate }}
-        </div>
-      }
-      @if (activeLease.endNoticeAlertActive) {
-        <div class="alert-banner alert-banner-orange">
-          ⚠ End notice deadline — {{ activeLease.endNoticeAlertDate | appDate }}
-        </div>
-      }
-
-      <!-- Card body -->
-      <div class="lease-card-body">
-        <!-- Left: status badge + type -->
-        <div class="lease-badge-col">
-          <span class="lease-status-badge" [ngClass]="activeStatusClass">
-            {{ activeLease.status }}
-          </span>
-          <span class="lease-type-label">{{
-            LEASE_TYPE_LABELS[activeLease.leaseType]
-          }}</span>
-        </div>
-
-        <!-- Right: details -->
-        <div class="lease-details">
-          <div class="lease-detail-row">
-            <span class="lease-detail-label">Tenants:</span>
-            <span>{{ activeLease.tenantNames.join(", ") || "—" }}</span>
-          </div>
-          <div class="lease-detail-row">
-            <span class="lease-detail-label">Rent:</span>
-            <span>{{
-              activeLease.monthlyRent | currency: "EUR" : "symbol" : "1.2-2"
-            }}</span>
-            @if (activeLease.monthlyCharges > 0) {
-              <span class="muted">
-                &nbsp;+
-                {{
-                  activeLease.monthlyCharges
-                    | currency: "EUR" : "symbol" : "1.2-2"
-                }}
-                charges ({{ activeLease.chargesType }})
-              </span>
-            }
-          </div>
-          <div class="lease-detail-row">
-            <span class="lease-detail-label">Period:</span>
-            <span>
-              {{ activeLease.startDate | appDate }} →
-              {{ activeLease.endDate | appDate }}
-            </span>
-          </div>
-        </div>
-
-        <!-- Actions -->
-        <div class="lease-actions">
+  <!-- Active / Draft leases -->
+  @for (lease of activeOrDraftLeases; track lease.id) {
+    <div class="lease-card" [class.lease-card--draft]="lease.status === 'DRAFT'">
+      <div class="lease-card__header">
+        <span class="lease-status-badge lease-status-badge--{{ lease.status | lowercase }}">
+          {{ statusLabel(lease.status) }}
+        </span>
+        <span class="lease-type">{{ leaseTypeLabel(lease.leaseType) }}</span>
+        @if (activeEstateService.canEdit()) {
           <a
+            class="btn-link lease-edit-link"
             [routerLink]="[
               '/estates',
               activeEstateService.activeEstateId(),
               'leases',
-              activeLease.id,
+              lease.id
             ]"
-            class="btn btn-sm btn-secondary"
-            >View</a
           >
-          @if (activeEstateService.canEdit()) {
-            <a
-              [routerLink]="[
-                '/estates',
-                activeEstateService.activeEstateId(),
-                'leases',
-                activeLease.id,
-                'edit',
-              ]"
-              class="btn btn-sm btn-ghost"
-              >Edit</a
-            >
-          }
+            View →
+          </a>
+        }
+      </div>
+
+      <div class="lease-card__body">
+        <div class="lease-info-row">
+          <span class="lease-label">Tenants</span>
+          <span class="lease-value">{{ tenantNames(lease) }}</span>
+        </div>
+        <div class="lease-info-row">
+          <span class="lease-label">Period</span>
+          <span class="lease-value">
+            {{ lease.startDate }}
+            @if (lease.endDate) { → {{ lease.endDate }} }
+          </span>
+        </div>
+        <div class="lease-info-row">
+          <span class="lease-label">Rent</span>
+          <span class="lease-value lease-rent">
+            €{{ lease.monthlyRent | number: "1.0-0" }}
+            <span class="lease-charges">+ €{{ lease.monthlyCharges | number: "1.0-0" }} charges</span>
+          </span>
         </div>
       </div>
     </div>
   }
 
-  <!-- View History toggle -->
-  @if (!isLoading && pastLeases.length > 0) {
-    <div class="lease-footer">
-      <button class="btn-link" (click)="toggleHistory()">
-        {{ showHistory ? "Hide History" : "View History" }}
+  <!-- Finished leases (collapsible) -->
+  @if (finishedLeases.length > 0) {
+    <div class="lease-history-toggle">
+      <button class="btn-link" (click)="showFinished = !showFinished">
+        {{ showFinished ? "Hide" : "Show" }} {{ finishedLeases.length }} past
+        lease{{ finishedLeases.length > 1 ? "s" : "" }}
       </button>
     </div>
-  }
 
-  <!-- History panel -->
-  @if (showHistory) {
-    <div class="history-panel">
-      <div class="history-header">
-        <h4>Lease History</h4>
-        <button class="btn-close" (click)="toggleHistory()">✕</button>
-      </div>
-      <table class="history-table">
+    @if (showFinished) {
+      <table class="lease-history-table">
         <thead>
           <tr>
-            <th>Status</th>
-            <th>Type</th>
             <th>Tenants</th>
+            <th>From</th>
+            <th>To</th>
             <th>Rent</th>
-            <th>Period</th>
+            <th>Type</th>
             <th></th>
           </tr>
         </thead>
         <tbody>
-          @for (lease of pastLeases; track lease.id) {
+          @for (lease of finishedLeases; track lease.id) {
             <tr>
-              <td>
-                <span
-                  class="lease-status-badge"
-                  [ngClass]="statusClass(lease)"
-                  >{{ lease.status }}</span
-                >
-              </td>
-              <td class="muted">{{ LEASE_TYPE_LABELS[lease.leaseType] }}</td>
-              <td>{{ lease.tenantNames.join(", ") || "—" }}</td>
-              <td>
-                {{ lease.monthlyRent | currency: "EUR" : "symbol" : "1.0-0" }}
-              </td>
-              <td class="muted">
-                {{ lease.startDate | appDate }} → {{ lease.endDate | appDate }}
-              </td>
+              <td>{{ tenantNames(lease) }}</td>
+              <td>{{ lease.startDate }}</td>
+              <td>{{ lease.endDate ?? "—" }}</td>
+              <td>€{{ lease.monthlyRent | number: "1.0-0" }}</td>
+              <td>{{ leaseTypeLabel(lease.leaseType) }}</td>
               <td>
                 <a
+                  class="btn-link"
                   [routerLink]="[
                     '/estates',
                     activeEstateService.activeEstateId(),
                     'leases',
-                    lease.id,
+                    lease.id
                   ]"
-                  class="btn-link"
-                  >View</a
                 >
+                  View
+                </a>
               </td>
             </tr>
           }
         </tbody>
       </table>
-    </div>
+    }
   }
 </section>
