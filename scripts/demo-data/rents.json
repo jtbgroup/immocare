@@ -1,0 +1,172 @@
+[
+  {
+    "buildingName": "Résidence Les Acacias",
+    "unitNumber": "01",
+    "estateName": "Estate Ville",
+    "rents": [
+      { "monthlyRent": 850.00, "effectiveFrom": "2017-09-01", "notes": "Loyer initial" },
+      { "monthlyRent": 900.00, "effectiveFrom": "2020-10-01", "notes": "Indexation annuelle" },
+      { "monthlyRent": 970.00, "effectiveFrom": "2023-11-01", "notes": "Indexation annuelle" }
+    ]
+  },
+  {
+    "buildingName": "Résidence Les Acacias",
+    "unitNumber": "02",
+    "estateName": "Estate Ville",
+    "rents": [
+      { "monthlyRent": 780.00, "effectiveFrom": "2018-04-01", "notes": "Loyer initial" },
+      { "monthlyRent": 830.00, "effectiveFrom": "2021-05-01", "notes": "Indexation annuelle" },
+      { "monthlyRent": 910.00, "effectiveFrom": "2024-06-01", "notes": "Indexation annuelle" }
+    ]
+  },
+  {
+    "buildingName": "Résidence Les Acacias",
+    "unitNumber": "03",
+    "estateName": "Estate Ville",
+    "rents": [
+      { "monthlyRent": 720.00, "effectiveFrom": "2019-02-01", "notes": "Loyer initial" },
+      { "monthlyRent": 760.00, "effectiveFrom": "2022-03-01", "notes": "Indexation annuelle" },
+      { "monthlyRent": 820.00, "effectiveFrom": "2025-04-01", "notes": "Indexation annuelle" }
+    ]
+  },
+  {
+    "buildingName": "Immeuble Midi",
+    "unitNumber": "01",
+    "estateName": "Estate Ville",
+    "rents": [
+      { "monthlyRent": 950.00, "effectiveFrom": "2016-06-01", "notes": "Loyer initial" },
+      { "monthlyRent": 990.00, "effectiveFrom": "2019-07-01", "notes": "Indexation annuelle" },
+      { "monthlyRent": 1050.00, "effectiveFrom": "2022-08-01", "notes": "Indexation annuelle" }
+    ]
+  },
+  {
+    "buildingName": "Immeuble Midi",
+    "unitNumber": "02",
+    "estateName": "Estate Ville",
+    "rents": [
+      { "monthlyRent": 1100.00, "effectiveFrom": "2017-03-01", "notes": "Loyer initial" },
+      { "monthlyRent": 1150.00, "effectiveFrom": "2020-04-01", "notes": "Indexation annuelle" },
+      { "monthlyRent": 1220.00, "effectiveFrom": "2023-05-01", "notes": "Indexation annuelle" }
+    ]
+  },
+  {
+    "buildingName": "Immeuble Grande Tourismo",
+    "unitNumber": "01",
+    "estateName": "Estate Ville",
+    "rents": [
+      { "monthlyRent": 1350.00, "effectiveFrom": "2018-10-01", "notes": "Loyer initial" },
+      { "monthlyRent": 1420.00, "effectiveFrom": "2021-11-01", "notes": "Indexation annuelle" },
+      { "monthlyRent": 1500.00, "effectiveFrom": "2024-12-01", "notes": "Indexation annuelle" }
+    ]
+  },
+  {
+    "buildingName": "Immeuble Grande Tourismo",
+    "unitNumber": "02",
+    "estateName": "Estate Ville",
+    "rents": [
+      { "monthlyRent": 1180.00, "effectiveFrom": "2019-05-01", "notes": "Loyer initial" },
+      { "monthlyRent": 1240.00, "effectiveFrom": "2022-06-01", "notes": "Indexation annuelle" },
+      { "monthlyRent": 1300.00, "effectiveFrom": "2025-07-01", "notes": "Indexation annuelle" }
+    ]
+  },
+  {
+    "buildingName": "Immeuble Grande Tourismo",
+    "unitNumber": "03",
+    "estateName": "Estate Ville",
+    "rents": [
+      { "monthlyRent": 1450.00, "effectiveFrom": "2017-12-01", "notes": "Loyer initial" },
+      { "monthlyRent": 1500.00, "effectiveFrom": "2021-01-01", "notes": "Indexation annuelle" },
+      { "monthlyRent": 1600.00, "effectiveFrom": "2024-02-01", "notes": "Indexation annuelle" }
+    ]
+  },
+  {
+    "buildingName": "Immeuble Village dans les nuages",
+    "unitNumber": "01",
+    "estateName": "Estate Mer",
+    "rents": [
+      { "monthlyRent": 870.00, "effectiveFrom": "2018-08-01", "notes": "Loyer initial" },
+      { "monthlyRent": 920.00, "effectiveFrom": "2021-09-01", "notes": "Indexation annuelle" },
+      { "monthlyRent": 980.00, "effectiveFrom": "2024-10-01", "notes": "Indexation annuelle" }
+    ]
+  },
+  {
+    "buildingName": "Immeuble Village dans les nuages",
+    "unitNumber": "02",
+    "estateName": "Estate Mer",
+    "rents": [
+      { "monthlyRent": 790.00, "effectiveFrom": "2019-03-01", "notes": "Loyer initial" },
+      { "monthlyRent": 830.00, "effectiveFrom": "2022-04-01", "notes": "Indexation annuelle" },
+      { "monthlyRent": 890.00, "effectiveFrom": "2025-05-01", "notes": "Indexation annuelle" }
+    ]
+  },
+  {
+    "buildingName": "Résidence du Littoral",
+    "unitNumber": "01",
+    "estateName": "Estate Mer",
+    "rents": [
+      { "monthlyRent": 1050.00, "effectiveFrom": "2017-06-01", "notes": "Loyer initial" },
+      { "monthlyRent": 1100.00, "effectiveFrom": "2020-07-01", "notes": "Indexation annuelle" },
+      { "monthlyRent": 1180.00, "effectiveFrom": "2023-08-01", "notes": "Indexation annuelle" }
+    ]
+  },
+  {
+    "buildingName": "Résidence du Littoral",
+    "unitNumber": "02",
+    "estateName": "Estate Mer",
+    "rents": [
+      { "monthlyRent": 880.00, "effectiveFrom": "2018-11-01", "notes": "Loyer initial" },
+      { "monthlyRent": 920.00, "effectiveFrom": "2021-12-01", "notes": "Indexation annuelle" },
+      { "monthlyRent": 980.00, "effectiveFrom": "2025-01-01", "notes": "Indexation annuelle" }
+    ]
+  },
+  {
+    "buildingName": "Résidence du Littoral",
+    "unitNumber": "03",
+    "estateName": "Estate Mer",
+    "rents": [
+      { "monthlyRent": 820.00, "effectiveFrom": "2019-07-01", "notes": "Loyer initial" },
+      { "monthlyRent": 860.00, "effectiveFrom": "2022-08-01", "notes": "Indexation annuelle" },
+      { "monthlyRent": 920.00, "effectiveFrom": "2025-09-01", "notes": "Indexation annuelle" }
+    ]
+  },
+  {
+    "buildingName": "Résidence du Littoral",
+    "unitNumber": "04",
+    "estateName": "Estate Mer",
+    "rents": [
+      { "monthlyRent": 1150.00, "effectiveFrom": "2018-02-01", "notes": "Loyer initial" },
+      { "monthlyRent": 1200.00, "effectiveFrom": "2021-03-01", "notes": "Indexation annuelle" },
+      { "monthlyRent": 1280.00, "effectiveFrom": "2024-04-01", "notes": "Indexation annuelle" }
+    ]
+  },
+  {
+    "buildingName": "Chalet des Ardennes",
+    "unitNumber": "01",
+    "estateName": "Estate Montagne",
+    "rents": [
+      { "monthlyRent": 950.00, "effectiveFrom": "2018-05-01", "notes": "Loyer initial" },
+      { "monthlyRent": 1000.00, "effectiveFrom": "2021-06-01", "notes": "Indexation annuelle" },
+      { "monthlyRent": 1080.00, "effectiveFrom": "2024-07-01", "notes": "Indexation annuelle" }
+    ]
+  },
+  {
+    "buildingName": "Chalet des Ardennes",
+    "unitNumber": "02",
+    "estateName": "Estate Montagne",
+    "rents": [
+      { "monthlyRent": 780.00, "effectiveFrom": "2019-10-01", "notes": "Loyer initial" },
+      { "monthlyRent": 820.00, "effectiveFrom": "2022-11-01", "notes": "Indexation annuelle" },
+      { "monthlyRent": 870.00, "effectiveFrom": "2025-12-01", "notes": "Indexation annuelle" }
+    ]
+  },
+  {
+    "buildingName": "Maison du Sommet",
+    "unitNumber": "01",
+    "estateName": "Estate Montagne",
+    "rents": [
+      { "monthlyRent": 1250.00, "effectiveFrom": "2017-04-01", "notes": "Loyer initial" },
+      { "monthlyRent": 1300.00, "effectiveFrom": "2020-05-01", "notes": "Indexation annuelle" },
+      { "monthlyRent": 1400.00, "effectiveFrom": "2023-06-01", "notes": "Indexation annuelle" }
+    ]
+  }
+]

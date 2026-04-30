@@ -6,6 +6,7 @@ import { HousingUnitService } from "../../../../core/services/housing-unit.servi
 import { HousingUnit } from "../../../../models/housing-unit.model";
 import { MeterSectionComponent } from "../../../../shared/components/meter-section/meter-section.component";
 import { BoilerSectionComponent } from "../boiler-section/boiler-section.component";
+import { LeaseSectionComponent } from "../lease-section/lease-section.component";
 import { PebSectionComponent } from "../peb-section/peb-section.component";
 import { RentSectionComponent } from "../rent-section/rent-section.component";
 import { RoomSectionComponent } from "../room-section/room-section.component";
@@ -25,6 +26,7 @@ import { RoomSectionComponent } from "../room-section/room-section.component";
     RoomSectionComponent,
     PebSectionComponent,
     RentSectionComponent,
+    LeaseSectionComponent,
   ],
   templateUrl: "./housing-unit-details.component.html",
   styleUrls: ["./housing-unit-details.component.scss"],

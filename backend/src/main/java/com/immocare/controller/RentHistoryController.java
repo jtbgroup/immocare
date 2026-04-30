@@ -1,6 +1,7 @@
 package com.immocare.controller;
 
 import java.util.List;
+import java.util.UUID;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -22,16 +23,18 @@ import jakarta.validation.Valid;
 
 /**
  * REST controller for UC006 — Manage Rents. Full CRUD.
+ * UC004_ESTATE_PLACEHOLDER: all routes are now scoped to an estate,
+ * consistent with HousingUnitController and other estate-scoped controllers.
  *
- * GET /api/v1/housing-units/{unitId}/rents → history
- * GET /api/v1/housing-units/{unitId}/rents/current → current rent
- * POST /api/v1/housing-units/{unitId}/rents → add rent record
- * PUT /api/v1/housing-units/{unitId}/rents/{rentId} → edit rent record
- * DELETE /api/v1/housing-units/{unitId}/rents/{rentId} → delete rent record
+ * GET    /api/v1/estates/{estateId}/housing-units/{unitId}/rents
+ * GET    /api/v1/estates/{estateId}/housing-units/{unitId}/rents/current
+ * POST   /api/v1/estates/{estateId}/housing-units/{unitId}/rents
+ * PUT    /api/v1/estates/{estateId}/housing-units/{unitId}/rents/{rentId}
+ * DELETE /api/v1/estates/{estateId}/housing-units/{unitId}/rents/{rentId}
  */
 @RestController
-@RequestMapping("/api/v1/housing-units/{unitId}/rents")
-@PreAuthorize("isAuthenticated()")
+@RequestMapping("/api/v1/estates/{estateId}/housing-units/{unitId}/rents")
+@PreAuthorize("@security.isMemberOf(#estateId)")
 public class RentHistoryController {
 
     private final RentHistoryService rentHistoryService;
@@ -41,19 +44,25 @@ public class RentHistoryController {
     }
 
     @GetMapping
-    public ResponseEntity<List<RentHistoryDTO>> getRentHistory(@PathVariable Long unitId) {
+    public ResponseEntity<List<RentHistoryDTO>> getRentHistory(
+            @PathVariable UUID estateId,
+            @PathVariable Long unitId) {
         return ResponseEntity.ok(rentHistoryService.getRentHistory(unitId));
     }
 
     @GetMapping("/current")
-    public ResponseEntity<RentHistoryDTO> getCurrentRent(@PathVariable Long unitId) {
+    public ResponseEntity<RentHistoryDTO> getCurrentRent(
+            @PathVariable UUID estateId,
+            @PathVariable Long unitId) {
         return rentHistoryService.getCurrentRent(unitId)
                 .map(ResponseEntity::ok)
                 .orElse(ResponseEntity.noContent().build());
     }
 
     @PostMapping
+    @PreAuthorize("@security.isManagerOf(#estateId)")
     public ResponseEntity<RentHistoryDTO> addRent(
+            @PathVariable UUID estateId,
             @PathVariable Long unitId,
             @Valid @RequestBody SetRentRequest request) {
         return ResponseEntity
@@ -62,7 +71,9 @@ public class RentHistoryController {
     }
 
     @PutMapping("/{rentId}")
+    @PreAuthorize("@security.isManagerOf(#estateId)")
     public ResponseEntity<RentHistoryDTO> updateRent(
+            @PathVariable UUID estateId,
             @PathVariable Long unitId,
             @PathVariable Long rentId,
             @Valid @RequestBody SetRentRequest request) {
@@ -70,7 +81,9 @@ public class RentHistoryController {
     }
 
     @DeleteMapping("/{rentId}")
+    @PreAuthorize("@security.isManagerOf(#estateId)")
     public ResponseEntity<Void> deleteRent(
+            @PathVariable UUID estateId,
             @PathVariable Long unitId,
             @PathVariable Long rentId) {
         rentHistoryService.deleteRent(unitId, rentId);

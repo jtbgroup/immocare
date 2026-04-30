@@ -1,0 +1,158 @@
+// Shared styles come from global styles.scss partials.
+
+.section-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1rem;
+}
+
+// ─── Lease card (active / draft) ──────────────────────────────────────────────
+
+.lease-card {
+  border: 1px solid #e0e0e0;
+  border-radius: 6px;
+  padding: 1rem;
+  margin-bottom: 0.75rem;
+  background: #fff;
+
+  &--draft {
+    border-color: #ffe082;
+    background: #fffde7;
+  }
+
+  &__header {
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+    margin-bottom: 0.75rem;
+    flex-wrap: wrap;
+  }
+
+  &__body {
+    display: flex;
+    flex-direction: column;
+    gap: 0.3rem;
+  }
+}
+
+.lease-type {
+  font-size: 0.85rem;
+  color: #555;
+  flex: 1;
+}
+
+.lease-edit-link {
+  font-size: 0.85rem;
+  margin-left: auto;
+}
+
+// ─── Info rows ────────────────────────────────────────────────────────────────
+
+.lease-info-row {
+  display: flex;
+  gap: 0.5rem;
+  font-size: 0.9rem;
+}
+
+.lease-label {
+  min-width: 5rem;
+  color: #777;
+  font-size: 0.8rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+  padding-top: 0.1rem;
+}
+
+.lease-value {
+  color: #222;
+}
+
+.lease-rent {
+  font-weight: 600;
+  color: #2e7d32;
+}
+
+.lease-charges {
+  font-weight: 400;
+  font-size: 0.85rem;
+  color: #777;
+  margin-left: 0.4rem;
+}
+
+// ─── Status badges ────────────────────────────────────────────────────────────
+
+.lease-status-badge {
+  display: inline-block;
+  padding: 0.15rem 0.55rem;
+  border-radius: 12px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+
+  &--active {
+    background: #e8f5e9;
+    color: #2e7d32;
+  }
+
+  &--draft {
+    background: #fff8e1;
+    color: #f57f17;
+  }
+
+  &--finished {
+    background: #f5f5f5;
+    color: #757575;
+  }
+}
+
+// ─── History toggle ───────────────────────────────────────────────────────────
+
+.lease-history-toggle {
+  margin-top: 0.5rem;
+  margin-bottom: 0.75rem;
+}
+
+.btn-link {
+  background: none;
+  border: none;
+  color: #007bff;
+  cursor: pointer;
+  padding: 0;
+  font-size: 0.9rem;
+
+  &:hover {
+    text-decoration: underline;
+  }
+}
+
+// ─── History table ────────────────────────────────────────────────────────────
+
+.lease-history-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.875rem;
+
+  th,
+  td {
+    padding: 0.45rem 0.6rem;
+    border-bottom: 1px solid #e0e0e0;
+    text-align: left;
+  }
+
+  th {
+    background: #fafafa;
+    font-weight: 600;
+    font-size: 0.8rem;
+    text-transform: uppercase;
+    letter-spacing: 0.03em;
+    color: #555;
+  }
+}
+
+.no-data {
+  color: #888;
+  font-style: italic;
+}
