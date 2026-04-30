@@ -10,7 +10,9 @@ import { RouterLink } from "@angular/router";
 import { Subject } from "rxjs";
 import { takeUntil } from "rxjs/operators";
 import { ActiveEstateService } from "../../../../core/services/active-estate.service";
-import { LeaseService, LeaseSummary } from "../../../../core/services/lease.service";
+import { LeaseService } from "../../../../core/services/lease.service";
+import { LeaseSummary } from "../../../../models/lease.model";
+
 
 @Component({
   selector: "app-lease-section",
