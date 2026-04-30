@@ -37,8 +37,11 @@ qu'en penses tu?
 - [] dans les app components "Financial" des loyers , je voudrais aussi le montant "expected" entre le début du contrat et maintenant et ce qui a été réellement payé. Dans les units ou buildings, les dépenses et recettes doivent couvrir tout ce qui est lié à chaque appartement. attention qu'il y a parfois des factures groupées. COmment gérer ça?
 - [] Le financial dashboard ne fonctionne pas
 - [] Si je veux faire des modifications plus tard, je dois avoir une possiblilité de le faire simplement. Par exemple avec des checkboxes dans la liste et changer le statut des sélectionnées. idem pour un delete.
-- [] Script seeds: ajouter les rooms et les scores PEB
-
+- [x] Script seeds: ajouter les rooms et les scores PEB
+- [] générer la doc des api type swagger
+- [] revoir la structure des components dans le front pour rendre ça plus cohérent
+- [] revoir les settings depuis que les estates ont entrés en jeu
+ 
 ## To maturate
 
 - [ ] user: lier à une personne (pas certain que ce soit nécessaire)
