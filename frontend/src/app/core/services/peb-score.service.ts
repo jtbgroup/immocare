@@ -1,6 +1,7 @@
 import { HttpClient } from "@angular/common/http";
 import { Injectable } from "@angular/core";
 import { Observable } from "rxjs";
+import { environment } from "../../../environments/environment.prod";
 import {
   CreatePebScoreRequest,
   PebImprovementDTO,
@@ -26,7 +27,7 @@ export class PebScoreService {
     return id;
   }
   private get api(): string {
-    return `/api/v1/estates/${this.estateId}/housing-units`;
+    return environment.apiUrl + `/estates/${this.estateId}/housing-units`;
   }
 
   addScore(

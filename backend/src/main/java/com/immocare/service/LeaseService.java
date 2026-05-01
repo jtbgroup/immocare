@@ -444,17 +444,21 @@ public class LeaseService {
 
     private void computeAlerts(Lease lease, LeaseDTO dto) {
         LocalDate today = LocalDate.now();
-        LocalDate noticeDeadline = lease.getEndDate().minusMonths(lease.getNoticePeriodMonths());
-        dto.setEndNoticeAlertActive(!today.isBefore(noticeDeadline));
-        dto.setEndNoticeAlertDate(noticeDeadline);
+        if (lease.getEndDate() != null) {
+            LocalDate noticeDeadline = lease.getEndDate().minusMonths(lease.getNoticePeriodMonths());
+            dto.setEndNoticeAlertActive(!today.isBefore(noticeDeadline));
+            dto.setEndNoticeAlertDate(noticeDeadline);
+        }
         setIndexationAlert(lease, today, dto::setIndexationAlertActive, dto::setIndexationAlertDate);
     }
 
     private void computeAlerts(Lease lease, LeaseSummaryDTO dto) {
         LocalDate today = LocalDate.now();
-        LocalDate noticeDeadline = lease.getEndDate().minusMonths(lease.getNoticePeriodMonths());
-        dto.setEndNoticeAlertActive(!today.isBefore(noticeDeadline));
-        dto.setEndNoticeAlertDate(noticeDeadline);
+        if (lease.getEndDate() != null) {
+            LocalDate noticeDeadline = lease.getEndDate().minusMonths(lease.getNoticePeriodMonths());
+            dto.setEndNoticeAlertActive(!today.isBefore(noticeDeadline));
+            dto.setEndNoticeAlertDate(noticeDeadline);
+        }
         setIndexationAlert(lease, today, dto::setIndexationAlertActive, dto::setIndexationAlertDate);
     }
 

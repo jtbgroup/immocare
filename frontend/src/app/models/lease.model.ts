@@ -9,6 +9,13 @@ export type LeaseType =
   | "STUDENT"
   | "GLIDING"
   | "COMMERCIAL";
+
+export const LEASE_STATUS_LABELS: Record<LeaseStatus, string> = {
+  DRAFT: "Draft",
+  ACTIVE: "Active",
+  FINISHED: "Finished",
+  CANCELLED: "Cancelled",
+};
 export type ChargesType = "FORFAIT" | "PROVISION";
 export type DepositType =
   | "BLOCKED_ACCOUNT"
@@ -116,7 +123,7 @@ export interface LeaseSummary {
   status: LeaseStatus;
   leaseType: LeaseType;
   startDate: string;
-  endDate: string;
+  endDate?: string;
   monthlyRent: number;
   monthlyCharges: number;
   totalRent: number;

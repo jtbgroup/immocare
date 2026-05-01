@@ -1,3 +1,4 @@
+import { DecimalPipe, LowerCasePipe } from "@angular/common";
 import {
   Component,
   Input,
@@ -5,14 +6,18 @@ import {
   OnDestroy,
   SimpleChanges,
 } from "@angular/core";
-import { DecimalPipe, LowerCasePipe } from "@angular/common";
 import { RouterLink } from "@angular/router";
 import { Subject } from "rxjs";
 import { takeUntil } from "rxjs/operators";
 import { ActiveEstateService } from "../../../../core/services/active-estate.service";
 import { LeaseService } from "../../../../core/services/lease.service";
-import { LeaseSummary } from "../../../../models/lease.model";
-
+import {
+  LEASE_STATUS_LABELS,
+  LEASE_TYPE_LABELS,
+  LeaseStatus,
+  LeaseSummary,
+  LeaseType,
+} from "../../../../models/lease.model";
 
 @Component({
   selector: "app-lease-section",
@@ -53,7 +58,11 @@ export class LeaseSectionComponent implements OnChanges, OnDestroy {
       .pipe(takeUntil(this.destroy$))
       .subscribe({
         next: (leases) => {
-          const order: Record<string, number> = { ACTIVE: 0, DRAFT: 1, FINISHED: 2 };
+          const order: Record<string, number> = {
+            ACTIVE: 0,
+            DRAFT: 1,
+            FINISHED: 2,
+          };
           this.leases = leases.sort((a, b) => {
             const diff = (order[a.status] ?? 3) - (order[b.status] ?? 3);
             if (diff !== 0) return diff;
@@ -75,18 +84,15 @@ export class LeaseSectionComponent implements OnChanges, OnDestroy {
     return this.leases.filter((l) => l.status === "FINISHED");
   }
 
-  statusLabel(status: string): string {
-    return { ACTIVE: "Active", DRAFT: "Draft", FINISHED: "Finished" }[status] ?? status;
+  statusLabel(status: LeaseStatus): string {
+    return LEASE_STATUS_LABELS[status] ?? status;
   }
 
-  leaseTypeLabel(type: string): string {
-    return type
-      .replace(/_/g, " ")
-      .toLowerCase()
-      .replace(/\b\w/g, (c) => c.toUpperCase());
+  leaseTypeLabel(type: LeaseType): string {
+    return LEASE_TYPE_LABELS[type] ?? type;
   }
 
   tenantNames(lease: LeaseSummary): string {
-    return lease.tenants.map((t) => t.fullName).join(", ") || "—";
+    return lease.tenantNames?.join(", ") || "—";
   }
 }

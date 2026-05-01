@@ -3,6 +3,7 @@
 import { HttpClient } from "@angular/common/http";
 import { Injectable } from "@angular/core";
 import { Observable } from "rxjs";
+import { environment } from "../../../environments/environment";
 import {
   AddBoilerServiceRecordRequest,
   BoilerDTO,
@@ -28,7 +29,7 @@ export class BoilerService {
   }
 
   private get api(): string {
-    return `/api/v1/estates/${this.estateId}`;
+    return environment.apiUrl + `/estates/${this.estateId}`;
   }
 
   // ─── Housing Unit ─────────────────────────────────────────────────────────

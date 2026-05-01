@@ -1,12 +1,13 @@
-import { HttpClient } from '@angular/common/http';
-import { Injectable } from '@angular/core';
-import { Observable } from 'rxjs';
-import { ActiveEstateService } from '../services/active-estate.service';
+import { HttpClient } from "@angular/common/http";
+import { Injectable } from "@angular/core";
+import { Observable } from "rxjs";
+import { environment } from "../../../environments/environment.prod";
 import {
   CreateHousingUnitRequest,
   HousingUnit,
   UpdateHousingUnitRequest,
-} from '../../models/housing-unit.model';
+} from "../../models/housing-unit.model";
+import { ActiveEstateService } from "../services/active-estate.service";
 
 /**
  * Angular service for Housing Unit API calls.
@@ -19,9 +20,8 @@ import {
  *   PUT    /api/v1/estates/{estateId}/units/{id}
  *   DELETE /api/v1/estates/{estateId}/units/{id}
  */
-@Injectable({ providedIn: 'root' })
+@Injectable({ providedIn: "root" })
 export class HousingUnitService {
-
   constructor(
     private http: HttpClient,
     private activeEstateService: ActiveEstateService,
@@ -29,16 +29,22 @@ export class HousingUnitService {
 
   private get estateId(): string {
     const id = this.activeEstateService.activeEstateId();
-    if (!id) throw new Error('No active estate — cannot call HousingUnitService without an estate context.');
+    if (!id)
+      throw new Error(
+        "No active estate — cannot call HousingUnitService without an estate context.",
+      );
     return id;
   }
 
   private get baseUnits(): string {
-    return `/api/v1/estates/${this.estateId}/units`;
+    return environment.apiUrl + `/estates/${this.estateId}/units`;
   }
 
   private baseBuilding(buildingId: number): string {
-    return `/api/v1/estates/${this.estateId}/buildings/${buildingId}/units`;
+    return (
+      environment.apiUrl +
+      `/estates/${this.estateId}/buildings/${buildingId}/units`
+    );
   }
 
   /**
@@ -65,7 +71,10 @@ export class HousingUnitService {
   /**
    * PUT /api/v1/estates/{estateId}/units/{id}
    */
-  update(id: number, request: UpdateHousingUnitRequest): Observable<HousingUnit> {
+  update(
+    id: number,
+    request: UpdateHousingUnitRequest,
+  ): Observable<HousingUnit> {
     return this.http.put<HousingUnit>(`${this.baseUnits}/${id}`, request);
   }
 
