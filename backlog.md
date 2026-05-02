@@ -39,7 +39,7 @@ qu'en penses tu?
 - [] Si je veux faire des modifications plus tard, je dois avoir une possiblilité de le faire simplement. Par exemple avec des checkboxes dans la liste et changer le statut des sélectionnées. idem pour un delete.
 - [x] Script seeds: ajouter les rooms et les scores PEB
 - [] générer la doc des api type swagger
-- [] revoir la structure des components dans le front pour rendre ça plus cohérent
+- [x] revoir la structure des components dans le front pour rendre ça plus cohérent
 - [] revoir les settings depuis que les estates ont entrés en jeu
 - [] revoir les actions en fonction des release number
 - [] revoir comment afficher la version

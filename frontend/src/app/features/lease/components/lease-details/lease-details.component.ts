@@ -15,8 +15,8 @@ import {
 } from "../../../../models/lease.model";
 import { TransactionStatistics } from "../../../../models/transaction.model";
 import { AppDatePipe } from "../../../../shared/pipes/app-date.pipe";
-import { RentAdjustmentSectionComponent } from "../rent-adjustment-section/rent-adjustment-section.component";
-import { TenantSectionComponent } from "../tenant-section/tenant-section.component";
+import { RentAdjustmentSectionComponent } from "../_partials/rent-adjustment-section/rent-adjustment-section.component";
+import { TenantSectionComponent } from "../_partials/tenant-section/tenant-section.component";
 
 const TRANSITIONS: Record<LeaseStatus, LeaseStatus[]> = {
   DRAFT: ["ACTIVE", "CANCELLED"],
