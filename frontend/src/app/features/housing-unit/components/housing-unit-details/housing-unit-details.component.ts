@@ -4,12 +4,12 @@ import { ActivatedRoute, Router, RouterLink } from "@angular/router";
 import { ActiveEstateService } from "../../../../core/services/active-estate.service";
 import { HousingUnitService } from "../../../../core/services/housing-unit.service";
 import { HousingUnit } from "../../../../models/housing-unit.model";
+import { BoilerSectionComponent } from "../../../../shared/components/boiler-section/boiler-section.component";
 import { MeterSectionComponent } from "../../../../shared/components/meter-section/meter-section.component";
-import { BoilerSectionComponent } from "../boiler-section/boiler-section.component";
-import { LeaseSectionComponent } from "../../../lease/components/lease-section/lease-section.component";
-import { PebSectionComponent } from "../peb-section/peb-section.component";
-import { RentSectionComponent } from "../rent-section/rent-section.component";
-import { RoomSectionComponent } from "../room-section/room-section.component";
+import { LeaseSectionComponent } from "../../../lease/components/_partials/lease-section/lease-section.component";
+import { PebSectionComponent } from "../_partials/peb-section/peb-section.component";
+import { RentSectionComponent } from "../_partials/rent-section/rent-section.component";
+import { RoomSectionComponent } from "../_partials/room-section/room-section.component";
 
 /**
  * Housing unit detail page.

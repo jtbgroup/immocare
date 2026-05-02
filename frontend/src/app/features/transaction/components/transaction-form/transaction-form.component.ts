@@ -1,33 +1,38 @@
 // features/transaction/components/transaction-form/transaction-form.component.ts — UC004_ESTATE_PLACEHOLDER Phase 4
-import { CommonModule } from '@angular/common';
-import { Component, OnInit } from '@angular/core';
-import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
-import { ActivatedRoute, Router } from '@angular/router';
-import { BankAccountService } from '../../../../core/services/bank-account.service';
-import { BuildingService } from '../../../../core/services/building.service';
-import { HousingUnitService } from '../../../../core/services/housing-unit.service';
-import { LeaseService } from '../../../../core/services/lease.service';
-import { TagCategoryService } from '../../../../core/services/tag-category.service';
-import { TagSubcategoryService } from '../../../../core/services/tag-subcategory.service';
-import { TransactionService } from '../../../../core/services/transaction.service';
-import { ActiveEstateService } from '../../../../core/services/active-estate.service';
-import { Building } from '../../../../models/building.model';
-import { HousingUnit } from '../../../../models/housing-unit.model';
-import { LeaseSummary } from '../../../../models/lease.model';
+import { CommonModule } from "@angular/common";
+import { Component, OnInit } from "@angular/core";
+import {
+  FormBuilder,
+  FormGroup,
+  ReactiveFormsModule,
+  Validators,
+} from "@angular/forms";
+import { ActivatedRoute, Router } from "@angular/router";
+import { ActiveEstateService } from "../../../../core/services/active-estate.service";
+import { BankAccountService } from "../../../../core/services/bank-account.service";
+import { BuildingService } from "../../../../core/services/building.service";
+import { HousingUnitService } from "../../../../core/services/housing-unit.service";
+import { LeaseService } from "../../../../core/services/lease.service";
+import { TagCategoryService } from "../../../../core/services/tag-category.service";
+import { TagSubcategoryService } from "../../../../core/services/tag-subcategory.service";
+import { TransactionService } from "../../../../core/services/transaction.service";
+import { Building } from "../../../../models/building.model";
+import { HousingUnit } from "../../../../models/housing-unit.model";
+import { LeaseSummary } from "../../../../models/lease.model";
 import {
   BankAccount,
   FinancialTransaction,
   TagCategory,
   TagSubcategory,
-} from '../../../../models/transaction.model';
-import { AssetLinkEditorComponent } from '../asset-link-editor/asset-link-editor.component';
+} from "../../../../models/transaction.model";
+import { AssetLinkEditorComponent } from "../_partials/asset-link-editor/asset-link-editor.component";
 
 @Component({
-  selector: 'app-transaction-form',
+  selector: "app-transaction-form",
   standalone: true,
   imports: [CommonModule, ReactiveFormsModule, AssetLinkEditorComponent],
-  templateUrl: './transaction-form.component.html',
-  styleUrls: ['./transaction-form.component.scss'],
+  templateUrl: "./transaction-form.component.html",
+  styleUrls: ["./transaction-form.component.scss"],
 })
 export class TransactionFormComponent implements OnInit {
   form!: FormGroup;
@@ -64,7 +69,7 @@ export class TransactionFormComponent implements OnInit {
     this.buildForm();
     this.loadRefData();
 
-    const id = this.route.snapshot.paramMap.get('id');
+    const id = this.route.snapshot.paramMap.get("id");
     if (id) {
       this.isEdit = true;
       this.transactionId = +id;
@@ -79,9 +84,9 @@ export class TransactionFormComponent implements OnInit {
   }
 
   private setupCascadeListeners(): void {
-    this.form.get('categoryId')?.valueChanges.subscribe((catId) => {
+    this.form.get("categoryId")?.valueChanges.subscribe((catId) => {
       if (catId) {
-        const dir = this.form.get('direction')?.value;
+        const dir = this.form.get("direction")?.value;
         this.tagSubcategoryService
           .getAll(catId, dir || undefined)
           .subscribe((s) => (this.subcategories = s));
@@ -91,10 +96,13 @@ export class TransactionFormComponent implements OnInit {
       }
     });
 
-    this.form.get('buildingId')?.valueChanges.subscribe((buildingId) => {
+    this.form.get("buildingId")?.valueChanges.subscribe((buildingId) => {
       this.units = [];
       this.leases = [];
-      this.form.patchValue({ housingUnitId: null, leaseId: null }, { emitEvent: false });
+      this.form.patchValue(
+        { housingUnitId: null, leaseId: null },
+        { emitEvent: false },
+      );
       if (buildingId) {
         this.housingUnitService
           .getUnitsByBuilding(+buildingId)
@@ -102,7 +110,7 @@ export class TransactionFormComponent implements OnInit {
       }
     });
 
-    this.form.get('housingUnitId')?.valueChanges.subscribe((unitId) => {
+    this.form.get("housingUnitId")?.valueChanges.subscribe((unitId) => {
       this.leases = [];
       this.form.patchValue({ leaseId: null }, { emitEvent: false });
       if (unitId) {
@@ -114,12 +122,12 @@ export class TransactionFormComponent implements OnInit {
   }
 
   buildForm(): void {
-    const today = new Date().toISOString().split('T')[0];
+    const today = new Date().toISOString().split("T")[0];
     this.form = this.fb.group({
-      direction: ['INCOME', Validators.required],
+      direction: ["INCOME", Validators.required],
       transactionDate: [today, Validators.required],
       valueDate: [null],
-      accountingMonth: [today.substring(0, 7) + '-01', Validators.required],
+      accountingMonth: [today.substring(0, 7) + "-01", Validators.required],
       amount: [null, [Validators.required, Validators.min(0.01)]],
       description: [null],
       counterpartyAccount: [null, Validators.maxLength(50)],
@@ -134,9 +142,11 @@ export class TransactionFormComponent implements OnInit {
 
   loadRefData(): void {
     this.tagCategoryService.getAll().subscribe((c) => (this.categories = c));
-    this.bankAccountService.getAll(true).subscribe((b) => (this.bankAccounts = b));
+    this.bankAccountService
+      .getAll(true)
+      .subscribe((b) => (this.bankAccounts = b));
     this.buildingService
-      .getAllBuildings(0, 200, 'name,asc')
+      .getAllBuildings(0, 200, "name,asc")
       .subscribe((page) => (this.buildings = page.content));
   }
 
@@ -179,15 +189,21 @@ export class TransactionFormComponent implements OnInit {
             then();
           });
         };
-        const loadUnitsAndLeases = (buildingId: number, unitId: number | undefined, then: () => void) => {
-          this.housingUnitService.getUnitsByBuilding(buildingId).subscribe((units) => {
-            this.units = units;
-            if (unitId) {
-              loadLeases(unitId, then);
-            } else {
-              then();
-            }
-          });
+        const loadUnitsAndLeases = (
+          buildingId: number,
+          unitId: number | undefined,
+          then: () => void,
+        ) => {
+          this.housingUnitService
+            .getUnitsByBuilding(buildingId)
+            .subscribe((units) => {
+              this.units = units;
+              if (unitId) {
+                loadLeases(unitId, then);
+              } else {
+                then();
+              }
+            });
         };
         if (tx.buildingId && tx.housingUnitId) {
           loadUnitsAndLeases(tx.buildingId, tx.housingUnitId, patchAndFinish);
@@ -200,7 +216,11 @@ export class TransactionFormComponent implements OnInit {
             next: (lease) => {
               (tx as any).buildingId = lease.buildingId;
               (tx as any).housingUnitId = lease.housingUnitId;
-              loadUnitsAndLeases(lease.buildingId, lease.housingUnitId, patchAndFinish);
+              loadUnitsAndLeases(
+                lease.buildingId,
+                lease.housingUnitId,
+                patchAndFinish,
+              );
             },
             error: () => patchAndFinish(),
           });
@@ -216,7 +236,7 @@ export class TransactionFormComponent implements OnInit {
   }
 
   onAssetSubcategoryPreFill(subcategoryId: number): void {
-    if (!this.form.get('subcategoryId')?.value) {
+    if (!this.form.get("subcategoryId")?.value) {
       this.form.patchValue({ subcategoryId }, { emitEvent: false });
     }
   }
@@ -234,26 +254,31 @@ export class TransactionFormComponent implements OnInit {
     obs.subscribe({
       next: (tx) => {
         if (this.estateId) {
-          this.router.navigate(['/estates', this.estateId, 'transactions', tx.id]);
+          this.router.navigate([
+            "/estates",
+            this.estateId,
+            "transactions",
+            tx.id,
+          ]);
         } else {
-          this.router.navigate(['/transactions', tx.id]);
+          this.router.navigate(["/transactions", tx.id]);
         }
       },
-      error: (err) => (this.error = err?.error?.message || 'An error occurred'),
+      error: (err) => (this.error = err?.error?.message || "An error occurred"),
     });
   }
 
   cancel(): void {
-    if (this.form.dirty && !confirm('Discard unsaved changes?')) return;
+    if (this.form.dirty && !confirm("Discard unsaved changes?")) return;
     if (this.estateId) {
-      this.router.navigate(['/estates', this.estateId, 'transactions']);
+      this.router.navigate(["/estates", this.estateId, "transactions"]);
     } else {
-      this.router.navigate(['/transactions']);
+      this.router.navigate(["/transactions"]);
     }
   }
 
   get isIncomeDirection(): boolean {
-    return this.form.get('direction')?.value === 'INCOME';
+    return this.form.get("direction")?.value === "INCOME";
   }
 
   unitLabel(unit: HousingUnit): string {
@@ -261,7 +286,7 @@ export class TransactionFormComponent implements OnInit {
   }
 
   leaseLabel(lease: LeaseSummary): string {
-    const tenants = lease.tenantNames?.join(', ') || 'No tenants';
+    const tenants = lease.tenantNames?.join(", ") || "No tenants";
     return `#${lease.id} — ${tenants} (${lease.status})`;
   }
 }

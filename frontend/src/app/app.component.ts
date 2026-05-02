@@ -16,7 +16,7 @@ import { AuthService } from "./core/auth/auth.service";
 import { ActiveEstateService } from "./core/services/active-estate.service";
 import { AlertService } from "./core/services/alert.service";
 import { VersionService } from "./core/services/version.service";
-import { EstateHeaderComponent } from "./features/estate/components/estate-header/estate-header.component";
+import { EstateHeaderComponent } from "./features/estate/components/user/estate-header/estate-header.component";
 
 @Component({
   selector: "app-root",

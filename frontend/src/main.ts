@@ -13,7 +13,7 @@ import { AuthInterceptor } from "./app/core/auth/auth.interceptor";
 import { EstateGuard } from "./app/core/auth/estate.guard";
 import { PlatformAdminGuard } from "./app/core/auth/platform-admin.guard";
 import { DateFormatService } from "./app/core/services/date-format.service";
-import { AdminEstateFormComponent } from "./app/features/estate/components/admin-estate-form/admin-estate-form.component";
+import { AdminEstateFormComponent } from "./app/features/estate/components/admin/admin-estate-form/admin-estate-form.component";
 
 bootstrapApplication(AppComponent, {
   providers: [
@@ -43,7 +43,7 @@ bootstrapApplication(AppComponent, {
         path: "select-estate",
         canActivate: [AuthGuard],
         loadComponent: () =>
-          import("./app/features/estate/components/estate-selector/estate-selector.component").then(
+          import("./app/features/estate/components/user/estate-selector/estate-selector.component").then(
             (m) => m.EstateSelectorComponent,
           ),
       },
@@ -53,7 +53,7 @@ bootstrapApplication(AppComponent, {
         path: "admin/estates/new",
         canActivate: [AuthGuard, PlatformAdminGuard],
         loadComponent: () =>
-          import("./app/features/estate/components/admin-estate-form/admin-estate-form.component").then(
+          import("./app/features/estate/components/admin/admin-estate-form/admin-estate-form.component").then(
             (m) => m.AdminEstateFormComponent,
           ),
       },
@@ -61,7 +61,7 @@ bootstrapApplication(AppComponent, {
         path: "admin/estates/:id/edit",
         canActivate: [AuthGuard, PlatformAdminGuard],
         loadComponent: () =>
-          import("./app/features/estate/components/admin-estate-form/admin-estate-form.component").then(
+          import("./app/features/estate/components/admin/admin-estate-form/admin-estate-form.component").then(
             (m) => m.AdminEstateFormComponent,
           ),
       },
@@ -76,7 +76,7 @@ bootstrapApplication(AppComponent, {
         pathMatch: "full",
         canActivate: [AuthGuard, PlatformAdminGuard],
         loadComponent: () =>
-          import("./app/features/estate/components/admin-estate-list/admin-estate-list.component").then(
+          import("./app/features/estate/components/admin/admin-estate-list/admin-estate-list.component").then(
             (m) => m.AdminEstateListComponent,
           ),
       },
@@ -86,7 +86,7 @@ bootstrapApplication(AppComponent, {
         path: "estates/:estateId/dashboard",
         canActivate: [AuthGuard, EstateGuard],
         loadComponent: () =>
-          import("./app/features/estate/components/estate-dashboard/estate-dashboard.component").then(
+          import("./app/features/estate/components/user/estate-dashboard/estate-dashboard.component").then(
             (m) => m.EstateDashboardComponent,
           ),
       },
@@ -96,7 +96,7 @@ bootstrapApplication(AppComponent, {
         path: "estates/:estateId/members",
         canActivate: [AuthGuard, EstateGuard],
         loadComponent: () =>
-          import("./app/features/estate/components/estate-member-list/estate-member-list.component").then(
+          import("./app/features/estate/components/user/estate-member-list/estate-member-list.component").then(
             (m) => m.EstateMemberListComponent,
           ),
       },
@@ -106,7 +106,7 @@ bootstrapApplication(AppComponent, {
         path: "estates/:estateId/admin/platform-settings",
         canActivate: [AuthGuard, EstateGuard],
         loadComponent: () =>
-          import("./app/features/estate/components/estate-platform-settings/estate-platform-settings.component").then(
+          import("./app/features/estate/components/user/estate-platform-settings/estate-platform-settings.component").then(
             (m) => m.EstatePlatformSettingsComponent,
           ),
       },
@@ -150,7 +150,7 @@ bootstrapApplication(AppComponent, {
         path: "estates/:estateId/units",
         canActivate: [AuthGuard, EstateGuard],
         loadComponent: () =>
-          import("./app/features/housing-unit/components/unit-global-list/unit-global-list.component").then(
+          import("./app/features/housing-unit/components/housing-unit-global-list/housing-unit-global-list.component").then(
             (m) => m.UnitGlobalListComponent,
           ),
       },

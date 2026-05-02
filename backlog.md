@@ -43,6 +43,7 @@ qu'en penses tu?
 - [] revoir les settings depuis que les estates ont entrés en jeu
 - [] revoir les actions en fonction des release number
 - [] revoir comment afficher la version
+- [] rendre les fireextinguishers, boilers, meters, comme des devices et avoir la possibilité d'avoir de devices generiques
  
 ## To maturate
 

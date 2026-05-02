@@ -15,7 +15,7 @@ import {
   ImportPreviewRow,
   ImportRowEnrichment,
 } from "../../../../models/transaction.model";
-import { ImportRowDetailPanelComponent } from "./import-row-detail-panel.component";
+import { ImportRowDetailPanelComponent } from "../_partials/import-row-detail-panel/import-row-detail-panel.component";
 
 type Step = "form" | "preview" | "result";
 
