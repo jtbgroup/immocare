@@ -2,9 +2,7 @@
   <!-- Section header -->
   <div class="section-header">
     <h3 class="section-heading">
-      <span class="material-icons section-title-icon"
-        >local_fire_department</span
-      >
+      <span class="material-icons section-title-icon">local_fire_department</span>
       Boiler
     </h3>
     @if (!showForm) {
@@ -154,7 +152,10 @@
               >
                 Yes, delete
               </button>
-              <button class="btn btn-xs btn-secondary" (click)="cancelDelete()">
+              <button
+                class="btn btn-xs btn-secondary"
+                (click)="cancelDelete()"
+              >
                 Cancel
               </button>
             </div>
@@ -182,10 +183,10 @@
                   }
                 </div>
                 <div class="form-row">
-                  <label
-                    >Valid until
-                    <span class="hint">(auto-calculated if empty)</span></label
-                  >
+                  <label>
+                    Valid until
+                    <span class="hint">(auto-calculated if empty)</span>
+                  </label>
                   <input type="date" formControlName="validUntil" />
                 </div>
                 <div class="form-row">
@@ -217,7 +218,7 @@
 
           <!-- Service history toggle -->
           <div class="boiler-card__footer">
-            <button class="btn-link" (click)="toggleServiceHistory(boiler.id)">
+            <button class="btn btn-link" (click)="toggleServiceHistory(boiler.id)">
               {{
                 serviceHistoryOpen[boiler.id]
                   ? "Hide service history"
@@ -226,58 +227,62 @@
             </button>
           </div>
 
-          <!-- Service history panel -->
+          <!-- Service history panel — shared visual conventions -->
           @if (serviceHistoryOpen[boiler.id]) {
             <div class="service-history-panel">
-              <div class="history-header">
-                <h4>Service History</h4>
-                <button
-                  class="btn-close"
-                  (click)="toggleServiceHistory(boiler.id)"
-                >
-                  ✕
-                </button>
-              </div>
-              @if (serviceHistoryLoading[boiler.id]) {
-                <div class="loading-placeholder">Loading history…</div>
-              }
-              @if (!serviceHistoryLoading[boiler.id]) {
-                @if (!serviceHistoryMap[boiler.id].length) {
-                  <div class="no-data">No service recorded.</div>
+              <div class="history-panel">
+                <div class="history-header">
+                  <h4>Service History</h4>
+                  <button
+                    class="btn-close"
+                    (click)="toggleServiceHistory(boiler.id)"
+                  >
+                    ✕
+                  </button>
+                </div>
+
+                @if (serviceHistoryLoading[boiler.id]) {
+                  <div class="loading-placeholder">Loading history…</div>
                 }
-                @if (serviceHistoryMap[boiler.id].length) {
-                  <table class="history-table">
-                    <thead>
-                      <tr>
-                        <th>Service date</th>
-                        <th>Valid until</th>
-                        <th>Notes</th>
-                        <th>Status</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      @for (
-                        record of serviceHistoryMap[boiler.id];
-                        track record.serviceDate
-                      ) {
+
+                @if (!serviceHistoryLoading[boiler.id]) {
+                  @if (!serviceHistoryMap[boiler.id]?.length) {
+                    <p class="no-data">No service recorded.</p>
+                  }
+                  @if (serviceHistoryMap[boiler.id]?.length) {
+                    <table class="history-table">
+                      <thead>
                         <tr>
-                          <td>{{ record.serviceDate | appDate }}</td>
-                          <td>{{ record.validUntil | appDate }}</td>
-                          <td>{{ record.notes || "—" }}</td>
-                          <td>
-                            <span
-                              class="badge"
-                              [ngClass]="SERVICE_STATUS_CSS[record.status]"
-                            >
-                              {{ SERVICE_STATUS_LABELS[record.status] }}
-                            </span>
-                          </td>
+                          <th>Service date</th>
+                          <th>Valid until</th>
+                          <th>Notes</th>
+                          <th>Status</th>
                         </tr>
-                      }
-                    </tbody>
-                  </table>
+                      </thead>
+                      <tbody>
+                        @for (
+                          record of serviceHistoryMap[boiler.id];
+                          track record.serviceDate
+                        ) {
+                          <tr>
+                            <td>{{ record.serviceDate | appDate }}</td>
+                            <td>{{ record.validUntil | appDate }}</td>
+                            <td>{{ record.notes || "—" }}</td>
+                            <td>
+                              <span
+                                class="badge"
+                                [ngClass]="SERVICE_STATUS_CSS[record.status]"
+                              >
+                                {{ SERVICE_STATUS_LABELS[record.status] }}
+                              </span>
+                            </td>
+                          </tr>
+                        }
+                      </tbody>
+                    </table>
+                  }
                 }
-              }
+              </div>
             </div>
           }
         </div>
