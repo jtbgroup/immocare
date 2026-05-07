@@ -10,7 +10,7 @@
         [routerLink]="[
           '/estates',
           activeEstateService.activeEstateId(),
-          'leases'
+          'leases',
         ]"
         [queryParams]="{ unitId: unitId }"
       >
@@ -29,25 +29,30 @@
 
   <!-- Active / Draft leases -->
   @for (lease of activeOrDraftLeases; track lease.id) {
-    <div class="lease-card" [class.lease-card--draft]="lease.status === 'DRAFT'">
+    <div
+      class="lease-card"
+      [class.lease-card--draft]="lease.status === 'DRAFT'"
+    >
       <div class="lease-card__header">
-        <span class="lease-status-badge lease-status-badge--{{ lease.status | lowercase }}">
+        <span
+          class="lease-status-badge lease-status-badge--{{
+            lease.status | lowercase
+          }}"
+        >
           {{ statusLabel(lease.status) }}
         </span>
         <span class="lease-type">{{ leaseTypeLabel(lease.leaseType) }}</span>
-        @if (activeEstateService.canEdit()) {
-          <a
-            class="btn-link lease-edit-link"
-            [routerLink]="[
-              '/estates',
-              activeEstateService.activeEstateId(),
-              'leases',
-              lease.id
-            ]"
-          >
-            View →
-          </a>
-        }
+        <a
+          class="lease-edit-link"
+          [routerLink]="[
+            '/estates',
+            activeEstateService.activeEstateId(),
+            'leases',
+            lease.id,
+          ]"
+        >
+          View →
+        </a>
       </div>
 
       <div class="lease-card__body">
@@ -59,14 +64,18 @@
           <span class="lease-label">Period</span>
           <span class="lease-value">
             {{ lease.startDate }}
-            @if (lease.endDate) { → {{ lease.endDate }} }
+            @if (lease.endDate) {
+              → {{ lease.endDate }}
+            }
           </span>
         </div>
         <div class="lease-info-row">
           <span class="lease-label">Rent</span>
           <span class="lease-value lease-rent">
             €{{ lease.monthlyRent | number: "1.0-0" }}
-            <span class="lease-charges">+ €{{ lease.monthlyCharges | number: "1.0-0" }} charges</span>
+            <span class="lease-charges">
+              + €{{ lease.monthlyCharges | number: "1.0-0" }} charges
+            </span>
           </span>
         </div>
       </div>
@@ -76,49 +85,56 @@
   <!-- Finished leases (collapsible) -->
   @if (finishedLeases.length > 0) {
     <div class="lease-history-toggle">
-      <button class="btn-link" (click)="showFinished = !showFinished">
+      <button class="btn btn-link" (click)="showFinished = !showFinished">
         {{ showFinished ? "Hide" : "Show" }} {{ finishedLeases.length }} past
         lease{{ finishedLeases.length > 1 ? "s" : "" }}
       </button>
     </div>
 
     @if (showFinished) {
-      <table class="lease-history-table">
-        <thead>
-          <tr>
-            <th>Tenants</th>
-            <th>From</th>
-            <th>To</th>
-            <th>Rent</th>
-            <th>Type</th>
-            <th></th>
-          </tr>
-        </thead>
-        <tbody>
-          @for (lease of finishedLeases; track lease.id) {
+      <div class="history-panel">
+        <div class="history-header">
+          <h4>Past Leases</h4>
+          <button class="btn-close" (click)="showFinished = false">✕</button>
+        </div>
+
+        <table class="history-table">
+          <thead>
             <tr>
-              <td>{{ tenantNames(lease) }}</td>
-              <td>{{ lease.startDate }}</td>
-              <td>{{ lease.endDate ?? "—" }}</td>
-              <td>€{{ lease.monthlyRent | number: "1.0-0" }}</td>
-              <td>{{ leaseTypeLabel(lease.leaseType) }}</td>
-              <td>
-                <a
-                  class="btn-link"
-                  [routerLink]="[
-                    '/estates',
-                    activeEstateService.activeEstateId(),
-                    'leases',
-                    lease.id
-                  ]"
-                >
-                  View
-                </a>
-              </td>
+              <th>Tenants</th>
+              <th>From</th>
+              <th>To</th>
+              <th>Rent</th>
+              <th>Type</th>
+              <th></th>
             </tr>
-          }
-        </tbody>
-      </table>
+          </thead>
+          <tbody>
+            @for (lease of finishedLeases; track lease.id) {
+              <tr>
+                <td>{{ tenantNames(lease) }}</td>
+                <td>{{ lease.startDate }}</td>
+                <td>{{ lease.endDate ?? "—" }}</td>
+                <td>€{{ lease.monthlyRent | number: "1.0-0" }}</td>
+                <td>{{ leaseTypeLabel(lease.leaseType) }}</td>
+                <td class="row-actions">
+                  <a
+                    class="btn btn-sm btn-link"
+                    [routerLink]="[
+                      '/estates',
+                      activeEstateService.activeEstateId(),
+                      'leases',
+                      lease.id,
+                    ]"
+                  >
+                    View
+                  </a>
+                </td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
     }
   }
 </section>

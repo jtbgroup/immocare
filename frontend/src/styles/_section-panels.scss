@@ -1,0 +1,214 @@
+@use "variables" as *;
+
+// ─── Shared section-level card patterns ───────────────────────────────────────
+// Used by: rent-section, peb-section, peb-history, lease-section
+// Import this partial in styles.scss after _cards.scss
+
+// ─── Section header (title + action button inline) ────────────────────────────
+
+.section-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: $spacing-md;
+}
+
+// ─── Generic content card (rent-card, peb-card, lease-card) ──────────────────
+
+.content-card {
+  display: flex;
+  align-items: flex-start;
+  gap: $spacing-md;
+  padding: $spacing-md;
+  border: 1px solid #e0e0e0;
+  border-radius: 6px;
+  background: #fafafa;
+}
+
+.content-card-badge {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 4.5rem;
+  height: 3rem;
+  padding: 0 0.75rem;
+  border-radius: 6px;
+  font-size: 1.05rem;
+  font-weight: 700;
+  background: #e3f2fd;
+  color: #1565c0;
+  flex-shrink: 0;
+  white-space: nowrap;
+}
+
+.content-card-body {
+  flex: 1;
+  line-height: 1.8;
+}
+
+// ─── Inline form panel (rent-form-panel, peb-form-panel, picker-panel) ────────
+
+.inline-form-panel {
+  border: 1px solid #e0e0e0;
+  border-radius: 6px;
+  padding: 1.25rem;
+  margin-top: $spacing-md;
+  background: #fff;
+
+  h4 {
+    margin: 0 0 $spacing-md;
+    font-size: 1rem;
+    font-weight: 600;
+  }
+}
+
+// ─── History panel ────────────────────────────────────────────────────────────
+
+.history-panel {
+  border: 1px solid #e0e0e0;
+  border-radius: 6px;
+  padding: 1.25rem;
+  margin-top: $spacing-md;
+  background: #fff;
+}
+
+.history-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: $spacing-md;
+
+  h4 {
+    margin: 0;
+    font-size: 1rem;
+    font-weight: 600;
+  }
+}
+
+.btn-close {
+  background: none;
+  border: none;
+  font-size: 1.1rem;
+  cursor: pointer;
+  color: $color-text-muted;
+  padding: 0;
+  line-height: 1;
+
+  &:hover {
+    color: $color-text;
+  }
+}
+
+// ─── Improvement / total summary banner ───────────────────────────────────────
+
+.improvement-summary {
+  padding: 0.75rem $spacing-md;
+  background: #f5f5f5;
+  border-radius: 6px;
+  margin-bottom: $spacing-md;
+  font-size: 0.9rem;
+  font-weight: 500;
+}
+
+// ─── History table ────────────────────────────────────────────────────────────
+
+.history-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.9rem;
+
+  th,
+  td {
+    padding: 0.5rem 0.6rem;
+    border-bottom: 1px solid #e0e0e0;
+    text-align: left;
+  }
+
+  th {
+    background: #fafafa;
+    font-weight: 600;
+    white-space: nowrap;
+  }
+
+  tr:last-child td {
+    border-bottom: none;
+  }
+}
+
+// ─── Row action buttons ───────────────────────────────────────────────────────
+
+.row-actions {
+  white-space: nowrap;
+  text-align: right;
+}
+
+.icon-btn-sm {
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-size: 0.85rem;
+  padding: 0.2rem 0.3rem;
+  border-radius: 4px;
+  opacity: 0.6;
+  transition: opacity 0.15s;
+
+  &:hover {
+    opacity: 1;
+    background: #f5f5f5;
+  }
+
+  &.icon-btn-delete:hover {
+    background: #ffebee;
+  }
+}
+
+// ─── Empty / no-data state ────────────────────────────────────────────────────
+
+.no-data {
+  color: $color-text-light;
+  font-style: italic;
+  padding: 0.4rem 0;
+  font-size: 0.875rem;
+}
+
+// ─── Colour helpers ───────────────────────────────────────────────────────────
+
+.positive {
+  color: #2e7d32;
+}
+
+.negative {
+  color: #c62828;
+}
+
+.improved {
+  color: #2e7d32;
+  font-weight: 700;
+}
+
+.degraded {
+  color: #c62828;
+  font-weight: 700;
+}
+
+.unchanged {
+  color: #9e9e9e;
+  font-weight: 700;
+}
+
+// ─── Actions row below a card ─────────────────────────────────────────────────
+
+.card-actions {
+  margin-top: $spacing-sm;
+}
+
+// ─── Delete / warning banner ──────────────────────────────────────────────────
+
+.warning-banner {
+  background: #fff3cd;
+  border: 1px solid #ffc107;
+  padding: 0.75rem;
+  border-radius: 4px;
+  font-size: 0.875rem;
+  margin-top: 0.75rem;
+}

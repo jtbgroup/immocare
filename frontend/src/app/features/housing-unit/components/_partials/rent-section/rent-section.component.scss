@@ -1,6 +1,9 @@
 // Shared styles (btn, btn-sm, btn-primary, btn-secondary, btn-danger,
-// loading, required, field-error, form-actions, alert, alert-error)
-// come from global styles.scss partials.
+// loading, required, field-error, form-actions, alert, alert-error,
+// history-panel, history-header, btn-close, improvement-summary,
+// history-table, row-actions, icon-btn-sm, no-data, positive, negative,
+// warning-banner, card-actions)
+// come from global styles.scss partials (_buttons, _alerts, _section-panels).
 
 // ─── Section layout ───────────────────────────────────────────────────────────
 
@@ -70,31 +73,6 @@
   &:hover {
     text-decoration: underline;
   }
-}
-
-// ─── Empty / color states ─────────────────────────────────────────────────────
-
-.no-data {
-  color: #888;
-  font-style: italic;
-}
-
-.positive {
-  color: #2e7d32;
-}
-.negative {
-  color: #c62828;
-}
-
-// ─── Delete warning banner ────────────────────────────────────────────────────
-
-.warning-banner {
-  background: #fff3cd;
-  border: 1px solid #ffc107;
-  padding: 0.75rem;
-  border-radius: 4px;
-  font-size: 0.875rem;
-  margin-top: 0.75rem;
 }
 
 // ─── Inline form panel ────────────────────────────────────────────────────────
@@ -172,101 +150,5 @@
 
   &:hover {
     background: #c5cae9;
-  }
-}
-
-// ─── History panel ────────────────────────────────────────────────────────────
-
-.history-panel {
-  border: 1px solid #e0e0e0;
-  border-radius: 6px;
-  padding: 1.25rem;
-  margin-top: 1rem;
-  background: #fff;
-}
-
-.history-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 1rem;
-
-  h4 {
-    margin: 0;
-    font-size: 1rem;
-    font-weight: 600;
-  }
-}
-
-.btn-close {
-  background: none;
-  border: none;
-  font-size: 1.1rem;
-  cursor: pointer;
-  color: #555;
-
-  &:hover {
-    color: #000;
-  }
-}
-
-.improvement-summary {
-  padding: 0.75rem 1rem;
-  background: #f5f5f5;
-  border-radius: 6px;
-  margin-bottom: 1rem;
-  font-size: 0.9rem;
-  font-weight: 500;
-
-  &.improved {
-    color: #2e7d32;
-  }
-  &.degraded {
-    color: #c62828;
-  }
-}
-
-.history-table {
-  width: 100%;
-  border-collapse: collapse;
-  font-size: 0.9rem;
-
-  th,
-  td {
-    padding: 0.5rem 0.6rem;
-    border-bottom: 1px solid #e0e0e0;
-    text-align: left;
-  }
-
-  th {
-    background: #fafafa;
-    font-weight: 600;
-  }
-}
-
-// ─── Row action buttons ───────────────────────────────────────────────────────
-
-.row-actions {
-  white-space: nowrap;
-  text-align: right;
-}
-
-.icon-btn-sm {
-  background: none;
-  border: none;
-  cursor: pointer;
-  font-size: 0.85rem;
-  padding: 0.2rem 0.3rem;
-  border-radius: 4px;
-  opacity: 0.6;
-  transition: opacity 0.15s;
-
-  &:hover {
-    opacity: 1;
-    background: #f5f5f5;
-  }
-
-  &.icon-btn-delete:hover {
-    background: #ffebee;
   }
 }

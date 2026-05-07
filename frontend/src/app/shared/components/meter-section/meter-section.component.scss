@@ -1,7 +1,9 @@
 // All shared styles (btn, btn-sm, btn-primary, btn-secondary, btn-danger,
 // btn-link, form-group, form-actions, required, optional, field-error,
-// alert, alert-success, alert-error, data-table, empty-state)
-// come from global styles.scss partials.
+// alert, alert-success, alert-error, empty-state, no-data,
+// history-panel, history-header, btn-close, history-table,
+// row-actions, icon-btn-sm)
+// come from global styles.scss partials (_buttons, _alerts, _section-panels).
 
 // ─── Section layout ───────────────────────────────────────────────────────────
 
@@ -163,12 +165,13 @@
   background: #e8f5e9;
   color: #2e7d32;
 }
+
 .badge-gray {
   background: #f5f5f5;
   color: #757575;
 }
 
-// ─── History ──────────────────────────────────────────────────────────────────
+// ─── History toggle ───────────────────────────────────────────────────────────
 
 .history-toggle {
   margin-top: 0.75rem;
@@ -180,37 +183,7 @@
   font-style: italic;
 }
 
-.history-panel {
-  margin-top: 0.5rem;
-  border: 1px solid #e0e0e0;
-  border-radius: 6px;
-  padding: 1.25rem;
-  background: #fff;
-}
-
-.history-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 1rem;
-
-  h4 {
-    margin: 0;
-    font-size: 1rem;
-    font-weight: 600;
-  }
-}
-
-.btn-close {
-  background: none;
-  border: none;
-  font-size: 1.1rem;
-  cursor: pointer;
-  color: #555;
-  &:hover {
-    color: #000;
-  }
-}
+// ─── History table wrapper (overflow for wide tables) ─────────────────────────
 
 .history-table-wrapper {
   overflow-x: auto;

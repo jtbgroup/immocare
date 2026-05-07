@@ -39,7 +39,7 @@
           <!-- Block header -->
           <div class="type-block-header">
             <div class="type-label">
-              <span class="type-label-text">{{ block.label }} </span>
+              <span class="type-label-text">{{ block.label }}</span>
             </div>
             @if (!isAddOpen(block.type)) {
               <button
@@ -366,9 +366,9 @@
                     <div class="meter-card-content">
                       <div class="meter-info">
                         @if (meter.label) {
-                          <span class="meter-label-badge"
-                            >{{ meter.label }}
-                          </span>
+                          <span class="meter-label-badge">{{
+                            meter.label
+                          }}</span>
                         }
                         <span class="meter-number">{{
                           meter.meterNumber
@@ -432,7 +432,7 @@
     </div>
   }
 
-  <!-- History panel -->
+  <!-- History panel — same visual conventions as rent-section and lease-section -->
   @if (showHistory) {
     <div class="history-panel">
       <div class="history-header">
@@ -441,8 +441,9 @@
           ✕
         </button>
       </div>
+
       <div class="history-table-wrapper">
-        <table class="data-table">
+        <table class="history-table">
           <thead>
             <tr>
               <th>Type</th>

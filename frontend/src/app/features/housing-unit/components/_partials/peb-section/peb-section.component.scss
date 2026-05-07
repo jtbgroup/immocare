@@ -1,6 +1,7 @@
 // Shared styles (btn, btn-sm, btn-primary, btn-secondary, btn-link,
-// form-group, form-actions, required, field-error, alert, alert-error, loading)
-// come from global styles.scss partials.
+// form-group, form-actions, required, field-error, alert, alert-error,
+// loading, no-data, inline-form-panel, card-actions)
+// come from global styles.scss partials (_buttons, _forms, _alerts, _section-panels).
 
 // ─── PEB card ─────────────────────────────────────────────────────────────────
 
@@ -52,14 +53,17 @@
   background: #e8f5e9;
   color: #2e7d32;
 }
+
 .badge-warning {
   background: #fff3e0;
   color: #e65100;
 }
+
 .badge-expired {
   background: #ffebee;
   color: #c62828;
 }
+
 .badge-nodate {
   background: #f5f5f5;
   color: #757575;
@@ -69,13 +73,6 @@
 
 .peb-actions {
   margin-top: 0.5rem;
-}
-
-// ─── Empty state ──────────────────────────────────────────────────────────────
-
-.no-data {
-  color: #888;
-  font-style: italic;
 }
 
 // ─── Inline form panel ────────────────────────────────────────────────────────
