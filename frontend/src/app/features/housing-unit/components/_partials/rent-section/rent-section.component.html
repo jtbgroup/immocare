@@ -229,68 +229,70 @@
       }
 
       @if (history.length > 0) {
-        <table class="history-table">
-          <thead>
-            <tr>
-              <th>Monthly Rent</th>
-              <th>From</th>
-              <th>To</th>
-              <th>Duration</th>
-              <th>Change</th>
-              <th>Notes</th>
-              <th></th>
-            </tr>
-          </thead>
-          <tbody>
-            @for (row of history; track row.id; let i = $index) {
+        <div class="history-table-wrapper">
+          <table class="history-table">
+            <thead>
               <tr>
-                <td>
-                  <strong>€{{ row.monthlyRent | number: "1.2-2" }}</strong>
-                </td>
-                <td>{{ row.effectiveFrom }}</td>
-                <td>{{ row.effectiveTo ?? "Current" }}</td>
-                <td>
-                  {{ row.durationMonths }} month{{
-                    row.durationMonths !== 1 ? "s" : ""
-                  }}
-                </td>
-                <td>
-                  @if (rowChanges[i]; as change) {
-                    <span
-                      [class.positive]="change.isIncrease"
-                      [class.negative]="!change.isIncrease"
-                    >
-                      {{ change.isIncrease ? "↑ +" : "↓ " }}€{{
-                        change.amount | number: "1.2-2"
-                      }}
-                      ({{ change.isIncrease ? "+" : ""
-                      }}{{ change.percentage }}%)
-                    </span>
-                  } @else {
-                    —
-                  }
-                </td>
-                <td>{{ row.notes ?? "—" }}</td>
-                <td class="row-actions">
-                  <button
-                    class="icon-btn-sm"
-                    title="Edit"
-                    (click)="openEditForm(row)"
-                  >
-                    ✏️
-                  </button>
-                  <button
-                    class="icon-btn-sm icon-btn-delete"
-                    title="Delete"
-                    (click)="askDelete(row)"
-                  >
-                    🗑️
-                  </button>
-                </td>
+                <th>Monthly Rent</th>
+                <th>From</th>
+                <th>To</th>
+                <th>Duration</th>
+                <th>Change</th>
+                <th>Notes</th>
+                <th></th>
               </tr>
-            }
-          </tbody>
-        </table>
+            </thead>
+            <tbody>
+              @for (row of history; track row.id; let i = $index) {
+                <tr>
+                  <td>
+                    <strong>€{{ row.monthlyRent | number: "1.2-2" }}</strong>
+                  </td>
+                  <td>{{ row.effectiveFrom }}</td>
+                  <td>{{ row.effectiveTo ?? "Current" }}</td>
+                  <td>
+                    {{ row.durationMonths }} month{{
+                      row.durationMonths !== 1 ? "s" : ""
+                    }}
+                  </td>
+                  <td>
+                    @if (rowChanges[i]; as change) {
+                      <span
+                        [class.positive]="change.isIncrease"
+                        [class.negative]="!change.isIncrease"
+                      >
+                        {{ change.isIncrease ? "↑ +" : "↓ " }}€{{
+                          change.amount | number: "1.2-2"
+                        }}
+                        ({{ change.isIncrease ? "+" : ""
+                        }}{{ change.percentage }}%)
+                      </span>
+                    } @else {
+                      —
+                    }
+                  </td>
+                  <td>{{ row.notes ?? "—" }}</td>
+                  <td class="row-actions">
+                    <button
+                      class="icon-btn-sm"
+                      title="Edit"
+                      (click)="openEditForm(row)"
+                    >
+                      ✏️
+                    </button>
+                    <button
+                      class="icon-btn-sm icon-btn-delete"
+                      title="Delete"
+                      (click)="askDelete(row)"
+                    >
+                      🗑️
+                    </button>
+                  </td>
+                </tr>
+              }
+            </tbody>
+          </table>
+        </div>
       }
     </div>
   }

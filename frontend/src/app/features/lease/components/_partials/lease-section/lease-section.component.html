@@ -98,42 +98,44 @@
           <button class="btn-close" (click)="showFinished = false">✕</button>
         </div>
 
-        <table class="history-table">
-          <thead>
-            <tr>
-              <th>Tenants</th>
-              <th>From</th>
-              <th>To</th>
-              <th>Rent</th>
-              <th>Type</th>
-              <th></th>
-            </tr>
-          </thead>
-          <tbody>
-            @for (lease of finishedLeases; track lease.id) {
+        <div class="history-table-wrapper">
+          <table class="history-table">
+            <thead>
               <tr>
-                <td>{{ tenantNames(lease) }}</td>
-                <td>{{ lease.startDate }}</td>
-                <td>{{ lease.endDate ?? "—" }}</td>
-                <td>€{{ lease.monthlyRent | number: "1.0-0" }}</td>
-                <td>{{ leaseTypeLabel(lease.leaseType) }}</td>
-                <td class="row-actions">
-                  <a
-                    class="btn btn-sm btn-link"
-                    [routerLink]="[
-                      '/estates',
-                      activeEstateService.activeEstateId(),
-                      'leases',
-                      lease.id,
-                    ]"
-                  >
-                    View
-                  </a>
-                </td>
+                <th>Tenants</th>
+                <th>From</th>
+                <th>To</th>
+                <th>Rent</th>
+                <th>Type</th>
+                <th></th>
               </tr>
-            }
-          </tbody>
-        </table>
+            </thead>
+            <tbody>
+              @for (lease of finishedLeases; track lease.id) {
+                <tr>
+                  <td>{{ tenantNames(lease) }}</td>
+                  <td>{{ lease.startDate }}</td>
+                  <td>{{ lease.endDate ?? "—" }}</td>
+                  <td>€{{ lease.monthlyRent | number: "1.0-0" }}</td>
+                  <td>{{ leaseTypeLabel(lease.leaseType) }}</td>
+                  <td class="row-actions">
+                    <a
+                      class="btn btn-sm btn-link"
+                      [routerLink]="[
+                        '/estates',
+                        activeEstateService.activeEstateId(),
+                        'leases',
+                        lease.id,
+                      ]"
+                    >
+                      View
+                    </a>
+                  </td>
+                </tr>
+              }
+            </tbody>
+          </table>
+        </div>
       </div>
     }
   }

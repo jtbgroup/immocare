@@ -146,11 +146,6 @@
 
 // ─── Revision panel ───────────────────────────────────────────────────────────
 
-.revision-panel {
-  border-top: 1px solid #e0e0e0;
-  background: #fff;
-}
-
 .service-form-panel {
   padding: 1rem;
   border-bottom: 1px solid #e0e0e0;
@@ -159,44 +154,6 @@
     margin: 0 0 0.75rem;
     font-size: 0.9rem;
     font-weight: 600;
-  }
-}
-
-.history-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 0.65rem 1rem 0.5rem;
-
-  h4 {
-    margin: 0;
-    font-size: 0.9rem;
-    font-weight: 600;
-  }
-}
-
-.history-table {
-  width: 100%;
-  border-collapse: collapse;
-  font-size: 0.85rem;
-
-  th {
-    text-align: left;
-    padding: 0.4rem 0.6rem;
-    border-bottom: 2px solid #e0e0e0;
-    font-weight: 600;
-    color: #555;
-    white-space: nowrap;
-  }
-
-  td {
-    padding: 0.45rem 0.6rem;
-    border-bottom: 1px solid #f0f0f0;
-    vertical-align: middle;
-  }
-
-  tr:last-child td {
-    border-bottom: none;
   }
 }
 

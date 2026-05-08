@@ -141,12 +141,24 @@
   letter-spacing: 0.03em;
   color: #fff;
 
-  &.fuel-gas        { background: #1976d2; }
-  &.fuel-oil        { background: #795548; }
-  &.fuel-electric   { background: #388e3c; }
-  &.fuel-heat_pump  { background: #7b1fa2; }
-  &.fuel-wood       { background: #e64a19; }
-  &.fuel-other      { background: #616161; }
+  &.fuel-gas {
+    background: #1976d2;
+  }
+  &.fuel-oil {
+    background: #795548;
+  }
+  &.fuel-electric {
+    background: #388e3c;
+  }
+  &.fuel-heat_pump {
+    background: #7b1fa2;
+  }
+  &.fuel-wood {
+    background: #e64a19;
+  }
+  &.fuel-other {
+    background: #616161;
+  }
 }
 
 // ─── Status badges ────────────────────────────────────────────────────────────
@@ -160,14 +172,30 @@
   margin-left: 0.35rem;
   vertical-align: middle;
 
-  &.badge-danger  { background: #ffebee; color: #c62828; }
-  &.badge-warning { background: #fff8e1; color: #e65100; }
-  &.badge-success { background: #e8f5e9; color: #2e7d32; }
-  &.badge-gray    { background: #f5f5f5; color: #757575; }
+  &.badge-danger {
+    background: #ffebee;
+    color: #c62828;
+  }
+  &.badge-warning {
+    background: #fff8e1;
+    color: #e65100;
+  }
+  &.badge-success {
+    background: #e8f5e9;
+    color: #2e7d32;
+  }
+  &.badge-gray {
+    background: #f5f5f5;
+    color: #757575;
+  }
 }
 
-.text-danger  { color: #c62828; }
-.text-warning { color: #e65100; }
+.text-danger {
+  color: #c62828;
+}
+.text-warning {
+  color: #e65100;
+}
 
 // ─── Delete confirmation ──────────────────────────────────────────────────────
 
@@ -196,7 +224,9 @@
   font-weight: 600;
   color: #e65100;
   cursor: pointer;
-  transition: background 0.15s, border-color 0.15s;
+  transition:
+    background 0.15s,
+    border-color 0.15s;
 
   &:hover {
     background: #fff3cd;
@@ -240,24 +270,24 @@
   }
 }
 
-.required { color: #dc3545; }
-.hint      { color: #888; font-size: 0.8rem; font-weight: 400; }
-.field-error { font-size: 0.78rem; color: #dc3545; }
+.required {
+  color: #dc3545;
+}
+.hint {
+  color: #888;
+  font-size: 0.8rem;
+  font-weight: 400;
+}
+.field-error {
+  font-size: 0.78rem;
+  color: #dc3545;
+}
 
 .form-actions {
   display: flex;
   gap: 0.5rem;
   justify-content: flex-end;
   margin-top: 1rem;
-}
-
-// ─── Service history panel — uses shared _section-panels classes ───────────────
-// .history-panel, .history-header, .btn-close, .history-table
-// are all provided by _section-panels.scss.
-// Only the panel wrapper placement is boiler-specific:
-
-.service-history-panel {
-  border-top: 1px solid #e0e0e0;
 }
 
 // ─── Add / Edit boiler form ───────────────────────────────────────────────────

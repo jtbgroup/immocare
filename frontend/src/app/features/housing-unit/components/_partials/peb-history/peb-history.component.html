@@ -37,62 +37,64 @@
   }
 
   @if (!loading && history.length > 0) {
-    <table class="history-table">
-      <thead>
-        <tr>
-          <th>Score</th>
-          <th>Score Date</th>
-          <th>Certificate</th>
-          <th>Valid Until</th>
-          <th>Status</th>
-          <th>Change</th>
-          <th></th>
-        </tr>
-      </thead>
-      <tbody>
-        @for (item of history; track item.id) {
+    <div class="history-table-wrapper">
+      <table class="history-table">
+        <thead>
           <tr>
-            <td>
-              <span
-                class="score-badge"
-                [style.background]="display[item.pebScore].color"
-                [style.color]="display[item.pebScore].textColor"
-              >
-                {{ display[item.pebScore].label }}
-              </span>
-            </td>
-            <td>{{ item.scoreDate }}</td>
-            <td>{{ item.certificateNumber ?? "—" }}</td>
-            <td>{{ item.validUntil ?? "—" }}</td>
-            <td>
-              <span class="status-badge" [ngClass]="statusClass(item.status)">
-                {{ item.status }}
-              </span>
-            </td>
-            <td>
-              <span [ngClass]="improvementClass(rowDirection(item))">
-                {{ improvementIcon(rowDirection(item)) }}
-              </span>
-            </td>
-            <td class="row-actions">
-              <button
-                class="icon-btn-sm"
-                title="Edit"
-                (click)="editRequest.emit(item)"
-              >
-                ✏️
-              </button>
-              <button
-                class="icon-btn-sm icon-btn-delete"
-                title="Delete"
-                (click)="deleteRequest.emit(item)"
-              >
-                🗑️
-              </button>
-            </td>
+            <th>Score</th>
+            <th>Score Date</th>
+            <th>Certificate</th>
+            <th>Valid Until</th>
+            <th>Status</th>
+            <th>Change</th>
+            <th></th>
           </tr>
-        }
-      </tbody>
-    </table>
+        </thead>
+        <tbody>
+          @for (item of history; track item.id) {
+            <tr>
+              <td>
+                <span
+                  class="score-badge"
+                  [style.background]="display[item.pebScore].color"
+                  [style.color]="display[item.pebScore].textColor"
+                >
+                  {{ display[item.pebScore].label }}
+                </span>
+              </td>
+              <td>{{ item.scoreDate }}</td>
+              <td>{{ item.certificateNumber ?? "—" }}</td>
+              <td>{{ item.validUntil ?? "—" }}</td>
+              <td>
+                <span class="status-badge" [ngClass]="statusClass(item.status)">
+                  {{ item.status }}
+                </span>
+              </td>
+              <td>
+                <span [ngClass]="improvementClass(rowDirection(item))">
+                  {{ improvementIcon(rowDirection(item)) }}
+                </span>
+              </td>
+              <td class="row-actions">
+                <button
+                  class="icon-btn-sm"
+                  title="Edit"
+                  (click)="editRequest.emit(item)"
+                >
+                  ✏️
+                </button>
+                <button
+                  class="icon-btn-sm icon-btn-delete"
+                  title="Delete"
+                  (click)="deleteRequest.emit(item)"
+                >
+                  🗑️
+                </button>
+              </td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
   }
 </div>

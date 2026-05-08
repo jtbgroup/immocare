@@ -85,6 +85,10 @@
   }
 }
 
+.embedded-history-panel {
+  margin: 1rem;
+}
+
 .btn-close {
   background: none;
   border: none;
@@ -133,6 +137,11 @@
   tr:last-child td {
     border-bottom: none;
   }
+}
+
+.history-table-wrapper {
+  overflow-x: auto;
+  width: 100%;
 }
 
 // ─── Row action buttons ───────────────────────────────────────────────────────
