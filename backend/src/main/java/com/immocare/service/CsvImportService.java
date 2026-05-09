@@ -52,7 +52,7 @@ public class CsvImportService {
         private final ImportBatchRepository importBatchRepository;
         private final BankAccountRepository bankAccountRepository;
         private final LearningService learningService;
-        private final PlatformConfigService platformConfigService;
+        private final EstateConfigService platformConfigService;
         private final PersonBankAccountRepository personBankAccountRepository;
         private final LeaseRepository leaseRepository;
         private final EstateRepository estateRepository;
@@ -61,7 +61,7 @@ public class CsvImportService {
                         ImportBatchRepository importBatchRepository,
                         BankAccountRepository bankAccountRepository,
                         LearningService learningService,
-                        PlatformConfigService platformConfigService,
+                        EstateConfigService platformConfigService,
                         LeaseRepository leaseRepository,
                         PersonBankAccountRepository personBankAccountRepository,
                         EstateRepository estateRepository) {

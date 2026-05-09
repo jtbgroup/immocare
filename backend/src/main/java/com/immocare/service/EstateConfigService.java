@@ -8,13 +8,13 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.immocare.exception.PlatformConfigNotFoundException;
 import com.immocare.model.dto.EstateConfigDTOs.AssetTypeMappingDTO;
-import com.immocare.model.dto.EstateConfigDTOs.PlatformConfigDTO;
+import com.immocare.model.dto.EstateConfigDTOs.EstateConfigDTO;
+import com.immocare.model.dto.EstateConfigDTOs.EstateConfigSeed;
 import com.immocare.model.dto.EstateConfigDTOs.UpdateAssetTypeMappingRequest;
-import com.immocare.model.dto.EstateConfigDTOs.UpdatePlatformConfigRequest;
+import com.immocare.model.dto.EstateConfigDTOs.UpdateEstateConfigRequest;
 import com.immocare.model.entity.Estate;
-import com.immocare.model.entity.PlatformConfig;
-import com.immocare.repository.EstateRepository;
-import com.immocare.repository.PlatformConfigRepository;
+import com.immocare.model.entity.EstateConfig;
+import com.immocare.repository.EstateConfigRepository;
 import com.immocare.repository.TagSubcategoryRepository;
 
 import lombok.RequiredArgsConstructor;
@@ -27,13 +27,12 @@ import lombok.RequiredArgsConstructor;
 @Service
 @RequiredArgsConstructor
 @Transactional(readOnly = true)
-public class PlatformConfigService {
+public class EstateConfigService {
 
     private static final String ASSET_MAPPING_PREFIX = "asset.type.subcategory.mapping.";
     private static final List<String> ASSET_TYPES = List.of("BOILER", "FIRE_EXTINGUISHER", "METER");
 
-    private final PlatformConfigRepository configRepository;
-    private final EstateRepository estateRepository;
+    private final EstateConfigRepository configRepository;
     private final TagSubcategoryRepository tagSubcategoryRepository;
 
     // ─── READ ─────────────────────────────────────────────────────────────────
@@ -41,7 +40,7 @@ public class PlatformConfigService {
     /**
      * Returns all config entries for the given estate, sorted by key.
      */
-    public List<PlatformConfigDTO> getAllConfigs(UUID estateId) {
+    public List<EstateConfigDTO> getAllConfigs(UUID estateId) {
         return configRepository.findByEstateIdOrderByConfigKeyAsc(estateId)
                 .stream()
                 .map(this::toDTO)
@@ -51,7 +50,7 @@ public class PlatformConfigService {
     /**
      * Returns a single config entry for the given estate and key.
      */
-    public PlatformConfigDTO getConfig(UUID estateId, String key) {
+    public EstateConfigDTO getConfig(UUID estateId, String key) {
         return configRepository.findByEstateIdAndConfigKey(estateId, key)
                 .map(this::toDTO)
                 .orElseThrow(() -> new PlatformConfigNotFoundException(key));
@@ -79,7 +78,7 @@ public class PlatformConfigService {
      */
     public String getStringValue(UUID estateId, String key, String defaultValue) {
         return configRepository.findByEstateIdAndConfigKey(estateId, key)
-                .map(PlatformConfig::getConfigValue)
+                .map(EstateConfig::getConfigValue)
                 .orElse(defaultValue);
     }
 
@@ -104,8 +103,8 @@ public class PlatformConfigService {
      * Updates a single config value for the given estate and key.
      */
     @Transactional
-    public PlatformConfigDTO updateConfig(UUID estateId, String key, UpdatePlatformConfigRequest req) {
-        PlatformConfig config = configRepository.findByEstateIdAndConfigKey(estateId, key)
+    public EstateConfigDTO updateConfig(UUID estateId, String key, UpdateEstateConfigRequest req) {
+        EstateConfig config = configRepository.findByEstateIdAndConfigKey(estateId, key)
                 .orElseThrow(() -> new PlatformConfigNotFoundException(key));
         config.setConfigValue(req.configValue().trim());
         return toDTO(configRepository.save(config));
@@ -125,7 +124,7 @@ public class PlatformConfigService {
         String key = ASSET_MAPPING_PREFIX + assetType.toUpperCase();
         String newValue = req.subcategoryId() != null ? String.valueOf(req.subcategoryId()) : "";
 
-        PlatformConfig config = configRepository.findByEstateIdAndConfigKey(estateId, key)
+        EstateConfig config = configRepository.findByEstateIdAndConfigKey(estateId, key)
                 .orElseThrow(() -> new PlatformConfigNotFoundException(key));
         config.setConfigValue(newValue);
         configRepository.save(config);
@@ -143,9 +142,9 @@ public class PlatformConfigService {
      */
     @Transactional
     public void seedDefaultConfig(Estate estate,
-            List<com.immocare.model.dto.EstateConfigDTOs.PlatformConfigSeed> seeds) {
+            List<EstateConfigSeed> seeds) {
         for (var seed : seeds) {
-            PlatformConfig config = new PlatformConfig();
+            EstateConfig config = new EstateConfig();
             config.setEstate(estate);
             config.setConfigKey(seed.key());
             config.setConfigValue(seed.value());
@@ -157,8 +156,8 @@ public class PlatformConfigService {
 
     // ─── Helpers ──────────────────────────────────────────────────────────────
 
-    private PlatformConfigDTO toDTO(PlatformConfig c) {
-        return new PlatformConfigDTO(
+    private EstateConfigDTO toDTO(EstateConfig c) {
+        return new EstateConfigDTO(
                 c.getEstate().getId(),
                 c.getConfigKey(),
                 c.getConfigValue(),

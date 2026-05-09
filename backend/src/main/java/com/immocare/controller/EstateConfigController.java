@@ -17,11 +17,11 @@ import org.springframework.web.bind.annotation.RestController;
 import com.immocare.model.dto.EstateConfigDTOs.AddBoilerServiceValidityRuleRequest;
 import com.immocare.model.dto.EstateConfigDTOs.AssetTypeMappingDTO;
 import com.immocare.model.dto.EstateConfigDTOs.BoilerServiceValidityRuleDTO;
-import com.immocare.model.dto.EstateConfigDTOs.PlatformConfigDTO;
+import com.immocare.model.dto.EstateConfigDTOs.EstateConfigDTO;
 import com.immocare.model.dto.EstateConfigDTOs.UpdateAssetTypeMappingRequest;
-import com.immocare.model.dto.EstateConfigDTOs.UpdatePlatformConfigRequest;
+import com.immocare.model.dto.EstateConfigDTOs.UpdateEstateConfigRequest;
 import com.immocare.service.BoilerServiceValidityRuleService;
-import com.immocare.service.PlatformConfigService;
+import com.immocare.service.EstateConfigService;
 
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -49,7 +49,7 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public class EstateConfigController {
 
-    private final PlatformConfigService platformConfigService;
+    private final EstateConfigService configService;
     private final BoilerServiceValidityRuleService validityRuleService;
 
     // ─── Platform Settings ────────────────────────────────────────────────────
@@ -60,9 +60,9 @@ public class EstateConfigController {
      */
     @GetMapping("/settings")
     @PreAuthorize("@security.isMemberOf(#estateId)")
-    public ResponseEntity<List<PlatformConfigDTO>> getAllSettings(
+    public ResponseEntity<List<EstateConfigDTO>> getAllSettings(
             @PathVariable UUID estateId) {
-        return ResponseEntity.ok(platformConfigService.getAllConfigs(estateId));
+        return ResponseEntity.ok(configService.getAllConfigs(estateId));
     }
 
     /**
@@ -71,10 +71,10 @@ public class EstateConfigController {
      */
     @GetMapping("/settings/{key}")
     @PreAuthorize("@security.isMemberOf(#estateId)")
-    public ResponseEntity<PlatformConfigDTO> getSetting(
+    public ResponseEntity<EstateConfigDTO> getSetting(
             @PathVariable UUID estateId,
             @PathVariable String key) {
-        return ResponseEntity.ok(platformConfigService.getConfig(estateId, key));
+        return ResponseEntity.ok(configService.getConfig(estateId, key));
     }
 
     /**
@@ -83,11 +83,11 @@ public class EstateConfigController {
      */
     @PutMapping("/settings/{key}")
     @PreAuthorize("@security.isManagerOf(#estateId)")
-    public ResponseEntity<PlatformConfigDTO> updateSetting(
+    public ResponseEntity<EstateConfigDTO> updateSetting(
             @PathVariable UUID estateId,
             @PathVariable String key,
-            @Valid @RequestBody UpdatePlatformConfigRequest req) {
-        return ResponseEntity.ok(platformConfigService.updateConfig(estateId, key, req));
+            @Valid @RequestBody UpdateEstateConfigRequest req) {
+        return ResponseEntity.ok(configService.updateConfig(estateId, key, req));
     }
 
     // ─── Boiler Service Validity Rules ────────────────────────────────────────
@@ -127,7 +127,7 @@ public class EstateConfigController {
     @PreAuthorize("@security.isMemberOf(#estateId)")
     public ResponseEntity<List<AssetTypeMappingDTO>> getAssetTypeMappings(
             @PathVariable UUID estateId) {
-        return ResponseEntity.ok(platformConfigService.getAssetTypeMappings(estateId));
+        return ResponseEntity.ok(configService.getAssetTypeMappings(estateId));
     }
 
     /**
@@ -142,6 +142,6 @@ public class EstateConfigController {
             @PathVariable String assetType,
             @RequestBody UpdateAssetTypeMappingRequest req) {
         return ResponseEntity.ok(
-                platformConfigService.updateAssetTypeMapping(estateId, assetType, req));
+                configService.updateAssetTypeMapping(estateId, assetType, req));
     }
 }

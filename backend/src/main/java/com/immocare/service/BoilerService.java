@@ -38,7 +38,7 @@ public class BoilerService {
     private final BoilerRepository boilerRepository;
     private final HousingUnitRepository housingUnitRepository;
     private final BuildingRepository buildingRepository;
-    private final PlatformConfigService platformConfigService;
+    private final EstateConfigService platformConfigService;
 
     // ─── READ ────────────────────────────────────────────────────────────────
 

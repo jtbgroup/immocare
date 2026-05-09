@@ -66,7 +66,7 @@ public class EstateService {
     private final BoilerRepository boilerRepository;
     private final FireExtinguisherRepository fireExtinguisherRepository;
     private final LeaseService leaseService;
-    private final PlatformConfigService platformConfigService;
+    private final EstateConfigService platformConfigService;
     private final BoilerServiceValidityRuleService validityRuleService;
 
     public EstateService(EstateRepository estateRepository,
@@ -78,7 +78,7 @@ public class EstateService {
             BoilerRepository boilerRepository,
             FireExtinguisherRepository fireExtinguisherRepository,
             LeaseService leaseService,
-            PlatformConfigService platformConfigService,
+            EstateConfigService platformConfigService,
             BoilerServiceValidityRuleService validityRuleService) {
         this.estateRepository = estateRepository;
         this.estateMemberRepository = estateMemberRepository;

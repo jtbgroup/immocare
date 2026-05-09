@@ -35,7 +35,7 @@ public class BoilerServiceHistoryService {
 
     private final BoilerRepository boilerRepository;
     private final BoilerServiceRecordRepository serviceRecordRepository;
-    private final PlatformConfigService platformConfigService;
+    private final EstateConfigService estateConfigService;
     private final BoilerServiceValidityRuleService validityRuleService;
     private final HousingUnitRepository housingUnitRepository;
     private final BuildingRepository buildingRepository;
@@ -137,7 +137,7 @@ public class BoilerServiceHistoryService {
             return ServiceStatus.EXPIRED;
 
         int warningMonths = (estateId != null)
-                ? platformConfigService.getIntValue(
+                ? estateConfigService.getIntValue(
                         estateId,
                         EstateConfigDTOs.KEY_BOILER_ALERT_THRESHOLD_MONTHS,
                         3)
