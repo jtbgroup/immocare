@@ -1,12 +1,27 @@
 package com.immocare.model.entity;
 
-import com.immocare.model.enums.BankAccountType;
-import jakarta.persistence.*;
 import java.time.LocalDateTime;
+
+import com.immocare.model.enums.BankAccountType;
+
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
+import jakarta.persistence.FetchType;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.PrePersist;
+import jakarta.persistence.PreUpdate;
+import jakarta.persistence.Table;
 
 /**
  * Bank account entity.
- * UC004_ESTATE_PLACEHOLDER Phase 4: estate_id added — bank accounts are now scoped to an estate.
+ * UC004_ESTATE_PLACEHOLDER Phase 4: estate_id added — bank accounts are now
+ * scoped to an estate.
  */
 @Entity
 @Table(name = "bank_account")
@@ -43,6 +58,14 @@ public class BankAccount {
     @Column(name = "updated_at", nullable = false)
     private LocalDateTime updatedAt;
 
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "created_by")
+    private AppUser createdBy;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "updated_by")
+    private AppUser updatedBy;
+
     @PrePersist
     protected void onCreate() {
         createdAt = LocalDateTime.now();
@@ -54,24 +77,59 @@ public class BankAccount {
         updatedAt = LocalDateTime.now();
     }
 
-    public Long getId() { return id; }
-    public void setId(Long id) { this.id = id; }
+    public Long getId() {
+        return id;
+    }
 
-    public String getLabel() { return label; }
-    public void setLabel(String label) { this.label = label; }
+    public void setId(Long id) {
+        this.id = id;
+    }
 
-    public String getAccountNumber() { return accountNumber; }
-    public void setAccountNumber(String accountNumber) { this.accountNumber = accountNumber; }
+    public String getLabel() {
+        return label;
+    }
 
-    public BankAccountType getType() { return type; }
-    public void setType(BankAccountType type) { this.type = type; }
+    public void setLabel(String label) {
+        this.label = label;
+    }
 
-    public boolean isActive() { return isActive; }
-    public void setActive(boolean active) { isActive = active; }
+    public String getAccountNumber() {
+        return accountNumber;
+    }
 
-    public Estate getEstate() { return estate; }
-    public void setEstate(Estate estate) { this.estate = estate; }
+    public void setAccountNumber(String accountNumber) {
+        this.accountNumber = accountNumber;
+    }
 
-    public LocalDateTime getCreatedAt() { return createdAt; }
-    public LocalDateTime getUpdatedAt() { return updatedAt; }
+    public BankAccountType getType() {
+        return type;
+    }
+
+    public void setType(BankAccountType type) {
+        this.type = type;
+    }
+
+    public boolean isActive() {
+        return isActive;
+    }
+
+    public void setActive(boolean active) {
+        isActive = active;
+    }
+
+    public Estate getEstate() {
+        return estate;
+    }
+
+    public void setEstate(Estate estate) {
+        this.estate = estate;
+    }
+
+    public LocalDateTime getCreatedAt() {
+        return createdAt;
+    }
+
+    public LocalDateTime getUpdatedAt() {
+        return updatedAt;
+    }
 }

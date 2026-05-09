@@ -335,7 +335,7 @@ seed-real: ## 🌱 Seed real data (prod)
 	@scripts/seed.sh $${URL:-http://localhost:8081} admin admin123 scripts/real-data
 
 seed-cleandata-real: ## 🌱 Seed real data after reset (dev)
-	@$(MAKE) reset-postgres
+	@$(MAKE) seed-reset-postgres
 	@$(MAKE) seed-real
 
 seed-cleandata-demo: ## 🌱 Seed demo data after reset (dev)

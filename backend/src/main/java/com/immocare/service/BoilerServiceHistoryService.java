@@ -11,7 +11,7 @@ import com.immocare.exception.BoilerNotFoundException;
 import com.immocare.model.dto.BoilerServiceDTOs.AddBoilerServiceRecordRequest;
 import com.immocare.model.dto.BoilerServiceDTOs.BoilerServiceRecordDTO;
 import com.immocare.model.dto.BoilerServiceDTOs.ServiceStatus;
-import com.immocare.model.dto.EstatePlatformConfigDTOs;
+import com.immocare.model.dto.EstateConfigDTOs;
 import com.immocare.model.entity.Boiler;
 import com.immocare.model.entity.BoilerServiceRecord;
 import com.immocare.repository.BoilerRepository;
@@ -22,8 +22,10 @@ import com.immocare.repository.HousingUnitRepository;
 import lombok.RequiredArgsConstructor;
 
 /**
- * Business logic for boiler maintenance history — UC012 (UC011.005/UC011.006/UC011.007).
- * UC004_ESTATE_PLACEHOLDER Phase 5: valid_until calculation now uses estate-scoped validity rules.
+ * Business logic for boiler maintenance history — UC012
+ * (UC011.005/UC011.006/UC011.007).
+ * UC004_ESTATE_PLACEHOLDER Phase 5: valid_until calculation now uses
+ * estate-scoped validity rules.
  * Alert threshold is now read from estate-scoped platform config.
  */
 @Service
@@ -104,7 +106,7 @@ public class BoilerServiceHistoryService {
     /**
      * Resolves the estate UUID from the boiler's polymorphic owner chain.
      * HOUSING_UNIT: boiler.ownerId → housing_unit → building → estate
-     * BUILDING:     boiler.ownerId → building → estate
+     * BUILDING: boiler.ownerId → building → estate
      * Returns null if resolution fails; config lookups then use default values.
      */
     private UUID resolveEstateIdFromBoiler(Boiler boiler) {
@@ -131,12 +133,13 @@ public class BoilerServiceHistoryService {
      */
     private ServiceStatus computeStatus(UUID estateId, LocalDate validUntil) {
         LocalDate today = LocalDate.now();
-        if (validUntil.isBefore(today)) return ServiceStatus.EXPIRED;
+        if (validUntil.isBefore(today))
+            return ServiceStatus.EXPIRED;
 
         int warningMonths = (estateId != null)
                 ? platformConfigService.getIntValue(
                         estateId,
-                        EstatePlatformConfigDTOs.KEY_BOILER_ALERT_THRESHOLD_MONTHS,
+                        EstateConfigDTOs.KEY_BOILER_ALERT_THRESHOLD_MONTHS,
                         3)
                 : 3;
 

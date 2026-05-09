@@ -19,7 +19,7 @@ import org.springframework.web.multipart.MultipartFile;
 import com.immocare.exception.EstateNotFoundException;
 import com.immocare.model.dto.AccountingMonthSuggestionDTO;
 import com.immocare.model.dto.CsvMappingConfig;
-import com.immocare.model.dto.EstatePlatformConfigDTOs;
+import com.immocare.model.dto.EstateConfigDTOs;
 import com.immocare.model.dto.ImportBatchResultDTO;
 import com.immocare.model.dto.ParsedCsvRow;
 import com.immocare.model.dto.SubcategorySuggestionDTO;
@@ -83,27 +83,27 @@ public class CsvImportService {
         public CsvMappingConfig loadMappingConfig(UUID estateId) {
                 return new CsvMappingConfig(
                                 platformConfigService.getStringValue(estateId,
-                                                EstatePlatformConfigDTOs.KEY_CSV_DELIMITER, ";"),
+                                                EstateConfigDTOs.KEY_CSV_DELIMITER, ";"),
                                 platformConfigService.getStringValue(estateId,
-                                                EstatePlatformConfigDTOs.KEY_CSV_DATE_FORMAT, "dd/MM/yyyy"),
+                                                EstateConfigDTOs.KEY_CSV_DATE_FORMAT, "dd/MM/yyyy"),
                                 platformConfigService.getIntValue(estateId,
-                                                EstatePlatformConfigDTOs.KEY_CSV_SKIP_HEADER_ROWS, 1),
+                                                EstateConfigDTOs.KEY_CSV_SKIP_HEADER_ROWS, 1),
                                 platformConfigService.getIntValue(estateId,
-                                                EstatePlatformConfigDTOs.KEY_CSV_COL_DATE, 0),
+                                                EstateConfigDTOs.KEY_CSV_COL_DATE, 0),
                                 platformConfigService.getIntValue(estateId,
-                                                EstatePlatformConfigDTOs.KEY_CSV_COL_AMOUNT, 1),
+                                                EstateConfigDTOs.KEY_CSV_COL_AMOUNT, 1),
                                 platformConfigService.getIntValue(estateId,
-                                                EstatePlatformConfigDTOs.KEY_CSV_COL_DESCRIPTION, 2),
+                                                EstateConfigDTOs.KEY_CSV_COL_DESCRIPTION, 2),
                                 platformConfigService.getIntValue(estateId,
-                                                EstatePlatformConfigDTOs.KEY_CSV_COL_COUNTERPARTY_ACCOUNT, 3),
+                                                EstateConfigDTOs.KEY_CSV_COL_COUNTERPARTY_ACCOUNT, 3),
                                 platformConfigService.getIntValue(estateId,
-                                                EstatePlatformConfigDTOs.KEY_CSV_COL_EXTERNAL_REFERENCE, 4),
+                                                EstateConfigDTOs.KEY_CSV_COL_EXTERNAL_REFERENCE, 4),
                                 platformConfigService.getIntValue(estateId,
-                                                EstatePlatformConfigDTOs.KEY_CSV_COL_BANK_ACCOUNT, 5),
+                                                EstateConfigDTOs.KEY_CSV_COL_BANK_ACCOUNT, 5),
                                 platformConfigService.getIntValue(estateId,
-                                                EstatePlatformConfigDTOs.KEY_CSV_COL_VALUE_DATE, -1),
+                                                EstateConfigDTOs.KEY_CSV_COL_VALUE_DATE, -1),
                                 platformConfigService.getIntValue(estateId,
-                                                EstatePlatformConfigDTOs.KEY_CSV_SUGGESTION_CONFIDENCE, 3));
+                                                EstateConfigDTOs.KEY_CSV_SUGGESTION_CONFIDENCE, 3));
         }
 
         public List<ParsedCsvRow> parsePreview(MultipartFile file, CsvMappingConfig config) {

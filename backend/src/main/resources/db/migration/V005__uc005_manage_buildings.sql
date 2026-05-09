@@ -14,6 +14,7 @@ CREATE TABLE building (
     estate_id      UUID NOT NULL REFERENCES estate(id),
     created_by     BIGINT       NULL REFERENCES app_user (id) ON DELETE SET NULL,
     created_at     TIMESTAMP    NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_by     BIGINT       NULL REFERENCES app_user (id) ON DELETE SET NULL,
     updated_at     TIMESTAMP    NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
 

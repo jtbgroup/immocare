@@ -8,7 +8,9 @@ CREATE TABLE room (
     housing_unit_id     BIGINT       NOT NULL REFERENCES housing_unit (id) ON DELETE CASCADE,
     room_type           VARCHAR(20)  NOT NULL,
     approximate_surface DECIMAL(6,2) NOT NULL,
+    created_by          BIGINT REFERENCES app_user(id) ON DELETE SET NULL,
     created_at          TIMESTAMP    NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_by          BIGINT REFERENCES app_user(id) ON DELETE SET NULL,
     updated_at          TIMESTAMP    NOT NULL DEFAULT CURRENT_TIMESTAMP,
 
     CONSTRAINT chk_room_approximate_surface CHECK (approximate_surface > 0 AND approximate_surface < 1000),

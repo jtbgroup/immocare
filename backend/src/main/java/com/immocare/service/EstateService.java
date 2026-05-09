@@ -18,6 +18,7 @@ import com.immocare.exception.EstateNotFoundException;
 import com.immocare.exception.EstateSelfOperationException;
 import com.immocare.exception.NoManagerInMembersException;
 import com.immocare.exception.UserNotFoundException;
+import com.immocare.model.dto.EstateConfigDTOs;
 import com.immocare.model.dto.EstateDTOs.AddEstateMemberRequest;
 import com.immocare.model.dto.EstateDTOs.CreateEstateRequest;
 import com.immocare.model.dto.EstateDTOs.EstateDTO;
@@ -28,7 +29,6 @@ import com.immocare.model.dto.EstateDTOs.EstatePendingAlertsDTO;
 import com.immocare.model.dto.EstateDTOs.EstateSummaryDTO;
 import com.immocare.model.dto.EstateDTOs.UpdateEstateMemberRoleRequest;
 import com.immocare.model.dto.EstateDTOs.UpdateEstateRequest;
-import com.immocare.model.dto.EstatePlatformConfigDTOs;
 import com.immocare.model.dto.LeaseAlertDTO;
 import com.immocare.model.entity.AppUser;
 import com.immocare.model.entity.Estate;
@@ -48,8 +48,9 @@ import com.immocare.repository.UserRepository;
  * Service for Estate management.
  *
  * Key changes vs Phase 1:
- * - {@link #createEstate} now accepts a {@code members} list (replacing the single
- *   {@code firstManagerId}) and enforces BR-UC003-02 (at least one MANAGER).
+ * - {@link #createEstate} now accepts a {@code members} list (replacing the
+ * single
+ * {@code firstManagerId}) and enforces BR-UC003-02 (at least one MANAGER).
  * - {@link #updateEstateByManager} added for estate-scoped MANAGER access.
  */
 @Service
@@ -220,14 +221,15 @@ public class EstateService {
     // ─── Admin mutations ──────────────────────────────────────────────────────
 
     /**
-     * Creates a new estate and bulk-adds the provided members in the same transaction.
+     * Creates a new estate and bulk-adds the provided members in the same
+     * transaction.
      *
      * Business rules enforced:
      * <ul>
-     *   <li>BR-UC003-01: estate name must be unique (case-insensitive)</li>
-     *   <li>BR-UC003-02: if a members list is provided and non-empty, it must
-     *       contain at least one entry with role MANAGER</li>
-     *   <li>Duplicate userIds within the members list are rejected</li>
+     * <li>BR-UC003-01: estate name must be unique (case-insensitive)</li>
+     * <li>BR-UC003-02: if a members list is provided and non-empty, it must
+     * contain at least one entry with role MANAGER</li>
+     * <li>Duplicate userIds within the members list are rejected</li>
      * </ul>
      */
     @Transactional
@@ -255,7 +257,7 @@ public class EstateService {
         Estate saved = estateRepository.save(estate);
 
         // Seed default platform config and boiler validity rule
-        platformConfigService.seedDefaultConfig(saved, EstatePlatformConfigDTOs.DEFAULT_CONFIG);
+        platformConfigService.seedDefaultConfig(saved, EstateConfigDTOs.DEFAULT_CONFIG);
         validityRuleService.seedDefaultRule(saved);
 
         // Bulk-add members preserving order; detect duplicates
@@ -308,14 +310,15 @@ public class EstateService {
     private int computeBoilerAlerts(UUID estateId) {
         int warningMonths = platformConfigService.getIntValue(
                 estateId,
-                EstatePlatformConfigDTOs.KEY_BOILER_ALERT_THRESHOLD_MONTHS,
+                EstateConfigDTOs.KEY_BOILER_ALERT_THRESHOLD_MONTHS,
                 3);
         LocalDate threshold = LocalDate.now().plusMonths(warningMonths);
 
         return (int) boilerRepository.findActiveByEstateId(estateId)
                 .stream()
                 .filter(b -> {
-                    if (b.getNextServiceDate() == null) return false;
+                    if (b.getNextServiceDate() == null)
+                        return false;
                     return b.getNextServiceDate().isBefore(threshold);
                 })
                 .count();
@@ -326,7 +329,8 @@ public class EstateService {
         return (int) fireExtinguisherRepository.findByBuildingEstateId(estateId)
                 .stream()
                 .filter(ext -> {
-                    if (ext.getRevisions().isEmpty()) return true;
+                    if (ext.getRevisions().isEmpty())
+                        return true;
                     LocalDate latest = ext.getRevisions().get(0).getRevisionDate();
                     return latest.isBefore(oneYearAgo);
                 })

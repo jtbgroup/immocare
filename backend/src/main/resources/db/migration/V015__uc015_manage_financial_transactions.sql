@@ -17,7 +17,9 @@ CREATE TABLE bank_account (
     is_active      BOOLEAN      NOT NULL DEFAULT TRUE,
     owner_user_id  BIGINT       REFERENCES app_user (id) ON DELETE SET NULL,
     estate_id      UUID NOT NULL REFERENCES estate(id),
+    created_by     BIGINT REFERENCES app_user(id) ON DELETE SET NULL,
     created_at     TIMESTAMP    NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_by     BIGINT REFERENCES app_user(id) ON DELETE SET NULL,
     updated_at     TIMESTAMP    NOT NULL DEFAULT CURRENT_TIMESTAMP,
 
     CONSTRAINT uq_bank_account_number_estate UNIQUE (account_number, estate_id)
@@ -31,7 +33,9 @@ CREATE TABLE tag_category (
     name        VARCHAR(100) NOT NULL,
     description TEXT,
     estate_id   UUID NOT NULL REFERENCES estate(id),
+    created_by  BIGINT REFERENCES app_user(id) ON DELETE SET NULL,
     created_at  TIMESTAMP    NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_by  BIGINT REFERENCES app_user(id) ON DELETE SET NULL,
     updated_at  TIMESTAMP    NOT NULL DEFAULT CURRENT_TIMESTAMP,
 
     CONSTRAINT uq_tag_category_name UNIQUE (name)
@@ -44,7 +48,10 @@ CREATE TABLE tag_subcategory (
     name        VARCHAR(100) NOT NULL,
     direction   VARCHAR(10)  NOT NULL CHECK (direction IN ('INCOME','EXPENSE','BOTH')),
     description TEXT,
+    
+    created_by  BIGINT REFERENCES app_user(id) ON DELETE SET NULL,
     created_at  TIMESTAMP    NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_by  BIGINT REFERENCES app_user(id) ON DELETE SET NULL,
     updated_at  TIMESTAMP    NOT NULL DEFAULT CURRENT_TIMESTAMP,
 
     CONSTRAINT uq_tag_subcategory_name_category UNIQUE (category_id, name)
@@ -108,7 +115,9 @@ CREATE TABLE financial_transaction (
     import_batch_id      BIGINT         REFERENCES import_batch (id)     ON DELETE SET NULL,
     parser_id            BIGINT         REFERENCES import_parser (id)    ON DELETE SET NULL,
     estate_id            UUID NOT NULL REFERENCES estate(id),
+    created_by           BIGINT         REFERENCES app_user(id) ON DELETE SET NULL,
     created_at           TIMESTAMP      NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_by           BIGINT         REFERENCES app_user(id) ON DELETE SET NULL,
     updated_at           TIMESTAMP      NOT NULL DEFAULT CURRENT_TIMESTAMP,
 
     CONSTRAINT uq_financial_transaction_reference UNIQUE (reference)

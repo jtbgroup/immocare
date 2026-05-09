@@ -12,7 +12,7 @@ import com.immocare.exception.BoilerNotFoundException;
 import com.immocare.exception.BuildingNotFoundException;
 import com.immocare.exception.HousingUnitNotFoundException;
 import com.immocare.model.dto.BoilerDTO;
-import com.immocare.model.dto.EstatePlatformConfigDTOs;
+import com.immocare.model.dto.EstateConfigDTOs;
 import com.immocare.model.dto.SaveBoilerRequest;
 import com.immocare.model.entity.Boiler;
 import com.immocare.repository.BoilerRepository;
@@ -23,7 +23,8 @@ import lombok.RequiredArgsConstructor;
 
 /**
  * Business logic for UC012 — Manage Boilers.
- * UC004_ESTATE_PLACEHOLDER Phase 5: alert threshold is now read from estate-scoped platform config.
+ * UC004_ESTATE_PLACEHOLDER Phase 5: alert threshold is now read from
+ * estate-scoped platform config.
  */
 @Service
 @RequiredArgsConstructor
@@ -63,7 +64,8 @@ public class BoilerService {
     /**
      * Returns all boilers with service due within the configured warning window
      * for the given estate.
-     * UC004_ESTATE_PLACEHOLDER Phase 5: estate-scoped threshold replaces global config.
+     * UC004_ESTATE_PLACEHOLDER Phase 5: estate-scoped threshold replaces global
+     * config.
      */
     public List<BoilerDTO> getServiceAlerts(UUID estateId) {
         int warningMonths = getWarningMonths(estateId);
@@ -122,10 +124,11 @@ public class BoilerService {
     // ─── Helpers ─────────────────────────────────────────────────────────────
 
     private int getWarningMonths(UUID estateId) {
-        if (estateId == null) return DEFAULT_WARNING_MONTHS;
+        if (estateId == null)
+            return DEFAULT_WARNING_MONTHS;
         return platformConfigService.getIntValue(
                 estateId,
-                EstatePlatformConfigDTOs.KEY_BOILER_ALERT_THRESHOLD_MONTHS,
+                EstateConfigDTOs.KEY_BOILER_ALERT_THRESHOLD_MONTHS,
                 DEFAULT_WARNING_MONTHS);
     }
 
@@ -141,7 +144,8 @@ public class BoilerService {
                         .map(b -> b.getEstate().getId())
                         .orElse(null);
             }
-        } catch (Exception ignored) {}
+        } catch (Exception ignored) {
+        }
         return null;
     }
 

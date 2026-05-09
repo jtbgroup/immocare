@@ -54,6 +54,10 @@ public class Building {
     @JoinColumn(name = "created_by")
     private AppUser createdBy;
 
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "updated_by")
+    private AppUser updatedBy;
+
     @Column(name = "created_at", nullable = false, updatable = false)
     private LocalDateTime createdAt;
 
@@ -153,6 +157,14 @@ public class Building {
 
     public void setCreatedAt(LocalDateTime createdAt) {
         this.createdAt = createdAt;
+    }
+
+    public void setUpdatedBy(AppUser updatedBy) {
+        this.updatedBy = updatedBy;
+    }
+
+    public AppUser getUpdatedBy() {
+        return updatedBy;
     }
 
     public LocalDateTime getUpdatedAt() {

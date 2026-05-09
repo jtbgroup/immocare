@@ -7,10 +7,10 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.immocare.exception.PlatformConfigNotFoundException;
-import com.immocare.model.dto.EstatePlatformConfigDTOs.AssetTypeMappingDTO;
-import com.immocare.model.dto.EstatePlatformConfigDTOs.PlatformConfigDTO;
-import com.immocare.model.dto.EstatePlatformConfigDTOs.UpdateAssetTypeMappingRequest;
-import com.immocare.model.dto.EstatePlatformConfigDTOs.UpdatePlatformConfigRequest;
+import com.immocare.model.dto.EstateConfigDTOs.AssetTypeMappingDTO;
+import com.immocare.model.dto.EstateConfigDTOs.PlatformConfigDTO;
+import com.immocare.model.dto.EstateConfigDTOs.UpdateAssetTypeMappingRequest;
+import com.immocare.model.dto.EstateConfigDTOs.UpdatePlatformConfigRequest;
 import com.immocare.model.entity.Estate;
 import com.immocare.model.entity.PlatformConfig;
 import com.immocare.repository.EstateRepository;
@@ -20,7 +20,8 @@ import com.immocare.repository.TagSubcategoryRepository;
 import lombok.RequiredArgsConstructor;
 
 /**
- * Business logic for UC004_ESTATE_PLACEHOLDER Phase 5 — per-estate Platform Configuration.
+ * Business logic for UC004_ESTATE_PLACEHOLDER Phase 5 — per-estate Platform
+ * Configuration.
  * All operations require an estateId — there are no global config reads.
  */
 @Service
@@ -142,7 +143,7 @@ public class PlatformConfigService {
      */
     @Transactional
     public void seedDefaultConfig(Estate estate,
-            List<com.immocare.model.dto.EstatePlatformConfigDTOs.PlatformConfigSeed> seeds) {
+            List<com.immocare.model.dto.EstateConfigDTOs.PlatformConfigSeed> seeds) {
         for (var seed : seeds) {
             PlatformConfig config = new PlatformConfig();
             config.setEstate(estate);

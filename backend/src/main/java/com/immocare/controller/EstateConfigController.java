@@ -14,12 +14,12 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.immocare.model.dto.EstatePlatformConfigDTOs.AddBoilerServiceValidityRuleRequest;
-import com.immocare.model.dto.EstatePlatformConfigDTOs.AssetTypeMappingDTO;
-import com.immocare.model.dto.EstatePlatformConfigDTOs.BoilerServiceValidityRuleDTO;
-import com.immocare.model.dto.EstatePlatformConfigDTOs.PlatformConfigDTO;
-import com.immocare.model.dto.EstatePlatformConfigDTOs.UpdateAssetTypeMappingRequest;
-import com.immocare.model.dto.EstatePlatformConfigDTOs.UpdatePlatformConfigRequest;
+import com.immocare.model.dto.EstateConfigDTOs.AddBoilerServiceValidityRuleRequest;
+import com.immocare.model.dto.EstateConfigDTOs.AssetTypeMappingDTO;
+import com.immocare.model.dto.EstateConfigDTOs.BoilerServiceValidityRuleDTO;
+import com.immocare.model.dto.EstateConfigDTOs.PlatformConfigDTO;
+import com.immocare.model.dto.EstateConfigDTOs.UpdateAssetTypeMappingRequest;
+import com.immocare.model.dto.EstateConfigDTOs.UpdatePlatformConfigRequest;
 import com.immocare.service.BoilerServiceValidityRuleService;
 import com.immocare.service.PlatformConfigService;
 
@@ -27,19 +27,22 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 
 /**
- * REST controller for per-estate platform configuration and boiler validity rules.
- * UC004_ESTATE_PLACEHOLDER Phase 5 — replaces the global PlatformConfigController for all estate-scoped routes.
+ * REST controller for per-estate platform configuration and boiler validity
+ * rules.
+ * UC004_ESTATE_PLACEHOLDER Phase 5 — replaces the global
+ * PlatformConfigController for all estate-scoped routes.
  *
  * All endpoints are under /api/v1/estates/{estateId}/config/.
  * VIEWER access on GET endpoints; MANAGER required for mutations.
  *
  * Endpoints:
- *   GET    /api/v1/estates/{estateId}/config/settings                         → UC013.001
- *   PUT    /api/v1/estates/{estateId}/config/settings/{key}                   → UC013.004
- *   GET    /api/v1/estates/{estateId}/config/boiler-validity-rules            → UC013.003
- *   POST   /api/v1/estates/{estateId}/config/boiler-validity-rules            → UC013.002
- *   GET    /api/v1/estates/{estateId}/config/asset-type-mappings              → UC012.001
- *   PUT    /api/v1/estates/{estateId}/config/asset-type-mappings/{assetType}  → UC012.001
+ * GET /api/v1/estates/{estateId}/config/settings → UC013.001
+ * PUT /api/v1/estates/{estateId}/config/settings/{key} → UC013.004
+ * GET /api/v1/estates/{estateId}/config/boiler-validity-rules → UC013.003
+ * POST /api/v1/estates/{estateId}/config/boiler-validity-rules → UC013.002
+ * GET /api/v1/estates/{estateId}/config/asset-type-mappings → UC012.001
+ * PUT /api/v1/estates/{estateId}/config/asset-type-mappings/{assetType} →
+ * UC012.001
  */
 @RestController
 @RequestMapping("/api/v1/estates/{estateId}/config")

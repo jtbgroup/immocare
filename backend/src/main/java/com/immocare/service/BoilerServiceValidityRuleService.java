@@ -9,8 +9,8 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.immocare.exception.BoilerValidityRuleDuplicateException;
 import com.immocare.exception.EstateNotFoundException;
-import com.immocare.model.dto.EstatePlatformConfigDTOs.AddBoilerServiceValidityRuleRequest;
-import com.immocare.model.dto.EstatePlatformConfigDTOs.BoilerServiceValidityRuleDTO;
+import com.immocare.model.dto.EstateConfigDTOs.AddBoilerServiceValidityRuleRequest;
+import com.immocare.model.dto.EstateConfigDTOs.BoilerServiceValidityRuleDTO;
 import com.immocare.model.entity.BoilerServiceValidityRule;
 import com.immocare.model.entity.Estate;
 import com.immocare.repository.BoilerServiceValidityRuleRepository;
@@ -19,7 +19,8 @@ import com.immocare.repository.EstateRepository;
 import lombok.RequiredArgsConstructor;
 
 /**
- * Business logic for boiler service validity rules — UC004_ESTATE_PLACEHOLDER Phase 5.
+ * Business logic for boiler service validity rules — UC004_ESTATE_PLACEHOLDER
+ * Phase 5.
  * All operations are scoped to an estate.
  * Rules are append-only: once added, they are never modified or deleted.
  */
@@ -45,7 +46,8 @@ public class BoilerServiceValidityRuleService {
 
     /**
      * Calculates the valid_until date for a service performed on the given date,
-     * using the applicable estate-scoped rule (most recent rule with valid_from <= serviceDate).
+     * using the applicable estate-scoped rule (most recent rule with valid_from <=
+     * serviceDate).
      * Falls back to 24 months if no rule is found.
      */
     public LocalDate calculateValidUntil(UUID estateId, LocalDate serviceDate) {

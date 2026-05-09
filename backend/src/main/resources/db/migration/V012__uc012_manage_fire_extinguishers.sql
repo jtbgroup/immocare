@@ -9,7 +9,9 @@ CREATE TABLE fire_extinguisher (
     unit_id               BIGINT      NULL     REFERENCES housing_unit (id) ON DELETE SET NULL,
     identification_number VARCHAR(50) NOT NULL,
     notes                 TEXT        NULL,
+    created_by BIGINT REFERENCES app_user(id) ON DELETE SET NULL
     created_at            TIMESTAMP   NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_by BIGINT REFERENCES app_user(id) ON DELETE SET NULL
     updated_at            TIMESTAMP   NOT NULL DEFAULT CURRENT_TIMESTAMP,
 
     CONSTRAINT uq_extinguisher_number UNIQUE (building_id, identification_number)

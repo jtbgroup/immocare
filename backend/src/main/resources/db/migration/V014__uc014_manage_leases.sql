@@ -34,7 +34,9 @@ CREATE TABLE lease (
     tenant_insurance_confirmed    BOOLEAN       NOT NULL DEFAULT FALSE,
     tenant_insurance_reference    VARCHAR(100)  NULL,
     tenant_insurance_expiry       DATE          NULL,
+    created_by                    BIGINT REFERENCES app_user(id) ON DELETE SET NULL,
     created_at                    TIMESTAMP     NOT NULL DEFAULT NOW(),
+    updated_by BIGINT REFERENCES app_user(id) ON DELETE SET NULL,
     updated_at                    TIMESTAMP     NOT NULL DEFAULT NOW(),
 
     CONSTRAINT chk_lease_status    CHECK (status      IN ('DRAFT','ACTIVE','FINISHED','CANCELLED')),

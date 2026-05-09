@@ -4,12 +4,12 @@ package com.immocare.model.dto;
  * Legacy placeholder — UC004_ESTATE_PLACEHOLDER Phase 5.
  *
  * All platform configuration is now per-estate.
- * Use {@link EstatePlatformConfigDTOs} for all config operations.
+ * Use {@link EstateConfigDTOs} for all config operations.
  *
  * This class is retained only to avoid compile errors in any files not yet
  * migrated. Remove it once all references have been updated.
  *
- * @deprecated Use {@link EstatePlatformConfigDTOs} instead.
+ * @deprecated Use {@link EstateConfigDTOs} instead.
  */
 @Deprecated(since = "UC004_ESTATE_PLACEHOLDER-Phase5", forRemoval = true)
 public final class PlatformConfigDTOs {
@@ -22,13 +22,13 @@ public final class PlatformConfigDTOs {
 
         /**
          * @deprecated Use
-         *             {@link EstatePlatformConfigDTOs#KEY_BOILER_ALERT_THRESHOLD_MONTHS}
+         *             {@link EstateConfigDTOs#KEY_BOILER_ALERT_THRESHOLD_MONTHS}
          */
         @Deprecated
         public static final String KEY_PEB_EXPIRY_WARNING_DAYS = "peb_expiry_warning_days";
         /**
          * @deprecated Use
-         *             {@link EstatePlatformConfigDTOs#KEY_BOILER_ALERT_THRESHOLD_MONTHS}
+         *             {@link EstateConfigDTOs#KEY_BOILER_ALERT_THRESHOLD_MONTHS}
          */
         @Deprecated
         public static final String KEY_BOILER_SERVICE_WARNING_DAYS = "boiler.service.alert.threshold.months";

@@ -47,12 +47,7 @@ public class FireExtinguisher {
     @Column(columnDefinition = "TEXT")
     private String notes;
 
-    @OneToMany(
-        mappedBy = "fireExtinguisher",
-        cascade = CascadeType.ALL,
-        orphanRemoval = true,
-        fetch = FetchType.LAZY
-    )
+    @OneToMany(mappedBy = "fireExtinguisher", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
     @OrderBy("revisionDate DESC, createdAt DESC")
     private List<FireExtinguisherRevision> revisions = new ArrayList<>();
 
@@ -61,6 +56,14 @@ public class FireExtinguisher {
 
     @Column(name = "updated_at", nullable = false)
     private LocalDateTime updatedAt;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "created_by")
+    private AppUser createdBy;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "updated_by")
+    private AppUser updatedBy;
 
     @PrePersist
     protected void onCreate() {

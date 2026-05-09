@@ -17,7 +17,9 @@ CREATE TABLE person (
     city           VARCHAR(100) NULL,
     country        VARCHAR(100) NULL DEFAULT 'Belgium',
     estate_id      UUID NOT NULL REFERENCES estate(id),
+    created_by     BIGINT REFERENCES app_user(id) ON DELETE SET NULL,
     created_at     TIMESTAMP    NOT NULL DEFAULT NOW(),
+    updated_by     BIGINT REFERENCES app_user(id) ON DELETE SET NULL,
     updated_at     TIMESTAMP    NOT NULL DEFAULT NOW()
 );
 

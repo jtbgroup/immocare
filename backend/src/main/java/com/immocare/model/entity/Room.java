@@ -1,5 +1,8 @@
 package com.immocare.model.entity;
 
+import java.math.BigDecimal;
+import java.time.LocalDateTime;
+
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
@@ -11,8 +14,6 @@ import jakarta.persistence.ManyToOne;
 import jakarta.persistence.PrePersist;
 import jakarta.persistence.PreUpdate;
 import jakarta.persistence.Table;
-import java.math.BigDecimal;
-import java.time.LocalDateTime;
 
 /**
  * JPA entity representing a room within a housing unit.
@@ -41,6 +42,13 @@ public class Room {
 
   @Column(name = "updated_at", nullable = false)
   private LocalDateTime updatedAt;
+  @ManyToOne(fetch = FetchType.LAZY)
+  @JoinColumn(name = "created_by")
+  private AppUser createdBy;
+
+  @ManyToOne(fetch = FetchType.LAZY)
+  @JoinColumn(name = "updated_by")
+  private AppUser updatedBy;
 
   @PrePersist
   protected void onCreate() {
@@ -55,23 +63,51 @@ public class Room {
 
   // ─── Getters / Setters ───────────────────────────────────────────────────────
 
-  public Long getId() { return id; }
-  public void setId(Long id) { this.id = id; }
+  public Long getId() {
+    return id;
+  }
 
-  public HousingUnit getHousingUnit() { return housingUnit; }
-  public void setHousingUnit(HousingUnit housingUnit) { this.housingUnit = housingUnit; }
+  public void setId(Long id) {
+    this.id = id;
+  }
 
-  public String getRoomType() { return roomType; }
-  public void setRoomType(String roomType) { this.roomType = roomType; }
+  public HousingUnit getHousingUnit() {
+    return housingUnit;
+  }
 
-  public BigDecimal getApproximateSurface() { return approximateSurface; }
+  public void setHousingUnit(HousingUnit housingUnit) {
+    this.housingUnit = housingUnit;
+  }
+
+  public String getRoomType() {
+    return roomType;
+  }
+
+  public void setRoomType(String roomType) {
+    this.roomType = roomType;
+  }
+
+  public BigDecimal getApproximateSurface() {
+    return approximateSurface;
+  }
+
   public void setApproximateSurface(BigDecimal approximateSurface) {
     this.approximateSurface = approximateSurface;
   }
 
-  public LocalDateTime getCreatedAt() { return createdAt; }
-  public void setCreatedAt(LocalDateTime createdAt) { this.createdAt = createdAt; }
+  public LocalDateTime getCreatedAt() {
+    return createdAt;
+  }
 
-  public LocalDateTime getUpdatedAt() { return updatedAt; }
-  public void setUpdatedAt(LocalDateTime updatedAt) { this.updatedAt = updatedAt; }
+  public void setCreatedAt(LocalDateTime createdAt) {
+    this.createdAt = createdAt;
+  }
+
+  public LocalDateTime getUpdatedAt() {
+    return updatedAt;
+  }
+
+  public void setUpdatedAt(LocalDateTime updatedAt) {
+    this.updatedAt = updatedAt;
+  }
 }

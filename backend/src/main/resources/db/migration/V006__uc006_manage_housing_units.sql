@@ -19,6 +19,7 @@ CREATE TABLE housing_unit (
     owner_id            BIGINT        NULL REFERENCES person (id) ON DELETE SET NULL,
     created_by          BIGINT        NULL REFERENCES app_user (id) ON DELETE SET NULL,
     created_at          TIMESTAMP     NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_by          BIGINT        NULL REFERENCES app_user (id) ON DELETE SET NULL,
     updated_at          TIMESTAMP     NOT NULL DEFAULT CURRENT_TIMESTAMP,
 
     CONSTRAINT uq_housing_unit_number  UNIQUE (building_id, unit_number),
