@@ -22,7 +22,8 @@ package com.immocare.controller;
  * It is a non-functional placeholder that compiles cleanly so the build
  * does not break during the migration step.
  *
- * @deprecated Removed in UC004_ESTATE_PLACEHOLDER Phase 5. Use {@link EstateConfigController}.
+ * @deprecated Removed in UC004_ESTATE_PLACEHOLDER Phase 5. Use
+ *             {@link EstateConfigController}.
  */
 @Deprecated(since = "UC004_ESTATE_PLACEHOLDER-Phase5", forRemoval = true)
 public class PlatformConfigController {

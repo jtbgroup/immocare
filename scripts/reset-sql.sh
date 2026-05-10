@@ -118,6 +118,10 @@ DO \$\$ BEGIN TRUNCATE TABLE building CASCADE; EXCEPTION WHEN UNDEFINED_TABLE TH
 -- ─── UC004 — Persons & bank accounts ─────────────────────────────────────────
 DO \$\$ BEGIN TRUNCATE TABLE person_bank_account CASCADE; EXCEPTION WHEN UNDEFINED_TABLE THEN NULL; END \$\$;
 DO \$\$ BEGIN TRUNCATE TABLE person              CASCADE; EXCEPTION WHEN UNDEFINED_TABLE THEN NULL; END \$\$;
+
+-- ─── Estate and Platform Configs
+DO \$\$ BEGIN TRUNCATE TABLE platform_config  CASCADE; EXCEPTION WHEN UNDEFINED_TABLE THEN NULL; END \$\$;
+DO \$\$ BEGIN TRUNCATE TABLE estate_config    CASCADE; EXCEPTION WHEN UNDEFINED_TABLE THEN NULL; END \$\$;
  
 -- ─── UC002 — Users (keep admin) ───────────────────────────────────────────────
 DELETE FROM app_user WHERE username != '$ADMIN_USER';

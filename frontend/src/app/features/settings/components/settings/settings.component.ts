@@ -25,29 +25,42 @@ import {
 type Section = "general" | "alerts" | "import";
 
 const INTEGER_KEYS = new Set<string>([
-  CONFIG_KEYS.PEB_EXPIRY_WARNING_DAYS,
-  CONFIG_KEYS.BOILER_SERVICE_WARNING_DAYS,
-  CONFIG_KEYS.LEASE_END_NOTICE_WARNING_DAYS,
-  CONFIG_KEYS.INDEXATION_NOTICE_DAYS,
-  CONFIG_KEYS.IMPORT_SUGGESTION_CONFIDENCE,
+  CONFIG_KEYS.BOILER_ALERT_THRESHOLD_MONTHS, // 'boiler.service.alert.threshold.months'
+  CONFIG_KEYS.IMPORT_SUGGESTION_CONFIDENCE, // 'csv.import.suggestion.confidence.threshold'
+  CONFIG_KEYS.CSV_SKIP_HEADER_ROWS,
+  CONFIG_KEYS.CSV_COL_DATE,
+  CONFIG_KEYS.CSV_COL_AMOUNT,
+  CONFIG_KEYS.CSV_COL_DESCRIPTION,
+  CONFIG_KEYS.CSV_COL_COUNTERPARTY,
+  CONFIG_KEYS.CSV_COL_EXTERNAL_REF,
+  CONFIG_KEYS.CSV_COL_BANK_ACCOUNT,
+  CONFIG_KEYS.CSV_COL_VALUE_DATE,
+  "alert.lease.end.notice.days",
+  "alert.lease.indexation.days",
 ]);
 
 const GENERAL_KEYS = new Set<string>([
-  CONFIG_KEYS.APP_NAME,
-  CONFIG_KEYS.DEFAULT_COUNTRY,
-  CONFIG_KEYS.APP_DATE_FORMAT,
+  CONFIG_KEYS.CSV_DATE_FORMAT, // 'csv.import.date_format'
+  CONFIG_KEYS.CSV_DELIMITER, // 'csv.import.delimiter'
 ]);
 
 const ALERT_KEYS = new Set<string>([
-  CONFIG_KEYS.PEB_EXPIRY_WARNING_DAYS,
-  CONFIG_KEYS.BOILER_SERVICE_WARNING_DAYS,
-  CONFIG_KEYS.LEASE_END_NOTICE_WARNING_DAYS,
-  CONFIG_KEYS.INDEXATION_NOTICE_DAYS,
+  CONFIG_KEYS.ALERT_PEB_EXPIRY_WARNING_MONTHS,
+  CONFIG_KEYS.BOILER_ALERT_THRESHOLD_MONTHS,
+  CONFIG_KEYS.ALERT_LEASE_END_NOTICE_DAYS,
+  CONFIG_KEYS.ALERT_LEASE_INDEXATION_DAYS,
 ]);
 
 const IMPORT_KEYS = new Set<string>([
-  CONFIG_KEYS.IMPORT_ON_DUPLICATE,
   CONFIG_KEYS.IMPORT_SUGGESTION_CONFIDENCE,
+  CONFIG_KEYS.CSV_SKIP_HEADER_ROWS,
+  CONFIG_KEYS.CSV_COL_DATE,
+  CONFIG_KEYS.CSV_COL_AMOUNT,
+  CONFIG_KEYS.CSV_COL_DESCRIPTION,
+  CONFIG_KEYS.CSV_COL_COUNTERPARTY,
+  CONFIG_KEYS.CSV_COL_EXTERNAL_REF,
+  CONFIG_KEYS.CSV_COL_BANK_ACCOUNT,
+  CONFIG_KEYS.CSV_COL_VALUE_DATE,
 ]);
 
 @Component({
@@ -119,6 +132,10 @@ export class SettingsComponent implements OnInit, OnDestroy {
   }
 
   buildForm(configs: EstateConfigDTO[]): void {
+    console.log(
+      "Keys received from api:",
+      configs.map((c) => c.configKey),
+    );
     const group: Record<string, unknown[]> = {};
     for (const c of configs) {
       const validators = [Validators.required];
@@ -138,7 +155,14 @@ export class SettingsComponent implements OnInit, OnDestroy {
     return this.configs.filter((c) => GENERAL_KEYS.has(c.configKey));
   }
   get alertConfigs(): EstateConfigDTO[] {
-    return this.configs.filter((c) => ALERT_KEYS.has(c.configKey));
+    const result = this.configs.filter((c) => ALERT_KEYS.has(c.configKey));
+    console.log(
+      "alertConfigs:",
+      result.map((c) => c.configKey),
+    );
+    console.log("ALERT_KEYS:", Array.from(ALERT_KEYS));
+    return result;
+    // return this.configs.filter((c) => ALERT_KEYS.has(c.configKey));
   }
   get importConfigs(): EstateConfigDTO[] {
     return this.configs.filter((c) => IMPORT_KEYS.has(c.configKey));

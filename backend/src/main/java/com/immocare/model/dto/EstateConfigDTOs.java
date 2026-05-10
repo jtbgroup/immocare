@@ -87,6 +87,7 @@ public final class EstateConfigDTOs {
         public static final String KEY_CSV_SUGGESTION_CONFIDENCE = "csv.import.suggestion.confidence.threshold";
         public static final String KEY_ALERT_LEASE_END_NOTICE_DAYS = "alert.lease.end.notice.days";
         public static final String KEY_ALERT_LEASE_INDEXATION_DAYS = "alert.lease.indexation.days";
+        public static final String KEY_ALERT_PEB_EXPIRY_WARNING_MONTHS = "alert.peb.expiry.warning.months";
 
         /** Default config entries seeded for every new estate. */
         public record EstateConfigSeed(String key, String value, String valueType, String description) {
@@ -126,6 +127,8 @@ public final class EstateConfigDTOs {
                         new EstateConfigSeed(KEY_ALERT_LEASE_END_NOTICE_DAYS, "30", "INTEGER",
                                         "Days before lease end to display a warning alert"),
                         new EstateConfigSeed(KEY_ALERT_LEASE_INDEXATION_DAYS, "30", "INTEGER",
-                                        "Days before lease indexation to display a warning alert"));
+                                        "Days before lease indexation to display a warning alert"),
+                        new EstateConfigSeed(KEY_ALERT_PEB_EXPIRY_WARNING_MONTHS, "3", "INTEGER",
+                                        "Months before PEB certificate expiry to display a warning alert"));
 
 }

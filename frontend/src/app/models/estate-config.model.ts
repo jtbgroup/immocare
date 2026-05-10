@@ -50,10 +50,12 @@ export const CONFIG_KEYS = {
   APP_DATE_FORMAT: "app.date_format",
 
   // ── Alert thresholds ───────────────────────────────────────────────────────
-  PEB_EXPIRY_WARNING_DAYS: "peb_expiry_warning_days",
+  ALERT_PEB_EXPIRY_WARNING_MONTHS: "alert.peb.expiry.warning.months",
   BOILER_SERVICE_WARNING_DAYS: "boiler_service_warning_days",
-  LEASE_END_NOTICE_WARNING_DAYS: "lease_end_notice_warning_days",
-  INDEXATION_NOTICE_DAYS: "indexation_notice_days",
+  // LEASE_END_NOTICE_WARNING_DAYS: "lease_end_notice_warning_days",
+  // INDEXATION_NOTICE_DAYS: "indexation_notice_days",
+  ALERT_LEASE_END_NOTICE_DAYS: "alert.lease.end.notice.days",
+  ALERT_LEASE_INDEXATION_DAYS: "alert.lease.indexation.days",
 
   // ── Import behaviour (Phase 5: per-estate) ────────────────────────────────
   IMPORT_ON_DUPLICATE: "import.on_duplicate",
@@ -88,10 +90,12 @@ export const CONFIG_LABELS: Record<string, string> = {
   "app.date_format": "Format de date",
 
   // Alerts
-  peb_expiry_warning_days: "Alerte expiration PEB (jours avant)",
-  boiler_service_warning_days: "Alerte entretien chaudière (jours avant)",
-  lease_end_notice_warning_days: "Alerte fin de bail (jours avant)",
-  indexation_notice_days: "Délai préavis indexation (jours)",
+  "alert.peb.expiry.warning.months": "Alerte expiration PEB (mois avant)",
+  "boiler.service.warning.days": "Alerte entretien chaudière (jours avant)",
+  // "lease_end_notice_warning_days": "Alerte fin de bail (jours avant)",
+  // "indexation_notice_days": "Délai préavis indexation (jours)",
+  "alert.lease.end.notice.days": "Alerte fin de bail (jours avant)",
+  "alert.lease.indexation.days": "Délai préavis indexation (jours)",
 
   // Import
   "import.on_duplicate": "Comportement sur doublon détecté",

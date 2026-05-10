@@ -18,7 +18,9 @@ import com.immocare.service.BoilerServiceHistoryService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 
-/** REST endpoints for boiler maintenance history — UC012 (UC011.005/UC011.006). */
+/**
+ * REST endpoints for boiler maintenance history — UC012 (UC011.005/UC011.006).
+ */
 @RestController
 @RequiredArgsConstructor
 @PreAuthorize("isAuthenticated()")
