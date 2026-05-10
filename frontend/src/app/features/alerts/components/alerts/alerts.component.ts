@@ -49,4 +49,8 @@ export class AlertsComponent implements OnInit {
   categoryLabel(category: string): string {
     return category === "LEASE" ? "Lease Alerts" : "Boiler Service Alerts";
   }
+
+  get pebAlerts(): AlertDTO[] {
+    return this.alerts.filter((a) => a.category === "PEB");
+  }
 }

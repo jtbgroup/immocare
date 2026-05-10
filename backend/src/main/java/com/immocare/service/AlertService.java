@@ -1,5 +1,6 @@
 package com.immocare.service;
 
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
@@ -9,7 +10,10 @@ import org.springframework.stereotype.Service;
 
 import com.immocare.model.dto.AlertDTO;
 import com.immocare.model.dto.BoilerDTO;
+import com.immocare.model.dto.EstateConfigDTOs;
 import com.immocare.model.dto.LeaseAlertDTO;
+import com.immocare.model.entity.PebScoreHistory;
+import com.immocare.repository.PebScoreRepository;
 
 import lombok.RequiredArgsConstructor;
 
@@ -28,6 +32,8 @@ public class AlertService {
 
         private final LeaseService leaseService;
         private final BoilerService boilerService;
+        private final PebScoreRepository pebScoreRepository;
+        private final EstateConfigService estateConfigService;
 
         // ─── Public API ──────────────────────────────────────────────────────────
 
@@ -39,6 +45,7 @@ public class AlertService {
                 List<AlertDTO> alerts = new ArrayList<>();
                 alerts.addAll(leaseAlertsToDTO(estateId));
                 alerts.addAll(boilerAlertsToDTO(estateId));
+                alerts.addAll(pebAlertsToDTO(estateId));
                 alerts.sort(Comparator.comparing(AlertDTO::deadline,
                                 Comparator.nullsLast(Comparator.naturalOrder())));
                 return alerts;
@@ -102,5 +109,37 @@ public class AlertService {
                                                                                 + " day(s)"
                                                                 : "Due in " + src.daysUntilNextService() + " day(s)")
                                                 : null);
+        }
+
+        // ─── PEB alerts ───────────────────────────────────────────────────────
+        private List<AlertDTO> pebAlertsToDTO(UUID estateId) {
+                int warningMonths = estateConfigService.getIntValue(
+                                estateId,
+                                EstateConfigDTOs.KEY_ALERT_PEB_EXPIRY_WARNING_MONTHS,
+                                3);
+                LocalDate threshold = LocalDate.now().plusMonths(warningMonths);
+
+                return pebScoreRepository.findCurrentScoresWithValidUntilByEstateId(estateId)
+                                .stream()
+                                .filter(p -> !p.getValidUntil().isAfter(threshold))
+                                .map(p -> fromPeb(p))
+                                .toList();
+        }
+
+        private AlertDTO fromPeb(PebScoreHistory p) {
+                boolean expired = p.getValidUntil().isBefore(LocalDate.now());
+                Long unitId = p.getHousingUnit().getId();
+                String unitNumber = p.getHousingUnit().getUnitNumber();
+                String buildingName = p.getHousingUnit().getBuilding().getName();
+
+                return new AlertDTO(
+                                "PEB",
+                                expired ? "CERTIFICATE_EXPIRED" : "CERTIFICATE_EXPIRING",
+                                expired ? "DANGER" : "WARNING",
+                                (expired ? "PEB expired — " : "PEB expiring — ")
+                                                + buildingName + " / unit " + unitNumber,
+                                p.getValidUntil(),
+                                "/units/" + unitId,
+                                "Certificate valid until " + p.getValidUntil());
         }
 }

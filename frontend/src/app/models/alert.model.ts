@@ -1,8 +1,14 @@
 // models/alert.model.ts
 
-export type AlertCategory = 'LEASE' | 'BOILER';
-export type AlertType = 'INDEXATION' | 'END_NOTICE' | 'SERVICE_DUE' | 'SERVICE_OVERDUE';
-export type AlertSeverity = 'WARNING' | 'DANGER';
+export type AlertCategory = "LEASE" | "BOILER" | "PEB";
+export type AlertType =
+  | "INDEXATION"
+  | "END_NOTICE"
+  | "SERVICE_DUE"
+  | "SERVICE_OVERDUE"
+  | "CERTIFICATE_EXPIRED"
+  | "CERTIFICATE_EXPIRING";
+export type AlertSeverity = "WARNING" | "DANGER";
 
 export interface AlertDTO {
   category: AlertCategory;

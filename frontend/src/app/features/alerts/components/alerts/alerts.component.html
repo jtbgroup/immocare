@@ -131,4 +131,56 @@
       </div>
     </div>
   }
+
+  <!-- PEB alerts -->
+  @if (!isLoading && pebAlerts.length > 0) {
+    <div class="info-card">
+      <h2>
+        <span class="alerts-section-title">🏠 PEB Certificate Alerts</span>
+      </h2>
+      <div class="table-responsive">
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th>Type</th>
+              <th>Description</th>
+              <th>Valid Until</th>
+              <th>Detail</th>
+              <th></th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (a of pebAlerts; track a.actionUrl) {
+              <tr>
+                <td>
+                  <span
+                    class="badge"
+                    [class.badge-warning]="a.severity === 'WARNING'"
+                    [class.badge-danger]="a.severity === 'DANGER'"
+                  >
+                    {{
+                      a.type === "CERTIFICATE_EXPIRED"
+                        ? "🔴 Expired"
+                        : "⚠ Expiring"
+                    }}
+                  </span>
+                </td>
+                <td>{{ a.label }}</td>
+                <td class="fw-semibold">{{ a.deadline | appDate }}</td>
+                <td class="alert-detail">{{ a.detail || "—" }}</td>
+                <td>
+                  <a
+                    [routerLink]="[a.actionUrl]"
+                    class="btn btn-sm btn-secondary"
+                  >
+                    View Unit
+                  </a>
+                </td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+    </div>
+  }
 </div>
