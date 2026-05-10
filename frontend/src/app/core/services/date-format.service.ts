@@ -5,7 +5,7 @@ import { HttpClient } from "@angular/common/http";
 import { Injectable } from "@angular/core";
 import { BehaviorSubject, Observable, of } from "rxjs";
 import { catchError, map, tap } from "rxjs/operators";
-import { PlatformConfigDTO } from "../../models/estate-config.model";
+import { EstateConfigDTO } from "../../models/estate-config.model";
 import { ActiveEstateService } from "./active-estate.service";
 
 const DEFAULT_FORMAT = "dd/MM/yyyy";
@@ -43,7 +43,7 @@ export class DateFormatService {
       ? `/api/v1/estates/${estateId}/config/settings/${CONFIG_KEY}`
       : `/api/v1/platform-config/${CONFIG_KEY}`;
 
-    return this.http.get<PlatformConfigDTO>(url).pipe(
+    return this.http.get<EstateConfigDTO>(url).pipe(
       tap((dto) =>
         this.format$.next(dto.configValue?.trim() || DEFAULT_FORMAT),
       ),

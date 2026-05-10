@@ -23,8 +23,8 @@ import {
   CONFIG_KEYS,
   CONFIG_LABELS,
   DATE_FORMAT_PRESETS,
+  EstateConfigDTO,
   ON_DUPLICATE_OPTIONS,
-  PlatformConfigDTO,
 } from "../../../../../models/estate-config.model";
 import { TagSubcategory } from "../../../../../models/transaction.model";
 
@@ -94,7 +94,7 @@ const ASSET_KEYS = new Set<string>([
 })
 export class EstatePlatformSettingsComponent implements OnInit, OnDestroy {
   // ── Settings ──────────────────────────────────────────────────────────────
-  configs: PlatformConfigDTO[] = [];
+  configs: EstateConfigDTO[] = [];
   loading = false;
   saving = false;
   error: string | null = null;
@@ -193,7 +193,7 @@ export class EstatePlatformSettingsComponent implements OnInit, OnDestroy {
       });
   }
 
-  buildForm(configs: PlatformConfigDTO[]): void {
+  buildForm(configs: EstateConfigDTO[]): void {
     const group: Record<string, unknown[]> = {};
     for (const c of configs) {
       const validators = [Validators.required];
@@ -370,20 +370,20 @@ export class EstatePlatformSettingsComponent implements OnInit, OnDestroy {
 
   // ── Form helpers ────────────────────────────────────────────────────────
 
-  configsFor(keys: Set<string>): PlatformConfigDTO[] {
+  configsFor(keys: Set<string>): EstateConfigDTO[] {
     return this.configs.filter((c) => keys.has(c.configKey));
   }
 
-  get generalConfigs(): PlatformConfigDTO[] {
+  get generalConfigs(): EstateConfigDTO[] {
     return this.configsFor(GENERAL_KEYS);
   }
-  get alertConfigs(): PlatformConfigDTO[] {
+  get alertConfigs(): EstateConfigDTO[] {
     return this.configsFor(ALERT_KEYS);
   }
-  get importConfigs(): PlatformConfigDTO[] {
+  get importConfigs(): EstateConfigDTO[] {
     return this.configsFor(IMPORT_KEYS);
   }
-  get boilerConfigs(): PlatformConfigDTO[] {
+  get boilerConfigs(): EstateConfigDTO[] {
     return this.configsFor(BOILER_KEYS);
   }
 
