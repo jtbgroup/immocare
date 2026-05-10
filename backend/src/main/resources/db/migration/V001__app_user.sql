@@ -23,7 +23,7 @@ COMMENT ON COLUMN app_user.role          IS 'ADMIN (Phase 1 only)';
 INSERT INTO app_user (username, password_hash, email, role)
 VALUES (
     'admin',
-    '$2a$12$5z2u7D4w9NIJbFRJ/g9/A.w3SWPX01nOyifIfuo.09HsNLkBRUiCy',
+    '$2b$12$Cjcy4.MrV8DCzBOQlLSdVuY5iKWeU7D1p7uGY0TqdK468LsB4v4vS',
     'admin@immocare.com',
     'ADMIN'
 );
