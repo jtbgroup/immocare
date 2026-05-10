@@ -14,7 +14,7 @@ import { Subject, forkJoin } from "rxjs";
 import { finalize, takeUntil } from "rxjs/operators";
 import { ActiveEstateService } from "../../../../../core/services/active-estate.service";
 import { DateFormatService } from "../../../../../core/services/date-format.service";
-import { PlatformConfigService } from "../../../../../core/services/platform-config.service";
+import { PlatformConfigService } from "../../../../../core/services/estate-config.service";
 import { TagSubcategoryService } from "../../../../../core/services/tag-subcategory.service";
 import {
   AddBoilerServiceValidityRuleRequest,
@@ -25,7 +25,7 @@ import {
   DATE_FORMAT_PRESETS,
   ON_DUPLICATE_OPTIONS,
   PlatformConfigDTO,
-} from "../../../../../models/platform-config.model";
+} from "../../../../../models/estate-config.model";
 import { TagSubcategory } from "../../../../../models/transaction.model";
 
 type Section = "general" | "alerts" | "import" | "boiler" | "assets";

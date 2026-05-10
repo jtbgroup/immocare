@@ -1,15 +1,15 @@
 // core/services/date-format.service.ts — UC004_ESTATE_PLACEHOLDER Phase 5
 // Updated to load date format from estate-scoped config endpoint.
 // Falls back to default if no active estate is set (e.g. at login time).
-import { Injectable } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
-import { BehaviorSubject, Observable, of } from 'rxjs';
-import { catchError, map, switchMap, tap } from 'rxjs/operators';
-import { PlatformConfigDTO } from '../../models/platform-config.model';
-import { ActiveEstateService } from './active-estate.service';
+import { HttpClient } from "@angular/common/http";
+import { Injectable } from "@angular/core";
+import { BehaviorSubject, Observable, of } from "rxjs";
+import { catchError, map, tap } from "rxjs/operators";
+import { PlatformConfigDTO } from "../../models/estate-config.model";
+import { ActiveEstateService } from "./active-estate.service";
 
-const DEFAULT_FORMAT = 'dd/MM/yyyy';
-const CONFIG_KEY = 'app.date_format';
+const DEFAULT_FORMAT = "dd/MM/yyyy";
+const CONFIG_KEY = "app.date_format";
 
 /**
  * Holds the application-wide date display format loaded from estate-scoped
@@ -21,9 +21,8 @@ const CONFIG_KEY = 'app.date_format';
  * Usage in templates:  {{ value | appDate }}
  * Usage in components: this.dateFormatService.getFormat()
  */
-@Injectable({ providedIn: 'root' })
+@Injectable({ providedIn: "root" })
 export class DateFormatService {
-
   private format$ = new BehaviorSubject<string>(DEFAULT_FORMAT);
 
   constructor(
@@ -45,7 +44,9 @@ export class DateFormatService {
       : `/api/v1/platform-config/${CONFIG_KEY}`;
 
     return this.http.get<PlatformConfigDTO>(url).pipe(
-      tap(dto => this.format$.next(dto.configValue?.trim() || DEFAULT_FORMAT)),
+      tap((dto) =>
+        this.format$.next(dto.configValue?.trim() || DEFAULT_FORMAT),
+      ),
       map(() => void 0),
       catchError(() => {
         // Keep the default — do not block startup
