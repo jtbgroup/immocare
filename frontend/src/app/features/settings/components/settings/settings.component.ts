@@ -17,6 +17,7 @@ import { PlatformConfigService as EstateConfigService } from "../../../../core/s
 import {
   CONFIG_KEYS,
   CONFIG_LABELS,
+  CONFIG_UNITS,
   DATE_FORMAT_PRESETS,
   EstateConfigDTO,
   ON_DUPLICATE_OPTIONS,
@@ -238,5 +239,9 @@ export class SettingsComponent implements OnInit, OnDestroy {
     if (ctrl.hasError("required")) return "Ce champ est obligatoire.";
     if (ctrl.hasError("pattern")) return "Doit être un entier positif.";
     return "Valeur invalide.";
+  }
+
+  unitFor(configKey: string): string {
+    return CONFIG_UNITS[configKey] ?? "jours";
   }
 }

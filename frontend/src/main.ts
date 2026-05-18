@@ -103,7 +103,7 @@ bootstrapApplication(AppComponent, {
 
       // ─── Estate settings (Phase 5) ───────────────────────────────────────────
       {
-        path: "estates/:estateId/admin/platform-settings",
+        path: "estates/:estateId/settings",
         canActivate: [AuthGuard, EstateGuard],
         loadComponent: () =>
           import("./app/features/estate/components/user/estate-platform-settings/estate-platform-settings.component").then(
@@ -388,8 +388,8 @@ bootstrapApplication(AppComponent, {
 
       // ─── Alerts ──────────────────────────────────────────────────────────────
       {
-        path: "alerts",
-        canActivate: [AuthGuard],
+        path: "estates/:estateId/alerts",
+        canActivate: [AuthGuard, EstateGuard],
         loadComponent: () =>
           import("./app/features/alerts/components/alerts/alerts.component").then(
             (m) => m.AlertsComponent,

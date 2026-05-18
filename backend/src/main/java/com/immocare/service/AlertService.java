@@ -60,11 +60,11 @@ public class AlertService {
 
         private List<AlertDTO> leaseAlertsToDTO(UUID estateId) {
                 return leaseService.getAlerts(estateId).stream()
-                                .map(this::fromLease)
+                                .map(src -> fromLease(src, estateId))
                                 .toList();
         }
 
-        private AlertDTO fromLease(LeaseAlertDTO src) {
+        private AlertDTO fromLease(LeaseAlertDTO src, UUID estateId) {
                 boolean isEndNotice = "END_NOTICE".equals(src.getAlertType());
                 return new AlertDTO(
                                 "LEASE",
@@ -76,7 +76,7 @@ public class AlertService {
                                                 : "Indexation due — " + src.getBuildingName() + " / unit "
                                                                 + src.getHousingUnitNumber(),
                                 src.getDeadline(),
-                                "/leases/" + src.getLeaseId(),
+                                "/estates/" + estateId + "/leases/" + src.getLeaseId(),
                                 src.getTenantNames() != null ? String.join(", ", src.getTenantNames()) : null);
         }
 
@@ -84,11 +84,11 @@ public class AlertService {
 
         private List<AlertDTO> boilerAlertsToDTO(UUID estateId) {
                 return boilerService.getServiceAlerts(estateId).stream()
-                                .map(this::fromBoiler)
+                                .map(src -> fromBoiler(src, estateId))
                                 .toList();
         }
 
-        private AlertDTO fromBoiler(BoilerDTO src) {
+        private AlertDTO fromBoiler(BoilerDTO src, UUID estateId) {
                 boolean overdue = src.daysUntilNextService() != null && src.daysUntilNextService() < 0;
                 String ownerLabel = "HOUSING_UNIT".equals(src.ownerType()) ? "Unit" : "Building";
                 String brandLabel = src.brand() != null ? src.brand() : "Boiler";
@@ -101,8 +101,8 @@ public class AlertService {
                                                 + brandLabel + " (" + ownerLabel + " #" + src.ownerId() + ")",
                                 src.nextServiceDate(),
                                 src.ownerType().equals("HOUSING_UNIT")
-                                                ? "/units/" + src.ownerId()
-                                                : "/buildings/" + src.ownerId(),
+                                                ? "/estates/" + estateId + "/units/" + src.ownerId()
+                                                : "/estates/" + estateId + "/buildings/" + src.ownerId(),
                                 src.daysUntilNextService() != null
                                                 ? (overdue
                                                                 ? "Overdue by " + Math.abs(src.daysUntilNextService())
@@ -112,6 +112,7 @@ public class AlertService {
         }
 
         // ─── PEB alerts ───────────────────────────────────────────────────────
+
         private List<AlertDTO> pebAlertsToDTO(UUID estateId) {
                 int warningMonths = estateConfigService.getIntValue(
                                 estateId,
@@ -122,11 +123,11 @@ public class AlertService {
                 return pebScoreRepository.findCurrentScoresWithValidUntilByEstateId(estateId)
                                 .stream()
                                 .filter(p -> !p.getValidUntil().isAfter(threshold))
-                                .map(p -> fromPeb(p))
+                                .map(p -> fromPeb(p, estateId))
                                 .toList();
         }
 
-        private AlertDTO fromPeb(PebScoreHistory p) {
+        private AlertDTO fromPeb(PebScoreHistory p, UUID estateId) {
                 boolean expired = p.getValidUntil().isBefore(LocalDate.now());
                 Long unitId = p.getHousingUnit().getId();
                 String unitNumber = p.getHousingUnit().getUnitNumber();
@@ -139,7 +140,7 @@ public class AlertService {
                                 (expired ? "PEB expired — " : "PEB expiring — ")
                                                 + buildingName + " / unit " + unitNumber,
                                 p.getValidUntil(),
-                                "/units/" + unitId,
+                                "/estates/" + estateId + "/units/" + unitId,
                                 "Certificate valid until " + p.getValidUntil());
         }
 }

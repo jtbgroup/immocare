@@ -41,7 +41,7 @@ qu'en penses tu?
 - [ ] générer la doc des api type swagger
 - [x] revoir la structure des components dans le front pour rendre ça plus cohérent
 - [ ] revoir les settings depuis que les estates ont entrés en jeu
-- [ ] revoir les actions en fonction des release number
+- [ ] revoir les actions github en fonction des release number
 - [ ] revoir comment afficher la version
 - [ ] rendre les fireextinguishers, boilers, meters, comme des devices et avoir la possibilité d'avoir de devices generiques
  

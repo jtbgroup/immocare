@@ -68,7 +68,7 @@
                         <input
                           [id]="config.configKey"
                           type="text"
-                          [formControlName]="config.configKey"
+                          [formControlName]="toFormKey(config.configKey)"
                           placeholder="ex: dd-MM-yyyy"
                           class="mt-2"
                         />
@@ -80,7 +80,6 @@
                       }
                     </div>
                   }
-
                   @if (!isDateFormatKey(config.configKey)) {
                     <div class="form-group">
                       <label [for]="config.configKey">{{
@@ -89,7 +88,7 @@
                       <input
                         [id]="config.configKey"
                         type="text"
-                        [formControlName]="config.configKey"
+                        [formControlName]="toFormKey(config.configKey)"
                       />
                       @if (fieldError(config.configKey)) {
                         <div class="field-error">
@@ -118,7 +117,7 @@
           @if (activeSection === "alerts") {
             <div class="info-card">
               <div class="section-header">
-                <h2>🔔 Seuils d'alertes</h2>
+                <h2>🔔 Contrats</h2>
               </div>
               <p class="section-desc">
                 Délais (en jours) avant lesquels une alerte est générée pour
@@ -135,7 +134,7 @@
                         [id]="config.configKey"
                         type="number"
                         min="1"
-                        [formControlName]="config.configKey"
+                        [formControlName]="toFormKey(config.configKey)"
                       />
                       <span class="unit">jours</span>
                     </div>
@@ -180,7 +179,7 @@
                       }}</label>
                       <select
                         [id]="config.configKey"
-                        [formControlName]="config.configKey"
+                        [formControlName]="toFormKey(config.configKey)"
                       >
                         @for (opt of ON_DUPLICATE_OPTIONS; track opt.value) {
                           <option [value]="opt.value">{{ opt.label }}</option>
@@ -188,7 +187,6 @@
                       </select>
                     </div>
                   }
-
                   @if (
                     !isSelectKey(config.configKey) &&
                     isIntegerKey(config.configKey)
@@ -200,7 +198,7 @@
                       <input
                         [id]="config.configKey"
                         type="number"
-                        [formControlName]="config.configKey"
+                        [formControlName]="toFormKey(config.configKey)"
                       />
                       @if (config.description) {
                         <span class="field-hint">{{ config.description }}</span>
@@ -212,7 +210,6 @@
                       }
                     </div>
                   }
-
                   @if (
                     !isSelectKey(config.configKey) &&
                     !isIntegerKey(config.configKey)
@@ -224,7 +221,7 @@
                       <input
                         [id]="config.configKey"
                         type="text"
-                        [formControlName]="config.configKey"
+                        [formControlName]="toFormKey(config.configKey)"
                       />
                       @if (config.description) {
                         <span class="field-hint">{{ config.description }}</span>
@@ -254,7 +251,6 @@
 
           <!-- ═══ CHAUDIÈRES ════════════════════════════════════════════════ -->
           @if (activeSection === "boiler") {
-            <!-- Threshold config -->
             <div class="info-card">
               <div class="section-header">
                 <h2>🔥 Configuration chaudières</h2>
@@ -270,7 +266,7 @@
                         [id]="config.configKey"
                         type="number"
                         min="1"
-                        [formControlName]="config.configKey"
+                        [formControlName]="toFormKey(config.configKey)"
                       />
                       <span class="unit">mois</span>
                     </div>
@@ -486,6 +482,355 @@
                 }
                 @if (assetMappings.length === 0) {
                   <p class="empty-message">Aucun mapping configuré.</p>
+                }
+              </div>
+            }
+          </div>
+        }
+
+        <!-- ═══ CATÉGORIES & SOUS-CATÉGORIES ═════════════════════════════════ -->
+        @if (activeSection === "categories") {
+          <div class="info-card">
+            <div class="section-header">
+              <h2>🏷️ Catégories de transactions</h2>
+              @if (canEdit) {
+                <button
+                  type="button"
+                  class="btn btn-sm btn-primary"
+                  (click)="openAddCategoryForm()"
+                >
+                  + Nouvelle catégorie
+                </button>
+              }
+            </div>
+            <p class="section-desc">
+              Organisez vos transactions en catégories et sous-catégories
+              propres à cette estate. Cliquez sur une catégorie pour gérer ses
+              sous-catégories.
+            </p>
+
+            @if (categoriesError) {
+              <div class="alert alert-error">{{ categoriesError }}</div>
+            }
+            @if (categoriesSuccess) {
+              <div class="alert alert-success">✅ {{ categoriesSuccess }}</div>
+            }
+
+            <!-- Category form (create / edit) -->
+            @if (showCategoryForm) {
+              <div class="rule-form-panel">
+                <h3 class="form-panel-title">
+                  {{
+                    editingCategory
+                      ? "Modifier la catégorie"
+                      : "Nouvelle catégorie"
+                  }}
+                </h3>
+                <div class="form-row">
+                  <div class="form-group">
+                    <label>Nom <span class="required">*</span></label>
+                    <input
+                      type="text"
+                      [formControl]="$any(categoryForm.controls['name'])"
+                      placeholder="ex: Charges locatives"
+                    />
+                    @if (categoryFieldError("name")) {
+                      <div class="field-error">
+                        {{ categoryFieldError("name") }}
+                      </div>
+                    }
+                  </div>
+                  <div class="form-group">
+                    <label>Description</label>
+                    <input
+                      type="text"
+                      [formControl]="$any(categoryForm.controls['description'])"
+                      placeholder="Optionnel"
+                    />
+                  </div>
+                </div>
+                <div class="form-actions">
+                  <button
+                    type="button"
+                    class="btn btn-secondary btn-sm"
+                    (click)="cancelCategoryForm()"
+                  >
+                    Annuler
+                  </button>
+                  <button
+                    type="button"
+                    class="btn btn-primary btn-sm"
+                    (click)="saveCategory()"
+                    [disabled]="categorySaving"
+                  >
+                    {{ categorySaving ? "Sauvegarde…" : "Sauvegarder" }}
+                  </button>
+                </div>
+              </div>
+            }
+
+            @if (categoriesLoading) {
+              <div class="loading">Chargement…</div>
+            }
+
+            @if (!categoriesLoading && categories.length === 0) {
+              <p class="empty-message">
+                Aucune catégorie définie. Créez-en une pour commencer.
+              </p>
+            }
+
+            <!-- Categories accordion list -->
+            @if (!categoriesLoading && categories.length > 0) {
+              <div class="categories-list">
+                @for (cat of categories; track cat.id) {
+                  <div
+                    class="category-block"
+                    [class.category-block--expanded]="
+                      expandedCategoryId === cat.id
+                    "
+                  >
+                    <!-- Category row -->
+                    <div class="category-row">
+                      <button
+                        type="button"
+                        class="category-toggle"
+                        (click)="toggleCategory(cat.id)"
+                        [attr.aria-expanded]="expandedCategoryId === cat.id"
+                      >
+                        <span class="category-chevron">{{
+                          expandedCategoryId === cat.id ? "▾" : "▸"
+                        }}</span>
+                        <span class="category-name">{{ cat.name }}</span>
+                        <span class="category-count"
+                          >{{ subcategoryCount(cat) }} sous-catégorie(s)</span
+                        >
+                      </button>
+                      @if (canEdit) {
+                        <div class="category-actions">
+                          <button
+                            type="button"
+                            class="btn-icon"
+                            title="Modifier"
+                            (click)="openEditCategoryForm(cat)"
+                          >
+                            ✏️
+                          </button>
+                          <button
+                            type="button"
+                            class="btn-icon btn-icon--danger"
+                            title="Supprimer"
+                            (click)="deleteCategory(cat)"
+                          >
+                            🗑️
+                          </button>
+                        </div>
+                      }
+                    </div>
+
+                    <!-- Expanded subcategories panel -->
+                    @if (expandedCategoryId === cat.id) {
+                      <div class="subcategories-panel">
+                        @if (subcategoryError[cat.id]) {
+                          <div class="alert alert-error">
+                            {{ subcategoryError[cat.id] }}
+                          </div>
+                        }
+
+                        <!-- Subcategory form -->
+                        @if (showSubcategoryForm[cat.id]) {
+                          <div class="subcat-form-panel">
+                            <h4 class="form-panel-title">
+                              {{
+                                editingSubcategory[cat.id]
+                                  ? "Modifier la sous-catégorie"
+                                  : "Nouvelle sous-catégorie"
+                              }}
+                            </h4>
+                            <div class="form-row">
+                              <div class="form-group">
+                                <label
+                                  >Nom <span class="required">*</span></label
+                                >
+                                <input
+                                  type="text"
+                                  [formControl]="
+                                    getSubcategoryControl(cat.id, 'name')
+                                  "
+                                  placeholder="ex: Eau"
+                                />
+                                @if (subcategoryFieldError(cat.id, "name")) {
+                                  <div class="field-error">
+                                    {{ subcategoryFieldError(cat.id, "name") }}
+                                  </div>
+                                }
+                              </div>
+                              <div class="form-group">
+                                <label
+                                  >Direction
+                                  <span class="required">*</span></label
+                                >
+                                <select
+                                  [formControl]="
+                                    getSubcategoryControl(cat.id, 'direction')
+                                  "
+                                >
+                                  @for (
+                                    opt of DIRECTION_OPTIONS;
+                                    track opt.value
+                                  ) {
+                                    <option [value]="opt.value">
+                                      {{ opt.label }}
+                                    </option>
+                                  }
+                                </select>
+                                @if (
+                                  subcategoryFieldError(cat.id, "direction")
+                                ) {
+                                  <div class="field-error">
+                                    {{
+                                      subcategoryFieldError(cat.id, "direction")
+                                    }}
+                                  </div>
+                                }
+                              </div>
+                              <div class="form-group">
+                                <label>Description</label>
+                                <input
+                                  type="text"
+                                  [formControl]="
+                                    getSubcategoryControl(cat.id, 'description')
+                                  "
+                                  placeholder="Optionnel"
+                                />
+                              </div>
+                            </div>
+                            <div class="form-actions">
+                              <button
+                                type="button"
+                                class="btn btn-secondary btn-sm"
+                                (click)="cancelSubcategoryForm(cat.id)"
+                              >
+                                Annuler
+                              </button>
+                              <button
+                                type="button"
+                                class="btn btn-primary btn-sm"
+                                (click)="saveSubcategory(cat.id)"
+                                [disabled]="subcategorySaving[cat.id]"
+                              >
+                                {{
+                                  subcategorySaving[cat.id]
+                                    ? "Sauvegarde…"
+                                    : "Sauvegarder"
+                                }}
+                              </button>
+                            </div>
+                          </div>
+                        }
+
+                        @if (subcategoriesLoading[cat.id]) {
+                          <div class="loading">Chargement…</div>
+                        }
+
+                        @if (!subcategoriesLoading[cat.id]) {
+                          @if (
+                            (categorySubcategories[cat.id] ?? []).length ===
+                              0 && !showSubcategoryForm[cat.id]
+                          ) {
+                            <p class="empty-message empty-message--sm">
+                              Aucune sous-catégorie. Ajoutez-en une ci-dessous.
+                            </p>
+                          }
+
+                          @if (
+                            (categorySubcategories[cat.id] ?? []).length > 0
+                          ) {
+                            <div class="data-table">
+                              <table>
+                                <thead>
+                                  <tr>
+                                    <th>Nom</th>
+                                    <th>Direction</th>
+                                    <th>Description</th>
+                                    <th>Usages</th>
+                                    @if (canEdit) {
+                                      <th></th>
+                                    }
+                                  </tr>
+                                </thead>
+                                <tbody>
+                                  @for (
+                                    sub of categorySubcategories[cat.id];
+                                    track sub.id
+                                  ) {
+                                    <tr>
+                                      <td>{{ sub.name }}</td>
+                                      <td>
+                                        <span
+                                          class="badge"
+                                          [class]="
+                                            directionBadgeClass(sub.direction)
+                                          "
+                                        >
+                                          {{ directionLabel(sub.direction) }}
+                                        </span>
+                                      </td>
+                                      <td class="text-muted">
+                                        {{ subDescription(sub) }}
+                                      </td>
+                                      <td class="text-center">
+                                        {{ subUsage(sub) }}
+                                      </td>
+                                      @if (canEdit) {
+                                        <td class="actions-cell">
+                                          <button
+                                            type="button"
+                                            class="btn-icon"
+                                            title="Modifier"
+                                            (click)="
+                                              openEditSubcategoryForm(
+                                                cat.id,
+                                                sub
+                                              )
+                                            "
+                                          >
+                                            ✏️
+                                          </button>
+                                          <button
+                                            type="button"
+                                            class="btn-icon btn-icon--danger"
+                                            title="Supprimer"
+                                            (click)="
+                                              deleteSubcategory(cat.id, sub)
+                                            "
+                                            [disabled]="subUsage(sub) > 0"
+                                          >
+                                            🗑️
+                                          </button>
+                                        </td>
+                                      }
+                                    </tr>
+                                  }
+                                </tbody>
+                              </table>
+                            </div>
+                          }
+
+                          @if (canEdit && !showSubcategoryForm[cat.id]) {
+                            <div class="subcat-add-row">
+                              <button
+                                type="button"
+                                class="btn btn-sm btn-secondary"
+                                (click)="openAddSubcategoryForm(cat.id)"
+                              >
+                                + Ajouter une sous-catégorie
+                              </button>
+                            </div>
+                          }
+                        }
+                      </div>
+                    }
+                  </div>
                 }
               </div>
             }

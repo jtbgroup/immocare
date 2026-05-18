@@ -133,3 +133,11 @@ export const ON_DUPLICATE_OPTIONS: { value: string; label: string }[] = [
   { value: "SKIP", label: "Ignorer silencieusement les doublons" },
   { value: "IMPORT", label: "Toujours importer (pas de détection)" },
 ];
+
+export const CONFIG_UNITS: Partial<Record<string, "jours" | "mois">> = {
+  [CONFIG_KEYS.ALERT_PEB_EXPIRY_WARNING_MONTHS]: "mois",
+  [CONFIG_KEYS.BOILER_SERVICE_WARNING_DAYS]: "jours",
+  [CONFIG_KEYS.ALERT_LEASE_END_NOTICE_DAYS]: "jours",
+  [CONFIG_KEYS.ALERT_LEASE_INDEXATION_DAYS]: "jours",
+  [CONFIG_KEYS.BOILER_ALERT_THRESHOLD_MONTHS]: "mois",
+};

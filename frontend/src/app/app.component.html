@@ -98,8 +98,12 @@
               >
                 🏦 Bank Accounts
               </a>
-               <a
-                routerLink="/settings"
+              <a
+                [routerLink]="[
+                  '/estates',
+                  activeEstateService.activeEstateId(),
+                  'settings',
+                ]"
                 class="dropdown-item"
                 (click)="closeDropdown()"
               >
@@ -128,10 +132,13 @@
       <div class="right-zone">
         <!-- Bell -->
         <a
-          routerLink="/alerts"
+          [routerLink]="[
+            '/estates',
+            activeEstateService.activeEstateId(),
+            'alerts',
+          ]"
           routerLinkActive="bell-btn--active"
           class="bell-btn"
-          title="Alerts"
         >
           🔔
           <span *ngIf="alertCount > 0" class="bell-badge">{{
@@ -158,16 +165,14 @@
               </div>
             </div>
 
-           
-
             @if (user.isPlatformAdmin) {
-               <a
-              routerLink="/users"
-              class="dropdown-item"
-              (click)="closeDropdown()"
-            >
-              <span class="di-icon">👥</span> Manage Users
-            </a>
+              <a
+                routerLink="/users"
+                class="dropdown-item"
+                (click)="closeDropdown()"
+              >
+                <span class="di-icon">👥</span> Manage Users
+              </a>
               <div class="dropdown-divider"></div>
               <a
                 routerLink="/admin/estates"
@@ -177,9 +182,9 @@
                 <span class="di-icon">🏛️</span> Manage Estates
               </a>
 
-  <div class="dropdown-divider"></div>
+              <div class="dropdown-divider"></div>
 
-               <a
+              <a
                 routerLink="/settings"
                 class="dropdown-item"
                 (click)="closeDropdown()"
@@ -187,7 +192,6 @@
                 <span class="di-icon">⚙️</span> Paramètres
               </a>
             }
-
 
             <div class="dropdown-divider"></div>
             <button

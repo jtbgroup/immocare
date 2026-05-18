@@ -1,12 +1,12 @@
 // core/services/alert.service.ts — UC004_ESTATE_PLACEHOLDER Phase 4
 // Alerts are now estate-scoped.
-import { HttpClient } from '@angular/common/http';
-import { Injectable } from '@angular/core';
-import { Observable } from 'rxjs';
-import { ActiveEstateService } from './active-estate.service';
-import { AlertDTO } from '../../models/alert.model';
+import { HttpClient } from "@angular/common/http";
+import { Injectable } from "@angular/core";
+import { Observable } from "rxjs";
+import { AlertDTO } from "../../models/alert.model";
+import { ActiveEstateService } from "./active-estate.service";
 
-@Injectable({ providedIn: 'root' })
+@Injectable({ providedIn: "root" })
 export class AlertService {
   constructor(
     private http: HttpClient,
@@ -15,9 +15,7 @@ export class AlertService {
 
   private get base(): string {
     const estateId = this.activeEstateService.activeEstateId();
-    return estateId
-      ? `/api/v1/estates/${estateId}/alerts`
-      : `/api/v1/alerts`;
+    return `/api/v1/estates/${estateId}/alerts`;
   }
 
   /** Returns all pending alerts, sorted by deadline ASC. */

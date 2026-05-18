@@ -5,6 +5,7 @@ import { CommonModule } from "@angular/common";
 import { Component, OnDestroy, OnInit } from "@angular/core";
 import {
   FormBuilder,
+  FormControl,
   FormGroup,
   ReactiveFormsModule,
   Validators,
@@ -15,6 +16,7 @@ import { finalize, takeUntil } from "rxjs/operators";
 import { ActiveEstateService } from "../../../../../core/services/active-estate.service";
 import { DateFormatService } from "../../../../../core/services/date-format.service";
 import { PlatformConfigService } from "../../../../../core/services/estate-config.service";
+import { TagCategoryService } from "../../../../../core/services/tag-category.service";
 import { TagSubcategoryService } from "../../../../../core/services/tag-subcategory.service";
 import {
   AddBoilerServiceValidityRuleRequest,
@@ -26,9 +28,20 @@ import {
   EstateConfigDTO,
   ON_DUPLICATE_OPTIONS,
 } from "../../../../../models/estate-config.model";
-import { TagSubcategory } from "../../../../../models/transaction.model";
+import {
+  SaveTagCategoryRequest,
+  SaveTagSubcategoryRequest,
+  TagCategory,
+  TagSubcategory,
+} from "../../../../../models/transaction.model";
 
-type Section = "general" | "alerts" | "import" | "boiler" | "assets";
+type Section =
+  | "general"
+  | "alerts"
+  | "import"
+  | "boiler"
+  | "assets"
+  | "categories";
 
 const INTEGER_KEYS = new Set<string>([
   CONFIG_KEYS.ALERT_PEB_EXPIRY_WARNING_MONTHS,
@@ -79,12 +92,6 @@ const BOILER_KEYS = new Set<string>([
   CONFIG_KEYS.BOILER_ALERT_THRESHOLD_MONTHS,
 ]);
 
-const ASSET_KEYS = new Set<string>([
-  CONFIG_KEYS.ASSET_MAPPING_BOILER,
-  CONFIG_KEYS.ASSET_MAPPING_FIRE_EXTINGUISHER,
-  CONFIG_KEYS.ASSET_MAPPING_METER,
-]);
-
 @Component({
   selector: "app-estate-platform-settings",
   standalone: true,
@@ -117,18 +124,47 @@ export class EstatePlatformSettingsComponent implements OnInit, OnDestroy {
   mappingError: string | null = null;
   mappingSuccess: string | null = null;
 
+  // ── Categories & subcategories ────────────────────────────────────────────
+  categories: TagCategory[] = [];
+  categoriesLoading = false;
+  categoriesError: string | null = null;
+  categoriesSuccess: string | null = null;
+
+  // Category form (create / edit)
+  showCategoryForm = false;
+  editingCategory: TagCategory | null = null;
+  categoryForm!: FormGroup;
+  categorySaving = false;
+
+  // Subcategory form (create / edit)
+  expandedCategoryId: number | null = null;
+  categorySubcategories: Record<number, TagSubcategory[]> = {};
+  subcategoriesLoading: Record<number, boolean> = {};
+  showSubcategoryForm: Record<number, boolean> = {};
+  editingSubcategory: Record<number, TagSubcategory | null> = {};
+  subcategoryForms: Record<number, FormGroup> = {};
+  subcategorySaving: Record<number, boolean> = {};
+  subcategoryError: Record<number, string | null> = {};
+
   readonly CONFIG_LABELS = CONFIG_LABELS;
   readonly DATE_FORMAT_PRESETS = DATE_FORMAT_PRESETS;
   readonly ON_DUPLICATE_OPTIONS = ON_DUPLICATE_OPTIONS;
   readonly DATE_FORMAT_KEY = CONFIG_KEYS.APP_DATE_FORMAT;
   readonly ON_DUPLICATE_KEY = CONFIG_KEYS.IMPORT_ON_DUPLICATE;
 
+  readonly DIRECTION_OPTIONS = [
+    { value: "EXPENSE", label: "💸 Dépense" },
+    { value: "INCOME", label: "💰 Recette" },
+    { value: "NEUTRAL", label: "↔️ Neutre" },
+  ];
+
   readonly sections: { id: Section; label: string; icon: string }[] = [
     { id: "general", label: "Général", icon: "🌐" },
-    { id: "alerts", label: "Alertes", icon: "🔔" },
+    { id: "alerts", label: "Contrats", icon: "🔔" },
     { id: "import", label: "Import CSV", icon: "📥" },
     { id: "boiler", label: "Chaudières", icon: "🔥" },
     { id: "assets", label: "Liens actifs", icon: "🔗" },
+    { id: "categories", label: "Catégories", icon: "🏷️" },
   ];
 
   private destroy$ = new Subject<void>();
@@ -136,7 +172,8 @@ export class EstatePlatformSettingsComponent implements OnInit, OnDestroy {
   constructor(
     private configService: PlatformConfigService,
     private dateFormatService: DateFormatService,
-    private subcategoryService: TagSubcategoryService,
+    private tagSubcategoryService: TagSubcategoryService,
+    private tagCategoryService: TagCategoryService,
     private activeEstateService: ActiveEstateService,
     private route: ActivatedRoute,
     private router: Router,
@@ -158,6 +195,8 @@ export class EstatePlatformSettingsComponent implements OnInit, OnDestroy {
     this.buildRuleForm();
     this.load();
     this.loadSubcategories();
+
+    if (this.activeSection === "categories") this.loadCategories();
   }
 
   ngOnDestroy(): void {
@@ -171,6 +210,7 @@ export class EstatePlatformSettingsComponent implements OnInit, OnDestroy {
 
     if (section === "boiler") this.loadValidityRules();
     if (section === "assets") this.loadAssetMappings();
+    if (section === "categories") this.loadCategories();
   }
 
   // ── Settings CRUD ────────────────────────────────────────────────────────
@@ -193,6 +233,14 @@ export class EstatePlatformSettingsComponent implements OnInit, OnDestroy {
       });
   }
 
+  // Dots are not allowed in FormGroup keys — encode/decode with __
+  toFormKey(key: string): string {
+    return key.replace(/\./g, "__");
+  }
+  private fromFormKey(key: string): string {
+    return key.replace(/__/g, ".");
+  }
+
   buildForm(configs: EstateConfigDTO[]): void {
     const group: Record<string, unknown[]> = {};
     for (const c of configs) {
@@ -200,14 +248,10 @@ export class EstatePlatformSettingsComponent implements OnInit, OnDestroy {
       if (INTEGER_KEYS.has(c.configKey)) {
         validators.push(Validators.pattern(/^-?[0-9]+$/));
       }
-      group[c.configKey] = [c.configValue, validators];
+      group[this.toFormKey(c.configKey)] = [c.configValue, validators];
     }
     this.form = this.fb.group(group);
-
-    // Disable form for VIEWERs
-    if (!this.canEdit) {
-      this.form.disable();
-    }
+    if (!this.canEdit) this.form.disable();
   }
 
   save(): void {
@@ -220,7 +264,9 @@ export class EstatePlatformSettingsComponent implements OnInit, OnDestroy {
     this.successMessage = null;
 
     const updates = Object.entries(this.form.value).map(([key, value]) =>
-      this.configService.updateOne(key, { configValue: String(value).trim() }),
+      this.configService.updateOne(this.fromFormKey(key), {
+        configValue: String(value).trim(),
+      }),
     );
 
     forkJoin(updates)
@@ -314,12 +360,10 @@ export class EstatePlatformSettingsComponent implements OnInit, OnDestroy {
   // ── Asset type mappings ───────────────────────────────────────────────────
 
   loadSubcategories(): void {
-    this.subcategoryService
+    this.tagSubcategoryService
       .getAll()
       .pipe(takeUntil(this.destroy$))
-      .subscribe({
-        next: (subs) => (this.subcategories = subs),
-      });
+      .subscribe({ next: (subs) => (this.subcategories = subs) });
   }
 
   loadAssetMappings(): void {
@@ -342,7 +386,6 @@ export class EstatePlatformSettingsComponent implements OnInit, OnDestroy {
     if (!this.canEdit) return;
     this.mappingError = null;
     this.mappingSuccess = null;
-
     this.configService
       .updateAssetTypeMapping(assetType, { subcategoryId })
       .pipe(takeUntil(this.destroy$))
@@ -366,6 +409,219 @@ export class EstatePlatformSettingsComponent implements OnInit, OnDestroy {
       METER: "⚡ Compteur",
     };
     return labels[type] ?? type;
+  }
+
+  // ── Categories ───────────────────────────────────────────────────────────
+
+  loadCategories(): void {
+    this.categoriesLoading = true;
+    this.categoriesError = null;
+    this.tagCategoryService
+      .getAll()
+      .pipe(takeUntil(this.destroy$))
+      .subscribe({
+        next: (cats) => {
+          this.categories = cats;
+          this.categoriesLoading = false;
+        },
+        error: () => {
+          this.categoriesError = "Impossible de charger les catégories.";
+          this.categoriesLoading = false;
+        },
+      });
+  }
+
+  openAddCategoryForm(): void {
+    this.editingCategory = null;
+    this.categoryForm = this.fb.group({
+      name: ["", Validators.required],
+      description: [""],
+    });
+    this.showCategoryForm = true;
+    this.categoriesError = null;
+  }
+
+  openEditCategoryForm(cat: TagCategory): void {
+    this.editingCategory = cat;
+    this.categoryForm = this.fb.group({
+      name: [cat.name, Validators.required],
+      description: [(cat as any).description ?? ""],
+    });
+    this.showCategoryForm = true;
+    this.categoriesError = null;
+  }
+
+  cancelCategoryForm(): void {
+    this.showCategoryForm = false;
+    this.editingCategory = null;
+  }
+
+  saveCategory(): void {
+    if (this.categoryForm.invalid) {
+      this.categoryForm.markAllAsTouched();
+      return;
+    }
+    this.categorySaving = true;
+    this.categoriesError = null;
+
+    const req: SaveTagCategoryRequest = {
+      name: this.categoryForm.value.name.trim(),
+      description: this.categoryForm.value.description?.trim() || null,
+    };
+
+    const call$ = this.editingCategory
+      ? this.tagCategoryService.update(this.editingCategory.id, req)
+      : this.tagCategoryService.create(req);
+
+    call$
+      .pipe(
+        takeUntil(this.destroy$),
+        finalize(() => (this.categorySaving = false)),
+      )
+      .subscribe({
+        next: () => {
+          this.showCategoryForm = false;
+          this.editingCategory = null;
+          this.categoriesSuccess = "Catégorie enregistrée.";
+          setTimeout(() => (this.categoriesSuccess = null), 2500);
+          this.loadCategories();
+        },
+        error: (err) => {
+          this.categoriesError =
+            err?.error?.message ?? "Erreur lors de l'enregistrement.";
+        },
+      });
+  }
+
+  deleteCategory(cat: TagCategory): void {
+    if (!confirm(`Supprimer la catégorie "${cat.name}" ?`)) return;
+    this.tagCategoryService
+      .delete(cat.id)
+      .pipe(takeUntil(this.destroy$))
+      .subscribe({
+        next: () => {
+          this.categoriesSuccess = "Catégorie supprimée.";
+          setTimeout(() => (this.categoriesSuccess = null), 2500);
+          // Close expanded panel if it was this category
+          if (this.expandedCategoryId === cat.id)
+            this.expandedCategoryId = null;
+          this.loadCategories();
+        },
+        error: (err) => {
+          this.categoriesError =
+            err?.error?.message ?? "Impossible de supprimer cette catégorie.";
+        },
+      });
+  }
+
+  // ── Subcategories (per category) ─────────────────────────────────────────
+
+  toggleCategory(catId: number): void {
+    if (this.expandedCategoryId === catId) {
+      this.expandedCategoryId = null;
+      return;
+    }
+    this.expandedCategoryId = catId;
+    this.showSubcategoryForm[catId] = false;
+    this.editingSubcategory[catId] = null;
+    this.loadSubcategoriesForCategory(catId);
+  }
+
+  loadSubcategoriesForCategory(catId: number): void {
+    this.subcategoriesLoading[catId] = true;
+    this.tagSubcategoryService
+      .getAll(catId)
+      .pipe(takeUntil(this.destroy$))
+      .subscribe({
+        next: (subs) => {
+          this.categorySubcategories[catId] = subs;
+          this.subcategoriesLoading[catId] = false;
+        },
+        error: () => {
+          this.subcategoriesLoading[catId] = false;
+        },
+      });
+  }
+
+  openAddSubcategoryForm(catId: number): void {
+    this.editingSubcategory[catId] = null;
+    this.subcategoryError[catId] = null;
+    this.subcategoryForms[catId] = this.fb.group({
+      name: ["", Validators.required],
+      direction: ["EXPENSE", Validators.required],
+      description: [""],
+    });
+    this.showSubcategoryForm[catId] = true;
+  }
+
+  openEditSubcategoryForm(catId: number, sub: TagSubcategory): void {
+    this.editingSubcategory[catId] = sub;
+    this.subcategoryError[catId] = null;
+    this.subcategoryForms[catId] = this.fb.group({
+      name: [sub.name, Validators.required],
+      direction: [sub.direction, Validators.required],
+      description: [(sub as any).description ?? ""],
+    });
+    this.showSubcategoryForm[catId] = true;
+  }
+
+  cancelSubcategoryForm(catId: number): void {
+    this.showSubcategoryForm[catId] = false;
+    this.editingSubcategory[catId] = null;
+    this.subcategoryError[catId] = null;
+  }
+
+  saveSubcategory(catId: number): void {
+    const form = this.subcategoryForms[catId];
+    if (!form || form.invalid) {
+      form?.markAllAsTouched();
+      return;
+    }
+    this.subcategorySaving[catId] = true;
+    this.subcategoryError[catId] = null;
+
+    const editing = this.editingSubcategory[catId];
+    const req: SaveTagSubcategoryRequest = {
+      categoryId: catId,
+      name: form.value.name.trim(),
+      direction: form.value.direction,
+      description: form.value.description?.trim() || null,
+    };
+
+    const call$ = editing
+      ? this.tagSubcategoryService.update(editing.id, req)
+      : this.tagSubcategoryService.create(req);
+
+    call$
+      .pipe(
+        takeUntil(this.destroy$),
+        finalize(() => (this.subcategorySaving[catId] = false)),
+      )
+      .subscribe({
+        next: () => {
+          this.showSubcategoryForm[catId] = false;
+          this.editingSubcategory[catId] = null;
+          this.loadSubcategoriesForCategory(catId);
+        },
+        error: (err) => {
+          this.subcategoryError[catId] =
+            err?.error?.message ?? "Erreur lors de l'enregistrement.";
+        },
+      });
+  }
+
+  deleteSubcategory(catId: number, sub: TagSubcategory): void {
+    if (!confirm(`Supprimer la sous-catégorie "${sub.name}" ?`)) return;
+    this.tagSubcategoryService
+      .delete(sub.id)
+      .pipe(takeUntil(this.destroy$))
+      .subscribe({
+        next: () => this.loadSubcategoriesForCategory(catId),
+        error: (err) => {
+          this.subcategoryError[catId] =
+            err?.error?.message ?? "Impossible de supprimer.";
+        },
+      });
   }
 
   // ── Form helpers ────────────────────────────────────────────────────────
@@ -401,7 +657,7 @@ export class EstatePlatformSettingsComponent implements OnInit, OnDestroy {
   }
 
   presetOrCustom(key: string): string {
-    const val = this.form?.get(key)?.value as string;
+    const val = this.form?.get(this.toFormKey(key))?.value as string;
     return this.DATE_FORMAT_PRESETS.some((p) => p.value === val)
       ? val
       : "__custom__";
@@ -409,11 +665,12 @@ export class EstatePlatformSettingsComponent implements OnInit, OnDestroy {
 
   onDateFormatSelectChange(key: string, event: Event): void {
     const selected = (event.target as HTMLSelectElement).value;
-    if (selected !== "__custom__") this.form.get(key)?.setValue(selected);
+    if (selected !== "__custom__")
+      this.form.get(this.toFormKey(key))?.setValue(selected);
   }
 
   fieldError(key: string): string | null {
-    const ctrl = this.form?.get(key);
+    const ctrl = this.form?.get(this.toFormKey(key));
     if (!ctrl || !ctrl.invalid || !ctrl.touched) return null;
     if (ctrl.hasError("required")) return "Ce champ est obligatoire.";
     if (ctrl.hasError("pattern")) return "Valeur invalide.";
@@ -426,5 +683,56 @@ export class EstatePlatformSettingsComponent implements OnInit, OnDestroy {
     if (ctrl.hasError("required")) return "Champ requis.";
     if (ctrl.hasError("min")) return "Doit être ≥ 1.";
     return "Valeur invalide.";
+  }
+
+  categoryFieldError(key: string): string | null {
+    const ctrl = this.categoryForm?.get(key);
+    if (!ctrl || !ctrl.invalid || !ctrl.touched) return null;
+    if (ctrl.hasError("required")) return "Ce champ est obligatoire.";
+    return "Valeur invalide.";
+  }
+
+  subcategoryFieldError(catId: number, key: string): string | null {
+    const ctrl = this.subcategoryForms[catId]?.get(key);
+    if (!ctrl || !ctrl.invalid || !ctrl.touched) return null;
+    if (ctrl.hasError("required")) return "Ce champ est obligatoire.";
+    return "Valeur invalide.";
+  }
+
+  getSubcategoryControl(catId: number, key: string): FormControl {
+    return (
+      (this.subcategoryForms[catId]?.get(key) as FormControl) ??
+      new FormControl()
+    );
+  }
+
+  subcategoryCount(cat: TagCategory): number {
+    return (cat as any).subcategoryCount ?? 0;
+  }
+
+  subDescription(sub: TagSubcategory): string {
+    return (sub as any).description || "—";
+  }
+
+  subUsage(sub: TagSubcategory): number {
+    return (sub as any).usage ?? 0;
+  }
+
+  directionLabel(direction: string): string {
+    const map: Record<string, string> = {
+      EXPENSE: "💸 Dépense",
+      INCOME: "💰 Recette",
+      NEUTRAL: "↔️ Neutre",
+    };
+    return map[direction] ?? direction;
+  }
+
+  directionBadgeClass(direction: string): string {
+    const map: Record<string, string> = {
+      EXPENSE: "badge-expense",
+      INCOME: "badge-income",
+      NEUTRAL: "badge-neutral",
+    };
+    return map[direction] ?? "";
   }
 }
