@@ -1,17 +1,17 @@
-// core/services/platform-config.service.ts — UC004_ESTATE_PLACEHOLDER Phase 5
-// All endpoints migrated to /api/v1/estates/{estateId}/config/**
+// core/services/estate-config.service.ts — UC004_ESTATE_PLACEHOLDER Phase 5
+// All endpoints scoped to /api/v1/estates/{estateId}/config/**
 import { HttpClient } from "@angular/common/http";
 import { Injectable } from "@angular/core";
 import { Observable } from "rxjs";
+
 import {
-  BulkUpdateConfigRequest,
   EstateConfigDTO,
   UpdateConfigRequest,
 } from "../../models/estate-config.model";
 import { ActiveEstateService } from "./active-estate.service";
 
 @Injectable({ providedIn: "root" })
-export class PlatformConfigService {
+export class EstateConfigService {
   constructor(
     private http: HttpClient,
     private activeEstateService: ActiveEstateService,
@@ -19,10 +19,11 @@ export class PlatformConfigService {
 
   private get estateId(): string {
     const id = this.activeEstateService.activeEstateId();
-    if (!id)
+    if (!id) {
       throw new Error(
-        "No active estate — cannot call PlatformConfigService without an estate context.",
+        "No active estate — cannot call EstateConfigService without an estate context.",
       );
+    }
     return id;
   }
 
@@ -58,19 +59,6 @@ export class PlatformConfigService {
     return this.http.put<EstateConfigDTO>(`${this.base}/settings/${key}`, req);
   }
 
-  /**
-   * Bulk update — kept for backward compatibility with SettingsComponent.
-   * Delegates to individual PUT calls sequentially.
-   * NOTE: If the backend exposes a bulk endpoint at this path, use it directly.
-   */
-  bulkUpdate(req: BulkUpdateConfigRequest): Observable<EstateConfigDTO[]> {
-    // The backend Phase 5 does not define a bulk endpoint — individual PUTs per entry.
-    // If a bulk endpoint is added later, swap this implementation.
-    throw new Error(
-      "bulkUpdate is not supported in Phase 5. Use updateOne() per key or implement a backend bulk endpoint.",
-    );
-  }
-
   // ─── Boiler validity rules ────────────────────────────────────────────────
 
   /**
@@ -89,7 +77,7 @@ export class PlatformConfigService {
     return this.http.post<any>(`${this.base}/boiler-validity-rules`, req);
   }
 
-  // ─── Asset type mappings ─────────────────────────────────────────────────
+  // ─── Asset type mappings ──────────────────────────────────────────────────
 
   /**
    * GET /api/v1/estates/{estateId}/config/asset-type-mappings

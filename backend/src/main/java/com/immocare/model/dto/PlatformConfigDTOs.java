@@ -1,47 +1,49 @@
 package com.immocare.model.dto;
 
+import java.time.LocalDateTime;
+
+import jakarta.validation.constraints.NotBlank;
+
 /**
- * Legacy placeholder — UC004_ESTATE_PLACEHOLDER Phase 5.
+ * DTOs for platform-wide configuration (not scoped to any estate).
  *
- * All platform configuration is now per-estate.
- * Use {@link EstateConfigDTOs} for all config operations.
+ * <p>Platform config keys are managed by PLATFORM_ADMIN only and apply
+ * globally across all estates. Estate-scoped config uses
+ * {@link EstateConfigDTOs} instead.
  *
- * This class is retained only to avoid compile errors in any files not yet
- * migrated. Remove it once all references have been updated.
- *
- * @deprecated Use {@link EstateConfigDTOs} instead.
+ * <p>Exposed via {@code /api/v1/platform-config/**}.
  */
-@Deprecated(since = "UC004_ESTATE_PLACEHOLDER-Phase5", forRemoval = true)
 public final class PlatformConfigDTOs {
 
-        private PlatformConfigDTOs() {
-        }
+    private PlatformConfigDTOs() {}
 
-        // ─── Keys retained as constants so callers compile during migration ───────
-        // All of these are superseded by EstatePlatformConfigDTOs constants.
+    // ─── Response ─────────────────────────────────────────────────────────────
 
-        /**
-         * @deprecated Use
-         *             {@link EstateConfigDTOs#KEY_BOILER_ALERT_THRESHOLD_MONTHS}
-         */
-        @Deprecated
-        public static final String KEY_PEB_EXPIRY_WARNING_DAYS = "peb_expiry_warning_days";
-        /**
-         * @deprecated Use
-         *             {@link EstateConfigDTOs#KEY_BOILER_ALERT_THRESHOLD_MONTHS}
-         */
-        @Deprecated
-        public static final String KEY_BOILER_SERVICE_WARNING_DAYS = "boiler.service.alert.threshold.months";
-        /** @deprecated */
-        @Deprecated
-        public static final String KEY_LEASE_END_NOTICE_WARNING_DAYS = "lease_end_notice_warning_days";
-        /** @deprecated */
-        @Deprecated
-        public static final String KEY_INDEXATION_NOTICE_DAYS = "indexation_notice_days";
-        /** @deprecated */
-        @Deprecated
-        public static final String KEY_APP_NAME = "app_name";
-        /** @deprecated */
-        @Deprecated
-        public static final String KEY_DEFAULT_COUNTRY = "default_country";
+    /** Response: one platform config entry. */
+    public record PlatformConfigDTO(
+            String configKey,
+            String configValue,
+            String valueType,
+            String description,
+            LocalDateTime updatedAt) {}
+
+    // ─── Request ──────────────────────────────────────────────────────────────
+
+    /** Request: update a single platform config value. */
+    public record UpdatePlatformConfigRequest(
+            @NotBlank(message = "Config value is required") String configValue) {}
+
+    // ─── Well-known keys ──────────────────────────────────────────────────────
+
+    /**
+     * Display name of the application shown in the UI header.
+     * Type: STRING. Default: "ImmoCare".
+     */
+    public static final String KEY_APP_NAME = "app_name";
+
+    /**
+     * Default country code (ISO 3166-1 alpha-2) used when creating new estates.
+     * Type: STRING. Default: "BE".
+     */
+    public static final String KEY_DEFAULT_COUNTRY = "default_country";
 }

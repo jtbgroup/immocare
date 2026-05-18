@@ -1,106 +1,66 @@
-// features/settings/components/settings/settings.component.ts — UC004_ESTATE_PLACEHOLDER Phase 6
-// ActiveEstateService injected; save() blocked for VIEWERs.
-import { CommonModule } from "@angular/common";
-import { Component, OnDestroy, OnInit } from "@angular/core";
+// features/settings/components/settings/settings.component.ts
+// Platform-wide settings — PLATFORM_ADMIN only.
+// Layout mirrors estate-platform-settings; content is different (global keys only).
+import { CommonModule } from '@angular/common';
+import { Component, OnDestroy, OnInit } from '@angular/core';
 import {
   FormBuilder,
   FormGroup,
   ReactiveFormsModule,
   Validators,
-} from "@angular/forms";
-import { ActivatedRoute, Router } from "@angular/router";
-import { Subject, forkJoin } from "rxjs";
-import { finalize, takeUntil } from "rxjs/operators";
-import { ActiveEstateService } from "../../../../core/services/active-estate.service";
-import { DateFormatService } from "../../../../core/services/date-format.service";
-import { PlatformConfigService as EstateConfigService } from "../../../../core/services/estate-config.service";
+} from '@angular/forms';
+import { ActivatedRoute, Router } from '@angular/router';
+import { Subject, forkJoin } from 'rxjs';
+import { finalize, takeUntil } from 'rxjs/operators';
+
+import { PlatformConfigService } from '../../../../core/services/platform-config.service';
 import {
-  CONFIG_KEYS,
-  CONFIG_LABELS,
-  CONFIG_UNITS,
-  DATE_FORMAT_PRESETS,
-  EstateConfigDTO,
-  ON_DUPLICATE_OPTIONS,
-} from "../../../../models/estate-config.model";
+  PLATFORM_CONFIG_KEYS,
+  PLATFORM_CONFIG_LABELS,
+  PLATFORM_CONFIG_STRING_KEYS,
+  PlatformConfigDTO,
+} from '../../../../models/platform-config.model';
 
-type Section = "general" | "alerts" | "import";
-
-const INTEGER_KEYS = new Set<string>([
-  CONFIG_KEYS.BOILER_ALERT_THRESHOLD_MONTHS, // 'boiler.service.alert.threshold.months'
-  CONFIG_KEYS.IMPORT_SUGGESTION_CONFIDENCE, // 'csv.import.suggestion.confidence.threshold'
-  CONFIG_KEYS.CSV_SKIP_HEADER_ROWS,
-  CONFIG_KEYS.CSV_COL_DATE,
-  CONFIG_KEYS.CSV_COL_AMOUNT,
-  CONFIG_KEYS.CSV_COL_DESCRIPTION,
-  CONFIG_KEYS.CSV_COL_COUNTERPARTY,
-  CONFIG_KEYS.CSV_COL_EXTERNAL_REF,
-  CONFIG_KEYS.CSV_COL_BANK_ACCOUNT,
-  CONFIG_KEYS.CSV_COL_VALUE_DATE,
-  "alert.lease.end.notice.days",
-  "alert.lease.indexation.days",
-]);
-
-const GENERAL_KEYS = new Set<string>([
-  CONFIG_KEYS.CSV_DATE_FORMAT, // 'csv.import.date_format'
-  CONFIG_KEYS.CSV_DELIMITER, // 'csv.import.delimiter'
-]);
-
-const ALERT_KEYS = new Set<string>([
-  CONFIG_KEYS.ALERT_PEB_EXPIRY_WARNING_MONTHS,
-  CONFIG_KEYS.BOILER_ALERT_THRESHOLD_MONTHS,
-  CONFIG_KEYS.ALERT_LEASE_END_NOTICE_DAYS,
-  CONFIG_KEYS.ALERT_LEASE_INDEXATION_DAYS,
-]);
-
-const IMPORT_KEYS = new Set<string>([
-  CONFIG_KEYS.IMPORT_SUGGESTION_CONFIDENCE,
-  CONFIG_KEYS.CSV_SKIP_HEADER_ROWS,
-  CONFIG_KEYS.CSV_COL_DATE,
-  CONFIG_KEYS.CSV_COL_AMOUNT,
-  CONFIG_KEYS.CSV_COL_DESCRIPTION,
-  CONFIG_KEYS.CSV_COL_COUNTERPARTY,
-  CONFIG_KEYS.CSV_COL_EXTERNAL_REF,
-  CONFIG_KEYS.CSV_COL_BANK_ACCOUNT,
-  CONFIG_KEYS.CSV_COL_VALUE_DATE,
-]);
+type Section = 'general';
 
 @Component({
-  selector: "app-settings",
+  selector: 'app-settings',
   standalone: true,
   imports: [CommonModule, ReactiveFormsModule],
-  templateUrl: "./settings.component.html",
-  styleUrls: ["./settings.component.scss"],
+  templateUrl: './settings.component.html',
+  styleUrls: ['./settings.component.scss'],
 })
 export class SettingsComponent implements OnInit, OnDestroy {
-  configs: EstateConfigDTO[] = [];
+
+  // ── State ─────────────────────────────────────────────────────────────────
+  configs: PlatformConfigDTO[] = [];
   loading = false;
-  saving = false;
+  saving  = false;
   error: string | null = null;
   successMessage: string | null = null;
   form!: FormGroup;
-  activeSection: Section = "general";
+  activeSection: Section = 'general';
 
-  readonly CONFIG_LABELS = CONFIG_LABELS;
-  readonly DATE_FORMAT_PRESETS = DATE_FORMAT_PRESETS;
-  readonly ON_DUPLICATE_OPTIONS = ON_DUPLICATE_OPTIONS;
-  readonly DATE_FORMAT_KEY = CONFIG_KEYS.APP_DATE_FORMAT;
-  readonly ON_DUPLICATE_KEY = CONFIG_KEYS.IMPORT_ON_DUPLICATE;
+  // ── Constants exposed to template ─────────────────────────────────────────
+  readonly PLATFORM_CONFIG_LABELS = PLATFORM_CONFIG_LABELS;
+  readonly sections: { id: Section; label: string; icon: string }[] = [
+    { id: 'general', label: 'Général', icon: '🌐' },
+  ];
 
   private destroy$ = new Subject<void>();
 
   constructor(
-    private configService: EstateConfigService,
-    private dateFormatService: DateFormatService,
+    private configService: PlatformConfigService,
     private route: ActivatedRoute,
     private router: Router,
     private fb: FormBuilder,
-    readonly activeEstateService: ActiveEstateService,
   ) {}
 
+  // ── Lifecycle ─────────────────────────────────────────────────────────────
+
   ngOnInit(): void {
-    const s = this.route.snapshot.queryParamMap.get("section") as Section;
-    if (s && ["general", "alerts", "import"].includes(s))
-      this.activeSection = s;
+    const s = this.route.snapshot.queryParamMap.get('section') as Section;
+    if (s && this.sections.find(sec => sec.id === s)) this.activeSection = s;
     this.load();
   }
 
@@ -109,83 +69,53 @@ export class SettingsComponent implements OnInit, OnDestroy {
     this.destroy$.complete();
   }
 
+  // ── Navigation ────────────────────────────────────────────────────────────
+
   setSection(section: Section): void {
     this.activeSection = section;
     this.router.navigate([], { queryParams: { section }, replaceUrl: true });
   }
 
+  // ── Data ──────────────────────────────────────────────────────────────────
+
   load(): void {
     this.loading = true;
+    this.error   = null;
     this.configService
       .getAll()
       .pipe(takeUntil(this.destroy$))
       .subscribe({
-        next: (configs) => {
+        next: configs => {
           this.configs = configs;
           this.buildForm(configs);
           this.loading = false;
         },
         error: () => {
-          this.error = "Impossible de charger les paramètres.";
+          this.error   = 'Impossible de charger les paramètres.';
           this.loading = false;
         },
       });
   }
 
-  buildForm(configs: EstateConfigDTO[]): void {
-    console.log(
-      "Keys received from api:",
-      configs.map((c) => c.configKey),
-    );
+  buildForm(configs: PlatformConfigDTO[]): void {
     const group: Record<string, unknown[]> = {};
     for (const c of configs) {
-      const validators = [Validators.required];
-      if (INTEGER_KEYS.has(c.configKey))
-        validators.push(Validators.pattern(/^[1-9][0-9]*$/));
-      group[c.configKey] = [c.configValue, validators];
+      group[c.configKey] = [c.configValue, Validators.required];
     }
     this.form = this.fb.group(group);
-
-    // Disable form for VIEWERs (BR-UC004_ESTATE_PLACEHOLDER-08)
-    if (!this.activeEstateService.canEdit()) {
-      this.form.disable();
-    }
-  }
-
-  get generalConfigs(): EstateConfigDTO[] {
-    return this.configs.filter((c) => GENERAL_KEYS.has(c.configKey));
-  }
-  get alertConfigs(): EstateConfigDTO[] {
-    const result = this.configs.filter((c) => ALERT_KEYS.has(c.configKey));
-    console.log(
-      "alertConfigs:",
-      result.map((c) => c.configKey),
-    );
-    console.log("ALERT_KEYS:", Array.from(ALERT_KEYS));
-    return result;
-    // return this.configs.filter((c) => ALERT_KEYS.has(c.configKey));
-  }
-  get importConfigs(): EstateConfigDTO[] {
-    return this.configs.filter((c) => IMPORT_KEYS.has(c.configKey));
   }
 
   save(): void {
-    // Block save for VIEWERs (BR-UC004_ESTATE_PLACEHOLDER-08)
-    if (!this.activeEstateService.canEdit()) return;
-
     if (this.form.invalid) {
       this.form.markAllAsTouched();
       return;
     }
     this.saving = true;
-    this.error = null;
+    this.error  = null;
     this.successMessage = null;
 
-    const updates = Object.entries(this.form.value).map(
-      ([configKey, configValue]) =>
-        this.configService.updateOne(configKey, {
-          configValue: String(configValue).trim(),
-        }),
+    const updates = Object.entries(this.form.value).map(([key, value]) =>
+      this.configService.updateOne(key, { configValue: String(value).trim() }),
     );
 
     forkJoin(updates)
@@ -195,53 +125,30 @@ export class SettingsComponent implements OnInit, OnDestroy {
       )
       .subscribe({
         next: () => {
-          this.successMessage = "Paramètres enregistrés.";
+          this.successMessage = 'Paramètres enregistrés.';
           setTimeout(() => (this.successMessage = null), 3000);
-          this.dateFormatService.reload();
           this.load();
         },
-        error: (err) => {
-          this.error =
-            err?.error?.message ?? "Erreur lors de l'enregistrement.";
+        error: err => {
+          this.error = err?.error?.message ?? "Erreur lors de l'enregistrement.";
         },
       });
   }
 
+  // ── Template helpers ──────────────────────────────────────────────────────
+
+  get generalConfigs(): PlatformConfigDTO[] {
+    return this.configs;
+  }
+
   labelFor(key: string): string {
-    return CONFIG_LABELS[key] ?? key;
-  }
-  isIntegerKey(key: string): boolean {
-    return INTEGER_KEYS.has(key);
-  }
-  isDateFormatKey(key: string): boolean {
-    return key === CONFIG_KEYS.APP_DATE_FORMAT;
-  }
-  isSelectKey(key: string): boolean {
-    return key === CONFIG_KEYS.IMPORT_ON_DUPLICATE;
-  }
-
-  presetOrCustom(key: string): string {
-    const val = this.form?.get(key)?.value as string;
-    return this.DATE_FORMAT_PRESETS.some((p) => p.value === val)
-      ? val
-      : "__custom__";
-  }
-
-  onDateFormatSelectChange(key: string, event: Event): void {
-    if (!this.activeEstateService.canEdit()) return;
-    const selected = (event.target as HTMLSelectElement).value;
-    if (selected !== "__custom__") this.form.get(key)?.setValue(selected);
+    return PLATFORM_CONFIG_LABELS[key] ?? key;
   }
 
   fieldError(key: string): string | null {
     const ctrl = this.form?.get(key);
     if (!ctrl || !ctrl.invalid || !ctrl.touched) return null;
-    if (ctrl.hasError("required")) return "Ce champ est obligatoire.";
-    if (ctrl.hasError("pattern")) return "Doit être un entier positif.";
-    return "Valeur invalide.";
-  }
-
-  unitFor(configKey: string): string {
-    return CONFIG_UNITS[configKey] ?? "jours";
+    if (ctrl.hasError('required')) return 'Ce champ est obligatoire.';
+    return 'Valeur invalide.';
   }
 }

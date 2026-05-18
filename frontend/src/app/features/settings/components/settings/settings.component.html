@@ -1,36 +1,98 @@
-@if (!loading) {
-  <div class="settings-page">
-    <div class="details-content">
-      <div class="header">
-        <h1>⚙️ Paramètres</h1>
-      </div>
+<!-- features/settings/components/settings/settings.component.html -->
+<!-- Platform-wide settings — PLATFORM_ADMIN only.                   -->
+<!-- Layout mirrors estate-platform-settings.component.html.         -->
+<div class="settings-page">
+  <div class="details-content">
+    <div class="header">
+      <h1>⚙️ Paramètres de la plateforme</h1>
     </div>
+  </div>
 
-    @if (error) {
-      <div class="alert alert-error">{{ error }}</div>
-    }
-    @if (successMessage) {
-      <div class="alert alert-success">✅ {{ successMessage }}</div>
-    }
-    @if (loading) {
-      <div class="loading">Chargement…</div>
-    }
+  @if (error) {
+    <div class="alert alert-error">{{ error }}</div>
+  }
+  @if (successMessage) {
+    <div class="alert alert-success">✅ {{ successMessage }}</div>
+  }
 
-    @if (!loading && form) {
-      <div class="settings-layout">
-        <!-- Sidebar -->
-        <aside class="settings-nav">
+  @if (loading) {
+    <div class="loading">Chargement des paramètres…</div>
+  }
+
+  @if (!loading && form) {
+    <div class="settings-layout">
+
+      <!-- ── Sidebar nav ──────────────────────────────────────────────────── -->
+      <aside class="settings-nav">
+        @for (section of sections; track section.id) {
           <button
             class="settings-nav__item"
-            [class.settings-nav__item--active]="activeSection === 'general'"
-            (click)="setSection('general')"
+            [class.settings-nav__item--active]="activeSection === section.id"
+            (click)="setSection(section.id)"
           >
-            🌐 Général
+            {{ section.icon }} {{ section.label }}
           </button>
-        </aside>
+        }
+      </aside>
 
-        <!-- Main content -->
+      <!-- ── Main content ─────────────────────────────────────────────────── -->
+      <div class="settings-content">
+        <form [formGroup]="form" (ngSubmit)="save()">
+
+          <!-- ═══ GÉNÉRAL ══════════════════════════════════════════════════ -->
+          @if (activeSection === 'general') {
+            <div class="info-card">
+              <div class="section-header">
+                <h2>🌐 Général</h2>
+              </div>
+              <p class="section-desc">
+                Ces paramètres s'appliquent à l'ensemble de la plateforme,
+                indépendamment des estates.
+              </p>
+
+              <div class="settings-fields">
+                @for (config of generalConfigs; track config.configKey) {
+                  <div class="form-group">
+                    <label [for]="config.configKey">
+                      {{ labelFor(config.configKey) }}
+                    </label>
+                    <input
+                      [id]="config.configKey"
+                      type="text"
+                      [formControlName]="config.configKey"
+                    />
+                    @if (config.description) {
+                      <span class="field-hint">{{ config.description }}</span>
+                    }
+                    @if (fieldError(config.configKey)) {
+                      <div class="field-error">
+                        {{ fieldError(config.configKey) }}
+                      </div>
+                    }
+                  </div>
+                }
+
+                @if (generalConfigs.length === 0) {
+                  <p class="empty-message">
+                    Aucun paramètre plateforme configuré.
+                  </p>
+                }
+              </div>
+
+              <div class="form-actions">
+                <button
+                  type="submit"
+                  class="btn btn-primary"
+                  [disabled]="saving"
+                >
+                  {{ saving ? 'Enregistrement…' : 'Enregistrer' }}
+                </button>
+              </div>
+            </div>
+          }
+
+        </form>
       </div>
-    }
-  </div>
-}
+    </div>
+  }
+</div>

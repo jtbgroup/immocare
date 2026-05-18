@@ -47,7 +47,7 @@ export class BoilerSectionComponent implements OnInit, OnDestroy {
   deleteConfirmId: number | null = null;
 
   // Service history state (keyed by boilerId)
-  serviceHistoryMap: Record<number, BoilerServiceRecordDTO[]> = {};
+  serviceHistoryMap: Record<number, BoilerServiceRecordDTO[] | undefined> = {};
   serviceHistoryOpen: Record<number, boolean> = {};
   serviceHistoryLoading: Record<number, boolean> = {};
 

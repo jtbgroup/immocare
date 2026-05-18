@@ -106,8 +106,8 @@ bootstrapApplication(AppComponent, {
         path: "estates/:estateId/settings",
         canActivate: [AuthGuard, EstateGuard],
         loadComponent: () =>
-          import("./app/features/estate/components/user/estate-platform-settings/estate-platform-settings.component").then(
-            (m) => m.EstatePlatformSettingsComponent,
+          import("./app/features/estate/components/user/estate-settings/estate-settings.component").then(
+            (m) => m.EstateSettingsComponent,
           ),
       },
 
