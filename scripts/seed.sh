@@ -154,6 +154,41 @@ if [ -z "$CURRENT_USER_ID" ] || [ "$CURRENT_USER_ID" = "null" ]; then
 fi
 log_info "Current user ID: $CURRENT_USER_ID"
 
+# ─── 0a. Platform config ──────────────────────────────────────────────────────
+PLATFORM_CONFIG_FILE="$DATA_DIR/platform_config.json"
+if [ -f "$PLATFORM_CONFIG_FILE" ]; then
+  log_section "0a — Seeding platform config"
+  TOTAL=$(jq length "$PLATFORM_CONFIG_FILE"); CREATED=0; SKIPPED=0
+ 
+  for i in $(seq 0 $(( TOTAL - 1 ))); do
+    ENTRY=$(jq -c ".[$i]" "$PLATFORM_CONFIG_FILE")
+    KEY=$(echo "$ENTRY"   | jq -r '.configKey')
+    VALUE=$(echo "$ENTRY" | jq -r '.configValue')
+ 
+    PAYLOAD=$(echo "$ENTRY" | jq '{configValue: .configValue}')
+ 
+    S=$(curl -s -o /tmp/pc.json -w "%{http_code}" \
+      -X PUT "$BASE_URL/api/v1/platform-config/settings/$KEY" \
+      -H "Content-Type: application/json" -b "$COOKIE_JAR" \
+      -d "$PAYLOAD")
+    case "$S" in
+      200|201)
+        log_ok "Platform config: $KEY = $VALUE"
+        CREATED=$(( CREATED+1 ))
+        ;;
+      404)
+        log_warn "Platform config: $KEY not found in DB — skipped (run Flyway or insert manually)"
+        SKIPPED=$(( SKIPPED+1 ))
+        ;;
+      *)
+        log_failure "Platform config: $KEY" "$S" /tmp/pc.json
+        ;;
+    esac
+  done
+  log_info "Platform config: $CREATED updated, $SKIPPED skipped"
+fi
+
+
 # ─── 0. Estates ───────────────────────────────────────────────────────────────
 ESTATES_FILE="$DATA_DIR/estates.json"
 if [ -f "$ESTATES_FILE" ]; then

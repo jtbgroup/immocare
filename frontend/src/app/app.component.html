@@ -4,7 +4,7 @@
     <!-- Brand -->
     <a routerLink="/" class="brand">
       <div class="brand-icon">🏢</div>
-      <span class="brand-name">ImmoCare</span>
+      <span class="brand-name">{{ appNameService.appName() }}</span>
     </a>
 
     <!-- Nav + right zone: visible only when logged in -->
@@ -145,7 +145,18 @@
             alertCount
           }}</span>
         </a>
-
+        <!-- Language switcher -->
+        <div class="lang-switcher">
+          @for (lang of languageService.supported; track lang) {
+            <button
+              class="lang-btn"
+              [class.lang-btn--active]="languageService.currentLang() === lang"
+              (click)="languageService.setLang(lang)"
+            >
+              {{ lang.toUpperCase() }}
+            </button>
+          }
+        </div>
         <!-- Avatar dropdown -->
         <div class="avatar-wrapper" #avatarWrapper>
           <button

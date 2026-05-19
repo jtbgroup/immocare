@@ -1,0 +1,12 @@
+[
+  {
+    "configKey": "app_name",
+    "configValue": "ImmoCare Demo",
+    "description": "Nom de l'application affiché dans l'UI"
+  },
+  {
+    "configKey": "default_country",
+    "configValue": "BE",
+    "description": "Code pays ISO 3166-1 alpha-2 par défaut"
+  }
+]

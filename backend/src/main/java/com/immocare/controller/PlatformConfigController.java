@@ -21,15 +21,23 @@ import lombok.RequiredArgsConstructor;
 /**
  * REST controller for platform-wide configuration.
  *
- * <p>All endpoints are restricted to PLATFORM_ADMIN. Platform config is global
+ * <p>
+ * All endpoints are restricted to PLATFORM_ADMIN. Platform config is global
  * and not scoped to any estate. Estate-scoped config is handled by
  * {@link EstateConfigController}.
  *
- * <p>Endpoints:
+ * <p>
+ * PUT is idempotent and acts as an upsert — it creates the entry if absent
+ * or updates it if it already exists. This means the table can start empty and
+ * the seed script or UI can populate it without any prior SQL setup.
+ *
+ * <p>
+ * Endpoints:
+ * 
  * <pre>
  *   GET /api/v1/platform-config/settings        — list all entries
- *   GET /api/v1/platform-config/settings/{key}  — get one entry
- *   PUT /api/v1/platform-config/settings/{key}  — update one entry
+ *   GET /api/v1/platform-config/settings/{key}  — get one entry (null if absent)
+ *   PUT /api/v1/platform-config/settings/{key}  — upsert one entry
  * </pre>
  */
 @RestController
@@ -51,23 +59,24 @@ public class PlatformConfigController {
 
     /**
      * GET /api/v1/platform-config/settings/{key}
-     * Returns a single platform config entry.
+     * Returns a single entry, or 404 if the key has never been set.
      */
     @GetMapping("/settings/{key}")
     @PreAuthorize("hasRole('PLATFORM_ADMIN')")
     public ResponseEntity<PlatformConfigDTO> getOne(@PathVariable String key) {
-        return ResponseEntity.ok(configService.getOne(key));
+        PlatformConfigDTO dto = configService.getOne(key);
+        return dto != null ? ResponseEntity.ok(dto) : ResponseEntity.notFound().build();
     }
 
     /**
      * PUT /api/v1/platform-config/settings/{key}
-     * Updates a single platform config value.
+     * Creates or updates a platform config entry (upsert).
      */
     @PutMapping("/settings/{key}")
     @PreAuthorize("hasRole('PLATFORM_ADMIN')")
-    public ResponseEntity<PlatformConfigDTO> updateOne(
+    public ResponseEntity<PlatformConfigDTO> upsert(
             @PathVariable String key,
             @Valid @RequestBody UpdatePlatformConfigRequest req) {
-        return ResponseEntity.ok(configService.updateOne(key, req));
+        return ResponseEntity.ok(configService.upsert(key, req));
     }
 }

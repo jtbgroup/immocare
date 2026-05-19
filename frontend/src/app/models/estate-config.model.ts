@@ -134,10 +134,11 @@ export const ON_DUPLICATE_OPTIONS: { value: string; label: string }[] = [
   { value: "IMPORT", label: "Toujours importer (pas de détection)" },
 ];
 
-export const CONFIG_UNITS: Partial<Record<string, "jours" | "mois">> = {
-  [CONFIG_KEYS.ALERT_PEB_EXPIRY_WARNING_MONTHS]: "mois",
-  [CONFIG_KEYS.BOILER_SERVICE_WARNING_DAYS]: "jours",
-  [CONFIG_KEYS.ALERT_LEASE_END_NOTICE_DAYS]: "jours",
-  [CONFIG_KEYS.ALERT_LEASE_INDEXATION_DAYS]: "jours",
-  [CONFIG_KEYS.BOILER_ALERT_THRESHOLD_MONTHS]: "mois",
+// unit for the duration keyframes. d=days, m=months
+export const CONFIG_UNITS: Partial<Record<string, "days" | "months">> = {
+  [CONFIG_KEYS.ALERT_PEB_EXPIRY_WARNING_MONTHS]: "months",
+  [CONFIG_KEYS.BOILER_SERVICE_WARNING_DAYS]: "days",
+  [CONFIG_KEYS.ALERT_LEASE_END_NOTICE_DAYS]: "days",
+  [CONFIG_KEYS.ALERT_LEASE_INDEXATION_DAYS]: "days",
+  [CONFIG_KEYS.BOILER_ALERT_THRESHOLD_MONTHS]: "months",
 };

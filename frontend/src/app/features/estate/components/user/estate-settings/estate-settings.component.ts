@@ -24,6 +24,7 @@ import {
   BoilerServiceValidityRuleDTO,
   CONFIG_KEYS,
   CONFIG_LABELS,
+  CONFIG_UNITS,
   DATE_FORMAT_PRESETS,
   EstateConfigDTO,
   ON_DUPLICATE_OPTIONS,
@@ -645,6 +646,11 @@ export class EstateSettingsComponent implements OnInit, OnDestroy {
   labelFor(key: string): string {
     return CONFIG_LABELS[key] ?? key;
   }
+
+  unitFor(key: string): string {
+    return CONFIG_UNITS[key] ?? "";
+  }
+
   isIntegerKey(key: string): boolean {
     return INTEGER_KEYS.has(key);
   }

@@ -15,6 +15,8 @@ import {
 import { AuthService } from "./core/auth/auth.service";
 import { ActiveEstateService } from "./core/services/active-estate.service";
 import { AlertService } from "./core/services/alert.service";
+import { AppNameService } from "./core/services/app-name.service";
+import { LanguageService } from "./core/services/language.service";
 import { VersionService } from "./core/services/version.service";
 import { EstateHeaderComponent } from "./features/estate/components/user/estate-header/estate-header.component";
 
@@ -48,6 +50,8 @@ export class AppComponent implements OnInit {
     private alertService: AlertService,
     private router: Router,
     readonly activeEstateService: ActiveEstateService,
+    readonly appNameService: AppNameService,
+    readonly languageService: LanguageService,
   ) {}
 
   ngOnInit(): void {

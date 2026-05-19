@@ -136,7 +136,9 @@
                         min="1"
                         [formControlName]="toFormKey(config.configKey)"
                       />
-                      <span class="unit">jours</span>
+                      <label [for]="config.configKey">{{
+                        unitFor(config.configKey)
+                      }}</label>
                     </div>
                     @if (fieldError(config.configKey)) {
                       <div class="field-error">

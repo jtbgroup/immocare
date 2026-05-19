@@ -1,0 +1,75 @@
+{
+  "NAV": {
+    "MY_ESTATES": "My Estates",
+    "BUILDINGS": "Buildings",
+    "UNITS": "Units",
+    "LEASES": "Leases",
+    "TRANSACTIONS": "Transactions",
+    "MANAGEMENT": "Management",
+    "PEOPLE": "People",
+    "BANK_ACCOUNTS": "Bank Accounts",
+    "SETTINGS": "Settings"
+  },
+  "BUILDING": {
+    "TITLE_LIST": "Buildings",
+    "ADD": "+ Add Building",
+    "SEARCH_PLACEHOLDER": "Search by name, address, city…",
+    "ALL_CITIES": "All cities",
+    "COLUMNS": {
+      "NAME": "Name",
+      "ADDRESS": "Address",
+      "CITY": "City",
+      "UNITS": "Units",
+      "OWNER": "Owner"
+    },
+    "EMPTY": "No buildings found.",
+    "EMPTY_HELP": "Get started by adding your first building.",
+    "DELETE_CONFIRM": "Delete building \"{{name}}\"? This cannot be undone."
+  },
+  "UNIT": {
+    "FLOOR": "Floor",
+    "SURFACE": "Surface (m²)",
+    "ROOMS": "Rooms",
+    "RENT": "Rent",
+    "STATUS": {
+      "ACTIVE": "Active",
+      "DRAFT": "Draft",
+      "VACANT": "Vacant"
+    }
+  },
+  "PEB": {
+    "TITLE": "Energy Performance (PEB)",
+    "SET": "+ Set PEB",
+    "SCORE_DATE": "Score date",
+    "VALID_UNTIL": "Valid until",
+    "CERTIFICATE": "Certificate",
+    "NO_DATA": "No PEB score recorded.",
+    "EXPIRY": {
+      "VALID": "Valid",
+      "EXPIRING_SOON": "Expires soon",
+      "EXPIRED": "Expired",
+      "NO_DATE": "No expiry date"
+    }
+  },
+  "COMMON": {
+    "SAVE": "Save",
+    "SAVING": "Saving…",
+    "CANCEL": "Cancel",
+    "EDIT": "Edit",
+    "DELETE": "Delete",
+    "SEARCH": "Search",
+    "CLEAR": "Clear",
+    "LOADING": "Loading…",
+    "REQUIRED": "Required field",
+    "OPTIONAL": "optional",
+    "NO_DATA": "—",
+    "PREVIOUS": "Previous",
+    "NEXT": "Next",
+    "PAGE_OF": "Page {{current}} of {{total}} ({{elements}} total)"
+  },
+  "LANG": {
+    "FR": "Français",
+    "EN": "English",
+    "NL": "Nederlands"
+  }
+}

@@ -5,7 +5,6 @@ import java.util.List;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.immocare.exception.PlatformConfigNotFoundException;
 import com.immocare.model.dto.PlatformConfigDTOs.PlatformConfigDTO;
 import com.immocare.model.dto.PlatformConfigDTOs.UpdatePlatformConfigRequest;
 import com.immocare.model.entity.PlatformConfig;
@@ -16,8 +15,14 @@ import lombok.RequiredArgsConstructor;
 /**
  * Business logic for platform-wide configuration.
  *
- * <p>Platform config is global — no estate scope. Mutations are restricted to
+ * <p>
+ * Platform config is global — no estate scope. Mutations are restricted to
  * PLATFORM_ADMIN at the controller level.
+ *
+ * <p>
+ * Keys are optional: callers should always provide a sensible default via
+ * {@link #getStringValue(String, String)} or {@link #getIntValue(String, int)}
+ * rather than assuming a key exists.
  */
 @Service
 @RequiredArgsConstructor
@@ -39,14 +44,12 @@ public class PlatformConfigService {
     }
 
     /**
-     * Returns a single platform config entry by key.
-     *
-     * @throws PlatformConfigNotFoundException if the key does not exist
+     * Returns a single platform config entry by key, or {@code null} if absent.
      */
     public PlatformConfigDTO getOne(String key) {
         return configRepository.findByConfigKey(key)
                 .map(this::toDTO)
-                .orElseThrow(() -> new PlatformConfigNotFoundException(key));
+                .orElse(null);
     }
 
     /**
@@ -75,17 +78,24 @@ public class PlatformConfigService {
                 .orElse(defaultValue);
     }
 
-    // ─── Update ───────────────────────────────────────────────────────────────
+    // ─── Upsert ───────────────────────────────────────────────────────────────
 
     /**
-     * Updates a single platform config value.
+     * Creates or updates a platform config entry (upsert).
      *
-     * @throws PlatformConfigNotFoundException if the key does not exist
+     * <p>
+     * If the key already exists its value is updated. If not, a new entry
+     * is created. This makes PUT idempotent regardless of prior state.
      */
     @Transactional
-    public PlatformConfigDTO updateOne(String key, UpdatePlatformConfigRequest req) {
+    public PlatformConfigDTO upsert(String key, UpdatePlatformConfigRequest req) {
         PlatformConfig config = configRepository.findByConfigKey(key)
-                .orElseThrow(() -> new PlatformConfigNotFoundException(key));
+                .orElseGet(() -> {
+                    PlatformConfig c = new PlatformConfig();
+                    c.setConfigKey(key);
+                    c.setValueType("STRING");
+                    return c;
+                });
         config.setConfigValue(req.configValue().trim());
         return toDTO(configRepository.save(config));
     }

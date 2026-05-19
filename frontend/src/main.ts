@@ -3,32 +3,61 @@ import {
   provideHttpClient,
   withInterceptorsFromDi,
 } from "@angular/common/http";
-import { APP_INITIALIZER } from "@angular/core";
+import {
+  importProvidersFrom,
+  inject,
+  provideAppInitializer,
+} from "@angular/core";
 import { bootstrapApplication } from "@angular/platform-browser";
 import { provideRouter } from "@angular/router";
+
+// CORRECTION 1 : Ajout des imports manquants pour ngx-translate
+import { TranslateLoader, TranslateModule } from "@ngx-translate/core";
+import { TranslateHttpLoader } from "@ngx-translate/http-loader";
 
 import { AppComponent } from "./app/app.component";
 import { AuthGuard } from "./app/core/auth/auth.guard";
 import { AuthInterceptor } from "./app/core/auth/auth.interceptor";
 import { EstateGuard } from "./app/core/auth/estate.guard";
 import { PlatformAdminGuard } from "./app/core/auth/platform-admin.guard";
+import { AppNameService } from "./app/core/services/app-name.service";
 import { DateFormatService } from "./app/core/services/date-format.service";
 import { AdminEstateFormComponent } from "./app/features/estate/components/admin/admin-estate-form/admin-estate-form.component";
 
+// CORRECTION 3 : La factory n'envoie plus d'argument si ta version n'en veut pas
+export function HttpLoaderFactory() {
+  return new TranslateHttpLoader();
+}
+
 bootstrapApplication(AppComponent, {
   providers: [
+    // CORRECTION 2 : On ne garde qu'un seul provideHttpClient propre
     provideHttpClient(withInterceptorsFromDi()),
+
+    // On utilise importProvidersFrom pour encapsuler le module classique
+    importProvidersFrom(
+      TranslateModule.forRoot({
+        loader: {
+          provide: TranslateLoader,
+          useFactory: HttpLoaderFactory,
+          deps: [], // Plus besoin de HttpClient ici non plus
+        },
+      }),
+    ),
+
     {
       provide: HTTP_INTERCEPTORS,
       useClass: AuthInterceptor,
       multi: true,
     },
-    {
-      provide: APP_INITIALIZER,
-      useFactory: (svc: DateFormatService) => () => svc.load(),
-      deps: [DateFormatService],
-      multi: true,
-    },
+    provideAppInitializer(() => {
+      const svc = inject(AppNameService);
+      return svc.load();
+    }),
+    provideAppInitializer(() => {
+      const svc = inject(DateFormatService);
+      return svc.load();
+    }),
     provideRouter([
       {
         path: "login",
@@ -248,7 +277,6 @@ bootstrapApplication(AppComponent, {
       },
 
       // ─── Transactions (Phase 4: estate-scoped) ───────────────────────────────
-      // IMPORTANT: routes with static segments (new, import) must come BEFORE :id
       {
         path: "estates/:estateId/transactions",
         canActivate: [AuthGuard, EstateGuard],
@@ -290,7 +318,7 @@ bootstrapApplication(AppComponent, {
           ),
       },
 
-      // ─── Transactions (legacy flat routes — kept for compatibility) ───────────
+      // ─── Transactions (legacy flat routes) ───────────────────────────────────
       {
         path: "transactions",
         canActivate: [AuthGuard],
@@ -376,7 +404,7 @@ bootstrapApplication(AppComponent, {
           ),
       },
 
-      // ─── Legacy global settings (kept for PLATFORM_ADMIN without estate) ─────
+      // ─── Legacy global settings ──────────────────────────────────────────────
       {
         path: "settings",
         canActivate: [AuthGuard],

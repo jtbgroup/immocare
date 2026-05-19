@@ -1,0 +1,75 @@
+{
+  "NAV": {
+    "MY_ESTATES": "Mes estates",
+    "BUILDINGS": "Immeubles",
+    "UNITS": "Unités",
+    "LEASES": "Baux",
+    "TRANSACTIONS": "Transactions",
+    "MANAGEMENT": "Gestion",
+    "PEOPLE": "Personnes",
+    "BANK_ACCOUNTS": "Comptes bancaires",
+    "SETTINGS": "Paramètres"
+  },
+  "BUILDING": {
+    "TITLE_LIST": "Immeubles",
+    "ADD": "Ajouter un immeuble",
+    "SEARCH_PLACEHOLDER": "Rechercher par nom, adresse, ville…",
+    "ALL_CITIES": "Toutes les villes",
+    "COLUMNS": {
+      "NAME": "Nom",
+      "ADDRESS": "Adresse",
+      "CITY": "Ville",
+      "UNITS": "Unités",
+      "OWNER": "Propriétaire"
+    },
+    "EMPTY": "Aucun immeuble trouvé.",
+    "EMPTY_HELP": "Commencez par ajouter votre premier immeuble.",
+    "DELETE_CONFIRM": "Supprimer l'immeuble \"{{name}}\" ? Cette action est irréversible."
+  },
+  "UNIT": {
+    "FLOOR": "Étage",
+    "SURFACE": "Surface (m²)",
+    "ROOMS": "Pièces",
+    "RENT": "Loyer",
+    "STATUS": {
+      "ACTIVE": "Actif",
+      "DRAFT": "Brouillon",
+      "VACANT": "Vacant"
+    }
+  },
+  "PEB": {
+    "TITLE": "Performance énergétique (PEB)",
+    "SET": "Définir PEB",
+    "SCORE_DATE": "Date du score",
+    "VALID_UNTIL": "Valable jusqu'au",
+    "CERTIFICATE": "Certificat",
+    "NO_DATA": "Aucun score PEB enregistré.",
+    "EXPIRY": {
+      "VALID": "Valide",
+      "EXPIRING_SOON": "Expire bientôt",
+      "EXPIRED": "Expiré",
+      "NO_DATE": "Sans date d'expiration"
+    }
+  },
+  "COMMON": {
+    "SAVE": "Enregistrer",
+    "SAVING": "Enregistrement…",
+    "CANCEL": "Annuler",
+    "EDIT": "Modifier",
+    "DELETE": "Supprimer",
+    "SEARCH": "Rechercher",
+    "CLEAR": "Effacer",
+    "LOADING": "Chargement…",
+    "REQUIRED": "Champ obligatoire",
+    "OPTIONAL": "optionnel",
+    "NO_DATA": "—",
+    "PREVIOUS": "Précédent",
+    "NEXT": "Suivant",
+    "PAGE_OF": "Page {{current}} sur {{total}} ({{elements}} au total)"
+  },
+  "LANG": {
+    "FR": "Français",
+    "EN": "English",
+    "NL": "Nederlands"
+  }
+}
