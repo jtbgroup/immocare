@@ -113,10 +113,37 @@ export class AppComponent implements OnInit {
     ) {
       this.managementOpen = false;
     }
+    if (
+      this.langOpen &&
+      this.langWrapper &&
+      !this.langWrapper.nativeElement.contains(event.target)
+    ) {
+      this.langOpen = false;
+    }
   }
 
   logout(): void {
     this.dropdownOpen = false;
     this.authService.logout();
+  }
+
+  @ViewChild("langWrapper") langWrapper!: ElementRef;
+  langOpen = false;
+
+  toggleLang(): void {
+    this.langOpen = !this.langOpen;
+  }
+
+  selectLang(lang: any): void {
+    this.languageService.setLang(lang);
+    this.langOpen = false;
+  }
+
+  langFlag(lang: string): string {
+    return { fr: "🇫🇷", en: "🇬🇧" }[lang] ?? "🌐";
+  }
+
+  langLabel(lang: string): string {
+    return { fr: "Français", en: "English" }[lang] ?? lang;
   }
 }

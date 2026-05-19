@@ -15,9 +15,8 @@
           routerLink="/select-estate"
           class="app-nav__link"
           routerLinkActive="app-nav__link--active"
-          *transloco="let t"
         >
-          🏛️ {{ t("NAV.MY_ESTATES") }}
+          🏛️ {{ "NAV.MY_ESTATES" | transloco }}
         </a>
         @if (activeEstateService.activeEstateId()) {
           <a
@@ -29,7 +28,7 @@
             routerLinkActive="app-nav__link--active"
             class="app-nav__link"
           >
-            🏢 Buildings
+            {{ "NAV.BUILDINGS" | transloco }}
           </a>
           <a
             [routerLink]="[
@@ -40,7 +39,7 @@
             routerLinkActive="app-nav__link--active"
             class="app-nav__link"
           >
-            🏠 Units
+            {{ "NAV.UNITS" | transloco }}
           </a>
           <a
             [routerLink]="[
@@ -51,14 +50,14 @@
             routerLinkActive="app-nav__link--active"
             class="app-nav__link"
           >
-            📄 Leases
+            📄 {{ "NAV.LEASES" | transloco }}
           </a>
           <a
             routerLink="/transactions"
             routerLinkActive="app-nav__link--active"
             class="app-nav__link"
           >
-            💶 Transactions
+            💶 {{ "NAV.TRANSACTIONS" | transloco }}
           </a>
 
           <!-- Management dropdown -->
@@ -70,7 +69,8 @@
               "
               (click)="toggleManagement()"
             >
-              🗂 Management <span class="nav-chevron">▾</span>
+              🗂 {{ "NAV.MANAGEMENT" | transloco }}
+              <span class="nav-chevron">▾</span>
             </button>
             <div class="nav-dropdown" [class.open]="managementOpen">
               @if (activeEstateService.activeEstateId()) {
@@ -83,13 +83,13 @@
                   class="nav-dropdown__item"
                   (click)="closeManagement()"
                 >
-                  👤 People
+                  👤 {{ "NAV.PEOPLE" | transloco }}
                 </a>
               } @else {
                 <span
                   class="nav-dropdown__item"
                   style="opacity: 0.4; cursor: not-allowed"
-                  >👤 People</span
+                  >👤 {{ "NAV.PEOPLE" | transloco }}</span
                 >
               }
               <a
@@ -108,21 +108,25 @@
                 class="dropdown-item"
                 (click)="closeDropdown()"
               >
-                ⚙️ Paramètres
+                ⚙️ {{ "NAV.SETTINGS" | transloco }}
               </a>
             </div>
           </div>
         } @else {
           <span class="app-nav__link app-nav__link--disabled"
-            >🏢 Buildings</span
-          >
-          <span class="app-nav__link app-nav__link--disabled">🏠 Units</span>
-          <span class="app-nav__link app-nav__link--disabled">📄 Leases</span>
-          <span class="app-nav__link app-nav__link--disabled"
-            >💶 Transactions</span
+            >🏢 {{ "NAV.BUILDINGS" | transloco }}</span
           >
           <span class="app-nav__link app-nav__link--disabled"
-            >🗂 Management</span
+            >🏠 {{ "NAV.UNITS" | transloco }}</span
+          >
+          <span class="app-nav__link app-nav__link--disabled"
+            >📄 {{ "NAV.LEASES" | transloco }}</span
+          >
+          <span class="app-nav__link app-nav__link--disabled"
+            >💶 {{ "NAV.TRANSACTIONS" | transloco }}</span
+          >
+          <span class="app-nav__link app-nav__link--disabled"
+            >🗂 {{ "NAV.MANAGEMENT" | transloco }}</span
           >
         }
       </nav>
@@ -147,16 +151,22 @@
           }}</span>
         </a>
         <!-- Language switcher -->
-        <div class="lang-switcher">
-          @for (lang of languageService.supported; track lang) {
-            <button
-              class="lang-btn"
-              [class.lang-btn--active]="languageService.currentLang() === lang"
-              (click)="languageService.setLang(lang)"
-            >
-              {{ lang.toUpperCase() }}
-            </button>
-          }
+        <div class="lang-wrapper" #langWrapper>
+          <button class="lang-btn" (click)="toggleLang()">
+            {{ langFlag(languageService.currentLang()) }}
+            <span class="avatar-chevron">▼</span>
+          </button>
+          <div class="lang-dropdown" [class.open]="langOpen">
+            @for (lang of languageService.supported; track lang) {
+              <button
+                class="lang-dropdown__item"
+                [class.active]="languageService.currentLang() === lang"
+                (click)="selectLang(lang)"
+              >
+                {{ langFlag(lang) }} {{ langLabel(lang) }}
+              </button>
+            }
+          </div>
         </div>
         <!-- Avatar dropdown -->
         <div class="avatar-wrapper" #avatarWrapper>
@@ -183,7 +193,8 @@
                 class="dropdown-item"
                 (click)="closeDropdown()"
               >
-                <span class="di-icon">👥</span> Manage Users
+                <span class="di-icon">👥</span>
+                {{ "NAV.MANAGE_USERS" | transloco }}
               </a>
               <div class="dropdown-divider"></div>
               <a
@@ -191,7 +202,8 @@
                 class="dropdown-item"
                 (click)="closeDropdown()"
               >
-                <span class="di-icon">🏛️</span> Manage Estates
+                <span class="di-icon">🏛️</span>
+                {{ "NAV.MANAGE_ESTATES" | transloco }}
               </a>
 
               <div class="dropdown-divider"></div>
@@ -201,7 +213,7 @@
                 class="dropdown-item"
                 (click)="closeDropdown()"
               >
-                <span class="di-icon">⚙️</span> Paramètres
+                <span class="di-icon">⚙️</span> {{ "NAV.SETTINGS" | transloco }}
               </a>
             }
 
@@ -210,7 +222,7 @@
               class="dropdown-item dropdown-item--logout"
               (click)="logout()"
             >
-              <span class="di-icon">↩</span> Logout
+              <span class="di-icon">↩</span> {{ "NAV.LOGOUT" | transloco }}
             </button>
           </div>
         </div>

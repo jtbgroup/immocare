@@ -8,7 +8,10 @@
     "MANAGEMENT": "Gestion",
     "PEOPLE": "Personnes",
     "BANK_ACCOUNTS": "Comptes bancaires",
-    "SETTINGS": "Paramètres"
+    "SETTINGS": "Paramètres",
+    "LOGOUT": "Logout",
+    "MANAGE_ESTATES": "Gestion des Estate",
+    "MANAGE_USERS": "Gestion des Utilisateurs"
   },
   "BUILDING": {
     "TITLE_LIST": "Immeubles",

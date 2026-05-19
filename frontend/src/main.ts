@@ -27,8 +27,8 @@ bootstrapApplication(AppComponent, {
     // Configuration Moderne du Multilingue (Bye bye les modules !)
     provideTransloco({
       config: {
-        availableLangs: ["fr", "en", "nl"],
-        defaultLang: "fr",
+        availableLangs: ["fr", "en"],
+        defaultLang: "en",
         reRenderOnLangChange: true,
         prodMode: !isDevMode(),
       },
@@ -424,16 +424,5 @@ bootstrapApplication(AppComponent, {
       { path: "", redirectTo: "/login", pathMatch: "full" },
       { path: "**", redirectTo: "/login" },
     ]),
-    provideHttpClient(),
-    provideTransloco({
-      config: {
-        availableLangs: ["fr", "en"],
-        defaultLang: "fr",
-        // Remove this option if your application doesn't support changing language in runtime.
-        reRenderOnLangChange: true,
-        prodMode: !isDevMode(),
-      },
-      loader: TranslocoHttpLoader,
-    }),
   ],
 }).catch((err) => console.error(err));

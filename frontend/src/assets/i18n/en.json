@@ -8,7 +8,10 @@
     "MANAGEMENT": "Management",
     "PEOPLE": "People",
     "BANK_ACCOUNTS": "Bank Accounts",
-    "SETTINGS": "Settings"
+    "SETTINGS": "Settings",
+    "LOGOUT": "Logout",
+    "MANAGE_ESTATES": "Manage Estate",
+    "MANAGE_USERS": "Manage Users"
   },
   "BUILDING": {
     "TITLE_LIST": "Buildings",

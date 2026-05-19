@@ -1,13 +1,13 @@
 import { Injectable, signal } from "@angular/core";
 import { TranslocoService } from "@ngneat/transloco"; // On passe sur Transloco
 
-export type SupportedLang = "fr" | "en" | "nl";
+export type SupportedLang = "fr" | "en";
 const STORAGE_KEY = "immocare_lang";
 
 @Injectable({ providedIn: "root" })
 export class LanguageService {
   readonly currentLang = signal<SupportedLang>("fr");
-  readonly supported: SupportedLang[] = ["fr", "en", "nl"];
+  readonly supported: SupportedLang[] = ["fr", "en"];
 
   constructor(private translocoService: TranslocoService) {
     const saved = localStorage.getItem(STORAGE_KEY) as SupportedLang;
