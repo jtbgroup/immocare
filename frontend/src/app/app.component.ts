@@ -12,6 +12,7 @@ import {
   RouterLinkActive,
   RouterOutlet,
 } from "@angular/router";
+import { TranslocoModule } from "@ngneat/transloco"; // Gardé pour les imports
 import { AuthService } from "./core/auth/auth.service";
 import { ActiveEstateService } from "./core/services/active-estate.service";
 import { AlertService } from "./core/services/alert.service";
@@ -29,6 +30,7 @@ import { EstateHeaderComponent } from "./features/estate/components/user/estate-
     RouterLink,
     RouterLinkActive,
     EstateHeaderComponent,
+    TranslocoModule,
   ],
   templateUrl: "./app.component.html",
   styleUrls: ["./app.component.scss"],
@@ -92,7 +94,6 @@ export class AppComponent implements OnInit {
 
   isManagementActive(): boolean {
     const url = this.router.url;
-    // Phase 3: persons are now under /estates/:id/persons
     return url.includes("/persons") || url.startsWith("/bank-accounts");
   }
 

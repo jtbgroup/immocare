@@ -15,8 +15,9 @@
           routerLink="/select-estate"
           class="app-nav__link"
           routerLinkActive="app-nav__link--active"
+          *transloco="let t"
         >
-          🏛️ My Estates
+          🏛️ {{ t("NAV.MY_ESTATES") }}
         </a>
         @if (activeEstateService.activeEstateId()) {
           <a

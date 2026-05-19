@@ -3,18 +3,13 @@ import {
   provideHttpClient,
   withInterceptorsFromDi,
 } from "@angular/common/http";
-import {
-  importProvidersFrom,
-  inject,
-  provideAppInitializer,
-} from "@angular/core";
+import { inject, isDevMode, provideAppInitializer } from "@angular/core";
 import { bootstrapApplication } from "@angular/platform-browser";
 import { provideRouter } from "@angular/router";
 
 // CORRECTION 1 : Ajout des imports manquants pour ngx-translate
-import { TranslateLoader, TranslateModule } from "@ngx-translate/core";
-import { TranslateHttpLoader } from "@ngx-translate/http-loader";
 
+import { provideTransloco } from "@ngneat/transloco";
 import { AppComponent } from "./app/app.component";
 import { AuthGuard } from "./app/core/auth/auth.guard";
 import { AuthInterceptor } from "./app/core/auth/auth.interceptor";
@@ -23,27 +18,28 @@ import { PlatformAdminGuard } from "./app/core/auth/platform-admin.guard";
 import { AppNameService } from "./app/core/services/app-name.service";
 import { DateFormatService } from "./app/core/services/date-format.service";
 import { AdminEstateFormComponent } from "./app/features/estate/components/admin/admin-estate-form/admin-estate-form.component";
-
-// CORRECTION 3 : La factory n'envoie plus d'argument si ta version n'en veut pas
-export function HttpLoaderFactory() {
-  return new TranslateHttpLoader();
-}
+import { TranslocoHttpLoader } from "./transloco-loader";
 
 bootstrapApplication(AppComponent, {
   providers: [
-    // CORRECTION 2 : On ne garde qu'un seul provideHttpClient propre
     provideHttpClient(withInterceptorsFromDi()),
 
-    // On utilise importProvidersFrom pour encapsuler le module classique
-    importProvidersFrom(
-      TranslateModule.forRoot({
-        loader: {
-          provide: TranslateLoader,
-          useFactory: HttpLoaderFactory,
-          deps: [], // Plus besoin de HttpClient ici non plus
-        },
-      }),
-    ),
+    // Configuration Moderne du Multilingue (Bye bye les modules !)
+    provideTransloco({
+      config: {
+        availableLangs: ["fr", "en", "nl"],
+        defaultLang: "fr",
+        reRenderOnLangChange: true,
+        prodMode: !isDevMode(),
+      },
+      loader: TranslocoHttpLoader,
+    }),
+
+    {
+      provide: HTTP_INTERCEPTORS,
+      useClass: AuthInterceptor,
+      multi: true,
+    },
 
     {
       provide: HTTP_INTERCEPTORS,
@@ -428,5 +424,16 @@ bootstrapApplication(AppComponent, {
       { path: "", redirectTo: "/login", pathMatch: "full" },
       { path: "**", redirectTo: "/login" },
     ]),
+    provideHttpClient(),
+    provideTransloco({
+      config: {
+        availableLangs: ["fr", "en"],
+        defaultLang: "fr",
+        // Remove this option if your application doesn't support changing language in runtime.
+        reRenderOnLangChange: true,
+        prodMode: !isDevMode(),
+      },
+      loader: TranslocoHttpLoader,
+    }),
   ],
 }).catch((err) => console.error(err));

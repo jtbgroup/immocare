@@ -1,5 +1,5 @@
 import { Injectable, signal } from "@angular/core";
-import { TranslateService } from "@ngx-translate/core";
+import { TranslocoService } from "@ngneat/transloco"; // On passe sur Transloco
 
 export type SupportedLang = "fr" | "en" | "nl";
 const STORAGE_KEY = "immocare_lang";
@@ -9,14 +9,14 @@ export class LanguageService {
   readonly currentLang = signal<SupportedLang>("fr");
   readonly supported: SupportedLang[] = ["fr", "en", "nl"];
 
-  constructor(private translate: TranslateService) {
+  constructor(private translocoService: TranslocoService) {
     const saved = localStorage.getItem(STORAGE_KEY) as SupportedLang;
     const initial = saved ?? this.detectBrowserLang() ?? "fr";
     this.setLang(initial);
   }
 
   setLang(lang: SupportedLang): void {
-    this.translate.use(lang);
+    this.translocoService.setActiveLang(lang); // La méthode s'appelle setActiveLang
     this.currentLang.set(lang);
     localStorage.setItem(STORAGE_KEY, lang);
     document.documentElement.lang = lang;
