@@ -1,11 +1,12 @@
 <div class="building-list-container">
-
   <!-- Header -->
   <div class="page-header">
-    <h1>Buildings</h1>
+    <h1>{{ "GLOBAL.BUILDINGS" | transloco }}</h1>
     <div class="actions">
       @if (activeEstateService.canEdit()) {
-        <button class="btn btn-primary" (click)="create()">+ Add Building</button>
+        <button class="btn btn-primary" (click)="create()">
+          + {{ "BUILDING.ADD" | transloco }}
+        </button>
       }
     </div>
   </div>
@@ -23,36 +24,40 @@
     <input
       type="search"
       class="search-input"
-      placeholder="Search by name, address, city…"
+      [placeholder]="'BUILDING.SEARCH_PLACEHOLDER' | transloco"
       [(ngModel)]="searchTerm"
       (keyup.enter)="onSearch()"
     />
     <select [(ngModel)]="selectedCity" (change)="onCityFilter()">
-      <option value="">All cities</option>
+      <option value="">{{ "BUILDING.ALL_CITIES" | transloco }}</option>
       @for (city of cities; track city) {
         <option [value]="city">{{ city }}</option>
       }
     </select>
-    <button class="btn btn-secondary btn-sm" (click)="onSearch()">Search</button>
+    <button class="btn btn-secondary btn-sm" (click)="onSearch()">
+      {{ "GLOBAL.SEARCH" | transloco }}
+    </button>
     @if (searchTerm || selectedCity) {
-      <button class="btn btn-secondary btn-sm" (click)="clearFilters()">Clear</button>
+      <button class="btn btn-secondary btn-sm" (click)="clearFilters()">
+        {{ "GLOBAL.CLEAR" | transloco }}
+      </button>
     }
   </div>
 
   <!-- Loading -->
   @if (loading) {
-    <div class="loading">Loading…</div>
+    <div class="loading">{{ "GLOBAL.LOADING" | transloco }}…</div>
   }
 
   @if (!loading) {
     <!-- Empty state -->
     @if (buildings.length === 0) {
       <div class="empty-state">
-        <p>No buildings found.</p>
+        <p>{{ "BUILDING.EMPTY" | transloco }}</p>
         @if (searchTerm || selectedCity) {
-          <p class="help-text">Try adjusting your filters.</p>
+          <p class="help-text">{{ "GLOBAL.ADJUST_FILTERS" | transloco }}</p>
         } @else if (activeEstateService.canEdit()) {
-          <p class="help-text">Get started by adding your first building.</p>
+          <p class="help-text">{{ "BUILDING.EMPTY_HELP" | transloco }}</p>
         }
       </div>
     }
@@ -64,25 +69,38 @@
           <thead>
             <tr>
               <th class="sortable" (click)="sort('name')">
-                Name
+                {{ "GLOBAL.NAME" | transloco }}
                 <span class="sort-icon" [class.active]="sortField === 'name'">
-                  {{ sortField === 'name' ? (sortDir === 'asc' ? '↑' : '↓') : '↕' }}
+                  {{
+                    sortField === "name" ? (sortDir === "asc" ? "↑" : "↓") : "↕"
+                  }}
                 </span>
               </th>
               <th class="sortable" (click)="sort('streetAddress')">
-                Address
-                <span class="sort-icon" [class.active]="sortField === 'streetAddress'">
-                  {{ sortField === 'streetAddress' ? (sortDir === 'asc' ? '↑' : '↓') : '↕' }}
+                {{ "GLOBAL.ADDRESS" | transloco }}
+                <span
+                  class="sort-icon"
+                  [class.active]="sortField === 'streetAddress'"
+                >
+                  {{
+                    sortField === "streetAddress"
+                      ? sortDir === "asc"
+                        ? "↑"
+                        : "↓"
+                      : "↕"
+                  }}
                 </span>
               </th>
               <th class="sortable" (click)="sort('city')">
-                City
+                {{ "GLOBAL.CITY" | transloco }}
                 <span class="sort-icon" [class.active]="sortField === 'city'">
-                  {{ sortField === 'city' ? (sortDir === 'asc' ? '↑' : '↓') : '↕' }}
+                  {{
+                    sortField === "city" ? (sortDir === "asc" ? "↑" : "↓") : "↕"
+                  }}
                 </span>
               </th>
-              <th>Units</th>
-              <th>Owner</th>
+              <th>{{ "GLOBAL.UNITS" | transloco }}</th>
+              <th>{{ "GLOBAL.OWNER" | transloco }}</th>
               @if (activeEstateService.canEdit()) {
                 <th></th>
               }
@@ -95,14 +113,14 @@
                 <td>{{ building.streetAddress }}</td>
                 <td>{{ building.city }}</td>
                 <td>{{ building.unitCount }}</td>
-                <td>{{ building.ownerName ?? '—' }}</td>
+                <td>{{ building.ownerName ?? "—" }}</td>
                 @if (activeEstateService.canEdit()) {
                   <td>
                     <button
                       class="btn btn-danger btn-sm"
                       (click)="confirmDelete(building, $event)"
                     >
-                      Delete
+                      {{ "GLOBAL.DELETE" | transloco }}
                     </button>
                   </td>
                 }
@@ -120,7 +138,7 @@
             [disabled]="currentPage === 0"
             (click)="goToPage(currentPage - 1)"
           >
-            Previous
+            {{ "GLOBAL.PREVIOUS" | transloco }}
           </button>
           @for (p of pages(); track p) {
             <button
@@ -136,15 +154,15 @@
             [disabled]="currentPage === totalPages - 1"
             (click)="goToPage(currentPage + 1)"
           >
-            Next
+            {{ "GLOBAL.NEXT" | transloco }}
           </button>
           <span class="page-info">
-            Page {{ currentPage + 1 }} of {{ totalPages }}
-            ({{ totalElements }} total)
+            {{ "GLOBAL.PAGE" | transloco }} {{ currentPage + 1 }}
+            {{ "GLOBAL.OF" | transloco }} {{ totalPages }} ({{ totalElements }}
+            total)
           </span>
         </div>
       }
     }
   }
-
 </div>

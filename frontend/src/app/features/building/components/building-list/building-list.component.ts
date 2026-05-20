@@ -2,6 +2,7 @@ import { CommonModule } from "@angular/common";
 import { Component, OnInit } from "@angular/core";
 import { FormsModule } from "@angular/forms";
 import { Router } from "@angular/router";
+import { TranslocoModule } from "@ngneat/transloco";
 import { ActiveEstateService } from "../../../../core/services/active-estate.service";
 import { BuildingService } from "../../../../core/services/building.service";
 import { Building } from "../../../../models/building.model";
@@ -13,7 +14,7 @@ import { Building } from "../../../../models/building.model";
 @Component({
   selector: "app-building-list",
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule, TranslocoModule],
   templateUrl: "./building-list.component.html",
   styleUrls: ["./building-list.component.scss"],
 })

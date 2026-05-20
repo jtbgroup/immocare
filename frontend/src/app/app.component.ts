@@ -12,7 +12,7 @@ import {
   RouterLinkActive,
   RouterOutlet,
 } from "@angular/router";
-import { TranslocoModule } from "@ngneat/transloco"; // Gardé pour les imports
+import { TranslocoModule } from "@ngneat/transloco";
 import { AuthService } from "./core/auth/auth.service";
 import { ActiveEstateService } from "./core/services/active-estate.service";
 import { AlertService } from "./core/services/alert.service";

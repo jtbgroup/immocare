@@ -1,10 +1,12 @@
-<div class="housing-unit-details-container">
+<div class="unit-details-container">
   <!-- Header -->
   <div class="page-header">
-    <h1>Housing Units</h1>
+    <h1>{{ "GLOBAL.UNITS" | transloco }}</h1>
     <div class="actions">
       @if (activeEstateService.canEdit()) {
-        <button class="btn btn-primary" (click)="create()">+ Add Unit</button>
+        <button class="btn btn-primary" (click)="create()">
+          + {{ "UNIT.ADD" | transloco }}
+        </button>
       }
     </div>
   </div>
@@ -18,32 +20,32 @@
     <input
       type="search"
       class="search-input"
-      placeholder="Search by unit number or building…"
+      [placeholder]="'UNIT.SEARCH_PLACEHOLDER' | transloco"
       [(ngModel)]="searchTerm"
     />
     <select [(ngModel)]="selectedBuildingId" (change)="onBuildingFilter()">
-      <option [value]="null">All buildings</option>
+      <option [value]="null">{{ "UNIT.ALL_BUILDINGS" | transloco }}</option>
       @for (b of buildings; track b.id) {
         <option [value]="b.id">{{ b.name }}</option>
       }
     </select>
     @if (searchTerm || selectedBuildingId) {
       <button class="btn btn-secondary btn-sm" (click)="clearFilters()">
-        Clear
+        {{ "GLOBAL.CLEAR" | transloco }}
       </button>
     }
   </div>
 
   @if (loading) {
-    <div class="loading">Loading…</div>
+    <div class="loading">{{ "UNIT.LOADING" | transloco }}…</div>
   }
 
   @if (!loading) {
     @if (filteredUnits.length === 0) {
       <div class="empty-state">
-        <p>No units found.</p>
+        <p>{{ "UNIT.EMPTY" | transloco }}</p>
         @if (activeEstateService.canEdit()) {
-          <p class="help-text">Get started by adding a unit to a building.</p>
+          <p class="help-text">{{ "UNIT.EMPTY_HELP" | transloco }}</p>
         }
       </div>
     } @else {
@@ -51,14 +53,14 @@
         <table>
           <thead>
             <tr>
-              <th>Unit #</th>
-              <th>Building</th>
-              <th>Floor</th>
-              <th>Surface</th>
-              <th>Rooms</th>
-              <th>Rent (€/mo)</th>
-              <th>PEB</th>
-              <th>Lease</th>
+              <th>{{ "UNIT.NUMBER" | transloco }}</th>
+              <th>{{ "GLOBAL.BUILDING" | transloco }}</th>
+              <th>{{ "GLOBAL.FLOOR" | transloco }}</th>
+              <th>{{ "GLOBAL.SURFACE" | transloco }}</th>
+              <th>{{ "GLOBAL.ROOMS" | transloco }}</th>
+              <th>{{ "GLOBAL.RENT" | transloco }}</th>
+              <th>{{ "GLOBAL.PEB" | transloco }}</th>
+              <th>{{ "GLOBAL.LEASE" | transloco }}</th>
             </tr>
           </thead>
           <tbody>
@@ -83,17 +85,19 @@
                 <td>{{ unit.currentPebScore ?? "—" }}</td>
                 <td>
                   @if (unit.activeLeaseStatus === "ACTIVE") {
-                    <span class="lease-status-badge lease-status-badge--active"
-                      >Active</span
+                    <span
+                      class="lease-status-badge lease-status-badge--active"
+                      >{{ "UNIT.STATUS.ACTIVE" | transloco }}</span
                     >
                   } @else if (unit.activeLeaseStatus === "DRAFT") {
-                    <span class="lease-status-badge lease-status-badge--draft"
-                      >Draft</span
+                    <span
+                      class="lease-status-badge lease-status-badge--draft"
+                      >{{ "UNIT.STATUS.DRAFT" | transloco }}</span
                     >
                   } @else {
                     <span
                       class="lease-status-badge lease-status-badge--finished"
-                      >Vacant</span
+                      >{{ "UNIT.STATUS.VACANT" | transloco }}</span
                     >
                   }
                 </td>
