@@ -2,6 +2,7 @@
   "GLOBAL": {
     "SEARCH": "Search",
     "CLEAR": "Clear",
+    "CANCEL": "Cancel",
     "LOADING": "Loading",
     "ADJUST_FILTERS": "Try adjusting your filters.",
     "PREVIOUS": "Previous",
@@ -10,11 +11,8 @@
     "OF": "of",
     "DELETE": "Delete",
     "BUILDING": "Building",
-    "BUILDINGS": "Buildings",
-    "UNIT": "Unit",
-    "UNITS": "Units",
+    "HOUSING_UNIT": "Unit",
     "LEASE": "Lease",
-    "LEASES": "Leases",
     "TRANSACTION": "Transaction",
     "MANAGEMENT": "Management",
     "PEB": "PEB",
@@ -25,7 +23,6 @@
     "USER": "User",
     "ROLE": "Role",
     "ROOM": "Room",
-    "ROOMS": "Rooms",
     "SURFACE": "Surface",
     "RENT": "Rent",
     "FLOOR": "Floor",
@@ -34,7 +31,13 @@
     "LOGOUT": "Logout",
     "NAME": "Name",
     "ADDRESS": "Address",
-    "CITY": "City"
+    "CITY": "City",
+    "SHOW_HISTORY": "Show History",
+    "HIDE_HISTORY": "Hide History",
+    "PENDING_ALERTS": "Pending Alerts",
+    "OVERVIEW": "Overview",
+    "QUICK_ACCESS": "Quick Access",
+    "INDEXATION": "Indexation"
   },
   "NAV": {
     "MY_ESTATES": "My Estates",
@@ -42,14 +45,17 @@
     "MANAGE_USERS": "Manage Users"
   },
   "BUILDING": {
+    "BUILDINGS": "Buildings",
     "ADD": "Add Building",
     "SEARCH_PLACEHOLDER": "Search by name, address, city…",
     "ALL_CITIES": "All cities",
     "EMPTY": "No buildings found.",
     "EMPTY_HELP": "Get started by adding your first building.",
-    "DELETE_CONFIRM": "Delete building \"{{name}}\"? This cannot be undone."
+    "DELETE_CONFIRM": "Delete building \"{{name}}\"? This cannot be undone.",
+    "QUICK_DESC": "Manage building details, units and PEB"
   },
-  "UNIT": {
+  "HOUSING_UNIT": {
+    "HOUSING_UNITS": "Units",
     "ADD": "Add Unit",
     "NUMBER": "Unit #",
     "SEARCH_PLACEHOLDER": "Search by unit number or building… ",
@@ -65,11 +71,16 @@
   },
   "PEB": {
     "TITLE": "Energy Performance (PEB)",
-    "SET": "+ Set PEB",
+    "SCORE": "PEB Score",
+    "SET_PEB": "+ Set PEB",
     "SCORE_DATE": "Score date",
     "VALID_UNTIL": "Valid until",
     "CERTIFICATE": "Certificate",
     "NO_DATA": "No PEB score recorded.",
+    "DATE_REQUIRED": "Score date is required.",
+    "SCORE_REQUIRED": "Score is required.",
+    "CERTIFICATE_NUMBER": "Certificate number",
+    "VALID_UNTIL_ERROR": "Valid until must be after score date",
     "EXPIRY": {
       "VALID": "Valid",
       "EXPIRING_SOON": "Expires soon",
@@ -80,22 +91,50 @@
   "COMMON": {
     "SAVE": "Save",
     "SAVING": "Saving…",
-    "CANCEL": "Cancel",
     "EDIT": "Edit",
-    "DELETE": "Delete",
-    "SEARCH": "Search",
-    "CLEAR": "Clear",
     "LOADING": "Loading…",
     "REQUIRED": "Required field",
     "OPTIONAL": "optional",
     "NO_DATA": "—",
-    "PREVIOUS": "Previous",
-    "NEXT": "Next",
+
     "PAGE_OF": "Page {{current}} of {{total}} ({{elements}} total)"
   },
   "LANG": {
     "FR": "Français",
     "EN": "English",
     "NL": "Nederlands"
+  },
+  "ALERT": {
+    "ALERTS": "Alerts",
+    "DETAILS": "Alert Details",
+    "VIEW_ALERTS": "View alerts",
+    "QUICK_DESC": "Pending actions and deadlines"
+  },
+  "BOILER": {
+    "SERVICE": "Boiler Service"
+  },
+  "FIRE_EXTINGUISHER": {
+    "SERVICE": "Fire Extinguisher Service"
+  },
+  "LEASE": {
+    "LEASES": "Leases",
+    "END_NOTICE": "Lease End Notice",
+    "ACTIVE_LEASES": "Active Leases"
+  },
+  "ESTATE": {
+    "ESTATES": "Estates",
+    "EDIT": "Edit Estate"
+  },
+  "PERSON": {
+    "PERSONS": "Persons",
+    "QUICK_DESC": "Owners, tenants and contacts"
+  },
+  "MEMBER": {
+    "MEMBERS": "Members",
+    "QUICK_DESC": "Manage estate access"
+  },
+  "TRANSACTION": {
+    "TRANSACTIONS": "Transactions",
+    "QUICK_DESC": "Track income and expenses"
   }
 }

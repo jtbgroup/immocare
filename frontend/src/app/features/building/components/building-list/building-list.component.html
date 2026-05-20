@@ -1,7 +1,7 @@
 <div class="building-list-container">
   <!-- Header -->
   <div class="page-header">
-    <h1>{{ "GLOBAL.BUILDINGS" | transloco }}</h1>
+    <h1>{{ "BUILDING.BUILDINGS" | transloco }}</h1>
     <div class="actions">
       @if (activeEstateService.canEdit()) {
         <button class="btn btn-primary" (click)="create()">
@@ -99,7 +99,7 @@
                   }}
                 </span>
               </th>
-              <th>{{ "GLOBAL.UNITS" | transloco }}</th>
+              <th>{{ "HOUSING_UNIT.HOUSING_UNITS" | transloco }}</th>
               <th>{{ "GLOBAL.OWNER" | transloco }}</th>
               @if (activeEstateService.canEdit()) {
                 <th></th>

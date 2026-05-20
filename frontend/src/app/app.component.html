@@ -28,7 +28,7 @@
             routerLinkActive="app-nav__link--active"
             class="app-nav__link"
           >
-            🏢 {{ "GLOBAL.BUILDINGS" | transloco }}
+            🏢 {{ "BUILDING.BUILDINGS" | transloco }}
           </a>
           <a
             [routerLink]="[
@@ -39,7 +39,7 @@
             routerLinkActive="app-nav__link--active"
             class="app-nav__link"
           >
-            🏠 {{ "GLOBAL.UNITS" | transloco }}
+            🏠 {{ "HOUSING_UNIT.HOUSING_UNITS" | transloco }}
           </a>
           <a
             [routerLink]="[
@@ -50,14 +50,18 @@
             routerLinkActive="app-nav__link--active"
             class="app-nav__link"
           >
-            📄 {{ "GLOBAL.LEASES" | transloco }}
+            📄 {{ "LEASE.LEASES" | transloco }}
           </a>
           <a
-            routerLink="/transactions"
+            [routerLink]="[
+              '/estates',
+              activeEstateService.activeEstateId(),
+              'transactions',
+            ]"
             routerLinkActive="app-nav__link--active"
             class="app-nav__link"
           >
-            💶 {{ "GLOBAL.TRANSACTIONS" | transloco }}
+            💶 {{ "TRANSACTION.TRANSACTIONS" | transloco }}
           </a>
 
           <!-- Management dropdown -->
@@ -114,16 +118,16 @@
           </div>
         } @else {
           <span class="app-nav__link app-nav__link--disabled"
-            >🏢 {{ "GLOBAL.BUILDINGS" | transloco }}</span
+            >🏢 {{ "BUILDING.BUILDINGS" | transloco }}</span
           >
           <span class="app-nav__link app-nav__link--disabled"
-            >🏠 {{ "GLOBAL.UNITS" | transloco }}</span
+            >🏠 {{ "HOUSING_UNIT.HOUSING_UNITS" | transloco }}</span
           >
           <span class="app-nav__link app-nav__link--disabled"
-            >📄 {{ "GLOBAL.LEASES" | transloco }}</span
+            >📄 {{ "LEASE.LEASES" | transloco }}</span
           >
           <span class="app-nav__link app-nav__link--disabled"
-            >💶 {{ "GLOBAL.TRANSACTIONS" | transloco }}</span
+            >💶 {{ "TRANSACTION.TRANSACTIONS" | transloco }}</span
           >
           <span class="app-nav__link app-nav__link--disabled"
             >🗂 {{ "GLOBAL.MANAGEMENT" | transloco }}</span

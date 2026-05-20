@@ -2,6 +2,7 @@
   "GLOBAL": {
     "SEARCH": "Rechercher",
     "CLEAR": "Effacer",
+    "CANCEL": "Annuler",
     "LOADING": "Chargement",
     "ADJUST_FILTERS": "Essayez d'ajuster vos filtres.",
     "PREVIOUS": "Précédent",
@@ -10,11 +11,8 @@
     "OF": "de",
     "DELETE": "Supprimer",
     "BUILDING": "Immeuble",
-    "BUILDINGS": "Immeubles",
     "UNIT": "Unité",
-    "UNITS": "Unités",
     "LEASE": "Bail",
-    "LEASES": "Baux",
     "TRANSACTION": "Transaction",
     "PERSON": "Personne",
     "BANK_ACCOUNT": "Compte bancaire",
@@ -23,7 +21,6 @@
     "USER": "Utilisateur",
     "ROLE": "Rôle",
     "ROOM": "Pièce",
-    "ROOMS": "Pièces",
     "SURFACE": "Surface",
     "RENT": "Loyer",
     "FLOOR": "Étage",
@@ -34,7 +31,13 @@
     "ADDRESS": "Adresse",
     "CITY": "Ville",
     "PEB": "PEB",
-    "MANAGEMENT": "Gestion"
+    "MANAGEMENT": "Gestion",
+    "SHOW_HISTORY": "Afficher l'historique",
+    "HIDE_HISTORY": "Masquer l'historique",
+    "PENDING_ALERTS": "Alertes en attente",
+    "OVERVIEW": "Aperçu",
+    "QUICK_ACCESS": "Accès rapide",
+    "INDEXATION": "Indexation"
   },
   "NAV": {
     "MY_ESTATES": "Mes estates",
@@ -42,14 +45,17 @@
     "MANAGE_USERS": "Gestion des Utilisateurs"
   },
   "BUILDING": {
+    "BUILDINGS": "Immeubles",
     "ADD": "Ajouter un immeuble",
     "SEARCH_PLACEHOLDER": "Rechercher par nom, adresse, ville…",
     "ALL_CITIES": "Toutes les villes",
     "EMPTY": "Aucun immeuble trouvé.",
     "EMPTY_HELP": "Commencez par ajouter votre premier immeuble.",
-    "DELETE_CONFIRM": "Supprimer l'immeuble \"{{name}}\" ? Cette action est irréversible."
+    "DELETE_CONFIRM": "Supprimer l'immeuble \"{{name}}\" ? Cette action est irréversible.",
+    "QUICK_DESC": "Gérez les détails de l'immeuble, les unités et le PEB"
   },
-  "UNIT": {
+  "HOUSING_UNIT": {
+    "HOUSING_UNITS": "Unités",
     "ADD": "Ajouter une unité",
     "SEARCH_PLACEHOLDER": "Rechercher par numéro ou immeuble…",
     "ALL_BUILDINGS": "Tous les immeubles",
@@ -64,11 +70,16 @@
   },
   "PEB": {
     "TITLE": "Performance énergétique (PEB)",
-    "SET": "Définir PEB",
+    "SET_PEB": "Définir PEB",
+    "SCORE": "Score PEB",
     "SCORE_DATE": "Date du score",
     "VALID_UNTIL": "Valable jusqu'au",
     "CERTIFICATE": "Certificat",
     "NO_DATA": "Aucun score PEB enregistré.",
+    "DATE_REQUIRED": "La date du score est requise.",
+    "SCORE_REQUIRED": "Le score est requis.",
+    "CERTIFICATE_NUMBER": "Numéro de certificat",
+    "VALID_UNTIL_ERROR": "La date de validité doit être postérieure à la date du score",
     "EXPIRY": {
       "VALID": "Valide",
       "EXPIRING_SOON": "Expire bientôt",
@@ -79,22 +90,50 @@
   "COMMON": {
     "SAVE": "Enregistrer",
     "SAVING": "Enregistrement…",
-    "CANCEL": "Annuler",
     "EDIT": "Modifier",
-    "DELETE": "Supprimer",
-    "SEARCH": "Rechercher",
     "CLEAR": "Effacer",
     "LOADING": "Chargement…",
     "REQUIRED": "Champ obligatoire",
     "OPTIONAL": "optionnel",
     "NO_DATA": "—",
-    "PREVIOUS": "Précédent",
-    "NEXT": "Suivant",
     "PAGE_OF": "Page {{current}} sur {{total}} ({{elements}} au total)"
   },
   "LANG": {
     "FR": "Français",
     "EN": "English",
     "NL": "Nederlands"
+  },
+  "ALERT": {
+    "ALERTS": "Alertes",
+    "DETAILS": "Détails de l'alerte",
+    "VIEW_ALERTS": "Voir les alertes",
+    "QUICK_DESC": "Actions en attente et échéances"
+  },
+  "BOILER": {
+    "SERVICE": "Entretien de la chaudière"
+  },
+  "FIRE_EXTINGUISHER": {
+    "SERVICE": "Entretien de l'extincteur"
+  },
+  "LEASE": {
+    "LEASES": "Baux",
+    "END_NOTICE": "Préavis de fin de bail",
+    "ACTIVE_LEASES": "Baux actifs"
+  },
+  "ESTATE": {
+    "ESTATES": "Estates",
+    "EDIT": "Modifier l'Estate"
+  },
+  "PERSON": {
+    "PERSONS": "Personnes",
+    "QUICK_DESC": "Propriétaires, locataires et contacts"
+  },
+  "MEMBER": {
+    "MEMBERS": "Membres",
+    "QUICK_DESC": "Gérez l'accès à l'estate"
+  },
+  "TRANSACTION": {
+    "TRANSACTIONS": "Transactions",
+    "QUICK_DESC": "Suivez les revenus et les dépenses"
   }
 }

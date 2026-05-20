@@ -1,18 +1,18 @@
 <div class="peb-section">
   <div class="section-header">
     <h3 class="section-heading">
-      <span class="material-icons section-icon">eco</span> Energy Performance
-      (PEB)
+      <span class="material-icons section-icon">eco</span>
+      {{ "PEB.TITLE" | transloco }}
     </h3>
     @if (!showForm && !loading) {
       <button class="btn btn-sm btn-primary" (click)="openForm()">
-        + Set PEB
+        + {{ "PEB.SET_PEB" | transloco }}
       </button>
     }
   </div>
 
   @if (loading) {
-    <div class="loading">Loading…</div>
+    <div class="loading">{{ "GLOBAL.LOADING" | transloco }}...</div>
   }
 
   <!-- Current score card -->
@@ -27,28 +27,34 @@
       </div>
       <div class="peb-details">
         <div class="peb-date">
-          Score date: <strong>{{ current.scoreDate }}</strong>
+          {{ "PEB.SCORE_DATE" | transloco }}:
+          <strong>{{ current.scoreDate }}</strong>
         </div>
         @if (current.validUntil) {
           <div class="peb-validity">
-            Valid until: <strong>{{ current.validUntil }}</strong>
+            {{ "PEB.VALID_UNTIL" | transloco }}:
+            <strong>{{ current.validUntil }}</strong>
             <span class="badge" [ngClass]="expiryClass">{{ expiryLabel }}</span>
           </div>
         } @else {
           <div class="peb-validity text-muted">
-            Validity period not specified
+            {{ "PEB.NO_DATA" | transloco }}
           </div>
         }
         @if (current.certificateNumber) {
           <div class="peb-cert">
-            Certificate: {{ current.certificateNumber }}
+            {{ "PEB.CERTIFICATE" | transloco }}: {{ current.certificateNumber }}
           </div>
         }
       </div>
     </div>
     <div class="peb-actions">
       <button class="btn btn-link" (click)="toggleHistory()">
-        {{ showHistory ? "Hide History" : "View History" }}
+        {{
+          showHistory
+            ? ("GLOBAL.HIDE_HISTORY" | transloco)
+            : ("GLOBAL.SHOW_HISTORY" | transloco)
+        }}
       </button>
     </div>
   }
@@ -61,13 +67,16 @@
   <!-- Inline form -->
   @if (showForm) {
     <div class="peb-form-panel">
-      <h4>Set PEB Score</h4>
+      <h4>{{ "PEB.SET_PEB" | transloco }}</h4>
       @if (saveError) {
         <div class="alert alert-error">{{ saveError }}</div>
       }
       <form [formGroup]="form" (ngSubmit)="save()">
         <div class="form-group">
-          <label>PEB Score <span class="required">*</span></label>
+          <label
+            >{{ "PEB.SCORE" | transloco }}
+            <span class="required">*</span></label
+          >
           <select formControlName="pebScore" class="form-control">
             <option [value]="null" disabled selected>Select a score</option>
             @for (s of scores; track s) {
@@ -75,12 +84,17 @@
             }
           </select>
           @if (form.get("pebScore")?.invalid && form.get("pebScore")?.touched) {
-            <div class="field-error">PEB score is required</div>
+            <div class="field-error">
+              {{ "PEB.SCORE_REQUIRED" | transloco }}
+            </div>
           }
         </div>
 
         <div class="form-group">
-          <label>Score Date <span class="required">*</span></label>
+          <label
+            >{{ "PEB.SCORE_DATE" | transloco }}
+            <span class="required">*</span></label
+          >
           <input
             type="date"
             formControlName="scoreDate"
@@ -90,12 +104,12 @@
           @if (
             form.get("scoreDate")?.invalid && form.get("scoreDate")?.touched
           ) {
-            <div class="field-error">Score date is required</div>
+            <div class="field-error">{{ "PEB.DATE_REQUIRED" | transloco }}</div>
           }
         </div>
 
         <div class="form-group">
-          <label>Certificate Number</label>
+          <label>{{ "PEB.CERTIFICATE_NUMBER" | transloco }}</label>
           <input
             type="text"
             formControlName="certificateNumber"
@@ -106,14 +120,16 @@
         </div>
 
         <div class="form-group">
-          <label>Valid Until</label>
+          <label>{{ "PEB.VALID_UNTIL" | transloco }}</label>
           <input
             type="date"
             formControlName="validUntil"
             class="form-control"
           />
           @if (form.get("validUntil")?.errors?.["invalidRange"]) {
-            <div class="field-error">Valid until must be after score date</div>
+            <div class="field-error">
+              {{ "PEB.VALID_UNTIL_ERROR" | transloco }}
+            </div>
           }
         </div>
 
@@ -127,7 +143,7 @@
             (click)="closeForm()"
             [disabled]="saving"
           >
-            Cancel
+            {{ "GLOBAL.CANCEL" | transloco }}
           </button>
         </div>
       </form>

@@ -8,6 +8,7 @@ import {
   ValidationErrors,
   Validators,
 } from "@angular/forms";
+import { TranslocoModule } from "@ngneat/transloco";
 import { Subject } from "rxjs";
 import { takeUntil } from "rxjs/operators";
 import { PebScoreService } from "../../../../../core/services/peb-score.service";
@@ -19,11 +20,10 @@ import {
   PebScoreDTO,
 } from "../../../../../models/peb-score.model";
 import { PebHistoryComponent } from "../peb-history/peb-history.component";
-
 @Component({
   selector: "app-peb-section",
   standalone: true,
-  imports: [NgClass, ReactiveFormsModule, PebHistoryComponent],
+  imports: [NgClass, ReactiveFormsModule, PebHistoryComponent, TranslocoModule],
   templateUrl: "./peb-section.component.html",
   styleUrls: ["./peb-section.component.scss"],
 })

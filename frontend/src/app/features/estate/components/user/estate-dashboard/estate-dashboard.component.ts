@@ -3,6 +3,7 @@
 import { CommonModule } from "@angular/common";
 import { Component, OnDestroy, OnInit } from "@angular/core";
 import { ActivatedRoute, Router, RouterModule } from "@angular/router";
+import { TranslocoModule } from "@ngneat/transloco";
 import { Subject } from "rxjs";
 import { takeUntil } from "rxjs/operators";
 import { ActiveEstateService } from "../../../../../core/services/active-estate.service";
@@ -19,7 +20,7 @@ interface QuickAccessCard {
 @Component({
   selector: "app-estate-dashboard",
   standalone: true,
-  imports: [CommonModule, RouterModule],
+  imports: [CommonModule, RouterModule, TranslocoModule],
   templateUrl: "./estate-dashboard.component.html",
   styleUrls: ["./estate-dashboard.component.scss"],
 })
@@ -105,36 +106,36 @@ export class EstateDashboardComponent implements OnInit, OnDestroy {
     const cards: QuickAccessCard[] = [
       {
         icon: "🏢",
-        label: "Buildings",
+        label: "BUILDING.BUILDINGS",
         route: ["/estates", this.estateId, "buildings"],
-        description: "Manage buildings and housing units",
+        description: "BUILDING.QUICK_DESC",
       },
       {
         icon: "💶",
-        label: "Transactions",
+        label: "TRANSACTION.TRANSACTIONS",
         route: ["/estates", this.estateId, "transactions"],
-        description: "Track income and expenses",
+        description: "TRANSACTION.QUICK_DESC",
       },
       {
         icon: "👤",
-        label: "Persons",
+        label: "PERSON.PERSONS",
         route: ["/estates", this.estateId, "persons"],
-        description: "Owners, tenants and contacts",
+        description: "PERSON.QUICK_DESC",
       },
       {
         icon: "🔔",
-        label: "Alerts",
+        label: "ALERT.ALERTS",
         route: ["/estates", this.estateId, "alerts"],
-        description: "Pending actions and deadlines",
+        description: "ALERT.QUICK_DESC",
       },
     ];
 
     if (this.canManageMembers) {
       cards.push({
         icon: "👥",
-        label: "Members",
+        label: "MEMBER.MEMBERS",
         route: ["/estates", this.estateId, "members"],
-        description: "Manage estate access",
+        description: "MEMBER.QUICK_DESC",
       });
     }
 
