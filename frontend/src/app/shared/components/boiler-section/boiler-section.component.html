@@ -5,24 +5,24 @@
       <span class="material-icons section-title-icon"
         >local_fire_department</span
       >
-      Boiler
+      {{ "GLOBAL.BOILER" | transloco }}
     </h3>
     @if (!showForm) {
       <button class="btn btn-sm btn-primary" (click)="openAddForm()">
-        + Add Boiler
+        + {{ "BOILER.ADD" | transloco }}
       </button>
     }
   </div>
 
   @if (loading) {
-    <div class="loading-placeholder">Loading…</div>
+    <div class="loading-placeholder">{{ "GLOBAL.LOADING" | transloco }}...</div>
   }
   @if (error) {
     <div class="error-banner">{{ error }}</div>
   }
 
   @if (!loading && boilers.length === 0 && !showForm) {
-    <div class="no-data">No boiler registered.</div>
+    <div class="no-data">{{ "BOILER.NO_DATA" | transloco }}</div>
   }
 
   <!-- Boiler list -->
@@ -61,20 +61,20 @@
                   class="btn btn-sm btn-primary"
                   (click)="openServiceForm(boiler.id)"
                 >
-                  + Add Service
+                  + {{ "BOILER.ADD_SERVICE" | transloco }}
                 </button>
               }
               <button
                 class="btn btn-sm btn-secondary"
                 (click)="openEditForm(boiler)"
               >
-                Edit
+                {{ "GLOBAL.EDIT" | transloco }}
               </button>
               <button
                 class="btn btn-sm btn-danger"
                 (click)="confirmDelete(boiler.id)"
               >
-                Delete
+                {{ "GLOBAL.DELETE" | transloco }}
               </button>
             </div>
           </div>
@@ -83,18 +83,24 @@
           <div class="boiler-card__body">
             <div class="boiler-meta">
               <span class="meta-item">
-                <span class="meta-label">Installed</span>
+                <span class="meta-label">{{
+                  "GLOBAL.INSTALLED" | transloco
+                }}</span>
                 <strong>{{ boiler.installationDate | appDate }}</strong>
               </span>
               @if (boiler.lastServiceDate) {
                 <span class="meta-item">
-                  <span class="meta-label">Last service</span>
+                  <span class="meta-label">{{
+                    "GLOBAL.LAST_SERVICE" | transloco
+                  }}</span>
                   <strong>{{ boiler.lastServiceDate | appDate }}</strong>
                 </span>
               }
               @if (boiler.nextServiceDate) {
                 <span class="meta-item">
-                  <span class="meta-label">Next service</span>
+                  <span class="meta-label">{{
+                    "GLOBAL.NEXT_SERVICE" | transloco
+                  }}</span>
                   <strong
                     [class.text-danger]="
                       boiler.daysUntilNextService !== null &&
@@ -113,7 +119,9 @@
                     boiler.daysUntilNextService < 0
                   ) {
                     <span class="badge badge-danger">
-                      Overdue by {{ -boiler.daysUntilNextService }} day(s)
+                      {{ "GLOBAL.OVERDUE_BY" | transloco }}
+                      {{ -boiler.daysUntilNextService }}
+                      {{ "GLOBAL.DAYS" | transloco }}
                     </span>
                   }
                   @if (
@@ -122,7 +130,9 @@
                     boiler.serviceAlert
                   ) {
                     <span class="badge badge-warning">
-                      Due in {{ boiler.daysUntilNextService }} day(s)
+                      {{ "GLOBAL.DUE_IN" | transloco }}
+                      {{ boiler.daysUntilNextService }}
+                      {{ "GLOBAL.DAYS" | transloco }}
                     </span>
                   }
                 </span>
@@ -155,7 +165,7 @@
                 Yes, delete
               </button>
               <button class="btn btn-xs btn-secondary" (click)="cancelDelete()">
-                Cancel
+                {{ "GLOBAL.CANCEL" | transloco }}
               </button>
             </div>
           }
@@ -163,10 +173,13 @@
           <!-- Add service inline form -->
           @if (serviceFormOpenId === boiler.id) {
             <div class="service-form-panel">
-              <h5>New Service Record</h5>
+              <h5>{{ "BOILER.NEW_SERVICE_RECORD" | transloco }}</h5>
               <form [formGroup]="serviceForm">
                 <div class="form-row">
-                  <label>Service date <span class="required">*</span></label>
+                  <label
+                    >{{ "GLOBAL.SERVICE_DATE" | transloco
+                    }}<span class="required">*</span></label
+                  >
                   <input
                     type="date"
                     formControlName="serviceDate"
@@ -177,19 +190,19 @@
                     serviceForm.get("serviceDate")?.touched
                   ) {
                     <span class="field-error">
-                      Service date is required and cannot be in the future.
+                      {{ "BOILER.SERVICE_DATE_REQUIRED" | transloco }}
                     </span>
                   }
                 </div>
                 <div class="form-row">
                   <label>
-                    Valid until
+                    {{ "GLOBAL.VALID_UNTIL" | transloco }}
                     <span class="hint">(auto-calculated if empty)</span>
                   </label>
                   <input type="date" formControlName="validUntil" />
                 </div>
                 <div class="form-row">
-                  <label>Notes</label>
+                  <label>{{ "GLOBAL.NOTES" | transloco }}</label>
                   <textarea formControlName="notes" rows="2"></textarea>
                 </div>
                 @if (serviceFormError) {
@@ -201,14 +214,18 @@
                     (click)="saveServiceRecord(boiler.id)"
                     [disabled]="savingService"
                   >
-                    {{ savingService ? "Saving…" : "Save" }}
+                    {{
+                      savingService
+                        ? ("GLOBAL.SAVING" | transloco) + "..."
+                        : ("GLOBAL.SAVE" | transloco)
+                    }}
                   </button>
                   <button
                     class="btn btn-sm btn-secondary"
                     (click)="closeServiceForm()"
                     [disabled]="savingService"
                   >
-                    Cancel
+                    {{ "GLOBAL.CANCEL" | transloco }}
                   </button>
                 </div>
               </form>
@@ -223,8 +240,8 @@
             >
               {{
                 serviceHistoryOpen[boiler.id]
-                  ? "Hide service history"
-                  : "View service history"
+                  ? ("GLOBAL.HIDE_HISTORY" | transloco)
+                  : ("GLOBAL.SHOW_HISTORY" | transloco)
               }}
             </button>
           </div>
@@ -234,7 +251,7 @@
             <div class="embedded-history-panel">
               <div class="history-panel">
                 <div class="history-header">
-                  <h4>Service History</h4>
+                  <h4>{{ "GLOBAL.SERVICE_HISTORY" | transloco }}</h4>
                   <button
                     class="btn-close"
                     (click)="toggleServiceHistory(boiler.id)"
@@ -244,7 +261,9 @@
                 </div>
 
                 @if (serviceHistoryLoading[boiler.id]) {
-                  <div class="loading-placeholder">Loading history…</div>
+                  <div class="loading-placeholder">
+                    {{ "GLOBAL.LOADING_HISTORY" | transloco }}...
+                  </div>
                 }
 
                 @if (!serviceHistoryLoading[boiler.id]) {
@@ -255,10 +274,10 @@
                     <table class="history-table">
                       <thead>
                         <tr>
-                          <th>Service date</th>
-                          <th>Valid until</th>
-                          <th>Notes</th>
-                          <th>Status</th>
+                          <th>{{ "BOILER.SERVICE_DATE" | transloco }}</th>
+                          <th>{{ "GLOBAL.VALID_UNTIL" | transloco }}</th>
+                          <th>{{ "GLOBAL.NOTES" | transloco }}</th>
+                          <th>{{ "GLOBAL.STATUS" | transloco }}</th>
                         </tr>
                       </thead>
                       <tbody>
@@ -298,22 +317,27 @@
       <h4>{{ editingId ? "Edit Boiler" : "Add Boiler" }}</h4>
       <form [formGroup]="form">
         <div class="form-row">
-          <label>Brand <span class="required">*</span></label>
+          <label
+            >{{ "GLOBAL.BRAND" | transloco }}
+            <span class="required">*</span></label
+          >
           <input type="text" formControlName="brand" />
           @if (form.get("brand")?.invalid && form.get("brand")?.touched) {
-            <span class="field-error">Brand is required.</span>
+            <span class="field-error">{{
+              "BOILER.BRAND_REQUIRED" | transloco
+            }}</span>
           }
         </div>
         <div class="form-row">
-          <label>Model</label>
+          <label>{{ "GLOBAL.MODEL" | transloco }}</label>
           <input type="text" formControlName="model" />
         </div>
         <div class="form-row">
-          <label>Serial number</label>
+          <label>{{ "GLOBAL.SERIAL_NUMBER" | transloco }}</label>
           <input type="text" formControlName="serialNumber" />
         </div>
         <div class="form-row">
-          <label>Fuel type</label>
+          <label>{{ "GLOBAL.FUEL_TYPE" | transloco }}</label>
           <select formControlName="fuelType">
             @for (ft of FUEL_TYPES; track ft) {
               <option [value]="ft">{{ FUEL_TYPE_LABELS[ft] }}</option>
@@ -321,17 +345,22 @@
           </select>
         </div>
         <div class="form-row">
-          <label>Installation date <span class="required">*</span></label>
+          <label
+            >{{ "GLOBAL.INSTALLATION_DATE" | transloco }}
+            <span class="required">*</span></label
+          >
           <input type="date" formControlName="installationDate" />
           @if (
             form.get("installationDate")?.invalid &&
             form.get("installationDate")?.touched
           ) {
-            <span class="field-error">Installation date is required.</span>
+            <span class="field-error">{{
+              "BOILER.INSTALLATION_DATE_REQUIRED" | transloco
+            }}</span>
           }
         </div>
         <div class="form-row">
-          <label>Notes</label>
+          <label>{{ "GLOBAL.NOTES" | transloco }}</label>
           <textarea formControlName="notes" rows="2"></textarea>
         </div>
         @if (saveError) {

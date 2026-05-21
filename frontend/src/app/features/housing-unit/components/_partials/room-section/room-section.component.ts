@@ -8,6 +8,7 @@ import {
   ReactiveFormsModule,
   Validators,
 } from "@angular/forms";
+import { TranslocoModule } from "@ngneat/transloco";
 import { Subject } from "rxjs";
 import { takeUntil } from "rxjs/operators";
 import { RoomService } from "../../../../../core/services/room.service";
@@ -27,7 +28,7 @@ import {
 @Component({
   selector: "app-room-section",
   standalone: true,
-  imports: [DecimalPipe, ReactiveFormsModule],
+  imports: [DecimalPipe, ReactiveFormsModule, TranslocoModule],
   templateUrl: "./room-section.component.html",
   styleUrls: ["./room-section.component.scss"],
 })

@@ -4,6 +4,8 @@
     "CLEAR": "Clear",
     "CANCEL": "Cancel",
     "LOADING": "Loading",
+    "SAVING": "Saving",
+    "SEARCHING": "Searching",
     "ADJUST_FILTERS": "Try adjusting your filters.",
     "PREVIOUS": "Previous",
     "NEXT": "Next",
@@ -18,6 +20,7 @@
     "PEB": "PEB",
     "PERSON": "Person",
     "BANK_ACCOUNT": "Bank Account",
+    "BANK_ACCOUNTS": "Bank Accounts",
     "SETTINGS": "Settings",
     "ESTATE": "Estate",
     "USER": "User",
@@ -37,7 +40,83 @@
     "PENDING_ALERTS": "Pending Alerts",
     "OVERVIEW": "Overview",
     "QUICK_ACCESS": "Quick Access",
-    "INDEXATION": "Indexation"
+    "INDEXATION": "Indexation",
+    "EMAIL": "Email",
+    "ADDED_AT": "Added at",
+    "ACTIONS": "Actions",
+    "REMOVE": "Remove",
+    "YES": "Yes",
+    "NO": "No",
+    "GENERAL_INFO": "General Info",
+    "DESCRIPTION": "Description",
+    "OPTIONAL": "optional",
+    "SAVE": "Save",
+    "ADDING": "Adding",
+    "ADD": "Add",
+    "NEW": "New",
+    "EDIT": "Edit",
+    "STREET_ADDRESS": "Street Address",
+    "POSTAL_CODE": "Postal Code",
+    "COUNTRY": "Country",
+    "PHONE": "Phone",
+    "LANDING": "Landing",
+    "TOTAL_SURFACE": "Total Surface",
+    "HAS_TERRACE": "Has Terrace",
+    "TERRACE_SURFACE": "Terrace Surface",
+    "TERRACE_ORIENTATION": "Terrace Orientation",
+    "HAS_GARDEN": "Has Garden",
+    "GARDEN_SURFACE": "Garden Surface",
+    "GARDEN_ORIENTATION": "Garden Orientation",
+    "CLICK_TO_ENTER": "Click to enter",
+    "DELETING": "Deleting",
+    "TOTAL": "Total",
+    "TYPE": "Type",
+    "SELECT": "Select",
+    "SAVE_ALL": "Save All",
+    "REMOVE_ROW": "Remove row",
+    "ADD_ROW": "Add row",
+    "ROWS": "Rows",
+    "NOTES": "Notes",
+    "DELETE_YES": "Yes, delete",
+    "NO_HISTORY": "No history available.",
+    "FROM": "From",
+    "TO": "To",
+    "DURATION": "Duration",
+    "CHANGE": "Change",
+    "CURRENT": "Current",
+    "MONTH": "Month",
+    "MONTHS": "Months",
+    "PREVIOUS_COMPARE": "vs previous",
+    "EFFECTIVE_FROM": "Effective from",
+    "DATE_REQUIRED": "Date is required.",
+    "TERRACE": "Terrace",
+    "GARDEN": "Garden",
+    "VIEW": "View",
+    "PERIOD": "Period",
+    "CHARGES": "charges",
+    "SHOW": "Show",
+    "HIDE": "Hide",
+    "BOILER": "Boiler",
+    "FUEL_TYPE": "Fuel type",
+    "INSTALLATION_DATE": "Installation date",
+    "SERIAL_NUMBER": "Serial number",
+    "MODEL": "Model",
+    "BRAND": "Brand",
+    "LOADING_HISTORY": "Loading history",
+    "SERVICE_HISTORY": "Service history",
+    "SERVICE_DATE": "Service date",
+    "DUE_IN": "Due in",
+    "DAYS": "day(s)",
+    "OVERDUE_BY": "Overdue by",
+    "INSTALLED": "Installed",
+    "LAST_SERVICE": "Last service",
+    "NEXT_SERVICE": "Next service",
+    "VALID_UNTIL": "Valid until",
+    "PLATFORM_ADMIN": "Platform Admin",
+    "SHOWING": "Showing",
+    "CREATED_AT": "Created at",
+    "BACK_TO_USERS": "Back to Users",
+    "UPDATED_AT": "Updated at"
   },
   "NAV": {
     "MY_ESTATES": "My Estates",
@@ -47,17 +126,23 @@
   "BUILDING": {
     "BUILDINGS": "Buildings",
     "ADD": "Add Building",
+    "EDIT": "Edit Building",
     "SEARCH_PLACEHOLDER": "Search by name, address, city…",
     "ALL_CITIES": "All cities",
     "EMPTY": "No buildings found.",
     "EMPTY_HELP": "Get started by adding your first building.",
     "DELETE_CONFIRM": "Delete building \"{{name}}\"? This cannot be undone.",
-    "QUICK_DESC": "Manage building details, units and PEB"
+    "QUICK_DESC": "Manage building details, units and PEB",
+    "CREATE": "Create Building",
+    "SELECT": "Select Building"
   },
   "HOUSING_UNIT": {
     "HOUSING_UNITS": "Units",
     "ADD": "Add Unit",
     "NUMBER": "Unit #",
+    "EDIT": "Edit Unit",
+    "NEW": "New Unit",
+    "CREATE": "Create Unit",
     "SEARCH_PLACEHOLDER": "Search by unit number or building… ",
     "ALL_BUILDINGS": "All buildings",
     "SURFACE": "Surface (m²)",
@@ -67,7 +152,10 @@
       "VACANT": "Vacant"
     },
     "EMPTY": "No units found.",
-    "EMPTY_HELP": "Get started by adding your first unit."
+    "EMPTY_HELP": "Get started by adding your first unit.",
+    "BACK_TO_UNITS": "Back to Units",
+    "INFO": "Unit Information",
+    "NO_UNITS": "No units yet. Click \"+ Add Housing Unit\" to get started."
   },
   "PEB": {
     "TITLE": "Energy Performance (PEB)",
@@ -86,17 +174,19 @@
       "EXPIRING_SOON": "Expires soon",
       "EXPIRED": "Expired",
       "NO_DATE": "No expiry date"
-    }
+    },
+    "SCORE_HISTORY": "PEB Score History",
+    "IMPROVED_BY": "Improved by",
+    "DEGRADED_BY": "Degraded by",
+    "NO_CHANGE": "No change",
+    "OVER": "over",
+    "YEARS": "year(s)",
+    "GRADES": "grade(s)"
   },
   "COMMON": {
     "SAVE": "Save",
-    "SAVING": "Saving…",
-    "EDIT": "Edit",
-    "LOADING": "Loading…",
     "REQUIRED": "Required field",
-    "OPTIONAL": "optional",
     "NO_DATA": "—",
-
     "PAGE_OF": "Page {{current}} of {{total}} ({{elements}} total)"
   },
   "LANG": {
@@ -111,7 +201,15 @@
     "QUICK_DESC": "Pending actions and deadlines"
   },
   "BOILER": {
-    "SERVICE": "Boiler Service"
+    "SERVICE": "Boiler Service",
+    "ADD": "Add Boiler",
+    "NO_DATA": "No boiler registered.",
+    "ADD_SERVICE": "Add Service",
+    "NEW_SERVICE_RECORD": "New Service Record",
+    "SERVICE_DATE": "Service date",
+    "INSTALLATION_DATE_REQUIRED": "Installation date is required.",
+    "BRAND_REQUIRED": "Brand is required.",
+    "SERVICE_DATE_REQUIRED": "Service date is required and cannot be in the future."
   },
   "FIRE_EXTINGUISHER": {
     "SERVICE": "Fire Extinguisher Service"
@@ -119,22 +217,91 @@
   "LEASE": {
     "LEASES": "Leases",
     "END_NOTICE": "Lease End Notice",
-    "ACTIVE_LEASES": "Active Leases"
+    "ACTIVE_LEASES": "Active Leases",
+    "STATUS": "Lease status",
+    "NEW": "New Lease",
+    "NO_LEASES": "No leases recorded.",
+    "PAST_LEASE": "past lease",
+    "PAST_LEASE_PLURAL": "past leases"
   },
   "ESTATE": {
     "ESTATES": "Estates",
-    "EDIT": "Edit Estate"
+    "NAME": "Estate Name",
+    "EDIT": "Edit Estate",
+    "SWITCH": "Switch Estate",
+    "CREATE": "Create Estate",
+    "SELECTOR_SUBTITLE": "Select the estate you want to work in",
+    "NO_ESTATE_EXISTS": "No estate exists yet",
+    "NO_ESTATE_ASSIGNED": "No estate assigned",
+    "CREATE_FIRST": "Create the first estate",
+    "CREATE_FIRST_HINT": "Create the first estate to get started. This estate will become the initial workspace for your organization.",
+    "NO_ESTATE_ASSIGNED_HINT": "You are not yet a member of any estate. Please contact your administrator to gain access.",
+    "MANAGE_ALL": "Manage all estates (Admin)"
   },
   "PERSON": {
     "PERSONS": "Persons",
-    "QUICK_DESC": "Owners, tenants and contacts"
+    "QUICK_DESC": "Owners, tenants and contacts",
+    "SEARCH_BY_NAME_PLACEHOLDER": "Search by name or email…"
   },
   "MEMBER": {
+    "ADD": "Add Member",
     "MEMBERS": "Members",
-    "QUICK_DESC": "Manage estate access"
+    "QUICK_DESC": "Manage estate access",
+    "LOADING": "Loading members",
+    "EMPTY": "No members found."
   },
   "TRANSACTION": {
     "TRANSACTIONS": "Transactions",
     "QUICK_DESC": "Track income and expenses"
+  },
+  "USER": {
+    "USERS": "Users",
+    "CREATE": "Create User",
+    "EDIT": "Edit User",
+    "SEARCH_PLACEHOLDER": "Search by name or email…",
+    "NO_USERS_FOUND": "No users found.",
+    "USERNAME": "Username",
+    "PASSWORD": "Password",
+    "CONFIRM_PASSWORD": "Confirm Password",
+    "PLATFORM_ADMIN": "Platform Administrator",
+    "PLATFORM_ADMIN_HELP": "Platform administrators have full access to all estates and platform-level settings.",
+    "REPEAT_PASSWORD": "Repeat password",
+    "PASSWORD_MISMATCH": "Passwords do not match",
+    "CANCEL_PASSWORD_CHANGE": "Cancel Password Change",
+    "CHANGE_PASSWORD": "Change Password",
+    "CANNOT_DELETE_SELF": "You cannot delete your own account",
+    "PASSWORD_UPDATED_SUCCESSFULLY": "Password updated successfully",
+    "USER_INFORMATION": "User Information",
+    "SAVE_PASSWORD": "Save Password",
+    "NEW_PASSWORD": "New Password",
+    "NEW_PASSWORD_PLACEHOLDER": "Min. 8 chars, 1 upper, 1 lower, 1 digit"
+  },
+  "ROLE": {
+    "EDIT": "Edit Role"
+  },
+  "ROOM": {
+    "ROOMS": "Rooms",
+    "ADD": "Add Room",
+    "QUICK_ADD": "Quick Add",
+    "APPROXIMATE_SURFACE_INVALID": "Approximate surface must be between 0.01 and 999.99"
+  },
+  "RENT": {
+    "CURRENT": "Current Rent",
+    "ERROR_POSITIVE_AMOUNT": "Rent must be positive",
+    "ANNUAL_INDEXATION": "Annual indexation",
+    "MARKET_ADJUSTMENT": "Market adjustment",
+    "AFTER_RENOVATION": "After renovation",
+    "TENANT_NEGOTIATION": "Tenant negotiation",
+    "MONTHLY_AMOUNT": "Monthly Rent",
+    "SET": "Set Rent",
+    "EDIT": "Edit Rent",
+    "ADD": "Add Rent",
+    "DELETE_FROM": "Delete rent record from",
+    "TOTAL_CHANGE": "Total change since first rent",
+    "HISTORY": "Rent History",
+    "OPTIONAL_NOTE_PLACEHOLDER": "Optional — reason for this change"
+  },
+  "TENANT": {
+    "TENANTS": "Tenants"
   }
 }

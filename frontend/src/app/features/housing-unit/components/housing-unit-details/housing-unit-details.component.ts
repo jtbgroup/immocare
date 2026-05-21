@@ -1,6 +1,7 @@
 import { CommonModule } from "@angular/common";
 import { Component, OnInit } from "@angular/core";
 import { ActivatedRoute, Router, RouterLink } from "@angular/router";
+import { TranslocoModule } from "@ngneat/transloco";
 import { ActiveEstateService } from "../../../../core/services/active-estate.service";
 import { HousingUnitService } from "../../../../core/services/housing-unit.service";
 import { HousingUnit } from "../../../../models/housing-unit.model";
@@ -27,6 +28,7 @@ import { RoomSectionComponent } from "../_partials/room-section/room-section.com
     PebSectionComponent,
     RentSectionComponent,
     LeaseSectionComponent,
+    TranslocoModule,
   ],
   templateUrl: "./housing-unit-details.component.html",
   styleUrls: ["./housing-unit-details.component.scss"],

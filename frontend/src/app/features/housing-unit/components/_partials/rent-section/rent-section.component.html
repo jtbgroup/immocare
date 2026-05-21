@@ -2,22 +2,23 @@
   <!-- Header -->
   <div class="section-header">
     <h3 class="section-heading">
-      <span class="material-icons section-icon">payments</span> Rent
+      <span class="material-icons section-icon">payments</span>
+      {{ "GLOBAL.RENT" | transloco }}
     </h3>
     @if (!showForm && !loading) {
       <button class="btn btn-sm btn-primary" (click)="openAddForm()">
-        + Set Rent
+        + {{ "RENT.SET" | transloco }}
       </button>
     }
   </div>
 
   @if (loading) {
-    <div class="loading">Loading…</div>
+    <div class="loading">{{ "GLOBAL.LOADING" | transloco }}...</div>
   }
 
   <!-- Empty state -->
   @if (!loading && !currentRent && !showForm) {
-    <p class="no-data">No rent recorded.</p>
+    <p class="no-data">{{ "GLOBAL.NO_DATA" | transloco }}</p>
   }
 
   <!-- Current rent card -->
@@ -28,7 +29,8 @@
       </div>
       <div class="rent-details">
         <div class="rent-date">
-          Effective from: <strong>{{ currentRent.effectiveFrom }}</strong>
+          {{ "GLOBAL.EFFECTIVE_FROM" | transloco }}:
+          <strong>{{ currentRent.effectiveFrom }}</strong>
         </div>
         @if (lastChange) {
           <div
@@ -41,7 +43,7 @@
               lastChange.amount | number: "1.2-2"
             }}
             ({{ lastChange.isIncrease ? "+" : "" }}{{ lastChange.percentage }}%)
-            vs previous
+            {{ "GLOBAL.PREVIOUS_COMPARE" | transloco }}
           </div>
         }
       </div>
@@ -52,7 +54,11 @@
   @if (currentRent && !showForm) {
     <div class="rent-actions">
       <button class="btn-link" (click)="toggleHistory()">
-        {{ showHistory ? "Hide History" : "View History" }}
+        {{
+          showHistory
+            ? ("GLOBAL.HIDE_HISTORY" | transloco)
+            : ("GLOBAL.SHOW_HISTORY" | transloco)
+        }}
       </button>
     </div>
   }
@@ -60,7 +66,11 @@
   <!-- Inline form -->
   @if (showForm) {
     <div class="rent-form-panel">
-      <h4>{{ editingRecord ? "Edit Rent" : "Add Rent" }}</h4>
+      <h4>
+        {{
+          editingRecord ? ("RENT.EDIT" | transloco) : ("RENT.ADD" | transloco)
+        }}
+      </h4>
 
       @if (editingRecord) {
         <div class="current-read-only">
@@ -71,7 +81,10 @@
 
       <form (ngSubmit)="saveForm()">
         <div class="form-field">
-          <label>Monthly Rent (€) <span class="required">*</span></label>
+          <label
+            >{{ "RENT.MONTHLY_AMOUNT" | transloco }} (€)
+            <span class="required">*</span></label
+          >
           <input
             type="number"
             step="0.01"
@@ -83,7 +96,9 @@
             [class.invalid]="submitted && (!formRent || formRent <= 0)"
           />
           @if (submitted && (!formRent || formRent <= 0)) {
-            <span class="field-error">Rent must be positive</span>
+            <span class="field-error">{{
+              "RENT.ERROR_POSITIVE_AMOUNT" | transloco
+            }}</span>
           }
           @if (editingRecord && formRent && formRent > 0 && previewChange) {
             <span
@@ -101,7 +116,10 @@
         </div>
 
         <div class="form-field">
-          <label>Effective From <span class="required">*</span></label>
+          <label
+            >{{ "GLOBAL.EFFECTIVE_FROM" | transloco }}
+            <span class="required">*</span></label
+          >
           <input
             type="date"
             [(ngModel)]="formDate"
@@ -110,40 +128,46 @@
             [class.invalid]="submitted && !formDate"
           />
           @if (submitted && !formDate) {
-            <span class="field-error">Date is required</span>
+            <span class="field-error">{{
+              "GLOBAL.DATE_REQUIRED" | transloco
+            }}</span>
           }
         </div>
 
         <div class="form-field">
-          <label>Notes (optional)</label>
+          <label
+            >{{ "GLOBAL.NOTES" | transloco }} ({{
+              "GLOBAL.OPTIONAL" | transloco
+            }})</label
+          >
           <div class="notes-templates">
             <button
               type="button"
               class="tag"
               (click)="applyTemplate('Annual indexation')"
             >
-              Annual indexation
+              {{ "RENT.ANNUAL_INDEXATION" | transloco }}
             </button>
             <button
               type="button"
               class="tag"
               (click)="applyTemplate('Market adjustment')"
             >
-              Market adjustment
+              {{ "RENT.MARKET_ADJUSTMENT" | transloco }}
             </button>
             <button
               type="button"
               class="tag"
               (click)="applyTemplate('After renovation')"
             >
-              After renovation
+              {{ "RENT.AFTER_RENOVATION" | transloco }}
             </button>
             <button
               type="button"
               class="tag"
               (click)="applyTemplate('Tenant negotiation')"
             >
-              Tenant negotiation
+              {{ "RENT.TENANT_NEGOTIATION" | transloco }}
             </button>
           </div>
           <textarea
@@ -151,7 +175,7 @@
             name="notes"
             rows="2"
             maxlength="500"
-            placeholder="Optional — reason for this change"
+            [placeholder]="'RENT.OPTIONAL_NOTE_PLACEHOLDER' | transloco"
           ></textarea>
         </div>
 
@@ -161,7 +185,11 @@
 
         <div class="form-actions">
           <button type="submit" class="btn btn-primary" [disabled]="saving">
-            {{ saving ? "Saving…" : "Save" }}
+            {{
+              saving
+                ? ("GLOBAL.SAVING" | transloco) + "..."
+                : ("GLOBAL.SAVE" | transloco)
+            }}
           </button>
           <button
             type="button"
@@ -169,7 +197,7 @@
             (click)="closeForm()"
             [disabled]="saving"
           >
-            Cancel
+            {{ "GLOBAL.CANCEL" | transloco }}
           </button>
         </div>
       </form>
@@ -179,7 +207,7 @@
   <!-- Delete confirmation banner -->
   @if (deleteTarget && !showForm) {
     <div class="warning-banner">
-      Delete rent record from
+      {{ "RENT.DELETE_FROM" | transloco }}
       <strong>{{ deleteTarget.effectiveFrom }}</strong> (€{{
         deleteTarget.monthlyRent | number: "1.2-2"
       }})?
@@ -189,14 +217,18 @@
           (click)="confirmDelete()"
           [disabled]="saving"
         >
-          {{ saving ? "Deleting…" : "Yes, delete" }}
+          {{
+            saving
+              ? ("GLOBAL.DELETING" | transloco)
+              : ("GLOBAL.DELETE_YES" | transloco)
+          }}
         </button>
         <button
           class="btn btn-secondary btn-sm"
           (click)="deleteTarget = null"
           [disabled]="saving"
         >
-          Cancel
+          {{ "GLOBAL.CANCEL" | transloco }}
         </button>
       </div>
     </div>
@@ -206,7 +238,7 @@
   @if (showHistory && !showForm) {
     <div class="history-panel">
       <div class="history-header">
-        <h4>Rent History</h4>
+        <h4>{{ "RENT.HISTORY" | transloco }}</h4>
         <button class="btn-close" (click)="toggleHistory()">✕</button>
       </div>
 
@@ -216,7 +248,7 @@
           [class.improved]="totalChange.isIncrease"
           [class.degraded]="!totalChange.isIncrease"
         >
-          Total since first rent:
+          {{ "RENT.TOTAL_CHANGE" | transloco }}:
           {{ totalChange.isIncrease ? "+" : "" }}€{{
             totalChange.amount | number: "1.2-2"
           }}
@@ -225,7 +257,7 @@
       }
 
       @if (history.length === 0) {
-        <p class="no-data">No history available.</p>
+        <p class="no-data">{{ "GLOBAL.NO_HISTORY" | transloco }}</p>
       }
 
       @if (history.length > 0) {
@@ -233,12 +265,12 @@
           <table class="history-table">
             <thead>
               <tr>
-                <th>Monthly Rent</th>
-                <th>From</th>
-                <th>To</th>
-                <th>Duration</th>
-                <th>Change</th>
-                <th>Notes</th>
+                <th>{{ "RENT.MONTHLY_AMOUNT" | transloco }}</th>
+                <th>{{ "GLOBAL.FROM" | transloco }}</th>
+                <th>{{ "GLOBAL.TO" | transloco }}</th>
+                <th>{{ "GLOBAL.DURATION" | transloco }}</th>
+                <th>{{ "GLOBAL.CHANGE" | transloco }}</th>
+                <th>{{ "GLOBAL.NOTES" | transloco }}</th>
                 <th></th>
               </tr>
             </thead>
@@ -249,10 +281,14 @@
                     <strong>€{{ row.monthlyRent | number: "1.2-2" }}</strong>
                   </td>
                   <td>{{ row.effectiveFrom }}</td>
-                  <td>{{ row.effectiveTo ?? "Current" }}</td>
+                  <td>
+                    {{ row.effectiveTo ?? ("GLOBAL.CURRENT" | transloco) }}
+                  </td>
                   <td>
                     {{ row.durationMonths }} month{{
-                      row.durationMonths !== 1 ? "s" : ""
+                      row.durationMonths !== 1
+                        ? ("GLOBAL.MONTHS" | transloco)
+                        : ("GLOBAL.MONTH" | transloco)
                     }}
                   </td>
                   <td>
@@ -275,14 +311,14 @@
                   <td class="row-actions">
                     <button
                       class="icon-btn-sm"
-                      title="Edit"
+                      [title]="'GLOBAL.EDIT' | transloco"
                       (click)="openEditForm(row)"
                     >
                       ✏️
                     </button>
                     <button
                       class="icon-btn-sm icon-btn-delete"
-                      title="Delete"
+                      [title]="'GLOBAL.DELETE' | transloco"
                       (click)="askDelete(row)"
                     >
                       🗑️

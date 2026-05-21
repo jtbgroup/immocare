@@ -1,18 +1,18 @@
 <div class="unit-list-container">
   <div class="unit-list-header">
-    <h3>Housing Units</h3>
+    <h3>{{ "HOUSING_UNIT.HOUSING_UNITS" | transloco }}</h3>
     <button class="btn btn-sm btn-primary" (click)="addUnit()">
-      + Add Housing Unit
+      + {{ "HOUSING_UNIT.ADD" | transloco }}
     </button>
   </div>
 
   @if (loading) {
-    <div class="loading-placeholder">Loading units…</div>
+    <div class="loading-placeholder">{{ "GLOBAL.LOADING" | transloco }}...</div>
   }
 
   @if (!loading && units.length === 0) {
     <div class="no-data">
-      No units yet. Click "+ Add Housing Unit" to get started.
+      {{ "HOUSING_UNIT.NO_UNITS" | transloco }}
     </div>
   }
 
@@ -20,14 +20,14 @@
     <table class="unit-table">
       <thead>
         <tr>
-          <th>Unit #</th>
-          <th>Floor</th>
-          <th>Surface (m²)</th>
-          <th>Rooms</th>
-          <th>Rent</th>
-          <th>PEB</th>
-          <th>Lease</th>
-          <th>Owner</th>
+          <th>{{ "HOUSING_UNIT.NUMBER" | transloco }}</th>
+          <th>{{ "GLOBAL.FLOOR" | transloco }}</th>
+          <th>{{ "GLOBAL.SURFACE" | transloco }}</th>
+          <th>{{ "ROOM.ROOMS" | transloco }}</th>
+          <th>{{ "GLOBAL.RENT" | transloco }}</th>
+          <th>{{ "GLOBAL.PEB" | transloco }}</th>
+          <th>{{ "GLOBAL.LEASE" | transloco }}</th>
+          <th>{{ "GLOBAL.OWNER" | transloco }}</th>
         </tr>
       </thead>
       <tbody>

@@ -7,6 +7,7 @@ import {
   SimpleChanges,
 } from "@angular/core";
 import { RouterLink } from "@angular/router";
+import { TranslocoModule } from "@ngneat/transloco";
 import { Subject } from "rxjs";
 import { takeUntil } from "rxjs/operators";
 import { ActiveEstateService } from "../../../../../core/services/active-estate.service";
@@ -22,7 +23,7 @@ import {
 @Component({
   selector: "app-lease-section",
   standalone: true,
-  imports: [DecimalPipe, LowerCasePipe, RouterLink],
+  imports: [DecimalPipe, LowerCasePipe, RouterLink, TranslocoModule],
   templateUrl: "./lease-section.component.html",
   styleUrls: ["./lease-section.component.scss"],
 })

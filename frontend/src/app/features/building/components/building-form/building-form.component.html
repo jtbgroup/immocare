@@ -1,7 +1,11 @@
 <div class="building-form-container">
   <!-- Header -->
   <div class="page-header">
-    <h1>{{ isEdit ? "Edit Building" : "Add Building" }}</h1>
+    <h1>
+      {{
+        isEdit ? ("BUILDING.EDIT" | transloco) : ("BUILDING.ADD" | transloco)
+      }}
+    </h1>
   </div>
 
   <!-- Breadcrumb -->
@@ -12,7 +16,7 @@
         activeEstateService.activeEstateId(),
         'buildings',
       ]"
-      >Buildings</a
+      >{{ "BUILDING.BUILDINGS" | transloco }}</a
     >
     <span class="breadcrumb-separator">›</span>
     @if (isEdit && buildingId) {
@@ -23,12 +27,12 @@
           'buildings',
           buildingId,
         ]"
-        >Building</a
+        >{{ "GLOBAL.BUILDING " | transloco }}</a
       >
       <span class="breadcrumb-separator">›</span>
-      <span>Edit</span>
+      <span>{{ "GLOBAL.EDIT " | transloco }}</span>
     } @else {
-      <span>New</span>
+      <span>{{ "GLOBAL.NEW" | transloco }}</span>
     }
   </nav>
 
@@ -46,7 +50,10 @@
 
         <!-- Name -->
         <div class="form-group">
-          <label for="name">Name <span class="required">*</span></label>
+          <label for="name"
+            >{{ "GLOBAL.NAME" | transloco }}
+            <span class="required">*</span></label
+          >
           <input
             id="name"
             type="text"
@@ -64,7 +71,8 @@
         <!-- Address -->
         <div class="form-group">
           <label for="streetAddress"
-            >Street Address <span class="required">*</span></label
+            >{{ "GLOBAL.STREET_ADDRESS" | transloco }}
+            <span class="required">*</span></label
           >
           <input
             id="streetAddress"
@@ -85,7 +93,8 @@
         <div class="form-row">
           <div class="form-group">
             <label for="postalCode"
-              >Postal Code <span class="required">*</span></label
+              >{{ "GLOBAL.POSTAL_CODE" | transloco }}
+              <span class="required">*</span></label
             >
             <input
               id="postalCode"
@@ -121,7 +130,10 @@
 
         <!-- Country -->
         <div class="form-group">
-          <label for="country">Country <span class="required">*</span></label>
+          <label for="country"
+            >{{ "GLOBAL.COUNTRY" | transloco }}
+            <span class="required">*</span></label
+          >
           <input
             id="country"
             type="text"
@@ -138,7 +150,12 @@
 
         <!-- Owner picker -->
         <div class="form-group">
-          <label>Owner <span class="optional">(optional)</span></label>
+          <label
+            >{{ "GLOBAL.OWNER" | transloco }}
+            <span class="optional"
+              >({{ "GLOBAL.OPTIONAL" | transloco }})</span
+            ></label
+          >
           @if (selectedOwner) {
             <div class="selected-owner">
               <span
@@ -163,7 +180,9 @@
               placeholder="Search by name…"
             />
             @if (ownerSearchLoading) {
-              <span class="help-text">Searching…</span>
+              <span class="help-text"
+                >{{ "GLOBAL.SEARCHING" | transloco }}...</span
+              >
             }
             @if (ownerResults.length > 0) {
               <ul class="picker-results">
@@ -180,15 +199,15 @@
         <!-- Actions -->
         <div class="form-actions">
           <button type="button" class="btn btn-secondary" (click)="cancel()">
-            Cancel
+            {{ "GLOBAL.CANCEL" | transloco }}
           </button>
           <button type="submit" class="btn btn-primary" [disabled]="submitting">
             {{
               submitting
-                ? "Saving…"
+                ? ("GLOBAL.SAVING" | transloco) + "..."
                 : isEdit
-                  ? "Save Changes"
-                  : "Create Building"
+                  ? ("GLOBAL.SAVE" | transloco)
+                  : ("BUILDING.CREATE" | transloco)
             }}
           </button>
         </div>

@@ -2,10 +2,10 @@
   <!-- Header -->
   <div class="details-content">
     <div class="header">
-      <h1>Users</h1>
+      <h1>{{ "USER.USERS" | transloco }}</h1>
       <div class="actions">
         <button class="btn btn-primary" (click)="create()">
-          + Create User
+          + {{ "USER.CREATE" | transloco }}
         </button>
       </div>
     </div>
@@ -18,14 +18,14 @@
 
   <!-- Loading -->
   @if (loading) {
-    <div class="loading">Loading...</div>
+    <div class="loading">{{ "GLOBAL.LOADING" | transloco }}...</div>
   }
 
   @if (!loading) {
     <!-- Empty state -->
     @if (users.length === 0) {
       <div class="empty-state">
-        <p>No users found.</p>
+        <p>{{ "USER.NO_USERS_FOUND" | transloco }}</p>
       </div>
     }
 
@@ -36,7 +36,7 @@
           <thead>
             <tr>
               <th class="sortable" (click)="sort('username')">
-                Username
+                {{ "USER.USERNAME" | transloco }}
                 <span
                   class="sort-icon"
                   [class.active]="sortField === 'username'"
@@ -45,13 +45,13 @@
                 </span>
               </th>
               <th class="sortable" (click)="sort('email')">
-                Email
+                {{ "GLOBAL.EMAIL" | transloco }}
                 <span class="sort-icon" [class.active]="sortField === 'email'">
                   {{ sortField | sortIcon: sortDir : "email" }}
                 </span>
               </th>
               <th class="sortable" (click)="sort('isPlatformAdmin')">
-                Role
+                {{ "GLOBAL.ROLE" | transloco }}
                 <span
                   class="sort-icon"
                   [class.active]="sortField === 'isPlatformAdmin'"
@@ -60,7 +60,7 @@
                 </span>
               </th>
               <th class="sortable" (click)="sort('createdAt')">
-                Created At
+                {{ "GLOBAL.CREATED_AT" | transloco }}
                 <span
                   class="sort-icon"
                   [class.active]="sortField === 'createdAt'"
@@ -77,11 +77,13 @@
                 <td>{{ user.email }}</td>
                 <td>
                   @if (user.isPlatformAdmin) {
-                    <span class="badge-role badge-role--admin"
-                      >Platform Admin</span
-                    >
+                    <span class="badge-role badge-role--admin">{{
+                      "GLOBAL.PLATFORM_ADMIN" | transloco
+                    }}</span>
                   } @else {
-                    <span class="badge-role badge-role--user">User</span>
+                    <span class="badge-role badge-role--user">{{
+                      "GLOBAL.USER" | transloco
+                    }}</span>
                   }
                 </td>
                 <td>{{ user.createdAt | date: "yyyy-MM-dd HH:mm" }}</td>
@@ -100,7 +102,7 @@
           [disabled]="currentPage === 1"
           (click)="goToPage(currentPage - 1)"
         >
-          Previous
+          {{ "GLOBAL.PREVIOUS" | transloco }}
         </button>
         @for (p of pages(); track p) {
           <button
@@ -116,15 +118,17 @@
           [disabled]="currentPage === totalPages"
           (click)="goToPage(currentPage + 1)"
         >
-          Next
+          {{ "GLOBAL.NEXT" | transloco }}
         </button>
       </div>
     }
 
     @if (users.length > 0) {
       <p class="page-info-bottom">
-        Showing {{ (currentPage - 1) * pageSize + 1 }}–{{ endIndex }} of
-        {{ users.length }} users
+        {{ "GLOBAL.SHOWING" | transloco }}
+        {{ (currentPage - 1) * pageSize + 1 }}–{{ endIndex }}
+        {{ "GLOBAL.OF" | transloco }} {{ users.length }}
+        {{ "USER.USERS" | transloco }}
       </p>
     }
   }

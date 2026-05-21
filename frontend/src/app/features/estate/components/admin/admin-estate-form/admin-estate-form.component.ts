@@ -10,6 +10,7 @@ import {
   Validators,
 } from "@angular/forms";
 import { ActivatedRoute, Router } from "@angular/router";
+import { TranslocoModule } from "@ngneat/transloco";
 import { Subject, of } from "rxjs";
 import {
   catchError,
@@ -36,7 +37,7 @@ interface PendingMember {
 @Component({
   selector: "app-admin-estate-form",
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule, FormsModule],
+  imports: [CommonModule, ReactiveFormsModule, FormsModule, TranslocoModule],
   templateUrl: "./admin-estate-form.component.html",
   styleUrls: ["./admin-estate-form.component.scss"],
 })

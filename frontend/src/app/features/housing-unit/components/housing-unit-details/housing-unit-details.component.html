@@ -1,12 +1,14 @@
 <div class="unit-details-container">
   @if (loading) {
-    <div class="loading">Loading…</div>
+    <div class="loading">{{ "GLOBAL.LOADING" | transloco }}...</div>
   }
 
   @if (errorMessage && !loading) {
     <div class="error-container">
       <p class="error">{{ errorMessage }}</p>
-      <button class="btn btn-primary" (click)="back()">Back to Units</button>
+      <button class="btn btn-primary" (click)="back()">
+        {{ "HOUSING_UNIT.BACK_TO_UNITS" | transloco }}
+      </button>
     </div>
   }
 
@@ -19,8 +21,9 @@
           activeEstateService.activeEstateId(),
           'buildings',
         ]"
-        >Buildings</a
       >
+        {{ "BUILDING.BUILDINGS" | transloco }}
+      </a>
       <span class="breadcrumb-separator">›</span>
       <a
         [routerLink]="[
@@ -33,21 +36,27 @@
         {{ unit.buildingName }}
       </a>
       <span class="breadcrumb-separator">›</span>
-      <span>Unit {{ unit.unitNumber }}</span>
+      <span>{{ "GLOBAL.HOUSING_UNIT" | transloco }} {{ unit.unitNumber }}</span>
     </nav>
 
     <!-- Header -->
     <div class="page-header">
-      <h1>Unit {{ unit.unitNumber }}</h1>
+      <h1>{{ "GLOBAL.HOUSING_UNIT" | transloco }} {{ unit.unitNumber }}</h1>
       <div class="actions">
         @if (activeEstateService.canEdit()) {
-          <button class="btn btn-secondary" (click)="edit()">Edit</button>
+          <button class="btn btn-secondary" (click)="edit()">
+            {{ "GLOBAL.EDIT" | transloco }}
+          </button>
           <button
             class="btn btn-danger"
             [disabled]="deleting"
             (click)="confirmDelete()"
           >
-            {{ deleting ? "Deleting…" : "Delete" }}
+            {{
+              deleting
+                ? ("GLOBAL.DELETING" | transloco) + "..."
+                : ("GLOBAL.DELETE" | transloco)
+            }}
           </button>
         }
       </div>
@@ -59,14 +68,14 @@
 
     <!-- Unit info -->
     <div class="info-card">
-      <h2>Unit Information</h2>
+      <h2>{{ "HOUSING_UNIT.INFO" | transloco }}</h2>
       <div class="info-grid">
         <div class="info-item">
-          <label>Unit Number</label>
+          <label>{{ "HOUSING_UNIT.NUMBER" | transloco }}</label>
           <p>{{ unit.unitNumber }}</p>
         </div>
         <div class="info-item">
-          <label>Building</label>
+          <label>{{ "GLOBAL.BUILDING" | transloco }}</label>
           <p>
             <a
               [routerLink]="[
@@ -81,27 +90,27 @@
           </p>
         </div>
         <div class="info-item">
-          <label>Floor</label>
+          <label>{{ "GLOBAL.FLOOR" | transloco }}</label>
           <p>{{ unit.floor }}</p>
         </div>
         @if (unit.landingNumber) {
           <div class="info-item">
-            <label>Landing</label>
+            <label>{{ "GLOBAL.LANDING" | transloco }}</label>
             <p>{{ unit.landingNumber }}</p>
           </div>
         }
         <div class="info-item">
-          <label>Total Surface</label>
+          <label>{{ "GLOBAL.TOTAL_SURFACE" | transloco }}</label>
           <p>
             {{ unit.totalSurface != null ? unit.totalSurface + " m²" : "—" }}
           </p>
         </div>
         <div class="info-item">
-          <label>Owner</label>
+          <label>{{ "GLOBAL.OWNER" | transloco }}</label>
           <p>{{ unit.effectiveOwnerName ?? unit.ownerName ?? "—" }}</p>
         </div>
         <div class="info-item">
-          <label>Lease Status</label>
+          <label>{{ "LEASE.STATUS" | transloco }}</label>
           <p>
             @if (unit.activeLeaseStatus === "ACTIVE") {
               <span class="lease-status-badge lease-status-badge--active"
@@ -120,13 +129,13 @@
         </div>
         @if (unit.currentMonthlyRent != null) {
           <div class="info-item">
-            <label>Current Rent</label>
+            <label>{{ "RENT.CURRENT" | transloco }}</label>
             <p>{{ unit.currentMonthlyRent | number: "1.0-0" }} €/month</p>
           </div>
         }
         @if (unit.currentPebScore) {
           <div class="info-item">
-            <label>PEB Score</label>
+            <label>{{ "PEB.SCORE" | transloco }}</label>
             <p>{{ unit.currentPebScore }}</p>
           </div>
         }
@@ -135,9 +144,8 @@
       <!-- Terrace -->
       @if (unit.hasTerrace) {
         <div class="card-footer">
-          🏡 Terrace{{
-            unit.terraceSurface ? " — " + unit.terraceSurface + " m²" : ""
-          }}
+          🏡 {{ "GLOBAL.TERRACE" | transloco
+          }}{{ unit.terraceSurface ? " — " + unit.terraceSurface + " m²" : "" }}
           {{
             unit.terraceOrientation ? "(" + unit.terraceOrientation + ")" : ""
           }}
@@ -146,9 +154,8 @@
       <!-- Garden -->
       @if (unit.hasGarden) {
         <div class="card-footer">
-          🌿 Garden{{
-            unit.gardenSurface ? " — " + unit.gardenSurface + " m²" : ""
-          }}
+          🌿 {{ "GLOBAL.GARDEN" | transloco
+          }}{{ unit.gardenSurface ? " — " + unit.gardenSurface + " m²" : "" }}
           {{ unit.gardenOrientation ? "(" + unit.gardenOrientation + ")" : "" }}
         </div>
       }

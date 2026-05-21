@@ -4,6 +4,8 @@
     "CLEAR": "Effacer",
     "CANCEL": "Annuler",
     "LOADING": "Chargement",
+    "SAVING": "Enregistrement",
+    "SEARCHING": "Recherche en cours",
     "ADJUST_FILTERS": "Essayez d'ajuster vos filtres.",
     "PREVIOUS": "Précédent",
     "NEXT": "Suivant",
@@ -11,11 +13,12 @@
     "OF": "de",
     "DELETE": "Supprimer",
     "BUILDING": "Immeuble",
-    "UNIT": "Unité",
+    "HOUSING_UNIT": "Unité",
     "LEASE": "Bail",
     "TRANSACTION": "Transaction",
     "PERSON": "Personne",
     "BANK_ACCOUNT": "Compte bancaire",
+    "BANK_ACCOUNTS": "Comptes bancaires",
     "SETTINGS": "Paramètres",
     "ESTATE": "Estate",
     "USER": "Utilisateur",
@@ -37,7 +40,83 @@
     "PENDING_ALERTS": "Alertes en attente",
     "OVERVIEW": "Aperçu",
     "QUICK_ACCESS": "Accès rapide",
-    "INDEXATION": "Indexation"
+    "INDEXATION": "Indexation",
+    "EMAIL": "Email",
+    "ADDED_AT": "Ajouté le",
+    "ACTIONS": "Actions",
+    "REMOVE": "Supprimer",
+    "YES": "Oui",
+    "NO": "Non",
+    "GENERAL_INFO": "Informations générales",
+    "DESCRIPTION": "Description",
+    "OPTIONAL": "optionnel",
+    "SAVE": "Enregistrer",
+    "ADDING": "Enregistrement",
+    "ADD": "Ajouter",
+    "NEW": "Nouveau",
+    "EDIT": "Modifier",
+    "STREET_ADDRESS": "Adresse",
+    "POSTAL_CODE": "Code postal",
+    "COUNTRY": "Pays",
+    "PHONE": "Téléphone",
+    "LANDING": "Palier",
+    "TOTAL_SURFACE": "Surface totale",
+    "HAS_TERRACE": "Avec terrasse",
+    "TERRACE_SURFACE": "Surface de la terrasse",
+    "TERRACE_ORIENTATION": "Orientation de la terrasse",
+    "HAS_GARDEN": "Avec jardin",
+    "GARDEN_SURFACE": "Surface du jardin",
+    "GARDEN_ORIENTATION": "Orientation du jardin",
+    "CLICK_TO_ENTER": "Cliquez pour entrer",
+    "DELETING": "Suppression en cours",
+    "TOTAL": "Total",
+    "TYPE": "Type",
+    "REMOVE_ROW": "Supprimer la ligne",
+    "ADD_ROW": "Ajouter une ligne",
+    "SELECT": "Sélectionner",
+    "SAVE_ALL": "Enregistrer tout",
+    "ROWS": "Lignes",
+    "NOTES": "Notes",
+    "DELETE_YES": "Oui, supprimer",
+    "NO_HISTORY": "Aucun historique disponible.",
+    "FROM": "De",
+    "TO": "À",
+    "DURATION": "Durée",
+    "CHANGE": "Changement",
+    "CURRENT": "Actuel",
+    "MONTH": "Mois",
+    "MONTHS": "Mois",
+    "PREVIOUS_COMPARE": "vs précédent",
+    "EFFECTIVE_FROM": "Valable à partir du",
+    "DATE_REQUIRED": "La date est requise.",
+    "TERRACE": "Terrasse",
+    "GARDEN": "Jardin",
+    "VIEW": "Voir",
+    "PERIOD": "Période",
+    "CHARGES": "charges",
+    "SHOW": "Afficher",
+    "HIDE": "Masquer",
+    "BOILER": "Chaudière",
+    "FUEL_TYPE": "Type de combustible",
+    "INSTALLATION_DATE": "Date d'installation",
+    "SERIAL_NUMBER": "Numéro de série",
+    "MODEL": "Modèle",
+    "BRAND": "Marque",
+    "LOADING_HISTORY": "Chargement de l'historique",
+    "SERVICE_HISTORY": "Historique des services",
+    "SERVICE_DATE": "Date du service",
+    "DUE_IN": "À faire dans",
+    "DAYS": "jour(s)",
+    "OVERDUE_BY": "En retard de",
+    "INSTALLED": "Installée",
+    "LAST_SERVICE": "Dernier entretien",
+    "NEXT_SERVICE": "Prochain entretien",
+    "VALID_UNTIL": "Valid until",
+    "PLATFORM_ADMIN": "Administrateur de la plateforme",
+    "SHOWING": "Affichage",
+    "CREATED_AT": "Créé le",
+    "BACK_TO_USERS": "Retour aux Utilisateurs",
+    "UPDATED_AT": "Mis à jour le"
   },
   "NAV": {
     "MY_ESTATES": "Mes estates",
@@ -47,16 +126,23 @@
   "BUILDING": {
     "BUILDINGS": "Immeubles",
     "ADD": "Ajouter un immeuble",
+    "EDIT": "Modifier l'immeuble",
     "SEARCH_PLACEHOLDER": "Rechercher par nom, adresse, ville…",
     "ALL_CITIES": "Toutes les villes",
     "EMPTY": "Aucun immeuble trouvé.",
     "EMPTY_HELP": "Commencez par ajouter votre premier immeuble.",
     "DELETE_CONFIRM": "Supprimer l'immeuble \"{{name}}\" ? Cette action est irréversible.",
-    "QUICK_DESC": "Gérez les détails de l'immeuble, les unités et le PEB"
+    "QUICK_DESC": "Gérez les détails de l'immeuble, les unités et le PEB",
+    "CREATE": "Créer un immeuble",
+    "SELECT": "Sélectionner un immeuble"
   },
   "HOUSING_UNIT": {
     "HOUSING_UNITS": "Unités",
     "ADD": "Ajouter une unité",
+    "EDIT": "Modifier l'unité",
+    "NEW": "Nouvelle unité",
+    "CREATE": "Créer une unité",
+    "NUMBER": "Unité n°",
     "SEARCH_PLACEHOLDER": "Rechercher par numéro ou immeuble…",
     "ALL_BUILDINGS": "Tous les immeubles",
     "SURFACE": "Surface (m²)",
@@ -66,7 +152,10 @@
       "VACANT": "Vacant"
     },
     "EMPTY": "Aucune unité trouvée.",
-    "EMPTY_HELP": "Commencez par ajouter votre première unité."
+    "EMPTY_HELP": "Commencez par ajouter votre première unité.",
+    "BACK_TO_UNITS": "Retour aux unités",
+    "INFO": "Informations sur l'unité",
+    "NO_UNITS": "Aucune unité pour le moment. Cliquez sur \"+ Ajouter une unité\" pour commencer."
   },
   "PEB": {
     "TITLE": "Performance énergétique (PEB)",
@@ -85,16 +174,19 @@
       "EXPIRING_SOON": "Expire bientôt",
       "EXPIRED": "Expiré",
       "NO_DATE": "Sans date d'expiration"
-    }
+    },
+    "SCORE_HISTORY": "Historique des scores PEB",
+    "IMPROVED_BY": "Amélioré de",
+    "DEGRADED_BY": "Dégradé de",
+    "NO_CHANGE": "Aucun changement",
+    "OVER": "sur",
+    "YEARS": "année(s)",
+    "GRADES": "grade(s)"
   },
   "COMMON": {
     "SAVE": "Enregistrer",
-    "SAVING": "Enregistrement…",
-    "EDIT": "Modifier",
     "CLEAR": "Effacer",
-    "LOADING": "Chargement…",
     "REQUIRED": "Champ obligatoire",
-    "OPTIONAL": "optionnel",
     "NO_DATA": "—",
     "PAGE_OF": "Page {{current}} sur {{total}} ({{elements}} au total)"
   },
@@ -110,7 +202,15 @@
     "QUICK_DESC": "Actions en attente et échéances"
   },
   "BOILER": {
-    "SERVICE": "Entretien de la chaudière"
+    "SERVICE": "Entretien de la chaudière",
+    "ADD": "Ajouter une chaudière",
+    "NO_DATA": "Aucune chaudière enregistrée.",
+    "ADD_SERVICE": "Ajouter un entretien",
+    "NEW_SERVICE_RECORD": "Nouvel enregistrement d'entretien",
+    "SERVICE_DATE": "Date de l'entretien",
+    "INSTALLATION_DATE_REQUIRED": "La date d'installation est requise.",
+    "BRAND_REQUIRED": "La marque est requise.",
+    "SERVICE_DATE_REQUIRED": "La date de l'entretien est requise et ne peut pas être dans le futur."
   },
   "FIRE_EXTINGUISHER": {
     "SERVICE": "Entretien de l'extincteur"
@@ -118,22 +218,91 @@
   "LEASE": {
     "LEASES": "Baux",
     "END_NOTICE": "Préavis de fin de bail",
-    "ACTIVE_LEASES": "Baux actifs"
+    "ACTIVE_LEASES": "Baux actifs",
+    "STATUS": "Statut du bail",
+    "NEW": "Nouveau bail",
+    "NO_LEASES": "Aucun bail enregistré.",
+    "PAST_LEASE": "bail passé",
+    "PAST_LEASE_PLURAL": "baux passés"
   },
   "ESTATE": {
     "ESTATES": "Estates",
-    "EDIT": "Modifier l'Estate"
+    "NAME": "Nom de l'Estate",
+    "EDIT": "Modifier l'Estate",
+    "SWITCH": "Changer d'Estate",
+    "CREATE": "Créer un Estate",
+    "SELECTOR_SUBTITLE": "Sélectionnez l'estate sur laquelle vous souhaitez travailler",
+    "NO_ESTATE_EXISTS": "Aucun estate n'existe encore",
+    "NO_ESTATE_ASSIGNED": "Aucun estate assigné",
+    "CREATE_FIRST": "Créer le premier estate",
+    "CREATE_FIRST_HINT": "Créez le premier estate pour commencer. Cet estate deviendra l'espace de travail initial de votre organisation.",
+    "NO_ESTATE_ASSIGNED_HINT": "Vous n'êtes pas encore membre d'aucun estate. Veuillez contacter votre administrateur pour obtenir un accès.",
+    "MANAGE_ALL": "Gérer tous les estates (Admin)"
   },
   "PERSON": {
     "PERSONS": "Personnes",
-    "QUICK_DESC": "Propriétaires, locataires et contacts"
+    "QUICK_DESC": "Propriétaires, locataires et contacts",
+    "SEARCH_BY_NAME_PLACEHOLDER": "Rechercher par nom ou email…"
   },
   "MEMBER": {
+    "ADD": "Ajouter un membre",
     "MEMBERS": "Membres",
-    "QUICK_DESC": "Gérez l'accès à l'estate"
+    "QUICK_DESC": "Gérez l'accès à l'estate",
+    "LOADING": "Chargement des membres",
+    "EMPTY": "Aucun membre trouvé."
   },
   "TRANSACTION": {
     "TRANSACTIONS": "Transactions",
     "QUICK_DESC": "Suivez les revenus et les dépenses"
+  },
+  "USER": {
+    "USERS": "Utilisateurs",
+    "CREATE": "Créer un utilisateur",
+    "EDIT": "Modifier l'utilisateur",
+    "SEARCH_PLACEHOLDER": "Rechercher par nom ou email…",
+    "NO_USERS_FOUND": "Aucun utilisateur trouvé.",
+    "USERNAME": "Nom d'utilisateur",
+    "PASSWORD": "Mot de passe",
+    "CONFIRM_PASSWORD": "Confirmer le mot de passe",
+    "PLATFORM_ADMIN": "Administrateur de la plateforme",
+    "PLATFORM_ADMIN_HELP": "Les administrateurs de la plateforme ont un accès complet à tous les estates et aux paramètres au niveau de la plateforme.",
+    "REPEAT_PASSWORD": "Répéter le mot de passe",
+    "PASSWORD_MISMATCH": "Les mots de passe ne correspondent pas",
+    "CANCEL_PASSWORD_CHANGE": "Annuler le changement de mot de passe",
+    "CHANGE_PASSWORD": "Changer le mot de passe",
+    "CANNOT_DELETE_SELF": "Vous ne pouvez pas supprimer votre propre compte",
+    "PASSWORD_UPDATED_SUCCESSFULLY": "Mot de passe mis à jour avec succès",
+    "USER_INFORMATION": "Informations sur l'utilisateur",
+    "SAVE_PASSWORD": "Enregistrer le mot de passe",
+    "NEW_PASSWORD": "Nouveau mot de passe",
+    "NEW_PASSWORD_PLACEHOLDER": "Min. 8 caractères, 1 majuscule, 1 minuscule, 1 chiffre"
+  },
+  "ROLE": {
+    "EDIT": "Modifier le rôle"
+  },
+  "ROOM": {
+    "ROOMS": "Pièces",
+    "ADD": "Ajouter une pièce",
+    "QUICK_ADD": "Ajout rapide",
+    "APPROXIMATE_SURFACE_INVALID": "La surface approximative doit être comprise entre 0.01 et 999.99"
+  },
+  "RENT": {
+    "CURRENT": "Loyer actuel",
+    "ERROR_POSITIVE_AMOUNT": "Le loyer doit être un montant positif",
+    "ANNUAL_INDEXATION": "Indexation annuelle",
+    "MARKET_ADJUSTMENT": "Ajustement du marché",
+    "AFTER_RENOVATION": "Après rénovation",
+    "TENANT_NEGOTIATION": "Négociation avec le locataire",
+    "MONTHLY_AMOUNT": "Loyer mensuel",
+    "SET": "Définir le loyer",
+    "EDIT": "Modifier le loyer",
+    "ADD": "Ajouter un loyer",
+    "DELETE_FROM": "Supprimer l'enregistrement de loyer à partir du",
+    "TOTAL_CHANGE": "Changement total depuis le premier loyer",
+    "HISTORY": "Historique des loyers",
+    "OPTIONAL_NOTE_PLACEHOLDER": "Optionnel — raison de ce changement"
+  },
+  "TENANT": {
+    "TENANTS": "Locataires"
   }
 }

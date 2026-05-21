@@ -1,6 +1,7 @@
 import { CommonModule } from "@angular/common";
 import { Component, OnInit } from "@angular/core";
 import { Router } from "@angular/router";
+import { TranslocoModule } from "@ngneat/transloco";
 import { UserService } from "../../../../core/services/user.service";
 import { User } from "../../../../models/user.model";
 import { SortIconPipe } from "../../../../shared/pipes/sort-icon.pipe";
@@ -14,7 +15,7 @@ type SortDir = "asc" | "desc";
 @Component({
   selector: "app-user-list",
   standalone: true,
-  imports: [CommonModule, SortIconPipe],
+  imports: [CommonModule, SortIconPipe, TranslocoModule],
   templateUrl: "./user-list.component.html",
   styleUrls: ["./user-list.component.scss"],
 })

@@ -4,6 +4,7 @@ import { CommonModule } from "@angular/common";
 import { Component, OnDestroy, OnInit } from "@angular/core";
 import { FormsModule } from "@angular/forms";
 import { ActivatedRoute } from "@angular/router";
+import { TranslocoModule } from "@ngneat/transloco";
 import { Subject, of } from "rxjs";
 import {
   catchError,
@@ -26,7 +27,7 @@ import { User } from "../../../../../models/user.model";
 @Component({
   selector: "app-estate-member-list",
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule, TranslocoModule],
   templateUrl: "./estate-member-list.component.html",
   styleUrls: ["./estate-member-list.component.scss"],
 })

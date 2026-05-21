@@ -2,14 +2,16 @@
 <div class="user-details-container">
   <!-- Loading -->
   @if (loading) {
-    <div class="loading">Loading…</div>
+    <div class="loading">{{ "GLOBAL.LOADING" | transloco }}...</div>
   }
 
   <!-- Error -->
   @if (errorMessage && !loading) {
     <div class="error-container">
       <p class="error">{{ errorMessage }}</p>
-      <button class="btn btn-primary" (click)="back()">Back to Users</button>
+      <button class="btn btn-primary" (click)="back()">
+        {{ "GLOBAL.BACK_TO_USERS" | transloco }}
+      </button>
     </div>
   }
 
@@ -17,7 +19,7 @@
   @if (user && !loading) {
     <!-- Breadcrumb -->
     <nav class="breadcrumb" aria-label="breadcrumb">
-      <a routerLink="/users">Users</a>
+      <a routerLink="/users">{{ "USER.USERS" | transloco }}</a>
       <span class="breadcrumb-separator">›</span>
       <span>{{ user.username }}</span>
     </nav>
@@ -27,19 +29,27 @@
       <div class="header">
         <h1>{{ user.username }}</h1>
         <div class="actions">
-          <button class="btn btn-secondary" (click)="edit()">Edit</button>
+          <button class="btn btn-secondary" (click)="edit()">
+            {{ "GLOBAL.EDIT" | transloco }}
+          </button>
           <button class="btn btn-secondary" (click)="togglePasswordForm()">
             {{
-              showPasswordForm ? "Cancel Password Change" : "Change Password"
+              showPasswordForm
+                ? ("USER.CANCEL_PASSWORD_CHANGE" | transloco)
+                : ("USER.CHANGE_PASSWORD" | transloco)
             }}
           </button>
-          <span [title]="isSelf ? 'You cannot delete your own account' : ''">
+          <span [title]="isSelf ? ('USER.CANNOT_DELETE_SELF' | transloco) : ''">
             <button
               class="btn btn-danger"
               [disabled]="isSelf || deleting"
               (click)="confirmDelete(false)"
             >
-              {{ deleting ? "Deleting…" : "Delete" }}
+              {{
+                deleting
+                  ? ("GLOBAL.DELETING" | transloco) + "..."
+                  : ("GLOBAL.DELETE" | transloco)
+              }}
             </button>
           </span>
         </div>
@@ -48,7 +58,9 @@
 
     <!-- Alerts -->
     @if (pwSuccess) {
-      <div class="alert alert-success">Password updated successfully.</div>
+      <div class="alert alert-success">
+        {{ "USER.PASSWORD_UPDATED_SUCCESSFULLY" | transloco }}
+      </div>
     }
     @if (deleteError) {
       <div class="alert alert-error">{{ deleteError }}</div>
@@ -56,18 +68,18 @@
 
     <!-- User Information -->
     <div class="info-card">
-      <h2>User Information</h2>
+      <h2>{{ "USER.USER_INFORMATION" | transloco }}</h2>
       <div class="info-grid">
         <div class="info-item">
-          <label>Username</label>
+          <label>{{ "USER.USERNAME" | transloco }}</label>
           <p>{{ user.username }}</p>
         </div>
         <div class="info-item">
-          <label>Email</label>
+          <label>{{ "GLOBAL.EMAIL" | transloco }}</label>
           <p>{{ user.email }}</p>
         </div>
         <div class="info-item">
-          <label>Role</label>
+          <label>{{ "GLOBAL.ROLE" | transloco }}</label>
           <p>
             @if (user.isPlatformAdmin) {
               <span class="badge-role badge-role--admin">Platform Admin</span>
@@ -77,11 +89,11 @@
           </p>
         </div>
         <div class="info-item">
-          <label>Created At</label>
+          <label>{{ "GLOBAL.CREATED_AT" | transloco }}</label>
           <p>{{ user.createdAt | date: "yyyy-MM-dd HH:mm" }}</p>
         </div>
         <div class="info-item">
-          <label>Updated At</label>
+          <label>{{ "GLOBAL.UPDATED_AT" | transloco }}</label>
           <p>{{ user.updatedAt | date: "yyyy-MM-dd HH:mm" }}</p>
         </div>
       </div>
@@ -90,7 +102,7 @@
     <!-- Change Password -->
     @if (showPasswordForm) {
       <div class="form-card">
-        <h2>Change Password</h2>
+        <h2>{{ "USER.CHANGE_PASSWORD" | transloco }}</h2>
 
         @if (pwError) {
           <div class="alert alert-error">{{ pwError }}</div>
@@ -99,13 +111,14 @@
         <form [formGroup]="pwForm" (ngSubmit)="submitPassword()" novalidate>
           <div class="form-group">
             <label for="newPassword"
-              >New Password <span class="required">*</span></label
+              >{{ "USER.NEW_PASSWORD" | transloco }}
+              <span class="required">*</span></label
             >
             <input
               id="newPassword"
               type="password"
               formControlName="newPassword"
-              placeholder="Min. 8 chars, 1 upper, 1 lower, 1 digit"
+              [placeholder]="'USER.NEW_PASSWORD_PLACEHOLDER' | transloco"
               [class.error]="
                 pwForm.get('newPassword')?.invalid &&
                 pwForm.get('newPassword')?.touched
@@ -120,13 +133,14 @@
 
           <div class="form-group">
             <label for="confirmPassword"
-              >Confirm Password <span class="required">*</span></label
+              >{{ "USER.CONFIRM_PASSWORD" | transloco }}
+              <span class="required">*</span></label
             >
             <input
               id="confirmPassword"
               type="password"
               formControlName="confirmPassword"
-              placeholder="Repeat new password"
+              [placeholder]="'USER.REPEAT_PASSWORD' | transloco"
               [class.error]="
                 (pwForm.get('confirmPassword')?.invalid &&
                   pwForm.get('confirmPassword')?.touched) ||
@@ -134,7 +148,9 @@
               "
             />
             @if (pwMismatch) {
-              <span class="error-message">Passwords do not match</span>
+              <span class="error-message">{{
+                "USER.PASSWORD_MISMATCH" | transloco
+              }}</span>
             }
             @if (!pwMismatch && pwFieldError("confirmPassword")) {
               <span class="error-message">{{
@@ -149,14 +165,18 @@
               class="btn btn-secondary"
               (click)="togglePasswordForm()"
             >
-              Cancel
+              {{ "USER.CANCEL_PASSWORD_CHANGE" | transloco }}
             </button>
             <button
               type="submit"
               class="btn btn-primary"
               [disabled]="pwSubmitting"
             >
-              {{ pwSubmitting ? "Saving…" : "Save Password" }}
+              {{
+                pwSubmitting
+                  ? ("GLOBAL.SAVING" | transloco)
+                  : ("USER.SAVE_PASSWORD" | transloco)
+              }}
             </button>
           </div>
         </form>

@@ -2,14 +2,15 @@
   <!-- Section header -->
   <div class="section-header">
     <h3 class="section-heading">
-      <span class="material-icons section-icon">straighten</span> Rooms
+      <span class="material-icons section-icon">straighten</span>
+      {{ "ROOM.ROOMS" | transloco }}
     </h3>
     <div class="ext-card__actions">
       <button class="btn btn-sm btn-primary" (click)="openAddForm()">
-        Add Room
+        {{ "ROOM.ADD" | transloco }}
       </button>
       <button class="btn btn-sm btn-secondary" (click)="openQuickAdd()">
-        Quick Add
+        {{ "ROOM.QUICK_ADD" | transloco }}
       </button>
     </div>
   </div>
@@ -36,9 +37,9 @@
       <table class="rooms-table">
         <thead>
           <tr>
-            <th>Type</th>
-            <th>Surface (m²)</th>
-            <th>Actions</th>
+            <th>{{ "GLOBAL.TYPE" | transloco }}</th>
+            <th>{{ "GLOBAL.SURFACE" | transloco }}</th>
+            <th>{{ "GLOBAL.ACTIONS" | transloco }}</th>
           </tr>
         </thead>
         <tbody>
@@ -50,7 +51,7 @@
                 <td class="actions">
                   <button
                     class="btn-icon"
-                    title="Edit"
+                    [title]="'GLOBAL.EDIT' | transloco"
                     (click)="startEdit(room)"
                     [disabled]="saving"
                   >
@@ -58,7 +59,7 @@
                   </button>
                   <button
                     class="btn-icon"
-                    title="Delete"
+                    [title]="'GLOBAL.DELETE' | transloco"
                     (click)="requestDelete(room)"
                     [disabled]="saving"
                   >
@@ -91,9 +92,9 @@
                     editApproximateSurface.invalid &&
                     editApproximateSurface.touched
                   ) {
-                    <span class="field-error"
-                      >Surface must be between 0.01 and 999.99</span
-                    >
+                    <span class="field-error">{{
+                      "ROOM.APPROXIMATE_SURFACE_INVALID" | transloco
+                    }}</span>
                   }
                 </td>
                 <td class="actions">
@@ -102,13 +103,17 @@
                     (click)="saveEdit(room)"
                     [disabled]="saving"
                   >
-                    {{ saving ? "Saving…" : "Save" }}
+                    {{
+                      saving
+                        ? ("GLOBAL.SAVING" | transloco) + "…"
+                        : ("GLOBAL.SAVE" | transloco)
+                    }}
                   </button>
                   <button
                     class="btn btn-sm btn-secondary"
                     (click)="cancelEdit()"
                   >
-                    Cancel
+                    {{ "GLOBAL.CANCEL" | transloco }}
                   </button>
                 </td>
               </tr>
@@ -117,7 +122,9 @@
         </tbody>
         <tfoot>
           <tr class="total-row">
-            <td><strong>Total</strong></td>
+            <td>
+              <strong>{{ "GLOBAL.TOTAL" | transloco }}</strong>
+            </td>
             <td>
               <strong>{{ totalSurface | number: "1.2-2" }} m²</strong>
             </td>
@@ -131,7 +138,7 @@
   <!-- Add single room form -->
   @if (showAddForm) {
     <div class="form-card">
-      <h4>Add Room</h4>
+      <h4>{{ "ROOM.ADD" | transloco }}</h4>
       <form [formGroup]="addForm" (ngSubmit)="saveAdd()">
         <div class="form-row">
           <div class="form-field">
@@ -140,7 +147,7 @@
               formControlName="roomType"
               [class.invalid]="isInvalidAdd('roomType')"
             >
-              <option value="">— Select —</option>
+              <option value="">— {{ "GLOBAL.SELECT" | transloco }} —</option>
               @for (t of allTypes; track t) {
                 <option [value]="t">{{ roomLabel(t) }}</option>
               }
@@ -161,18 +168,22 @@
               placeholder="e.g. 15.50"
             />
             @if (isInvalidAdd("approximateSurface")) {
-              <span class="field-error"
-                >Surface must be between 0.01 and 999.99</span
-              >
+              <span class="field-error">{{
+                "ROOM.APPROXIMATE_SURFACE_INVALID" | transloco
+              }}</span>
             }
           </div>
         </div>
         <div class="form-actions">
           <button type="submit" class="btn btn-primary" [disabled]="saving">
-            {{ saving ? "Saving…" : "Save" }}
+            {{
+              saving
+                ? ("GLOBAL.SAVING" | transloco) + "…"
+                : ("GLOBAL.SAVE" | transloco)
+            }}
           </button>
           <button type="button" class="btn btn-secondary" (click)="cancelAdd()">
-            Cancel
+            {{ "GLOBAL.CANCEL" | transloco }}
           </button>
         </div>
       </form>
@@ -182,7 +193,7 @@
   <!-- Quick Add form -->
   @if (showQuickAdd) {
     <div class="form-card">
-      <h4>Quick Add Rooms</h4>
+      <h4>{{ "ROOM.QUICK_ADD" | transloco }}</h4>
       @if (quickError) {
         <div class="form-error">{{ quickError }}</div>
       }
@@ -190,8 +201,8 @@
         <table class="quick-table">
           <thead>
             <tr>
-              <th>Type</th>
-              <th>Surface (m²)</th>
+              <th>{{ "GLOBAL.TYPE" | transloco }}</th>
+              <th>{{ "ROOM.SURFACE" | transloco }} (m²)</th>
               <th></th>
             </tr>
           </thead>
@@ -203,7 +214,9 @@
                     formControlName="roomType"
                     [class.invalid]="isRowInvalid(i, 'roomType')"
                   >
-                    <option value="">— Select —</option>
+                    <option value="">
+                      — {{ "GLOBAL.SELECT" | transloco }} —
+                    </option>
                     @for (t of allTypes; track t) {
                       <option [value]="t">{{ roomLabel(t) }}</option>
                     }
@@ -226,7 +239,7 @@
                     class="btn-icon"
                     (click)="removeQuickRow(i)"
                     [disabled]="quickRows.length <= 1"
-                    title="Remove row"
+                    [title]="'GLOBAL.REMOVE_ROW' | transloco"
                   >
                     ✕
                   </button>
@@ -242,20 +255,26 @@
             (click)="addQuickRow()"
             [disabled]="quickRows.length >= 20"
           >
-            + Add Row
+            + {{ "GLOBAL.ADD_ROW" | transloco }}
           </button>
-          <span class="row-count">{{ quickRows.length }} / 20 rows</span>
+          <span class="row-count"
+            >{{ quickRows.length }} / 20 {{ "GLOBAL.ROWS" | transloco }}</span
+          >
         </div>
         <div class="form-actions">
           <button type="submit" class="btn btn-primary" [disabled]="saving">
-            {{ saving ? "Saving…" : "Save All" }}
+            {{
+              saving
+                ? ("GLOBAL.SAVING" | transloco) + "…"
+                : ("GLOBAL.SAVE_ALL" | transloco)
+            }}
           </button>
           <button
             type="button"
             class="btn btn-secondary"
             (click)="cancelQuickAdd()"
           >
-            Cancel
+            {{ "GLOBAL.CANCEL" | transloco }}
           </button>
         </div>
       </form>
@@ -281,7 +300,11 @@
             (click)="confirmDelete()"
             [disabled]="deleting"
           >
-            {{ deleting ? "Deleting…" : "Confirm" }}
+            {{
+              deleting
+                ? ("GLOBAL.DELETING" | transloco) + "…"
+                : ("GLOBAL.DELETE" | transloco)
+            }}
           </button>
         </div>
       </div>

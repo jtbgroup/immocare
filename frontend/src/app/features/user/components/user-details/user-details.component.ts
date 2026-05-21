@@ -9,6 +9,7 @@ import {
   Validators,
 } from "@angular/forms";
 import { ActivatedRoute, Router, RouterLink } from "@angular/router";
+import { TranslocoModule } from "@ngneat/transloco";
 import { UserService } from "../../../../core/services/user.service";
 import { User } from "../../../../models/user.model";
 
@@ -34,7 +35,7 @@ function passwordsMatch(group: AbstractControl): ValidationErrors | null {
 @Component({
   selector: "app-user-details",
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule, RouterLink],
+  imports: [CommonModule, ReactiveFormsModule, RouterLink, TranslocoModule],
   templateUrl: "./user-details.component.html",
   styleUrls: ["./user-details.component.scss"],
 })

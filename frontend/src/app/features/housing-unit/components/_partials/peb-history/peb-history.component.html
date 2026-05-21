@@ -1,6 +1,6 @@
 <div class="history-panel">
   <div class="history-header">
-    <h4>PEB Score History</h4>
+    <h4>{{ "PEB.SCORE_HISTORY" | transloco }}</h4>
     <button class="btn-close" (click)="close.emit()">✕</button>
   </div>
 
@@ -9,7 +9,8 @@
     <div class="improvement-summary">
       @if (improvement.gradesImproved > 0) {
         <span class="improved"
-          >↑ Improved by {{ improvement.gradesImproved }} grade(s)</span
+          >↑ {{ "PEB.IMPROVED_BY" | transloco }}
+          {{ improvement.gradesImproved }} {{ "PEB.GRADES" | transloco }}</span
         >
         over {{ improvement.yearsCovered }} year(s) ({{
           display[improvement.firstScore].label
@@ -17,23 +18,26 @@
         → {{ display[improvement.currentScore].label }})
       } @else if (improvement.gradesImproved < 0) {
         <span class="degraded"
-          >↓ Degraded by {{ improvement.gradesImproved * -1 }} grade(s)</span
+          >↓ {{ "PEB.DEGRADED_BY" | transloco }}
+          {{ improvement.gradesImproved * -1 }}
+          {{ "PEB.GRADES" | transloco }}</span
         >
         over {{ improvement.yearsCovered }} year(s)
       } @else {
         <span class="unchanged"
-          >− No change over {{ improvement.yearsCovered }} year(s)</span
+          >− {{ "PEB.NO_CHANGE" | transloco }} {{ "PEB.OVER" | transloco }}
+          {{ improvement.yearsCovered }} {{ "PEB.YEARS" | transloco }}</span
         >
       }
     </div>
   }
 
   @if (loading) {
-    <div class="loading">Loading…</div>
+    <div class="loading">{{ "GLOBAL.LOADING" | transloco }}...</div>
   }
 
   @if (!loading && history.length === 0) {
-    <p class="no-data">No PEB scores recorded yet.</p>
+    <p class="no-data">{{ "PEB.NO_DATA" | transloco }}</p>
   }
 
   @if (!loading && history.length > 0) {
@@ -41,12 +45,12 @@
       <table class="history-table">
         <thead>
           <tr>
-            <th>Score</th>
-            <th>Score Date</th>
-            <th>Certificate</th>
-            <th>Valid Until</th>
-            <th>Status</th>
-            <th>Change</th>
+            <th>{{ "PEB.SCORE" | transloco }}</th>
+            <th>{{ "PEB.SCORE_DATE" | transloco }}</th>
+            <th>{{ "PEB.CERTIFICATE" | transloco }}</th>
+            <th>{{ "GLOBAL.VALID_UNTIL" | transloco }}</th>
+            <th>{{ "GLOBAL.STATUS" | transloco }}</th>
+            <th>{{ "GLOBAL.CHANGE" | transloco }}</th>
             <th></th>
           </tr>
         </thead>
@@ -78,14 +82,14 @@
               <td class="row-actions">
                 <button
                   class="icon-btn-sm"
-                  title="Edit"
+                  [title]="'GLOBAL.EDIT' | transloco"
                   (click)="editRequest.emit(item)"
                 >
                   ✏️
                 </button>
                 <button
                   class="icon-btn-sm icon-btn-delete"
-                  title="Delete"
+                  [title]="'GLOBAL.DELETE' | transloco"
                   (click)="deleteRequest.emit(item)"
                 >
                   🗑️

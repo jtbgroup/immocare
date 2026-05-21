@@ -1,6 +1,7 @@
 import { LowerCasePipe } from "@angular/common";
 import { Component, Input, OnDestroy, OnInit } from "@angular/core";
 import { Router } from "@angular/router";
+import { TranslocoModule } from "@ngneat/transloco";
 import { Subject } from "rxjs";
 import { takeUntil } from "rxjs/operators";
 import { HousingUnitService } from "../../../../../core/services/housing-unit.service";
@@ -10,7 +11,7 @@ import { PEB_SCORE_DISPLAY } from "../../../../../models/peb-score.model";
 @Component({
   selector: "app-housing-unit-list",
   standalone: true,
-  imports: [LowerCasePipe],
+  imports: [LowerCasePipe, TranslocoModule],
   templateUrl: "./housing-unit-list.component.html",
   styleUrls: ["./housing-unit-list.component.scss"],
 })

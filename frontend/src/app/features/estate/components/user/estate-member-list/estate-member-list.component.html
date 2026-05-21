@@ -5,7 +5,11 @@
       <h1>👥 Members</h1>
       <div class="actions">
         <button class="btn btn-primary" (click)="toggleAddPanel()">
-          {{ showAddPanel ? 'Cancel' : '+ Add Member' }}
+          {{
+            showAddPanel
+              ? ("GLOBAL.CANCEL" | transloco)
+              : "+ " + ("MEMBER.ADD" | transloco)
+          }}
         </button>
       </div>
     </div>
@@ -25,7 +29,7 @@
   <!-- Add member panel -->
   @if (showAddPanel) {
     <div class="add-member-panel">
-      <h3>Add a Member</h3>
+      <h3>{{ "MEMBER.ADD" | transloco }}</h3>
 
       @if (addError) {
         <div class="alert alert-error">{{ addError }}</div>
@@ -39,29 +43,43 @@
             <div class="selected-person">
               <span class="selected-badge">
                 👤 {{ selectedNewUser.username }}
-                <span class="selected-email">— {{ selectedNewUser.email }}</span>
+                <span class="selected-email"
+                  >— {{ selectedNewUser.email }}</span
+                >
               </span>
-              <button type="button" class="btn-clear" (click)="clearNewUser()">✕</button>
+              <button type="button" class="btn-clear" (click)="clearNewUser()">
+                ✕
+              </button>
             </div>
           } @else {
             <div class="picker-search-wrapper">
-              <input type="text" class="picker-input"
-                     placeholder="Search by username or email…"
-                     [value]="addUserSearch"
-                     (input)="onAddUserSearchInput($any($event.target).value)"
-                     (blur)="closeAddDropdown()"
-                     autocomplete="off" />
+              <input
+                type="text"
+                class="picker-input"
+                [placeholder]="'USER.SEARCH_PLACEHOLDER' | transloco"
+                [value]="addUserSearch"
+                (input)="onAddUserSearchInput($any($event.target).value)"
+                (blur)="closeAddDropdown()"
+                autocomplete="off"
+              />
               @if (addUserDropdownOpen) {
                 <div class="picker-dropdown">
                   @if (addUserSearchLoading) {
-                    <div class="picker-item picker-hint">Searching…</div>
+                    <div class="picker-item picker-hint">
+                      {{ "GLOBAL.SEARCHING" | transloco }}...
+                    </div>
                   }
                   @if (!addUserSearchLoading && addUserResults.length === 0) {
-                    <div class="picker-item picker-hint">No users found.</div>
+                    <div class="picker-item picker-hint">
+                      {{ "USER.NO_USERS_FOUND" | transloco }}
+                    </div>
                   }
                   @for (user of addUserResults; track user.id) {
-                    <button type="button" class="picker-item picker-result"
-                            (mousedown)="selectNewUser(user)">
+                    <button
+                      type="button"
+                      class="picker-item picker-result"
+                      (mousedown)="selectNewUser(user)"
+                    >
                       <span class="result-name">{{ user.username }}</span>
                       <span class="result-meta"> — {{ user.email }}</span>
                     </button>
@@ -85,8 +103,12 @@
         <!-- Actions -->
         <div class="form-group add-actions">
           <label>&nbsp;</label>
-          <button class="btn btn-primary" (click)="submitAddMember()" [disabled]="addSubmitting">
-            {{ addSubmitting ? 'Adding…' : 'Add' }}
+          <button
+            class="btn btn-primary"
+            (click)="submitAddMember()"
+            [disabled]="addSubmitting"
+          >
+            {{ addSubmitting ? "Adding…" : "Add" }}
           </button>
         </div>
       </div>
@@ -95,13 +117,13 @@
 
   <!-- Loading -->
   @if (loading) {
-    <div class="loading">Loading members…</div>
+    <div class="loading">{{ "MEMBER.LOADING" | transloco }}…</div>
   }
 
   <!-- Empty state -->
   @if (!loading && members.length === 0) {
     <div class="empty-state">
-      <p>No members yet.</p>
+      <p>{{ "MEMBER.EMPTY" | transloco }}</p>
     </div>
   }
 
@@ -111,11 +133,11 @@
       <table>
         <thead>
           <tr>
-            <th>Username</th>
-            <th>Email</th>
-            <th>Role</th>
-            <th>Added at</th>
-            <th>Actions</th>
+            <th>{{ "GLOBAL.NAME" | transloco }}</th>
+            <th>{{ "GLOBAL.EMAIL" | transloco }}</th>
+            <th>{{ "GLOBAL.ROLE" | transloco }}</th>
+            <th>{{ "GLOBAL.ADDED_AT" | transloco }}</th>
+            <th>{{ "GLOBAL.ACTIONS" | transloco }}</th>
           </tr>
         </thead>
         <tbody>
@@ -132,56 +154,80 @@
                 @if (roleEditMemberId === member.userId) {
                   <!-- Inline role edit -->
                   <div class="role-edit-inline">
-                    <select [(ngModel)]="roleEditValue" [name]="'role-' + member.userId">
+                    <select
+                      [(ngModel)]="roleEditValue"
+                      [name]="'role-' + member.userId"
+                    >
                       @for (role of ROLES; track role) {
-                        <option [value]="role">{{ ESTATE_ROLE_LABELS[role] }}</option>
+                        <option [value]="role">
+                          {{ ESTATE_ROLE_LABELS[role] }}
+                        </option>
                       }
                     </select>
-                    <button class="btn btn-sm btn-primary"
-                            (click)="saveRoleEdit(member)"
-                            [disabled]="roleEditSubmitting">
-                      {{ roleEditSubmitting ? '…' : 'Save' }}
+                    <button
+                      class="btn btn-sm btn-primary"
+                      (click)="saveRoleEdit(member)"
+                      [disabled]="roleEditSubmitting"
+                    >
+                      {{ roleEditSubmitting ? "…" : "Save" }}
                     </button>
-                    <button class="btn btn-sm btn-secondary"
-                            (click)="cancelRoleEdit()">Cancel</button>
+                    <button
+                      class="btn btn-sm btn-secondary"
+                      (click)="cancelRoleEdit()"
+                    >
+                      {{ "GLOBAL.CANCEL" | transloco }}
+                    </button>
                   </div>
                 } @else {
-                  <span class="role-badge"
-                        [style.background]="roleStyle(member.role).background"
-                        [style.color]="roleStyle(member.role).color">
+                  <span
+                    class="role-badge"
+                    [style.background]="roleStyle(member.role).background"
+                    [style.color]="roleStyle(member.role).color"
+                  >
                     {{ ESTATE_ROLE_LABELS[member.role] }}
                   </span>
                 }
               </td>
-              <td>{{ member.addedAt | date: 'dd/MM/yyyy HH:mm' }}</td>
+              <td>{{ member.addedAt | date: "dd/MM/yyyy HH:mm" }}</td>
               <td class="actions-cell">
                 @if (roleEditMemberId !== member.userId) {
                   <!-- Edit role button -->
-                  <button class="btn btn-sm btn-secondary"
-                          [disabled]="!canEditRole(member)"
-                          [title]="editRoleTooltip(member)"
-                          (click)="openRoleEdit(member)">
-                    Edit Role
+                  <button
+                    class="btn btn-sm btn-secondary"
+                    [disabled]="!canEditRole(member)"
+                    [title]="editRoleTooltip(member)"
+                    (click)="openRoleEdit(member)"
+                  >
+                    {{ "ROLE.EDIT" | transloco }}
                   </button>
 
                   <!-- Remove button -->
                   @if (deleteConfirmMemberId !== member.userId) {
-                    <button class="btn btn-sm btn-danger"
-                            [disabled]="!canRemove(member)"
-                            [title]="removeTooltip(member)"
-                            (click)="requestRemove(member)">
-                      Remove
+                    <button
+                      class="btn btn-sm btn-danger"
+                      [disabled]="!canRemove(member)"
+                      [title]="removeTooltip(member)"
+                      (click)="requestRemove(member)"
+                    >
+                      {{ "GLOBAL.REMOVE" | transloco }}
                     </button>
                   } @else {
                     <span class="confirm-inline">
-                      Remove {{ member.username }}?
-                      <button class="btn btn-xs btn-danger"
-                              (click)="confirmRemove()"
-                              [disabled]="deleting">
-                        {{ deleting ? '…' : 'Yes' }}
+                      {{ "GLOBAL.CONFIRM_REMOVE" | transloco }}
+                      {{ member.username }}?
+                      <button
+                        class="btn btn-xs btn-danger"
+                        (click)="confirmRemove()"
+                        [disabled]="deleting"
+                      >
+                        {{ deleting ? "…" : ("GLOBAL.YES" | transloco) }}
                       </button>
-                      <button class="btn btn-xs btn-secondary"
-                              (click)="cancelRemove()">No</button>
+                      <button
+                        class="btn btn-xs btn-secondary"
+                        (click)="cancelRemove()"
+                      >
+                        {{ "GLOBAL.NO" | transloco }}
+                      </button>
                     </span>
                   }
                 }

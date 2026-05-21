@@ -157,7 +157,7 @@ dev-start: ## ▶  Démarrer l'env de dev avec PostgreSQL (sans rebuild)
 	DB_PROFILE=postgres docker compose -f docker-compose.dev.yml up -d
 	@echo ""
 	@echo "✅ Development services (postgres) started!"
-	@echo "   🌐 App (Nginx):       http://localhost:8080"
+	@echo "   🌐 App (Nginx):       http://localhost:8090"
 	@echo "   🎨 Angular direct:    http://localhost:4200"
 	@echo "   🔧 Backend direct:    http://localhost:8081"
 	@echo "   🐛 Remote Debug:      localhost:5005"

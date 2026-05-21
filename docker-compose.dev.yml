@@ -11,7 +11,6 @@ services:
     container_name: immocare-dev
     environment:
       SPRING_PROFILES_ACTIVE: ${DB_PROFILE:-postgres}
-      SERVER_PORT: 8081
       MAVEN_OPTS: "-Xmx512m"
       NODE_ENV: development
     
@@ -21,7 +20,7 @@ services:
       DB_USER: ${DB_USER:-immocare}
       DB_PASSWORD: ${DB_PASSWORD:-immocare}
     ports:
-      - "8080:8080"   # nginx → point d'entrée principal
+      - "8090:80"   # nginx → point d'entrée principal
       - "4200:4200"   # Angular dev server (accès direct)
       - "8081:8081"   # Spring Boot (accès direct)
       - "5005:5005"   # Remote debug JDWP

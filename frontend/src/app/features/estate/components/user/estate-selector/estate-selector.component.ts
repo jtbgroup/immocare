@@ -2,6 +2,7 @@
 import { CommonModule } from "@angular/common";
 import { Component, OnDestroy, OnInit } from "@angular/core";
 import { Router } from "@angular/router";
+import { TranslocoModule } from "@ngneat/transloco";
 import { Subject } from "rxjs";
 import { takeUntil } from "rxjs/operators";
 import { AuthService } from "../../../../../core/auth/auth.service";
@@ -16,7 +17,7 @@ import {
 @Component({
   selector: "app-estate-selector",
   standalone: true,
-  imports: [CommonModule],
+  imports: [CommonModule, TranslocoModule],
   templateUrl: "./estate-selector.component.html",
   styleUrls: ["./estate-selector.component.scss"],
 })

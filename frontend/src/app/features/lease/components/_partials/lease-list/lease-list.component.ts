@@ -2,6 +2,7 @@
 import { CommonModule } from "@angular/common";
 import { Component, Input, OnInit } from "@angular/core";
 import { RouterModule } from "@angular/router";
+import { TranslocoModule } from "@ngneat/transloco";
 import { ActiveEstateService } from "../../../../../core/services/active-estate.service";
 import { LeaseService } from "../../../../../core/services/lease.service";
 import {
@@ -12,7 +13,7 @@ import {
 @Component({
   selector: "app-lease-list",
   standalone: true,
-  imports: [CommonModule, RouterModule],
+  imports: [CommonModule, RouterModule, TranslocoModule],
   templateUrl: "./lease-list.component.html",
   styleUrls: ["./lease-list.component.scss"],
 })

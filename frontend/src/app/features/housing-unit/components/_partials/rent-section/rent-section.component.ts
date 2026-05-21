@@ -7,6 +7,7 @@ import {
   SimpleChanges,
 } from "@angular/core";
 import { FormsModule } from "@angular/forms";
+import { TranslocoModule } from "@ngneat/transloco";
 import { Subject } from "rxjs";
 import { takeUntil } from "rxjs/operators";
 import { RentService } from "../../../../../core/services/rent.service";
@@ -20,7 +21,7 @@ import {
 @Component({
   selector: "app-rent-section",
   standalone: true,
-  imports: [DecimalPipe, FormsModule],
+  imports: [DecimalPipe, FormsModule, TranslocoModule],
   templateUrl: "./rent-section.component.html",
   styleUrls: ["./rent-section.component.scss"],
 })

@@ -66,7 +66,7 @@
 
 set -euo pipefail
 
-BASE_URL="${1:-http://localhost:8081}"
+BASE_URL="${1:-http://localhost:8090}"
 ADMIN_USER="${2:-admin}"
 ADMIN_PASS="${3:-admin123}"
 

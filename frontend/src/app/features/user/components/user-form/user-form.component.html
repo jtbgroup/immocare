@@ -2,13 +2,15 @@
   <!-- Header -->
   <div class="details-content">
     <div class="header">
-      <h1>{{ isEdit ? "Edit User" : "Create User" }}</h1>
+      <h1>
+        {{ isEdit ? ("USER.EDIT" | transloco) : ("USER.CREATE" | transloco) }}
+      </h1>
     </div>
   </div>
 
   <!-- Loading -->
   @if (loading) {
-    <div class="loading">Loading...</div>
+    <div class="loading">{{ "GLOBAL.LOADING" | transloco }}...</div>
   }
 
   @if (!loading) {
@@ -21,7 +23,10 @@
 
         <!-- Username -->
         <div class="form-group">
-          <label for="username">Username <span class="required">*</span></label>
+          <label for="username"
+            >{{ "USER.USERNAME" | transloco }}
+            <span class="required">*</span></label
+          >
           <input
             id="username"
             type="text"
@@ -38,7 +43,10 @@
 
         <!-- Email -->
         <div class="form-group">
-          <label for="email">Email <span class="required">*</span></label>
+          <label for="email"
+            >{{ "GLOBAL.EMAIL" | transloco }}
+            <span class="required">*</span></label
+          >
           <input
             id="email"
             type="email"
@@ -57,7 +65,8 @@
         @if (!isEdit) {
           <div class="form-group">
             <label for="password"
-              >Password <span class="required">*</span></label
+              >{{ "USER.PASSWORD" | transloco }}
+              <span class="required">*</span></label
             >
             <input
               id="password"
@@ -75,13 +84,14 @@
 
           <div class="form-group">
             <label for="confirmPassword"
-              >Confirm Password <span class="required">*</span></label
+              >{{ "USER.CONFIRM_PASSWORD" | transloco }}
+              <span class="required">*</span></label
             >
             <input
               id="confirmPassword"
               type="password"
               formControlName="confirmPassword"
-              placeholder="Repeat password"
+              [placeholder]="'USER.REPEAT_PASSWORD' | transloco"
               [class.error]="
                 (form.get('confirmPassword')?.invalid &&
                   form.get('confirmPassword')?.touched) ||
@@ -89,7 +99,9 @@
               "
             />
             @if (passwordMismatch) {
-              <span class="error-message">Passwords do not match</span>
+              <span class="error-message">{{
+                "USER.PASSWORD_MISMATCH" | transloco
+              }}</span>
             }
             @if (!passwordMismatch && fieldError("confirmPassword")) {
               <span class="error-message">{{
@@ -104,22 +116,25 @@
           <div class="section-toggle">
             <label>
               <input type="checkbox" formControlName="isPlatformAdmin" />
-              Platform Administrator
+              {{ "USER.PLATFORM_ADMIN" | transloco }}
             </label>
           </div>
           <span class="help-text">
-            Platform administrators have full access to all estates and
-            platform-level settings.
+            {{ "USER.PLATFORM_ADMIN_HELP" | transloco }}
           </span>
         </div>
 
         <div class="form-actions">
           <button type="button" class="btn btn-secondary" (click)="cancel()">
-            Cancel
+            {{ "GLOBAL.CANCEL" | transloco }}
           </button>
           <button type="submit" class="btn btn-primary" [disabled]="submitting">
             {{
-              submitting ? "Saving..." : isEdit ? "Save Changes" : "Create User"
+              submitting
+                ? ("USER.SAVING" | transloco) + "..."
+                : isEdit
+                  ? ("GLOBAL.SAVE" | transloco)
+                  : ("USER.CREATE" | transloco)
             }}
           </button>
         </div>

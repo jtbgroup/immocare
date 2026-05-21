@@ -1,28 +1,29 @@
-import { CommonModule } from '@angular/common';
-import { Component, OnInit } from '@angular/core';
+import { CommonModule } from "@angular/common";
+import { Component, OnInit } from "@angular/core";
 import {
   FormBuilder,
   FormGroup,
   ReactiveFormsModule,
   Validators,
-} from '@angular/forms';
-import { ActivatedRoute, Router, RouterLink } from '@angular/router';
-import { ActiveEstateService } from '../../../../core/services/active-estate.service';
-import { BuildingService } from '../../../../core/services/building.service';
-import { PersonService } from '../../../../core/services/person.service';
-import { Building } from '../../../../models/building.model';
-import { PersonSummary } from '../../../../models/person.model';
+} from "@angular/forms";
+import { ActivatedRoute, Router, RouterLink } from "@angular/router";
+import { TranslocoModule } from "@ngneat/transloco";
+import { ActiveEstateService } from "../../../../core/services/active-estate.service";
+import { BuildingService } from "../../../../core/services/building.service";
+import { PersonService } from "../../../../core/services/person.service";
+import { Building } from "../../../../models/building.model";
+import { PersonSummary } from "../../../../models/person.model";
 
 /**
  * Create / Edit building form.
  * UC004_ESTATE_PLACEHOLDER Phase 2: breadcrumb and cancel navigation include estateId.
  */
 @Component({
-  selector: 'app-building-form',
+  selector: "app-building-form",
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule, RouterLink],
-  templateUrl: './building-form.component.html',
-  styleUrls: ['./building-form.component.scss'],
+  imports: [CommonModule, ReactiveFormsModule, RouterLink, TranslocoModule],
+  templateUrl: "./building-form.component.html",
+  styleUrls: ["./building-form.component.scss"],
 })
 export class BuildingFormComponent implements OnInit {
   form!: FormGroup;
@@ -30,11 +31,11 @@ export class BuildingFormComponent implements OnInit {
   buildingId?: number;
   loading = false;
   submitting = false;
-  errorMessage = '';
+  errorMessage = "";
   isDirty = false;
 
   // Owner picker
-  ownerSearchTerm = '';
+  ownerSearchTerm = "";
   ownerResults: PersonSummary[] = [];
   selectedOwner: PersonSummary | null = null;
   ownerSearchLoading = false;
@@ -49,8 +50,8 @@ export class BuildingFormComponent implements OnInit {
   ) {}
 
   ngOnInit(): void {
-    const id = this.route.snapshot.paramMap.get('id');
-    this.isEdit = !!id && id !== 'new';
+    const id = this.route.snapshot.paramMap.get("id");
+    this.isEdit = !!id && id !== "new";
     this.buildForm();
 
     if (this.isEdit) {
@@ -63,7 +64,7 @@ export class BuildingFormComponent implements OnInit {
           setTimeout(() => this.form.markAsPristine());
         },
         error: () => {
-          this.errorMessage = 'Failed to load building.';
+          this.errorMessage = "Failed to load building.";
           this.loading = false;
         },
       });
@@ -80,28 +81,28 @@ export class BuildingFormComponent implements OnInit {
 
   private buildForm(): void {
     this.form = this.fb.group({
-      name:          ['', [Validators.required, Validators.maxLength(100)]],
-      streetAddress: ['', [Validators.required, Validators.maxLength(200)]],
-      postalCode:    ['', [Validators.required, Validators.maxLength(20)]],
-      city:          ['', [Validators.required, Validators.maxLength(100)]],
-      country:       ['Belgium', [Validators.required, Validators.maxLength(100)]],
+      name: ["", [Validators.required, Validators.maxLength(100)]],
+      streetAddress: ["", [Validators.required, Validators.maxLength(200)]],
+      postalCode: ["", [Validators.required, Validators.maxLength(20)]],
+      city: ["", [Validators.required, Validators.maxLength(100)]],
+      country: ["Belgium", [Validators.required, Validators.maxLength(100)]],
     });
   }
 
   private patchForm(b: Building): void {
     this.form.patchValue({
-      name:          b.name,
+      name: b.name,
       streetAddress: b.streetAddress,
-      postalCode:    b.postalCode,
-      city:          b.city,
-      country:       b.country,
+      postalCode: b.postalCode,
+      city: b.city,
+      country: b.country,
     });
     if (b.ownerId && b.ownerName) {
       // Reconstruct a minimal PersonSummary for display
       this.selectedOwner = {
         id: b.ownerId,
         lastName: b.ownerName,
-        firstName: '',
+        firstName: "",
         isOwner: true,
         isTenant: false,
       };
@@ -110,10 +111,10 @@ export class BuildingFormComponent implements OnInit {
 
   fieldError(name: string): string {
     const ctrl = this.form.get(name);
-    if (!ctrl || !ctrl.invalid || !ctrl.touched) return '';
-    if (ctrl.errors?.['required'])   return 'Required field';
-    if (ctrl.errors?.['maxlength'])  return 'Value too long';
-    return '';
+    if (!ctrl || !ctrl.invalid || !ctrl.touched) return "";
+    if (ctrl.errors?.["required"]) return "Required field";
+    if (ctrl.errors?.["maxlength"]) return "Value too long";
+    return "";
   }
 
   // ── Owner picker ──────────────────────────────────────────────────────────
@@ -136,7 +137,7 @@ export class BuildingFormComponent implements OnInit {
 
   selectOwner(person: PersonSummary): void {
     this.selectedOwner = person;
-    this.ownerSearchTerm = '';
+    this.ownerSearchTerm = "";
     this.ownerResults = [];
     this.form.markAsDirty();
   }
@@ -153,31 +154,37 @@ export class BuildingFormComponent implements OnInit {
     if (this.form.invalid) return;
 
     this.submitting = true;
-    this.errorMessage = '';
+    this.errorMessage = "";
 
     const val = this.form.value;
     const payload = {
-      name:          val['name'],
-      streetAddress: val['streetAddress'],
-      postalCode:    val['postalCode'],
-      city:          val['city'],
-      country:       val['country'],
-      ownerId:       this.selectedOwner?.id ?? null,
+      name: val["name"],
+      streetAddress: val["streetAddress"],
+      postalCode: val["postalCode"],
+      city: val["city"],
+      country: val["country"],
+      ownerId: this.selectedOwner?.id ?? null,
     };
 
-    const obs$ = this.isEdit && this.buildingId != null
-      ? this.buildingService.updateBuilding(this.buildingId, payload)
-      : this.buildingService.createBuilding(payload);
+    const obs$ =
+      this.isEdit && this.buildingId != null
+        ? this.buildingService.updateBuilding(this.buildingId, payload)
+        : this.buildingService.createBuilding(payload);
 
     obs$.subscribe({
       next: (building) => {
         this.submitting = false;
         this.form.markAsPristine();
-        this.router.navigate(['/estates', this.estateId, 'buildings', building.id]);
+        this.router.navigate([
+          "/estates",
+          this.estateId,
+          "buildings",
+          building.id,
+        ]);
       },
       error: (err) => {
         this.submitting = false;
-        this.errorMessage = err.error?.message ?? 'An error occurred.';
+        this.errorMessage = err.error?.message ?? "An error occurred.";
       },
     });
   }
@@ -185,12 +192,18 @@ export class BuildingFormComponent implements OnInit {
   cancel(): void {
     if (
       this.isDirty &&
-      !confirm('You have unsaved changes. Are you sure you want to cancel?')
-    ) return;
+      !confirm("You have unsaved changes. Are you sure you want to cancel?")
+    )
+      return;
     if (this.isEdit && this.buildingId != null) {
-      this.router.navigate(['/estates', this.estateId, 'buildings', this.buildingId]);
+      this.router.navigate([
+        "/estates",
+        this.estateId,
+        "buildings",
+        this.buildingId,
+      ]);
     } else {
-      this.router.navigate(['/estates', this.estateId, 'buildings']);
+      this.router.navigate(["/estates", this.estateId, "buildings"]);
     }
   }
 }

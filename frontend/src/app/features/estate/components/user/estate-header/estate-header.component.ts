@@ -2,12 +2,13 @@
 import { CommonModule } from "@angular/common";
 import { Component } from "@angular/core";
 import { Router } from "@angular/router";
+import { TranslocoModule } from "@ngneat/transloco";
 import { ActiveEstateService } from "../../../../../core/services/active-estate.service";
 
 @Component({
   selector: "app-estate-header",
   standalone: true,
-  imports: [CommonModule],
+  imports: [CommonModule, TranslocoModule],
   templateUrl: "./estate-header.component.html",
   styleUrls: ["./estate-header.component.scss"],
 })

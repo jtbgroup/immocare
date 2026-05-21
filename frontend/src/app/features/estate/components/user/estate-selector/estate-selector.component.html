@@ -4,7 +4,9 @@
       <div class="brand-icon">🏢</div>
       <h1 class="brand-title">ImmoCare</h1>
     </div>
-    <p class="selector-subtitle">Select the estate you want to work in</p>
+    <p class="selector-subtitle">
+      {{ "ESTATE.SELECTOR_SUBTITLE" | transloco }}
+    </p>
   </div>
 
   @if (loading) {
@@ -20,23 +22,21 @@
       <div class="no-estate-icon">🏗️</div>
       <h2>
         @if (isPlatformAdmin) {
-          No estate exists yet
+          {{ "ESTATE.NO_ESTATE_EXISTS" | transloco }}
         } @else {
-          No estate assigned
+          {{ "ESTATE.NO_ESTATE_ASSIGNED" | transloco }}
         }
       </h2>
       <p>
         @if (isPlatformAdmin) {
-          Create the first estate to get started. This estate will become the
-          initial workspace for your organization.
+          {{ "ESTATE.CREATE_FIRST_HINT" | transloco }}
         } @else {
-          You are not yet a member of any estate. Please contact your
-          administrator to gain access.
+          {{ "ESTATE.NO_ESTATE_ASSIGNED_HINT" | transloco }}
         }
       </p>
       @if (isPlatformAdmin) {
         <button class="btn btn-primary" (click)="goToAdmin()">
-          Create the first estate
+          {{ "ESTATE.CREATE_FIRST" | transloco }}
         </button>
       }
     </div>
@@ -70,17 +70,27 @@
           <div class="estate-card__stats">
             <span class="stat-item">
               <span class="stat-icon">🏢</span>
-              {{ estate.buildingCount }} building{{
-                estate.buildingCount !== 1 ? "s" : ""
+              {{ estate.buildingCount }}
+              {{
+                estate.buildingCount !== 1
+                  ? ("BUILDING.BUILDINGS" | transloco)
+                  : ("GLOBAL.BUILDING" | transloco)
               }}
             </span>
             <span class="stat-item">
               <span class="stat-icon">🏠</span>
-              {{ estate.unitCount }} unit{{ estate.unitCount !== 1 ? "s" : "" }}
+              {{ estate.unitCount }}
+              {{
+                estate.unitCount !== 1
+                  ? ("HOUSING_UNIT.HOUSING_UNITS" | transloco)
+                  : ("GLOBAL.HOUSING_UNIT" | transloco)
+              }}
             </span>
           </div>
           <div class="estate-card__footer">
-            <span class="enter-hint">Click to enter →</span>
+            <span class="enter-hint"
+              >{{ "GLOBAL.CLICK_TO_ENTER" | transloco }} →</span
+            >
           </div>
         </div>
       }
@@ -90,7 +100,7 @@
   @if (!loading && isPlatformAdmin) {
     <div class="admin-section">
       <button class="btn btn-secondary" (click)="goToAdmin()">
-        ⚙️ Manage all estates (Admin)
+        ⚙️ {{ "ESTATE.MANAGE_ALL" | transloco }}
       </button>
     </div>
   }

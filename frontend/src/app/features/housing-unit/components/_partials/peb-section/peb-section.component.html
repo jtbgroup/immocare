@@ -32,7 +32,7 @@
         </div>
         @if (current.validUntil) {
           <div class="peb-validity">
-            {{ "PEB.VALID_UNTIL" | transloco }}:
+            {{ "GLOBAL.VALID_UNTIL" | transloco }}:
             <strong>{{ current.validUntil }}</strong>
             <span class="badge" [ngClass]="expiryClass">{{ expiryLabel }}</span>
           </div>
@@ -120,7 +120,7 @@
         </div>
 
         <div class="form-group">
-          <label>{{ "PEB.VALID_UNTIL" | transloco }}</label>
+          <label>{{ "GLOBAL.VALID_UNTIL" | transloco }}</label>
           <input
             type="date"
             formControlName="validUntil"
@@ -135,7 +135,11 @@
 
         <div class="form-actions">
           <button type="submit" class="btn btn-primary" [disabled]="saving">
-            {{ saving ? "Saving…" : "Save" }}
+            {{
+              saving
+                ? ("GLOBAL.SAVING" | transloco) + "..."
+                : ("GLOBAL.SAVE" | transloco)
+            }}
           </button>
           <button
             type="button"

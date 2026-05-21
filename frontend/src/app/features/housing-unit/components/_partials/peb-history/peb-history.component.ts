@@ -7,6 +7,7 @@ import {
   OnInit,
   Output,
 } from "@angular/core";
+import { TranslocoModule } from "@ngneat/transloco";
 import { Subject } from "rxjs";
 import { takeUntil } from "rxjs/operators";
 import { PebScoreService } from "../../../../../core/services/peb-score.service";
@@ -19,7 +20,7 @@ import {
 @Component({
   selector: "app-peb-history",
   standalone: true,
-  imports: [NgClass],
+  imports: [NgClass, TranslocoModule],
   templateUrl: "./peb-history.component.html",
   styleUrls: ["./peb-history.component.scss"],
 })

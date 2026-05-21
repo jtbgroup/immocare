@@ -1,13 +1,13 @@
 <!-- features/lease/lease-list/lease-list.component.html — UC004_ESTATE_PLACEHOLDER Phase 3 -->
 <div class="info-card">
-  <h2>Lease History</h2>
+  <h2>{{ "LEASE.HISTORY" | transloco }}</h2>
 
   @if (isLoading) {
-    <div class="loading">Loading…</div>
+    <div class="loading">{{ "GLOBAL.LOADING" | transloco }}...</div>
   }
 
   @if (!isLoading && leases.length === 0) {
-    <p class="empty-message">No leases yet.</p>
+    <p class="empty-message">{{ "LEASE.NO_LEASES" | transloco }}</p>
   }
 
   @if (!isLoading && leases.length > 0) {
@@ -15,12 +15,12 @@
       <table>
         <thead>
           <tr>
-            <th>Status</th>
-            <th>Type</th>
-            <th>Start</th>
-            <th>End</th>
-            <th>Tenant(s)</th>
-            <th>Rent</th>
+            <th>{{ "GLOBAL.STATUS" | transloco }}</th>
+            <th>{{ "GLOBAL.TYPE" | transloco }}</th>
+            <th>{{ "GLOBAL.FROM" | transloco }}</th>
+            <th>{{ "GLOBAL.TO" | transloco }}</th>
+            <th>{{ "TENANT.TENANTS" | transloco }}</th>
+            <th>{{ "GLOBAL.RENT" | transloco }}</th>
             <th></th>
           </tr>
         </thead>
@@ -48,7 +48,7 @@
                     l.id,
                   ]"
                   class="btn btn-secondary btn-sm"
-                  >View</a
+                  >{{ "GLOBAL.VIEW" | transloco }}</a
                 >
               </td>
             </tr>

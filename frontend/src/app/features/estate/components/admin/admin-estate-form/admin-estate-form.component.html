@@ -1,7 +1,7 @@
 <div class="admin-estate-form-container">
   <div class="details-content">
     <div class="header">
-      <h1>{{ isEdit ? 'Edit Estate' : 'Create Estate' }}</h1>
+      <h1>{{ isEdit ? "Edit Estate" : "Create Estate" }}</h1>
     </div>
   </div>
 
@@ -10,7 +10,6 @@
   }
 
   @if (!loading) {
-
     <!-- ═══ SECTION NAV (edit mode only) ══════════════════════════════════════ -->
     @if (isEdit) {
       <div class="form-section-nav">
@@ -19,14 +18,14 @@
           [class.section-nav-btn--active]="activeSection === 'general'"
           (click)="setSection('general')"
         >
-          🏢 General Info
+          🏢 {{ "GLOBAL.GENERAL_INFO" | transloco }}
         </button>
         <button
           class="section-nav-btn"
           [class.section-nav-btn--active]="activeSection === 'members'"
           (click)="setSection('members')"
         >
-          👥 Members
+          👥 {{ "MEMBER.MEMBERS" | transloco }}
           @if (members.length > 0) {
             <span class="member-count-badge">{{ members.length }}</span>
           }
@@ -35,36 +34,58 @@
     }
 
     <!-- ═══ GENERAL SECTION ═══════════════════════════════════════════════════ -->
-    @if (!isEdit || activeSection === 'general') {
+    @if (!isEdit || activeSection === "general") {
       <div class="form-card">
         <form [formGroup]="form" (ngSubmit)="submit()" novalidate>
-
           @if (errorMessage) {
             <div class="alert alert-error">{{ errorMessage }}</div>
           }
 
           <!-- Name -->
           <div class="form-group">
-            <label for="name">Estate Name <span class="required">*</span></label>
-            <input id="name" type="text" formControlName="name"
-                   placeholder="e.g. Brussels Portfolio"
-                   [class.error]="form.get('name')?.invalid && form.get('name')?.touched" />
-            @if (fieldError('name')) {
-              <span class="error-message">{{ fieldError('name') }}</span>
+            <label for="name"
+              >{{ "ESTATE.NAME" | transloco }}
+              <span class="required">*</span></label
+            >
+            <input
+              id="name"
+              type="text"
+              formControlName="name"
+              placeholder="e.g. Brussels Portfolio"
+              [class.error]="
+                form.get('name')?.invalid && form.get('name')?.touched
+              "
+            />
+            @if (fieldError("name")) {
+              <span class="error-message">{{ fieldError("name") }}</span>
             }
           </div>
 
           <!-- Description -->
           <div class="form-group">
-            <label for="description">Description <span class="optional">(optional)</span></label>
-            <textarea id="description" formControlName="description" rows="3"
-                      placeholder="Brief description of this estate…"></textarea>
+            <label for="description"
+              >{{ "GLOBAL.DESCRIPTION" | transloco }}
+              <span class="optional"
+                >({{ "GLOBAL.OPTIONAL" | transloco }})</span
+              ></label
+            >
+            <textarea
+              id="description"
+              formControlName="description"
+              rows="3"
+              placeholder="Brief description of this estate…"
+            ></textarea>
           </div>
 
           <!-- ── Members panel (CREATE mode only) ──────────────────────────── -->
           @if (!isEdit) {
             <div class="form-group">
-              <label>Members <span class="optional">(optional)</span></label>
+              <label
+                >{{ "MEMBER.MEMBERS" | transloco }}
+                <span class="optional"
+                  >({{ "GLOBAL.OPTIONAL" | transloco }})</span
+                ></label
+              >
               <p class="help-text">
                 Add users and assign their roles. At least one member must have
                 the <strong>MANAGER</strong> role if any members are added.
@@ -77,25 +98,41 @@
                     <div class="pending-member-row">
                       <span class="pending-member-name">
                         👤 {{ pm.user.username }}
-                        <span class="pending-member-email">— {{ pm.user.email }}</span>
+                        <span class="pending-member-email"
+                          >— {{ pm.user.email }}</span
+                        >
                       </span>
                       <select
                         class="pending-role-select"
                         [value]="pm.role"
-                        (change)="updatePendingRole(pm.user.id, $any($event.target).value)"
+                        (change)="
+                          updatePendingRole(
+                            pm.user.id,
+                            $any($event.target).value
+                          )
+                        "
                       >
                         @for (role of ROLES; track role) {
-                          <option [value]="role">{{ ESTATE_ROLE_LABELS[role] }}</option>
+                          <option [value]="role">
+                            {{ ESTATE_ROLE_LABELS[role] }}
+                          </option>
                         }
                       </select>
-                      <button type="button" class="btn-clear" (click)="removePendingMember(pm.user.id)">✕</button>
+                      <button
+                        type="button"
+                        class="btn-clear"
+                        (click)="removePendingMember(pm.user.id)"
+                      >
+                        ✕
+                      </button>
                     </div>
                   }
                 </div>
 
                 @if (pendingMembers.length > 0 && !hasPendingManager()) {
                   <div class="alert alert-warning pending-warning">
-                    ⚠️ At least one member must have the <strong>Manager</strong> role.
+                    ⚠️ At least one member must have the
+                    <strong>Manager</strong> role.
                   </div>
                 }
               }
@@ -107,28 +144,46 @@
                     <div class="selected-person">
                       <span class="selected-badge">
                         👤 {{ selectedPendingUser.username }}
-                        <span class="selected-email">— {{ selectedPendingUser.email }}</span>
+                        <span class="selected-email"
+                          >— {{ selectedPendingUser.email }}</span
+                        >
                       </span>
-                      <button type="button" class="btn-clear" (click)="clearPendingUser()">✕</button>
+                      <button
+                        type="button"
+                        class="btn-clear"
+                        (click)="clearPendingUser()"
+                      >
+                        ✕
+                      </button>
                     </div>
                   } @else {
-                    <input type="text" class="picker-input"
-                           placeholder="Search by username or email…"
-                           [value]="pendingSearch"
-                           (input)="onPendingSearchInput($any($event.target).value)"
-                           (blur)="closePendingDropdown()"
-                           autocomplete="off" />
+                    <input
+                      type="text"
+                      class="picker-input"
+                      placeholder="Search by username or email…"
+                      [value]="pendingSearch"
+                      (input)="onPendingSearchInput($any($event.target).value)"
+                      (blur)="closePendingDropdown()"
+                      autocomplete="off"
+                    />
                     @if (pendingDropdownOpen) {
                       <div class="picker-dropdown">
                         @if (pendingSearchLoading) {
                           <div class="picker-item picker-hint">Searching…</div>
                         }
-                        @if (!pendingSearchLoading && pendingResults.length === 0) {
-                          <div class="picker-item picker-hint">No users found.</div>
+                        @if (
+                          !pendingSearchLoading && pendingResults.length === 0
+                        ) {
+                          <div class="picker-item picker-hint">
+                            No users found.
+                          </div>
                         }
                         @for (user of pendingResults; track user.id) {
-                          <button type="button" class="picker-item picker-result"
-                                  (mousedown)="selectPendingUser(user)">
+                          <button
+                            type="button"
+                            class="picker-item picker-result"
+                            (mousedown)="selectPendingUser(user)"
+                          >
                             <span class="result-name">{{ user.username }}</span>
                             <span class="result-meta"> — {{ user.email }}</span>
                           </button>
@@ -138,18 +193,25 @@
                   }
                 </div>
 
-                <select class="pending-role-select"
-                        [(ngModel)]="pendingRole"
-                        name="pendingRole"
-                        [ngModelOptions]="{standalone: true}">
+                <select
+                  class="pending-role-select"
+                  [(ngModel)]="pendingRole"
+                  name="pendingRole"
+                  [ngModelOptions]="{ standalone: true }"
+                >
                   @for (role of ROLES; track role) {
-                    <option [value]="role">{{ ESTATE_ROLE_LABELS[role] }}</option>
+                    <option [value]="role">
+                      {{ ESTATE_ROLE_LABELS[role] }}
+                    </option>
                   }
                 </select>
 
-                <button type="button" class="btn btn-secondary"
-                        [disabled]="!selectedPendingUser"
-                        (click)="addPendingMember()">
+                <button
+                  type="button"
+                  class="btn btn-secondary"
+                  [disabled]="!selectedPendingUser"
+                  (click)="addPendingMember()"
+                >
                   + Add
                 </button>
               </div>
@@ -161,27 +223,41 @@
           }
 
           <div class="form-actions">
-            <button type="button" class="btn btn-secondary" (click)="cancel()">Cancel</button>
-            <button type="submit" class="btn btn-primary" [disabled]="submitting">
-              {{ submitting ? 'Saving…' : isEdit ? 'Save Changes' : 'Create Estate' }}
+            <button type="button" class="btn btn-secondary" (click)="cancel()">
+              {{ "GLOBAL.CANCEL" | transloco }}
+            </button>
+            <button
+              type="submit"
+              class="btn btn-primary"
+              [disabled]="submitting"
+            >
+              {{
+                submitting
+                  ? "Saving…"
+                  : isEdit
+                    ? ("GLOBAL.SAVE" | transloco)
+                    : ("ESTATE.CREATE" | transloco)
+              }}
             </button>
           </div>
-
         </form>
       </div>
     }
 
     <!-- ═══ MEMBERS SECTION (edit mode only) ══════════════════════════════════ -->
-    @if (isEdit && activeSection === 'members') {
+    @if (isEdit && activeSection === "members") {
       <div class="members-section">
-
         <!-- Header -->
         <div class="details-content">
           <div class="header">
-            <h2>👥 Members</h2>
+            <h2>👥 {{ "MEMBER.MEMBERS" | transloco }}</h2>
             <div class="actions">
               <button class="btn btn-primary" (click)="toggleAddMemberPanel()">
-                {{ showAddMemberPanel ? 'Cancel' : '+ Add Member' }}
+                {{
+                  showAddMemberPanel
+                    ? ("GLOBAL.CANCEL" | transloco)
+                    : "+ " + ("MEMBER.ADD" | transloco)
+                }}
               </button>
             </div>
           </div>
@@ -201,40 +277,64 @@
         <!-- Add member panel -->
         @if (showAddMemberPanel) {
           <div class="add-member-panel">
-            <h3>Add a Member</h3>
+            <h3>{{ "MEMBER.ADD" | transloco }}</h3>
             @if (addMemberError) {
               <div class="alert alert-error">{{ addMemberError }}</div>
             }
             <div class="add-member-row">
               <div class="form-group picker-wrapper">
-                <label>User <span class="required">*</span></label>
+                <label
+                  >{{ "GLOBAL.USER" | transloco }}
+                  <span class="required">*</span></label
+                >
                 @if (selectedAddUser) {
                   <div class="selected-person">
                     <span class="selected-badge">
                       👤 {{ selectedAddUser.username }}
-                      <span class="selected-email">— {{ selectedAddUser.email }}</span>
+                      <span class="selected-email"
+                        >— {{ selectedAddUser.email }}</span
+                      >
                     </span>
-                    <button type="button" class="btn-clear" (click)="clearAddUser()">✕</button>
+                    <button
+                      type="button"
+                      class="btn-clear"
+                      (click)="clearAddUser()"
+                    >
+                      ✕
+                    </button>
                   </div>
                 } @else {
                   <div class="picker-search-wrapper">
-                    <input type="text" class="picker-input"
-                           placeholder="Search by username or email…"
-                           [value]="addMemberSearch"
-                           (input)="onAddMemberSearchInput($any($event.target).value)"
-                           (blur)="closeAddDropdown()"
-                           autocomplete="off" />
+                    <input
+                      type="text"
+                      class="picker-input"
+                      placeholder="Search by username or email…"
+                      [value]="addMemberSearch"
+                      (input)="
+                        onAddMemberSearchInput($any($event.target).value)
+                      "
+                      (blur)="closeAddDropdown()"
+                      autocomplete="off"
+                    />
                     @if (addMemberDropdownOpen) {
                       <div class="picker-dropdown">
                         @if (addMemberSearchLoading) {
                           <div class="picker-item picker-hint">Searching…</div>
                         }
-                        @if (!addMemberSearchLoading && addMemberResults.length === 0) {
-                          <div class="picker-item picker-hint">No users found.</div>
+                        @if (
+                          !addMemberSearchLoading &&
+                          addMemberResults.length === 0
+                        ) {
+                          <div class="picker-item picker-hint">
+                            {{ "USER.NO_USERS_FOUND" | transloco }}
+                          </div>
                         }
                         @for (user of addMemberResults; track user.id) {
-                          <button type="button" class="picker-item picker-result"
-                                  (mousedown)="selectAddUser(user)">
+                          <button
+                            type="button"
+                            class="picker-item picker-result"
+                            (mousedown)="selectAddUser(user)"
+                          >
                             <span class="result-name">{{ user.username }}</span>
                             <span class="result-meta"> — {{ user.email }}</span>
                           </button>
@@ -245,19 +345,34 @@
                 }
               </div>
               <div class="form-group role-selector">
-                <label>Role <span class="required">*</span></label>
-                <select [(ngModel)]="addMemberRole" name="addMemberRole"
-                        [ngModelOptions]="{standalone: true}">
+                <label
+                  >{{ "GLOBAL.ROLE" | transloco }}
+                  <span class="required">*</span></label
+                >
+                <select
+                  [(ngModel)]="addMemberRole"
+                  name="addMemberRole"
+                  [ngModelOptions]="{ standalone: true }"
+                >
                   @for (role of ROLES; track role) {
-                    <option [value]="role">{{ ESTATE_ROLE_LABELS[role] }}</option>
+                    <option [value]="role">
+                      {{ ESTATE_ROLE_LABELS[role] }}
+                    </option>
                   }
                 </select>
               </div>
               <div class="form-group add-actions">
                 <label>&nbsp;</label>
-                <button class="btn btn-primary" (click)="submitAddMember()"
-                        [disabled]="addMemberSubmitting">
-                  {{ addMemberSubmitting ? 'Adding…' : 'Add' }}
+                <button
+                  class="btn btn-primary"
+                  (click)="submitAddMember()"
+                  [disabled]="addMemberSubmitting"
+                >
+                  {{
+                    addMemberSubmitting
+                      ? ("GLOBAL.ADDING" | transloco) + "..."
+                      : ("GLOBAL.ADD" | transloco)
+                  }}
                 </button>
               </div>
             </div>
@@ -282,11 +397,11 @@
             <table>
               <thead>
                 <tr>
-                  <th>Username</th>
-                  <th>Email</th>
-                  <th>Role</th>
-                  <th>Added at</th>
-                  <th>Actions</th>
+                  <th>{{ "GLOBAL.NAME" | transloco }}</th>
+                  <th>{{ "GLOBAL.EMAIL" | transloco }}</th>
+                  <th>{{ "GLOBAL.ROLE" | transloco }}</th>
+                  <th>{{ "GLOBAL.ADDED_AT" | transloco }}</th>
+                  <th>{{ "GLOBAL.ACTIONS" | transloco }}</th>
                 </tr>
               </thead>
               <tbody>
@@ -302,55 +417,78 @@
                     <td>
                       @if (roleEditMemberId === member.userId) {
                         <div class="role-edit-inline">
-                          <select [(ngModel)]="roleEditValue"
-                                  [name]="'role-' + member.userId"
-                                  [ngModelOptions]="{standalone: true}">
+                          <select
+                            [(ngModel)]="roleEditValue"
+                            [name]="'role-' + member.userId"
+                            [ngModelOptions]="{ standalone: true }"
+                          >
                             @for (role of ROLES; track role) {
-                              <option [value]="role">{{ ESTATE_ROLE_LABELS[role] }}</option>
+                              <option [value]="role">
+                                {{ ESTATE_ROLE_LABELS[role] }}
+                              </option>
                             }
                           </select>
-                          <button class="btn btn-sm btn-primary"
-                                  (click)="saveRoleEdit(member)"
-                                  [disabled]="roleEditSubmitting">
-                            {{ roleEditSubmitting ? '…' : 'Save' }}
+                          <button
+                            class="btn btn-sm btn-primary"
+                            (click)="saveRoleEdit(member)"
+                            [disabled]="roleEditSubmitting"
+                          >
+                            {{ roleEditSubmitting ? "…" : "Save" }}
                           </button>
-                          <button class="btn btn-sm btn-secondary"
-                                  (click)="cancelRoleEdit()">Cancel</button>
+                          <button
+                            class="btn btn-sm btn-secondary"
+                            (click)="cancelRoleEdit()"
+                          >
+                            Cancel
+                          </button>
                         </div>
                       } @else {
-                        <span class="role-badge"
-                              [style.background]="roleStyle(member.role).background"
-                              [style.color]="roleStyle(member.role).color">
+                        <span
+                          class="role-badge"
+                          [style.background]="roleStyle(member.role).background"
+                          [style.color]="roleStyle(member.role).color"
+                        >
                           {{ ESTATE_ROLE_LABELS[member.role] }}
                         </span>
                       }
                     </td>
-                    <td>{{ member.addedAt | date: 'dd/MM/yyyy HH:mm' }}</td>
+                    <td>{{ member.addedAt | date: "dd/MM/yyyy HH:mm" }}</td>
                     <td class="actions-cell">
                       @if (roleEditMemberId !== member.userId) {
-                        <button class="btn btn-sm btn-secondary"
-                                [disabled]="!canEditRole(member)"
-                                [title]="editRoleTooltip(member)"
-                                (click)="openRoleEdit(member)">
-                          Edit Role
+                        <button
+                          class="btn btn-sm btn-secondary"
+                          [disabled]="!canEditRole(member)"
+                          [title]="editRoleTooltip(member)"
+                          (click)="openRoleEdit(member)"
+                        >
+                          {{ "ROLE.EDIT" | transloco }}
                         </button>
                         @if (deleteConfirmMemberId !== member.userId) {
-                          <button class="btn btn-sm btn-danger"
-                                  [disabled]="!canRemove(member)"
-                                  [title]="removeTooltip(member)"
-                                  (click)="requestRemove(member)">
-                            Remove
+                          <button
+                            class="btn btn-sm btn-danger"
+                            [disabled]="!canRemove(member)"
+                            [title]="removeTooltip(member)"
+                            (click)="requestRemove(member)"
+                          >
+                            {{ "GLOBAL.REMOVE" | transloco }}
                           </button>
                         } @else {
                           <span class="confirm-inline">
-                            Remove {{ member.username }}?
-                            <button class="btn btn-xs btn-danger"
-                                    (click)="confirmRemove()"
-                                    [disabled]="deleting">
-                              {{ deleting ? '…' : 'Yes' }}
+                            {{ "GLOBAL.REMOVE" | transloco }}
+                            {{ member.username }}?
+                            <button
+                              class="btn btn-xs btn-danger"
+                              (click)="confirmRemove()"
+                              [disabled]="deleting"
+                            >
+                              {{ deleting ? "…" : ("GLOBAL.YES" | transloco) }}
                             </button>
-                            <button class="btn btn-xs btn-secondary"
-                                    (click)="cancelRemove()">No</button>
+                            <button
+                              class="btn btn-xs btn-secondary"
+                              (click)="cancelRemove()"
+                            >
+                              {{ "GLOBAL.NO" | transloco }}
+                            </button>
                           </span>
                         }
                       }
@@ -363,6 +501,5 @@
         }
       </div>
     }
-
   }
 </div>

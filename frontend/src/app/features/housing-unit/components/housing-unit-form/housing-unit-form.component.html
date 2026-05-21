@@ -1,14 +1,20 @@
 <div class="unit-form-container">
   <!-- Header -->
   <div class="page-header">
-    <h1>{{ isEdit ? "Edit Unit" : "Add Unit" }}</h1>
+    <h1>
+      {{
+        isEdit
+          ? ("HOUSING_UNIT.EDIT" | transloco)
+          : ("HOUSING_UNIT.NEW" | transloco)
+      }}
+    </h1>
   </div>
 
   <!-- Breadcrumb -->
   <nav class="breadcrumb" aria-label="breadcrumb">
     <a
       [routerLink]="['/estates', activeEstateService.activeEstateId(), 'units']"
-      >Units</a
+      >{{ "HOUSING_UNIT.HOUSING_UNITS" | transloco }}</a
     >
     <span class="breadcrumb-separator">›</span>
     @if (isEdit && unitId) {
@@ -19,17 +25,17 @@
           'units',
           unitId,
         ]"
-        >Unit</a
+        >{{ "GLOBAL.HOUSING_UNIT" | transloco }}</a
       >
       <span class="breadcrumb-separator">›</span>
-      <span>Edit</span>
+      <span>{{ "GLOBAL.EDIT" | transloco }}</span>
     } @else {
-      <span>New</span>
+      <span>{{ "GLOBAL.NEW" | transloco }}</span>
     }
   </nav>
 
   @if (loading) {
-    <div class="loading">Loading…</div>
+    <div class="loading">{{ "GLOBAL.LOADING" | transloco }}...</div>
   }
 
   @if (!loading) {
@@ -42,7 +48,8 @@
         <!-- Building -->
         <div class="form-group">
           <label for="buildingId"
-            >Building <span class="required">*</span></label
+            >{{ "GLOBAL.BUILDING" | transloco
+            }}<span class="required">*</span></label
           >
           <select
             id="buildingId"
@@ -51,7 +58,9 @@
               form.get('buildingId')?.invalid && form.get('buildingId')?.touched
             "
           >
-            <option [value]="null">— Select a building —</option>
+            <option [value]="null">
+              — {{ "BUILDING.SELECT" | transloco }} —
+            </option>
             @for (b of buildings; track b.id) {
               <option [value]="b.id">{{ b.name }} — {{ b.city }}</option>
             }
@@ -65,7 +74,8 @@
         <div class="form-row">
           <div class="form-group">
             <label for="unitNumber"
-              >Unit Number <span class="required">*</span></label
+              >{{ "HOUSING_UNIT.NUMBER" | transloco }}
+              <span class="required">*</span></label
             >
             <input
               id="unitNumber"
@@ -82,7 +92,10 @@
             }
           </div>
           <div class="form-group">
-            <label for="floor">Floor <span class="required">*</span></label>
+            <label for="floor"
+              >{{ "GLOBAL.FLOOR" | transloco }}
+              <span class="required">*</span></label
+            >
             <input
               id="floor"
               type="number"
@@ -101,7 +114,10 @@
         <div class="form-row">
           <div class="form-group">
             <label for="landingNumber"
-              >Landing <span class="optional">(optional)</span></label
+              >{{ "GLOBAL.LANDING" | transloco }}
+              <span class="optional"
+                >({{ "GLOBAL.OPTIONAL" | transloco }})</span
+              ></label
             >
             <input
               id="landingNumber"
@@ -112,8 +128,10 @@
           </div>
           <div class="form-group">
             <label for="totalSurface"
-              >Total Surface (m²)
-              <span class="optional">(optional)</span></label
+              >{{ "GLOBAL.TOTAL_SURFACE" | transloco }} (m²)
+              <span class="optional"
+                >({{ "GLOBAL.LANDING" | transloco }})</span
+              ></label
             >
             <input
               id="totalSurface"
@@ -129,14 +147,14 @@
           <div class="section-toggle">
             <label>
               <input type="checkbox" formControlName="hasTerrace" />
-              Has Terrace
+              {{ "GLOBAL.HAS_TERRACE" | transloco }}
             </label>
           </div>
           @if (hasTerrace) {
             <div class="sub-section">
               <div class="form-row">
                 <div class="form-group">
-                  <label>Terrace Surface (m²)</label>
+                  <label>{{ "GLOBAL.TERRACE_SURFACE" | transloco }} (m²)</label>
                   <input
                     type="number"
                     formControlName="terraceSurface"
@@ -144,7 +162,7 @@
                   />
                 </div>
                 <div class="form-group">
-                  <label>Terrace Orientation</label>
+                  <label>{{ "GLOBAL.TERRACE_ORIENTATION" | transloco }}</label>
                   <select formControlName="terraceOrientation">
                     <option [value]="null">—</option>
                     @for (o of orientations; track o) {
@@ -162,14 +180,14 @@
           <div class="section-toggle">
             <label>
               <input type="checkbox" formControlName="hasGarden" />
-              Has Garden
+              {{ "GLOBAL.HAS_GARDEN" | transloco }}
             </label>
           </div>
           @if (hasGarden) {
             <div class="sub-section">
               <div class="form-row">
                 <div class="form-group">
-                  <label>Garden Surface (m²)</label>
+                  <label>{{ "GLOBAL.GARDEN_SURFACE" | transloco }} (m²)</label>
                   <input
                     type="number"
                     formControlName="gardenSurface"
@@ -177,7 +195,7 @@
                   />
                 </div>
                 <div class="form-group">
-                  <label>Garden Orientation</label>
+                  <label>{{ "GLOBAL.GARDEN_ORIENTATION" | transloco }}</label>
                   <select formControlName="gardenOrientation">
                     <option [value]="null">—</option>
                     @for (o of orientations; track o) {
@@ -192,7 +210,12 @@
 
         <!-- Owner -->
         <div class="form-group">
-          <label>Owner <span class="optional">(optional)</span></label>
+          <label
+            >{{ "GLOBAL.OWNER" | transloco }}
+            <span class="optional"
+              >({{ "GLOBAL.OPTIONAL" | transloco }})</span
+            ></label
+          >
           @if (selectedOwner) {
             <div class="selected-owner">
               <span
@@ -214,7 +237,7 @@
               (input)="
                 ownerSearchTerm = $any($event.target).value; searchOwner()
               "
-              placeholder="Search by name…"
+              [placeholder]="'PERSON.SEARCH_BY_NAME_PLACEHOLDER' | transloco"
             />
             @if (ownerSearchLoading) {
               <span class="help-text">Searching…</span>
@@ -234,11 +257,15 @@
         <!-- Actions -->
         <div class="form-actions">
           <button type="button" class="btn btn-secondary" (click)="cancel()">
-            Cancel
+            {{ "GLOBAL.CANCEL" | transloco }}
           </button>
           <button type="submit" class="btn btn-primary" [disabled]="submitting">
             {{
-              submitting ? "Saving…" : isEdit ? "Save Changes" : "Create Unit"
+              submitting
+                ? ("GLOBAL.SAVING" | transloco)
+                : isEdit
+                  ? ("GLOBAL.SAVE_CHANGES" | transloco)
+                  : ("HOUSING_UNIT.CREATE" | transloco)
             }}
           </button>
         </div>

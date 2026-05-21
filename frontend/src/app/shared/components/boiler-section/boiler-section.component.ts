@@ -8,6 +8,7 @@ import {
   Validators,
 } from "@angular/forms";
 import { Router } from "@angular/router";
+import { TranslocoModule } from "@ngneat/transloco";
 import { Subject } from "rxjs";
 import { takeUntil } from "rxjs/operators";
 import { BoilerService } from "../../../core/services/boiler.service";
@@ -26,7 +27,7 @@ import { AppDatePipe } from "../../../shared/pipes/app-date.pipe";
 @Component({
   selector: "app-boiler-section",
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule, AppDatePipe],
+  imports: [CommonModule, ReactiveFormsModule, AppDatePipe, TranslocoModule],
   templateUrl: "./boiler-section.component.html",
   styleUrls: ["./boiler-section.component.scss"],
 })
