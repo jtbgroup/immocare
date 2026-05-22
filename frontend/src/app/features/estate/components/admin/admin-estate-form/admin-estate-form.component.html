@@ -1,12 +1,16 @@
 <div class="admin-estate-form-container">
   <div class="details-content">
     <div class="header">
-      <h1>{{ isEdit ? "Edit Estate" : "Create Estate" }}</h1>
+      <h1>
+        {{
+          isEdit ? ("ESTATE.EDIT" | transloco) : ("ESTATE.CREATE" | transloco)
+        }}
+      </h1>
     </div>
   </div>
 
   @if (loading) {
-    <div class="loading">Loading…</div>
+    <div class="loading">{{ "GLOBAL.LOADING" | transloco }}...</div>
   }
 
   @if (!loading) {
@@ -51,7 +55,7 @@
               id="name"
               type="text"
               formControlName="name"
-              placeholder="e.g. Brussels Portfolio"
+              [placeholder]="'ESTATE.NAME_PLACEHOLDER' | transloco"
               [class.error]="
                 form.get('name')?.invalid && form.get('name')?.touched
               "
@@ -73,7 +77,7 @@
               id="description"
               formControlName="description"
               rows="3"
-              placeholder="Brief description of this estate…"
+              [placeholder]="'ESTATE.DESCRIPTION_PLACEHOLDER' | transloco"
             ></textarea>
           </div>
 
@@ -86,10 +90,10 @@
                   >({{ "GLOBAL.OPTIONAL" | transloco }})</span
                 ></label
               >
-              <p class="help-text">
-                Add users and assign their roles. At least one member must have
-                the <strong>MANAGER</strong> role if any members are added.
-              </p>
+              <p
+                class="help-text"
+                [innerHTML]="'ESTATE.MEMBERS_HELP' | transloco"
+              ></p>
 
               <!-- Pending members list -->
               @if (pendingMembers.length > 0) {
@@ -131,8 +135,10 @@
 
                 @if (pendingMembers.length > 0 && !hasPendingManager()) {
                   <div class="alert alert-warning pending-warning">
-                    ⚠️ At least one member must have the
-                    <strong>Manager</strong> role.
+                    ⚠️
+                    <span
+                      [innerHTML]="'ESTATE.MEMBERS_HELP_SHORT' | transloco"
+                    ></span>
                   </div>
                 }
               }
@@ -160,7 +166,7 @@
                     <input
                       type="text"
                       class="picker-input"
-                      placeholder="Search by username or email…"
+                      [placeholder]="'USER.SEARCH_PLACEHOLDER' | transloco"
                       [value]="pendingSearch"
                       (input)="onPendingSearchInput($any($event.target).value)"
                       (blur)="closePendingDropdown()"
@@ -175,7 +181,7 @@
                           !pendingSearchLoading && pendingResults.length === 0
                         ) {
                           <div class="picker-item picker-hint">
-                            No users found.
+                            {{ "USER.NO_USERS_FOUND" | transloco }}
                           </div>
                         }
                         @for (user of pendingResults; track user.id) {
@@ -212,7 +218,7 @@
                   [disabled]="!selectedPendingUser"
                   (click)="addPendingMember()"
                 >
-                  + Add
+                  + {{ "GLOBAL.ADD" | transloco }}
                 </button>
               </div>
 
@@ -308,7 +314,7 @@
                     <input
                       type="text"
                       class="picker-input"
-                      placeholder="Search by username or email…"
+                      [placeholder]="'USER.SEARCH_PLACEHOLDER' | transloco"
                       [value]="addMemberSearch"
                       (input)="
                         onAddMemberSearchInput($any($event.target).value)
@@ -319,7 +325,9 @@
                     @if (addMemberDropdownOpen) {
                       <div class="picker-dropdown">
                         @if (addMemberSearchLoading) {
-                          <div class="picker-item picker-hint">Searching…</div>
+                          <div class="picker-item picker-hint">
+                            {{ "GLOBAL.SEARCHING" | transloco }}...
+                          </div>
                         }
                         @if (
                           !addMemberSearchLoading &&
@@ -381,13 +389,13 @@
 
         <!-- Loading -->
         @if (membersLoading) {
-          <div class="loading">Loading members…</div>
+          <div class="loading">{{ "GLOBAL.LOADING" | transloco }}…</div>
         }
 
         <!-- Empty state -->
         @if (!membersLoading && members.length === 0) {
           <div class="empty-state">
-            <p>No members yet.</p>
+            <p>{{ "MEMBER.EMPTY" | transloco }}</p>
           </div>
         }
 
@@ -433,13 +441,17 @@
                             (click)="saveRoleEdit(member)"
                             [disabled]="roleEditSubmitting"
                           >
-                            {{ roleEditSubmitting ? "…" : "Save" }}
+                            {{
+                              roleEditSubmitting
+                                ? "…"
+                                : ("GLOBAL.SAVE" | transloco)
+                            }}
                           </button>
                           <button
                             class="btn btn-sm btn-secondary"
                             (click)="cancelRoleEdit()"
                           >
-                            Cancel
+                            {{ "GLOBAL.CANCEL" | transloco }}
                           </button>
                         </div>
                       } @else {

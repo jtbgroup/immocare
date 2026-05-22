@@ -2,10 +2,10 @@
   <!-- Header -->
   <div class="details-content">
     <div class="header">
-      <h1>🏛️ Estates</h1>
+      <h1>🏛️ {{ "ESTATE.ESTATES" | transloco }}</h1>
       <div class="actions">
         <button class="btn btn-primary" (click)="create()">
-          + Create Estate
+          + {{ "ESTATE.CREATE" | transloco }}
         </button>
       </div>
     </div>
@@ -24,7 +24,7 @@
     <input
       type="text"
       class="search-input"
-      placeholder="Search by name…"
+      [placeholder]="'ESTATE.SEARCH_PLACEHOLDER' | transloco"
       [value]="searchTerm"
       (input)="onSearchChange($any($event.target).value)"
     />
@@ -32,14 +32,14 @@
 
   <!-- Loading -->
   @if (loading) {
-    <div class="loading">Loading estates…</div>
+    <div class="loading">{{ "GLOBAL.LOADING" | transloco }}</div>
   }
 
   <!-- Empty state -->
   @if (!loading && estates.length === 0) {
     <div class="empty-state">
-      <p>No estates found.</p>
-      <p class="help-text">Create your first estate to get started.</p>
+      <p>{{ "ESTATE.NO_ESTATES_FOUND" | transloco }}</p>
+      <p class="help-text">{{ "ESTATE.CREATE_FIRST_HINT" | transloco }}</p>
     </div>
   }
 
@@ -49,13 +49,13 @@
       <table>
         <thead>
           <tr>
-            <th>Name</th>
-            <th>Description</th>
-            <th>Members</th>
-            <th>Buildings</th>
-            <th>Created at</th>
-            <th>Created by</th>
-            <th>Actions</th>
+            <th>{{ "GLOBAL.NAME" | transloco }}</th>
+            <th>{{ "GLOBAL.DESCRIPTION" | transloco }}</th>
+            <th>{{ "MEMBER.MEMBERS" | transloco }}</th>
+            <th>{{ "BUILDING.BUILDINGS" | transloco }}</th>
+            <th>{{ "GLOBAL.CREATED_AT" | transloco }}</th>
+            <th>{{ "GLOBAL.CREATED_BY" | transloco }}</th>
+            <th>{{ "GLOBAL.ACTIONS" | transloco }}</th>
           </tr>
         </thead>
         <tbody>
@@ -70,13 +70,25 @@
               <td>{{ estate.createdAt | date: "dd/MM/yyyy" }}</td>
               <td>{{ estate.createdByUsername || "—" }}</td>
               <td class="actions-cell">
-                <button class="icon-btn" title="Dashboard" (click)="viewDashboard(estate)">
+                <button
+                  class="icon-btn"
+                  [title]="'GLOBAL.DASHBOARD' | transloco"
+                  (click)="viewDashboard(estate)"
+                >
                   📊
                 </button>
-                <button class="icon-btn" title="Edit" (click)="edit(estate)">
+                <button
+                  class="icon-btn"
+                  [title]="'GLOBAL.EDIT' | transloco"
+                  (click)="edit(estate)"
+                >
                   ✏️
                 </button>
-                <button class="icon-btn" title="Delete" (click)="requestDelete(estate)">
+                <button
+                  class="icon-btn"
+                  [title]="'GLOBAL.DELETE' | transloco"
+                  (click)="requestDelete(estate)"
+                >
                   🗑️
                 </button>
               </td>
@@ -95,20 +107,23 @@
         (click)="previousPage()"
         [disabled]="currentPage === 0"
       >
-        Previous
+        {{ "GLOBAL.PREVIOUS" | transloco }}
       </button>
-      <span class="page-info"
-        >Page {{ currentPage + 1 }} of {{ totalPages }} ({{
-          totalElements
-        }}
-        total)</span
-      >
+      <span class="page-info">{{
+        "GLOBAL.PAGE_OF"
+          | transloco
+            : {
+                current: currentPage + 1,
+                total: totalPages,
+                elements: totalElements,
+              }
+      }}</span>
       <button
         class="btn btn-secondary"
         (click)="nextPage()"
         [disabled]="currentPage >= totalPages - 1"
       >
-        Next
+        {{ "GLOBAL.NEXT" | transloco }}
       </button>
     </div>
   }
@@ -119,15 +134,16 @@
   <div class="modal-overlay">
     <div class="modal-content">
       <div class="modal-header">
-        <h2>Delete Estate</h2>
+        <h2>{{ "GLOBAL.DELETE" | transloco }}</h2>
       </div>
       <div class="modal-body">
         <p>
-          Are you sure you want to delete
-          <strong>{{ estateToDelete()?.name }}</strong
-          >?
+          {{
+            "GLOBAL.DELETE_CONFIRM"
+              | transloco: { name: estateToDelete()?.name }
+          }}
         </p>
-        <p class="warning">This action cannot be undone.</p>
+        <p class="warning">{{ "GLOBAL.DELETE_CONFIRM_WARNING" | transloco }}</p>
       </div>
       <div class="modal-actions">
         <button
@@ -135,14 +151,18 @@
           (click)="cancelDelete()"
           [disabled]="deleting"
         >
-          Cancel
+          {{ "GLOBAL.CANCEL" | transloco }}
         </button>
         <button
           class="btn btn-danger"
           (click)="confirmDelete()"
           [disabled]="deleting"
         >
-          {{ deleting ? "Deleting…" : "Delete" }}
+          {{
+            deleting
+              ? ("GLOBAL.DELETING" | transloco) + "..."
+              : ("GLOBAL.DELETE" | transloco)
+          }}
         </button>
       </div>
     </div>

@@ -116,7 +116,12 @@
     "SHOWING": "Affichage",
     "CREATED_AT": "Créé le",
     "BACK_TO_USERS": "Retour aux Utilisateurs",
-    "UPDATED_AT": "Mis à jour le"
+    "UPDATED_AT": "Mis à jour le",
+    "PAGE_OF": "Page {{current}} sur {{total}} ({{elements}} au total)",
+    "DELETE_CONFIRM": "Supprimer {{item}} \"{{name}}\" ? Cette action est irréversible.",
+    "DELETE_CONFIRM_WARNING": "Cette action est irréversible.",
+    "CREATED_BY": "Créé par",
+    "DASHBOARD": "Tableau de bord"
   },
   "NAV": {
     "MY_ESTATES": "Mes estates",
@@ -183,13 +188,6 @@
     "YEARS": "année(s)",
     "GRADES": "grade(s)"
   },
-  "COMMON": {
-    "SAVE": "Enregistrer",
-    "CLEAR": "Effacer",
-    "REQUIRED": "Champ obligatoire",
-    "NO_DATA": "—",
-    "PAGE_OF": "Page {{current}} sur {{total}} ({{elements}} au total)"
-  },
   "LANG": {
     "FR": "Français",
     "EN": "English",
@@ -229,6 +227,7 @@
     "ESTATES": "Estates",
     "NAME": "Nom de l'Estate",
     "EDIT": "Modifier l'Estate",
+    "DELETE": "Supprimer l'Estate",
     "SWITCH": "Changer d'Estate",
     "CREATE": "Créer un Estate",
     "SELECTOR_SUBTITLE": "Sélectionnez l'estate sur laquelle vous souhaitez travailler",
@@ -237,7 +236,13 @@
     "CREATE_FIRST": "Créer le premier estate",
     "CREATE_FIRST_HINT": "Créez le premier estate pour commencer. Cet estate deviendra l'espace de travail initial de votre organisation.",
     "NO_ESTATE_ASSIGNED_HINT": "Vous n'êtes pas encore membre d'aucun estate. Veuillez contacter votre administrateur pour obtenir un accès.",
-    "MANAGE_ALL": "Gérer tous les estates (Admin)"
+    "MANAGE_ALL": "Gérer tous les estates (Admin)",
+    "SEARCH_PLACEHOLDER": "Rechercher par nom…",
+    "NO_ESTATES_FOUND": "Aucun estate trouvé.",
+    "NAME_PLACEHOLDER": "ex. Mon portefeuille immobilier",
+    "DESCRIPTION_PLACEHOLDER": "Brève description de cet estate…",
+    "MEMBERS_HELP": "Ajoutez des utilisateurs et attribuez leurs rôles. Au moins un membre doit avoir le rôle de <strong>MANAGER</strong> si des membres sont ajoutés.",
+    "MEMBERS_HELP_SHORT": "Au moins un membre doit avoir le rôle de <strong>MANAGER</strong>."
   },
   "PERSON": {
     "PERSONS": "Personnes",
@@ -249,7 +254,8 @@
     "MEMBERS": "Membres",
     "QUICK_DESC": "Gérez l'accès à l'estate",
     "LOADING": "Chargement des membres",
-    "EMPTY": "Aucun membre trouvé."
+    "EMPTY": "Aucun membre pour le moment.",
+    "NO_MEMBER_FOUND": "Aucun membre trouvé."
   },
   "TRANSACTION": {
     "TRANSACTIONS": "Transactions",

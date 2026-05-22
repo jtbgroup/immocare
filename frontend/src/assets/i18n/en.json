@@ -116,7 +116,12 @@
     "SHOWING": "Showing",
     "CREATED_AT": "Created at",
     "BACK_TO_USERS": "Back to Users",
-    "UPDATED_AT": "Updated at"
+    "UPDATED_AT": "Updated at",
+    "PAGE_OF": "Page {{current}} of {{total}} ({{elements}} total)",
+    "DELETE_CONFIRM": "Delete {{item}} \"{{name}}\"? This cannot be undone.",
+    "DELETE_CONFIRM_WARNING": "This action cannot be undone.",
+    "CREATED_BY": "Created by",
+    "DASHBOARD": "Dashboard"
   },
   "NAV": {
     "MY_ESTATES": "My Estates",
@@ -183,12 +188,6 @@
     "YEARS": "year(s)",
     "GRADES": "grade(s)"
   },
-  "COMMON": {
-    "SAVE": "Save",
-    "REQUIRED": "Required field",
-    "NO_DATA": "—",
-    "PAGE_OF": "Page {{current}} of {{total}} ({{elements}} total)"
-  },
   "LANG": {
     "FR": "Français",
     "EN": "English",
@@ -228,6 +227,7 @@
     "ESTATES": "Estates",
     "NAME": "Estate Name",
     "EDIT": "Edit Estate",
+    "DELETE": "Delete Estate",
     "SWITCH": "Switch Estate",
     "CREATE": "Create Estate",
     "SELECTOR_SUBTITLE": "Select the estate you want to work in",
@@ -236,7 +236,13 @@
     "CREATE_FIRST": "Create the first estate",
     "CREATE_FIRST_HINT": "Create the first estate to get started. This estate will become the initial workspace for your organization.",
     "NO_ESTATE_ASSIGNED_HINT": "You are not yet a member of any estate. Please contact your administrator to gain access.",
-    "MANAGE_ALL": "Manage all estates (Admin)"
+    "MANAGE_ALL": "Manage all estates (Admin)",
+    "SEARCH_PLACEHOLDER": "Search by name…",
+    "NO_ESTATES_FOUND": "No estates found.",
+    "NAME_PLACEHOLDER": "e.g. My Real Estate Portfolio",
+    "DESCRIPTION_PLACEHOLDER": "Brief description of this estate…",
+    "MEMBERS_HELP": "Add users and assign their roles. At least one member must have the <strong>MANAGER</strong> role if any members are added.",
+    "MEMBERS_HELP_SHORT": "At least one member must have the <strong>MANAGER</strong> role."
   },
   "PERSON": {
     "PERSONS": "Persons",
@@ -248,7 +254,8 @@
     "MEMBERS": "Members",
     "QUICK_DESC": "Manage estate access",
     "LOADING": "Loading members",
-    "EMPTY": "No members found."
+    "EMPTY": "No members yet.",
+    "NO_MEMBER_FOUND": "No member found."
   },
   "TRANSACTION": {
     "TRANSACTIONS": "Transactions",

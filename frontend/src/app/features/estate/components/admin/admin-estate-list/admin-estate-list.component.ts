@@ -3,6 +3,7 @@ import { CommonModule } from "@angular/common";
 import { Component, OnDestroy, OnInit } from "@angular/core";
 import { FormsModule } from "@angular/forms";
 import { Router } from "@angular/router";
+import { TranslocoModule } from "@ngneat/transloco";
 import { Subject } from "rxjs";
 import { debounceTime, distinctUntilChanged, takeUntil } from "rxjs/operators";
 import { ActiveEstateService } from "../../../../../core/services/active-estate.service";
@@ -13,7 +14,7 @@ import { Page } from "../../../../../models/page.model";
 @Component({
   selector: "app-admin-estate-list",
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule, TranslocoModule],
   templateUrl: "./admin-estate-list.component.html",
   styleUrls: ["./admin-estate-list.component.scss"],
 })
