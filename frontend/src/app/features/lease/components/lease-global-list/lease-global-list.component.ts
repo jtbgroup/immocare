@@ -6,6 +6,7 @@ import { Router } from "@angular/router";
 import { Subject } from "rxjs";
 import { takeUntil } from "rxjs/operators";
 
+import { TranslocoModule } from "@ngneat/transloco";
 import { ActiveEstateService } from "../../../../core/services/active-estate.service";
 import { LeaseService } from "../../../../core/services/lease.service";
 import {
@@ -30,7 +31,7 @@ export interface LeaseGlobalFilters {
 @Component({
   selector: "app-lease-global-list",
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule, TranslocoModule],
   templateUrl: "./lease-global-list.component.html",
   styleUrls: ["./lease-global-list.component.scss"],
 })

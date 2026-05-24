@@ -84,7 +84,7 @@ public class BoilerService {
     public BoilerDTO create(String ownerType, Long ownerId, SaveBoilerRequest req) {
         validateOwnerExists(ownerType, ownerId);
         validateFuelType(req.fuelType());
-        validateDates(req.installationDate(), req.lastServiceDate(), req.nextServiceDate());
+        validateDates(req.installationDate(), req.outOfServiceDate(), req.lastServiceDate(), req.nextServiceDate());
 
         Boiler boiler = new Boiler();
         boiler.setOwnerType(ownerType);
@@ -103,7 +103,7 @@ public class BoilerService {
         Boiler boiler = boilerRepository.findById(id)
                 .orElseThrow(() -> new BoilerNotFoundException(id));
         validateFuelType(req.fuelType());
-        validateDates(req.installationDate(), req.lastServiceDate(), req.nextServiceDate());
+        validateDates(req.installationDate(), req.outOfServiceDate(), req.lastServiceDate(), req.nextServiceDate());
         applyRequest(boiler, req);
 
         UUID estateId = resolveEstateIdFromBoiler(boiler);
@@ -156,6 +156,7 @@ public class BoilerService {
     private void applyRequest(Boiler boiler, SaveBoilerRequest req) {
         boiler.setFuelType(req.fuelType());
         boiler.setInstallationDate(req.installationDate());
+        boiler.setOutOfServiceDate(req.outOfServiceDate());
         boiler.setBrand(req.brand());
         boiler.setModel(req.model());
         boiler.setSerialNumber(req.serialNumber());
@@ -180,6 +181,7 @@ public class BoilerService {
                 b.getSerialNumber(),
                 b.getFuelType(),
                 b.getInstallationDate(),
+                b.getOutOfServiceDate(),
                 b.getLastServiceDate(),
                 b.getNextServiceDate(),
                 b.getNotes(),
@@ -207,7 +209,8 @@ public class BoilerService {
         }
     }
 
-    private void validateDates(LocalDate installationDate, LocalDate lastServiceDate, LocalDate nextServiceDate) {
+    private void validateDates(LocalDate installationDate, LocalDate outOfServiceDate, LocalDate lastServiceDate,
+            LocalDate nextServiceDate) {
         if (lastServiceDate != null && lastServiceDate.isAfter(LocalDate.now())) {
             throw new IllegalArgumentException("Last service date cannot be in the future");
         }
@@ -216,6 +219,9 @@ public class BoilerService {
         }
         if (nextServiceDate != null && nextServiceDate.isBefore(installationDate)) {
             throw new IllegalArgumentException("Next service date cannot be before installation date");
+        }
+        if (lastServiceDate != null && lastServiceDate.isBefore(outOfServiceDate)) {
+            throw new IllegalArgumentException("Last service date cannot be before out of service date");
         }
     }
 }

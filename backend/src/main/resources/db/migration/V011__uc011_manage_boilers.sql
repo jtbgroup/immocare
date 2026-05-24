@@ -14,6 +14,7 @@ CREATE TABLE boiler (
     serial_number     VARCHAR(100) NULL,
     fuel_type         VARCHAR(20)  NOT NULL,
     installation_date DATE         NOT NULL,
+    out_of_service_date DATE       NULL,
     removal_date      DATE         NULL,
     last_service_date DATE         NULL,
     next_service_date DATE         NULL,

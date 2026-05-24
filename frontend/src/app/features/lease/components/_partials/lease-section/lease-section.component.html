@@ -90,14 +90,8 @@
       <button class="btn btn-link" (click)="showFinished = !showFinished">
         {{
           showFinished
-            ? ("GLOBAL.HIDE" | transloco)
-            : ("GLOBAL.SHOW" | transloco)
-        }}
-        {{ finishedLeases.length }}
-        {{
-          finishedLeases.length > 1
-            ? ("LEASE.PAST_LEASE_PLURAL" | transloco)
-            : ("LEASE.PAST_LEASE" | transloco)
+            ? ("GLOBAL.HIDE_HISTORY" | transloco)
+            : ("GLOBAL.SHOW_HISTORY" | transloco)
         }}
       </button>
     </div>
@@ -105,7 +99,7 @@
     @if (showFinished) {
       <div class="history-panel">
         <div class="history-header">
-          <h4>Past Leases</h4>
+          <h4>{{ "LEASE.PAST_LEASES" | transloco }}</h4>
           <button class="btn-close" (click)="showFinished = false">✕</button>
         </div>
 

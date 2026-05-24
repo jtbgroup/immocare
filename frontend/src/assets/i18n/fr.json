@@ -121,7 +121,23 @@
     "DELETE_CONFIRM": "Supprimer {{item}} \"{{name}}\" ? Cette action est irréversible.",
     "DELETE_CONFIRM_WARNING": "Cette action est irréversible.",
     "CREATED_BY": "Créé par",
-    "DASHBOARD": "Tableau de bord"
+    "DASHBOARD": "Tableau de bord",
+    "DATE": "Date",
+    "EXPENSE_S": "dépense(s)",
+    "NOT_ASSIGNED": "Non assigné",
+    "INSTALLATION": "Installation",
+    "SINCE": "Depuis",
+    "REASON": "Raison",
+    "SELECT_REASON": "Sélectionnez une raison",
+    "CONFIRM_REPLACEMENT": "Confirmer le remplacement",
+    "CONFIRM_REMOVE": "Confirmer la suppression",
+    "REPLACE": "Remplacer",
+    "LABEL": "Libellé",
+    "START_DATE": "Date de début",
+    "END_DATE": "Date de fin",
+    "ALL": "Tous",
+    "RESET_FILTERS": "Réinitialiser les filtres",
+    "NO_RESULTS": "Aucun résultat trouvé."
   },
   "NAV": {
     "MY_ESTATES": "Mes estates",
@@ -139,7 +155,9 @@
     "DELETE_CONFIRM": "Supprimer l'immeuble \"{{name}}\" ? Cette action est irréversible.",
     "QUICK_DESC": "Gérez les détails de l'immeuble, les unités et le PEB",
     "CREATE": "Créer un immeuble",
-    "SELECT": "Sélectionner un immeuble"
+    "SELECT": "Sélectionner un immeuble",
+    "BACK_TO_BUILDINGS": "Retour aux immeubles",
+    "INFO": "Informations sur l'immeuble"
   },
   "HOUSING_UNIT": {
     "HOUSING_UNITS": "Unités",
@@ -202,6 +220,7 @@
   "BOILER": {
     "SERVICE": "Entretien de la chaudière",
     "ADD": "Ajouter une chaudière",
+    "EDIT": "Modifier la chaudière",
     "NO_DATA": "Aucune chaudière enregistrée.",
     "ADD_SERVICE": "Ajouter un entretien",
     "NEW_SERVICE_RECORD": "Nouvel enregistrement d'entretien",
@@ -211,7 +230,23 @@
     "SERVICE_DATE_REQUIRED": "La date de l'entretien est requise et ne peut pas être dans le futur."
   },
   "FIRE_EXTINGUISHER": {
-    "SERVICE": "Entretien de l'extincteur"
+    "FIRE_EXTINGUISHERS": "Extincteurs",
+    "ADD": "Ajouter un extincteur",
+    "EDIT": "Modifier l'extincteur",
+    "NO_DATA": "Aucun extincteur enregistré.",
+    "SERVICE": "Entretien de l'extincteur",
+    "DELETE_CONFIRM": "Supprimer cet extincteur et tous ses enregistrements d'entretien ?",
+    "REVISION_DATE_REQUIRED": "La date de révision est requise et ne peut pas être dans le futur.",
+    "ADD_REVISION": "Ajouter une révision",
+    "REVISION_HISTORY": "Historique des révisions",
+    "HIDE_REVISIONS": "Masquer les révisions",
+    "VIEW_REVISIONS": "Voir les révisions ({{count}})",
+    "REVISION_DATE": "Date de la révision",
+    "LAST_INSPECTED": "Dernière inspection",
+    "NEVER_INSPECTED": "Jamais inspecté",
+    "NEW_REVISION_RECORD": "Nouvel enregistrement de révision",
+    "IDENTIFICATION_NUMBER": "Numéro d'identification",
+    "IDENTIFICATION_NUMBER_REQUIRED": "Le numéro d'identification est requis."
   },
   "LEASE": {
     "LEASES": "Baux",
@@ -220,8 +255,7 @@
     "STATUS": "Statut du bail",
     "NEW": "Nouveau bail",
     "NO_LEASES": "Aucun bail enregistré.",
-    "PAST_LEASE": "bail passé",
-    "PAST_LEASE_PLURAL": "baux passés"
+    "PAST_LEASES": "Baux passés"
   },
   "ESTATE": {
     "ESTATES": "Estates",
@@ -247,7 +281,7 @@
   "PERSON": {
     "PERSONS": "Personnes",
     "QUICK_DESC": "Propriétaires, locataires et contacts",
-    "SEARCH_BY_NAME_PLACEHOLDER": "Rechercher par nom ou email…"
+    "SEARCH_BY_NAME_PLACEHOLDER": "Rechercher par nom…"
   },
   "MEMBER": {
     "ADD": "Ajouter un membre",
@@ -306,9 +340,43 @@
     "DELETE_FROM": "Supprimer l'enregistrement de loyer à partir du",
     "TOTAL_CHANGE": "Changement total depuis le premier loyer",
     "HISTORY": "Historique des loyers",
-    "OPTIONAL_NOTE_PLACEHOLDER": "Optionnel — raison de ce changement"
+    "OPTIONAL_NOTE_PLACEHOLDER": "Optionnel — raison de ce changement",
+    "NO_RENT": "Aucun loyer enregistré."
   },
   "TENANT": {
     "TENANTS": "Locataires"
+  },
+  "METER": {
+    "METERS": "Compteurs",
+    "ADD": "Ajouter un compteur",
+    "EDIT": "Modifier le compteur",
+    "TYPE": "Type de compteur",
+    "READING": "Relevé actuel",
+    "READING_DATE": "Date du relevé",
+    "NO_METERS": "Aucun compteur enregistré.",
+    "QUICK_DESC": "Suivez les compteurs et les relevés de consommation",
+    "METER_NUMBER": "Numéro du compteur",
+    "LABEL_PLACEHOLDER": "ex. Cuisine, Sous-sol",
+    "EAN_CODE_PLACEHOLDER": "EAN à 18 chiffres",
+    "INSTALLATION_NUMBER": "Numéro d'installation",
+    "CUSTOMER_NUMBER": "Numéro de client",
+    "CUSTOMER_NUMBER_PLACEHOLDER": "Numéro de client",
+    "CUSTOMER_NUMBER_REQUIRED": "Le numéro de client est requis pour ce type de compteur.",
+    "REPLACE_METER": "Remplacer le compteur {{label}}",
+    "NEW_METER_NUMBER": "Nouveau numéro de compteur",
+    "NEW_EAN_CODE": "Nouveau code EAN",
+    "EAN": "EAN",
+    "NEW_INSTALLATION_NUMBER": "Nouveau numéro d'installation",
+    "NEW_START_DATE": "Nouvelle date de début",
+    "NEW_CUSTOMER_NUMBER": "Nouveau numéro de client",
+    "REMOVE": "Supprimer le compteur",
+    "HISTORY": "Historique des compteurs",
+    "TYPE_VALUES": {
+      "ELECTRICITY": "Électricité",
+      "GAS": "Gaz",
+      "WATER": "Eau",
+      "HEAT": "Chauffage"
+    },
+    "CLOSE_WARNING": "⚠️ Vous êtes sur le point de fermer le compteur <strong>{{label}}{{meterNumber}}</strong>. Cette action ne peut pas être annulée."
   }
 }

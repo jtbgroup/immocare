@@ -1,7 +1,7 @@
 <div class="building-details-container">
   <!-- Loading -->
   @if (loading) {
-    <div class="loading">Loading…</div>
+    <div class="loading">{{ "GLOBAL.LOADING" | transloco }}...</div>
   }
 
   <!-- Error -->
@@ -9,7 +9,7 @@
     <div class="error-container">
       <p class="error">{{ errorMessage }}</p>
       <button class="btn btn-primary" (click)="back()">
-        Back to Buildings
+        {{ "GLOBAL.BACK_TO_BUILDINGS" | transloco }}
       </button>
     </div>
   }
@@ -23,7 +23,7 @@
           activeEstateService.activeEstateId(),
           'buildings',
         ]"
-        >Buildings</a
+        >{{ "BUILDING.BUILDINGS" | transloco }}</a
       >
       <span class="breadcrumb-separator">›</span>
       <span>{{ building.name }}</span>
@@ -34,13 +34,19 @@
       <h1>{{ building.name }}</h1>
       <div class="actions">
         @if (activeEstateService.canEdit()) {
-          <button class="btn btn-secondary" (click)="edit()">Edit</button>
+          <button class="btn btn-secondary" (click)="edit()">
+            {{ "GLOBAL.EDIT" | transloco }}
+          </button>
           <button
             class="btn btn-danger"
             [disabled]="deleting"
             (click)="confirmDelete()"
           >
-            {{ deleting ? "Deleting…" : "Delete" }}
+            {{
+              deleting
+                ? ("GLOBAL.DELETING" | transloco) + "..."
+                : ("GLOBAL.DELETE" | transloco)
+            }}
           </button>
         }
       </div>
@@ -53,30 +59,30 @@
 
     <!-- Building info -->
     <div class="info-card">
-      <h2>Building Information</h2>
+      <h2>{{ "BUILDING.INFO" | transloco }}</h2>
       <div class="info-grid">
         <div class="info-item">
-          <label>Name</label>
+          <label>{{ "GLOBAL.NAME" | transloco }}</label>
           <p>{{ building.name }}</p>
         </div>
         <div class="info-item">
-          <label>Address</label>
+          <label>{{ "GLOBAL.STREET_ADDRESS" | transloco }}</label>
           <p>{{ building.streetAddress }}</p>
         </div>
         <div class="info-item">
-          <label>City</label>
+          <label>{{ "GLOBAL.CITY" | transloco }}</label>
           <p>{{ building.postalCode }} {{ building.city }}</p>
         </div>
         <div class="info-item">
-          <label>Country</label>
+          <label>{{ "GLOBAL.COUNTRY" | transloco }}</label>
           <p>{{ building.country }}</p>
         </div>
         <div class="info-item">
-          <label>Owner</label>
+          <label>{{ "GLOBAL.OWNER" | transloco }}</label>
           <p>{{ building.ownerName ?? "—" }}</p>
         </div>
         <div class="info-item">
-          <label>Units</label>
+          <label>{{ "HOUSING_UNIT.HOUSING_UNITS" | transloco }}</label>
           <p>{{ building.unitCount }}</p>
         </div>
       </div>
@@ -85,10 +91,12 @@
     <!-- Housing Units -->
     <div class="info-card">
       <div class="section-header">
-        <h2 class="section-heading">🏠 Housing Units</h2>
+        <h2 class="section-heading">
+          🏠 {{ "HOUSING_UNIT.HOUSING_UNITS" | transloco }}
+        </h2>
         @if (activeEstateService.canEdit()) {
           <button class="btn btn-primary btn-sm" (click)="addUnit()">
-            + Add Unit
+            + {{ "HOUSING_UNIT.ADD" | transloco }}
           </button>
         }
       </div>
@@ -100,12 +108,12 @@
           <table>
             <thead>
               <tr>
-                <th>Unit #</th>
-                <th>Floor</th>
-                <th>Surface (m²)</th>
-                <th>Rooms</th>
-                <th>Rent</th>
-                <th>Status</th>
+                <th>{{ "HOUSING_UNIT.NUMBER" | transloco }}</th>
+                <th>{{ "GLOBAL.FLOOR" | transloco }}</th>
+                <th>{{ "GLOBAL.TOTAL_SURFACE" | transloco }}</th>
+                <th>{{ "ROOM.ROOMS" | transloco }}</th>
+                <th>{{ "GLOBAL.RENT" | transloco }}</th>
+                <th>{{ "GLOBAL.STATUS" | transloco }}</th>
               </tr>
             </thead>
             <tbody>

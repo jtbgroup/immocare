@@ -121,7 +121,23 @@
     "DELETE_CONFIRM": "Delete {{item}} \"{{name}}\"? This cannot be undone.",
     "DELETE_CONFIRM_WARNING": "This action cannot be undone.",
     "CREATED_BY": "Created by",
-    "DASHBOARD": "Dashboard"
+    "DASHBOARD": "Dashboard",
+    "DATE": "Date",
+    "EXPENSE_S": "expense(s)",
+    "NOT_ASSIGNED": "Not assigned",
+    "INSTALLATION": "Installation",
+    "SINCE": "Since",
+    "REASON": "Reason",
+    "SELECT_REASON": "Select a reason",
+    "CONFIRM_REPLACEMENT": "Confirm Replacement",
+    "CONFIRM_REMOVE": "Confirm Remove",
+    "REPLACE": "Replace",
+    "LABEL": "Label",
+    "START_DATE": "Start Date",
+    "END_DATE": "End Date",
+    "ALL": "All",
+    "RESET_FILTERS": "Reset Filters",
+    "NO_RESULTS": "No results found."
   },
   "NAV": {
     "MY_ESTATES": "My Estates",
@@ -139,7 +155,9 @@
     "DELETE_CONFIRM": "Delete building \"{{name}}\"? This cannot be undone.",
     "QUICK_DESC": "Manage building details, units and PEB",
     "CREATE": "Create Building",
-    "SELECT": "Select Building"
+    "SELECT": "Select Building",
+    "BACK_TO_BUILDINGS": "Back to Buildings",
+    "INFO": "Building Information"
   },
   "HOUSING_UNIT": {
     "HOUSING_UNITS": "Units",
@@ -202,6 +220,7 @@
   "BOILER": {
     "SERVICE": "Boiler Service",
     "ADD": "Add Boiler",
+    "EDIT": "Edit Boiler",
     "NO_DATA": "No boiler registered.",
     "ADD_SERVICE": "Add Service",
     "NEW_SERVICE_RECORD": "New Service Record",
@@ -211,7 +230,23 @@
     "SERVICE_DATE_REQUIRED": "Service date is required and cannot be in the future."
   },
   "FIRE_EXTINGUISHER": {
-    "SERVICE": "Fire Extinguisher Service"
+    "FIRE_EXTINGUISHERS": "Fire Extinguishers",
+    "ADD": "Add Fire Extinguisher",
+    "EDIT": "Edit Fire Extinguisher",
+    "NO_DATA": "No fire extinguisher registered.",
+    "SERVICE": "Fire Extinguisher Service",
+    "DELETE_CONFIRM": "Delete this extinguisher and all its revisions?",
+    "REVISION_DATE_REQUIRED": "Revision date is required and cannot be in the future.",
+    "ADD_REVISION": "Add Revision",
+    "REVISION_HISTORY": "Revision History",
+    "HIDE_REVISIONS": "Hide revisions",
+    "VIEW_REVISIONS": "View revisions ({{count}})",
+    "REVISION_DATE": "Revision date",
+    "LAST_INSPECTED": "Last inspected",
+    "NEVER_INSPECTED": "Never inspected",
+    "NEW_REVISION_RECORD": "New Revision Record",
+    "IDENTIFICATION_NUMBER": "Identification Number",
+    "IDENTIFICATION_NUMBER_REQUIRED": "Identification number is required."
   },
   "LEASE": {
     "LEASES": "Leases",
@@ -220,8 +255,7 @@
     "STATUS": "Lease status",
     "NEW": "New Lease",
     "NO_LEASES": "No leases recorded.",
-    "PAST_LEASE": "past lease",
-    "PAST_LEASE_PLURAL": "past leases"
+    "PAST_LEASES": "Past Leases"
   },
   "ESTATE": {
     "ESTATES": "Estates",
@@ -247,7 +281,7 @@
   "PERSON": {
     "PERSONS": "Persons",
     "QUICK_DESC": "Owners, tenants and contacts",
-    "SEARCH_BY_NAME_PLACEHOLDER": "Search by name or email…"
+    "SEARCH_BY_NAME_PLACEHOLDER": "Search by name..."
   },
   "MEMBER": {
     "ADD": "Add Member",
@@ -306,9 +340,43 @@
     "DELETE_FROM": "Delete rent record from",
     "TOTAL_CHANGE": "Total change since first rent",
     "HISTORY": "Rent History",
-    "OPTIONAL_NOTE_PLACEHOLDER": "Optional — reason for this change"
+    "OPTIONAL_NOTE_PLACEHOLDER": "Optional — reason for this change",
+    "NO_RENT": "No rent recorded."
   },
   "TENANT": {
     "TENANTS": "Tenants"
+  },
+  "METER": {
+    "METERS": "Meters",
+    "ADD": "Add Meter",
+    "EDIT": "Edit Meter",
+    "TYPE": "Meter Type",
+    "READING": "Current Reading",
+    "READING_DATE": "Reading Date",
+    "NO_METERS": "No meters recorded.",
+    "QUICK_DESC": "Track utility meters and readings",
+    "METER_NUMBER": "Meter Number",
+    "LABEL_PLACEHOLDER": "e.g. Kitchen, Basement",
+    "EAN_CODE_PLACEHOLDER": "18-digit EAN",
+    "CUSTOMER_NUMBER_PLACEHOLDER": "Customer number",
+    "INSTALLATION_NUMBER": "Installation Number",
+    "CUSTOMER_NUMBER": "Customer Number",
+    "CUSTOMER_NUMBER_REQUIRED": "Customer number is required for this meter type.",
+    "REPLACE_METER": "Replace {{ block.label }} Meter",
+    "NEW_METER_NUMBER": "New Meter Number",
+    "NEW_EAN_CODE": "New EAN Code",
+    "EAN": "EAN",
+    "NEW_INSTALLATION_NUMBER": "New Installation Number",
+    "NEW_START_DATE": "New Start Date",
+    "NEW_CUSTOMER_NUMBER": "New Customer Number",
+    "REMOVE": "Remove Meter",
+    "HISTORY": "Meter History",
+    "TYPE_VALUES": {
+      "ELECTRICITY": "Electricity",
+      "GAS": "Gas",
+      "WATER": "Water",
+      "HEAT": "Heat"
+    },
+    "CLOSE_WARNING": "⚠️ You are about to close meter <strong>{{label}}{{meterNumber}}</strong>. This action cannot be undone."
   }
 }

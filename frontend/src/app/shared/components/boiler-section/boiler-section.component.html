@@ -314,7 +314,11 @@
   <!-- Add / Edit boiler form -->
   @if (showForm) {
     <div class="boiler-form-panel">
-      <h4>{{ editingId ? "Edit Boiler" : "Add Boiler" }}</h4>
+      <h4>
+        {{
+          editingId ? ("BOILER.EDIT" | transloco) : ("BOILER.ADD" | transloco)
+        }}
+      </h4>
       <form [formGroup]="form">
         <div class="form-row">
           <label
@@ -360,6 +364,18 @@
           }
         </div>
         <div class="form-row">
+          <label>{{ "GLOBAL.OUT_OF_SERVICE_DATE" | transloco }} </label>
+          <input type="date" formControlName="outOfServiceDate" />
+          <!-- @if (
+            form.get("outOfServiceDate")?.invalid &&
+            form.get("outOfServiceDate")?.touched
+          ) {
+            <span class="field-error">{{
+              "BOILER.OUT_OF_SERVICE_DATE_REQUIRED" | transloco
+            }}</span>
+          } -->
+        </div>
+        <div class="form-row">
           <label>{{ "GLOBAL.NOTES" | transloco }}</label>
           <textarea formControlName="notes" rows="2"></textarea>
         </div>
@@ -372,14 +388,18 @@
             (click)="save()"
             [disabled]="saving"
           >
-            {{ saving ? "Saving…" : "Save" }}
+            {{
+              saving
+                ? ("GLOBAL.SAVING" | transloco) + "..."
+                : ("GLOBAL.SAVE" | transloco)
+            }}
           </button>
           <button
             class="btn btn-sm btn-secondary"
             (click)="closeForm()"
             [disabled]="saving"
           >
-            Cancel
+            {{ "GLOBAL.CANCEL" | transloco }}
           </button>
         </div>
       </form>

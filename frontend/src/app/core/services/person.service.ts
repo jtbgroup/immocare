@@ -59,7 +59,7 @@ export class PersonService {
    */
   searchForPicker(query: string): Observable<PersonSummary[]> {
     const params = new HttpParams().set("q", query);
-    return this.http.get<PersonSummary[]>(`${this.base}/search`, { params });
+    return this.http.get<PersonSummary[]>(`${this.base}/picker`, { params });
   }
 
   /**

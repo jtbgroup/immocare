@@ -3,10 +3,15 @@
   <!-- Header -->
   <div class="details-content">
     <div class="header">
-      <h1>Leases</h1>
+      <h1>{{ "LEASE.LEASES" | transloco }}</h1>
       @if (!loading) {
         <span class="total-count"
-          >{{ totalElements }} lease{{ totalElements !== 1 ? "s" : "" }}</span
+          >{{ totalElements }}
+          {{
+            totalElements !== 1
+              ? ("LEASE.LEASES" | transloco | lowercase)
+              : ("GLOBAL.LEASE" | transloco | lowercase)
+          }}</span
         >
       }
     </div>
@@ -16,7 +21,7 @@
   <div class="filters-panel">
     <!-- Status toggle buttons -->
     <div class="filter-group">
-      <label class="filter-label">Status</label>
+      <label class="filter-label">{{ "GLOBAL.STATUS" | transloco }}</label>
       <div class="status-toggles">
         @for (s of allStatuses; track s) {
           <button
@@ -34,9 +39,9 @@
 
     <!-- Lease type -->
     <div class="filter-group">
-      <label class="filter-label">Type</label>
+      <label class="filter-label">{{ "GLOBAL.TYPE" | transloco }}</label>
       <select [(ngModel)]="filters.leaseType" (change)="onFilterChange()">
-        <option value="">All types</option>
+        <option value="">{{ "GLOBAL.ALL" | transloco }}</option>
         @for (key of leaseTypeKeys; track key) {
           <option [value]="key">
             {{ leaseTypeLabels[key] }}
@@ -47,7 +52,7 @@
 
     <!-- Start date range -->
     <div class="filter-group">
-      <label class="filter-label">Start date</label>
+      <label class="filter-label">{{ "GLOBAL.START_DATE" | transloco }}</label>
       <div class="date-range">
         <input
           type="date"
@@ -65,7 +70,7 @@
 
     <!-- End date range -->
     <div class="filter-group">
-      <label class="filter-label">End date</label>
+      <label class="filter-label">{{ "GLOBAL.END_DATE" | transloco }}</label>
       <div class="date-range">
         <input
           type="date"
@@ -83,7 +88,9 @@
 
     <!-- Rent range -->
     <div class="filter-group">
-      <label class="filter-label">Monthly rent (€)</label>
+      <label class="filter-label"
+        >{{ "RENT.MONTHLY_AMOUNT" | transloco }} (€)</label
+      >
       <div class="date-range">
         <input
           type="number"
@@ -110,14 +117,14 @@
         (click)="clearFilters()"
         [disabled]="!hasActiveFilters()"
       >
-        Reset filters
+        {{ "GLOBAL.RESET_FILTERS" | transloco }}
       </button>
     </div>
   </div>
 
   <!-- Loading -->
   @if (loading) {
-    <div class="loading">Loading leases…</div>
+    <div class="loading">{{ "GLOBAL.LOADING" | transloco }}...</div>
   }
 
   <!-- Error -->
@@ -128,10 +135,10 @@
   <!-- Empty -->
   @if (!loading && !error && leases.length === 0) {
     <div class="empty-state">
-      <p>No leases match the current filters.</p>
+      <p>{{ "GLOBAL.NO_RESULTS" | transloco }}</p>
       @if (hasActiveFilters()) {
         <button class="btn btn-secondary btn-sm" (click)="clearFilters()">
-          Clear filters
+          {{ "GLOBAL.RESET_FILTERS" | transloco }}
         </button>
       }
     </div>
@@ -143,31 +150,35 @@
       <table>
         <thead>
           <tr>
-            <th>Tenant(s)</th>
+            <th>{{ "TENANT.TENANTS" | transloco }}</th>
             <th
               class="sortable"
               (click)="onSortChange('housingUnit.building.name')"
             >
-              Building
+              {{ "GLOBAL.BUILDING" | transloco }}
               <span class="sort-icon">{{
                 sortIcon("housingUnit.building.name")
               }}</span>
             </th>
-            <th>Unit</th>
+            <th>{{ "GLOBAL.HOUSING_UNIT" | transloco }}</th>
             <th class="sortable" (click)="onSortChange('status')">
-              Status <span class="sort-icon">{{ sortIcon("status") }}</span>
+              {{ "GLOBAL.STATUS" | transloco }}
+              <span class="sort-icon">{{ sortIcon("status") }}</span>
             </th>
             <th class="sortable" (click)="onSortChange('startDate')">
-              Start <span class="sort-icon">{{ sortIcon("startDate") }}</span>
+              {{ "GLOBAL.START_DATE" | transloco }}
+              <span class="sort-icon">{{ sortIcon("startDate") }}</span>
             </th>
             <th class="sortable" (click)="onSortChange('endDate')">
-              End <span class="sort-icon">{{ sortIcon("endDate") }}</span>
+              {{ "GLOBAL.END_DATE" | transloco }}
+              <span class="sort-icon">{{ sortIcon("endDate") }}</span>
             </th>
             <th
               class="sortable text-right"
               (click)="onSortChange('monthlyRent')"
             >
-              Rent <span class="sort-icon">{{ sortIcon("monthlyRent") }}</span>
+              {{ "RENT.MONTHLY_AMOUNT" | transloco }}
+              <span class="sort-icon">{{ sortIcon("monthlyRent") }}</span>
             </th>
             <th></th>
           </tr>
@@ -194,7 +205,9 @@
               </td>
               <td>
                 <a
-                  (click)="viewBuilding(lease.buildingId); $event.stopPropagation()"
+                  (click)="
+                    viewBuilding(lease.buildingId); $event.stopPropagation()
+                  "
                   class="clickable-link"
                 >
                   {{ lease.buildingName }}
@@ -202,7 +215,9 @@
               </td>
               <td>
                 <a
-                  (click)="viewUnit(lease.housingUnitId); $event.stopPropagation()"
+                  (click)="
+                    viewUnit(lease.housingUnitId); $event.stopPropagation()
+                  "
                   class="clickable-link"
                 >
                   {{ lease.housingUnitNumber }}
@@ -235,7 +250,7 @@
                   class="btn btn-sm btn-link"
                   (click)="viewLease(lease.id); $event.stopPropagation()"
                 >
-                  View
+                  {{ "GLOBAL.VIEW" | transloco }}
                 </button>
               </td>
             </tr>
@@ -253,20 +268,25 @@
         (click)="previousPage()"
         [disabled]="currentPage === 0"
       >
-        Previous
+        {{ "GLOBAL.PREVIOUS" | transloco }}
       </button>
-      <span class="page-info"
-        >Page {{ currentPage + 1 }} of {{ totalPages }} ({{
-          totalElements
+      <span class="page-info">
+        {{
+          "GLOBAL.PAGE_OF"
+            | transloco
+              : {
+                  currentPage: currentPage + 1,
+                  totalPages: totalPages,
+                  totalElements: totalElements,
+                }
         }}
-        total)</span
-      >
+      </span>
       <button
         class="btn btn-secondary"
         (click)="nextPage()"
         [disabled]="currentPage >= totalPages - 1"
       >
-        Next
+        {{ "GLOBAL.NEXT" | transloco }}
       </button>
     </div>
   }

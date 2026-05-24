@@ -3,7 +3,8 @@
   <!-- Section header -->
   <div class="section-header">
     <h3 class="section-heading">
-      <span class="material-icons section-icon">speed</span> Utility Meters
+      <span class="material-icons section-icon">speed</span>
+      {{ "METER.METERS" | transloco }}
     </h3>
   </div>
 
@@ -28,7 +29,7 @@
 
   <!-- Loading -->
   @if (loading) {
-    <div class="loading-placeholder">Loading meters…</div>
+    <div class="loading-placeholder">{{ "GLOBAL.LOADING" | transloco }}...</div>
   }
 
   <!-- Type blocks -->
@@ -39,14 +40,16 @@
           <!-- Block header -->
           <div class="type-block-header">
             <div class="type-label">
-              <span class="type-label-text">{{ block.label }}</span>
+              <span class="type-label-text">{{
+                "METER.TYPE_VALUES." + block.type | transloco
+              }}</span>
             </div>
             @if (!isAddOpen(block.type)) {
               <button
                 class="btn btn-sm btn-primary"
                 (click)="openAddForm(block.type)"
               >
-                + Add Meter
+                {{ "METER.ADD" | transloco }}
               </button>
             }
           </div>
@@ -54,7 +57,7 @@
           <!-- ── ADD FORM ──────────────────────────────────────────────── -->
           @if (isAddOpen(block.type)) {
             <div class="inline-form">
-              <h4>Add {{ block.label }} Meter</h4>
+              <h4>{{ "METER.ADD" | transloco }} {{ block.label }}</h4>
 
               @if (errorMessage) {
                 <div class="alert alert-error">{{ errorMessage }}</div>
@@ -62,11 +65,16 @@
 
               <form [formGroup]="addForm" (ngSubmit)="submitAdd()" novalidate>
                 <div class="form-group">
-                  <label>Label <span class="optional">(optional)</span></label>
+                  <label
+                    >{{ "GLOBAL.LABEL" | transloco }}
+                    <span class="optional"
+                      >({{ "GLOBAL.OPTIONAL" | transloco }})</span
+                    ></label
+                  >
                   <input
                     formControlName="label"
                     type="text"
-                    placeholder="e.g. Kitchen, Basement"
+                    [placeholder]="'METER.LABEL_PLACEHOLDER' | transloco"
                   />
                   <span class="field-error">{{
                     fieldError(addForm, "label")
@@ -74,11 +82,14 @@
                 </div>
 
                 <div class="form-group">
-                  <label>Meter Number <span class="required">*</span></label>
+                  <label
+                    >{{ "METER.METER_NUMBER" | transloco }}
+                    <span class="required">*</span></label
+                  >
                   <input
                     formControlName="meterNumber"
                     type="text"
-                    placeholder="Meter number"
+                    [placeholder]="'METER.METER_NUMBER' | transloco"
                   />
                   <span class="field-error">{{
                     fieldError(addForm, "meterNumber")
@@ -91,7 +102,7 @@
                     <input
                       formControlName="eanCode"
                       type="text"
-                      placeholder="18-digit EAN"
+                      [placeholder]="'METER.EAN_CODE_PLACEHOLDER' | transloco"
                     />
                     @if (
                       addForm.get("eanCode")?.touched &&
@@ -108,7 +119,7 @@
                 @if (needsInstallation(block.type)) {
                   <div class="form-group">
                     <label
-                      >Installation Number
+                      >{{ "METER.INSTALLATION_NUMBER" | transloco }}
                       <span class="required">*</span></label
                     >
                     <input formControlName="installationNumber" type="text" />
@@ -121,27 +132,32 @@
                 @if (needsCustomerNumber(block.type)) {
                   <div class="form-group">
                     <label
-                      >Customer Number <span class="required">*</span></label
+                      >{{ "METER.CUSTOMER_NUMBER" | transloco }}
+                      <span class="required">*</span></label
                     >
                     <input
                       formControlName="customerNumber"
                       type="text"
-                      placeholder="Customer number"
+                      [placeholder]="
+                        'METER.CUSTOMER_NUMBER_PLACEHOLDER' | transloco
+                      "
                     />
                     @if (
                       addForm.get("customerNumber")?.touched &&
                       !addForm.get("customerNumber")?.value
                     ) {
-                      <span class="field-error"
-                        >Customer number is required for water meters on a
-                        building.</span
-                      >
+                      <span class="field-error">{{
+                        "METER.CUSTOMER_NUMBER_REQUIRED" | transloco
+                      }}</span>
                     }
                   </div>
                 }
 
                 <div class="form-group">
-                  <label>Start Date <span class="required">*</span></label>
+                  <label
+                    >{{ "GLOBAL.START_DATE" | transloco }}
+                    <span class="required">*</span></label
+                  >
                   <input formControlName="startDate" type="date" />
                   <span class="field-error">{{
                     fieldError(addForm, "startDate")
@@ -150,14 +166,14 @@
 
                 <div class="form-actions">
                   <button type="submit" class="btn btn-primary btn-sm">
-                    Save
+                    {{ "GLOBAL.SAVE" | transloco }}
                   </button>
                   <button
                     type="button"
                     class="btn btn-secondary btn-sm"
                     (click)="closeAllPanels()"
                   >
-                    Cancel
+                    {{ "GLOBAL.CANCEL" | transloco }}
                   </button>
                 </div>
               </form>
@@ -180,14 +196,14 @@
                     isReplaceOpen(block.type) && activeMeter?.id === meter.id
                   ) {
                     <div class="inline-form">
-                      <h4>Replace {{ block.label }} Meter</h4>
+                      <h4>{{ "METER.REPLACE_METER" | transloco }}</h4>
 
                       @if (errorMessage) {
                         <div class="alert alert-error">{{ errorMessage }}</div>
                       }
 
                       <div class="readonly-info">
-                        <strong>Current:</strong>
+                        <strong>{{ "GLOBAL.CURRENT" | transloco }}:</strong>
                         @if (meter.label) {
                           <span class="meter-label-badge">{{
                             meter.label
@@ -199,10 +215,12 @@
                         }
                         @if (meter.installationNumber) {
                           <span>
-                            · Install #: {{ meter.installationNumber }}</span
+                            · {{ "GLOBAL.INSTALLATION" | transloco }} #:
+                            {{ meter.installationNumber }}</span
                           >
                         }
-                        · since {{ meter.startDate | appDate }}
+                        · {{ "GLOBAL.SINCE" | transloco }}
+                        {{ meter.startDate | appDate }}
                       </div>
 
                       <form
@@ -212,19 +230,23 @@
                       >
                         <div class="form-group">
                           <label
-                            >Label
-                            <span class="optional">(optional)</span></label
+                            >{{ "GLOBAL.LABEL" | transloco }}
+                            <span class="optional"
+                              >({{ "GLOBAL.OPTIONAL" | transloco }})</span
+                            ></label
                           >
                           <input
                             formControlName="newLabel"
                             type="text"
-                            placeholder="e.g. Kitchen, Basement"
+                            [placeholder]="
+                              'METER.LABEL_PLACEHOLDER' | transloco
+                            "
                           />
                         </div>
 
                         <div class="form-group">
                           <label
-                            >New Meter Number
+                            >{{ "METER.NEW_METER_NUMBER" | transloco }}
                             <span class="required">*</span></label
                           >
                           <input formControlName="newMeterNumber" type="text" />
@@ -236,7 +258,7 @@
                         @if (needsEan(block.type)) {
                           <div class="form-group">
                             <label
-                              >New EAN Code
+                              >{{ "METER.NEW_EAN_CODE" | transloco }}
                               <span class="required">*</span></label
                             >
                             <input formControlName="newEanCode" type="text" />
@@ -246,7 +268,7 @@
                         @if (needsInstallation(block.type)) {
                           <div class="form-group">
                             <label
-                              >New Installation Number
+                              >{{ "METER.NEW_INSTALLATION_NUMBER" | transloco }}
                               <span class="required">*</span></label
                             >
                             <input
@@ -259,7 +281,7 @@
                         @if (needsCustomerNumber(block.type)) {
                           <div class="form-group">
                             <label
-                              >New Customer Number
+                              >{{ "METER.NEW_CUSTOMER_NUMBER" | transloco }}
                               <span class="required">*</span></label
                             >
                             <input
@@ -271,7 +293,7 @@
 
                         <div class="form-group">
                           <label
-                            >New Start Date
+                            >{{ "METER.NEW_START_DATE" | transloco }}
                             <span class="required">*</span></label
                           >
                           <input formControlName="newStartDate" type="date" />
@@ -282,12 +304,12 @@
 
                         <div class="form-group">
                           <label
-                            >Reason
+                            >{{ "GLOBAL.REASON" | transloco }}
                             <span class="optional">(optional)</span></label
                           >
                           <select formControlName="reason">
                             <option [ngValue]="null">
-                              — Select a reason —
+                              — {{ "GLOBAL.SELECT_REASON" | transloco }} —
                             </option>
                             @for (r of ALL_REPLACEMENT_REASONS; track r) {
                               <option [value]="r">
@@ -299,14 +321,14 @@
 
                         <div class="form-actions">
                           <button type="submit" class="btn btn-primary btn-sm">
-                            Confirm Replace
+                            {{ "GLOBAL.CONFIRM_REPLACEMENT" | transloco }}
                           </button>
                           <button
                             type="button"
                             class="btn btn-secondary btn-sm"
                             (click)="closeAllPanels()"
                           >
-                            Cancel
+                            {{ "GLOBAL.CANCEL" | transloco }}
                           </button>
                         </div>
                       </form>
@@ -317,15 +339,21 @@
                     isRemoveOpen(block.type) && activeMeter?.id === meter.id
                   ) {
                     <div class="inline-form remove-dialog">
-                      <h4>Remove Meter</h4>
+                      <h4>{{ "METER.REMOVE" | transloco }}</h4>
                       <p class="warning-text">
-                        ⚠ You are about to close meter
-                        <strong>
-                          @if (meter.label) {
-                            {{ meter.label }} —
-                          }
-                          {{ meter.meterNumber }} </strong
-                        >. This action cannot be undone.
+                        <span
+                          [innerHTML]="
+                            'METER.CLOSE_WARNING'
+                              | transloco
+                                : {
+                                    label: meter.label
+                                      ? meter.label + ' — '
+                                      : '',
+                                    meterNumber: meter.meterNumber,
+                                  }
+                          "
+                        >
+                        </span>
                       </p>
 
                       @if (errorMessage) {
@@ -348,14 +376,14 @@
                         </div>
                         <div class="form-actions">
                           <button type="submit" class="btn btn-danger btn-sm">
-                            Confirm Remove
+                            {{ "GLOBAL.CONFIRM_REMOVE" | transloco }}
                           </button>
                           <button
                             type="button"
                             class="btn btn-secondary btn-sm"
                             (click)="closeAllPanels()"
                           >
-                            Cancel
+                            {{ "GLOBAL.CANCEL" | transloco }}
                           </button>
                         </div>
                       </form>
@@ -375,21 +403,25 @@
                         }}</span>
                         @if (meter.eanCode) {
                           <span class="meter-detail"
-                            >EAN: {{ meter.eanCode }}</span
+                            >{{ "METER.EAN" | transloco }}:
+                            {{ meter.eanCode }}</span
                           >
                         }
                         @if (meter.installationNumber) {
                           <span class="meter-detail"
-                            >Install #: {{ meter.installationNumber }}</span
+                            >{{ "METER.INSTALLATION_NUMBER" | transloco }}:
+                            {{ meter.installationNumber }}</span
                           >
                         }
                         @if (meter.customerNumber) {
                           <span class="meter-detail"
-                            >Customer #: {{ meter.customerNumber }}</span
+                            >{{ "METER.CUSTOMER_NUMBER" | transloco }}:
+                            {{ meter.customerNumber }}</span
                           >
                         }
                         <span class="meter-detail muted"
-                          >Since {{ meter.startDate | appDate }}</span
+                          >{{ "GLOBAL.SINCE" | transloco }}
+                          {{ meter.startDate | appDate }}</span
                         >
                         <span class="meter-detail muted"
                           >{{
@@ -403,13 +435,13 @@
                           class="btn btn-sm btn-secondary"
                           (click)="openReplaceForm(meter)"
                         >
-                          Replace
+                          {{ "GLOBAL.REPLACE" | transloco }}
                         </button>
                         <button
                           class="btn btn-sm btn-danger"
                           (click)="openRemoveDialog(meter)"
                         >
-                          Remove
+                          {{ "GLOBAL.REMOVE" | transloco }}
                         </button>
                       </div>
                     </div>
@@ -427,7 +459,11 @@
   @if (hasAnyMeter || history.length > 0) {
     <div class="history-toggle">
       <button class="btn btn-link" (click)="toggleHistory()">
-        {{ showHistory ? "Hide History" : "View History" }}
+        {{
+          showHistory
+            ? ("GLOBAL.HIDE_HISTORY" | transloco)
+            : ("GLOBAL.SHOW_HISTORY" | transloco)
+        }}
       </button>
     </div>
   }
@@ -436,7 +472,7 @@
   @if (showHistory) {
     <div class="history-panel">
       <div class="history-header">
-        <h4>Meter History</h4>
+        <h4>{{ "METER.HISTORY" | transloco }}</h4>
         <button class="btn-close" (click)="toggleHistory()" title="Close">
           ✕
         </button>
@@ -446,17 +482,20 @@
         <table class="history-table">
           <thead>
             <tr>
-              <th>Type</th>
-              <th>Label</th>
-              <th>Meter Number</th>
+              <th>{{ "METER.TYPE" | transloco }}</th>
+              <th>{{ "GLOBAL.LABEL" | transloco }}</th>
+              <th>{{ "METER.METER_NUMBER" | transloco }}</th>
               @if (ownerType === "BUILDING") {
-                <th>Customer #</th>
+                <th>{{ "METER.CUSTOMER_NUMBER" | transloco }}</th>
               }
-              <th>EAN / Install #</th>
-              <th>Start</th>
-              <th>End</th>
-              <th>Duration</th>
-              <th>Status</th>
+              <th>
+                {{ "METER.EAN" | transloco }} /
+                {{ "METER.INSTALLATION_NUMBER" | transloco }}
+              </th>
+              <th>{{ "GLOBAL.START_DATE" | transloco }}</th>
+              <th>{{ "GLOBAL.END_DATE" | transloco }}</th>
+              <th>{{ "GLOBAL.DURATION" | transloco }}</th>
+              <th>{{ "GLOBAL.STATUS" | transloco }}</th>
             </tr>
           </thead>
           <tbody>

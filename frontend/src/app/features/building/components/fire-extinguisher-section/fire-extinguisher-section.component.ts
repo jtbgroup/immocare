@@ -11,6 +11,7 @@ import { Router, RouterModule } from "@angular/router";
 import { Subject } from "rxjs";
 import { takeUntil } from "rxjs/operators";
 
+import { TranslocoModule } from "@ngneat/transloco";
 import { FireExtinguisherService } from "../../../../core/services/fire-extinguisher.service";
 import {
   AddRevisionRequest,
@@ -22,7 +23,13 @@ import { AppDatePipe } from "../../../../shared/pipes/app-date.pipe";
 @Component({
   selector: "app-fire-extinguisher-section",
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule, RouterModule, AppDatePipe],
+  imports: [
+    CommonModule,
+    ReactiveFormsModule,
+    RouterModule,
+    AppDatePipe,
+    TranslocoModule,
+  ],
   templateUrl: "./fire-extinguisher-section.component.html",
   styleUrls: ["./fire-extinguisher-section.component.scss"],
 })

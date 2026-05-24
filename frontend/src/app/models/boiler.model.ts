@@ -31,6 +31,7 @@ export interface BoilerDTO {
   serialNumber: string | null;
   fuelType: FuelType;
   installationDate: string; // ISO date
+  outOfServiceDate: string | null; // ISO date or null
   lastServiceDate: string | null;
   nextServiceDate: string | null;
   notes: string | null;
@@ -44,6 +45,7 @@ export interface BoilerDTO {
 export interface SaveBoilerRequest {
   fuelType: FuelType;
   installationDate: string;
+  outOfServiceDate?: string | null;
   brand?: string | null;
   model?: string | null;
   serialNumber?: string | null;

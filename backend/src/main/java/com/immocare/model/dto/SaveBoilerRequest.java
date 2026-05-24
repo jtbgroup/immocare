@@ -12,25 +12,21 @@ import jakarta.validation.constraints.Size;
  */
 public record SaveBoilerRequest(
 
-        @NotBlank(message = "Fuel type is required")
-        String fuelType,
+                @NotBlank(message = "Fuel type is required") String fuelType,
 
-        @NotNull(message = "Installation date is required")
-        LocalDate installationDate,
+                @NotNull(message = "Installation date is required") LocalDate installationDate,
 
-        @Size(max = 100)
-        String brand,
+                LocalDate outOfServiceDate,
 
-        @Size(max = 100)
-        String model,
+                @Size(max = 100) String brand,
 
-        @Size(max = 100)
-        String serialNumber,
+                @Size(max = 100) String model,
 
-        LocalDate lastServiceDate,
+                @Size(max = 100) String serialNumber,
 
-        LocalDate nextServiceDate,
+                LocalDate lastServiceDate,
 
-        String notes
-) {
+                LocalDate nextServiceDate,
+
+                String notes) {
 }

@@ -17,7 +17,8 @@ import lombok.Setter;
 /**
  * Boiler entity — UC012.
  *
- * <p>Polymorphic ownership: {@code ownerType} is either {@code HOUSING_UNIT}
+ * <p>
+ * Polymorphic ownership: {@code ownerType} is either {@code HOUSING_UNIT}
  * or {@code BUILDING}; {@code ownerId} references the PK of that table.
  * No FK constraint is used (same pattern as {@code Meter}).
  */
@@ -52,6 +53,9 @@ public class Boiler {
 
     @Column(name = "installation_date", nullable = false)
     private LocalDate installationDate;
+
+    @Column(name = "out_of_service_date")
+    private LocalDate outOfServiceDate;
 
     @Column(name = "last_service_date")
     private LocalDate lastServiceDate;

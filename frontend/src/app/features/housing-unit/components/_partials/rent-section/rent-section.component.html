@@ -18,7 +18,7 @@
 
   <!-- Empty state -->
   @if (!loading && !currentRent && !showForm) {
-    <p class="no-data">{{ "GLOBAL.NO_DATA" | transloco }}</p>
+    <p class="no-data">{{ "RENT.NO_RENT" | transloco }}</p>
   }
 
   <!-- Current rent card -->
@@ -53,7 +53,7 @@
   <!-- View History link -->
   @if (currentRent && !showForm) {
     <div class="rent-actions">
-      <button class="btn-link" (click)="toggleHistory()">
+      <button class="btn btn-link" (click)="toggleHistory()">
         {{
           showHistory
             ? ("GLOBAL.HIDE_HISTORY" | transloco)

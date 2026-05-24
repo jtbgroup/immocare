@@ -1,6 +1,7 @@
 import { CommonModule } from "@angular/common";
 import { Component, OnInit } from "@angular/core";
 import { ActivatedRoute, Router, RouterLink } from "@angular/router";
+import { TranslocoModule } from "@ngneat/transloco";
 import { ActiveEstateService } from "../../../../core/services/active-estate.service";
 import { BuildingService } from "../../../../core/services/building.service";
 import { HousingUnitService } from "../../../../core/services/housing-unit.service";
@@ -21,6 +22,7 @@ import { FireExtinguisherSectionComponent } from "../fire-extinguisher-section/f
     RouterLink,
     MeterSectionComponent,
     FireExtinguisherSectionComponent,
+    TranslocoModule,
   ],
   templateUrl: "./building-details.component.html",
   styleUrls: ["./building-details.component.scss"],

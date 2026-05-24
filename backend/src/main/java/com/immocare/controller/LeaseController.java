@@ -46,16 +46,17 @@ import lombok.RequiredArgsConstructor;
  * UC004_ESTATE_PLACEHOLDER Phase 3: all routes are now scoped to an estate.
  *
  * Endpoints:
- *   GET    /api/v1/estates/{estateId}/housing-units/{unitId}/leases          - leases by unit
- *   POST   /api/v1/estates/{estateId}/housing-units/{unitId}/leases          - create lease
- *   GET    /api/v1/estates/{estateId}/leases                                 - global paginated list
- *   GET    /api/v1/estates/{estateId}/leases/alerts                          - contextual alerts
- *   GET    /api/v1/estates/{estateId}/leases/{id}                            - get by id
- *   PUT    /api/v1/estates/{estateId}/leases/{id}                            - update
- *   PATCH  /api/v1/estates/{estateId}/leases/{id}/status                     - change status
- *   POST   /api/v1/estates/{estateId}/leases/{id}/tenants                    - add tenant
- *   DELETE /api/v1/estates/{estateId}/leases/{id}/tenants/{personId}         - remove tenant
- *   POST   /api/v1/estates/{estateId}/leases/{id}/rent-adjustments           - adjust rent
+ * GET /api/v1/estates/{estateId}/housing-units/{unitId}/leases - leases by unit
+ * POST /api/v1/estates/{estateId}/housing-units/{unitId}/leases - create lease
+ * GET /api/v1/estates/{estateId}/leases - global paginated list
+ * GET /api/v1/estates/{estateId}/leases/alerts - contextual alerts
+ * GET /api/v1/estates/{estateId}/leases/{id} - get by id
+ * PUT /api/v1/estates/{estateId}/leases/{id} - update
+ * PATCH /api/v1/estates/{estateId}/leases/{id}/status - change status
+ * POST /api/v1/estates/{estateId}/leases/{id}/tenants - add tenant
+ * DELETE /api/v1/estates/{estateId}/leases/{id}/tenants/{personId} - remove
+ * tenant
+ * POST /api/v1/estates/{estateId}/leases/{id}/rent-adjustments - adjust rent
  */
 @RestController
 @RequiredArgsConstructor
@@ -106,7 +107,8 @@ public class LeaseController {
         if (status != null && !status.isEmpty()) {
             params.setStatuses(status.stream().map(LeaseStatus::valueOf).collect(Collectors.toList()));
         }
-        if (leaseType != null) params.setLeaseType(LeaseType.valueOf(leaseType));
+        if (leaseType != null)
+            params.setLeaseType(LeaseType.valueOf(leaseType));
         params.setBuildingId(buildingId);
         params.setHousingUnitId(housingUnitId);
         params.setStartDateFrom(startDateFrom);
@@ -118,7 +120,8 @@ public class LeaseController {
 
         String[] sortParts = sort.split(",");
         Sort.Direction direction = sortParts.length > 1 && sortParts[1].equalsIgnoreCase("desc")
-                ? Sort.Direction.DESC : Sort.Direction.ASC;
+                ? Sort.Direction.DESC
+                : Sort.Direction.ASC;
         Pageable pageable = PageRequest.of(page, size, Sort.by(direction, sortParts[0]));
 
         return ResponseEntity.ok(leaseService.getAll(estateId, params, pageable));

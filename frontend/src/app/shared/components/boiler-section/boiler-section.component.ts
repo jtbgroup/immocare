@@ -114,6 +114,7 @@ export class BoilerSectionComponent implements OnInit, OnDestroy {
     this.form = this.fb.group({
       fuelType: ["GAS", Validators.required],
       installationDate: ["", Validators.required],
+      outOfServiceDate: [""],
       brand: [""],
       model: [""],
       serialNumber: [""],
@@ -136,6 +137,7 @@ export class BoilerSectionComponent implements OnInit, OnDestroy {
     this.form.patchValue({
       fuelType: boiler.fuelType,
       installationDate: boiler.installationDate,
+      outOfServiceDate: boiler.outOfServiceDate ?? "",
       brand: boiler.brand ?? "",
       model: boiler.model ?? "",
       serialNumber: boiler.serialNumber ?? "",
@@ -162,6 +164,7 @@ export class BoilerSectionComponent implements OnInit, OnDestroy {
     const req: SaveBoilerRequest = {
       fuelType: this.form.value.fuelType,
       installationDate: this.form.value.installationDate,
+      outOfServiceDate: this.form.value.outOfServiceDate || null,
       brand: this.form.value.brand || null,
       model: this.form.value.model || null,
       serialNumber: this.form.value.serialNumber || null,

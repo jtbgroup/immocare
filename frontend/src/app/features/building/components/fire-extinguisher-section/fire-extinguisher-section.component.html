@@ -1,10 +1,10 @@
 <section class="ext-section">
   <!-- Section header -->
   <div class="section-header">
-    <h3>🧯 Fire Extinguishers</h3>
+    <h3>🧯 {{ "FIRE_EXTINGUISHER.FIRE_EXTINGUISHERS" | transloco }}</h3>
     @if (!showForm) {
       <button class="btn btn-sm btn-primary" (click)="openAddForm()">
-        + Add Fire Extinguisher
+        + {{ "FIRE_EXTINGUISHER.ADD" | transloco }}
       </button>
     }
   </div>
@@ -17,7 +17,7 @@
   }
 
   @if (!loading && !error && extinguishers.length === 0 && !showForm) {
-    <div class="no-data">No fire extinguishers registered.</div>
+    <div class="no-data">{{ "FIRE_EXTINGUISHER.NO_DATA" | transloco }}</div>
   }
 
   <!-- Extinguisher list -->
@@ -39,7 +39,7 @@
                   class="btn btn-sm btn-secondary"
                   (click)="openEditForm(ext)"
                 >
-                  Edit
+                  {{ "GLOBAL.EDIT" | transloco }}
                 </button>
               }
               @if (deleteConfirmId !== ext.id) {
@@ -47,7 +47,7 @@
                   class="btn btn-sm btn-danger"
                   (click)="confirmDelete(ext.id)"
                 >
-                  Delete
+                  {{ "GLOBAL.DELETE" | transloco }}
                 </button>
               }
             </div>
@@ -62,10 +62,13 @@
               <span>{{ ext.revisions.length }} revision(s)</span>
               @if (latestRevisionDate(ext)) {
                 <span>
-                  · Last inspected: {{ latestRevisionDate(ext) | appDate }}
+                  · {{ "FIRE_EXTINGUISHER.LAST_INSPECTED" | transloco }}:
+                  {{ latestRevisionDate(ext) | appDate }}
                 </span>
               } @else {
-                <span class="text-muted">· Never inspected</span>
+                <span class="text-muted"
+                  >· {{ "FIRE_EXTINGUISHER.NEVER_INSPECTED" | transloco }}</span
+                >
               }
             </div>
           </div>
@@ -76,19 +79,20 @@
               (click)="navigateToExtinguisherTransactions(ext.id)"
               title="View related transactions"
             >
-              💶 {{ extinguisherTransactionCounts[ext.id] }} expense(s)
+              💶 {{ extinguisherTransactionCounts[ext.id] }}
+              {{ "GLOBAL.EXPENSE_S" | transloco }}
             </span>
           }
 
           <!-- Delete confirmation -->
           @if (deleteConfirmId === ext.id) {
             <div class="delete-confirm">
-              <span>Delete this extinguisher and all its revisions?</span>
+              <span>{{ "FIRE_EXTINGUISHER.DELETE_CONFIRM" | transloco }}</span>
               <button class="btn btn-xs btn-danger" (click)="doDelete()">
-                Yes, delete
+                {{ "GLOBAL.DELETE" | transloco }}
               </button>
               <button class="btn btn-xs btn-secondary" (click)="cancelDelete()">
-                Cancel
+                {{ "GLOBAL.CANCEL" | transloco }}
               </button>
             </div>
           }
@@ -98,8 +102,9 @@
             <button class="btn-link" (click)="toggleRevisionPanel(ext.id)">
               {{
                 revisionPanelOpen[ext.id]
-                  ? "Hide revisions"
-                  : "View revisions (" + ext.revisions.length + ")"
+                  ? ("FIRE_EXTINGUISHER.HIDE_REVISIONS" | transloco)
+                  : ("FIRE_EXTINGUISHER.VIEW_REVISIONS"
+                    | transloco: { count: ext.revisions.length })
               }}
             </button>
           </div>
@@ -111,11 +116,14 @@
                 <!-- Add revision inline form -->
                 @if (revisionFormOpenId === ext.id) {
                   <div class="service-form-panel">
-                    <h5>New Revision Record</h5>
+                    <h5>
+                      {{ "FIRE_EXTINGUISHER.NEW_REVISION_RECORD" | transloco }}
+                    </h5>
                     <form [formGroup]="revisionForm">
                       <div class="form-row">
                         <label
-                          >Revision date <span class="required">*</span></label
+                          >{{ "FIRE_EXTINGUISHER.REVISION_DATE" | transloco }}
+                          <span class="required">*</span></label
                         >
                         <input
                           type="date"
@@ -127,13 +135,15 @@
                           revisionForm.get("revisionDate")?.touched
                         ) {
                           <span class="field-error">
-                            Revision date is required and cannot be in the
-                            future.
+                            {{
+                              "FIRE_EXTINGUISHER.REVISION_DATE_REQUIRED"
+                                | transloco
+                            }}
                           </span>
                         }
                       </div>
                       <div class="form-row">
-                        <label>Notes</label>
+                        <label>{{ "GLOBAL.NOTES" | transloco }}</label>
                         <textarea
                           formControlName="notes"
                           rows="2"
@@ -149,14 +159,18 @@
                           (click)="saveRevision(ext.id)"
                           [disabled]="savingRevision"
                         >
-                          {{ savingRevision ? "Saving…" : "Save" }}
+                          {{
+                            savingRevision
+                              ? ("GLOBAL.SAVING" | transloco) + "..."
+                              : ("GLOBAL.SAVE" | transloco)
+                          }}
                         </button>
                         <button
                           class="btn btn-sm btn-secondary"
                           (click)="cancelRevisionForm()"
                           [disabled]="savingRevision"
                         >
-                          Cancel
+                          {{ "GLOBAL.CANCEL" | transloco }}
                         </button>
                       </div>
                     </form>
@@ -165,13 +179,15 @@
 
                 <!-- Revision history header -->
                 <div class="history-header">
-                  <h4>Revision History</h4>
+                  <h4>
+                    {{ "FIRE_EXTINGUISHER.REVISION_HISTORY" | transloco }}
+                  </h4>
                   @if (revisionFormOpenId !== ext.id) {
                     <button
                       class="btn btn-sm btn-primary"
                       (click)="openRevisionForm(ext.id)"
                     >
-                      + Add revision
+                      + {{ "FIRE_EXTINGUISHER.ADD_REVISION" | transloco }}
                     </button>
                   }
                 </div>
@@ -184,8 +200,8 @@
                   <table class="history-table">
                     <thead>
                       <tr>
-                        <th>Date</th>
-                        <th>Notes</th>
+                        <th>{{ "GLOBAL.DATE" | transloco }}</th>
+                        <th>{{ "GLOBAL.NOTES" | transloco }}</th>
                         <th></th>
                       </tr>
                     </thead>
@@ -197,18 +213,18 @@
                           <td>
                             @if (deleteRevisionConfirmId === rev.id) {
                               <span class="delete-inline-confirm">
-                                Delete?
+                                {{ "GLOBAL.DELETE" | transloco }}?
                                 <button
                                   class="btn btn-xs btn-danger"
                                   (click)="doDeleteRevision()"
                                 >
-                                  Yes
+                                  {{ "GLOBAL.YES" | transloco }}
                                 </button>
                                 <button
                                   class="btn btn-xs btn-secondary"
                                   (click)="cancelDeleteRevision()"
                                 >
-                                  No
+                                  {{ "GLOBAL.NO" | transloco }}
                                 </button>
                               </span>
                             } @else {
@@ -216,7 +232,7 @@
                                 class="btn btn-xs btn-danger"
                                 (click)="confirmDeleteRevision(ext.id, rev.id)"
                               >
-                                Delete
+                                {{ "GLOBAL.DELETE" | transloco }}
                               </button>
                             }
                           </td>
@@ -237,11 +253,18 @@
   @if (showForm) {
     <div class="ext-form-panel">
       <h4>
-        {{ editingId ? "Edit Fire Extinguisher" : "Add Fire Extinguisher" }}
+        {{
+          editingId
+            ? ("FIRE_EXTINGUISHER.EDIT" | transloco)
+            : ("FIRE_EXTINGUISHER.ADD" | transloco)
+        }}
       </h4>
       <form [formGroup]="form">
         <div class="form-row">
-          <label>Identification number <span class="required">*</span></label>
+          <label
+            >{{ "FIRE_EXTINGUISHER.IDENTIFICATION_NUMBER" | transloco }}
+            <span class="required">*</span></label
+          >
           <input
             type="text"
             formControlName="identificationNumber"
@@ -252,21 +275,35 @@
             form.get("identificationNumber")?.touched
           ) {
             <span class="field-error">
-              Identification number is required (max 50 characters).
+              {{
+                "FIRE_EXTINGUISHER.IDENTIFICATION_NUMBER_REQUIRED" | transloco
+              }}
             </span>
           }
         </div>
         <div class="form-row">
-          <label>Unit <span class="hint">(optional)</span></label>
+          <label
+            >{{ "GLOBAL.HOUSING_UNIT" | transloco }}
+            <span class="hint"
+              >({{ "GLOBAL.OPTIONAL" | transloco }})</span
+            ></label
+          >
           <select formControlName="unitId">
-            <option [ngValue]="null">— Not assigned —</option>
+            <option [ngValue]="null">
+              — {{ "GLOBAL.NOT_ASSIGNED" | transloco }} —
+            </option>
             @for (u of buildingUnits; track u.id) {
               <option [ngValue]="u.id">Unit {{ u.unitNumber }}</option>
             }
           </select>
         </div>
         <div class="form-row">
-          <label>Notes <span class="hint">(optional)</span></label>
+          <label
+            >{{ "GLOBAL.NOTES" | transloco }}
+            <span class="hint"
+              >({{ "GLOBAL.OPTIONAL" | transloco }})</span
+            ></label
+          >
           <textarea
             formControlName="notes"
             rows="2"
@@ -282,14 +319,18 @@
             (click)="saveForm()"
             [disabled]="saving"
           >
-            {{ saving ? "Saving…" : "Save" }}
+            {{
+              saving
+                ? ("GLOBAL.SAVING" | transloco) + "..."
+                : ("GLOBAL.SAVE" | transloco)
+            }}
           </button>
           <button
             class="btn btn-sm btn-secondary"
             (click)="cancelForm()"
             [disabled]="saving"
           >
-            Cancel
+            {{ "GLOBAL.CANCEL" | transloco }}
           </button>
         </div>
       </form>

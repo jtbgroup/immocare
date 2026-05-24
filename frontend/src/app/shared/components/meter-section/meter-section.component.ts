@@ -14,6 +14,7 @@ import {
   Validators,
 } from "@angular/forms";
 
+import { TranslocoModule } from "@ngneat/transloco";
 import { MeterService } from "../../../core/services/meter.service";
 import {
   ALL_METER_TYPES,
@@ -43,7 +44,13 @@ interface TypeBlock {
 @Component({
   selector: "app-meter-section",
   standalone: true,
-  imports: [ReactiveFormsModule, LowerCasePipe, NgClass, AppDatePipe],
+  imports: [
+    ReactiveFormsModule,
+    LowerCasePipe,
+    NgClass,
+    AppDatePipe,
+    TranslocoModule,
+  ],
   templateUrl: "./meter-section.component.html",
   styleUrls: ["./meter-section.component.scss"],
   changeDetection: ChangeDetectionStrategy.OnPush,

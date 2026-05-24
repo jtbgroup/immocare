@@ -177,7 +177,7 @@
               (input)="
                 ownerSearchTerm = $any($event.target).value; searchOwner()
               "
-              placeholder="Search by name…"
+              [placeholder]="'PERSON.SEARCH_BY_NAME_PLACEHOLDER' | transloco"
             />
             @if (ownerSearchLoading) {
               <span class="help-text"

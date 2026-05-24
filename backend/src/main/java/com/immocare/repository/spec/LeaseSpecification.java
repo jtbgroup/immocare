@@ -17,11 +17,13 @@ import jakarta.persistence.criteria.Predicate;
 
 /**
  * JPA Specifications for Lease queries.
- * UC004_ESTATE_PLACEHOLDER Phase 3: {@link #hasEstate(UUID)} added for estate-scoped filtering.
+ * UC004_ESTATE_PLACEHOLDER Phase 3: {@link #hasEstate(UUID)} added for
+ * estate-scoped filtering.
  */
 public class LeaseSpecification {
 
-    private LeaseSpecification() {}
+    private LeaseSpecification() {
+    }
 
     // ── Individual specs ──────────────────────────────────────────────────────
 
@@ -34,22 +36,20 @@ public class LeaseSpecification {
     }
 
     public static Specification<Lease> hasBuilding(Long buildingId) {
-        return (root, query, cb) ->
-                cb.equal(root.get("housingUnit").get("building").get("id"), buildingId);
+        return (root, query, cb) -> cb.equal(root.get("housingUnit").get("building").get("id"), buildingId);
     }
 
     public static Specification<Lease> hasHousingUnit(Long housingUnitId) {
-        return (root, query, cb) ->
-                cb.equal(root.get("housingUnit").get("id"), housingUnitId);
+        return (root, query, cb) -> cb.equal(root.get("housingUnit").get("id"), housingUnitId);
     }
 
     /**
      * Restricts results to leases whose housing unit belongs to the given estate.
-     * UC004_ESTATE_PLACEHOLDER Phase 3 — used by LeaseService.getAll() to enforce estate scope.
+     * UC004_ESTATE_PLACEHOLDER Phase 3 — used by LeaseService.getAll() to enforce
+     * estate scope.
      */
     public static Specification<Lease> hasEstate(UUID estateId) {
-        return (root, query, cb) ->
-                cb.equal(root.get("housingUnit").get("building").get("estate").get("id"), estateId);
+        return (root, query, cb) -> cb.equal(root.get("housingUnit").get("building").get("estate").get("id"), estateId);
     }
 
     public static Specification<Lease> startDateFrom(LocalDate from) {
