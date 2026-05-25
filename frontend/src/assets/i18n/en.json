@@ -137,7 +137,17 @@
     "END_DATE": "End Date",
     "ALL": "All",
     "RESET_FILTERS": "Reset Filters",
-    "NO_RESULTS": "No results found."
+    "NO_RESULTS": "No results found.",
+    "FINANCES": "Finances",
+    "SPF_FINANCES": "SPF Finances",
+    "REGION": "Region",
+    "INVENTORY": "Inventory",
+    "DEPOSIT": "Deposit",
+    "AMOUNT": "Amount",
+    "REFERENCE": "Reference",
+    "CONFIRMED": "Confirmed",
+    "EXPIRY": "Expiry",
+    "FINANCIAL": "Financial"
   },
   "NAV": {
     "MY_ESTATES": "My Estates",
@@ -255,7 +265,11 @@
     "STATUS": "Lease status",
     "NEW": "New Lease",
     "NO_LEASES": "No leases recorded.",
-    "PAST_LEASES": "Past Leases"
+    "PAST_LEASES": "Past Leases",
+    "INDEXATION_DUE_ANNIVERSARY": "🔔 Indexation due — anniversary",
+    "END_NOTICE_DUE": "🔔 End notice due — end date",
+    "SIGNATURE_DATE": "Signature Date",
+    "NOTICE_PERIOD": "Notice Period (months)"
   },
   "ESTATE": {
     "ESTATES": "Estates",
@@ -293,7 +307,13 @@
   },
   "TRANSACTION": {
     "TRANSACTIONS": "Transactions",
-    "QUICK_DESC": "Track income and expenses"
+    "QUICK_DESC": "Track income and expenses",
+    "STATISTICS": "Statistics",
+    "EXPENSES": "Expenses",
+    "INCOMES": "Incomes",
+    "VIEW_ALL": "View all transactions",
+    "NET_BALANCE": "Net balance",
+    "LOADING_FINANCIAL_DATA": "Loading financial data"
   },
   "USER": {
     "USERS": "Users",
@@ -341,10 +361,12 @@
     "TOTAL_CHANGE": "Total change since first rent",
     "HISTORY": "Rent History",
     "OPTIONAL_NOTE_PLACEHOLDER": "Optional — reason for this change",
-    "NO_RENT": "No rent recorded."
+    "NO_RENT": "No rent recorded.",
+    "MONTHLY_CHARGES": "Monthly Charges"
   },
   "TENANT": {
-    "TENANTS": "Tenants"
+    "TENANTS": "Tenants",
+    "INSURANCE": "Tenant Insurance"
   },
   "METER": {
     "METERS": "Meters",

@@ -3,6 +3,7 @@ import { CommonModule } from "@angular/common";
 import { Component, OnDestroy, OnInit } from "@angular/core";
 import { FormsModule } from "@angular/forms";
 import { ActivatedRoute, Router, RouterModule } from "@angular/router";
+import { TranslocoModule } from "@ngneat/transloco";
 import { Subject } from "rxjs";
 import { takeUntil } from "rxjs/operators";
 import { ActiveEstateService } from "../../../../core/services/active-estate.service";
@@ -35,6 +36,7 @@ const TRANSITIONS: Record<LeaseStatus, LeaseStatus[]> = {
     TenantSectionComponent,
     RentAdjustmentSectionComponent,
     AppDatePipe,
+    TranslocoModule,
   ],
   templateUrl: "./lease-details.component.html",
   styleUrls: ["./lease-details.component.scss"],

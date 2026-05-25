@@ -180,6 +180,13 @@
               {{ "RENT.MONTHLY_AMOUNT" | transloco }}
               <span class="sort-icon">{{ sortIcon("monthlyRent") }}</span>
             </th>
+            <th
+              class="sortable text-right"
+              (click)="onSortChange('monthlyCharges')"
+            >
+              {{ "RENT.MONTHLY_CHARGES" | transloco }}
+              <span class="sort-icon">{{ sortIcon("monthlyCharges") }}</span>
+            </th>
             <th></th>
           </tr>
         </thead>
@@ -236,7 +243,17 @@
                 }
               </td>
               <td class="text-right">
-                {{ formatCurrency(lease.totalRent) }}
+                {{ formatCurrency(lease.monthlyRent) }}
+                @if (lease.indexationAlertActive) {
+                  <span
+                    class="alert-icon alert-icon--yellow"
+                    title="Indexation due"
+                    >📋</span
+                  >
+                }
+              </td>
+              <td class="text-right">
+                {{ formatCurrency(lease.monthlyCharges) }}
                 @if (lease.indexationAlertActive) {
                   <span
                     class="alert-icon alert-icon--yellow"

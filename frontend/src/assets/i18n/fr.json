@@ -137,7 +137,17 @@
     "END_DATE": "Date de fin",
     "ALL": "Tous",
     "RESET_FILTERS": "Réinitialiser les filtres",
-    "NO_RESULTS": "Aucun résultat trouvé."
+    "NO_RESULTS": "Aucun résultat trouvé.",
+    "FINANCES": "Finances",
+    "SPF_FINANCES": "SPF Finances",
+    "REGION": "Région",
+    "INVENTORY": "Inventaire",
+    "DEPOSIT": "Dépôt",
+    "AMOUNT": "Montant",
+    "REFERENCE": "Référence",
+    "CONFIRMED": "Confirmé",
+    "EXPIRY": "Expiration",
+    "FINANCIAL": "Financier"
   },
   "NAV": {
     "MY_ESTATES": "Mes estates",
@@ -255,7 +265,11 @@
     "STATUS": "Statut du bail",
     "NEW": "Nouveau bail",
     "NO_LEASES": "Aucun bail enregistré.",
-    "PAST_LEASES": "Baux passés"
+    "PAST_LEASES": "Baux passés",
+    "INDEXATION_DUE_ANNIVERSARY": "🔔 Indexation due — anniversaire",
+    "END_NOTICE_DUE": "🔔 Préavis de fin de bail — date de fin",
+    "SIGNATURE_DATE": "Date de signature",
+    "NOTICE_PERIOD": "Période de préavis (mois)"
   },
   "ESTATE": {
     "ESTATES": "Estates",
@@ -293,7 +307,13 @@
   },
   "TRANSACTION": {
     "TRANSACTIONS": "Transactions",
-    "QUICK_DESC": "Suivez les revenus et les dépenses"
+    "QUICK_DESC": "Suivez les revenus et les dépenses",
+    "STATISTICS": "Statistiques",
+    "EXPENSES": "Dépenses",
+    "INCOMES": "Revenus",
+    "VIEW_ALL": "Voir toutes les transactions",
+    "NET_BALANCE": "Solde net",
+    "LOADING_FINANCIAL_DATA": "Chargement des données financières"
   },
   "USER": {
     "USERS": "Utilisateurs",
@@ -341,10 +361,12 @@
     "TOTAL_CHANGE": "Changement total depuis le premier loyer",
     "HISTORY": "Historique des loyers",
     "OPTIONAL_NOTE_PLACEHOLDER": "Optionnel — raison de ce changement",
-    "NO_RENT": "Aucun loyer enregistré."
+    "NO_RENT": "Aucun loyer enregistré.",
+    "MONTHLY_CHARGES": "Charges mensuelles"
   },
   "TENANT": {
-    "TENANTS": "Locataires"
+    "TENANTS": "Locataires",
+    "INSURANCE": "Assurance du locataire"
   },
   "METER": {
     "METERS": "Compteurs",
