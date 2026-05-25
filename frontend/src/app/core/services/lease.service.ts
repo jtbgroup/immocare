@@ -46,7 +46,11 @@ export class LeaseService {
     return this.http.get<Lease>(`${this.base}/${id}`);
   }
 
-  create(unitId: number, req: CreateLeaseRequest, activate = false): Observable<Lease> {
+  create(
+    unitId: number,
+    req: CreateLeaseRequest,
+    activate = false,
+  ): Observable<Lease> {
     const params = new HttpParams().set("activate", activate);
     return this.http.post<Lease>(
       `/api/v1/estates/${this.estateId}/housing-units/${unitId}/leases`,
@@ -61,6 +65,10 @@ export class LeaseService {
 
   changeStatus(id: number, req: ChangeLeaseStatusRequest): Observable<Lease> {
     return this.http.patch<Lease>(`${this.base}/${id}/status`, req);
+  }
+
+  deleteLease(id: number): Observable<void> {
+    return this.http.delete<void>(`${this.base}/${id}`);
   }
 
   // ── Tenants ───────────────────────────────────────────────────────────────

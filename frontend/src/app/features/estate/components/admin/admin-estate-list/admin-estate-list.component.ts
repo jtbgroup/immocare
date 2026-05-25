@@ -144,16 +144,9 @@ export class AdminEstateListComponent implements OnInit, OnDestroy {
       });
   }
 
-  previousPage(): void {
-    if (this.currentPage > 0) {
-      this.currentPage--;
-      this.load();
-    }
-  }
-
-  nextPage(): void {
-    if (this.currentPage < this.totalPages - 1) {
-      this.currentPage++;
+  goToPage(page: number): void {
+    if (page >= 0 && page < this.totalPages) {
+      this.currentPage = page;
       this.load();
     }
   }

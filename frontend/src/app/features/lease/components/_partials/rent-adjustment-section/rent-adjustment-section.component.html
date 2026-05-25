@@ -2,10 +2,14 @@
 <!-- canEdit() guard on Adjust Rent button -->
 <div class="info-card">
   <div class="info-card-title">
-    <h2>Rent History</h2>
-    @if ((lease.status === 'ACTIVE' || lease.status === 'DRAFT') && !showForm && activeEstateService.canEdit()) {
+    <h2>{{ "LEASE.RENT_HISTORY" | transloco }}</h2>
+    @if (
+      (lease.status === "ACTIVE" || lease.status === "DRAFT") &&
+      !showForm &&
+      activeEstateService.canEdit()
+    ) {
       <button class="btn btn-primary btn-sm" (click)="openForm()">
-        Adjust Rent
+        {{ "LEASE.ADJUST" | transloco }}
       </button>
     }
   </div>
@@ -13,18 +17,27 @@
   <!-- Current amounts summary -->
   <div class="rent-summary">
     <div class="rent-summary-item">
-      <span class="rent-label">Rent</span>
-      <span class="rent-value">{{ lease.monthlyRent | currency:'EUR':'symbol':'1.2-2' }}</span>
+      <span class="rent-label">{{ "GLOBAL.RENT" | transloco }}</span>
+      <span class="rent-value">{{
+        lease.monthlyRent | currency: "EUR" : "symbol" : "1.2-2"
+      }}</span>
     </div>
     <div class="rent-summary-sep">+</div>
     <div class="rent-summary-item">
-      <span class="rent-label">Charges <em>({{ lease.chargesType }})</em></span>
-      <span class="rent-value">{{ lease.monthlyCharges | currency:'EUR':'symbol':'1.2-2' }}</span>
+      <span class="rent-label"
+        >{{ "RENT.MONTHLY_CHARGES" | transloco }}
+        <em>({{ lease.chargesType }})</em></span
+      >
+      <span class="rent-value">{{
+        lease.monthlyCharges | currency: "EUR" : "symbol" : "1.2-2"
+      }}</span>
     </div>
     <div class="rent-summary-sep">=</div>
     <div class="rent-summary-item rent-summary-total">
-      <span class="rent-label">Total</span>
-      <span class="rent-value">{{ lease.totalRent | currency:'EUR':'symbol':'1.2-2' }}</span>
+      <span class="rent-label">{{ "GLOBAL.TOTAL" | transloco }}</span>
+      <span class="rent-value">{{
+        lease.totalRent | currency: "EUR" : "symbol" : "1.2-2"
+      }}</span>
     </div>
   </div>
 
@@ -37,41 +50,74 @@
 
       <div class="form-row form-row-3">
         <div class="form-group">
-          <label>Field <span class="required">*</span></label>
+          <label
+            >{{ "GLOBAL.POST" | transloco }}
+            <span class="required">*</span></label
+          >
           <select [(ngModel)]="req.field" (ngModelChange)="onFieldChange()">
-            <option value="RENT">Rent</option>
-            <option value="CHARGES">Charges</option>
+            <option value="RENT">{{ "GLOBAL.RENT" | transloco }}</option>
+            <option value="CHARGES">
+              {{ "RENT.MONTHLY_CHARGES" | transloco }}
+            </option>
           </select>
         </div>
         <div class="form-group">
-          <label>Current amount</label>
+          <label>{{ "GLOBAL.CURRENT_AMOUNT" | transloco }}</label>
           <input
             type="text"
             class="current-value-readonly"
-            [value]="currentValue | currency:'EUR':'symbol':'1.2-2'"
+            [value]="currentValue | currency: 'EUR' : 'symbol' : '1.2-2'"
             readonly
             tabindex="-1"
           />
         </div>
         <div class="form-group">
-          <label>New amount (€) <span class="required">*</span></label>
-          <input type="number" [(ngModel)]="req.newValue" step="0.01" min="0.01" />
+          <label
+            >{{ "GLOBAL.NEW_AMOUNT" | transloco }}
+            <span class="required">*</span></label
+          >
+          <input
+            type="number"
+            [(ngModel)]="req.newValue"
+            step="0.01"
+            min="0.01"
+          />
         </div>
       </div>
       <div class="form-row">
         <div class="form-group">
-          <label>Effective date <span class="required">*</span></label>
+          <label
+            >{{ "GLOBAL.EFFECTIVE_DATE" | transloco }}
+            <span class="required">*</span></label
+          >
           <input type="date" [(ngModel)]="req.effectiveDate" />
         </div>
         <div class="form-group">
-          <label>Reason <span class="required">*</span></label>
-          <input type="text" [(ngModel)]="req.reason" placeholder="e.g. Annual indexation, Market adjustment…" />
+          <label
+            >{{ "GLOBAL.REASON" | transloco }}
+            <span class="required">*</span></label
+          >
+          <input
+            type="text"
+            [(ngModel)]="req.reason"
+            [placeholder]="'LEASE.ADJUSTMENT_REASON_PLACEHOLDER' | transloco"
+          />
         </div>
       </div>
       <div class="picker-panel-actions">
-        <button class="btn btn-secondary btn-sm" (click)="showForm = false">Cancel</button>
-        <button class="btn btn-primary btn-sm" (click)="save()" [disabled]="isSaving">
-          {{ isSaving ? 'Saving…' : 'Save adjustment' }}
+        <button class="btn btn-secondary btn-sm" (click)="showForm = false">
+          {{ "GLOBAL.CANCEL" | transloco }}
+        </button>
+        <button
+          class="btn btn-primary btn-sm"
+          (click)="save()"
+          [disabled]="isSaving"
+        >
+          {{
+            isSaving
+              ? ("GLOBAL.SAVING" | transloco) + "..."
+              : ("GLOBAL.SAVE" | transloco)
+          }}
         </button>
       </div>
     </div>
@@ -83,32 +129,42 @@
       <table>
         <thead>
           <tr>
-            <th>Date</th>
-            <th>Field</th>
-            <th>Old</th>
-            <th>New</th>
-            <th>Δ</th>
-            <th>Reason</th>
+            <th>{{ "GLOBAL.DATE" | transloco }}</th>
+            <th>{{ "GLOBAL.POST" | transloco }}</th>
+            <th>{{ "GLOBAL.OLD" | transloco }}</th>
+            <th>{{ "GLOBAL.NEW" | transloco }}</th>
+            <th>{{ "GLOBAL.DELTA" | transloco }}</th>
+            <th>{{ "GLOBAL.REASON" | transloco }}</th>
           </tr>
         </thead>
         <tbody>
           @for (adj of lease.rentAdjustments; track adj.effectiveDate) {
             <tr>
-              <td>{{ adj.effectiveDate | date:'dd/MM/yyyy' }}</td>
+              <td>{{ adj.effectiveDate | date: "dd/MM/yyyy" }}</td>
               <td>
-                <span class="field-badge"
-                      [class.field-rent]="adj.field === 'RENT'"
-                      [class.field-charges]="adj.field === 'CHARGES'">
+                <span
+                  class="field-badge"
+                  [class.field-rent]="adj.field === 'RENT'"
+                  [class.field-charges]="adj.field === 'CHARGES'"
+                >
                   {{ adj.field }}
                 </span>
               </td>
-              <td>{{ adj.oldValue | currency:'EUR':'symbol':'1.2-2' }}</td>
-              <td><strong>{{ adj.newValue | currency:'EUR':'symbol':'1.2-2' }}</strong></td>
+              <td>{{ adj.oldValue | currency: "EUR" : "symbol" : "1.2-2" }}</td>
+              <td>
+                <strong>{{
+                  adj.newValue | currency: "EUR" : "symbol" : "1.2-2"
+                }}</strong>
+              </td>
               <td
                 [class.delta-up]="adj.newValue > adj.oldValue"
                 [class.delta-down]="adj.newValue < adj.oldValue"
               >
-                {{ adj.newValue > adj.oldValue ? '+' : '' }}{{ adj.newValue - adj.oldValue | currency:'EUR':'symbol':'1.2-2' }}
+                {{ adj.newValue > adj.oldValue ? "+" : ""
+                }}{{
+                  adj.newValue - adj.oldValue
+                    | currency: "EUR" : "symbol" : "1.2-2"
+                }}
               </td>
               <td>{{ adj.reason }}</td>
             </tr>
@@ -119,6 +175,6 @@
   }
 
   @if (!lease.rentAdjustments || lease.rentAdjustments.length === 0) {
-    <p class="empty-message">No adjustments recorded yet.</p>
+    <p class="empty-message">{{ "LEASE.NO_RENT_ADJUSTMENTS" | transloco }}</p>
   }
 </div>

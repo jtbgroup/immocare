@@ -19,6 +19,16 @@
     "PERSON": "Personne",
     "BANK_ACCOUNT": "Compte bancaire",
     "BANK_ACCOUNTS": "Comptes bancaires",
+    "ADD_ACCOUNT": "Ajouter compte",
+    "NO_BANK_ACCOUNT": "No bank account configured",
+    "BANK_ACCOUNT_LABEL_PLACEHOLDER": "e.g. ING Compte Principal",
+    "BANK_ACCOUNT_TYPES": {
+      "CURRENT": "Courant",
+      "SAVINGS": "Epargne"
+    },
+    "IBAN": "IBAN",
+    "NO_IBAN": "Pas d'IBAN encore enregistré",
+    "ADD_IBAN": "Ajouter IBAN",
     "SETTINGS": "Paramètres",
     "ESTATE": "Estate",
     "USER": "Utilisateur",
@@ -93,7 +103,6 @@
     "GARDEN": "Jardin",
     "VIEW": "Voir",
     "PERIOD": "Période",
-    "CHARGES": "charges",
     "SHOW": "Afficher",
     "HIDE": "Masquer",
     "BOILER": "Chaudière",
@@ -141,13 +150,29 @@
     "FINANCES": "Finances",
     "SPF_FINANCES": "SPF Finances",
     "REGION": "Région",
-    "INVENTORY": "Inventaire",
+    "INVENTORY": "Etat des lieux",
     "DEPOSIT": "Dépôt",
     "AMOUNT": "Montant",
     "REFERENCE": "Référence",
     "CONFIRMED": "Confirmé",
     "EXPIRY": "Expiration",
-    "FINANCIAL": "Financier"
+    "FINANCIAL": "Financier",
+    "GENERAL": "Général",
+    "LOCATION": "Emplacement",
+    "EFFECTIVE_DATE": "Date d'effet",
+    "POST": "Poste",
+    "CURRENT_AMOUNT": "Montant actuel",
+    "NEW_AMOUNT": "Nouveau montant",
+    "OLD": "Ancien",
+    "DELTA": "Delta",
+    "SHOW_MIN_CHARS_HINT": "Tapez au moins 2 caractères pour rechercher",
+    "MOBILE": "Mobile",
+    "PRIMARY": "Principal",
+    "CREATED": "Créé",
+    "UPDATED": "Mis à jour",
+    "CREATE": "Créer",
+    "ACTIVE": "Actif",
+    "INACTIVE": "Inactif"
   },
   "NAV": {
     "MY_ESTATES": "Mes estates",
@@ -264,12 +289,39 @@
     "ACTIVE_LEASES": "Baux actifs",
     "STATUS": "Statut du bail",
     "NEW": "Nouveau bail",
+    "EDIT": "Modifier le bail",
     "NO_LEASES": "Aucun bail enregistré.",
     "PAST_LEASES": "Baux passés",
     "INDEXATION_DUE_ANNIVERSARY": "🔔 Indexation due — anniversaire",
     "END_NOTICE_DUE": "🔔 Préavis de fin de bail — date de fin",
     "SIGNATURE_DATE": "Date de signature",
-    "NOTICE_PERIOD": "Période de préavis (mois)"
+    "NOTICE_PERIOD": "Période de préavis (mois)",
+    "REGISTRATION": "Enregistrement",
+    "CHARGES": "Charges",
+    "CHARGES_TYPE": "Type de charges",
+    "CHARGES_DESCRIPTION": "Description des charges",
+    "RENT_ADJUSTMENT": "Ajustement du loyer",
+    "RENT_HISTORY": "Historique des loyers",
+    "ADJUST": "Ajuster le loyer",
+    "NO_RENT_ADJUSTMENTS": "Aucun ajustement enregistré.",
+    "ADJUSTMENT_REASON_PLACEHOLDER": "ex. Indexation annuelle, Ajustement du marché…",
+    "STATUS_VALUES": {
+      "FINISHED": "Terminé",
+      "ACTIVE": "Actif",
+      "DRAFT": "Brouillon",
+      "CANCELLED": "Annulé"
+    },
+    "TYPE_VALUES": {
+      "SHORT_TERM": "Court term",
+      "MAIN_RESIDENCE_3Y": "Long terme 3 ans",
+      "MAIN_RESIDENCE_6Y": "Long terme 6 ans",
+      "MAIN_RESIDENCE_9Y": "Long terme 6 ans",
+      "STUDENT": "Etudiant",
+      "GLIDING": "Glissant",
+      "COMMERCIAL": "Commercial",
+      "SHARING": "Collocation"
+    },
+    "CHANGE_STATUS": "Changer le statut"
   },
   "ESTATE": {
     "ESTATES": "Estates",
@@ -294,8 +346,24 @@
   },
   "PERSON": {
     "PERSONS": "Personnes",
+    "NEW": "Nouvelle personne",
+    "ADD": "Ajouter une personne",
+    "EDIT": "Editer une person",
     "QUICK_DESC": "Propriétaires, locataires et contacts",
-    "SEARCH_BY_NAME_PLACEHOLDER": "Rechercher par nom…"
+    "SEARCH_BY_NAME_PLACEHOLDER": "Rechercher par nom…",
+    "SELECT_PLACEHOLDER": "Sélectionner une personne",
+    "NO_RECORD": "Aucune personne",
+    "FIRST_NAME": "Prénom",
+    "LAST_NAME": "Nom de famille",
+    "NATIONAL_ID": "Numéro national",
+    "BIRTHDATE": "Date de naissance",
+    "BIRTH_PLACE": "Lieu de naisssance",
+    "INFORMATION": "Information personnelle",
+    "AS_TENANT": "En tant que locataire - Baux",
+    "AS_OWNER_BUILDING": "En tant que propriétaire - Building",
+    "AS_OWNER_HOUSING_UNIT": "En tant que propriétaire - Unité",
+    "VIEW_PERSON": "Afficher une personne existante",
+    "ENTER_VALID_EMAIL": "Entrez un email valide"
   },
   "MEMBER": {
     "ADD": "Ajouter un membre",
@@ -338,7 +406,8 @@
     "NEW_PASSWORD_PLACEHOLDER": "Min. 8 caractères, 1 majuscule, 1 minuscule, 1 chiffre"
   },
   "ROLE": {
-    "EDIT": "Modifier le rôle"
+    "EDIT": "Modifier le rôle",
+    "ROLES": "Roles"
   },
   "ROOM": {
     "ROOMS": "Pièces",
@@ -348,6 +417,7 @@
   },
   "RENT": {
     "CURRENT": "Loyer actuel",
+    "NEW": "Nouveau loyer",
     "ERROR_POSITIVE_AMOUNT": "Le loyer doit être un montant positif",
     "ANNUAL_INDEXATION": "Indexation annuelle",
     "MARKET_ADJUSTMENT": "Ajustement du marché",
@@ -366,7 +436,14 @@
   },
   "TENANT": {
     "TENANTS": "Locataires",
-    "INSURANCE": "Assurance du locataire"
+    "ADD": "Ajouter un locataire",
+    "INSURANCE": "Assurance du locataire",
+    "NO_RECORD": "Aucun locataire.",
+    "ROLE": {
+      "PRIMARY": "Principal",
+      "CO_TENANT": "Co-locataire",
+      "GUARANTOR": "Garant"
+    }
   },
   "METER": {
     "METERS": "Compteurs",

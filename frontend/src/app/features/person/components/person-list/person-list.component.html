@@ -2,11 +2,13 @@
   <!-- Header -->
   <div class="details-content">
     <div class="header">
-      <h1>Persons</h1>
+      <h1>{{ "PERSON.PERSONS" | transloco }}</h1>
       <div class="actions">
         @if (activeEstateService.canEdit()) {
-          <a [routerLink]="['/estates', estateId, 'persons', 'new']" class="btn btn-primary"
-            >+ Add Person</a
+          <a
+            [routerLink]="['/estates', estateId, 'persons', 'new']"
+            class="btn btn-primary"
+            >+ {{ "PERSON.ADD" | transloco }}</a
           >
         }
       </div>
@@ -18,7 +20,7 @@
     <input
       type="text"
       class="search-input"
-      placeholder="Search by name, email, national ID..."
+      [placeholder]="'USER.SEARCH_PLACEHOLDER' | transloco"
       [(ngModel)]="searchTerm"
       (ngModelChange)="onSearch()"
     />
@@ -31,17 +33,19 @@
 
   <!-- Loading -->
   @if (isLoading) {
-    <div class="loading">Loading...</div>
+    <div class="loading">{{ "GLOBAL.LOADING" | transloco }}...</div>
   }
 
   <!-- Empty state -->
   @if (!isLoading && persons.length === 0) {
     <div class="empty-state">
-      <p>No persons yet.</p>
+      <p>{{ "PERSON.NO_RECORD" | transloco }}</p>
       @if (activeEstateService.canEdit()) {
-        <a [routerLink]="['/estates', estateId, 'persons', 'new']" class="btn btn-primary"
-          >Add Person</a
-        >
+        <a
+          [routerLink]="['/estates', estateId, 'persons', 'new']"
+          class="btn btn-primary"
+          >{{ "PERSON.ADD" | transloco }}
+        </a>
       }
     </div>
   }
@@ -53,13 +57,13 @@
         <thead>
           <tr>
             <th class="sortable" (click)="sortBy('lastName')">
-              Last Name
+              {{ "PERSON.LAST_NAME" | transloco }}
               <span class="sort-icon" [class.active]="sortField === 'lastName'">
                 {{ sortField | sortIcon: sortDirection : "lastName" }}
               </span>
             </th>
             <th class="sortable" (click)="sortBy('firstName')">
-              First Name
+              {{ "PERSON.FIRST_NAME" | transloco }}
               <span
                 class="sort-icon"
                 [class.active]="sortField === 'firstName'"
@@ -68,13 +72,13 @@
               </span>
             </th>
             <th class="sortable" (click)="sortBy('city')">
-              City
+              {{ "GLOBAL.CITY" | transloco }}
               <span class="sort-icon" [class.active]="sortField === 'city'">
                 {{ sortField | sortIcon: sortDirection : "city" }}
               </span>
             </th>
-            <th>National ID</th>
-            <th>Roles</th>
+            <th>{{ "PERSON.NATIONAL_ID" | transloco }}</th>
+            <th>{{ "ROLE.ROLES" | transloco }}</th>
           </tr>
         </thead>
         <tbody>
@@ -115,7 +119,35 @@
         (click)="goToPage(currentPage - 1)"
         [disabled]="currentPage === 0"
       >
-        Previous
+        {{ "GLOBAL.PREVIOUS" | transloco }}
+      </button>
+      <span class="page-info">{{
+        "GLOBAL.PAGE_OF"
+          | transloco
+            : {
+                current: currentPage + 1,
+                total: totalPages,
+                elements: totalElements,
+              }
+      }}</span>
+      <button
+        class="btn btn-secondary"
+        (click)="goToPage(currentPage + 1)"
+        [disabled]="currentPage >= totalPages - 1"
+      >
+        {{ "GLOBAL.NEXT" | transloco }}
+      </button>
+    </div>
+
+    <!-- Pagination -->
+    <!-- @if (totalPages > 1) {
+    <div class="pagination">
+      <button
+        class="btn btn-secondary"
+        (click)="goToPage(currentPage - 1)"
+        [disabled]="currentPage === 0"
+      >
+        {{ "GLOBAL.PREVIOUS" | transloco }}
       </button>
       <span class="page-info"
         >{{ totalElements }} person(s) — Page {{ currentPage + 1 }} of
@@ -126,8 +158,8 @@
         (click)="goToPage(currentPage + 1)"
         [disabled]="currentPage === totalPages - 1"
       >
-        Next
+        {{ "GLOBAL.NEXT" | transloco }}
       </button>
-    </div>
+    </div> -->
   }
 </div>

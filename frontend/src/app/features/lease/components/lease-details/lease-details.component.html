@@ -1,328 +1,445 @@
-<div class="lease-details-container" *ngIf="lease; else loading">
-  <!-- Header -->
-  <div class="details-header">
-    <div class="header-left">
-      <h1>{{ "GLOBAL.LEASE" | transloco }} #{{ lease.id }}</h1>
-      <span
-        class="lease-status-badge lease-status-badge--{{
-          lease.status | lowercase
-        }}"
-      >
-        {{ lease.status }}
-      </span>
-    </div>
-    <div class="header-actions">
-      <!-- Status change -->
-      @if (canChangeStatus) {
-        <div class="status-change-bar">
-          <select
-            [(ngModel)]="selectedStatus"
-            class="form-control form-control-sm"
-          >
-            <option value="">Change status…</option>
-            @for (s of eligibleStatuses; track s) {
-              <option [value]="s">{{ s }}</option>
-            }
-          </select>
-          <button
-            class="btn btn-sm btn-warning"
-            [disabled]="!selectedStatus || isChangingStatus"
-            (click)="applyStatusChange()"
-          >
-            {{
-              isChangingStatus
-                ? ("GLOBAL.SAVING" | transloco) + "..."
-                : ("GLOBAL.SAVE" | transloco)
-            }}
-          </button>
-        </div>
-      }
-
-      @if (canEdit() && activeEstateService.canEdit()) {
-        <a
-          [routerLink]="[
-            '/estates',
-            activeEstateService.activeEstateId(),
-            'leases',
-            lease.id,
-            'edit',
-          ]"
-          class="btn btn-secondary"
-        >
-          {{ "GLOBAL.EDIT" | transloco }}
-        </a>
-      }
-    </div>
-  </div>
-
-  <!-- Status error -->
-  @if (statusError) {
-    <div class="alert alert-error">{{ statusError }}</div>
+<div class="lease-details-container">
+  <!-- ── Loading / Error ───────────────────────────────────────────────────── -->
+  @if (isLoading) {
+    <div class="loading">{{ "GLOBAL.LOADING" | transloco }}...</div>
   }
-
-  <!-- Alert banners -->
-  @if (lease.indexationAlertActive) {
-    <div class="alert alert-warning">
-      {{ "LEASE.INDEXATION_DUE_ANNIVERSARY" | transloco }}:
-      {{ lease.indexationAlertDate | appDate }}
-    </div>
-  }
-  @if (lease.endNoticeAlertActive) {
-    <div class="alert alert-warning">
-      {{ "LEASE.END_NOTICE" | transloco }}:
-      {{ lease.endNoticeAlertDate | appDate }}
-    </div>
-  }
-
-  <!-- Unit info -->
-  <div class="info-card">
-    <h2>{{ "GLOBAL.HOUSING_UNIT" | transloco }}</h2>
-    <div class="info-grid">
-      <div class="info-item">
-        <label>{{ "GLOBAL.HOUSING_UNIT" | transloco }}</label>
-        <p>
-          <a
-            [routerLink]="[
-              '/estates',
-              activeEstateService.activeEstateId(),
-              'units',
-              lease.housingUnitId,
-            ]"
-          >
-            {{ lease.housingUnitNumber }}
-          </a>
-        </p>
-      </div>
-      <div class="info-item">
-        <label>{{ "GLOBAL.BUILDING" | transloco }}</label>
-        <p>
-          <a
-            [routerLink]="[
-              '/estates',
-              activeEstateService.activeEstateId(),
-              'buildings',
-              lease.buildingId,
-            ]"
-          >
-            {{ lease.buildingName }}
-          </a>
-        </p>
-      </div>
-    </div>
-  </div>
-
-  <!-- Dates & Duration -->
-  <div class="info-card">
-    <h2>Dates &amp; Duration</h2>
-    <div class="info-grid">
-      <div class="info-item">
-        <label>{{ "LEASE.SIGNATURE_DATE" | transloco }}</label>
-        <p>{{ lease.signatureDate | appDate }}</p>
-      </div>
-      <div class="info-item">
-        <label>{{ "GLOBAL.START_DATE" | transloco }}</label>
-        <p>{{ lease.startDate | appDate }}</p>
-      </div>
-      <div class="info-item">
-        <label>{{ "GLOBAL.END_DATE" | transloco }}</label>
-        <p>{{ lease.endDate | appDate }}</p>
-      </div>
-      <div class="info-item">
-        <label>{{ "GLOBAL.DURATION" | transloco }}</label>
-        <p>{{ lease.durationMonths }} months</p>
-      </div>
-      <div class="info-item">
-        <label>{{ "LEASE.NOTICE_PERIOD" | transloco }}</label>
-        <p>{{ lease.noticePeriodMonths }} months</p>
-      </div>
-      <div class="info-item">
-        <label>{{ "GLOBAL.TYPE" | transloco }}</label>
-        <p>{{ LEASE_TYPE_LABELS[lease.leaseType] }}</p>
-      </div>
-    </div>
-  </div>
-
-  <!-- Financial -->
-  <div class="info-card">
-    <h2>{{ "GLOBAL.FINANCIAL" | transloco }}</h2>
-    <div class="info-grid">
-      <div class="info-item">
-        <label>{{ "RENT.MONTHLY_AMOUNT" | transloco }}</label>
-        <p>{{ lease.monthlyRent | currency: "EUR" : "symbol" : "1.2-2" }}</p>
-      </div>
-      <div class="info-item">
-        <label>{{ "GLOBAL.CHARGES" | transloco }}</label>
-        <p>
-          {{ lease.monthlyCharges | currency: "EUR" : "symbol" : "1.2-2" }}
-          <span class="muted">({{ lease.chargesType }})</span>
-        </p>
-      </div>
-      <div class="info-item">
-        <label>{{ "GLOBAL.TOTAL" | transloco }}</label>
-        <p>
-          <strong>{{
-            lease.totalRent | currency: "EUR" : "symbol" : "1.2-2"
-          }}</strong>
-        </p>
-      </div>
-    </div>
-  </div>
-
-  <!-- Rent adjustment section -->
-  <app-rent-adjustment-section
-    [lease]="lease"
-    (leaseUpdated)="loadLease(lease.id)"
-  >
-  </app-rent-adjustment-section>
-
-  <!-- Tenants -->
-  <app-tenant-section [lease]="lease" (leaseUpdated)="loadLease(lease.id)">
-  </app-tenant-section>
-
-  <!-- Registration -->
-  @if (
-    lease.registrationSpf ||
-    lease.registrationRegion ||
-    lease.registrationInventorySpf ||
-    lease.registrationInventoryRegion
-  ) {
-    <div class="info-card">
-      <h2>Registration</h2>
-      <div class="info-subsection-label">Lease deed</div>
-      <div class="info-grid">
-        <div class="info-item">
-          <label>{{ "GLOBAL.SPF_FINANCES" | transloco }}</label>
-          <p>{{ lease.registrationSpf || "—" }}</p>
-        </div>
-        <div class="info-item">
-          <label>{{ "GLOBAL.REGION" | transloco }}</label>
-          <p>{{ lease.registrationRegion || "—" }}</p>
-        </div>
-      </div>
-      <div class="info-subsection-label">
-        {{ "GLOBAL.INVENTORY" | transloco }}
-      </div>
-      <div class="info-grid">
-        <div class="info-item">
-          <label>{{ "GLOBAL.SPF_FINANCES" | transloco }}</label>
-          <p>{{ lease.registrationInventorySpf || "—" }}</p>
-        </div>
-        <div class="info-item">
-          <label>{{ "GLOBAL.REGION" | transloco }}</label>
-          <p>{{ lease.registrationInventoryRegion || "—" }}</p>
-        </div>
-      </div>
-    </div>
-  }
-
-  <!-- Deposit -->
-  @if (lease.depositAmount || lease.depositType) {
-    <div class="info-card">
-      <h2>{{ "GLOBAL.DEPOSIT" | transloco }}</h2>
-      <div class="info-grid">
-        <div class="info-item">
-          <label>{{ "GLOBAL.AMOUNT" | transloco }}</label>
-          <p>
-            {{ lease.depositAmount | currency: "EUR" : "symbol" : "1.2-2" }}
-          </p>
-        </div>
-        <div class="info-item">
-          <label>{{ "GLOBAL.TYPE" | transloco }}</label>
-          <p>{{ lease.depositType || "—" }}</p>
-        </div>
-        @if (lease.depositReference) {
-          <div class="info-item">
-            <label>{{ "GLOBAL.REFERENCE" | transloco }}</label>
-            <p>{{ lease.depositReference }}</p>
-          </div>
-        }
-      </div>
-    </div>
-  }
-
-  <!-- Insurance -->
-  <div class="info-card">
-    <h2>{{ "TENANT.INSURANCE" | transloco }}</h2>
-    <div class="info-grid">
-      @if (lease.tenantInsuranceConfirmed) {
-        <div class="info-item">
-          <label>{{ "GLOBAL.CONFIRMED" | transloco }}</label>
-          <p>✅ {{ "GLOBAL.YES" | transloco }}</p>
-        </div>
-        @if (lease.tenantInsuranceReference) {
-          <div class="info-item">
-            <label>{{ "GLOBAL.REFERENCE" | transloco }}</label>
-            <p>{{ lease.tenantInsuranceReference }}</p>
-          </div>
-        }
-        @if (lease.tenantInsuranceExpiry) {
-          <div class="info-item">
-            <label>{{ "GLOBAL.EXPIRY" | transloco }}</label>
-            <p>{{ lease.tenantInsuranceExpiry | appDate }}</p>
-          </div>
-        }
-      } @else {
-        <div class="info-item">
-          <label>{{ "GLOBAL.CONFIRMED" | transloco }}</label>
-          <p>❌ {{ "GLOBAL.NO" | transloco }}</p>
-        </div>
-      }
-    </div>
-  </div>
-
-  <!-- Transaction Statistics -->
-  <div class="info-card">
-    <div class="section-header">
-      <h2>{{ "TRANSACTION.STATISTICS" | transloco }}</h2>
-      <button class="btn btn-ghost btn-sm" (click)="viewLeaseTransactions()">
-        {{ "TRANSACTION.VIEW_ALL" | transloco }} →
+  @if (errorMessage && !isLoading) {
+    <div class="error-container">
+      <p class="error">{{ errorMessage }}</p>
+      <button class="btn btn-primary" (click)="back()">
+        {{ "GLOBAL.BACK" | transloco }}
       </button>
     </div>
-    @if (leaseStats) {
-      <div class="financial-stats-grid">
-        <div class="financial-stat financial-stat--income">
-          <span class="financial-stat__label">{{
-            "TRANSACTION.INCOMES" | transloco
-          }}</span>
-          <span class="financial-stat__value"
-            >+{{ leaseStats.totalIncome.toFixed(2) }} €</span
-          >
-        </div>
-        <div class="financial-stat financial-stat--expense">
-          <span class="financial-stat__label">{{
-            "TRANSACTION.EXPENSES" | transloco
-          }}</span>
-          <span class="financial-stat__value"
-            >-{{ leaseStats.totalExpenses.toFixed(2) }} €</span
-          >
-        </div>
-        <div
-          class="financial-stat"
-          [class.financial-stat--positive]="leaseStats.netBalance >= 0"
-          [class.financial-stat--negative]="leaseStats.netBalance < 0"
+  }
+
+  @if (lease && !isLoading) {
+    <!-- ── Breadcrumb ─────────────────────────────────────────────────────── -->
+    <nav class="breadcrumb" aria-label="breadcrumb">
+      <a
+        [routerLink]="[
+          '/estates',
+          activeEstateService.activeEstateId(),
+          'buildings',
+        ]"
+      >
+        {{ "BUILDING.BUILDINGS" | transloco }}
+      </a>
+      <span class="breadcrumb-separator">›</span>
+      <a
+        [routerLink]="[
+          '/estates',
+          activeEstateService.activeEstateId(),
+          'buildings',
+          lease.buildingId,
+        ]"
+      >
+        {{ lease.buildingName }}
+      </a>
+      <span class="breadcrumb-separator">›</span>
+      <a
+        [routerLink]="[
+          '/estates',
+          activeEstateService.activeEstateId(),
+          'units',
+          lease.housingUnitId,
+        ]"
+      >
+        {{ "GLOBAL.HOUSING_UNIT" | transloco }} {{ lease.housingUnitNumber }}
+      </a>
+      <span class="breadcrumb-separator">›</span>
+      <span>{{ "GLOBAL.LEASE" | transloco }} #{{ lease.id }}</span>
+    </nav>
+
+    <!-- ── Page header ───────────────────────────────────────────────────── -->
+    <div class="page-header">
+      <h1>
+        {{ "GLOBAL.LEASE" | transloco }} #{{ lease.id }}
+        <span class="lease-type-label"
+          >— {{ "LEASE.TYPE_VALUES." + lease.leaseType | transloco }}</span
         >
-          <span class="financial-stat__label">{{
-            "TRANSACTION.NET_BALANCE" | transloco
-          }}</span>
-          <span class="financial-stat__value"
-            >{{ leaseStats.netBalance >= 0 ? "+" : ""
-            }}{{ leaseStats.netBalance.toFixed(2) }} €</span
+      </h1>
+      <div class="actions">
+        @if (canEdit() && activeEstateService.canEdit()) {
+          <button class="btn btn-secondary" (click)="edit()">
+            {{ "GLOBAL.EDIT" | transloco }}
+          </button>
+        }
+        @if (activeEstateService.canEdit()) {
+          <button
+            class="btn btn-danger"
+            [disabled]="deleting"
+            (click)="confirmDelete()"
           >
+            {{
+              deleting
+                ? ("GLOBAL.DELETING" | transloco) + "..."
+                : ("GLOBAL.DELETE" | transloco)
+            }}
+          </button>
+        }
+      </div>
+    </div>
+
+    <!-- ── Alerts ────────────────────────────────────────────────────────── -->
+    @if (deleteError) {
+      <div class="alert alert-error">{{ deleteError }}</div>
+    }
+    @if (statusError) {
+      <div class="alert alert-error">{{ statusError }}</div>
+    }
+    @if (lease.indexationAlertActive) {
+      <div class="alert alert-warning">
+        {{ "LEASE.INDEXATION_DUE_ANNIVERSARY" | transloco }}:
+        {{ lease.indexationAlertDate | appDate }}
+      </div>
+    }
+    @if (lease.endNoticeAlertActive) {
+      <div class="alert alert-warning">
+        {{ "LEASE.END_NOTICE" | transloco }}:
+        {{ lease.endNoticeAlertDate | appDate }}
+      </div>
+    }
+
+    <!-- ═══════════════════════════════════════════════════════════════════════
+         Informations générales
+    ════════════════════════════════════════════════════════════════════════ -->
+    <div class="info-card">
+      <h2>{{ "GLOBAL.GENERAL_INFO" | transloco }}</h2>
+
+      <!-- ── Localisation ── -->
+      <div class="info-group">
+        <div class="info-group-header">
+          <span class="info-group-label"
+            >📍 {{ "GLOBAL.LOCATION" | transloco }}</span
+          >
+          <span class="info-group-line"></span>
+        </div>
+        <div class="info-grid">
+          <div class="info-item">
+            <label>{{ "GLOBAL.HOUSING_UNIT" | transloco }}</label>
+            <p>
+              <a
+                [routerLink]="[
+                  '/estates',
+                  activeEstateService.activeEstateId(),
+                  'units',
+                  lease.housingUnitId,
+                ]"
+              >
+                {{ lease.housingUnitNumber }}
+              </a>
+            </p>
+          </div>
+          <div class="info-item">
+            <label>{{ "GLOBAL.BUILDING" | transloco }}</label>
+            <p>
+              <a
+                [routerLink]="[
+                  '/estates',
+                  activeEstateService.activeEstateId(),
+                  'buildings',
+                  lease.buildingId,
+                ]"
+              >
+                {{ lease.buildingName }}
+              </a>
+            </p>
+          </div>
         </div>
       </div>
-    } @else {
-      <p class="loading-placeholder">
-        {{ "TRANSACTION.LOADING_FINANCIAL_DATA" | transloco }}...
-      </p>
-    }
-  </div>
-</div>
 
-<ng-template #loading>
-  @if (isLoading) {
-    <div class="loading">{{ "GLOBAL.LOADING" | transloco }}</div>
+      <!-- ── Général ── -->
+      <div class="info-group">
+        <div class="info-group-header">
+          <span class="info-group-label"
+            >📋 {{ "GLOBAL.GENERAL" | transloco }}</span
+          >
+          <span class="info-group-line"></span>
+        </div>
+        <div class="info-grid">
+          <div class="info-item">
+            <label>{{ "LEASE.STATUS" | transloco }}</label>
+            <div class="status-cell">
+              <span
+                class="lease-status-badge lease-status-badge--{{
+                  lease.status | lowercase
+                }}"
+              >
+                {{ "LEASE.STATUS_VALUES." + lease.status | transloco }}
+              </span>
+              @if (canChangeStatus) {
+                <div class="status-change-inline">
+                  <select [(ngModel)]="selectedStatus" class="status-select">
+                    <option value="">
+                      {{ "LEASE.CHANGE_STATUS" | transloco }}…
+                    </option>
+                    @for (s of eligibleStatuses; track s) {
+                      <option [value]="s">
+                        {{ "LEASE.STATUS_VALUES." + s | transloco }}
+                      </option>
+                    }
+                  </select>
+                  <button
+                    class="btn btn-sm btn-warning"
+                    [disabled]="!selectedStatus || isChangingStatus"
+                    (click)="applyStatusChange()"
+                  >
+                    {{
+                      isChangingStatus
+                        ? ("GLOBAL.SAVING" | transloco) + "..."
+                        : ("GLOBAL.SAVE" | transloco)
+                    }}
+                  </button>
+                </div>
+              }
+            </div>
+          </div>
+          <div class="info-item">
+            <label>{{ "GLOBAL.TYPE" | transloco }}</label>
+            <p>{{ "LEASE.TYPE_VALUES." + lease.leaseType | transloco }}</p>
+          </div>
+          <div class="info-item">
+            <label>{{ "LEASE.SIGNATURE_DATE" | transloco }}</label>
+            <p>{{ lease.signatureDate | appDate }}</p>
+          </div>
+          <div class="info-item">
+            <label>{{ "GLOBAL.START_DATE" | transloco }}</label>
+            <p>{{ lease.startDate | appDate }}</p>
+          </div>
+          <div class="info-item">
+            <label>{{ "GLOBAL.END_DATE" | transloco }}</label>
+            <p>{{ lease.endDate | appDate }}</p>
+          </div>
+          <div class="info-item">
+            <label>{{ "GLOBAL.DURATION" | transloco }}</label>
+            <p>{{ lease.durationMonths }} {{ "GLOBAL.MONTHS" | transloco }}</p>
+          </div>
+          <div class="info-item">
+            <label>{{ "LEASE.NOTICE_PERIOD" | transloco }}</label>
+            <p>
+              {{ lease.noticePeriodMonths }} {{ "GLOBAL.MONTHS" | transloco }}
+            </p>
+          </div>
+        </div>
+      </div>
+
+      <!-- ── Financier ── -->
+      <div class="info-group">
+        <div class="info-group-header">
+          <span class="info-group-label"
+            >💶 {{ "GLOBAL.FINANCIAL" | transloco }}</span
+          >
+          <span class="info-group-line"></span>
+        </div>
+        <div class="info-grid">
+          <div class="info-item">
+            <label>{{ "RENT.MONTHLY_AMOUNT" | transloco }}</label>
+            <p>
+              {{ lease.monthlyRent | currency: "EUR" : "symbol" : "1.2-2" }}
+            </p>
+          </div>
+          <div class="info-item">
+            <label>{{ "LEASE.CHARGES" | transloco }}</label>
+            <p>
+              {{ lease.monthlyCharges | currency: "EUR" : "symbol" : "1.2-2" }}
+              <span class="muted">({{ lease.chargesType }})</span>
+            </p>
+          </div>
+          @if (lease.chargesDescription) {
+            <div class="info-item">
+              <label>{{ "LEASE.CHARGES_DESCRIPTION" | transloco }}</label>
+              <p>{{ lease.chargesDescription }}</p>
+            </div>
+          }
+          <div class="info-item">
+            <label>{{ "GLOBAL.TOTAL" | transloco }}</label>
+            <p>
+              <strong>{{
+                lease.totalRent | currency: "EUR" : "symbol" : "1.2-2"
+              }}</strong>
+            </p>
+          </div>
+        </div>
+      </div>
+
+      <!-- ── Dépôt de garantie ── -->
+      <div class="info-group">
+        <div class="info-group-header">
+          <span class="info-group-label"
+            >🔒 {{ "GLOBAL.DEPOSIT" | transloco }}</span
+          >
+          <span class="info-group-line"></span>
+        </div>
+        <div class="info-grid">
+          <div class="info-item">
+            <label>{{ "GLOBAL.AMOUNT" | transloco }}</label>
+            <p>
+              {{
+                lease.depositAmount
+                  ? (lease.depositAmount | currency: "EUR" : "symbol" : "1.2-2")
+                  : "—"
+              }}
+            </p>
+          </div>
+          <div class="info-item">
+            <label>{{ "GLOBAL.TYPE" | transloco }}</label>
+            <p>{{ lease.depositType || "—" }}</p>
+          </div>
+          <div class="info-item">
+            <label>{{ "GLOBAL.REFERENCE" | transloco }}</label>
+            <p>{{ lease.depositReference || "—" }}</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- ── Assurance locataire ── -->
+      <div class="info-group">
+        <div class="info-group-header">
+          <span class="info-group-label"
+            >🛡️ {{ "TENANT.INSURANCE" | transloco }}</span
+          >
+          <span class="info-group-line"></span>
+        </div>
+        <div class="info-grid">
+          <div class="info-item">
+            <label>{{ "GLOBAL.CONFIRMED" | transloco }}</label>
+            <p>
+              {{
+                lease.tenantInsuranceConfirmed
+                  ? "✅ " + ("GLOBAL.YES" | transloco)
+                  : "❌ " + ("GLOBAL.NO" | transloco)
+              }}
+            </p>
+          </div>
+          @if (lease.tenantInsuranceConfirmed) {
+            <div class="info-item">
+              <label>{{ "GLOBAL.REFERENCE" | transloco }}</label>
+              <p>{{ lease.tenantInsuranceReference || "—" }}</p>
+            </div>
+            <div class="info-item">
+              <label>{{ "GLOBAL.EXPIRY" | transloco }}</label>
+              <p>
+                {{
+                  lease.tenantInsuranceExpiry
+                    ? (lease.tenantInsuranceExpiry | appDate)
+                    : "—"
+                }}
+              </p>
+            </div>
+          }
+        </div>
+      </div>
+
+      <!-- ── Enregistrement ── -->
+      <div class="info-group">
+        <div class="info-group-header">
+          <span class="info-group-label"
+            >📄 {{ "LEASE.REGISTRATION" | transloco }}</span
+          >
+          <span class="info-group-line"></span>
+        </div>
+        <div class="info-grid">
+          <div class="info-item">
+            <label
+              >{{ "GLOBAL.SPF_FINANCES" | transloco }}
+              <span class="info-sublabel"
+                >({{ "GLOBAL.LEASE" | transloco }})</span
+              ></label
+            >
+            <p>{{ lease.registrationSpf || "—" }}</p>
+          </div>
+          <div class="info-item">
+            <label
+              >{{ "GLOBAL.REGION" | transloco }}
+              <span class="info-sublabel"
+                >({{ "GLOBAL.LEASE" | transloco }})</span
+              ></label
+            >
+            <p>{{ lease.registrationRegion || "—" }}</p>
+          </div>
+          <div class="info-item">
+            <label
+              >{{ "GLOBAL.SPF_FINANCES" | transloco }}
+              <span class="info-sublabel"
+                >({{ "GLOBAL.INVENTORY" | transloco }})</span
+              ></label
+            >
+            <p>{{ lease.registrationInventorySpf || "—" }}</p>
+          </div>
+          <div class="info-item">
+            <label
+              >{{ "GLOBAL.REGION" | transloco }}
+              <span class="info-sublabel"
+                >({{ "GLOBAL.INVENTORY" | transloco }})</span
+              ></label
+            >
+            <p>{{ lease.registrationInventoryRegion || "—" }}</p>
+          </div>
+        </div>
+      </div>
+    </div>
+    <!-- fin info-card générale -->
+
+    <!-- ═══════════════════════════════════════════════════════════════════════
+         Sections avec historique / actions
+    ════════════════════════════════════════════════════════════════════════ -->
+
+    <app-tenant-section [lease]="lease" (leaseUpdated)="loadLease(lease.id)">
+    </app-tenant-section>
+
+    <app-rent-adjustment-section
+      [lease]="lease"
+      (leaseUpdated)="loadLease(lease.id)"
+    >
+    </app-rent-adjustment-section>
+
+    <div class="info-card">
+      <div class="section-header">
+        <h2>{{ "TRANSACTION.STATISTICS" | transloco }}</h2>
+        <button
+          class="btn btn-secondary btn-sm"
+          (click)="viewLeaseTransactions()"
+        >
+          {{ "TRANSACTION.VIEW_ALL" | transloco }} →
+        </button>
+      </div>
+      @if (leaseStats) {
+        <div class="financial-stats-grid">
+          <div class="financial-stat financial-stat--income">
+            <span class="financial-stat__label">{{
+              "TRANSACTION.INCOMES" | transloco
+            }}</span>
+            <span class="financial-stat__value"
+              >+{{ leaseStats.totalIncome.toFixed(2) }} €</span
+            >
+          </div>
+          <div class="financial-stat financial-stat--expense">
+            <span class="financial-stat__label">{{
+              "TRANSACTION.EXPENSES" | transloco
+            }}</span>
+            <span class="financial-stat__value"
+              >-{{ leaseStats.totalExpenses.toFixed(2) }} €</span
+            >
+          </div>
+          <div
+            class="financial-stat"
+            [class.financial-stat--positive]="leaseStats.netBalance >= 0"
+            [class.financial-stat--negative]="leaseStats.netBalance < 0"
+          >
+            <span class="financial-stat__label">{{
+              "TRANSACTION.NET_BALANCE" | transloco
+            }}</span>
+            <span class="financial-stat__value">
+              {{ leaseStats.netBalance >= 0 ? "+" : ""
+              }}{{ leaseStats.netBalance.toFixed(2) }} €
+            </span>
+          </div>
+        </div>
+      } @else {
+        <p class="loading-placeholder">
+          {{ "TRANSACTION.LOADING_FINANCIAL_DATA" | transloco }}...
+        </p>
+      }
+    </div>
   }
-  @if (errorMessage) {
-    <div class="alert alert-error">{{ errorMessage }}</div>
-  }
-</ng-template>
+</div>

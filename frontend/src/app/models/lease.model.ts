@@ -1,6 +1,7 @@
 // models/lease.model.ts
 
 export type LeaseStatus = "DRAFT" | "ACTIVE" | "FINISHED" | "CANCELLED";
+
 export type LeaseType =
   | "SHORT_TERM"
   | "MAIN_RESIDENCE_3Y"
@@ -8,14 +9,30 @@ export type LeaseType =
   | "MAIN_RESIDENCE_9Y"
   | "STUDENT"
   | "GLIDING"
-  | "COMMERCIAL";
+  | "COMMERCIAL"
+  | "SHARING";
 
-export const LEASE_STATUS_LABELS: Record<LeaseStatus, string> = {
-  DRAFT: "Draft",
-  ACTIVE: "Active",
-  FINISHED: "Finished",
-  CANCELLED: "Cancelled",
-};
+type EnforceAllLeaseTypes<T extends readonly LeaseType[]> = [
+  LeaseType,
+] extends [T[number]]
+  ? T
+  : never;
+
+const createLeaseTypes = <T extends readonly LeaseType[]>(
+  arr: EnforceAllLeaseTypes<T>,
+) => arr;
+
+export const LEASE_TYPES = createLeaseTypes([
+  "SHORT_TERM",
+  "MAIN_RESIDENCE_3Y",
+  "MAIN_RESIDENCE_6Y",
+  "MAIN_RESIDENCE_9Y",
+  "STUDENT",
+  "GLIDING",
+  "COMMERCIAL",
+  "SHARING",
+] as const);
+
 export type ChargesType = "FORFAIT" | "PROVISION";
 export type DepositType =
   | "BLOCKED_ACCOUNT"
@@ -25,20 +42,6 @@ export type DepositType =
 export type TenantRole = "PRIMARY" | "CO_TENANT" | "GUARANTOR";
 export type RentField = "RENT" | "CHARGES";
 
-export const LEASE_TYPE_LABELS: Record<LeaseType, string> = {
-  SHORT_TERM: "Short-term",
-  MAIN_RESIDENCE_3Y: "Main residence (3y)",
-  MAIN_RESIDENCE_6Y: "Main residence (6y)",
-  MAIN_RESIDENCE_9Y: "Main residence (9y)",
-  STUDENT: "Student",
-  GLIDING: "Gliding",
-  COMMERCIAL: "Commercial",
-};
-
-export const LEASE_TYPES: LeaseType[] = Object.keys(
-  LEASE_TYPE_LABELS,
-) as LeaseType[];
-
 export const LEASE_DURATION_MONTHS: Record<LeaseType, number> = {
   SHORT_TERM: 3,
   MAIN_RESIDENCE_3Y: 36,
@@ -47,6 +50,7 @@ export const LEASE_DURATION_MONTHS: Record<LeaseType, number> = {
   STUDENT: 12,
   GLIDING: 12,
   COMMERCIAL: 108,
+  SHARING: 36,
 };
 
 export const DEFAULT_NOTICE_MONTHS: Record<LeaseType, number> = {
@@ -57,6 +61,7 @@ export const DEFAULT_NOTICE_MONTHS: Record<LeaseType, number> = {
   STUDENT: 1,
   GLIDING: 3,
   COMMERCIAL: 6,
+  SHARING: 3,
 };
 
 export interface LeaseTenant {

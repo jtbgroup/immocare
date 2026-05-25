@@ -12,13 +12,7 @@ import { Subject } from "rxjs";
 import { takeUntil } from "rxjs/operators";
 import { ActiveEstateService } from "../../../../../core/services/active-estate.service";
 import { LeaseService } from "../../../../../core/services/lease.service";
-import {
-  LEASE_STATUS_LABELS,
-  LEASE_TYPE_LABELS,
-  LeaseStatus,
-  LeaseSummary,
-  LeaseType,
-} from "../../../../../models/lease.model";
+import { LeaseSummary } from "../../../../../models/lease.model";
 
 @Component({
   selector: "app-lease-section",
@@ -85,13 +79,11 @@ export class LeaseSectionComponent implements OnChanges, OnDestroy {
     return this.leases.filter((l) => l.status === "FINISHED");
   }
 
-  statusLabel(status: LeaseStatus): string {
-    return LEASE_STATUS_LABELS[status] ?? status;
-  }
+  // statusLabel(status: LeaseStatus): string {
+  //   return LEASE_STATUS_LABELS[status] ?? status;
+  // }
 
-  leaseTypeLabel(type: LeaseType): string {
-    return LEASE_TYPE_LABELS[type] ?? type;
-  }
+  // leaseTypeLabel(type: LeaseType): string {}
 
   tenantNames(lease: LeaseSummary): string {
     return lease.tenantNames?.join(", ") || "—";

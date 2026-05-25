@@ -31,7 +31,7 @@
             (click)="toggleStatus(s)"
             type="button"
           >
-            {{ s }}
+            {{ "LEASE.STATUS_VALUES." + s | transloco }}
           </button>
         }
       </div>
@@ -42,9 +42,9 @@
       <label class="filter-label">{{ "GLOBAL.TYPE" | transloco }}</label>
       <select [(ngModel)]="filters.leaseType" (change)="onFilterChange()">
         <option value="">{{ "GLOBAL.ALL" | transloco }}</option>
-        @for (key of leaseTypeKeys; track key) {
+        @for (key of LEASE_TYPES; track key) {
           <option [value]="key">
-            {{ leaseTypeLabels[key] }}
+            {{ "LEASE.TYPE_VALUES." + key | transloco }}
           </option>
         }
       </select>
@@ -231,9 +231,12 @@
                 </a>
               </td>
               <td>
-                <span [class]="statusClass(lease.status)">{{
-                  lease.status
-                }}</span>
+                <span
+                  class="lease-status-badge lease-status-badge--{{
+                    lease.status | lowercase
+                  }}"
+                  >{{ "LEASE.STATUS_VALUES." + lease.status | transloco }}</span
+                >
               </td>
               <td>{{ lease.startDate | date: "dd/MM/yyyy" }}</td>
               <td>

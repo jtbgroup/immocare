@@ -86,21 +86,19 @@
                 </td>
                 <td>{{ unit.currentPebScore ?? "—" }}</td>
                 <td>
-                  @if (unit.activeLeaseStatus === "ACTIVE") {
+                  @if (unit.activeLeaseStatus) {
                     <span
-                      class="lease-status-badge lease-status-badge--active"
-                      >{{ "HOUSING_UNIT.STATUS.ACTIVE" | transloco }}</span
+                      class="lease-status-badge lease-status-badge--{{
+                        unit.activeLeaseStatus | lowercase
+                      }}"
                     >
-                  } @else if (unit.activeLeaseStatus === "DRAFT") {
-                    <span
-                      class="lease-status-badge lease-status-badge--draft"
-                      >{{ "HOUSING_UNIT.STATUS.DRAFT" | transloco }}</span
-                    >
+                      {{
+                        "LEASE.STATUS_VALUES." + unit.activeLeaseStatus
+                          | transloco
+                      }}
+                    </span>
                   } @else {
-                    <span
-                      class="lease-status-badge lease-status-badge--finished"
-                      >{{ "HOUSING_UNIT.STATUS.VACANT" | transloco }}</span
-                    >
+                    <span class="text-muted">—</span>
                   }
                 </td>
               </tr>

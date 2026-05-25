@@ -1,6 +1,6 @@
 <div class="person-details-container">
   @if (isLoading) {
-    <div class="loading">Loading…</div>
+    <div class="loading">{{ "GLOBAL.LOADING" | transloco }}...</div>
   }
   @if (errorMessage) {
     <div class="alert alert-error">{{ errorMessage }}</div>
@@ -9,7 +9,9 @@
   @if (person && !isLoading) {
     <!-- Breadcrumb -->
     <nav class="breadcrumb" aria-label="breadcrumb">
-      <a [routerLink]="['/estates', estateId, 'persons']">Persons</a>
+      <a [routerLink]="['/estates', estateId, 'persons']">{{
+        "PERSON.PERSONS" | transloco
+      }}</a>
       <span class="breadcrumb-separator">›</span>
       <span>{{ person.firstName }} {{ person.lastName }}</span>
     </nav>
@@ -20,20 +22,24 @@
         <div class="title-row">
           <h1>{{ person.firstName }} {{ person.lastName }}</h1>
           @if (person.isOwner) {
-            <span class="badge badge-owner">Owner</span>
+            <span class="badge badge-owner">{{
+              "GLOBAL.OWNER" | transloco
+            }}</span>
           }
           @if (person.isTenant) {
-            <span class="badge badge-tenant">Tenant</span>
+            <span class="badge badge-tenant">{{
+              "GLOBAL.TENANT" | transloco
+            }}</span>
           }
         </div>
         <div class="actions">
           <a
             [routerLink]="['/estates', estateId, 'persons', person.id, 'edit']"
             class="btn btn-secondary"
-            >Edit</a
+            >{{ "GLOBAL.EDIT" | transloco }}</a
           >
           <button class="btn btn-danger" (click)="confirmDelete()">
-            Delete
+            {{ "GLOBAL.DELETE" | transloco }}
           </button>
         </div>
       </div>
@@ -72,7 +78,11 @@
             (click)="doDelete()"
             [disabled]="isDeleting"
           >
-            {{ isDeleting ? "Deleting..." : "Confirm Delete" }}
+            {{
+              isDeleting
+                ? ("GLOBAL.DELETING" | transloco)
+                : ("GLOBAL.DELETE" | transloco)
+            }}
           </button>
           <button class="btn btn-secondary" (click)="cancelDelete()">
             Cancel
@@ -83,34 +93,34 @@
 
     <!-- Personal Information -->
     <div class="info-card">
-      <h2>Personal Information</h2>
+      <h2>{{ "PERSON.INFORMATION" | transloco }}</h2>
       <div class="info-grid">
         <div class="info-item">
-          <label>Last Name</label>
+          <label>{{ "PERSON.LAST_NAME" | transloco }}</label>
           <p>{{ person.lastName }}</p>
         </div>
         <div class="info-item">
-          <label>First Name</label>
+          <label>{{ "PERSON.FIRST_NAME" | transloco }}</label>
           <p>{{ person.firstName }}</p>
         </div>
         <div class="info-item">
-          <label>Date of Birth</label>
+          <label>{{ "PERSON.BIRTHDATE" | transloco }}</label>
           <p>{{ (person.birthDate | appDate) || "—" }}</p>
         </div>
         <div class="info-item">
-          <label>Place of Birth</label>
+          <label>{{ "PERSON.BIRTH_PLACE" | transloco }}</label>
           <p>{{ person.birthPlace || "—" }}</p>
         </div>
         <div class="info-item">
-          <label>National ID</label>
+          <label>{{ "PERSON.NATIONAL_ID" | transloco }}</label>
           <p>{{ person.nationalId || "—" }}</p>
         </div>
         <div class="info-item">
-          <label>GSM</label>
+          <label>{{ "GLOBAL.MOBILE" | transloco }}</label>
           <p>{{ person.gsm || "—" }}</p>
         </div>
         <div class="info-item">
-          <label>Email</label>
+          <label>{{ "GLOBAL.EMAIL" | transloco }}</label>
           <p>
             @if (person.email) {
               <a [href]="'mailto:' + person.email">{{ person.email }}</a>
@@ -120,7 +130,7 @@
           </p>
         </div>
         <div class="info-item">
-          <label>Address</label>
+          <label>{{ "GLOBAL.ADDRESS" | transloco }}</label>
           <p>
             @if (person.streetAddress || person.postalCode || person.city) {
               <span>
@@ -134,7 +144,9 @@
         </div>
       </div>
       <div class="card-footer">
-        Created {{ person.createdAt | appDate: "HH:mm" }} · Updated
+        {{ "GLOBAL.CREATED" | transloco }}
+        {{ person.createdAt | appDate: "HH:mm" }} ·
+        {{ "GLOBAL.UPDATED" | transloco }}
         {{ person.updatedAt | appDate: "HH:mm" }}
       </div>
     </div>
@@ -142,11 +154,13 @@
     <!-- As Owner: Buildings -->
     @if (person.ownedBuildings && person.ownedBuildings.length > 0) {
       <div class="info-card">
-        <h2>As Owner — Buildings</h2>
+        <h2>{{ "GLOBAL.AS_OWNER_BUILDING" | transloco }}</h2>
         <ul class="related-list">
           @for (b of person.ownedBuildings; track b.id) {
             <li class="related-item">
-              <a [routerLink]="['/estates', estateId, 'buildings', b.id]">{{ b.name }}</a>
+              <a [routerLink]="['/estates', estateId, 'buildings', b.id]">{{
+                b.name
+              }}</a>
               <span class="related-meta">{{ b.city }}</span>
             </li>
           }
@@ -157,11 +171,13 @@
     <!-- As Owner: Units -->
     @if (person.ownedUnits && person.ownedUnits.length > 0) {
       <div class="info-card">
-        <h2>As Owner — Housing Units</h2>
+        <h2>{{ "GLOBAL.AS_OWNER_HOUSING_UNIT" | transloco }}</h2>
         <ul class="related-list">
           @for (u of person.ownedUnits; track u.id) {
             <li class="related-item">
-              <a [routerLink]="['/estates', estateId, 'units', u.id]">Unit {{ u.unitNumber }}</a>
+              <a [routerLink]="['/estates', estateId, 'units', u.id]"
+                >Unit {{ u.unitNumber }}</a
+              >
               <span class="related-meta">{{ u.buildingName }}</span>
             </li>
           }
@@ -172,7 +188,7 @@
     <!-- As Tenant: Leases -->
     @if (person.leases && person.leases.length > 0) {
       <div class="info-card">
-        <h2>As Tenant — Leases</h2>
+        <h2>{{ "PERSON.AS_TENANT" | transloco }}</h2>
         <ul class="related-list">
           @for (l of person.leases; track l.leaseId) {
             <li class="related-item">
@@ -185,7 +201,7 @@
                 >
               </div>
               <span class="badge" [ngClass]="getStatusClass(l.status)">{{
-                l.status
+                "LEASE.STATUS_VALUES." + l.status | transloco
               }}</span>
             </li>
           }
@@ -196,7 +212,11 @@
     <!-- Bank Accounts -->
     <div class="info-card">
       <div class="card-header-row">
-        <h2>🏦 Bank Accounts (IBAN)</h2>
+        <h2>
+          🏦 {{ "GLOBAL.BANK_ACCOUNT" | transloco }} ({{
+            "GLOBAL.IBAN" | transloco
+          }})
+        </h2>
         <button
           class="btn btn-sm btn-secondary"
           (click)="
@@ -205,7 +225,7 @@
             resetIbanForm()
           "
         >
-          + Add IBAN
+          + {{ "GLOBAL.ADD_IBAN" | transloco }}
         </button>
       </div>
 
@@ -228,11 +248,16 @@
           <input
             type="text"
             [(ngModel)]="ibanForm.label"
-            placeholder="Label (optional)"
+            [placeholder]="
+              ('GLOBAL.LABEL' | transloco) +
+              '(' +
+              ('GLOBAL.OPTIONAL' | transloco) +
+              ')'
+            "
           />
           <label class="checkbox-label">
             <input type="checkbox" [(ngModel)]="ibanForm.primary" />
-            Primary
+            {{ "GLOBAL.PRIMARY" | transloco }}
           </label>
           <button class="btn btn-sm btn-primary" (click)="saveIban()">
             {{ editingIban ? "Update" : "Save" }}
@@ -241,7 +266,7 @@
             class="btn btn-sm btn-link"
             (click)="showIbanForm = false; editingIban = undefined"
           >
-            Cancel
+            {{ "GLOBAL.CANCEL" | transloco }}
           </button>
         </div>
       }
@@ -251,9 +276,9 @@
         <table class="data-table">
           <thead>
             <tr>
-              <th>IBAN</th>
-              <th>Label</th>
-              <th class="text-center">Primary</th>
+              <th>{{ "GLOBAL.IBAN" | transloco }}</th>
+              <th>{{ "GLOBAL.LABEL" | transloco }}</th>
+              <th class="text-center">{{ "GLOBAL.PRIMARY" | transloco }}</th>
               <th></th>
             </tr>
           </thead>
@@ -268,12 +293,16 @@
                   }
                 </td>
                 <td class="actions-cell">
-                  <button class="icon-btn" title="Edit" (click)="editIban(ba)">
+                  <button
+                    class="icon-btn"
+                    [title]="'GLOBAL.EDIT' | transloco"
+                    (click)="editIban(ba)"
+                  >
                     ✏️
                   </button>
                   <button
                     class="icon-btn"
-                    title="Delete"
+                    [title]="'GLOBAL.DELETE' | transloco"
                     (click)="deleteIban(ba.id)"
                   >
                     🗑️
@@ -285,7 +314,7 @@
         </table>
       } @else {
         <p class="text-muted" style="margin-top: 0.5rem">
-          No IBAN registered yet.
+          {{ "GLOBAL.NO_IBAN" | transloco }}
         </p>
       }
     </div>

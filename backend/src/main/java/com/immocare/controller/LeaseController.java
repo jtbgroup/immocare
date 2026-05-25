@@ -190,4 +190,15 @@ public class LeaseController {
             @Valid @RequestBody AdjustRentRequest req) {
         return ResponseEntity.ok(leaseService.adjustRent(estateId, id, req));
     }
+
+    /** DELETE /api/v1/estates/{estateId}/leases/{id} */
+    @DeleteMapping("/api/v1/estates/{estateId}/leases/{id}")
+    @PreAuthorize("@security.isManagerOf(#estateId)")
+    public ResponseEntity<Void> delete(
+            @PathVariable UUID estateId,
+            @PathVariable Long id) {
+        leaseService.delete(estateId, id);
+        return ResponseEntity.noContent().build();
+    }
+
 }

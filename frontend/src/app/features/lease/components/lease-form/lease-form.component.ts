@@ -1,4 +1,4 @@
-// features/lease/lease-form/lease-form.component.ts — UC004_ESTATE_PLACEHOLDER Phase 3
+// features/lease/lease-form/lease-form.component.ts
 import { CommonModule } from "@angular/common";
 import { Component, OnInit } from "@angular/core";
 import {
@@ -9,12 +9,12 @@ import {
   Validators,
 } from "@angular/forms";
 import { ActivatedRoute, Router, RouterModule } from "@angular/router";
+import { TranslocoModule } from "@ngneat/transloco";
 import { ActiveEstateService } from "../../../../core/services/active-estate.service";
 import { LeaseService } from "../../../../core/services/lease.service";
 import {
   DEFAULT_NOTICE_MONTHS,
   LEASE_DURATION_MONTHS,
-  LEASE_TYPE_LABELS,
   LEASE_TYPES,
   LeaseType,
   TenantRole,
@@ -29,6 +29,7 @@ import { PersonPickerComponent } from "../../../../shared/components/person-pick
     ReactiveFormsModule,
     FormsModule,
     RouterModule,
+    TranslocoModule,
     PersonPickerComponent,
   ],
   templateUrl: "./lease-form.component.html",
@@ -43,7 +44,6 @@ export class LeaseFormComponent implements OnInit {
   errorMessage = "";
 
   readonly LEASE_TYPES = LEASE_TYPES;
-  readonly LEASE_TYPE_LABELS = LEASE_TYPE_LABELS;
 
   private _updatingDates = false;
 
@@ -61,7 +61,8 @@ export class LeaseFormComponent implements OnInit {
     private route: ActivatedRoute,
     private router: Router,
     private leaseService: LeaseService,
-    private activeEstateService: ActiveEstateService,
+    // exposed as readonly so the template can use it for breadcrumb links
+    readonly activeEstateService: ActiveEstateService,
   ) {}
 
   private get estateId(): string {
@@ -214,7 +215,7 @@ export class LeaseFormComponent implements OnInit {
     return !!(c && c.invalid && (c.dirty || c.touched));
   }
 
-  // ── Tenant picker helpers ────────────────────────────────────────────────
+  // ── Tenant picker ─────────────────────────────────────────────────────────
 
   onTenantPersonSelected(person: any): void {
     this.selectedTenantPerson = person;
@@ -226,9 +227,8 @@ export class LeaseFormComponent implements OnInit {
       this.pendingTenants.some(
         (t) => t.person.id === this.selectedTenantPerson.id,
       )
-    ) {
+    )
       return;
-    }
     this.pendingTenants.push({
       person: {
         id: this.selectedTenantPerson.id,
@@ -250,7 +250,7 @@ export class LeaseFormComponent implements OnInit {
     this.pendingTenants.splice(index, 1);
   }
 
-  // ── Save ─────────────────────────────────────────────────────────────────
+  // ── Save ──────────────────────────────────────────────────────────────────
 
   save(): void {
     if (this.form.invalid) {
@@ -284,7 +284,12 @@ export class LeaseFormComponent implements OnInit {
     if (this.isEditMode && this.leaseId) {
       this.leaseService.update(this.leaseId, base).subscribe({
         next: () =>
-          this.router.navigate(["/estates", this.estateId, "leases", this.leaseId]),
+          this.router.navigate([
+            "/estates",
+            this.estateId,
+            "leases",
+            this.leaseId,
+          ]),
         error: (err) => {
           this.errorMessage = err.error?.message || "Save failed.";
         },

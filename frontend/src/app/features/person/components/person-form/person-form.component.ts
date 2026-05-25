@@ -10,6 +10,7 @@ import {
 import { ActivatedRoute, Router, RouterModule } from "@angular/router";
 import { debounceTime, distinctUntilChanged } from "rxjs/operators";
 
+import { TranslocoModule } from "@ngneat/transloco";
 import { ActiveEstateService } from "../../../../core/services/active-estate.service";
 import { PersonService } from "../../../../core/services/person.service";
 import { Person } from "../../../../models/person.model";
@@ -17,7 +18,7 @@ import { Person } from "../../../../models/person.model";
 @Component({
   selector: "app-person-form",
   standalone: true,
-  imports: [CommonModule, RouterModule, ReactiveFormsModule],
+  imports: [CommonModule, RouterModule, ReactiveFormsModule, TranslocoModule],
   templateUrl: "./person-form.component.html",
   styleUrls: ["./person-form.component.scss"],
 })

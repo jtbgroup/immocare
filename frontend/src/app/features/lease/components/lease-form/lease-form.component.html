@@ -1,95 +1,209 @@
-<!-- features/lease/lease-form/lease-form.component.html — UC004_ESTATE_PLACEHOLDER Phase 3 -->
+<!-- features/lease/lease-form/lease-form.component.html -->
 <div class="lease-form-container">
-  <div class="details-content">
-    <div class="header">
-      <h1>{{ isEditMode ? "Edit Lease" : "Create Lease" }}</h1>
-    </div>
+  <!-- ── Header ──────────────────────────────────────────────────────────── -->
+  <div class="page-header">
+    <h1>
+      {{
+        isEditMode ? ("LEASE.EDIT" | transloco) : ("LEASE.CREATE" | transloco)
+      }}
+    </h1>
   </div>
 
+  <!-- ── Breadcrumb ───────────────────────────────────────────────────────── -->
+  <nav class="breadcrumb" aria-label="breadcrumb">
+    <a
+      [routerLink]="[
+        '/estates',
+        activeEstateService.activeEstateId(),
+        'units',
+        unitId,
+      ]"
+    >
+      {{ "GLOBAL.HOUSING_UNIT" | transloco }}
+    </a>
+    <span class="breadcrumb-separator">›</span>
+    @if (isEditMode && leaseId) {
+      <a
+        [routerLink]="[
+          '/estates',
+          activeEstateService.activeEstateId(),
+          'leases',
+          leaseId,
+        ]"
+      >
+        {{ "GLOBAL.LEASE" | transloco }} #{{ leaseId }}
+      </a>
+      <span class="breadcrumb-separator">›</span>
+      <span>{{ "GLOBAL.EDIT" | transloco }}</span>
+    } @else {
+      <span>{{ "GLOBAL.NEW" | transloco }}</span>
+    }
+  </nav>
+
+  <!-- ── Loading / error ──────────────────────────────────────────────────── -->
   @if (isLoading) {
-    <div class="loading">Loading…</div>
+    <div class="loading">{{ "GLOBAL.LOADING" | transloco }}…</div>
   }
   @if (errorMessage) {
     <div class="alert alert-error">{{ errorMessage }}</div>
   }
 
   @if (!isLoading) {
-    <form [formGroup]="form">
+    <form [formGroup]="form" novalidate>
       <div class="form-card">
-        <!-- 1 — General -->
-        <div class="form-section-title">1 — General</div>
-        <div class="form-row form-row-3">
-          <div class="form-group">
-            <label>Signature Date <span class="required">*</span></label>
-            <input
-              type="date"
-              formControlName="signatureDate"
-              [class.error]="isInvalid('signatureDate')"
-            />
-          </div>
-          <div class="form-group">
-            <label>Start Date <span class="required">*</span></label>
-            <input
-              type="date"
-              formControlName="startDate"
-              [class.error]="isInvalid('startDate')"
-            />
-          </div>
-          <div class="form-group">
-            <label>End Date <span class="required">*</span></label>
-            <input
-              type="date"
-              formControlName="endDate"
-              [class.error]="isInvalid('endDate')"
-            />
-          </div>
+        <!-- ══════════════════════════════════════════════════════════════════
+             1 — Général
+        ══════════════════════════════════════════════════════════════════════ -->
+        <div class="form-group-header">
+          <span class="form-group-label">
+            📋 {{ "GLOBAL.GENERAL" | transloco }}</span
+          >
+          <span class="form-group-line"></span>
         </div>
+
         <div class="form-row form-row-3">
           <div class="form-group">
-            <label>Lease Type <span class="required">*</span></label>
-            <select formControlName="leaseType">
+            <label for="leaseType">
+              {{ "GLOBAL.TYPE" | transloco }} <span class="required">*</span>
+            </label>
+            <select id="leaseType" formControlName="leaseType">
               @for (t of LEASE_TYPES; track t) {
                 <option [value]="t">
-                  {{ LEASE_TYPE_LABELS[t] }}
+                  {{ "LEASE.TYPE_VALUES." + t | transloco }}
                 </option>
               }
             </select>
           </div>
           <div class="form-group">
-            <label>Duration (months) <span class="required">*</span></label>
+            <label for="durationMonths">
+              {{ "GLOBAL.DURATION" | transloco }}
+              <span class="field-unit"
+                >({{ "GLOBAL.MONTHS" | transloco }})</span
+              >
+              <span class="required">*</span>
+            </label>
             <input
+              id="durationMonths"
               type="number"
               formControlName="durationMonths"
               min="1"
               [class.error]="isInvalid('durationMonths')"
             />
+            @if (isInvalid("durationMonths")) {
+              <span class="error-message">{{
+                "VALIDATION.REQUIRED" | transloco
+              }}</span>
+            }
           </div>
           <div class="form-group">
-            <label
-              >Notice Period (months) <span class="required">*</span></label
-            >
-            <input type="number" formControlName="noticePeriodMonths" min="1" />
+            <label for="noticePeriodMonths">
+              {{ "LEASE.NOTICE_PERIOD" | transloco }}
+              <span class="field-unit"
+                >({{ "GLOBAL.MONTHS" | transloco }})</span
+              >
+              <span class="required">*</span>
+            </label>
+            <input
+              id="noticePeriodMonths"
+              type="number"
+              formControlName="noticePeriodMonths"
+              min="1"
+            />
           </div>
         </div>
 
-        <hr class="form-section-divider" />
-
-        <!-- 2 — Financial -->
-        <div class="form-section-title">2 — Financial</div>
         <div class="form-row form-row-3">
           <div class="form-group">
-            <label>Monthly Rent (€) <span class="required">*</span></label>
+            <label for="signatureDate">
+              {{ "LEASE.SIGNATURE_DATE" | transloco }}
+              <span class="required">*</span>
+            </label>
             <input
+              id="signatureDate"
+              type="date"
+              formControlName="signatureDate"
+              [class.error]="isInvalid('signatureDate')"
+            />
+            @if (isInvalid("signatureDate")) {
+              <span class="error-message">{{
+                "VALIDATION.REQUIRED" | transloco
+              }}</span>
+            }
+          </div>
+          <div class="form-group">
+            <label for="startDate">
+              {{ "GLOBAL.START_DATE" | transloco }}
+              <span class="required">*</span>
+            </label>
+            <input
+              id="startDate"
+              type="date"
+              formControlName="startDate"
+              [class.error]="isInvalid('startDate')"
+            />
+            @if (isInvalid("startDate")) {
+              <span class="error-message">{{
+                "VALIDATION.REQUIRED" | transloco
+              }}</span>
+            }
+          </div>
+          <div class="form-group">
+            <label for="endDate">
+              {{ "GLOBAL.END_DATE" | transloco }}
+              <span class="required">*</span>
+            </label>
+            <input
+              id="endDate"
+              type="date"
+              formControlName="endDate"
+              [class.error]="isInvalid('endDate')"
+            />
+            @if (isInvalid("endDate")) {
+              <span class="error-message">{{
+                "VALIDATION.REQUIRED" | transloco
+              }}</span>
+            }
+          </div>
+        </div>
+
+        <!-- ══════════════════════════════════════════════════════════════════
+             2 — Financier
+        ══════════════════════════════════════════════════════════════════════ -->
+        <div class="form-group-header">
+          <span class="form-group-label"
+            >💶 {{ "GLOBAL.FINANCIAL" | transloco }}</span
+          >
+          <span class="form-group-line"></span>
+        </div>
+
+        <div class="form-row form-row-3">
+          <div class="form-group">
+            <label for="monthlyRent">
+              {{ "RENT.MONTHLY_AMOUNT" | transloco }}
+              <span class="field-unit">(€)</span>
+              <span class="required">*</span>
+            </label>
+            <input
+              id="monthlyRent"
               type="number"
               formControlName="monthlyRent"
               min="0.01"
               step="0.01"
               [class.error]="isInvalid('monthlyRent')"
             />
+            @if (isInvalid("monthlyRent")) {
+              <span class="error-message">{{
+                "VALIDATION.REQUIRED" | transloco
+              }}</span>
+            }
           </div>
           <div class="form-group">
-            <label>Monthly Charges (€)</label>
+            <label for="monthlyCharges">
+              {{ "LEASE.CHARGES" | transloco }}
+              <span class="field-unit">(€)</span>
+            </label>
             <input
+              id="monthlyCharges"
               type="number"
               formControlName="monthlyCharges"
               min="0"
@@ -97,55 +211,109 @@
             />
           </div>
           <div class="form-group">
-            <label>Charges Type</label>
-            <select formControlName="chargesType">
+            <label for="chargesType">{{
+              "LEASE.CHARGES_TYPE" | transloco
+            }}</label>
+            <select id="chargesType" formControlName="chargesType">
               <option value="FORFAIT">Forfait</option>
               <option value="PROVISION">Provision</option>
             </select>
           </div>
         </div>
+
         <div class="form-group">
-          <label>Charges Description</label>
-          <input type="text" formControlName="chargesDescription" />
+          <label for="chargesDescription">{{
+            "LEASE.CHARGES_DESCRIPTION" | transloco
+          }}</label>
+          <input
+            id="chargesDescription"
+            type="text"
+            formControlName="chargesDescription"
+          />
         </div>
 
-        <hr class="form-section-divider" />
+        <!-- ══════════════════════════════════════════════════════════════════
+             3 — Enregistrement
+        ══════════════════════════════════════════════════════════════════════ -->
+        <div class="form-group-header">
+          <span class="form-group-label"
+            >📄 {{ "LEASE.REGISTRATION" | transloco }}</span
+          >
+          <span class="form-group-line"></span>
+        </div>
 
-        <!-- 3 — Registration -->
-        <div class="form-section-title">3 — Registration</div>
-
-        <div class="form-subsection-label">Lease deed</div>
+        <p class="form-subsection-label">
+          {{ "GLOBAL.LEASE" | transloco }}
+        </p>
         <div class="form-row">
           <div class="form-group">
-            <label>SPF Finances reference</label>
-            <input type="text" formControlName="registrationSpf" />
+            <label for="registrationSpf">{{
+              "GLOBAL.SPF_FINANCES" | transloco
+            }}</label>
+            <input
+              id="registrationSpf"
+              type="text"
+              formControlName="registrationSpf"
+            />
           </div>
           <div class="form-group">
-            <label>Region reference <span class="field-hint">(Brussels)</span></label>
-            <input type="text" formControlName="registrationRegion" />
+            <label for="registrationRegion">
+              {{ "GLOBAL.REGION" | transloco }}
+              <span class="field-hint">(Brussels)</span>
+            </label>
+            <input
+              id="registrationRegion"
+              type="text"
+              formControlName="registrationRegion"
+            />
           </div>
         </div>
 
-        <div class="form-subsection-label">Inventory (état des lieux)</div>
+        <p class="form-subsection-label">
+          {{ "GLOBAL.INVENTORY" | transloco }}
+        </p>
         <div class="form-row">
           <div class="form-group">
-            <label>SPF Finances reference</label>
-            <input type="text" formControlName="registrationInventorySpf" />
+            <label for="registrationInventorySpf">{{
+              "GLOBAL.SPF_FINANCES" | transloco
+            }}</label>
+            <input
+              id="registrationInventorySpf"
+              type="text"
+              formControlName="registrationInventorySpf"
+            />
           </div>
           <div class="form-group">
-            <label>Region reference <span class="field-hint">(Brussels)</span></label>
-            <input type="text" formControlName="registrationInventoryRegion" />
+            <label for="registrationInventoryRegion">
+              {{ "GLOBAL.REGION" | transloco }}
+              <span class="field-hint">(Brussels)</span>
+            </label>
+            <input
+              id="registrationInventoryRegion"
+              type="text"
+              formControlName="registrationInventoryRegion"
+            />
           </div>
         </div>
 
-        <hr class="form-section-divider" />
+        <!-- ══════════════════════════════════════════════════════════════════
+             4 — Dépôt de garantie
+        ══════════════════════════════════════════════════════════════════════ -->
+        <div class="form-group-header">
+          <span class="form-group-label"
+            >🔒 {{ "GLOBAL.DEPOSIT" | transloco }}</span
+          >
+          <span class="form-group-line"></span>
+        </div>
 
-        <!-- 4 — Guarantee / Deposit -->
-        <div class="form-section-title">4 — Guarantee / Deposit</div>
         <div class="form-row form-row-3">
           <div class="form-group">
-            <label>Amount (€)</label>
+            <label for="depositAmount">
+              {{ "GLOBAL.AMOUNT" | transloco }}
+              <span class="field-unit">(€)</span>
+            </label>
             <input
+              id="depositAmount"
               type="number"
               formControlName="depositAmount"
               min="0"
@@ -153,8 +321,8 @@
             />
           </div>
           <div class="form-group">
-            <label>Type</label>
-            <select formControlName="depositType">
+            <label for="depositType">{{ "GLOBAL.TYPE" | transloco }}</label>
+            <select id="depositType" formControlName="depositType">
               <option [value]="null">—</option>
               <option value="BLOCKED_ACCOUNT">Blocked Account</option>
               <option value="BANK_GUARANTEE">Bank Guarantee</option>
@@ -164,45 +332,81 @@
             </select>
           </div>
           <div class="form-group">
-            <label>Reference</label>
-            <input type="text" formControlName="depositReference" />
+            <label for="depositReference">{{
+              "GLOBAL.REFERENCE" | transloco
+            }}</label>
+            <input
+              id="depositReference"
+              type="text"
+              formControlName="depositReference"
+            />
           </div>
         </div>
 
-        <hr class="form-section-divider" />
+        <!-- ══════════════════════════════════════════════════════════════════
+             5 — Assurance locataire
+        ══════════════════════════════════════════════════════════════════════ -->
+        <div class="form-group-header">
+          <span class="form-group-label"
+            >🛡️ {{ "TENANT.INSURANCE" | transloco }}</span
+          >
+          <span class="form-group-line"></span>
+        </div>
 
-        <!-- 5 — Tenant Insurance -->
-        <div class="form-section-title">5 — Tenant Insurance</div>
         <div class="form-check-group">
           <input
             type="checkbox"
-            id="insuranceCheck"
+            id="tenantInsuranceConfirmed"
             formControlName="tenantInsuranceConfirmed"
           />
-          <label for="insuranceCheck">Insurance confirmed</label>
+          <label for="tenantInsuranceConfirmed">{{
+            "GLOBAL.CONFIRMED" | transloco
+          }}</label>
         </div>
+
         @if (showInsuranceDetails) {
-          <div class="form-row">
+          <div class="form-row insurance-details">
             <div class="form-group">
-              <label>Reference</label>
-              <input type="text" formControlName="tenantInsuranceReference" />
+              <label for="tenantInsuranceReference">{{
+                "GLOBAL.REFERENCE" | transloco
+              }}</label>
+              <input
+                id="tenantInsuranceReference"
+                type="text"
+                formControlName="tenantInsuranceReference"
+              />
             </div>
             <div class="form-group">
-              <label>Expiry Date</label>
-              <input type="date" formControlName="tenantInsuranceExpiry" />
+              <label for="tenantInsuranceExpiry">{{
+                "GLOBAL.EXPIRY" | transloco
+              }}</label>
+              <input
+                id="tenantInsuranceExpiry"
+                type="date"
+                formControlName="tenantInsuranceExpiry"
+              />
             </div>
           </div>
         }
 
-        <!-- 6 — Tenants (create only) -->
+        <!-- ══════════════════════════════════════════════════════════════════
+             6 — Locataires (création uniquement)
+        ══════════════════════════════════════════════════════════════════════ -->
         @if (!isEditMode) {
-          <hr class="form-section-divider" />
-          <div class="form-section-title">6 — Tenants</div>
+          <div class="form-group-header">
+            <span class="form-group-label"
+              >6 — {{ "GLOBAL.TENANTS" | transloco }}</span
+            >
+            <span class="form-group-line"></span>
+          </div>
 
           @if (pendingTenants.length) {
             <ul class="tenant-list">
               @for (t of pendingTenants; track t.person.id; let i = $index) {
                 <li>
+                  <div class="tenant-avatar">
+                    {{ t.person.firstName[0] }}{{ t.person.lastName[0] }}
+                  </div>
                   <span class="tenant-name"
                     >{{ t.person.lastName }} {{ t.person.firstName }}</span
                   >
@@ -228,26 +432,24 @@
           }
 
           @if (!showTenantPicker) {
-            <div>
-              <button
-                type="button"
-                class="btn btn-secondary btn-sm"
-                (click)="showTenantPicker = true"
-              >
-                + Add Tenant
-              </button>
-            </div>
+            <button
+              type="button"
+              class="btn btn-secondary btn-sm"
+              (click)="showTenantPicker = true"
+            >
+              + {{ "GLOBAL.ADD_TENANT" | transloco }}
+            </button>
           }
 
           @if (showTenantPicker) {
             <div class="picker-panel">
               <app-person-picker
-                label="Select Person"
+                label="{{ 'PERSON.SELECT' | transloco }}"
                 [required]="false"
                 (personSelected)="onTenantPersonSelected($event)"
               ></app-person-picker>
-              <div class="form-group" style="margin-top: 0.75rem">
-                <label>Role</label>
+              <div class="form-group picker-role">
+                <label>{{ "GLOBAL.ROLE" | transloco }}</label>
                 <select
                   [(ngModel)]="newTenantRole"
                   [ngModelOptions]="{ standalone: true }"
@@ -264,28 +466,33 @@
                   [disabled]="!selectedTenantPerson"
                   (click)="confirmAddTenant()"
                 >
-                  Add
+                  {{ "GLOBAL.ADD" | transloco }}
                 </button>
                 <button
                   type="button"
                   class="btn btn-secondary btn-sm"
                   (click)="cancelAddTenant()"
                 >
-                  Cancel
+                  {{ "GLOBAL.CANCEL" | transloco }}
                 </button>
               </div>
             </div>
           }
         }
       </div>
-      <!-- end form-card -->
+      <!-- fin form-card -->
 
+      <!-- ── Actions ───────────────────────────────────────────────────────── -->
       <div class="form-actions">
         <button type="button" class="btn btn-secondary" (click)="cancel()">
-          Cancel
+          {{ "GLOBAL.CANCEL" | transloco }}
         </button>
         <button type="button" class="btn btn-primary" (click)="save()">
-          {{ isEditMode ? "Save" : "Create" }}
+          {{
+            isEditMode
+              ? ("GLOBAL.SAVE" | transloco)
+              : ("LEASE.CREATE" | transloco)
+          }}
         </button>
       </div>
     </form>

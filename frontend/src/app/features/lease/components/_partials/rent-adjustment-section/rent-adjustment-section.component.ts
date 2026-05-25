@@ -2,6 +2,7 @@
 import { CommonModule } from "@angular/common";
 import { Component, EventEmitter, Input, OnInit, Output } from "@angular/core";
 import { FormsModule } from "@angular/forms";
+import { TranslocoModule } from "@ngneat/transloco";
 import { ActiveEstateService } from "../../../../../core/services/active-estate.service";
 import { LeaseService } from "../../../../../core/services/lease.service";
 import { AdjustRentRequest, Lease } from "../../../../../models/lease.model";
@@ -9,7 +10,7 @@ import { AdjustRentRequest, Lease } from "../../../../../models/lease.model";
 @Component({
   selector: "app-rent-adjustment-section",
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule, TranslocoModule],
   templateUrl: "./rent-adjustment-section.component.html",
   styleUrls: ["./rent-adjustment-section.component.scss"],
 })

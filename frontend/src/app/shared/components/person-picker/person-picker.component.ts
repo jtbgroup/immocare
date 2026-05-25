@@ -18,13 +18,14 @@ import { RouterModule } from "@angular/router";
 import { of, Subscription } from "rxjs";
 import { catchError, debounceTime, distinctUntilChanged } from "rxjs/operators";
 
+import { TranslocoModule } from "@ngneat/transloco";
 import { PersonService } from "../../../core/services/person.service";
 import { PersonSummary } from "../../../models/person.model";
 
 @Component({
   selector: "app-person-picker",
   standalone: true,
-  imports: [ReactiveFormsModule, RouterModule],
+  imports: [ReactiveFormsModule, RouterModule, TranslocoModule],
   templateUrl: "./person-picker.component.html",
   styleUrls: ["./person-picker.component.scss"],
   providers: [

@@ -1,4 +1,4 @@
-// features/lease/components/lease-details/lease-details.component.ts — UC004_ESTATE_PLACEHOLDER Phase 3
+// features/lease/components/lease-details/lease-details.component.ts
 import { CommonModule } from "@angular/common";
 import { Component, OnDestroy, OnInit } from "@angular/core";
 import { FormsModule } from "@angular/forms";
@@ -9,11 +9,7 @@ import { takeUntil } from "rxjs/operators";
 import { ActiveEstateService } from "../../../../core/services/active-estate.service";
 import { LeaseService } from "../../../../core/services/lease.service";
 import { TransactionService } from "../../../../core/services/transaction.service";
-import {
-  Lease,
-  LEASE_TYPE_LABELS,
-  LeaseStatus,
-} from "../../../../models/lease.model";
+import { Lease, LeaseStatus } from "../../../../models/lease.model";
 import { TransactionStatistics } from "../../../../models/transaction.model";
 import { AppDatePipe } from "../../../../shared/pipes/app-date.pipe";
 import { RentAdjustmentSectionComponent } from "../_partials/rent-adjustment-section/rent-adjustment-section.component";
@@ -45,11 +41,15 @@ export class LeaseDetailsComponent implements OnInit, OnDestroy {
   lease?: Lease;
   isLoading = false;
   errorMessage = "";
-  readonly LEASE_TYPE_LABELS = LEASE_TYPE_LABELS;
 
+  // Status change
   selectedStatus: LeaseStatus | "" = "";
   isChangingStatus = false;
   statusError = "";
+
+  // Delete
+  deleting = false;
+  deleteError = "";
 
   leaseStats: TransactionStatistics | null = null;
 
@@ -108,13 +108,21 @@ export class LeaseDetailsComponent implements OnInit, OnDestroy {
     });
   }
 
+  back(): void {
+    this.router.navigate(["/estates", this.estateId, "leases"]);
+  }
+
+  // ── Status change ─────────────────────────────────────────────────────────
+
   get eligibleStatuses(): LeaseStatus[] {
     if (!this.lease) return [];
     return TRANSITIONS[this.lease.status] ?? [];
   }
 
   get canChangeStatus(): boolean {
-    return this.eligibleStatuses.length > 0;
+    return (
+      this.eligibleStatuses.length > 0 && this.activeEstateService.canEdit()
+    );
   }
 
   applyStatusChange(): void {
@@ -135,7 +143,39 @@ export class LeaseDetailsComponent implements OnInit, OnDestroy {
       });
   }
 
+  // ── Edit / Delete ─────────────────────────────────────────────────────────
+
   canEdit(): boolean {
     return this.lease?.status === "DRAFT" || this.lease?.status === "ACTIVE";
+  }
+
+  confirmDelete(): void {
+    if (!this.lease) return;
+    if (!confirm(`Delete lease #${this.lease.id}? This cannot be undone.`))
+      return;
+    this.deleting = true;
+    this.leaseService.deleteLease(this.lease.id).subscribe({
+      next: () =>
+        this.router.navigate([
+          "/estates",
+          this.estateId,
+          "units",
+          this.lease!.housingUnitId,
+        ]),
+      error: (err) => {
+        this.deleting = false;
+        this.deleteError = err.error?.message ?? "Failed to delete lease.";
+      },
+    });
+  }
+
+  edit(): void {
+    this.router.navigate([
+      "/estates",
+      this.estateId,
+      "leases",
+      this.lease!.id,
+      "edit",
+    ]);
   }
 }

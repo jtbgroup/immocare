@@ -3,6 +3,7 @@
 import { CommonModule } from "@angular/common";
 import { Component, EventEmitter, Input, Output } from "@angular/core";
 import { FormsModule } from "@angular/forms";
+import { TranslocoModule } from "@ngneat/transloco";
 import { ActiveEstateService } from "../../../../../core/services/active-estate.service";
 import { LeaseService } from "../../../../../core/services/lease.service";
 import { Lease, LeaseTenant } from "../../../../../models/lease.model";
@@ -11,7 +12,7 @@ import { PersonPickerComponent } from "../../../../../shared/components/person-p
 @Component({
   selector: "app-tenant-section",
   standalone: true,
-  imports: [CommonModule, FormsModule, PersonPickerComponent],
+  imports: [CommonModule, FormsModule, PersonPickerComponent, TranslocoModule],
   templateUrl: "./tenant-section.component.html",
   styleUrls: ["./tenant-section.component.scss"],
 })

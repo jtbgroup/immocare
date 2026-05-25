@@ -30,7 +30,7 @@
       <input
         type="text"
         class="picker-input"
-        placeholder="Search by first or last name…"
+        placeholder="{{ 'USER.SEARCH_PLACEHOLDER' | transloco }}"
         [formControl]="searchControl"
         (focus)="openPicker()"
         (blur)="closeDropdown()"
@@ -44,7 +44,7 @@
           }
           @if (showMinCharsHint && !isLoading) {
             <div class="picker-item picker-hint">
-              Type at least 2 characters to search
+              {{ "GLOBAL.SHOW_MIN_CHARS_HINT" | transloco }}
             </div>
           }
           @if (!isLoading && !showMinCharsHint) {
@@ -73,12 +73,12 @@
             }
             @if (noResults) {
               <div class="picker-item picker-hint">
-                No person found.
+                {{ "PERSON.NO_RESULTS" | transloco }}
                 <a
                   routerLink="/persons/new"
                   target="_blank"
                   class="picker-create"
-                  >+ Create new</a
+                  >+ {{ "PERSON.CREATE_NEW" | transloco }}</a
                 >
               </div>
             }

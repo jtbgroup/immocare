@@ -261,6 +261,25 @@ public class LeaseService {
         return toDTO(leaseRepository.save(lease));
     }
 
+    // ─── Delete ───────────────────────────────────────────────────────────────
+
+    /**
+     * Deletes a lease.
+     * Business rules:
+     * - Only DRAFT or CANCELLED leases can be deleted.
+     * - An ACTIVE or FINISHED lease cannot be deleted (use status change instead).
+     * - All associated LeaseTenants and LeaseRentAdjustments are deleted via
+     * cascade (orphanRemoval = true on the entity), so no manual cleanup needed.
+     */
+    @Transactional
+    public void delete(UUID estateId, Long id) {
+        Lease lease = findLeaseInEstate(estateId, id);
+        if (lease.getStatus() != LeaseStatus.DRAFT && lease.getStatus() != LeaseStatus.CANCELLED) {
+            throw new LeaseNotEditableException(id, lease.getStatus().name());
+        }
+        leaseRepository.delete(lease);
+    }
+
     // ─── Private helpers ──────────────────────────────────────────────────────
 
     /**

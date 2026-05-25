@@ -21,6 +21,16 @@
     "PERSON": "Person",
     "BANK_ACCOUNT": "Bank Account",
     "BANK_ACCOUNTS": "Bank Accounts",
+    "ADD_ACCOUNT": "Add account",
+    "NO_BANK_ACCOUNT": "No bank account configured",
+    "BANK_ACCOUNT_LABEL_PLACEHOLDER": "e.g. ING Main Account",
+    "BANK_ACCOUNT_TYPES": {
+      "CURRENT": "Current",
+      "SAVINGS": "Savings"
+    },
+    "IBAN": "IBAN",
+    "ADD_IBAN": "Add IBAN",
+    "NO_IBAN": "No IBAN recorded yet",
     "SETTINGS": "Settings",
     "ESTATE": "Estate",
     "USER": "User",
@@ -93,7 +103,6 @@
     "GARDEN": "Garden",
     "VIEW": "View",
     "PERIOD": "Period",
-    "CHARGES": "charges",
     "SHOW": "Show",
     "HIDE": "Hide",
     "BOILER": "Boiler",
@@ -147,7 +156,23 @@
     "REFERENCE": "Reference",
     "CONFIRMED": "Confirmed",
     "EXPIRY": "Expiry",
-    "FINANCIAL": "Financial"
+    "FINANCIAL": "Financial",
+    "LOCATION": "Location",
+    "GENERAL": "General",
+    "EFFECTIVE_DATE": "Effective Date",
+    "POST": "Post",
+    "CURRENT_AMOUNT": "Current Amount",
+    "NEW_AMOUNT": "New Amount",
+    "OLD": "Old",
+    "DELTA": "Delta",
+    "SHOW_MIN_CHARS_HINT": "Type at least 2 characters to search",
+    "MOBILE": "Mobile",
+    "PRIMARY": "Primary",
+    "CREATED": "Created",
+    "UPDATED": "Updated",
+    "CREATE": "Create",
+    "ACTIVE": "Active",
+    "INACTIVE": "Inactive"
   },
   "NAV": {
     "MY_ESTATES": "My Estates",
@@ -264,12 +289,39 @@
     "ACTIVE_LEASES": "Active Leases",
     "STATUS": "Lease status",
     "NEW": "New Lease",
+    "EDIT": "Edit Lease",
     "NO_LEASES": "No leases recorded.",
     "PAST_LEASES": "Past Leases",
     "INDEXATION_DUE_ANNIVERSARY": "🔔 Indexation due — anniversary",
     "END_NOTICE_DUE": "🔔 End notice due — end date",
     "SIGNATURE_DATE": "Signature Date",
-    "NOTICE_PERIOD": "Notice Period (months)"
+    "NOTICE_PERIOD": "Notice Period (months)",
+    "REGISTRATION": "Lease Registration",
+    "CHARGES": "Charges",
+    "CHARGES_TYPE": "Charges Type",
+    "CHARGES_DESCRIPTION": "Charges description",
+    "RENT_HISTORY": "Rent History",
+    "RENT_ADJUSTMENT": "Rent Adjustment",
+    "ADJUST": "Adjust Rent",
+    "NO_RENT_ADJUSTMENTS": "No adjustments recorded yet.",
+    "ADJUSTMENT_REASON_PLACEHOLDER": "e.g. Annual indexation, Market adjustment…",
+    "STATUS_VALUES": {
+      "FINISHED": "Finished",
+      "ACTIVE": "Active",
+      "DRAFT": "Draft",
+      "CANCELLED": "Cancelled"
+    },
+    "TYPE_VALUES": {
+      "SHORT_TERM": "Short term",
+      "MAIN_RESIDENCE_3Y": "Residence 3 years",
+      "MAIN_RESIDENCE_6Y": "Residence 6 years",
+      "MAIN_RESIDENCE_9Y": "Residence 9 years",
+      "STUDENT": "Student",
+      "GLIDING": "Gliding",
+      "COMMERCIAL": "Commercial",
+      "SHARING": "Sharing"
+    },
+    "CHANGE_STATUS": "Change status"
   },
   "ESTATE": {
     "ESTATES": "Estates",
@@ -294,8 +346,24 @@
   },
   "PERSON": {
     "PERSONS": "Persons",
+    "NEW": "New Person",
+    "ADD": "Add Person",
+    "EDIT": "Edit Person",
     "QUICK_DESC": "Owners, tenants and contacts",
-    "SEARCH_BY_NAME_PLACEHOLDER": "Search by name..."
+    "SEARCH_BY_NAME_PLACEHOLDER": "Search by name...",
+    "SELECT_PLACEHOLDER": "Select Person",
+    "NO_RECORD": "No person yet",
+    "FIST_NAME": "First name",
+    "LAST_NAME": "Last name",
+    "NATIONAL_ID": "National number",
+    "BIRTHDATE": "Date of birth",
+    "BIRTH_PLACE": "Place od birth",
+    "INFORMATION": "Personal information",
+    "AS_TENANT": "As Tenant - Lease",
+    "AS_OWNER_BUILDING": "As owner - Building",
+    "AS_OWNER_HOUSING_UNIT": "As owner - Housing unit",
+    "VIEW_PERSON": "View existing person",
+    "ENTER_VALID_EMAIL": "Enter a valid email"
   },
   "MEMBER": {
     "ADD": "Add Member",
@@ -338,7 +406,8 @@
     "NEW_PASSWORD_PLACEHOLDER": "Min. 8 chars, 1 upper, 1 lower, 1 digit"
   },
   "ROLE": {
-    "EDIT": "Edit Role"
+    "EDIT": "Edit Role",
+    "ROLES": "Roles"
   },
   "ROOM": {
     "ROOMS": "Rooms",
@@ -348,6 +417,7 @@
   },
   "RENT": {
     "CURRENT": "Current Rent",
+    "NEW": "New Rent",
     "ERROR_POSITIVE_AMOUNT": "Rent must be positive",
     "ANNUAL_INDEXATION": "Annual indexation",
     "MARKET_ADJUSTMENT": "Market adjustment",
@@ -366,7 +436,14 @@
   },
   "TENANT": {
     "TENANTS": "Tenants",
-    "INSURANCE": "Tenant Insurance"
+    "ADD": "Add tenant",
+    "INSURANCE": "Tenant Insurance",
+    "NO_RECORD": "No tenants.",
+    "ROLE": {
+      "PRIMARY": "Primary",
+      "CO_TENANT": "Co-tenant",
+      "GUARANTOR": "Guarantor"
+    }
   },
   "METER": {
     "METERS": "Meters",

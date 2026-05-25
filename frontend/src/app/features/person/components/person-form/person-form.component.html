@@ -2,13 +2,17 @@
   <!-- Header -->
   <div class="details-content">
     <div class="header">
-      <h1>{{ isEditMode ? "Edit Person" : "Add Person" }}</h1>
+      <h1>
+        {{
+          isEditMode ? ("PERSON.EDIT" | transloco) : ("PERSON.ADD" | transloco)
+        }}
+      </h1>
     </div>
   </div>
 
   <!-- Loading -->
   @if (isLoading) {
-    <div class="loading">Loading...</div>
+    <div class="loading">{{ "GLOBAL.LOADING" | transloco }}...</div>
   }
 
   <!-- Error -->
@@ -24,7 +28,10 @@
           <div class="form-section-title">Identity</div>
           <div class="form-row">
             <div class="form-group">
-              <label>Last Name <span class="required">*</span></label>
+              <label
+                >{{ "PERSON.LAST_NAME" | transloco }}
+                <span class="required">*</span></label
+              >
               <input
                 type="text"
                 formControlName="lastName"
@@ -37,7 +44,10 @@
               }
             </div>
             <div class="form-group">
-              <label>First Name <span class="required">*</span></label>
+              <label
+                >{{ "PERSON.FIRST_NAME" | transloco }}
+                <span class="required">*</span></label
+              >
               <input
                 type="text"
                 formControlName="firstName"
@@ -52,16 +62,16 @@
           </div>
           <div class="form-row">
             <div class="form-group">
-              <label>Date of Birth</label>
+              <label>{{ "PERSON.BIRTHDATE" | transloco }}</label>
               <input type="date" formControlName="birthDate" />
             </div>
             <div class="form-group">
-              <label>Place of Birth</label>
+              <label>{{ "PERSON.BIRTH_PLACE" | transloco }}</label>
               <input type="text" formControlName="birthPlace" />
             </div>
           </div>
           <div class="form-group">
-            <label>National ID</label>
+            <label>{{ "PERSON.NATIONAL_ID" | transloco }}</label>
             <input
               type="text"
               formControlName="nationalId"
@@ -71,9 +81,14 @@
               <span class="error-message">
                 This national ID already exists.
                 <a
-                  [routerLink]="['/estates', estateId, 'persons', nationalIdConflictId]"
+                  [routerLink]="[
+                    '/estates',
+                    estateId,
+                    'persons',
+                    nationalIdConflictId,
+                  ]"
                   target="_blank"
-                  >View existing person</a
+                  >{{ "PERSON.VIEW_PERSON" | transloco }}</a
                 >
               </span>
             }
@@ -85,7 +100,7 @@
           <div class="form-section-title">Contact</div>
           <div class="form-row">
             <div class="form-group">
-              <label>GSM</label>
+              <label>{{ "GLOBAL.MOBILE" | transloco }}</label>
               <input
                 type="text"
                 formControlName="gsm"
@@ -93,16 +108,16 @@
               />
             </div>
             <div class="form-group">
-              <label>Email</label>
+              <label>{{ "GLOBAL.EMAIL" | transloco }}</label>
               <input
                 type="email"
                 formControlName="email"
                 [class.error]="isInvalid('email')"
               />
               @if (isInvalid("email")) {
-                <span class="error-message"
-                  >Please enter a valid email address.</span
-                >
+                <span class="error-message">{{
+                  "PERSON.ENTER_VALID_EMAIL" | transloco
+                }}</span>
               }
             </div>
           </div>
@@ -112,20 +127,20 @@
         <div class="form-section">
           <div class="form-section-title">Address</div>
           <div class="form-group">
-            <label>Street Address</label>
+            <label>{{ "GLOBAL.STREET_ADDRESS" | transloco }}</label>
             <input type="text" formControlName="streetAddress" />
           </div>
           <div class="form-row form-row-3">
             <div class="form-group">
-              <label>Postal Code</label>
+              <label>{{ "GLOBAL.POSTAL_CODE" | transloco }}</label>
               <input type="text" formControlName="postalCode" />
             </div>
             <div class="form-group">
-              <label>City</label>
+              <label>{{ "GLOBAL.CITY" | transloco }}</label>
               <input type="text" formControlName="city" />
             </div>
             <div class="form-group">
-              <label>Country</label>
+              <label>{{ "GLOBAL.COUNTRY" | transloco }}</label>
               <input type="text" formControlName="country" />
             </div>
           </div>
@@ -134,7 +149,7 @@
         <!-- Actions -->
         <div class="form-actions">
           <button type="button" class="btn btn-secondary" (click)="cancel()">
-            Cancel
+            {{ "GLOBAL.CANCEL" | transloco }}
           </button>
           <button
             type="submit"
@@ -143,10 +158,10 @@
           >
             {{
               isSaving
-                ? "Saving..."
+                ? ("GLOBAL.SAVING" | transloco) + "..."
                 : isEditMode
-                  ? "Save Changes"
-                  : "Create Person"
+                  ? ("GLOBAL.SAVE" | transloco)
+                  : ("GLOBAL.CREATE" | transloco)
             }}
           </button>
         </div>

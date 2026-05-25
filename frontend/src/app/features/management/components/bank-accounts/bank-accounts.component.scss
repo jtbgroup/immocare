@@ -50,5 +50,7 @@
   opacity: 0.75;
   transition: opacity 0.15s;
 
-  &:hover { opacity: 1; }
+  &:hover {
+    opacity: 1;
+  }
 }

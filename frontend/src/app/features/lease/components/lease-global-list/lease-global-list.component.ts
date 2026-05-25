@@ -10,7 +10,7 @@ import { TranslocoModule } from "@ngneat/transloco";
 import { ActiveEstateService } from "../../../../core/services/active-estate.service";
 import { LeaseService } from "../../../../core/services/lease.service";
 import {
-  LEASE_TYPE_LABELS,
+  LEASE_TYPES,
   LeaseGlobalSummary,
   LeaseStatus,
   LeaseType,
@@ -54,8 +54,8 @@ export class LeaseGlobalListComponent implements OnInit, OnDestroy {
     "FINISHED",
     "CANCELLED",
   ];
-  readonly leaseTypeLabels = LEASE_TYPE_LABELS;
-  readonly leaseTypeKeys = Object.keys(LEASE_TYPE_LABELS) as LeaseType[];
+
+  readonly LEASE_TYPES = LEASE_TYPES;
 
   filters: LeaseGlobalFilters = {
     statuses: ["ACTIVE"],
@@ -192,16 +192,16 @@ export class LeaseGlobalListComponent implements OnInit, OnDestroy {
     this.router.navigate(["/estates", this.estateId, "buildings", buildingId]);
   }
 
-  statusClass(status: LeaseStatus): string {
-    return (
-      {
-        ACTIVE: "badge badge-active",
-        DRAFT: "badge badge-draft",
-        FINISHED: "badge badge-finished",
-        CANCELLED: "badge badge-cancelled",
-      }[status] ?? "badge"
-    );
-  }
+  // statusClass(status: LeaseStatus): string {
+  //   return (
+  //     {
+  //       ACTIVE: "badge badge-active",
+  //       DRAFT: "badge badge-draft",
+  //       FINISHED: "badge badge-finished",
+  //       CANCELLED: "badge badge-cancelled",
+  //     }[status] ?? "badge"
+  //   );
+  // }
 
   formatCurrency(value: number): string {
     return new Intl.NumberFormat("fr-BE", {

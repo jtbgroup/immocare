@@ -64,7 +64,9 @@
                     unit.activeLeaseStatus | lowercase
                   }}"
                 >
-                  {{ unit.activeLeaseStatus }}
+                  {{
+                    "LEASE.STATUS_VALUES." + unit.activeLeaseStatus | transloco
+                  }}
                 </span>
               } @else {
                 <span class="text-muted">—</span>

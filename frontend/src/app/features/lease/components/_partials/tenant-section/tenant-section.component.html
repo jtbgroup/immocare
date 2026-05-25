@@ -2,10 +2,17 @@
 <!-- canEdit() guards applied to Add Tenant and Remove Tenant buttons -->
 <div class="info-card">
   <div class="info-card-title">
-    <h2>Tenants</h2>
-    @if ((lease.status === 'DRAFT' || lease.status === 'ACTIVE') && activeEstateService.canEdit()) {
+    <h2>{{ "TENANT.TENANTS" | transloco }}</h2>
+    @if (
+      (lease.status === "DRAFT" || lease.status === "ACTIVE") &&
+      activeEstateService.canEdit()
+    ) {
       <button class="btn btn-primary btn-sm" (click)="showPicker = !showPicker">
-        {{ showPicker ? 'Cancel' : '+ Add Tenant' }}
+        {{
+          showPicker
+            ? ("GLOBAL.CANCEL" | transloco)
+            : "+ " + ("TENANT.ADD" | transloco)
+        }}
       </button>
     }
   </div>
@@ -20,7 +27,9 @@
       <li class="tenant-item">
         <div class="tenant-info">
           <strong>{{ t.lastName }} {{ t.firstName }}</strong>
-          <span class="badge" [ngClass]="roleClass(t.role)">{{ t.role }}</span>
+          <span class="badge" [ngClass]="roleClass(t.role)">
+            {{ "TENANT.ROLE." + t.role | transloco }}
+          </span>
           @if (t.email) {
             <span class="tenant-contact">📧 {{ t.email }}</span>
           }
@@ -40,7 +49,7 @@
       </li>
     }
     @if (lease.tenants.length === 0) {
-      <li class="tenant-empty">No tenants.</li>
+      <li class="tenant-empty">{{ "TENANT.NO_RECORD" | transloco }}</li>
     }
   </ul>
 
@@ -48,16 +57,22 @@
   @if (showPicker && activeEstateService.canEdit()) {
     <div class="picker-panel">
       <app-person-picker
-        label="Select Person"
+        [label]="'PERSON.SELECT_PLACEHOLDER' | transloco"
         [required]="true"
         (personSelected)="onPersonSelected($event)"
       ></app-person-picker>
       <div class="form-group">
-        <label>Role</label>
+        <label>{{ "GLOBAL.ROLE" | transloco }}</label>
         <select [(ngModel)]="newRole">
-          <option value="PRIMARY">Primary</option>
-          <option value="CO_TENANT">Co-Tenant</option>
-          <option value="GUARANTOR">Guarantor</option>
+          <option value="PRIMARY">
+            {{ "TENANT.ROLE.PRIMARY" | transloco }}
+          </option>
+          <option value="CO_TENANT">
+            {{ "TENANT.ROLE.CO_TENANT" | transloco }}
+          </option>
+          <option value="GUARANTOR">
+            {{ "TENANT.ROLE.GUARANTOR" | transloco }}
+          </option>
         </select>
       </div>
       @if (selectedPerson) {
@@ -66,7 +81,11 @@
           (click)="confirmAdd()"
           [disabled]="isAdding"
         >
-          {{ isAdding ? 'Adding…' : 'Add Tenant' }}
+          {{
+            isAdding
+              ? ("GLOBAL.ADDING" | transloco)
+              : ("TENANT.ADD" | transloco)
+          }}
         </button>
       }
     </div>

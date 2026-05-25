@@ -2,6 +2,7 @@ import { CommonModule } from "@angular/common";
 import { Component, OnInit } from "@angular/core";
 import { FormsModule } from "@angular/forms";
 import { RouterModule } from "@angular/router";
+import { TranslocoModule } from "@ngneat/transloco";
 import { debounceTime, distinctUntilChanged, Subject } from "rxjs";
 import { ActiveEstateService } from "../../../../core/services/active-estate.service";
 import { PersonService } from "../../../../core/services/person.service";
@@ -11,7 +12,13 @@ import { SortIconPipe } from "../../../../shared/pipes/sort-icon.pipe";
 @Component({
   selector: "app-person-list",
   standalone: true,
-  imports: [CommonModule, RouterModule, FormsModule, SortIconPipe],
+  imports: [
+    CommonModule,
+    RouterModule,
+    FormsModule,
+    SortIconPipe,
+    TranslocoModule,
+  ],
   templateUrl: "./person-list.component.html",
   styleUrls: ["./person-list.component.scss"],
 })

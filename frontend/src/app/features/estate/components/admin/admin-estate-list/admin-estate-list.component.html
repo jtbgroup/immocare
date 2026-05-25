@@ -104,7 +104,7 @@
     <div class="pagination">
       <button
         class="btn btn-secondary"
-        (click)="previousPage()"
+        (click)="goToPage(currentPage - 1)"
         [disabled]="currentPage === 0"
       >
         {{ "GLOBAL.PREVIOUS" | transloco }}
@@ -120,7 +120,7 @@
       }}</span>
       <button
         class="btn btn-secondary"
-        (click)="nextPage()"
+        (click)="goToPage(currentPage + 1)"
         [disabled]="currentPage >= totalPages - 1"
       >
         {{ "GLOBAL.NEXT" | transloco }}

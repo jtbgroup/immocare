@@ -1,7 +1,7 @@
 <div class="bank-accounts-page page-container">
   <div class="details-content">
     <div class="header">
-      <h1>Bank Accounts</h1>
+      <h1>{{ "GLOBAL.BANK_ACCOUNTS" | transloco }}</h1>
       <div class="actions">
         <button
           class="btn btn-primary"
@@ -9,7 +9,7 @@
             showForm = !showForm; editingAccount = undefined; resetForm()
           "
         >
-          + Add Account
+          + {{ "GLOBAL.ADD_ACCOUNT" | transloco }}
         </button>
       </div>
     </div>
@@ -22,25 +22,39 @@
     <div class="alert alert-success">✅ {{ successMessage }}</div>
   }
   @if (loading) {
-    <div class="loading">Loading…</div>
+    <div class="loading">{{ "GLOBAL.LOADING" | transloco }}...</div>
   }
 
   <!-- Add / Edit form -->
   @if (showForm || editingAccount) {
     <div class="info-card">
-      <h2>{{ editingAccount ? "Edit Account" : "New Account" }}</h2>
+      <h2>
+        {{
+          editingAccount
+            ? ("GLOBAL.EDIT" | transloco)
+            : ("GLOBAL.NEW" | transloco)
+        }}
+      </h2>
       <div class="form-section">
         <div class="form-row">
           <div class="form-group">
-            <label>Label <span class="required">*</span></label>
+            <label
+              >{{ "GLOBAL.LABEL" | transloco }}
+              <span class="required">*</span></label
+            >
             <input
               type="text"
               [(ngModel)]="formData.label"
-              placeholder="e.g. ING Main Account"
+              [placeholder]="
+                'GLOBAL.BANK_ACCOUNT_LABEL_PLACEHOLDER' | transloco
+              "
             />
           </div>
           <div class="form-group">
-            <label>IBAN <span class="required">*</span></label>
+            <label
+              >{{ "GLOBAL.IBAN" | transloco }}
+              <span class="required">*</span></label
+            >
             <input
               type="text"
               [(ngModel)]="formData.accountNumber"
@@ -51,17 +65,19 @@
         </div>
         <div class="form-row">
           <div class="form-group">
-            <label>Type</label>
+            <label>{{ "GLOBAL.TYPE" | transloco }}</label>
             <select [(ngModel)]="formData.type">
               @for (t of accountTypes; track t) {
-                <option [value]="t">{{ t }}</option>
+                <option [value]="t">
+                  {{ "GLOBAL.BANK_ACCOUNT_TYPES." + t | transloco }}
+                </option>
               }
             </select>
           </div>
           <div class="form-group form-group--checkbox">
             <label>
               <input type="checkbox" [(ngModel)]="formData.isActive" />
-              Active
+              {{ "GLOBAL.ACTIVE" | transloco }}
             </label>
           </div>
         </div>
@@ -71,10 +87,14 @@
           class="btn btn-secondary"
           (click)="editingAccount = undefined; showForm = false"
         >
-          Cancel
+          {{ "GLOBAL.CANCEL" | transloco }}
         </button>
         <button class="btn btn-primary" (click)="save()">
-          {{ editingAccount ? "Update" : "Create" }}
+          {{
+            editingAccount
+              ? ("GLOBAL.SAVE" | transloco)
+              : ("GLOBAL.CREATE" | transloco)
+          }}
         </button>
       </div>
     </div>
@@ -87,10 +107,10 @@
         <table>
           <thead>
             <tr>
-              <th>Label</th>
-              <th>IBAN</th>
-              <th>Type</th>
-              <th class="text-center">Active</th>
+              <th>{{ "GLOBAL.LABEL" | transloco }}</th>
+              <th>{{ "GLOBAL.IBAN" | transloco }}</th>
+              <th>{{ "GLOBAL.TYPE" | transloco }}</th>
+              <th class="text-center">{{ "GLOBAL.STATUS" | transloco }}</th>
               <th></th>
             </tr>
           </thead>
@@ -99,18 +119,28 @@
               <tr>
                 <td>{{ ba.label }}</td>
                 <td class="monospace">{{ ba.accountNumber }}</td>
-                <td>{{ ba.type }}</td>
+                <td>
+                  {{ "GLOBAL.BANK_ACCOUNT_TYPES." + ba.type | transloco }}
+                </td>
                 <td class="text-center">
                   <span
                     class="badge"
                     [class.badge--active]="ba.isActive"
                     [class.badge--inactive]="!ba.isActive"
                   >
-                    {{ ba.isActive ? "Active" : "Inactive" }}
+                    {{
+                      ba.isActive
+                        ? ("GLOBAL.ACTIVE" | transloco)
+                        : ("GLOBAL.INACTIVE" | transloco)
+                    }}
                   </span>
                 </td>
                 <td class="actions-cell">
-                  <button class="icon-btn" title="Edit" (click)="edit(ba)">
+                  <button
+                    class="icon-btn"
+                    [title]="'GLOBAL.NO_BANK_ACCOUNT' | transloco"
+                    (click)="edit(ba)"
+                  >
                     ✏️
                   </button>
                 </td>
@@ -119,7 +149,7 @@
             @if (accounts.length === 0) {
               <tr>
                 <td colspan="5" class="empty-state">
-                  No bank accounts configured.
+                  {{ "GLOBAL.NO_BANK_ACCOUNT" | transloco }}
                 </td>
               </tr>
             }
