@@ -201,7 +201,7 @@ Manages rental leases for housing units. A lease links a housing unit to one or 
 | `signature_date` | DATE | NOT NULL |
 | `start_date` | DATE | NOT NULL |
 | `end_date` | DATE | NOT NULL |
-| `lease_type` | VARCHAR(30) | NOT NULL, CHECK IN (SHORT_TERM, MAIN_RESIDENCE_3Y, MAIN_RESIDENCE_6Y, MAIN_RESIDENCE_9Y, STUDENT, GLIDING, COMMERCIAL) |
+| `lease_type` | VARCHAR(30) | NOT NULL, CHECK IN (SHORT_TERM, MAIN_RESIDENCE_3Y, MAIN_RESIDENCE_6Y, MAIN_RESIDENCE_9Y, STUDENT, GLIDING, COMMERCIAL, SHARING) |
 | `duration_months` | INTEGER | NOT NULL, CHECK > 0 |
 | `notice_period_months` | INTEGER | NOT NULL, CHECK > 0 |
 | `monthly_rent` | NUMERIC(10,2) | NOT NULL, CHECK > 0 |
@@ -326,7 +326,7 @@ effectiveDate* LocalDate
 ## Enums
 
 ### `LeaseStatus`: `DRAFT`, `ACTIVE`, `FINISHED`, `CANCELLED`
-### `LeaseType`: `SHORT_TERM`, `MAIN_RESIDENCE_3Y`, `MAIN_RESIDENCE_6Y`, `MAIN_RESIDENCE_9Y`, `STUDENT`, `GLIDING`, `COMMERCIAL`
+### `LeaseType`: `SHORT_TERM`, `MAIN_RESIDENCE_3Y`, `MAIN_RESIDENCE_6Y`, `MAIN_RESIDENCE_9Y`, `STUDENT`, `GLIDING`, `COMMERCIAL`,`SHARING`
 ### `ChargesType`: `FORFAIT`, `PROVISION`
 ### `DepositType`: `BLOCKED_ACCOUNT`, `BANK_GUARANTEE`, `CPAS`, `INSURANCE`
 ### `TenantRole`: `PRIMARY`, `CO_TENANT`, `GUARANTOR`

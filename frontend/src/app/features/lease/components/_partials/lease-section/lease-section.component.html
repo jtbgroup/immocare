@@ -6,7 +6,7 @@
       {{ "LEASE.LEASES" | transloco }}
     </h3>
     @if (activeEstateService.canEdit()) {
-      <a
+      <!-- <a
         class="btn btn-sm btn-primary"
         [routerLink]="[
           '/estates',
@@ -14,6 +14,19 @@
           'leases',
         ]"
         [queryParams]="{ unitId: unitId }"
+      >
+        + {{ "LEASE.NEW" | transloco }}
+      </a> -->
+      <a
+        class="btn btn-sm btn-primary"
+        [routerLink]="[
+          '/estates',
+          activeEstateService.activeEstateId(),
+          'housing-units',
+          unitId,
+          'leases',
+          'new',
+        ]"
       >
         + {{ "LEASE.NEW" | transloco }}
       </a>

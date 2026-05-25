@@ -61,7 +61,7 @@ CREATE TABLE lease (
     created_at                    TIMESTAMP     NOT NULL DEFAULT NOW(),
     updated_at                    TIMESTAMP     NOT NULL DEFAULT NOW(),
     CONSTRAINT chk_lease_status   CHECK (status IN ('DRAFT','ACTIVE','FINISHED','CANCELLED')),
-    CONSTRAINT chk_lease_type     CHECK (lease_type IN ('SHORT_TERM','MAIN_RESIDENCE_3Y','MAIN_RESIDENCE_6Y','MAIN_RESIDENCE_9Y','STUDENT','GLIDING','COMMERCIAL')),
+    CONSTRAINT chk_lease_type     CHECK (lease_type IN ('SHORT_TERM','MAIN_RESIDENCE_3Y','MAIN_RESIDENCE_6Y','MAIN_RESIDENCE_9Y','STUDENT','GLIDING','COMMERCIAL', 'SHARING')),
     CONSTRAINT chk_charges_type   CHECK (charges_type IN ('FORFAIT','PROVISION'))
 );
 

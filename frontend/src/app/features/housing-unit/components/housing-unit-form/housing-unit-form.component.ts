@@ -139,8 +139,8 @@ export class HousingUnitFormComponent implements OnInit {
         id: u.ownerId,
         lastName: u.ownerName,
         firstName: "",
-        isOwner: true,
-        isTenant: false,
+        owner: true,
+        tenant: false,
       };
     }
   }

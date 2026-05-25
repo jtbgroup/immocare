@@ -3,9 +3,7 @@
   <!-- ── Header ──────────────────────────────────────────────────────────── -->
   <div class="page-header">
     <h1>
-      {{
-        isEditMode ? ("LEASE.EDIT" | transloco) : ("LEASE.CREATE" | transloco)
-      }}
+      {{ isEditMode ? ("LEASE.EDIT" | transloco) : ("LEASE.NEW" | transloco) }}
     </h1>
   </div>
 
@@ -34,9 +32,9 @@
         {{ "GLOBAL.LEASE" | transloco }} #{{ leaseId }}
       </a>
       <span class="breadcrumb-separator">›</span>
-      <span>{{ "GLOBAL.EDIT" | transloco }}</span>
+      <span>{{ "LEASE.EDIT" | transloco }}</span>
     } @else {
-      <span>{{ "GLOBAL.NEW" | transloco }}</span>
+      <span>{{ "LEASE.NEW" | transloco }}</span>
     }
   </nav>
 
@@ -395,7 +393,7 @@
         @if (!isEditMode) {
           <div class="form-group-header">
             <span class="form-group-label"
-              >6 — {{ "GLOBAL.TENANTS" | transloco }}</span
+              >6 — {{ "TENANT.TENANTS" | transloco }}</span
             >
             <span class="form-group-line"></span>
           </div>
@@ -437,7 +435,7 @@
               class="btn btn-secondary btn-sm"
               (click)="showTenantPicker = true"
             >
-              + {{ "GLOBAL.ADD_TENANT" | transloco }}
+              + {{ "TENANT.ADD" | transloco }}
             </button>
           }
 
@@ -454,9 +452,11 @@
                   [(ngModel)]="newTenantRole"
                   [ngModelOptions]="{ standalone: true }"
                 >
-                  <option value="PRIMARY">Primary</option>
-                  <option value="CO_TENANT">Co-tenant</option>
-                  <option value="GUARANTOR">Guarantor</option>
+                  @for (role of TENANT_ROLES; track role) {
+                    <option value="{{ role }}">
+                      {{ "TENANT.ROLE_VALUES." + role | transloco }}
+                    </option>
+                  }
                 </select>
               </div>
               <div class="picker-actions">
@@ -488,11 +488,7 @@
           {{ "GLOBAL.CANCEL" | transloco }}
         </button>
         <button type="button" class="btn btn-primary" (click)="save()">
-          {{
-            isEditMode
-              ? ("GLOBAL.SAVE" | transloco)
-              : ("LEASE.CREATE" | transloco)
-          }}
+          {{ "GLOBAL.SAVE" | transloco }}
         </button>
       </div>
     </form>

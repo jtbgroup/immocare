@@ -6,7 +6,11 @@ import { FormsModule } from "@angular/forms";
 import { TranslocoModule } from "@ngneat/transloco";
 import { ActiveEstateService } from "../../../../../core/services/active-estate.service";
 import { LeaseService } from "../../../../../core/services/lease.service";
-import { Lease, LeaseTenant } from "../../../../../models/lease.model";
+import {
+  Lease,
+  LeaseTenant,
+  TENANT_ROLES,
+} from "../../../../../models/lease.model";
 import { PersonPickerComponent } from "../../../../../shared/components/person-picker/person-picker.component";
 
 @Component({
@@ -26,6 +30,8 @@ export class TenantSectionComponent {
   errorMessage = "";
   isAdding = false;
   isRemoving = false;
+
+  readonly TENANT_ROLES = TENANT_ROLES;
 
   constructor(
     private leaseService: LeaseService,

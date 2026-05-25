@@ -39,7 +39,25 @@ export type DepositType =
   | "BANK_GUARANTEE"
   | "CPAS"
   | "INSURANCE";
+
 export type TenantRole = "PRIMARY" | "CO_TENANT" | "GUARANTOR";
+
+type EnforceAllTenantRoles<T extends readonly TenantRole[]> = [
+  TenantRole,
+] extends [T[number]]
+  ? T
+  : never;
+
+const createTenantRoles = <T extends readonly TenantRole[]>(
+  arr: EnforceAllTenantRoles<T>,
+) => arr;
+
+export const TENANT_ROLES = createTenantRoles([
+  "PRIMARY",
+  "CO_TENANT",
+  "GUARANTOR",
+] as const);
+
 export type RentField = "RENT" | "CHARGES";
 
 export const LEASE_DURATION_MONTHS: Record<LeaseType, number> = {

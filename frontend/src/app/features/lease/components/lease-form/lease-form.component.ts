@@ -17,6 +17,7 @@ import {
   LEASE_DURATION_MONTHS,
   LEASE_TYPES,
   LeaseType,
+  TENANT_ROLES,
   TenantRole,
 } from "../../../../models/lease.model";
 import { PersonPickerComponent } from "../../../../shared/components/person-picker/person-picker.component";
@@ -44,6 +45,7 @@ export class LeaseFormComponent implements OnInit {
   errorMessage = "";
 
   readonly LEASE_TYPES = LEASE_TYPES;
+  readonly TENANT_ROLES = TENANT_ROLES;
 
   private _updatingDates = false;
 

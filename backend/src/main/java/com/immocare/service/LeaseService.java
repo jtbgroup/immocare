@@ -62,7 +62,8 @@ public class LeaseService {
             "MAIN_RESIDENCE_9Y", 3,
             "STUDENT", 1,
             "GLIDING", 3,
-            "COMMERCIAL", 6);
+            "COMMERCIAL", 6,
+            "SHARING", 3);
 
     private final LeaseRepository leaseRepository;
     private final LeaseRentAdjustmentRepository adjustmentRepository;

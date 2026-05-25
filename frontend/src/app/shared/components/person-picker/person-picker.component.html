@@ -63,10 +63,10 @@
                 @if (person.nationalId) {
                   <span class="result-meta"> ({{ person.nationalId }})</span>
                 }
-                @if (person.isOwner) {
+                @if (person.owner) {
                   <span class="result-badge result-badge--owner">Owner</span>
                 }
-                @if (person.isTenant) {
+                @if (person.tenant) {
                   <span class="result-badge result-badge--tenant">Tenant</span>
                 }
               </button>

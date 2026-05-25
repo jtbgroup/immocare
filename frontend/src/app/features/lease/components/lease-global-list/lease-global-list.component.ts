@@ -180,6 +180,12 @@ export class LeaseGlobalListComponent implements OnInit, OnDestroy {
     }
   }
 
+  newLease(): void {
+    // Redirige vers la liste des unités — l'utilisateur choisit l'unité
+    // depuis laquelle il créera le bail
+    this.router.navigate(["/estates", this.estateId, "units"]);
+  }
+
   viewLease(id: number): void {
     this.router.navigate(["/estates", this.estateId, "leases", id]);
   }

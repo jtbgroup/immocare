@@ -28,7 +28,7 @@
         <div class="tenant-info">
           <strong>{{ t.lastName }} {{ t.firstName }}</strong>
           <span class="badge" [ngClass]="roleClass(t.role)">
-            {{ "TENANT.ROLE." + t.role | transloco }}
+            {{ "TENANT.ROLE_VALUES." + t.role | transloco }}
           </span>
           @if (t.email) {
             <span class="tenant-contact">📧 {{ t.email }}</span>
@@ -64,7 +64,12 @@
       <div class="form-group">
         <label>{{ "GLOBAL.ROLE" | transloco }}</label>
         <select [(ngModel)]="newRole">
-          <option value="PRIMARY">
+          @for (role of TENANT_ROLES; track role) {
+            <option value="{{ role }}">
+              {{ "TENANT.ROLE_VALUES." + role | transloco }}
+            </option>
+          }
+          <!-- <option value="PRIMARY">
             {{ "TENANT.ROLE.PRIMARY" | transloco }}
           </option>
           <option value="CO_TENANT">
@@ -72,7 +77,7 @@
           </option>
           <option value="GUARANTOR">
             {{ "TENANT.ROLE.GUARANTOR" | transloco }}
-          </option>
+          </option> -->
         </select>
       </div>
       @if (selectedPerson) {

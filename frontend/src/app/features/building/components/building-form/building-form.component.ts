@@ -103,8 +103,8 @@ export class BuildingFormComponent implements OnInit {
         id: b.ownerId,
         lastName: b.ownerName,
         firstName: "",
-        isOwner: true,
-        isTenant: false,
+        owner: true,
+        tenant: false,
       };
     }
   }

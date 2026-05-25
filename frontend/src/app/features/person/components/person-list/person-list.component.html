@@ -94,13 +94,17 @@
               <td>{{ person.city || "—" }}</td>
               <td>{{ person.nationalId || "—" }}</td>
               <td>
-                @if (person.isOwner) {
-                  <span class="badge badge-owner">Owner</span>
+                @if (person.owner) {
+                  <span class="badge badge-owner">{{
+                    "GLOBAL.OWNER" | transloco
+                  }}</span>
                 }
-                @if (person.isTenant) {
-                  <span class="badge badge-tenant">Tenant</span>
+                @if (person.tenant) {
+                  <span class="badge badge-tenant">{{
+                    "GLOBAL.TENANT" | transloco
+                  }}</span>
                 }
-                @if (!person.isOwner && !person.isTenant) {
+                @if (!person.owner && !person.tenant) {
                   <span>—</span>
                 }
               </td>

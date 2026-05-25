@@ -21,12 +21,12 @@
       <div class="header">
         <div class="title-row">
           <h1>{{ person.firstName }} {{ person.lastName }}</h1>
-          @if (person.isOwner) {
+          @if (person.owner) {
             <span class="badge badge-owner">{{
               "GLOBAL.OWNER" | transloco
             }}</span>
           }
-          @if (person.isTenant) {
+          @if (person.tenant) {
             <span class="badge badge-tenant">{{
               "GLOBAL.TENANT" | transloco
             }}</span>

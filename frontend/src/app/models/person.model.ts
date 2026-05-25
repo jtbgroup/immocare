@@ -15,8 +15,8 @@ export interface Person {
   postalCode?: string;
   city?: string;
   country?: string;
-  isOwner: boolean;
-  isTenant: boolean;
+  owner: boolean;
+  tenant: boolean;
   ownedBuildings?: OwnedBuilding[];
   ownedUnits?: OwnedUnit[];
   leases?: TenantLease[];
@@ -31,8 +31,8 @@ export interface PersonSummary {
   firstName: string;
   city?: string;
   nationalId?: string;
-  isOwner: boolean;
-  isTenant: boolean;
+  owner: boolean;
+  tenant: boolean;
 }
 
 export interface OwnedBuilding {

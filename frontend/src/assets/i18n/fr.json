@@ -172,7 +172,8 @@
     "UPDATED": "Mis à jour",
     "CREATE": "Créer",
     "ACTIVE": "Actif",
-    "INACTIVE": "Inactif"
+    "INACTIVE": "Inactif",
+    "TENANT": "Locataire"
   },
   "NAV": {
     "MY_ESTATES": "Mes estates",
@@ -363,7 +364,8 @@
     "AS_OWNER_BUILDING": "En tant que propriétaire - Building",
     "AS_OWNER_HOUSING_UNIT": "En tant que propriétaire - Unité",
     "VIEW_PERSON": "Afficher une personne existante",
-    "ENTER_VALID_EMAIL": "Entrez un email valide"
+    "ENTER_VALID_EMAIL": "Entrez un email valide",
+    "SELECT": "Sélectionner une personne"
   },
   "MEMBER": {
     "ADD": "Ajouter un membre",
@@ -439,7 +441,7 @@
     "ADD": "Ajouter un locataire",
     "INSURANCE": "Assurance du locataire",
     "NO_RECORD": "Aucun locataire.",
-    "ROLE": {
+    "ROLE_VALUES": {
       "PRIMARY": "Principal",
       "CO_TENANT": "Co-locataire",
       "GUARANTOR": "Garant"

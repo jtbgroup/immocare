@@ -172,7 +172,8 @@
     "UPDATED": "Updated",
     "CREATE": "Create",
     "ACTIVE": "Active",
-    "INACTIVE": "Inactive"
+    "INACTIVE": "Inactive",
+    "TENANT": "Tenant"
   },
   "NAV": {
     "MY_ESTATES": "My Estates",
@@ -363,7 +364,8 @@
     "AS_OWNER_BUILDING": "As owner - Building",
     "AS_OWNER_HOUSING_UNIT": "As owner - Housing unit",
     "VIEW_PERSON": "View existing person",
-    "ENTER_VALID_EMAIL": "Enter a valid email"
+    "ENTER_VALID_EMAIL": "Enter a valid email",
+    "SELECT": "Select a person"
   },
   "MEMBER": {
     "ADD": "Add Member",
@@ -439,7 +441,7 @@
     "ADD": "Add tenant",
     "INSURANCE": "Tenant Insurance",
     "NO_RECORD": "No tenants.",
-    "ROLE": {
+    "ROLE_VALUES": {
       "PRIMARY": "Primary",
       "CO_TENANT": "Co-tenant",
       "GUARANTOR": "Guarantor"

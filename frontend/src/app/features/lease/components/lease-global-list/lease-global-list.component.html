@@ -14,6 +14,11 @@
           }}</span
         >
       }
+      @if (activeEstateService.canEdit()) {
+        <button class="btn btn-primary btn-sm" (click)="newLease()">
+          + {{ "LEASE.NEW" | transloco }}
+        </button>
+      }
     </div>
   </div>
 
