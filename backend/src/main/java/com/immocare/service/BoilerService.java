@@ -220,7 +220,7 @@ public class BoilerService {
         if (nextServiceDate != null && nextServiceDate.isBefore(installationDate)) {
             throw new IllegalArgumentException("Next service date cannot be before installation date");
         }
-        if (lastServiceDate != null && lastServiceDate.isBefore(outOfServiceDate)) {
+        if (lastServiceDate != null && outOfServiceDate != null && lastServiceDate.isBefore(outOfServiceDate)) {
             throw new IllegalArgumentException("Last service date cannot be before out of service date");
         }
     }

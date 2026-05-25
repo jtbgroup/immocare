@@ -1,25 +1,76 @@
 // models/boiler.model.ts — UC012
 
-export type FuelType = "GAS" | "OIL" | "ELECTRIC" | "HEAT_PUMP";
 export type BoilerOwnerType = "HOUSING_UNIT" | "BUILDING";
-export type ServiceStatus =
-  | "VALID"
-  | "EXPIRING_SOON"
-  | "EXPIRED"
-  | "NO_SERVICE";
 
-export const FUEL_TYPE_LABELS: Record<FuelType, string> = {
-  GAS: "Gas",
-  OIL: "Oil",
-  ELECTRIC: "Electric",
-  HEAT_PUMP: "Heat Pump",
-};
+// *****************
+// FUEL TYPES
+// *****************
+
+export type FuelType = "GAS" | "OIL" | "ELECTRIC" | "HEAT_PUMP";
+
+type EnforceAllFuelTypes<T extends readonly FuelType[]> = [FuelType] extends [
+  T[number],
+]
+  ? T
+  : never;
+
+const createFuelTypes = <T extends readonly FuelType[]>(
+  arr: EnforceAllFuelTypes<T>,
+) => arr;
+
+export const FUEL_TYPES = createFuelTypes([
+  "GAS",
+  "OIL",
+  "ELECTRIC",
+  "HEAT_PUMP",
+] as const);
 
 export const FUEL_TYPE_ICONS: Record<FuelType, string> = {
   GAS: "🔥",
   OIL: "🛢️",
   ELECTRIC: "⚡",
   HEAT_PUMP: "♻️",
+};
+
+// *****************
+// SERVICE STATUSES
+// *****************
+
+export type ServiceStatus =
+  | "VALID"
+  | "EXPIRING_SOON"
+  | "EXPIRED"
+  | "NO_SERVICE";
+
+type EnforceAllServiceStatuses<T extends readonly ServiceStatus[]> = [
+  ServiceStatus,
+] extends [T[number]]
+  ? T
+  : never;
+
+const createServiceStatuses = <T extends readonly ServiceStatus[]>(
+  arr: EnforceAllServiceStatuses<T>,
+) => arr;
+
+export const SERVICE_STATUSES = createServiceStatuses([
+  "VALID",
+  "EXPIRING_SOON",
+  "EXPIRED",
+  "NO_SERVICE",
+] as const);
+
+// export const SERVICE_STATUS_LABELS: Record<ServiceStatus, string> = {
+//   VALID: "Valid",
+//   EXPIRING_SOON: "Expiring soon",
+//   EXPIRED: "Expired",
+//   NO_SERVICE: "No service recorded",
+// };
+
+export const SERVICE_STATUS_CSS: Record<ServiceStatus, string> = {
+  VALID: "badge-green",
+  EXPIRING_SOON: "badge-warning",
+  EXPIRED: "badge-danger",
+  NO_SERVICE: "badge-danger",
 };
 
 export interface BoilerDTO {
@@ -69,17 +120,3 @@ export interface AddBoilerServiceRecordRequest {
   validUntil?: string | null;
   notes?: string | null;
 }
-
-export const SERVICE_STATUS_LABELS: Record<ServiceStatus, string> = {
-  VALID: "Valid",
-  EXPIRING_SOON: "Expiring soon",
-  EXPIRED: "Expired",
-  NO_SERVICE: "No service recorded",
-};
-
-export const SERVICE_STATUS_CSS: Record<ServiceStatus, string> = {
-  VALID: "badge-green",
-  EXPIRING_SOON: "badge-warning",
-  EXPIRED: "badge-danger",
-  NO_SERVICE: "badge-danger",
-};

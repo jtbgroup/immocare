@@ -17,10 +17,10 @@ import {
   BoilerDTO,
   BoilerOwnerType,
   BoilerServiceRecordDTO,
-  FUEL_TYPE_LABELS,
+  FUEL_TYPES,
   SaveBoilerRequest,
   SERVICE_STATUS_CSS,
-  SERVICE_STATUS_LABELS,
+  SERVICE_STATUSES,
 } from "../../../models/boiler.model";
 import { AppDatePipe } from "../../../shared/pipes/app-date.pipe";
 
@@ -60,11 +60,8 @@ export class BoilerSectionComponent implements OnInit, OnDestroy {
 
   today = new Date().toISOString().split("T")[0];
 
-  readonly FUEL_TYPE_LABELS = FUEL_TYPE_LABELS;
-  readonly FUEL_TYPES = Object.keys(
-    FUEL_TYPE_LABELS,
-  ) as (keyof typeof FUEL_TYPE_LABELS)[];
-  readonly SERVICE_STATUS_LABELS = SERVICE_STATUS_LABELS;
+  readonly FUEL_TYPES = FUEL_TYPES;
+  readonly SERVICE_STATUSES = SERVICE_STATUSES;
   readonly SERVICE_STATUS_CSS = SERVICE_STATUS_CSS;
 
   private destroy$ = new Subject<void>();

@@ -120,7 +120,8 @@
     "INSTALLED": "Installée",
     "LAST_SERVICE": "Dernier entretien",
     "NEXT_SERVICE": "Prochain entretien",
-    "VALID_UNTIL": "Valid until",
+    "VALID_UNTIL": "Valable jusqu'au",
+    "AUTO_CALCULATED": "calculé automatiquement si vide",
     "PLATFORM_ADMIN": "Administrateur de la plateforme",
     "SHOWING": "Affichage",
     "CREATED_AT": "Créé le",
@@ -173,7 +174,8 @@
     "CREATE": "Créer",
     "ACTIVE": "Actif",
     "INACTIVE": "Inactif",
-    "TENANT": "Locataire"
+    "TENANT": "Locataire",
+    "OUT_OF_SERVICE_DATE": "Date de mise hors service"
   },
   "NAV": {
     "MY_ESTATES": "Mes estates",
@@ -263,7 +265,19 @@
     "SERVICE_DATE": "Date de l'entretien",
     "INSTALLATION_DATE_REQUIRED": "La date d'installation est requise.",
     "BRAND_REQUIRED": "La marque est requise.",
-    "SERVICE_DATE_REQUIRED": "La date de l'entretien est requise et ne peut pas être dans le futur."
+    "SERVICE_DATE_REQUIRED": "La date de l'entretien est requise et ne peut pas être dans le futur.",
+    "FUEL_TYPES": {
+      "GAS": "Gaz",
+      "OIL": "Mazout",
+      "ELECTRIC": "Électrique",
+      "HEAT_PUMP": "Pompe à chaleur"
+    },
+    "SERVICE_STATUSES": {
+      "VALID": "Valide",
+      "EXPIRING_SOON": "Expire bientôt",
+      "EXPIRED": "Expiré",
+      "NO_SERVICE": "Aucun entretien enregistré"
+    }
   },
   "FIRE_EXTINGUISHER": {
     "FIRE_EXTINGUISHERS": "Extincteurs",

@@ -121,6 +121,7 @@
     "LAST_SERVICE": "Last service",
     "NEXT_SERVICE": "Next service",
     "VALID_UNTIL": "Valid until",
+    "AUTO_CALCULATED": "auto-calculated if empty",
     "PLATFORM_ADMIN": "Platform Admin",
     "SHOWING": "Showing",
     "CREATED_AT": "Created at",
@@ -173,7 +174,8 @@
     "CREATE": "Create",
     "ACTIVE": "Active",
     "INACTIVE": "Inactive",
-    "TENANT": "Tenant"
+    "TENANT": "Tenant",
+    "OUT_OF_SERVICE_DATE": "Out of service date"
   },
   "NAV": {
     "MY_ESTATES": "My Estates",
@@ -263,7 +265,19 @@
     "SERVICE_DATE": "Service date",
     "INSTALLATION_DATE_REQUIRED": "Installation date is required.",
     "BRAND_REQUIRED": "Brand is required.",
-    "SERVICE_DATE_REQUIRED": "Service date is required and cannot be in the future."
+    "SERVICE_DATE_REQUIRED": "Service date is required and cannot be in the future.",
+    "FUEL_TYPES": {
+      "GAS": "Gas",
+      "OIL": "Oil",
+      "ELECTRIC": "Electric",
+      "HEAT_PUMP": "Heat Pump"
+    },
+    "SERVICE_STATUSES": {
+      "VALID": "Valid",
+      "EXPIRING_SOON": "Expiring soon",
+      "EXPIRED": "Expired",
+      "NO_SERVICE": "No service recorded"
+    }
   },
   "FIRE_EXTINGUISHER": {
     "FIRE_EXTINGUISHERS": "Fire Extinguishers",

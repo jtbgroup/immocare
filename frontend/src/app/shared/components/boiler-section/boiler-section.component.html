@@ -45,7 +45,7 @@
           <div class="boiler-card__header">
             <div class="boiler-card__identity">
               <span class="fuel-badge fuel-{{ boiler.fuelType | lowercase }}">
-                {{ FUEL_TYPE_LABELS[boiler.fuelType] }}
+                {{ "BOILER.FUEL_TYPES." + boiler.fuelType | transloco }}
               </span>
               <span class="boiler-name">
                 {{ boiler.brand || "—" }} {{ boiler.model || "" }}
@@ -197,7 +197,9 @@
                 <div class="form-row">
                   <label>
                     {{ "GLOBAL.VALID_UNTIL" | transloco }}
-                    <span class="hint">(auto-calculated if empty)</span>
+                    <span class="hint"
+                      >({{ "GLOBAL.AUTO_CALCULATED" | transloco }})</span
+                    >
                   </label>
                   <input type="date" formControlName="validUntil" />
                 </div>
@@ -294,7 +296,10 @@
                                 class="badge"
                                 [ngClass]="SERVICE_STATUS_CSS[record.status]"
                               >
-                                {{ SERVICE_STATUS_LABELS[record.status] }}
+                                {{
+                                  "BOILER.SERVICE_STATUSES." + record.status
+                                    | transloco
+                                }}
                               </span>
                             </td>
                           </tr>
@@ -344,7 +349,9 @@
           <label>{{ "GLOBAL.FUEL_TYPE" | transloco }}</label>
           <select formControlName="fuelType">
             @for (ft of FUEL_TYPES; track ft) {
-              <option [value]="ft">{{ FUEL_TYPE_LABELS[ft] }}</option>
+              <option [value]="ft">
+                {{ "BOILER.FUEL_TYPES." + ft | transloco }}
+              </option>
             }
           </select>
         </div>
