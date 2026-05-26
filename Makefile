@@ -326,13 +326,14 @@ seed-reset-postgres: ## 🗑  Reset via SQL direct (requiert psql + PostgreSQL)
 seed-demo: ## 🌱 Seed demo data (dev)
 	@echo "🌱 Seeding demo data"
 	@chmod +x scripts/seed.sh
-	@scripts/seed.sh http://localhost:8081 admin admin123 scripts/demo-data
+	@scripts/seed.sh http://localhost:8090 admin admin123 scripts/demo-data
+	@scripts/seed_transactions_patch.sh http://localhost:8090 admin admin123 scripts/demo-data
 
 
 seed-real: ## 🌱 Seed real data (prod)
 	@echo "🌱 Seeding real data"
 	@chmod +x scripts/seed.sh
-	@scripts/seed.sh $${URL:-http://localhost:8081} admin admin123 scripts/real-data
+	@scripts/seed.sh $${URL:-http://localhost:8090} admin admin123 scripts/real-data
 
 seed-cleandata-real: ## 🌱 Seed real data after reset (dev)
 	@$(MAKE) seed-reset-postgres

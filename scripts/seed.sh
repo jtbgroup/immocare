@@ -1049,6 +1049,10 @@ for UNIT_KEY in "${!UNIT_LEASES[@]}"; do
 done
 log_info "Leases: $CREATED created, $SKIPPED skipped, $ERRORS errors"
 
+# ─── 12. Transactions ─────────────────────────────────────────────────────────
+# source "$(dirname "${BASH_SOURCE[0]}")/seed_transactions_patch.sh"
+
+
 # ─── Logout ───────────────────────────────────────────────────────────────────
 curl -s -o /dev/null -X POST "$BASE_URL/api/v1/auth/logout" -b "$COOKIE_JAR" || true
 
