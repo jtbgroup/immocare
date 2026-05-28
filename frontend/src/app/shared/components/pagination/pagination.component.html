@@ -1,0 +1,24 @@
+@if (totalPages() > 1) {
+  <div class="pagination">
+    <button
+      class="btn btn-sm btn-secondary"
+      (click)="goToPage(currentPage() - 1)"
+      [disabled]="currentPage() === 0"
+    >
+      ← {{ "GLOBAL.PREVIOUS" | transloco }}
+    </button>
+
+    <span class="page-info">
+      Page {{ currentPage() + 1 }} / {{ totalPages() }} — {{ totalElements() }}
+      {{ "GLOBAL.TOTAL" | transloco }}
+    </span>
+
+    <button
+      class="btn btn-sm btn-secondary"
+      (click)="goToPage(currentPage() + 1)"
+      [disabled]="currentPage() >= totalPages() - 1"
+    >
+      {{ "GLOBAL.NEXT" | transloco }} →
+    </button>
+  </div>
+}

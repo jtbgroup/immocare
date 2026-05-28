@@ -19,7 +19,7 @@ import { AlertService } from "./core/services/alert.service";
 import { AppNameService } from "./core/services/app-name.service";
 import { LanguageService } from "./core/services/language.service";
 import { VersionService } from "./core/services/version.service";
-import { EstateHeaderComponent } from "./features/estate/components/user/estate-header/estate-header.component";
+import { EstateHeaderComponent } from "./features/estate/user/estate-header/estate-header.component";
 
 @Component({
   selector: "app-root",

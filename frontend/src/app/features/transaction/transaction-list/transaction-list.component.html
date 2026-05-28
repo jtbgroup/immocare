@@ -1,0 +1,392 @@
+<div class="transactions-page">
+  <!-- Header -->
+  <div class="details-content">
+    <div class="header">
+      <h1>{{ "TRANSACTION.TRANSACTIONS" | transloco }}</h1>
+      <div class="actions">
+        <button class="btn btn-secondary" (click)="showFilters = !showFilters">
+          {{ "GLOBAL.FILTERS" | transloco }}
+          @if (activeFilterCount > 0) {
+            <span> ({{ activeFilterCount }})</span>
+          }
+        </button>
+        <button class="btn btn-secondary" (click)="exportCsv()">
+          {{ "TRANSACTION.EXPORT_CSV" | transloco }}
+        </button>
+        <button class="btn btn-primary" (click)="navigateToNew()">
+          + {{ "GLOBAL.NEW" | transloco }}
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Filter panel -->
+  @if (showFilters) {
+    <div class="filter-panel">
+      <div class="filter-grid">
+        <div class="filter-field">
+          <label>{{ "TRANSACTION.DIRECTION" | transloco }}</label>
+          <select [(ngModel)]="filter.direction" (change)="load()">
+            <option value="">{{ "GLOBAL.ALL" | transloco }}</option>
+            @for (d of directions; track d) {
+              <option [value]="d">{{ DIRECTION_LABELS[d] }}</option>
+            }
+          </select>
+        </div>
+        <div class="filter-field">
+          <label>{{ "GLOBAL.DATE_FROM" | transloco }}</label>
+          <input type="date" [(ngModel)]="filter.from" (change)="load()" />
+        </div>
+        <div class="filter-field">
+          <label>{{ "GLOBAL.DATE_TO" | transloco }}</label>
+          <input type="date" [(ngModel)]="filter.to" (change)="load()" />
+        </div>
+        <div class="filter-field">
+          <label>{{ "TRANSACTION.ACCOUNT_SOURCE" | transloco }}</label>
+          <input
+            type="date"
+            [(ngModel)]="filter.accountingFrom"
+            (change)="load()"
+          />
+        </div>
+        <div class="filter-field">
+          <label>{{ "TRANSACTION.ACCOUNT_SOURCE" | transloco }}</label>
+          <input
+            type="date"
+            [(ngModel)]="filter.accountingTo"
+            (change)="load()"
+          />
+        </div>
+        <div class="filter-field">
+          <label>{{ "GLOBAL.CATEGORY" | transloco }}</label>
+          <select
+            [(ngModel)]="filter.categoryId"
+            (change)="onCategoryChange(); load()"
+          >
+            <option [ngValue]="undefined">All</option>
+            @for (c of categories; track c.id) {
+              <option [value]="c.id">{{ c.name }}</option>
+            }
+          </select>
+        </div>
+        <div class="filter-field">
+          <label>{{ "GLOBAL.SUBCATEGORY" | transloco }}</label>
+          <select
+            [(ngModel)]="filter.subcategoryId"
+            (change)="load()"
+            [disabled]="!filter.categoryId"
+          >
+            <option [ngValue]="undefined">
+              {{ "GLOBAL.ALL" | transloco }}
+            </option>
+            @for (s of subcategories; track s.id) {
+              <option [value]="s.id">{{ s.name }}</option>
+            }
+          </select>
+        </div>
+        <div class="filter-field">
+          <label>{{ "GLOBAL.BANK_ACCOUNT" | transloco }}</label>
+          <select [(ngModel)]="filter.bankAccountId" (change)="load()">
+            <option [ngValue]="undefined">All</option>
+            @for (b of bankAccounts; track b.id) {
+              <option [value]="b.id">{{ b.label }}</option>
+            }
+          </select>
+        </div>
+        <div class="filter-field">
+          <label>Status</label>
+          <select [(ngModel)]="filter.status" (change)="load()">
+            <option value="">{{ "GLOBAL.ALL" | transloco }}</option>
+            @for (s of statuses; track s) {
+              <option [value]="s">{{ STATUS_LABELS[s] }}</option>
+            }
+          </select>
+        </div>
+        <div class="filter-field filter-field--wide">
+          <label>{{ "GLOBAL.SEARCH" | transloco }}</label>
+          <input
+            type="text"
+            [(ngModel)]="filter.search"
+            (keyup.enter)="load()"
+            placeholder="Reference, counterparty, description…"
+          />
+        </div>
+      </div>
+      <button class="btn btn-link" (click)="clearFilters()">
+        {{ "GLOBAL.FILTER.CLEAR" | transloco }}
+      </button>
+    </div>
+  }
+
+  <!-- Bulk action bar -->
+  @if (someSelected) {
+    <div class="bulk-bar">
+      <div class="bulk-bar__info">
+        <strong>{{ selectedIds.size }}</strong> selected
+        <button class="btn btn-link btn-sm" (click)="clearBulkSelection()">
+          Clear
+        </button>
+      </div>
+
+      <div class="bulk-bar__actions">
+        <div class="bulk-field">
+          <label>Set status</label>
+          <select [(ngModel)]="bulkStatus">
+            <option value="">— no change —</option>
+            @for (s of statuses; track s) {
+              <option [value]="s">{{ STATUS_LABELS[s] }}</option>
+            }
+          </select>
+        </div>
+
+        <div class="bulk-field">
+          <label>Set subcategory</label>
+          <select [(ngModel)]="bulkSubcategoryId">
+            <option value="">— no change —</option>
+            <option [ngValue]="0">✕ Clear subcategory</option>
+            @for (s of allSubcategories; track s.id) {
+              <option [value]="s.id">
+                {{ s.categoryName }} / {{ s.name }}
+              </option>
+            }
+          </select>
+        </div>
+
+        <button
+          class="btn btn-primary"
+          [disabled]="bulkApplying || (!bulkStatus && bulkSubcategoryId === '')"
+          (click)="applyBulk()"
+        >
+          {{ bulkApplying ? "Applying…" : "Apply" }}
+        </button>
+      </div>
+
+      @if (bulkResult) {
+        <div class="bulk-bar__result">
+          <span class="text-success"
+            >✓ {{ bulkResult.updatedCount }} updated</span
+          >
+          @if (bulkResult.skippedCount > 0) {
+            <span class="text-muted">
+              · {{ bulkResult.skippedCount }} skipped (reconciled or direction
+              mismatch)
+            </span>
+          }
+        </div>
+      }
+    </div>
+  }
+
+  <!-- Summary bar -->
+  @if (response) {
+    <div class="summary-bar">
+      <div class="summary-item summary-item--income">
+        <span class="summary-label">Total Income</span>
+        <span class="summary-value">{{
+          response.totalIncome | belgianCurrency: true : "+"
+        }}</span>
+      </div>
+      <div class="summary-item summary-item--expense">
+        <span class="summary-label">Total Expenses</span>
+        <span class="summary-value">{{
+          response.totalExpenses | belgianCurrency: true : "-"
+        }}</span>
+      </div>
+      <div
+        class="summary-item"
+        [class.summary-item--positive]="response.netBalance >= 0"
+        [class.summary-item--negative]="response.netBalance < 0"
+      >
+        <span class="summary-label">Net Balance</span>
+        <span class="summary-value">{{
+          response.netBalance
+            | belgianCurrency: true : (response.netBalance >= 0 ? "+" : "")
+        }}</span>
+      </div>
+      <span class="summary-total"
+        >{{ response.totalElements }} transaction(s)</span
+      >
+    </div>
+  }
+
+  @if (loading) {
+    <div class="loading">Loading…</div>
+  }
+
+  <!-- Table -->
+  @if (response && !loading) {
+    <div class="data-table">
+      <table>
+        <thead>
+          <tr>
+            <th class="col-check">
+              <input
+                type="checkbox"
+                [checked]="allSelected"
+                [indeterminate]="someSelected && !allSelected"
+                (change)="toggleAll($any($event.target).checked)"
+              />
+            </th>
+            <th class="sortable" (click)="sortBy('reference')">
+              {{ "GLOBAL.REFERENCE" | transloco }}
+              <span
+                class="sort-icon"
+                [class.active]="sortField === 'reference'"
+              >
+                {{ sortField | sortIcon: sortDirection : "reference" }}
+              </span>
+            </th>
+            <th class="sortable" (click)="sortBy('transactionDate')">
+              {{ "GLOBAL.DATE" | transloco }}
+              <span
+                class="sort-icon"
+                [class.active]="sortField === 'transactionDate'"
+              >
+                {{ sortField | sortIcon: sortDirection : "transactionDate" }}
+              </span>
+            </th>
+            <th class="sortable" (click)="sortBy('direction')">
+              {{ "GLOBAL.DIRECTION" | transloco }}
+              <span
+                class="sort-icon"
+                [class.active]="sortField === 'direction'"
+              >
+                {{ sortField | sortIcon: sortDirection : "direction" }}
+              </span>
+            </th>
+            <th class="sortable" (click)="sortBy('amount')">
+              {{ "GLOBAL.AMOUNT" | transloco }}
+              <span class="sort-icon" [class.active]="sortField === 'amount'">
+                {{ sortField | sortIcon: sortDirection : "amount" }}
+              </span>
+            </th>
+            <th>{{ "GLOBAL.CATEGORY" | transloco }}</th>
+            <th>{{ "GLOBAL.LINKED_TO" | transloco }}</th>
+            <th class="sortable" (click)="sortBy('status')">
+              Status
+              <span class="sort-icon" [class.active]="sortField === 'status'">
+                {{ sortField | sortIcon: sortDirection : "status" }}
+              </span>
+            </th>
+            <th>{{ "GLOBAL.ACTIONS" | transloco }}</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (tx of response.content; track tx.id) {
+            <tr
+              (click)="navigateToDetail(tx)"
+              [class.clickable]="!someSelected"
+              [class.row-selected]="isSelected(tx)"
+            >
+              <td class="col-check" (click)="toggleRow(tx, $event)">
+                <input
+                  type="checkbox"
+                  [checked]="isSelected(tx)"
+                  (click)="$event.stopPropagation()"
+                  (change)="toggleRow(tx, $event)"
+                />
+              </td>
+              <td class="monospace">{{ tx.reference }}</td>
+              <td class="nowrap">{{ tx.transactionDate }}</td>
+              <td>
+                @if (tx.direction === "INCOME") {
+                  <span class="badge badge--income">{{
+                    DIRECTION_LABELS[tx.direction]
+                  }}</span>
+                }
+                @if (tx.direction === "EXPENSE") {
+                  <span class="badge badge--expense">{{
+                    DIRECTION_LABELS[tx.direction]
+                  }}</span>
+                }
+              </td>
+              <td
+                class="amount nowrap"
+                [class.amount--income]="tx.direction === 'INCOME'"
+                [class.amount--expense]="tx.direction === 'EXPENSE'"
+              >
+                {{
+                  tx.amount
+                    | belgianCurrency
+                      : true
+                      : (tx.direction === "INCOME" ? "+" : "-")
+                }}
+              </td>
+              <td class="text-muted">
+                @if (tx.categoryName) {
+                  <span>{{ tx.categoryName }}</span>
+                }
+                @if (tx.subcategoryName) {
+                  <span> / {{ tx.subcategoryName }}</span>
+                }
+                @if (!tx.categoryName) {
+                  <span>—</span>
+                }
+              </td>
+              <td class="linked-cell" (click)="$event.stopPropagation()">
+                @if (tx.buildingName) {
+                  <span class="link-chip link-chip--building" title="Building">
+                    🏢 {{ tx.buildingName }}
+                  </span>
+                }
+                @if (tx.unitNumber) {
+                  <span class="link-chip link-chip--unit" title="Unit">
+                    🚪 {{ tx.unitNumber }}
+                  </span>
+                }
+                @if (tx.leaseId) {
+                  <a
+                    [routerLink]="['/leases', tx.leaseId]"
+                    class="link-chip link-chip--lease"
+                    title="Lease"
+                    >📄 Lease #{{ tx.leaseId }}</a
+                  >
+                }
+                @if (!tx.buildingName && !tx.unitNumber && !tx.leaseId) {
+                  <span class="text-muted">—</span>
+                }
+              </td>
+              <td>
+                <span class="badge badge--status-{{ tx.status.toLowerCase() }}">
+                  {{ STATUS_LABELS[tx.status] }}
+                </span>
+              </td>
+              <td class="actions-cell" (click)="$event.stopPropagation()">
+                <button
+                  class="icon-btn"
+                  title="Edit"
+                  (click)="navigateToEdit(tx, $event)"
+                >
+                  ✏️
+                </button>
+                <button
+                  class="icon-btn"
+                  title="Delete"
+                  (click)="deleteTransaction(tx, $event)"
+                >
+                  🗑️
+                </button>
+              </td>
+            </tr>
+          }
+          @if (response.content.length === 0) {
+            <tr>
+              <td colspan="10" class="empty-state">No transactions found.</td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+  }
+
+  <!-- Pagination -->
+  @if (response) {
+    <app-pagination
+      [currentPage]="response.page"
+      [totalPages]="response.totalPages"
+      [totalElements]="response.totalElements"
+      (pageChange)="goToPage($event)"
+    >
+    </app-pagination>
+  }
+</div>

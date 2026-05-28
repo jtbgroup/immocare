@@ -176,7 +176,10 @@
     "INACTIVE": "Inactif",
     "TENANT": "Locataire",
     "OUT_OF_SERVICE_DATE": "Date de mise hors service",
-    "CODE": "Code"
+    "CODE": "Code",
+    "FILTERS": "Filtres",
+    "CATEGORY": "Catégorie",
+    "SUBCATEGORY": "Sous-catégorie"
   },
   "NAV": {
     "MY_ESTATES": "Mes estates",
@@ -400,7 +403,9 @@
     "NET_BALANCE": "Solde net",
     "LOADING_FINANCIAL_DATA": "Chargement des données financières",
     "EXPORT_CSV": "Exporter en CVS",
-    "DIRECTION": "Direction"
+    "DIRECTION": "Direction",
+    "ACCOUNT_SOURCE": "Compte source",
+    "ACCOUNT_DESTINATION": "Compte destination"
   },
   "USER": {
     "USERS": "Utilisateurs",
