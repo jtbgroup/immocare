@@ -1,0 +1,178 @@
+[
+  {
+    "buildingName": "Résidence Les Acacias",
+    "unitNumber": "01",
+    "estateName": "Estate Ville",
+    "rents": [
+      {
+        "monthlyRent": 850.0,
+        "effectiveFrom": "2017-09-01",
+        "notes": "Loyer initial"
+      },
+      {
+        "monthlyRent": 900.0,
+        "effectiveFrom": "2020-10-01",
+        "notes": "Indexation annuelle"
+      },
+      {
+        "monthlyRent": 970.0,
+        "effectiveFrom": "2023-11-01",
+        "notes": "Indexation annuelle"
+      }
+    ]
+  },
+  {
+    "buildingName": "Résidence Les Acacias",
+    "unitNumber": "02",
+    "estateName": "Estate Ville",
+    "rents": [
+      {
+        "monthlyRent": 780.0,
+        "effectiveFrom": "2018-04-01",
+        "notes": "Loyer initial"
+      },
+      {
+        "monthlyRent": 830.0,
+        "effectiveFrom": "2021-05-01",
+        "notes": "Indexation annuelle"
+      },
+      {
+        "monthlyRent": 910.0,
+        "effectiveFrom": "2024-06-01",
+        "notes": "Indexation annuelle"
+      }
+    ]
+  },
+  {
+    "buildingName": "Résidence Les Acacias",
+    "unitNumber": "03",
+    "estateName": "Estate Ville",
+    "rents": [
+      {
+        "monthlyRent": 720.0,
+        "effectiveFrom": "2019-02-01",
+        "notes": "Loyer initial"
+      },
+      {
+        "monthlyRent": 760.0,
+        "effectiveFrom": "2022-03-01",
+        "notes": "Indexation annuelle"
+      },
+      {
+        "monthlyRent": 820.0,
+        "effectiveFrom": "2025-04-01",
+        "notes": "Indexation annuelle"
+      }
+    ]
+  },
+  {
+    "buildingName": "Immeuble Midi",
+    "unitNumber": "01",
+    "estateName": "Estate Ville",
+    "rents": [
+      {
+        "monthlyRent": 950.0,
+        "effectiveFrom": "2016-06-01",
+        "notes": "Loyer initial"
+      },
+      {
+        "monthlyRent": 990.0,
+        "effectiveFrom": "2019-07-01",
+        "notes": "Indexation annuelle"
+      },
+      {
+        "monthlyRent": 1050.0,
+        "effectiveFrom": "2022-08-01",
+        "notes": "Indexation annuelle"
+      }
+    ]
+  },
+  {
+    "buildingName": "Immeuble Midi",
+    "unitNumber": "02",
+    "estateName": "Estate Ville",
+    "rents": [
+      {
+        "monthlyRent": 1100.0,
+        "effectiveFrom": "2017-03-01",
+        "notes": "Loyer initial"
+      },
+      {
+        "monthlyRent": 1150.0,
+        "effectiveFrom": "2020-04-01",
+        "notes": "Indexation annuelle"
+      },
+      {
+        "monthlyRent": 1220.0,
+        "effectiveFrom": "2023-05-01",
+        "notes": "Indexation annuelle"
+      }
+    ]
+  },
+  {
+    "buildingName": "Immeuble Grande Tourismo",
+    "unitNumber": "01",
+    "estateName": "Estate Ville",
+    "rents": [
+      {
+        "monthlyRent": 1350.0,
+        "effectiveFrom": "2018-10-01",
+        "notes": "Loyer initial"
+      },
+      {
+        "monthlyRent": 1420.0,
+        "effectiveFrom": "2021-11-01",
+        "notes": "Indexation annuelle"
+      },
+      {
+        "monthlyRent": 1500.0,
+        "effectiveFrom": "2024-12-01",
+        "notes": "Indexation annuelle"
+      }
+    ]
+  },
+  {
+    "buildingName": "Immeuble Grande Tourismo",
+    "unitNumber": "02",
+    "estateName": "Estate Ville",
+    "rents": [
+      {
+        "monthlyRent": 1180.0,
+        "effectiveFrom": "2019-05-01",
+        "notes": "Loyer initial"
+      },
+      {
+        "monthlyRent": 1240.0,
+        "effectiveFrom": "2022-06-01",
+        "notes": "Indexation annuelle"
+      },
+      {
+        "monthlyRent": 1300.0,
+        "effectiveFrom": "2025-07-01",
+        "notes": "Indexation annuelle"
+      }
+    ]
+  },
+  {
+    "buildingName": "Immeuble Grande Tourismo",
+    "unitNumber": "03",
+    "estateName": "Estate Ville",
+    "rents": [
+      {
+        "monthlyRent": 1450.0,
+        "effectiveFrom": "2017-12-01",
+        "notes": "Loyer initial"
+      },
+      {
+        "monthlyRent": 1500.0,
+        "effectiveFrom": "2021-01-01",
+        "notes": "Indexation annuelle"
+      },
+      {
+        "monthlyRent": 1600.0,
+        "effectiveFrom": "2024-02-01",
+        "notes": "Indexation annuelle"
+      }
+    ]
+  }
+]

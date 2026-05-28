@@ -1,0 +1,29 @@
+[
+  {
+    "name": "Résidence Les Acacias",
+    "streetAddress": "Rue des Acacias 12",
+    "postalCode": "1030",
+    "city": "Schaerbeek",
+    "country": "Belgium",
+    "ownerPersonNationalId": "75031512345",
+    "estateName": "Estate Ville"
+  },
+  {
+    "name": "Immeuble Midi",
+    "streetAddress": "Rue du Midi 58",
+    "postalCode": "1000",
+    "city": "Bruxelles",
+    "country": "Belgium",
+    "ownerPersonNationalId": "75031512345",
+    "estateName": "Estate Ville"
+  },
+  {
+    "name": "Immeuble Grande Tourismo",
+    "streetAddress": "Rue du Duc 25",
+    "postalCode": "1000",
+    "city": "Bruxelles",
+    "country": "Belgium",
+    "ownerPersonNationalId": "75031512345",
+    "estateName": "Estate Ville"
+  }
+]

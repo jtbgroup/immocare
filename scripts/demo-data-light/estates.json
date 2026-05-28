@@ -1,0 +1,11 @@
+[
+  {
+    "name": "Estate Ville",
+    "description": "Urban properties in major Belgian cities",
+    "createdByUsername": "user2",
+    "members": [
+      { "username": "user2", "role": "MANAGER" },
+      { "username": "user3", "role": "VIEWER" }
+    ]
+  }
+]

@@ -1,0 +1,168 @@
+[
+  {
+    "buildingName": "Résidence Les Acacias",
+    "unitNumber": "01",
+    "ownerType": "HOUSING_UNIT",
+    "brand": "Vaillant",
+    "model": "ecoTEC plus VUW 246/5-5",
+    "serialNumber": "VAI-2019-001",
+    "fuelType": "GAS",
+    "installationDate": "2019-06-15",
+    "lastServiceDate": "2023-06-10",
+    "nextServiceDate": "2025-06-10",
+    "notes": "Chaudière murale gaz condensation",
+    "estateName": "Estate Ville"
+  },
+  {
+    "buildingName": "Résidence Les Acacias",
+    "unitNumber": "02",
+    "ownerType": "HOUSING_UNIT",
+    "brand": "Buderus",
+    "model": "Logamax U072-24K",
+    "serialNumber": "BUD-2020-002",
+    "fuelType": "GAS",
+    "installationDate": "2020-09-01",
+    "lastServiceDate": "2024-09-15",
+    "nextServiceDate": "2026-09-15",
+    "notes": "Entretien annuel chez Dalkia",
+    "estateName": "Estate Ville"
+  },
+  {
+    "buildingName": "Résidence Les Acacias",
+    "unitNumber": "03",
+    "ownerType": "HOUSING_UNIT",
+    "brand": "Bosch",
+    "model": "Condens 2500 W",
+    "serialNumber": "BSH-2021-003",
+    "fuelType": "GAS",
+    "installationDate": "2021-03-20",
+    "lastServiceDate": "2024-03-18",
+    "nextServiceDate": "2026-03-18",
+    "notes": null,
+    "estateName": "Estate Ville"
+  },
+  {
+    "buildingName": "Immeuble Midi",
+    "unitNumber": "01",
+    "ownerType": "HOUSING_UNIT",
+    "brand": "Viessmann",
+    "model": "Vitodens 200-W",
+    "serialNumber": "VIE-2018-004",
+    "fuelType": "GAS",
+    "installationDate": "2018-11-10",
+    "lastServiceDate": "2022-11-08",
+    "nextServiceDate": "2024-11-08",
+    "notes": "Chaudière haute performance, contrat entretien Viessmann",
+    "estateName": "Estate Ville"
+  },
+  {
+    "buildingName": "Immeuble Midi",
+    "unitNumber": "02",
+    "ownerType": "HOUSING_UNIT",
+    "brand": "De Dietrich",
+    "model": "Innovens MCA 25",
+    "serialNumber": "DED-2022-005",
+    "fuelType": "GAS",
+    "installationDate": "2022-07-05",
+    "lastServiceDate": "2024-07-12",
+    "nextServiceDate": "2026-07-12",
+    "notes": "Chaudière neuve installée lors de la rénovation",
+    "estateName": "Estate Ville"
+  },
+  {
+    "buildingName": "Immeuble Grande Tourismo",
+    "unitNumber": "01",
+    "ownerType": "HOUSING_UNIT",
+    "brand": "Vaillant",
+    "model": "ecoTEC plus VUW 236/5-5",
+    "serialNumber": "VAI-2020-011",
+    "fuelType": "GAS",
+    "installationDate": "2020-04-01",
+    "lastServiceDate": "2024-04-15",
+    "nextServiceDate": "2026-04-15",
+    "notes": null,
+    "estateName": "Estate Ville",
+    "services": [
+      {
+        "serviceDate": "2021-05-10",
+        "notes": "Entretien annuel OK — nettoyage brûleur"
+      },
+      {
+        "serviceDate": "2022-05-14",
+        "notes": "Entretien annuel OK"
+      },
+      {
+        "serviceDate": "2023-05-08",
+        "notes": "Entretien annuel OK — remplacement joint"
+      },
+      {
+        "serviceDate": "2024-05-12",
+        "notes": "Entretien annuel OK"
+      }
+    ]
+  },
+  {
+    "buildingName": "Immeuble Grande Tourismo",
+    "unitNumber": "02",
+    "ownerType": "HOUSING_UNIT",
+    "brand": "Buderus",
+    "model": "Logamax U072-24K",
+    "serialNumber": "BUD-2019-012",
+    "fuelType": "GAS",
+    "installationDate": "2019-05-01",
+    "lastServiceDate": "2023-05-10",
+    "nextServiceDate": "2025-05-10",
+    "notes": null,
+    "estateName": "Estate Ville",
+    "services": [
+      {
+        "serviceDate": "2021-05-10",
+        "notes": "Entretien annuel OK — nettoyage brûleur"
+      },
+      {
+        "serviceDate": "2022-05-14",
+        "notes": "Entretien annuel OK"
+      },
+      {
+        "serviceDate": "2023-05-08",
+        "notes": "Entretien annuel OK — remplacement joint"
+      },
+      {
+        "serviceDate": "2024-05-12",
+        "notes": "Entretien annuel OK"
+      }
+    ]
+  },
+  {
+    "buildingName": "Immeuble Grande Tourismo",
+    "unitNumber": "03",
+    "ownerType": "HOUSING_UNIT",
+    "brand": "Bosch",
+    "model": "Condens 2500 W",
+    "serialNumber": "BOS-2018-013",
+    "fuelType": "GAS",
+    "installationDate": "2018-01-01",
+    "lastServiceDate": "2022-01-20",
+    "nextServiceDate": "2024-01-20",
+    "notes": null,
+    "estateName": "Estate Ville",
+    "services": [
+      {
+        "serviceDate": "2021-05-10",
+        "notes": "Entretien annuel OK — nettoyage brûleur"
+      },
+      {
+        "serviceDate": "2022-05-14",
+        "notes": "Entretien annuel OK"
+      },
+      {
+        "serviceDate": "2023-05-08",
+        "notes": "Entretien annuel OK — remplacement joint"
+      },
+      {
+        "serviceDate": "2024-05-12",
+        "notes": "Entretien annuel OK"
+      }
+    ]
+  }
+]

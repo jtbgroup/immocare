@@ -1,0 +1,16 @@
+[
+  {
+    "label": "Compte courant",
+    "accountNumber": "BE13651212423639",
+    "type": "CURRENT",
+    "isActive": true,
+    "estateName": "Estate Ville"
+  },
+  {
+    "label": "Compte épargne",
+    "accountNumber": "BE27651292364773",
+    "type": "SAVINGS",
+    "isActive": true,
+    "estateName": "Estate Ville"
+  }
+]
