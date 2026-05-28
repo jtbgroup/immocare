@@ -329,6 +329,12 @@ seed-demo: ## 🌱 Seed demo data (dev)
 	@scripts/seed.sh http://localhost:8090 admin admin123 scripts/demo-data
 	@scripts/seed_transactions_patch.sh http://localhost:8090 admin admin123 scripts/demo-data
 
+seed-demo-light: ## 🌱 Seed demo data light (dev) iot validate the seed scripts
+	@echo "🌱 Seeding demo data"
+	@chmod +x scripts/seed.sh
+	@scripts/seed.sh http://localhost:8090 admin admin123 scripts/demo-data-light
+	@scripts/seed_transactions_patch.sh http://localhost:8090 admin admin123 scripts/demo-data-light
+
 
 seed-real: ## 🌱 Seed real data (prod)
 	@echo "🌱 Seeding real data"
@@ -342,3 +348,7 @@ seed-cleandata-real: ## 🌱 Seed real data after reset (dev)
 seed-cleandata-demo: ## 🌱 Seed demo data after reset (dev)
 	@$(MAKE) seed-reset-postgres
 	@$(MAKE) seed-demo
+
+seed-cleandata-demo-light: ## 🌱 Seed demo data after reset (dev)
+	@$(MAKE) seed-reset-postgres
+	@$(MAKE) seed-demo-light

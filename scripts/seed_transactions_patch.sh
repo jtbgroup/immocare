@@ -59,10 +59,15 @@ if [[ "${BASH_SOURCE[0]}" == "${0}" ]]; then
     TOTAL_E=$(jq length "$ESTATES_FILE")
     for i in $(seq 0 $(( TOTAL_E - 1 ))); do
       ENAME=$(jq -r ".[$i].name" "$ESTATES_FILE")
-      EID=$(get_resource "/api/v1/admin/estates?search=$(python3 -c "import urllib.parse,sys;print(urllib.parse.quote(sys.argv[1]))" "$ENAME")&size=10" \
+      ENC=$(python3 -c "import urllib.parse,sys;print(urllib.parse.quote(sys.argv[1]))" "$ENAME")
+      EID=$(get_resource "/api/v1/admin/estates?search=$ENC&size=10" \
         | jq -r --arg n "$ENAME" '.content[]? | select(.name == $n) | .id' | head -1)
-      [ -n "$EID" ] && ESTATE_ID_MAP["$ENAME"]="$EID"
-      log_info "Estate '$ENAME' → id=$EID"
+      if [ -n "$EID" ]; then
+        ESTATE_ID_MAP["$ENAME"]="$EID"
+        log_info "Estate '$ENAME' → id=$EID"
+      else
+        log_error "Estate '$ENAME' not found in API"
+      fi
     done
   fi
 
@@ -72,15 +77,19 @@ if [[ "${BASH_SOURCE[0]}" == "${0}" ]]; then
   TOTAL_B=$(jq length "$BUILDINGS_FILE")
   for i in $(seq 0 $(( TOTAL_B - 1 ))); do
     BNAME=$(jq -r ".[$i].name" "$BUILDINGS_FILE")
-    ESTATE_NAME=$(jq -r ".[$i].estateName" "$BUILDINGS_FILE")
-    ESTATE_ID="${ESTATE_ID_MAP[$ESTATE_NAME]:-}"
-    [ -z "$ESTATE_ID" ] && continue
+    ESTATE_NAME_B=$(jq -r ".[$i].estateName" "$BUILDINGS_FILE")
+    local_estate_id="${ESTATE_ID_MAP[$ESTATE_NAME_B]:-}"
+    [ -z "$local_estate_id" ] && log_error "Building '$BNAME': estate '$ESTATE_NAME_B' not found" && continue
     ENC=$(python3 -c "import urllib.parse,sys;print(urllib.parse.quote(sys.argv[1]))" "$BNAME")
-    BID=$(get_resource "/api/v1/estates/$ESTATE_ID/buildings?search=$ENC&size=20" \
+    BID=$(get_resource "/api/v1/estates/$local_estate_id/buildings?search=$ENC&size=20" \
       | jq -r --arg n "$BNAME" '.content[]? | select(.name == $n) | .id' | head -1)
-    [ -n "$BID" ] && BUILDING_ID_MAP["$BNAME"]="$BID"
-    log_info "Building '$BNAME' → id=$BID"
+    if [ -n "$BID" ]; then
+      BUILDING_ID_MAP["$BNAME"]="$BID"
+    else
+      log_error "Building '$BNAME' not found in API"
+    fi
   done
+  log_info "Building map rebuilt: ${#BUILDING_ID_MAP[@]} entries"
 
   # ── Rebuild UNIT_ID_MAP ────────────────────────────────────────────────────
   declare -A UNIT_ID_MAP
@@ -89,13 +98,13 @@ if [[ "${BASH_SOURCE[0]}" == "${0}" ]]; then
   for i in $(seq 0 $(( TOTAL_U - 1 ))); do
     BNAME=$(jq -r ".[$i].buildingName" "$UNITS_FILE")
     UNUM=$(jq -r ".[$i].unitNumber" "$UNITS_FILE")
-    ESTATE_NAME=$(jq -r ".[$i].estateName" "$UNITS_FILE")
-    ESTATE_ID="${ESTATE_ID_MAP[$ESTATE_NAME]:-}"
-    BID="${BUILDING_ID_MAP[$BNAME]:-}"
-    [ -z "$ESTATE_ID" ] || [ -z "$BID" ] && continue
-    UID=$(get_resource "/api/v1/estates/$ESTATE_ID/buildings/$BID/units" \
+    ESTATE_NAME_U=$(jq -r ".[$i].estateName" "$UNITS_FILE")
+    local_estate_id="${ESTATE_ID_MAP[$ESTATE_NAME_U]:-}"
+    local_bid="${BUILDING_ID_MAP[$BNAME]:-}"
+    [ -z "$local_estate_id" ] || [ -z "$local_bid" ] && continue
+    UNIT_DB_ID=$(get_resource "/api/v1/estates/$local_estate_id/buildings/$local_bid/units" \
       | jq -r --arg u "$UNUM" '.[]? | select(.unitNumber == $u) | .id' | head -1)
-    [ -n "$UID" ] && UNIT_ID_MAP["$BNAME|$UNUM"]="$UID"
+    [ -n "$UNIT_DB_ID" ] && UNIT_ID_MAP["$BNAME|$UNUM"]="$UNIT_DB_ID"
   done
   log_info "Unit map rebuilt: ${#UNIT_ID_MAP[@]} entries"
 fi
@@ -117,20 +126,23 @@ log_info "Total transactions to seed: $TOTAL_TX"
 
 CREATED_TX=0; SKIPPED_TX=0; ERRORS_TX=0
 
-# ── Build category/subcategory lookup per estate ─────────────────────────────
-# Cache: CAT_ID_MAP["estateName|categoryName"] = categoryId
-# Cache: SUB_ID_MAP["estateName|subcategoryName|categoryId"] = subcategoryId
+# ── Build category/subcategory/bank-account lookup per estate ─────────────────
+# Toutes les fonctions de cache utilisent ESTATE_ID_MAP[$estate_name]
+# pour résoudre l'estate_id localement — jamais la variable globale ESTATE_ID.
+
 declare -A CAT_ID_MAP
 declare -A SUB_ID_MAP
+declare -A BANK_ACCOUNT_ID_MAP
 
 get_or_cache_category() {
-  local estate_name="$1" cat_name="$2"
-  local estate_id="${ESTATE_ID_MAP[$estate_name]:-}"
-  [ -z "$estate_id" ] && echo "" && return
+  local estate_name="$1"
+  local cat_name="$2"
+  local local_estate_id="${ESTATE_ID_MAP[$estate_name]:-}"
+  [ -z "$local_estate_id" ] && echo "" && return
   local key="$estate_name|$cat_name"
   if [ -z "${CAT_ID_MAP[$key]+_}" ]; then
     local result
-    result=$(get_resource "/api/v1/estates/$estate_id/tag-categories" \
+    result=$(get_resource "/api/v1/estates/$local_estate_id/tag-categories" \
       | jq -r --arg n "$cat_name" '.[] | select(.name == $n) | .id' | head -1)
     CAT_ID_MAP["$key"]="${result:-}"
   fi
@@ -138,28 +150,28 @@ get_or_cache_category() {
 }
 
 get_or_cache_subcategory() {
-  local estate_name="$1" sub_name="$2" cat_id="$3"
-  local estate_id="${ESTATE_ID_MAP[$estate_name]:-}"
-  [ -z "$estate_id" ] && echo "" && return
+  local estate_name="$1"
+  local sub_name="$2"
+  local cat_id="$3"
+  local local_estate_id="${ESTATE_ID_MAP[$estate_name]:-}"
+  [ -z "$local_estate_id" ] && echo "" && return
   local key="$estate_name|$sub_name|$cat_id"
   if [ -z "${SUB_ID_MAP[$key]+_}" ]; then
     local result
-    result=$(get_resource "/api/v1/estates/$estate_id/tag-subcategories?categoryId=$cat_id" \
+    result=$(get_resource "/api/v1/estates/$local_estate_id/tag-subcategories?categoryId=$cat_id" \
       | jq -r --arg n "$sub_name" '.[] | select(.name == $n) | .id' | head -1)
     SUB_ID_MAP["$key"]="${result:-}"
   fi
   echo "${SUB_ID_MAP[$key]}"
 }
 
-# ── Get bank account IDs per estate (use first CURRENT account) ──────────────
-declare -A BANK_ACCOUNT_ID_MAP
 get_or_cache_bank_account() {
   local estate_name="$1"
-  local estate_id="${ESTATE_ID_MAP[$estate_name]:-}"
-  [ -z "$estate_id" ] && echo "" && return
+  local local_estate_id="${ESTATE_ID_MAP[$estate_name]:-}"
+  [ -z "$local_estate_id" ] && echo "" && return
   if [ -z "${BANK_ACCOUNT_ID_MAP[$estate_name]+_}" ]; then
     local result
-    result=$(get_resource "/api/v1/estates/$estate_id/bank-accounts" \
+    result=$(get_resource "/api/v1/estates/$local_estate_id/bank-accounts" \
       | jq -r '[.[] | select(.type == "CURRENT")] | .[0].id // (.[] | .id)' | head -1)
     BANK_ACCOUNT_ID_MAP["$estate_name"]="${result:-}"
   fi
@@ -172,92 +184,100 @@ BATCH=50  # log progress every N transactions
 for i in $(seq 0 $(( TOTAL_TX - 1 ))); do
   TX=$(jq -c ".[$i]" "$TRANSACTIONS_FILE")
 
-  TX_DATE=$(echo "$TX"       | jq -r '.transactionDate')
-  TX_ACCT=$(echo "$TX"       | jq -r '.accountingMonth')
-  TX_AMT=$(echo "$TX"        | jq -r '.amount')
-  TX_DIR=$(echo "$TX"        | jq -r '.direction')
-  TX_DESC=$(echo "$TX"       | jq -r '.description')
-  TX_STATUS=$(echo "$TX"     | jq -r '.status')
-  TX_SOURCE=$(echo "$TX"     | jq -r '.source')
-  TX_REF=$(echo "$TX"        | jq -r '._ref')
-  ESTATE_NAME=$(echo "$TX"   | jq -r '.estateName')
-  CAT_NAME=$(echo "$TX"      | jq -r '.categoryName')
-  SUB_NAME=$(echo "$TX"      | jq -r '.subcategoryName')
-  BNAME=$(echo "$TX"         | jq -r '.buildingName // empty')
-  UNUM=$(echo "$TX"          | jq -r '.unitNumber // empty')
+  TX_DATE=$(echo "$TX"     | jq -r '.transactionDate')
+  TX_ACCT=$(echo "$TX"     | jq -r '.accountingMonth')
+  TX_AMT=$(echo "$TX"      | jq -r '.amount')
+  TX_DIR=$(echo "$TX"      | jq -r '.direction')
+  TX_DESC=$(echo "$TX"     | jq -r '.description // ""')
+  TX_STATUS=$(echo "$TX"   | jq -r '.status')
+  TX_REF=$(echo "$TX"      | jq -r '._ref')
+  TX_COUNTER=$(echo "$TX"  | jq -r '.counterpartyAccount // empty')
+  ESTATE_NAME=$(echo "$TX" | jq -r '.estateName')
+  CAT_NAME=$(echo "$TX"    | jq -r '.categoryName // empty')
+  SUB_NAME=$(echo "$TX"    | jq -r '.subcategoryName // empty')
+  BNAME=$(echo "$TX"       | jq -r '.buildingName // empty')
+  UNUM=$(echo "$TX"        | jq -r '.unitNumber // empty')
 
-  # Estate
-  ESTATE_ID="${ESTATE_ID_MAP[$ESTATE_NAME]:-}"
-  if [ -z "$ESTATE_ID" ]; then
+  # ── Résolution de l'estate pour CETTE transaction ──────────────────────────
+  # On utilise une variable locale tx_estate_id pour éviter tout écrasement
+  # de la variable globale ESTATE_ID utilisée éventuellement ailleurs.
+  tx_estate_id="${ESTATE_ID_MAP[$ESTATE_NAME]:-}"
+  if [ -z "$tx_estate_id" ]; then
     log_error "TX $TX_REF: estate '$ESTATE_NAME' not found — skipped"
     ERRORS_TX=$(( ERRORS_TX+1 )); continue
   fi
 
-  # Resolve building id
-  BID=""
+  # ── Résolution du building ─────────────────────────────────────────────────
+  tx_building_id=""
   if [ -n "$BNAME" ] && [ "$BNAME" != "null" ]; then
-    BID="${BUILDING_ID_MAP[$BNAME]:-}"
-    if [ -z "$BID" ]; then
+    tx_building_id="${BUILDING_ID_MAP[$BNAME]:-}"
+    if [ -z "$tx_building_id" ]; then
       log_warn "TX $TX_REF: building '$BNAME' not resolved — continuing without buildingId"
     fi
   fi
 
-  # Resolve unit id
-  UNIT_ID=""
+  # ── Résolution de l'unité ──────────────────────────────────────────────────
+  tx_unit_id=""
   if [ -n "$UNUM" ] && [ "$UNUM" != "null" ] && [ -n "$BNAME" ] && [ "$BNAME" != "null" ]; then
-    UNIT_ID="${UNIT_ID_MAP[$BNAME|$UNUM]:-}"
+    tx_unit_id="${UNIT_ID_MAP[$BNAME|$UNUM]:-}"
   fi
 
-  # Resolve category/subcategory
-  CAT_ID=$(get_or_cache_category "$ESTATE_NAME" "$CAT_NAME")
-  SUB_ID=""
-  if [ -n "$CAT_ID" ]; then
-    SUB_ID=$(get_or_cache_subcategory "$ESTATE_NAME" "$SUB_NAME" "$CAT_ID")
+  # ── Résolution category/subcategory ───────────────────────────────────────
+  tx_cat_id=""
+  tx_sub_id=""
+  if [ -n "$CAT_NAME" ] && [ "$CAT_NAME" != "null" ]; then
+    tx_cat_id=$(get_or_cache_category "$ESTATE_NAME" "$CAT_NAME")
+    if [ -n "$tx_cat_id" ] && [ -n "$SUB_NAME" ] && [ "$SUB_NAME" != "null" ]; then
+      tx_sub_id=$(get_or_cache_subcategory "$ESTATE_NAME" "$SUB_NAME" "$tx_cat_id")
+    fi
   fi
 
-  # Bank account
-  BANK_ID=$(get_or_cache_bank_account "$ESTATE_NAME")
+  # ── Résolution du compte bancaire ─────────────────────────────────────────
+  tx_bank_id=$(get_or_cache_bank_account "$ESTATE_NAME")
 
-  # Build payload
+  # ── Construction du payload ───────────────────────────────────────────────
   PAYLOAD=$(jq -n \
     --arg  date    "$TX_DATE" \
     --arg  acct    "$TX_ACCT" \
     --arg  amount  "$TX_AMT" \
     --arg  dir     "$TX_DIR" \
     --arg  desc    "$TX_DESC" \
-    --arg  status  "$TX_STATUS" \
-    --arg  source  "$TX_SOURCE" \
     '{
       transactionDate: $date,
       accountingMonth: $acct,
       amount:          ($amount | tonumber),
       direction:       $dir,
-      description:     $desc,
-      status:          $status,
-      source:          $source
+      description:     $desc
     }')
 
-  [ -n "$BANK_ID"   ] && PAYLOAD=$(echo "$PAYLOAD" | jq --argjson v "$BANK_ID"   '. + {bankAccountId: $v}')
-  [ -n "$BID"       ] && PAYLOAD=$(echo "$PAYLOAD" | jq --argjson v "$BID"        '. + {buildingId: $v}')
-  [ -n "$UNIT_ID"   ] && PAYLOAD=$(echo "$PAYLOAD" | jq --argjson v "$UNIT_ID"   '. + {housingUnitId: $v}')
-  [ -n "$SUB_ID"    ] && PAYLOAD=$(echo "$PAYLOAD" | jq --argjson v "$SUB_ID"    '. + {subcategoryId: $v}')
+  # Ajout des champs optionnels uniquement s'ils sont résolus
+  [ -n "$tx_bank_id"     ] && PAYLOAD=$(echo "$PAYLOAD" | jq --argjson v "$tx_bank_id"     '. + {bankAccountId: $v}')
+  [ -n "$tx_building_id" ] && PAYLOAD=$(echo "$PAYLOAD" | jq --argjson v "$tx_building_id" '. + {buildingId: $v}')
+  [ -n "$tx_unit_id"     ] && PAYLOAD=$(echo "$PAYLOAD" | jq --argjson v "$tx_unit_id"     '. + {housingUnitId: $v}')
+  [ -n "$tx_sub_id"      ] && PAYLOAD=$(echo "$PAYLOAD" | jq --argjson v "$tx_sub_id"      '. + {subcategoryId: $v}')
+  if [ -n "$TX_COUNTER" ] && [ "$TX_COUNTER" != "null" ]; then
+    PAYLOAD=$(echo "$PAYLOAD" | jq --arg v "$TX_COUNTER" '. + {counterpartyAccount: $v}')
+  fi
 
-  # POST
+  # ── POST vers l'estate correct ─────────────────────────────────────────────
   TS=$(curl -s -o /tmp/tx_r.json -w "%{http_code}" \
-    -X POST "$BASE_URL/api/v1/estates/$ESTATE_ID/transactions" \
+    -X POST "$BASE_URL/api/v1/estates/$tx_estate_id/transactions" \
     -H "Content-Type: application/json" -b "$COOKIE_JAR" \
     -d "$PAYLOAD")
 
   case "$TS" in
     200|201)
+      TX_ID=$(jq -r '.id' /tmp/tx_r.json)
+      TX_REF_CREATED=$(jq -r '.reference' /tmp/tx_r.json)
+      log_ok "TX $TX_REF → $TX_REF_CREATED (id=$TX_ID) [$ESTATE_NAME] [$TX_DIR ${TX_AMT}€] $TX_DATE — $TX_DESC"
       CREATED_TX=$(( CREATED_TX+1 ))
-      # Progress log every BATCH
       if (( CREATED_TX % BATCH == 0 )); then
         log_info "  ... $CREATED_TX / $TOTAL_TX transactions inserted"
       fi
       ;;
     409)
       SKIPPED_TX=$(( SKIPPED_TX+1 ))
+      log_warn "TX $TX_REF: already exists — $TX_DATE $TX_DESC"
       ;;
     *)
       log_failure "TX $TX_REF ($TX_DATE $TX_DESC)" "$TS" /tmp/tx_r.json

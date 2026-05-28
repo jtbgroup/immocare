@@ -199,6 +199,7 @@ if [ -f "$ESTATES_FILE" ]; then
   for i in $(seq 0 $(( TOTAL - 1 ))); do
     ESTATE=$(jq -c ".[$i]" "$ESTATES_FILE")
     ENAME=$(echo "$ESTATE" | jq -r '.name')
+    ECODE=$(echo "$ESTATE" | jq -r '.code')
     EDESC=$(echo "$ESTATE" | jq -r '.description // empty')
     
     # Remove createdByUsername and members (not part of API request)

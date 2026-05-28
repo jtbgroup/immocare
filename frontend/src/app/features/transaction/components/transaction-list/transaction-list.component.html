@@ -2,18 +2,20 @@
   <!-- Header -->
   <div class="details-content">
     <div class="header">
-      <h1>Transactions</h1>
+      <h1>{{ "TRANSACTION.TRANSACTIONS" | transloco }}</h1>
       <div class="actions">
         <button class="btn btn-secondary" (click)="showFilters = !showFilters">
-          Filters
+          {{ "GLOBAL.FILTERS" | transloco }}
           @if (activeFilterCount > 0) {
             <span> ({{ activeFilterCount }})</span>
           }
         </button>
         <button class="btn btn-secondary" (click)="exportCsv()">
-          Export CSV
+          {{ "TRANSACTION.EXPORT_CSV" | transloco }}
         </button>
-        <button class="btn btn-primary" (click)="navigateToNew()">+ New</button>
+        <button class="btn btn-primary" (click)="navigateToNew()">
+          + {{ "GLOBAL.NEW" | transloco }}
+        </button>
       </div>
     </div>
   </div>
@@ -23,7 +25,7 @@
     <div class="filter-panel">
       <div class="filter-grid">
         <div class="filter-field">
-          <label>Direction</label>
+          <label>{{ "TRANSACTION.DIRECTION" | transloco }}</label>
           <select [(ngModel)]="filter.direction" (change)="load()">
             <option value="">All</option>
             @for (d of directions; track d) {

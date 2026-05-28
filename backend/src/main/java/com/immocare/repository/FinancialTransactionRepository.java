@@ -43,7 +43,6 @@ public interface FinancialTransactionRepository
                         SELECT COALESCE(MAX(CAST(SUBSTRING(reference FROM 10) AS INTEGER)), 0) + 1
                         FROM financial_transaction
                         WHERE reference LIKE :prefix
-                        AND estate_id = :estateId
                         """, nativeQuery = true)
         int nextSequenceForYear(@Param("prefix") String prefix, @Param("estateId") UUID estateId);
 

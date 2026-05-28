@@ -49,16 +49,35 @@ public class Estate {
 
     // ─── Getters & Setters ────────────────────────────────────────────────────
 
-    public UUID getId() { return id; }
+    public UUID getId() {
+        return id;
+    }
 
-    public String getName() { return name; }
-    public void setName(String name) { this.name = name; }
+    public String getName() {
+        return name;
+    }
 
-    public String getDescription() { return description; }
-    public void setDescription(String description) { this.description = description; }
+    public void setName(String name) {
+        this.name = name;
+    }
 
-    public LocalDateTime getCreatedAt() { return createdAt; }
+    public String getDescription() {
+        return description;
+    }
 
-    public AppUser getCreatedBy() { return createdBy; }
-    public void setCreatedBy(AppUser createdBy) { this.createdBy = createdBy; }
+    public void setDescription(String description) {
+        this.description = description;
+    }
+
+    public LocalDateTime getCreatedAt() {
+        return createdAt;
+    }
+
+    public AppUser getCreatedBy() {
+        return createdBy;
+    }
+
+    public void setCreatedBy(AppUser createdBy) {
+        this.createdBy = createdBy;
+    }
 }
