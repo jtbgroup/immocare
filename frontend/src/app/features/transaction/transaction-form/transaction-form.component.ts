@@ -8,6 +8,7 @@ import {
   Validators,
 } from "@angular/forms";
 import { ActivatedRoute, Router } from "@angular/router";
+import { TranslocoModule } from "@ngneat/transloco";
 import { ActiveEstateService } from "../../../core/services/active-estate.service";
 import { BankAccountService } from "../../../core/services/bank-account.service";
 import { BuildingService } from "../../../core/services/building.service";
@@ -30,7 +31,12 @@ import { AssetLinkEditorComponent } from "../components/asset-link-editor/asset-
 @Component({
   selector: "app-transaction-form",
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule, AssetLinkEditorComponent],
+  imports: [
+    CommonModule,
+    ReactiveFormsModule,
+    AssetLinkEditorComponent,
+    TranslocoModule,
+  ],
   templateUrl: "./transaction-form.component.html",
   styleUrls: ["./transaction-form.component.scss"],
 })

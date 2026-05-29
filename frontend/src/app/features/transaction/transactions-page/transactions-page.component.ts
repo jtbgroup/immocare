@@ -1,7 +1,7 @@
 import { CommonModule } from "@angular/common";
 import { Component, OnInit } from "@angular/core";
 import { ActivatedRoute, Router, RouterModule } from "@angular/router";
-import { TransactionCategoriesComponent } from "../transaction-categories/transaction-categories.component";
+import { TranslocoModule } from "@ngneat/transloco";
 import { TransactionDashboardComponent } from "../transaction-dashboard/transaction-dashboard.component";
 import { TransactionImportComponent } from "../transaction-import/transaction-import.component";
 import { TransactionListComponent } from "../transaction-list/transaction-list.component";
@@ -17,7 +17,7 @@ type Tab = "list" | "import" | "dashboard" | "categories";
     TransactionListComponent,
     TransactionImportComponent,
     TransactionDashboardComponent,
-    TransactionCategoriesComponent,
+    TranslocoModule,
   ],
   templateUrl: "./transactions-page.component.html",
   styleUrls: ["./transactions-page.component.scss"],
@@ -26,10 +26,9 @@ export class TransactionsPageComponent implements OnInit {
   activeTab: Tab = "list";
 
   tabs: { id: Tab; label: string }[] = [
-    { id: "list",       label: "Transactions" },
-    { id: "import",     label: "Import" },
-    { id: "dashboard",  label: "Dashboard" },
-    { id: "categories", label: "Categories" },
+    { id: "list", label: "TRANSACTION.TRANSACTIONS" },
+    { id: "import", label: "GLOBAL.IMPORT" },
+    { id: "dashboard", label: "GLOBAL.DASHBOARD" },
   ];
 
   constructor(

@@ -2,7 +2,13 @@
   <!-- Header -->
   <div class="details-content">
     <div class="header">
-      <h1>{{ isEdit ? "Edit Transaction" : "New Transaction" }}</h1>
+      <h1>
+        {{
+          isEdit
+            ? ("TRANSACTION.EDIT" | transloco)
+            : ("TRANSACTION.ADD" | transloco)
+        }}
+      </h1>
       @if (existing) {
         <p class="reference text-muted">{{ existing.reference }}</p>
       }
@@ -13,7 +19,7 @@
     <div class="alert alert-error">{{ error }}</div>
   }
   @if (loading) {
-    <div class="loading">Loading…</div>
+    <div class="loading">{{ "GLOBAL.LOADING" | transloco }}...</div>
   }
 
   @if (!loading) {
@@ -21,11 +27,16 @@
       <!-- 1. General -->
       <div class="form-card">
         <div class="form-section">
-          <div class="form-section-title">General</div>
+          <div class="form-section-title">
+            {{ "GLOBAL.GENERAL" | transloco }}
+          </div>
 
           <div class="form-row">
             <div class="form-group">
-              <label>Direction <span class="required">*</span></label>
+              <label
+                >{{ "TRANSACTION.DIRECTION" | transloco }}
+                <span class="required">*</span></label
+              >
               <div class="radio-group">
                 <label class="radio-label">
                   <input
@@ -33,7 +44,7 @@
                     formControlName="direction"
                     value="INCOME"
                   />
-                  Income
+                  {{ "TRANSACTION.INCOME" | transloco }}
                 </label>
                 <label class="radio-label">
                   <input
@@ -41,12 +52,15 @@
                     formControlName="direction"
                     value="EXPENSE"
                   />
-                  Expense
+                  {{ "TRANSACTION.EXPENSE" | transloco }}
                 </label>
               </div>
             </div>
             <div class="form-group">
-              <label>Amount (€) <span class="required">*</span></label>
+              <label
+                >{{ "GLOBAL.AMOUNT" | transloco }} (€)
+                <span class="required">*</span></label
+              >
               <input
                 type="number"
                 formControlName="amount"
@@ -54,26 +68,32 @@
                 min="0.01"
               />
               @if (form.get("amount")?.invalid && form.get("amount")?.touched) {
-                <span class="error-message"
-                  >A positive amount is required.</span
-                >
+                <span class="error-message">{{
+                  "TRANSACTION.POSITIVE_AMOUNT_WARNING" | transloco
+                }}</span>
               }
             </div>
           </div>
 
           <div class="form-row">
             <div class="form-group">
-              <label>Transaction Date <span class="required">*</span></label>
+              <label
+                >{{ "TRANSACTION.DATE" | transloco
+                }}<span class="required">*</span></label
+              >
               <input type="date" formControlName="transactionDate" />
             </div>
             <div class="form-group">
-              <label>Accounting Month <span class="required">*</span></label>
+              <label
+                >{{ "TRANSACTION.ACCOUNTING_MONTH" | transloco }}
+                <span class="required">*</span></label
+              >
               <input type="month" formControlName="accountingMonth" />
             </div>
           </div>
 
           <div class="form-group">
-            <label>Description</label>
+            <label>{{ "GLOBAL.DESCRIPTION" | transloco }}</label>
             <textarea formControlName="description" rows="2"></textarea>
           </div>
         </div>
@@ -82,15 +102,17 @@
       <!-- 2. Counterparty -->
       <div class="form-card">
         <div class="form-section">
-          <div class="form-section-title">Counterparty</div>
+          <div class="form-section-title">
+            {{ "TRANSACTION.COUNTERPARTY" | transloco }}
+          </div>
 
           <div class="form-row">
             <div class="form-group">
-              <label>Value Date</label>
+              <label>{{ "TRANSACTION.VALUE_DATE" | transloco }}</label>
               <input type="date" formControlName="valueDate" />
             </div>
             <div class="form-group">
-              <label>Bank Account</label>
+              <label>{{ "GLOBAL.BANK_ACCOUNT" | transloco }}</label>
               <select formControlName="bankAccountId">
                 <option [ngValue]="null">— Select —</option>
                 @for (b of bankAccounts; track b.id) {
@@ -109,21 +131,25 @@
 
           <div class="form-row">
             <div class="form-group">
-              <label>Category</label>
+              <label>{{ "GLOBAL.CATEGORY" | transloco }}</label>
               <select formControlName="categoryId">
-                <option [ngValue]="null">— Select —</option>
+                <option [ngValue]="null">
+                  — {{ "GLOBAL.SELECT" | transloco }} —
+                </option>
                 @for (c of categories; track c.id) {
                   <option [value]="c.id">{{ c.name }}</option>
                 }
               </select>
             </div>
             <div class="form-group">
-              <label>Subcategory</label>
+              <label>{{ "GLOBAL.SUBCATEGORY" | transloco }}</label>
               <select
                 formControlName="subcategoryId"
                 [attr.disabled]="!form.get('categoryId')?.value ? '' : null"
               >
-                <option [ngValue]="null">— Select —</option>
+                <option [ngValue]="null">
+                  — {{ "GLOBAL.SELECT" | transloco }} —
+                </option>
                 @for (s of subcategories; track s.id) {
                   <option [value]="s.id">{{ s.name }}</option>
                 }
@@ -136,13 +162,15 @@
       <!-- 4. Links -->
       <div class="form-card">
         <div class="form-section">
-          <div class="form-section-title">Links</div>
+          <div class="form-section-title">{{ "GLOBAL.LINKS" | transloco }}</div>
 
           <div class="form-row">
             <div class="form-group">
-              <label>Building</label>
+              <label>{{ "GLOBAL.BUILDING" | transloco }}</label>
               <select formControlName="buildingId">
-                <option [ngValue]="null">— None —</option>
+                <option [ngValue]="null">
+                  — {{ "GLOBAL.NONE" | transloco }} —
+                </option>
                 @for (b of buildings; track b.id) {
                   <option [value]="b.id">{{ b.name }}</option>
                 }
@@ -154,15 +182,19 @@
           @if (form.get("buildingId")?.value) {
             <div class="form-row">
               <div class="form-group">
-                <label>Housing Unit</label>
+                <label>{{ "GLOBAL.HOUSING_UNIT" | transloco }}</label>
                 <select formControlName="housingUnitId">
-                  <option [ngValue]="null">— None —</option>
+                  <option [ngValue]="null">
+                    — {{ "GLOBAL.NONE" | transloco }} —
+                  </option>
                   @for (u of units; track u.id) {
                     <option [value]="u.id">{{ unitLabel(u) }}</option>
                   }
                 </select>
                 @if (units.length === 0) {
-                  <span class="hint">No units in this building.</span>
+                  <span class="hint">{{
+                    "HOUSING_UNIT.NONE_FOR_BUILDING" | transloco
+                  }}</span>
                 }
               </div>
               <div class="form-group"><!-- spacer --></div>
@@ -172,15 +204,19 @@
           @if (form.get("housingUnitId")?.value) {
             <div class="form-row">
               <div class="form-group">
-                <label>Lease</label>
+                <label>{{ "GLOBAL.LEASE" | transloco }}</label>
                 <select formControlName="leaseId">
-                  <option [ngValue]="null">— None —</option>
+                  <option [ngValue]="null">
+                    — {{ "GLOBAL.NONE" | transloco }} —
+                  </option>
                   @for (l of leases; track l.id) {
                     <option [ngValue]="l.id">{{ leaseLabel(l) }}</option>
                   }
                 </select>
                 @if (leases.length === 0) {
-                  <span class="hint">No leases for this unit.</span>
+                  <span class="hint">{{
+                    "LEASE.NONE_FOR_HOUSING_UNIT" | transloco
+                  }}</span>
                 }
               </div>
               <div class="form-group"><!-- spacer --></div>
@@ -193,7 +229,9 @@
       @if (!isIncomeDirection) {
         <div class="form-card">
           <div class="form-section">
-            <div class="form-section-title">Related Assets</div>
+            <div class="form-section-title">
+              {{ "TRANSACTION.RELATED_ASSETS" | transloco }}
+            </div>
             <app-asset-link-editor
               [buildingId]="form.get('buildingId')?.value"
               [unitId]="form.get('housingUnitId')?.value"
@@ -209,10 +247,12 @@
       <!-- Actions -->
       <div class="form-actions">
         <button type="button" class="btn btn-secondary" (click)="cancel()">
-          Cancel
+          {{ "GLOBAL.CANCEL" | transloco }}
         </button>
         <button type="submit" class="btn btn-primary" [disabled]="form.invalid">
-          {{ isEdit ? "Save Changes" : "Create Transaction" }}
+          {{
+            isEdit ? ("GLOBAL.SAVE" | transloco) : ("GLOBAL.CREATE" | transloco)
+          }}
         </button>
       </div>
     </form>

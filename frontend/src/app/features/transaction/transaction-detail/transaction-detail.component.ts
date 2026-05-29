@@ -2,6 +2,7 @@
 import { CommonModule } from "@angular/common";
 import { Component, OnInit } from "@angular/core";
 import { ActivatedRoute, Router, RouterModule } from "@angular/router";
+import { TranslocoModule } from "@ngneat/transloco";
 import { ActiveEstateService } from "../../../core/services/active-estate.service";
 import { TransactionService } from "../../../core/services/transaction.service";
 import {
@@ -13,7 +14,7 @@ import {
 @Component({
   selector: "app-transaction-detail",
   standalone: true,
-  imports: [CommonModule, RouterModule],
+  imports: [CommonModule, RouterModule, TranslocoModule],
   templateUrl: "./transaction-detail.component.html",
   styleUrls: ["./transaction-detail.component.scss"],
 })

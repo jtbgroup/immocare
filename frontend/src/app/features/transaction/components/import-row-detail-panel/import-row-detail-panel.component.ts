@@ -11,6 +11,7 @@ import {
 } from "@angular/core";
 import { FormsModule } from "@angular/forms";
 
+import { TranslocoModule } from "@ngneat/transloco";
 import { BuildingService } from "../../../../core/services/building.service";
 import { LeaseService } from "../../../../core/services/lease.service";
 import { TagSubcategoryService } from "../../../../core/services/tag-subcategory.service";
@@ -28,7 +29,7 @@ import {
 @Component({
   selector: "app-import-row-detail-panel",
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule, TranslocoModule],
   templateUrl: "./import-row-detail-panel.component.html",
   styleUrls: ["./import-row-detail-panel.component.scss"],
 })

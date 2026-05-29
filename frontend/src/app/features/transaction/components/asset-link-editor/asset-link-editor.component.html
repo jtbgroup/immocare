@@ -1,32 +1,31 @@
 <div class="asset-link-editor">
-
   <!-- Empty state hint -->
-  <p class="ale-empty-hint" *ngIf="rows.length === 0">
-    No asset linked to this expense. Click <em>Add asset link</em> to associate a device.
-  </p>
+  <p
+    class="ale-empty-hint"
+    *ngIf="rows.length === 0"
+    [innerHTML]="'GLOBAL.NO_ASSET_LINKED_EXPENSE' | transloco"
+  ></p>
 
   <!-- ── Rows ──────────────────────────────────────────────────────────────── -->
   <div class="ale-row" *ngFor="let row of rows; let i = index">
-
     <!-- 1. Asset type -->
     <div class="ale-cell ale-cell--type">
-      <label class="ale-label">Type</label>
+      <label class="ale-label">{{ "GLOBAL.TYPE" | transloco }}</label>
       <select
         class="ale-select"
         [(ngModel)]="row.assetType"
         (ngModelChange)="onTypeChange(row)"
       >
         <option *ngFor="let t of assetTypes" [value]="t">
-          {{ assetTypeLabels[t] }}
+          {{ assetTypeIcons[t] }} {{ "ASSET.ASSET_TYPES." + t | transloco }}
         </option>
       </select>
     </div>
 
     <!-- 2. Device picker -->
     <div class="ale-cell ale-cell--picker">
-      <label class="ale-label">Device</label>
+      <label class="ale-label">{{ "GLOBAL.DEVICE" | transloco }}</label>
       <div class="ale-picker-wrap">
-
         <!-- Selected device chip -->
         <div class="ale-selected-chip" *ngIf="row.assetId != null">
           <span class="ale-chip-label">{{ row.assetLabel }}</span>
@@ -34,8 +33,10 @@
             type="button"
             class="ale-chip-clear"
             (click)="clearDevice(row)"
-            title="Change device"
-          >✕</button>
+            [title]="'GLOBAL.CHANGE_DEVICE' | transloco"
+          >
+            ✕
+          </button>
         </div>
 
         <!-- Search input (hidden once a device is selected) -->
@@ -43,7 +44,15 @@
           <input
             type="text"
             class="ale-search-input"
-            [placeholder]="'Search ' + assetTypeLabels[row.assetType] + '… (min 2 chars)'"
+            [placeholder]="
+              ('GLOBAL.SEARCH' | transloco) +
+              assetTypeIcons[row.assetType] +
+              ' ' +
+              ('ASSET.ASSET_TYPES.' + row.assetType | transloco) +
+              '… (' +
+              ('GLOBAL.MIN_2_CHARS' | transloco) +
+              ')'
+            "
             [value]="row.searchQuery"
             (input)="onSearchInput(row, i, $any($event.target).value)"
             (blur)="closeDropdown(row)"
@@ -52,7 +61,10 @@
           <span class="ale-spinner" *ngIf="row.searching">⏳</span>
 
           <!-- Dropdown results -->
-          <ul class="ale-dropdown" *ngIf="row.dropdownOpen && row.searchResults.length > 0">
+          <ul
+            class="ale-dropdown"
+            *ngIf="row.dropdownOpen && row.searchResults.length > 0"
+          >
             <li
               class="ale-dropdown-item"
               *ngFor="let result of row.searchResults"
@@ -60,7 +72,9 @@
             >
               <span class="ale-result-label">{{ result.label }}</span>
               <span class="ale-result-context">
-                <span *ngIf="result.unitNumber">🚪 {{ result.unitNumber }} · </span>
+                <span *ngIf="result.unitNumber"
+                  >🚪 {{ result.unitNumber }} ·
+                </span>
                 🏢 {{ result.buildingName }}
               </span>
             </li>
@@ -69,9 +83,13 @@
           <!-- No results -->
           <p
             class="ale-no-results"
-            *ngIf="row.dropdownOpen && row.searchResults.length === 0 && !row.searching"
+            *ngIf="
+              row.dropdownOpen &&
+              row.searchResults.length === 0 &&
+              !row.searching
+            "
           >
-            No results found.
+            {{ "GLOBAL.NO_RESULTS" | transloco }}
           </p>
         </ng-container>
       </div>
@@ -80,11 +98,17 @@
     <!-- 3. Context (read-only) -->
     <div class="ale-cell ale-cell--context">
       <label class="ale-label">Location</label>
-      <div class="ale-context-chips" *ngIf="row.assetId != null; else contextEmpty">
+      <div
+        class="ale-context-chips"
+        *ngIf="row.assetId != null; else contextEmpty"
+      >
         <span class="ale-ctx-chip ale-ctx-chip--unit" *ngIf="row.unitNumber">
           🚪 {{ row.unitNumber }}
         </span>
-        <span class="ale-ctx-chip ale-ctx-chip--building" *ngIf="row.buildingName">
+        <span
+          class="ale-ctx-chip ale-ctx-chip--building"
+          *ngIf="row.buildingName"
+        >
           🏢 {{ row.buildingName }}
         </span>
       </div>
@@ -95,7 +119,12 @@
 
     <!-- 4. Amount -->
     <div class="ale-cell ale-cell--amount">
-      <label class="ale-label">Amount (€) <span class="ale-optional">optional</span></label>
+      <label class="ale-label"
+        >{{ "GLOBAL.AMOUNT" | transloco }} (€)
+        <span class="ale-optional">{{
+          "GLOBAL.OPTIONAL" | transloco
+        }}</span></label
+      >
       <input
         type="number"
         class="ale-amount-input"
@@ -109,13 +138,18 @@
 
     <!-- 5. Notes -->
     <div class="ale-cell ale-cell--notes">
-      <label class="ale-label">Notes <span class="ale-optional">optional</span></label>
+      <label class="ale-label"
+        >Notes
+        <span class="ale-optional">{{
+          "GLOBAL.OPTIONAL" | transloco
+        }}</span></label
+      >
       <input
         type="text"
         class="ale-notes-input"
         [(ngModel)]="row.notes"
         (ngModelChange)="onNotesChange()"
-        placeholder="e.g. Annual service"
+        [placeholder]="'GLOBAL.ANNUAL_SERVICE_PLACEHOLDER' | transloco"
         maxlength="200"
       />
     </div>
@@ -126,8 +160,10 @@
         type="button"
         class="ale-remove-btn"
         (click)="removeRow(i)"
-        title="Remove this link"
-      >✕</button>
+        [title]="'GLOBAL.REMOVE_LINK' | transloco"
+      >
+        ✕
+      </button>
     </div>
   </div>
 
@@ -138,15 +174,17 @@
     [class.ale-ventilation--valid]="ventilationValid"
     [class.ale-ventilation--invalid]="!ventilationValid"
   >
-    <span class="ale-vent-icon">{{ ventilationValid ? '✓' : '✗' }}</span>
+    <span class="ale-vent-icon">{{ ventilationValid ? "✓" : "✗" }}</span>
     <span class="ale-vent-text">
-      Ventilated: <strong>{{ ventilatedTotal.toFixed(2) }} €</strong>
+      {{ "GLOBAL.VENTILATED" | transloco }}:
+      <strong>{{ ventilatedTotal.toFixed(2) }} €</strong>
       <ng-container *ngIf="transactionAmount != null">
-        &nbsp;/&nbsp; Transaction total: <strong>{{ transactionAmount.toFixed(2) }} €</strong>
+        &nbsp;/&nbsp; {{ "TRANSACTION.TOTAL" | transloco }}:
+        <strong>{{ transactionAmount.toFixed(2) }} €</strong>
       </ng-container>
     </span>
     <span class="ale-vent-warn" *ngIf="!ventilationValid">
-      Sum of partial amounts exceeds the transaction total.
+      {{ "TRANSACTION.SUM_EXCEED" | transloco }}
     </span>
   </div>
 
@@ -156,7 +194,6 @@
     class="btn btn-sm btn-secondary ale-add-btn"
     (click)="addRow()"
   >
-    + Add asset link
+    + {{ "GLOBAL.ADD_ASSET_LINK" | transloco }}
   </button>
-
 </div>

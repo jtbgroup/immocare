@@ -1,9 +1,10 @@
 // features/transaction/components/transaction-import/transaction-import.component.ts — UC004_ESTATE_PLACEHOLDER Phase 6
 // activeEstateService.canEdit() checked before allowing upload/import actions.
 import { CommonModule } from "@angular/common";
-import { Component, OnInit } from "@angular/core";
+import { Component, OnInit, signal } from "@angular/core";
 import { FormsModule } from "@angular/forms";
 import { Router, RouterModule } from "@angular/router";
+import { TranslocoModule } from "@ngneat/transloco";
 import { ActiveEstateService } from "../../../core/services/active-estate.service";
 import { BankAccountService } from "../../../core/services/bank-account.service";
 import { ImportParserService } from "../../../core/services/import-parser.service";
@@ -27,13 +28,14 @@ type Step = "form" | "preview" | "result";
     FormsModule,
     RouterModule,
     ImportRowDetailPanelComponent,
+    TranslocoModule,
   ],
   templateUrl: "./transaction-import.component.html",
   styleUrls: ["./transaction-import.component.scss"],
 })
 export class TransactionImportComponent implements OnInit {
-  parsers: ImportParser[] = [];
-  bankAccounts: BankAccount[] = [];
+  parsers = signal<ImportParser[]>([]);
+  bankAccounts = signal<BankAccount[]>([]);
 
   selectedParserCode = "";
   selectedBankAccountId: number | null = null;
@@ -62,20 +64,41 @@ export class TransactionImportComponent implements OnInit {
   ) {}
 
   ngOnInit(): void {
-    this.importParserService.getAll().subscribe((p) => {
-      this.parsers = p;
-      if (p.length === 1) this.selectedParserCode = p[0].code;
-    });
-    this.bankAccountService.getAll().subscribe((accounts) => {
-      this.bankAccounts = accounts.filter((a) => a.isActive);
-      if (this.bankAccounts.length === 1) {
-        this.selectedBankAccountId = this.bankAccounts[0].id;
+    console.log('TransactionImportComponent.ngOnInit() called');
+    this.importParserService.getAll().subscribe(
+      (p) => {
+        console.log('Parsers received:', p);
+        this.parsers.set(p);
+        if (p.length === 1) this.selectedParserCode = p[0].code;
+      },
+      (error) => {
+        console.error('Error loading parsers:', error);
       }
-    });
+    );
+    this.bankAccountService.getAll().subscribe(
+      (accounts) => {
+        console.log('Bank accounts received:', accounts);
+        this.bankAccounts.set(accounts);
+        if (accounts.length === 1) {
+          this.selectedBankAccountId = accounts[0].id;
+        }
+      },
+      (error) => {
+        console.error('Error loading bank accounts:', error);
+      }
+    );
   }
 
   get selectedParser(): ImportParser | undefined {
-    return this.parsers.find((p) => p.code === this.selectedParserCode);
+    return this.parsers().find((p) => p.code === this.selectedParserCode);
+  }
+
+  get parsersArray(): ImportParser[] {
+    return this.parsers();
+  }
+
+  get bankAccountsArray(): BankAccount[] {
+    return this.bankAccounts();
   }
 
   get acceptedFileTypes(): string {

@@ -24,6 +24,7 @@
     "ADD_ACCOUNT": "Add account",
     "NO_BANK_ACCOUNT": "No bank account configured",
     "BANK_ACCOUNT_LABEL_PLACEHOLDER": "e.g. ING Main Account",
+    "BANK_ACCOUNT_OWN": "Own bank account",
     "BANK_ACCOUNT_TYPES": {
       "CURRENT": "Current",
       "SAVINGS": "Savings"
@@ -181,7 +182,34 @@
     "DATE_FROM": "Date from",
     "DATE_TO": "Date to",
     "CATEGORY": "Category",
-    "SUBCATEGORY": "Subcategory"
+    "SUBCATEGORY": "Subcategory",
+    "CATEGORIES": "Categories",
+    "IMPORT": "Import",
+    "LINKED_TO": "Linked to",
+    "NONE": "None",
+    "LINKS": "Links",
+    "BROWSE": "Browse",
+    "DND_FILE_OR": "Drag & drop your file here, or ",
+    "ACCEPTED": "Accepted",
+    "ANALYZING": "Analyzing",
+    "PREVIEW": "Preview",
+    "ACCEPT": "Accept",
+    "DEVICE": "Device",
+    "CHANGE_DEVICE": "Change device",
+    "ANNUAL_SERVICE_PLACEHOLDER": "e.g. Annual service",
+    "REMOVE_LINK": "Remove this link",
+    "ADD_ASSET_LINK": "Add asset link",
+    "NO_ASSET_LINKED_EXPENSE": "No asset linked to this expense. Click <em>Add asset link</em> to associate a device.",
+    "MIN_2_CHARS": "min 2 chars",
+    "VENTILATED": "Ventilated"
+  },
+  "ASSET": {
+    "ASSET_TYPES": {
+      "BOILER": "Boiler",
+      "FIRE_EXTINGUISHER": "Fire extinguisher",
+      "METER": "Meter"
+    },
+    "RELATED": "Related"
   },
   "NAV": {
     "MY_ESTATES": "My Estates",
@@ -201,7 +229,8 @@
     "CREATE": "Create Building",
     "SELECT": "Select Building",
     "BACK_TO_BUILDINGS": "Back to Buildings",
-    "INFO": "Building Information"
+    "INFO": "Building Information",
+    "ALL": "All buildings"
   },
   "HOUSING_UNIT": {
     "HOUSING_UNITS": "Units",
@@ -222,7 +251,8 @@
     "EMPTY_HELP": "Get started by adding your first unit.",
     "BACK_TO_UNITS": "Back to Units",
     "INFO": "Unit Information",
-    "NO_UNITS": "No units yet. Click \"+ Add Housing Unit\" to get started."
+    "NO_UNITS": "No units yet. Click \"+ Add Housing Unit\" to get started.",
+    "NONE_FOR_BUILDING": "No housing unit for this building"
   },
   "PEB": {
     "TITLE": "Energy Performance (PEB)",
@@ -342,7 +372,8 @@
       "COMMERCIAL": "Commercial",
       "SHARING": "Sharing"
     },
-    "CHANGE_STATUS": "Change status"
+    "CHANGE_STATUS": "Change status",
+    "NONE_FOR_HOUSING_UNIT": "No lease for this housing unit"
   },
   "ESTATE": {
     "ESTATES": "Estates",
@@ -399,15 +430,41 @@
     "TRANSACTIONS": "Transactions",
     "QUICK_DESC": "Track income and expenses",
     "STATISTICS": "Statistics",
-    "EXPENSES": "Expenses",
-    "INCOMES": "Incomes",
+    "EXPENSE": "Expense",
+    "INCOME": "Income",
     "VIEW_ALL": "View all transactions",
     "NET_BALANCE": "Net balance",
     "LOADING_FINANCIAL_DATA": "Loading financial data",
     "EXPORT_CSV": "Export to CSV",
     "DIRECTION": "Direction",
     "ACCOUNT_SOURCE": "Source account",
-    "ACCOUNT_DESTINATION": "Destination account"
+    "ACCOUNT_DESTINATION": "Destination account",
+    "FINANCIAL_TRANSACTIONS": "Financial Transactions",
+    "TOTAL_INCOME": "Total income",
+    "TOTAL_EXPENSE": "Total expense",
+    "STATUS_VALUES": {
+      "DRAFT": "Draft",
+      "CONFIRMED": "Confirmed",
+      "RECONCILED": "Reconcilied",
+      "CANCELLED": "Cancelled"
+    },
+    "EDIT": "Edit transaction",
+    "NEW": "New transaction",
+    "ADD": "Add transaction",
+    "POSITIVE_AMOUNT_WARNING": "A positive amount is required.",
+    "DATE": "Transaction date",
+    "ACCOUNTING_MONTH": "Accounting month",
+    "VALUE_DATE": "Value date",
+    "RELATED_ASSETS": "Related assets",
+    "COUNTERPARTY": "Counterparty",
+    "COUNTERPARTY_IBAN": "Counterparty IBAN",
+    "PARSER": "Parser",
+    "PARSER_SELECT": "Select a parser",
+    "IMPORT": "Import transactions",
+    "LINK_LEASE_UNIT": "Link to lease / housing unit",
+    "TOTAL": "Transaction total",
+    "SUM EXCEED": "Sum of partial amounts exceeds the transaction total.",
+    "EXTERNAL_REF": "External reference"
   },
   "USER": {
     "USERS": "Users",

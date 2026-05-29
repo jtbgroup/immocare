@@ -179,7 +179,35 @@
     "CODE": "Code",
     "FILTERS": "Filtres",
     "CATEGORY": "Catégorie",
-    "SUBCATEGORY": "Sous-catégorie"
+    "SUBCATEGORY": "Sous-catégorie",
+    "CATEGORIES": "Categories",
+    "IMPORT": "Importer",
+    "LINKED_TO": "Lié à",
+    "NONE": "Aucun",
+    "LINKS": "Liens",
+    "BANK_ACCOUNT_OWN": "Compte bancaire personnel",
+    "BROWSE": "Parcourir",
+    "DND_FILE_OR": "Glissez votre fichier ici, ou",
+    "ACCEPTED": "Accepté",
+    "ANALYZING": "Analyse",
+    "PREVIEW": "Preview",
+    "ACCEPT": "Accepter",
+    "DEVICE": "Appareil",
+    "CHANGE_DEVICE": "Changer l'équipement",
+    "ANNUAL_SERVICE_PLACEHOLDER": "e.g. Révision annuelle",
+    "REMOVE_LINK": "Supprimer le lien",
+    "ADD_ASSET_LINK": "Ajouter un lien vers un équipement",
+    "NO_ASSET_LINKED_EXPENSE": "Pas d'équipement lié à cette dépense. Cliquez <em>Ajouter un lien vers un équipement</em> pour associer un équipement.",
+    "MIN_2_CHARS": "min 2 caract.",
+    "VENTILATED": "Ventilé"
+  },
+  "ASSET": {
+    "ASSET_TYPES": {
+      "BOILER": "Chaudière",
+      "FIRE_EXTINGUISHER": "Extincteur",
+      "METER": "Compteur"
+    },
+    "RELATED": "Related"
   },
   "NAV": {
     "MY_ESTATES": "Mes estates",
@@ -199,7 +227,8 @@
     "CREATE": "Créer un immeuble",
     "SELECT": "Sélectionner un immeuble",
     "BACK_TO_BUILDINGS": "Retour aux immeubles",
-    "INFO": "Informations sur l'immeuble"
+    "INFO": "Informations sur l'immeuble",
+    "ALL": "Tous les buildings"
   },
   "HOUSING_UNIT": {
     "HOUSING_UNITS": "Unités",
@@ -220,7 +249,8 @@
     "EMPTY_HELP": "Commencez par ajouter votre première unité.",
     "BACK_TO_UNITS": "Retour aux unités",
     "INFO": "Informations sur l'unité",
-    "NO_UNITS": "Aucune unité pour le moment. Cliquez sur \"+ Ajouter une unité\" pour commencer."
+    "NO_UNITS": "Aucune unité pour le moment. Cliquez sur \"+ Ajouter une unité\" pour commencer.",
+    "NONE_FOR_BUILDING": "Pas d'unité de logement pour cet immeuble."
   },
   "PEB": {
     "TITLE": "Performance énergétique (PEB)",
@@ -340,7 +370,8 @@
       "COMMERCIAL": "Commercial",
       "SHARING": "Collocation"
     },
-    "CHANGE_STATUS": "Changer le statut"
+    "CHANGE_STATUS": "Changer le statut",
+    "NONE_FOR_HOUSING_UNIT": "Pas de bail pour cette unité de logement"
   },
   "ESTATE": {
     "ESTATES": "Estates",
@@ -397,15 +428,41 @@
     "TRANSACTIONS": "Transactions",
     "QUICK_DESC": "Suivez les revenus et les dépenses",
     "STATISTICS": "Statistiques",
-    "EXPENSES": "Dépenses",
-    "INCOMES": "Revenus",
+    "EXPENSE": "Dépense",
+    "INCOME": "Revenu",
     "VIEW_ALL": "Voir toutes les transactions",
     "NET_BALANCE": "Solde net",
     "LOADING_FINANCIAL_DATA": "Chargement des données financières",
     "EXPORT_CSV": "Exporter en CVS",
     "DIRECTION": "Direction",
     "ACCOUNT_SOURCE": "Compte source",
-    "ACCOUNT_DESTINATION": "Compte destination"
+    "ACCOUNT_DESTINATION": "Compte destination",
+    "FINANCIAL_TRANSACTIONS": "Transactions financières",
+    "TOTAL_INCOME": "Rentrées totales",
+    "TOTAL_EXPENSE": "Dépenses totales",
+    "STATUS_VALUES": {
+      "DRAFT": "Brouillon",
+      "CONFIRMED": "Confirmé",
+      "RECONCILED": "Reconcilié",
+      "CANCELLED": "Annulé"
+    },
+    "EDIT": "Editer une transaction",
+    "NEW": "Nouvelle transaction",
+    "ADD": "Ajouter une transaction",
+    "POSITIVE_AMOUNT_WARNING": "Un montant positif est attendu.",
+    "DATE": "Date de la transaction",
+    "ACCOUNTING_MONTH": "Mois de comptabilité",
+    "VALUE_DATE": "Date valeur",
+    "RELATED_ASSETS": "Assets associés",
+    "COUNTERPARTY": "Contre-partie",
+    "COUNTERPARTY_IBAN": "IBAN de la contre-partie",
+    "PARSER": "Parser",
+    "PARSER_SELECT": "Selectionner un parser",
+    "IMPORT": "Importer des transactions",
+    "LINK_LEASE_UNIT": "Lien vers le bail / unité de logement",
+    "TOTAL": "Total de la transaction",
+    "SUM EXCEED": "Somme des montants partiels dépasse le total de la transaction.",
+    "EXTERNAL_REF": "Référence externe"
   },
   "USER": {
     "USERS": "Utilisateurs",

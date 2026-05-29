@@ -2,7 +2,9 @@
   <div class="transaction-detail-container">
     <!-- Breadcrumb -->
     <nav class="breadcrumb" aria-label="breadcrumb">
-      <a routerLink="/transactions">Transactions</a>
+      <a routerLink="/transactions">{{
+        "TRANSACTION.TRANSACTIONS" | transloco
+      }}</a>
       <span class="breadcrumb-separator">›</span>
       <span>{{ transaction.reference }}</span>
     </nav>
@@ -41,8 +43,12 @@
         </div>
         @if (transaction.editable) {
           <div class="detail-header__actions">
-            <button class="btn btn-secondary" (click)="edit()">Edit</button>
-            <button class="btn btn-danger" (click)="delete()">Delete</button>
+            <button class="btn btn-secondary" (click)="edit()">
+              {{ "GLOBAL.EDIT" | transloco }}
+            </button>
+            <button class="btn btn-danger" (click)="delete()">
+              {{ "GLOBAL.DELETE" | transloco }}
+            </button>
           </div>
         }
       </div>
@@ -66,40 +72,40 @@
       <!-- Main grid -->
       <div class="detail-grid">
         <div class="info-item">
-          <label>Reference</label>
+          <label>{{ "GLOBAL.REFERENCE" | transloco }}</label>
           <p class="monospace">{{ transaction.reference }}</p>
         </div>
         <div class="info-item">
-          <label>Transaction Date</label>
+          <label>{{ "TRANSACTION.DATE" | transloco }}</label>
           <p>{{ transaction.transactionDate }}</p>
         </div>
         <div class="info-item">
-          <label>Accounting Month</label>
+          <label>{{ "TRANSACTION.ACCOUNTING_MONTH" | transloco }}</label>
           <p>{{ transaction.accountingMonth.substring(0, 7) }}</p>
         </div>
         @if (transaction.valueDate) {
           <div class="info-item">
-            <label>Value Date</label>
+            <label>{{ "TRANSACTION.VALUE_DATE" | transloco }}</label>
             <p>{{ transaction.valueDate }}</p>
           </div>
         }
         <div class="info-item">
-          <label>Source</label>
+          <label>{{ "GLOBAL.SOURCE" | transloco }}</label>
           <p>{{ transaction.source }}</p>
         </div>
         <div class="info-item">
-          <label>Bank Account</label>
+          <label>{{ "GLOBAL.BANK_ACCOUNT" | transloco }}</label>
           <p>{{ transaction.bankAccountLabel || "—" }}</p>
         </div>
         @if (transaction.counterpartyAccount) {
           <div class="info-item">
-            <label>Counterparty IBAN</label>
+            <label>{{ "TRANSACTION.COUNTERPARTY_IBAN" | transloco }}</label>
             <p class="monospace">{{ transaction.counterpartyAccount }}</p>
           </div>
         }
         @if (transaction.externalReference) {
           <div class="info-item">
-            <label>External Ref.</label>
+            <label>{{ "TRANSACTION.EXTERNAL_REF" | transloco }}</label>
             <p class="monospace">{{ transaction.externalReference }}</p>
           </div>
         }
@@ -108,7 +114,7 @@
       <!-- Description -->
       @if (transaction.description) {
         <div class="detail-description">
-          <label>Description</label>
+          <label>{{ "GLOBAL.DESCRIPTION" | transloco }}</label>
           <p>{{ transaction.description }}</p>
         </div>
       }
@@ -121,7 +127,7 @@
         transaction.suggestedLeaseId
       ) {
         <div class="detail-linked">
-          <label>Linked to</label>
+          <label>{{ "GLOBAL.LINKED_TO" | transloco }}</label>
           <div class="linked-chain">
             @if (transaction.buildingId) {
               <a
@@ -131,7 +137,9 @@
                 🏢
                 {{
                   transaction.buildingName ||
-                    "Building #" + transaction.buildingId
+                    ("GLOBAL.BUILDING" | transloco) +
+                      " #" +
+                      transaction.buildingId
                 }}
               </a>
             }
@@ -145,7 +153,10 @@
               >
                 🚪
                 {{
-                  transaction.unitNumber || "Unit #" + transaction.housingUnitId
+                  transaction.unitNumber ||
+                    ("GLOBAL.HOUSING_UNIT" | transloco) +
+                      " #" +
+                      transaction.housingUnitId
                 }}
               </a>
             }
@@ -160,7 +171,7 @@
                 [routerLink]="['/leases', transaction.leaseId]"
                 class="linked-chip linked-chip--lease"
               >
-                📄 Lease #{{ transaction.leaseId }}
+                📄 {{ "GLOBAL.LEASE" | transloco }} #{{ transaction.leaseId }}
               </a>
             }
             @if (transaction.suggestedLeaseId && !transaction.leaseId) {
@@ -168,7 +179,9 @@
                 [routerLink]="['/leases', transaction.suggestedLeaseId]"
                 class="linked-chip linked-chip--lease linked-chip--suggestion"
               >
-                📄 Lease #{{ transaction.suggestedLeaseId }}
+                📄 {{ "GLOBAL.LEASE" | transloco }} #{{
+                  transaction.suggestedLeaseId
+                }}
                 <span class="badge badge--suggestion">Suggestion</span>
               </a>
             }
@@ -180,7 +193,7 @@
       @if (transaction.assetLinks.length) {
         <div class="detail-assets">
           <div class="detail-divider"></div>
-          <label>Related Assets</label>
+          <label>{{ "ASSET.RELATED" | transloco }}</label>
           <ul class="asset-list">
             @for (link of transaction.assetLinks; track link.assetType) {
               <li class="asset-item">
@@ -198,13 +211,17 @@
       <!-- Metadata footer -->
       <div class="detail-divider"></div>
       <div class="detail-meta">
-        <span>Created: {{ transaction.createdAt }}</span>
-        <span>Updated: {{ transaction.updatedAt }}</span>
+        <span
+          >{{ "GLOBAL.CREATED" | transloco }}: {{ transaction.createdAt }}</span
+        >
+        <span
+          >{{ "GLOBAL.UPDATED" | transloco }}: {{ transaction.updatedAt }}</span
+        >
       </div>
     </div>
   </div>
 }
 
 @if (loading) {
-  <div class="loading">Loading…</div>
+  <div class="loading">{{ "GLOBAL.LOADING" | transloco }}...</div>
 }

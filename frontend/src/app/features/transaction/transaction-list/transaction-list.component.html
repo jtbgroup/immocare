@@ -181,13 +181,17 @@
   @if (response) {
     <div class="summary-bar">
       <div class="summary-item summary-item--income">
-        <span class="summary-label">Total Income</span>
+        <span class="summary-label">{{
+          "TRANSACTION.TOTAL_INCOME" | transloco
+        }}</span>
         <span class="summary-value">{{
           response.totalIncome | belgianCurrency: true : "+"
         }}</span>
       </div>
       <div class="summary-item summary-item--expense">
-        <span class="summary-label">Total Expenses</span>
+        <span class="summary-label">{{
+          "TRANSACTION.TOTAL_EXPENSE" | transloco
+        }}</span>
         <span class="summary-value">{{
           response.totalExpenses | belgianCurrency: true : "-"
         }}</span>
@@ -197,20 +201,27 @@
         [class.summary-item--positive]="response.netBalance >= 0"
         [class.summary-item--negative]="response.netBalance < 0"
       >
-        <span class="summary-label">Net Balance</span>
+        <span class="summary-label">{{
+          "TRANSACTION.NET_BALANCE" | transloco
+        }}</span>
         <span class="summary-value">{{
           response.netBalance
             | belgianCurrency: true : (response.netBalance >= 0 ? "+" : "")
         }}</span>
       </div>
       <span class="summary-total"
-        >{{ response.totalElements }} transaction(s)</span
+        >{{ response.totalElements }}
+        {{
+          response.totalElements > 1
+            ? ("TRANSACTION.TRANSACTIONS" | transloco)
+            : ("GLOBAL.TRANSACTION" | transloco)
+        }}</span
       >
     </div>
   }
 
   @if (loading) {
-    <div class="loading">Loading…</div>
+    <div class="loading">{{ "GLOBAL.LOADING" | transloco }}...</div>
   }
 
   <!-- Table -->
@@ -246,7 +257,7 @@
               </span>
             </th>
             <th class="sortable" (click)="sortBy('direction')">
-              {{ "GLOBAL.DIRECTION" | transloco }}
+              {{ "TRANSACTION.DIRECTION" | transloco }}
               <span
                 class="sort-icon"
                 [class.active]="sortField === 'direction'"
@@ -289,16 +300,9 @@
               <td class="monospace">{{ tx.reference }}</td>
               <td class="nowrap">{{ tx.transactionDate }}</td>
               <td>
-                @if (tx.direction === "INCOME") {
-                  <span class="badge badge--income">{{
-                    DIRECTION_LABELS[tx.direction]
-                  }}</span>
-                }
-                @if (tx.direction === "EXPENSE") {
-                  <span class="badge badge--expense">{{
-                    DIRECTION_LABELS[tx.direction]
-                  }}</span>
-                }
+                <span class="badge badge--{{ tx.direction.toLowerCase() }}">{{
+                  "TRANSACTION." + tx.direction | transloco
+                }}</span>
               </td>
               <td
                 class="amount nowrap"
@@ -348,20 +352,20 @@
               </td>
               <td>
                 <span class="badge badge--status-{{ tx.status.toLowerCase() }}">
-                  {{ STATUS_LABELS[tx.status] }}
+                  {{ "TRANSACTION.STATUS_VALUES." + tx.status | transloco }}
                 </span>
               </td>
               <td class="actions-cell" (click)="$event.stopPropagation()">
                 <button
                   class="icon-btn"
-                  title="Edit"
+                  [title]="'GLOBAL.EDIT' | transloco"
                   (click)="navigateToEdit(tx, $event)"
                 >
                   ✏️
                 </button>
                 <button
                   class="icon-btn"
-                  title="Delete"
+                  [title]="'GLOBAL.DELETE' | transloco"
                   (click)="deleteTransaction(tx, $event)"
                 >
                   🗑️

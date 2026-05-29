@@ -131,37 +131,14 @@
       </div>
 
       <!-- Pagination -->
-      @if (totalPages > 1) {
-        <div class="pagination">
-          <button
-            class="btn btn-secondary btn-sm"
-            [disabled]="currentPage === 0"
-            (click)="goToPage(currentPage - 1)"
-          >
-            {{ "GLOBAL.PREVIOUS" | transloco }}
-          </button>
-          @for (p of pages(); track p) {
-            <button
-              class="btn btn-secondary btn-sm"
-              [class.btn-active]="p === currentPage"
-              (click)="goToPage(p)"
-            >
-              {{ p + 1 }}
-            </button>
-          }
-          <button
-            class="btn btn-secondary btn-sm"
-            [disabled]="currentPage === totalPages - 1"
-            (click)="goToPage(currentPage + 1)"
-          >
-            {{ "GLOBAL.NEXT" | transloco }}
-          </button>
-          <span class="page-info">
-            {{ "GLOBAL.PAGE" | transloco }} {{ currentPage + 1 }}
-            {{ "GLOBAL.OF" | transloco }} {{ totalPages }} ({{ totalElements }}
-            total)
-          </span>
-        </div>
+      @if (response) {
+        <app-pagination
+          [currentPage]="response.page"
+          [totalPages]="response.totalPages"
+          [totalElements]="response.totalElements"
+          (pageChange)="goToPage($event)"
+        >
+        </app-pagination>
       }
     }
   }

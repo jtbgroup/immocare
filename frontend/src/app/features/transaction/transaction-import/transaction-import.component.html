@@ -3,16 +3,18 @@
   @if (step === "form") {
     <div class="details-content">
       <div class="header">
-        <h1>Import Transactions</h1>
+        <h1>{{ "TRANSACTION.IMPORT" | transloco }}</h1>
       </div>
     </div>
 
     <div class="info-card">
       <div class="form-group">
-        <label class="form-label">Parser</label>
+        <label class="form-label">{{ "TRANSACTION.PARSER" | transloco }}</label>
         <select class="form-control" [(ngModel)]="selectedParserCode">
-          <option value="">— Select a parser —</option>
-          @for (p of parsers; track p.code) {
+          <option value="">
+            — {{ "TRANSACTION.PARSER_SELECT" | transloco }} —
+          </option>
+          @for (p of parsersArray; track p.code) {
             <option [value]="p.code">{{ p.label }}</option>
           }
         </select>
@@ -21,13 +23,17 @@
         }
       </div>
 
-      @if (bankAccounts.length > 0) {
+      @if (bankAccountsArray.length > 0) {
         <div class="form-group">
-          <label class="form-label">Own bank account (optional)</label>
+          <label class="form-label"
+            >{{ "GLOBAL.BANK_ACCOUNT_OWN" | transloco }} ({{
+              "GLOBAL.OPTIONAL" | transloco
+            }})</label
+          >
           <select class="form-control" [(ngModel)]="selectedBankAccountId">
-            <option [ngValue]="null">— None —</option>
-            @for (a of bankAccounts; track a.id) {
-              <option [ngValue]="a.id">{{ a.label }}</option>
+            <option value="">— {{ "GLOBAL.NONE" | transloco }} —</option>
+            @for (a of bankAccountsArray; track a.id) {
+              <option [value]="a.id">{{ a.label }}</option>
             }
           </select>
         </div>
@@ -43,9 +49,9 @@
       >
         @if (!selectedFile) {
           <div class="drop-zone__icon">📂</div>
-          <p class="drop-zone__text">Drag & drop your file here, or</p>
+          <p class="drop-zone__text">{{ "GLOBAL.DND_FILE_OR" | transloco }}</p>
           <label class="btn btn-secondary">
-            Browse
+            {{ "GLOBAL.BROWSE" | transloco }}
             <input
               type="file"
               hidden
@@ -53,12 +59,14 @@
               (change)="onFileChange($event)"
             />
           </label>
-          <p class="drop-zone__hint">Accepted: {{ acceptedFileTypes }}</p>
+          <p class="drop-zone__hint">
+            {{ "GLOBAL.ACCEPTED" | transloco }}: {{ acceptedFileTypes }}
+          </p>
         } @else {
           <div class="drop-zone__icon">📄</div>
           <p class="drop-zone__filename">{{ selectedFile.name }}</p>
           <button class="btn btn-sm btn-secondary" (click)="clearFile()">
-            Remove
+            {{ "GLOBAL.REMOVE" | transloco }}
           </button>
         }
       </div>
@@ -73,7 +81,11 @@
           [disabled]="!canPreview || loading"
           (click)="preview()"
         >
-          {{ loading ? "⏳ Analysing…" : "🔍 Preview" }}
+          {{
+            loading
+              ? "⏳" + ("GLOBAL.ANALYZING" | transloco)
+              : "🔍" + ("GLOBAL.PREVIEW" | transloco)
+          }}
         </button>
       </div>
     </div>
@@ -108,21 +120,22 @@
       <span class="preview-summary__item">{{ validRows.length }} valid</span>
       @if (duplicateCount > 0) {
         <span class="preview-summary__item preview-summary__item--dup">
-          ⚠️ {{ duplicateCount }} already in DB
+          ⚠️ {{ duplicateCount }} {{ "GLOBAL.ALREADY_PRESENT" | transloco }}
         </span>
       }
       @if (previewRows.length - validRows.length > 0) {
         <span class="preview-summary__item preview-summary__item--err">
-          ❌ {{ previewRows.length - validRows.length }} errors
+          ❌ {{ previewRows.length - validRows.length }}
+          {{ "GLOBAL.ERRORS" | transloco }}
         </span>
       }
       @if (enrichedCount > 0) {
         <span class="preview-summary__item preview-summary__item--enriched">
-          ✏️ {{ enrichedCount }} enriched
+          ✏️ {{ enrichedCount }} {{ "GLOBAL.ENRICHED" | transloco }}
         </span>
       }
       <span class="preview-summary__item preview-summary__item--sel">
-        ✅ {{ selectedRows.length }} selected
+        ✅ {{ selectedRows.length }} {{ "GLOBAL.SELECTED" | transloco }}
       </span>
     </div>
 
@@ -171,7 +184,7 @@
                 class="col-cp sortable"
                 (click)="sortBy('counterpartyAccount')"
               >
-                Counterparty
+                {{ "TRANSACTION.COUNTERPARTY" | transloco }}
                 <span
                   class="sort-icon"
                   [class.active]="sortField === 'counterpartyAccount'"
@@ -180,7 +193,7 @@
                 </span>
               </th>
               <th class="col-subcat sortable" (click)="sortBy('subcategory')">
-                Subcategory
+                {{ "GLOBAL.SUBCATEGORY" | transloco }}
                 <span
                   class="sort-icon"
                   [class.active]="sortField === 'subcategory'"
@@ -189,13 +202,14 @@
                 </span>
               </th>
               <th class="col-lease sortable" (click)="sortBy('lease')">
-                Lease / Unit
+                {{ "GLOBAL.LEASE" | transloco }} /
+                {{ "GLOBAL.HOUSING_UNIT" | transloco }}
                 <span class="sort-icon" [class.active]="sortField === 'lease'">
                   {{ sortIcon("lease") }}
                 </span>
               </th>
               <th class="col-status sortable" (click)="sortBy('duplicateInDb')">
-                Status
+                {{ "GLOBAL.STATUS" | transloco }}
                 <span
                   class="sort-icon"
                   [class.active]="sortField === 'duplicateInDb'"
@@ -326,7 +340,7 @@
                       target="_blank"
                       title="View existing transaction"
                     >
-                      voir →
+                      {{ "GLOBAL.SHOW" | transloco }} →
                     </a>
                   }
                   @if (!row.parseError && !row.duplicateInDb) {

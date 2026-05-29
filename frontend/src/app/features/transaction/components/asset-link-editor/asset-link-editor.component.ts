@@ -17,6 +17,7 @@ import {
   switchMap,
 } from "rxjs/operators";
 
+import { TranslocoModule } from "@ngneat/transloco";
 import {
   AssetSearchResult,
   AssetSearchService,
@@ -61,7 +62,7 @@ interface AssetLinkRow {
 @Component({
   selector: "app-asset-link-editor",
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule, TranslocoModule],
   templateUrl: "./asset-link-editor.component.html",
   styleUrls: ["./asset-link-editor.component.scss"],
 })
@@ -97,10 +98,10 @@ export class AssetLinkEditorComponent implements OnChanges, OnDestroy {
 
   readonly assetTypes: AssetType[] = ["BOILER", "FIRE_EXTINGUISHER", "METER"];
 
-  readonly assetTypeLabels: Record<AssetType, string> = {
-    BOILER: "🔥 Boiler",
-    FIRE_EXTINGUISHER: "🧯 Fire Extinguisher",
-    METER: "⚡ Meter",
+  readonly assetTypeIcons: Record<AssetType, string> = {
+    BOILER: "🔥",
+    FIRE_EXTINGUISHER: "🧯",
+    METER: "⚡",
   };
 
   /** One search Subject per row index — rebuilt when rows are added/removed */

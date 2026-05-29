@@ -6,6 +6,8 @@ import { TranslocoModule } from "@ngneat/transloco";
 import { ActiveEstateService } from "../../../core/services/active-estate.service";
 import { BuildingService } from "../../../core/services/building.service";
 import { Building } from "../../../models/building.model";
+import { PagedTransactionResponse } from "../../../models/transaction.model";
+import { PaginationComponent } from "../../../shared/components/pagination/pagination.component";
 
 /**
  * Displays the paginated list of buildings scoped to the active estate.
@@ -14,11 +16,12 @@ import { Building } from "../../../models/building.model";
 @Component({
   selector: "app-building-list",
   standalone: true,
-  imports: [CommonModule, FormsModule, TranslocoModule],
+  imports: [CommonModule, FormsModule, TranslocoModule, PaginationComponent],
   templateUrl: "./building-list.component.html",
   styleUrls: ["./building-list.component.scss"],
 })
 export class BuildingListComponent implements OnInit {
+  response: PagedTransactionResponse | null = null;
   buildings: Building[] = [];
   cities: string[] = [];
   loading = false;
