@@ -14,7 +14,7 @@
           <option value="">
             — {{ "TRANSACTION.PARSER_SELECT" | transloco }} —
           </option>
-          @for (p of parsersArray; track p.code) {
+          @for (p of parsers(); track p.code) {
             <option [value]="p.code">{{ p.label }}</option>
           }
         </select>
@@ -23,7 +23,7 @@
         }
       </div>
 
-      @if (bankAccountsArray.length > 0) {
+      @if (bankAccounts().length > 0) {
         <div class="form-group">
           <label class="form-label"
             >{{ "GLOBAL.BANK_ACCOUNT_OWN" | transloco }} ({{
@@ -32,7 +32,7 @@
           >
           <select class="form-control" [(ngModel)]="selectedBankAccountId">
             <option value="">— {{ "GLOBAL.NONE" | transloco }} —</option>
-            @for (a of bankAccountsArray; track a.id) {
+            @for (a of bankAccounts(); track a.id) {
               <option [value]="a.id">{{ a.label }}</option>
             }
           </select>

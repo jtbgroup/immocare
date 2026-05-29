@@ -64,41 +64,20 @@ export class TransactionImportComponent implements OnInit {
   ) {}
 
   ngOnInit(): void {
-    console.log('TransactionImportComponent.ngOnInit() called');
-    this.importParserService.getAll().subscribe(
-      (p) => {
-        console.log('Parsers received:', p);
-        this.parsers.set(p);
-        if (p.length === 1) this.selectedParserCode = p[0].code;
-      },
-      (error) => {
-        console.error('Error loading parsers:', error);
+    this.importParserService.getAll().subscribe((p) => {
+      this.parsers.set(p);
+      if (p.length === 1) this.selectedParserCode = p[0].code;
+    });
+    this.bankAccountService.getAll().subscribe((accounts) => {
+      this.bankAccounts.set(accounts);
+      if (accounts.length === 1) {
+        this.selectedBankAccountId = accounts[0].id;
       }
-    );
-    this.bankAccountService.getAll().subscribe(
-      (accounts) => {
-        console.log('Bank accounts received:', accounts);
-        this.bankAccounts.set(accounts);
-        if (accounts.length === 1) {
-          this.selectedBankAccountId = accounts[0].id;
-        }
-      },
-      (error) => {
-        console.error('Error loading bank accounts:', error);
-      }
-    );
+    });
   }
 
   get selectedParser(): ImportParser | undefined {
     return this.parsers().find((p) => p.code === this.selectedParserCode);
-  }
-
-  get parsersArray(): ImportParser[] {
-    return this.parsers();
-  }
-
-  get bankAccountsArray(): BankAccount[] {
-    return this.bankAccounts();
   }
 
   get acceptedFileTypes(): string {
