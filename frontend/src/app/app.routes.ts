@@ -81,7 +81,7 @@ export const routes: Routes = [
     path: "estates/:estateId/settings",
     canActivate: [AuthGuard, EstateGuard],
     loadComponent: () =>
-      import("./features/estate/user/estate-settings/estate-settings.component").then(
+      import("./features/estate-config/estate-config.component").then(
         (m) => m.EstateSettingsComponent,
       ),
   },

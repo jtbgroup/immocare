@@ -139,7 +139,7 @@ public class BoilerServiceHistoryService {
         int warningMonths = (estateId != null)
                 ? estateConfigService.getIntValue(
                         estateId,
-                        EstateConfigDTOs.KEY_BOILER_ALERT_THRESHOLD_MONTHS,
+                        EstateConfigDTOs.KEY_BOILERS_ALERT_THRESHOLD_MONTHS,
                         3)
                 : 3;
 

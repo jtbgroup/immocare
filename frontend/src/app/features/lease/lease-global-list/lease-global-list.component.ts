@@ -198,17 +198,6 @@ export class LeaseGlobalListComponent implements OnInit, OnDestroy {
     this.router.navigate(["/estates", this.estateId, "buildings", buildingId]);
   }
 
-  // statusClass(status: LeaseStatus): string {
-  //   return (
-  //     {
-  //       ACTIVE: "badge badge-active",
-  //       DRAFT: "badge badge-draft",
-  //       FINISHED: "badge badge-finished",
-  //       CANCELLED: "badge badge-cancelled",
-  //     }[status] ?? "badge"
-  //   );
-  // }
-
   formatCurrency(value: number): string {
     return new Intl.NumberFormat("fr-BE", {
       style: "currency",

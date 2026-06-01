@@ -7,10 +7,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.immocare.exception.PlatformConfigNotFoundException;
-import com.immocare.model.dto.EstateConfigDTOs.AssetTypeMappingDTO;
 import com.immocare.model.dto.EstateConfigDTOs.EstateConfigDTO;
 import com.immocare.model.dto.EstateConfigDTOs.EstateConfigSeed;
-import com.immocare.model.dto.EstateConfigDTOs.UpdateAssetTypeMappingRequest;
 import com.immocare.model.dto.EstateConfigDTOs.UpdateEstateConfigRequest;
 import com.immocare.model.entity.Estate;
 import com.immocare.model.entity.EstateConfig;
@@ -29,8 +27,10 @@ import lombok.RequiredArgsConstructor;
 @Transactional(readOnly = true)
 public class EstateConfigService {
 
-    private static final String ASSET_MAPPING_PREFIX = "asset.type.subcategory.mapping.";
-    private static final List<String> ASSET_TYPES = List.of("BOILER", "FIRE_EXTINGUISHER", "METER");
+    // private static final String ASSET_MAPPING_PREFIX =
+    // "asset.type.subcategory.mapping.";
+    // private static final List<String> ASSET_TYPES = List.of("BOILER",
+    // "FIRE_EXTINGUISHER", "METER");
 
     private final EstateConfigRepository configRepository;
     private final TagSubcategoryRepository tagSubcategoryRepository;
@@ -82,20 +82,20 @@ public class EstateConfigService {
                 .orElse(defaultValue);
     }
 
-    /**
-     * Returns all asset-type → subcategory mappings for the given estate.
-     */
-    public List<AssetTypeMappingDTO> getAssetTypeMappings(UUID estateId) {
-        return ASSET_TYPES.stream()
-                .map(assetType -> {
-                    String key = ASSET_MAPPING_PREFIX + assetType;
-                    String value = getStringValue(estateId, key, "");
-                    Long subcategoryId = parseSubcategoryId(value);
-                    String subcategoryName = resolveSubcategoryName(subcategoryId);
-                    return new AssetTypeMappingDTO(assetType, subcategoryId, subcategoryName);
-                })
-                .toList();
-    }
+    // /**
+    // * Returns all asset-type → subcategory mappings for the given estate.
+    // */
+    // public List<AssetTypeMappingDTO> getAssetTypeMappings(UUID estateId) {
+    // return ASSET_TYPES.stream()
+    // .map(assetType -> {
+    // String key = ASSET_MAPPING_PREFIX + assetType;
+    // String value = getStringValue(estateId, key, "");
+    // Long subcategoryId = parseSubcategoryId(value);
+    // String subcategoryName = resolveSubcategoryName(subcategoryId);
+    // return new AssetTypeMappingDTO(assetType, subcategoryId, subcategoryName);
+    // })
+    // .toList();
+    // }
 
     // ─── UPDATE ───────────────────────────────────────────────────────────────
 
@@ -110,29 +110,33 @@ public class EstateConfigService {
         return toDTO(configRepository.save(config));
     }
 
-    /**
-     * Updates the subcategory mapping for a given asset type within an estate.
-     * A null subcategoryId clears the mapping (stored as empty string).
-     */
-    @Transactional
-    public AssetTypeMappingDTO updateAssetTypeMapping(UUID estateId, String assetType,
-            UpdateAssetTypeMappingRequest req) {
-        if (!ASSET_TYPES.contains(assetType.toUpperCase())) {
-            throw new IllegalArgumentException("Invalid asset type: " + assetType
-                    + ". Allowed: " + ASSET_TYPES);
-        }
-        String key = ASSET_MAPPING_PREFIX + assetType.toUpperCase();
-        String newValue = req.subcategoryId() != null ? String.valueOf(req.subcategoryId()) : "";
+    // /**
+    // * Updates the subcategory mapping for a given asset type within an estate.
+    // * A null subcategoryId clears the mapping (stored as empty string).
+    // */
+    // @Transactional
+    // public AssetTypeMappingDTO updateAssetTypeMapping(UUID estateId, String
+    // assetType,
+    // UpdateAssetTypeMappingRequest req) {
+    // if (!ASSET_TYPES.contains(assetType.toUpperCase())) {
+    // throw new IllegalArgumentException("Invalid asset type: " + assetType
+    // + ". Allowed: " + ASSET_TYPES);
+    // }
+    // String key = ASSET_MAPPING_PREFIX + assetType.toUpperCase();
+    // String newValue = req.subcategoryId() != null ?
+    // String.valueOf(req.subcategoryId()) : "";
 
-        EstateConfig config = configRepository.findByEstateIdAndConfigKey(estateId, key)
-                .orElseThrow(() -> new PlatformConfigNotFoundException(key));
-        config.setConfigValue(newValue);
-        configRepository.save(config);
+    // EstateConfig config = configRepository.findByEstateIdAndConfigKey(estateId,
+    // key)
+    // .orElseThrow(() -> new PlatformConfigNotFoundException(key));
+    // config.setConfigValue(newValue);
+    // configRepository.save(config);
 
-        Long subcategoryId = parseSubcategoryId(newValue);
-        String subcategoryName = resolveSubcategoryName(subcategoryId);
-        return new AssetTypeMappingDTO(assetType.toUpperCase(), subcategoryId, subcategoryName);
-    }
+    // Long subcategoryId = parseSubcategoryId(newValue);
+    // String subcategoryName = resolveSubcategoryName(subcategoryId);
+    // return new AssetTypeMappingDTO(assetType.toUpperCase(), subcategoryId,
+    // subcategoryName);
+    // }
 
     // ─── SEED (called by EstateService at creation) ───────────────────────────
 

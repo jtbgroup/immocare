@@ -310,7 +310,7 @@ public class EstateService {
     private int computeBoilerAlerts(UUID estateId) {
         int warningMonths = platformConfigService.getIntValue(
                 estateId,
-                EstateConfigDTOs.KEY_BOILER_ALERT_THRESHOLD_MONTHS,
+                EstateConfigDTOs.KEY_BOILERS_ALERT_THRESHOLD_MONTHS,
                 3);
         LocalDate threshold = LocalDate.now().plusMonths(warningMonths);
 

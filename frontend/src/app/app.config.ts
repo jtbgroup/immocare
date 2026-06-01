@@ -9,6 +9,7 @@ import {
   isDevMode,
   provideAppInitializer,
 } from "@angular/core";
+import { provideAnimations } from "@angular/platform-browser/animations";
 import { provideRouter } from "@angular/router";
 import { provideTransloco } from "@ngneat/transloco";
 import { TranslocoHttpLoader } from "../transloco-loader";
@@ -21,6 +22,7 @@ export const appConfig: ApplicationConfig = {
   providers: [
     provideRouter(routes),
     provideHttpClient(withInterceptorsFromDi()),
+    provideAnimations(),
 
     // Configuration Moderne du Multilingue (Bye bye les modules !)
     provideTransloco({
@@ -32,13 +34,6 @@ export const appConfig: ApplicationConfig = {
       },
       loader: TranslocoHttpLoader,
     }),
-
-    {
-      provide: HTTP_INTERCEPTORS,
-      useClass: AuthInterceptor,
-      multi: true,
-    },
-
     {
       provide: HTTP_INTERCEPTORS,
       useClass: AuthInterceptor,

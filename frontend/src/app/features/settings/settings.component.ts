@@ -13,6 +13,7 @@ import { ActivatedRoute, Router } from "@angular/router";
 import { Subject, forkJoin } from "rxjs";
 import { finalize, takeUntil } from "rxjs/operators";
 
+import { TranslocoModule } from "@ngneat/transloco";
 import { PlatformConfigService } from "../../core/services/platform-config.service";
 import {
   PLATFORM_CONFIG_LABELS,
@@ -24,7 +25,7 @@ type Section = "general";
 @Component({
   selector: "app-settings",
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule],
+  imports: [CommonModule, ReactiveFormsModule, TranslocoModule],
   templateUrl: "./settings.component.html",
   styleUrls: ["./settings.component.scss"],
 })

@@ -7,7 +7,9 @@ import {
   OnInit,
   Output,
   SimpleChanges,
+  computed,
   inject,
+  signal,
 } from "@angular/core";
 import { FormsModule } from "@angular/forms";
 
@@ -51,7 +53,15 @@ export class ImportRowDetailPanelComponent implements OnInit, OnChanges {
 
   buildings: Building[] = [];
   allLeases: LeaseGlobalSummary[] = [];
-  filteredLeases: LeaseGlobalSummary[] = [];
+  filteredLeases = signal<LeaseGlobalSummary[]>([]);
+  sortedLeases = computed(() => {
+    return [...this.filteredLeases()].sort((a, b) => {
+      const timeA = new Date(a.startDate).getTime();
+      const timeB = new Date(b.startDate).getTime();
+
+      return timeB - timeA;
+    });
+  });
   filterBuildingId: number | null = null;
   selectedLeaseId: number | null = null;
 
@@ -111,9 +121,11 @@ export class ImportRowDetailPanelComponent implements OnInit, OnChanges {
   }
 
   applyBuildingFilter(): void {
-    this.filteredLeases = this.filterBuildingId
-      ? this.allLeases.filter((l) => l.buildingId === this.filterBuildingId)
-      : this.allLeases;
+    this.filteredLeases.set(
+      this.filterBuildingId
+        ? this.allLeases.filter((l) => l.buildingId === this.filterBuildingId)
+        : this.allLeases,
+    );
   }
 
   onLeaseChange(leaseId: number | null): void {
@@ -175,7 +187,7 @@ export class ImportRowDetailPanelComponent implements OnInit, OnChanges {
     };
     this.leaseService.getAll(filters, 0, 500).subscribe((page) => {
       this.allLeases = page.content;
-      this.filteredLeases = page.content;
+      this.filteredLeases.set(page.content);
       if (this.row) this.syncFromRow();
     });
   }

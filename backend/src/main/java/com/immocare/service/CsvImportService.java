@@ -83,27 +83,27 @@ public class CsvImportService {
         public CsvMappingConfig loadMappingConfig(UUID estateId) {
                 return new CsvMappingConfig(
                                 platformConfigService.getStringValue(estateId,
-                                                EstateConfigDTOs.KEY_CSV_DELIMITER, ";"),
+                                                EstateConfigDTOs.KEY_IMPORTS_CSV_DELIMITER, ";"),
                                 platformConfigService.getStringValue(estateId,
-                                                EstateConfigDTOs.KEY_CSV_DATE_FORMAT, "dd/MM/yyyy"),
+                                                EstateConfigDTOs.KEY_IMPORTS_CSV_DATE_FORMAT, "dd/MM/yyyy"),
                                 platformConfigService.getIntValue(estateId,
-                                                EstateConfigDTOs.KEY_CSV_SKIP_HEADER_ROWS, 1),
+                                                EstateConfigDTOs.KEY_IMPORTS_CSV_SKIP_HEADER_ROWS, 1),
                                 platformConfigService.getIntValue(estateId,
-                                                EstateConfigDTOs.KEY_CSV_COL_DATE, 0),
+                                                EstateConfigDTOs.KEY_IMPORTS_CSV_COL_DATE, 0),
                                 platformConfigService.getIntValue(estateId,
-                                                EstateConfigDTOs.KEY_CSV_COL_AMOUNT, 1),
+                                                EstateConfigDTOs.KEY_IMPORTS_CSV_COL_AMOUNT, 1),
                                 platformConfigService.getIntValue(estateId,
-                                                EstateConfigDTOs.KEY_CSV_COL_DESCRIPTION, 2),
+                                                EstateConfigDTOs.KEY_IMPORTS_CSV_COL_DESCRIPTION, 2),
                                 platformConfigService.getIntValue(estateId,
-                                                EstateConfigDTOs.KEY_CSV_COL_COUNTERPARTY_ACCOUNT, 3),
+                                                EstateConfigDTOs.KEY_IMPORTS_CSV_COL_COUNTERPARTY_ACCOUNT, 3),
                                 platformConfigService.getIntValue(estateId,
-                                                EstateConfigDTOs.KEY_CSV_COL_EXTERNAL_REFERENCE, 4),
+                                                EstateConfigDTOs.KEY_IMPORTS_CSV_COL_EXTERNAL_REFERENCE, 4),
                                 platformConfigService.getIntValue(estateId,
-                                                EstateConfigDTOs.KEY_CSV_COL_BANK_ACCOUNT, 5),
+                                                EstateConfigDTOs.KEY_IMPORTS_CSV_COL_BANK_ACCOUNT, 5),
                                 platformConfigService.getIntValue(estateId,
-                                                EstateConfigDTOs.KEY_CSV_COL_VALUE_DATE, -1),
+                                                EstateConfigDTOs.KEY_IMPORTS_CSV_COL_VALUE_DATE, -1),
                                 platformConfigService.getIntValue(estateId,
-                                                EstateConfigDTOs.KEY_CSV_SUGGESTION_CONFIDENCE, 3));
+                                                EstateConfigDTOs.KEY_IMPORTS_CSV_SUGGESTION_CONFIDENCE, 3));
         }
 
         public List<ParsedCsvRow> parsePreview(MultipartFile file, CsvMappingConfig config) {

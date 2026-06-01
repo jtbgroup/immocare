@@ -45,81 +45,43 @@ export interface AddBoilerServiceValidityRuleRequest {
 
 export const CONFIG_KEYS = {
   // ── General ────────────────────────────────────────────────────────────────
-  APP_NAME: "app_name",
-  DEFAULT_COUNTRY: "default_country",
-  APP_DATE_FORMAT: "app.date_format",
 
-  // ── Alert thresholds ───────────────────────────────────────────────────────
-  ALERT_PEB_EXPIRY_WARNING_MONTHS: "alert.peb.expiry.warning.months",
-  BOILER_SERVICE_WARNING_DAYS: "boiler_service_warning_days",
-  // LEASE_END_NOTICE_WARNING_DAYS: "lease_end_notice_warning_days",
-  // INDEXATION_NOTICE_DAYS: "indexation_notice_days",
-  ALERT_LEASE_END_NOTICE_DAYS: "alert.lease.end.notice.days",
-  ALERT_LEASE_INDEXATION_DAYS: "alert.lease.indexation.days",
+  // ── CONTACTS ───────────────────────────────────────────────────────
+  CONTACTS_ALERT_PEB_EXPIRY_WARNING_MONTHS:
+    "contracts.alert.peb.expiry.warning.months",
+  CONTACTS_ALERT_LEASE_END_NOTICE_DAYS: "contracts.alert.lease.end.notice.days",
+  CONTACTS_ALERT_LEASE_INDEXATION_DAYS: "contracts.alert.lease.indexation.days",
 
-  // ── Import behaviour (Phase 5: per-estate) ────────────────────────────────
-  IMPORT_ON_DUPLICATE: "import.on_duplicate",
-  IMPORT_SUGGESTION_CONFIDENCE: "csv.import.suggestion.confidence.threshold",
+  // ── IMPORTS ───────────────────────────────────────────────────────
+  IMPORTS_CSV_COL_DATE: "imports.csv.col.date",
+  IMPORTS_CSV_COL_AMOUNT: "imports.csv.col.amount",
+  IMPORTS_CSV_COL_DESCRIPTION: "imports.csv.col.description",
+  IMPORTS_CSV_COL_COUNTERPARTY: "imports.csv.col.counterparty_account",
+  IMPORTS_CSV_COL_EXTERNAL_REF: "imports.csv.col.external_reference",
+  IMPORTS_CSV_COL_BANK_ACCOUNT: "imports.csv.col.bank_account",
+  IMPORTS_CSV_COL_VALUE_DATE: "imports.csv.col.value_date",
+  IMPORTS_CSV_SKIP_HEADER_ROWS: "imports.csv.skip_header_rows",
+  IMPORTS_CSV_DELIMITER: "imports.csv.delimiter",
+  IMPORTS_CSV_DATE_FORMAT: "imports.csv.date_format",
+  IMPORTS_CSV_SUGGESTION_CONFIDENCE:
+    "imports.csv.suggestion.confidence.threshold",
 
+  // ── BOILERS ───────────────────────────────────────────────────────
+  BOILER_ALERT_THRESHOLD_MONTHS: "boilers.service.alert.threshold.months",
+
+  // ── ASSETS MAPPING ───────────────────────────────────────────────────────
+  ASSETS_MAPPING_BOILER: "assets.type.subcategory.mapping.boiler",
+  ASSETS_MAPPING_FIRE_EXTINGUISHER:
+    "assets.type.subcategory.mapping.fire_extinguisher",
+  ASSETS_MAPPING_METER: "assets.type.subcategory.mapping.meter",
+
+  // *************************
+  // TO CHECK FROM HERE
+  // IMPORT_ON_DUPLICATE: "import.on_duplicate",
   // ── Boiler alert (Phase 5) ────────────────────────────────────────────────
-  BOILER_ALERT_THRESHOLD_MONTHS: "boiler.service.alert.threshold.months",
-
+  // BOILER_SERVICE_WARNING_DAYS: "boiler_service_warning_days",
   // ── Asset type subcategory mappings (Phase 5) ─────────────────────────────
-  ASSET_MAPPING_BOILER: "asset.type.subcategory.mapping.BOILER",
-  ASSET_MAPPING_FIRE_EXTINGUISHER:
-    "asset.type.subcategory.mapping.FIRE_EXTINGUISHER",
-  ASSET_MAPPING_METER: "asset.type.subcategory.mapping.METER",
-
-  // ── CSV import (Phase 5: per-estate) ─────────────────────────────────────
-  CSV_DELIMITER: "csv.import.delimiter",
-  CSV_DATE_FORMAT: "csv.import.date_format",
-  CSV_SKIP_HEADER_ROWS: "csv.import.skip_header_rows",
-  CSV_COL_DATE: "csv.import.col.date",
-  CSV_COL_AMOUNT: "csv.import.col.amount",
-  CSV_COL_DESCRIPTION: "csv.import.col.description",
-  CSV_COL_COUNTERPARTY: "csv.import.col.counterparty_account",
-  CSV_COL_EXTERNAL_REF: "csv.import.col.external_reference",
-  CSV_COL_BANK_ACCOUNT: "csv.import.col.bank_account",
-  CSV_COL_VALUE_DATE: "csv.import.col.value_date",
 } as const;
-
-export const CONFIG_LABELS: Record<string, string> = {
-  // General
-  app_name: "Nom de l'application",
-  default_country: "Pays par défaut",
-  "app.date_format": "Format de date",
-
-  // Alerts
-  "alert.peb.expiry.warning.months": "Alerte expiration PEB (mois avant)",
-  "boiler.service.warning.days": "Alerte entretien chaudière (jours avant)",
-  // "lease_end_notice_warning_days": "Alerte fin de bail (jours avant)",
-  // "indexation_notice_days": "Délai préavis indexation (jours)",
-  "alert.lease.end.notice.days": "Alerte fin de bail (jours avant)",
-  "alert.lease.indexation.days": "Délai préavis indexation (jours)",
-
-  // Import
-  "import.on_duplicate": "Comportement sur doublon détecté",
-  "csv.import.suggestion.confidence.threshold":
-    "Seuil de confiance pour suggestions de catégorie",
-
-  // Phase 5
-  "boiler.service.alert.threshold.months":
-    "Seuil alerte chaudière (mois avant expiration)",
-  "asset.type.subcategory.mapping.BOILER": "Sous-catégorie auto — Chaudière",
-  "asset.type.subcategory.mapping.FIRE_EXTINGUISHER":
-    "Sous-catégorie auto — Extincteur",
-  "asset.type.subcategory.mapping.METER": "Sous-catégorie auto — Compteur",
-  "csv.import.delimiter": "Délimiteur CSV",
-  "csv.import.date_format": "Format de date dans le CSV",
-  "csv.import.skip_header_rows": "Lignes en-tête à ignorer",
-  "csv.import.col.date": "Colonne date",
-  "csv.import.col.amount": "Colonne montant",
-  "csv.import.col.description": "Colonne description",
-  "csv.import.col.counterparty_account": "Colonne IBAN contrepartie",
-  "csv.import.col.external_reference": "Colonne référence bancaire",
-  "csv.import.col.bank_account": "Colonne IBAN propre",
-  "csv.import.col.value_date": "Colonne date valeur (-1 = absente)",
-};
 
 // Preset options for the date-format selector
 export const DATE_FORMAT_PRESETS: { value: string; label: string }[] = [
@@ -128,17 +90,8 @@ export const DATE_FORMAT_PRESETS: { value: string; label: string }[] = [
   { value: "yyyy-MM-dd", label: "ISO 8601  —  yyyy-MM-dd" },
 ];
 
-export const ON_DUPLICATE_OPTIONS: { value: string; label: string }[] = [
-  { value: "WARN", label: "Importer et signaler comme doublon potentiel" },
-  { value: "SKIP", label: "Ignorer silencieusement les doublons" },
-  { value: "IMPORT", label: "Toujours importer (pas de détection)" },
-];
-
-// unit for the duration keyframes. d=days, m=months
-export const CONFIG_UNITS: Partial<Record<string, "days" | "months">> = {
-  [CONFIG_KEYS.ALERT_PEB_EXPIRY_WARNING_MONTHS]: "months",
-  [CONFIG_KEYS.BOILER_SERVICE_WARNING_DAYS]: "days",
-  [CONFIG_KEYS.ALERT_LEASE_END_NOTICE_DAYS]: "days",
-  [CONFIG_KEYS.ALERT_LEASE_INDEXATION_DAYS]: "days",
-  [CONFIG_KEYS.BOILER_ALERT_THRESHOLD_MONTHS]: "months",
-};
+// export const ON_DUPLICATE_OPTIONS: { value: string; label: string }[] = [
+//   { value: "WARN", label: "Importer et signaler comme doublon potentiel" },
+//   { value: "SKIP", label: "Ignorer silencieusement les doublons" },
+//   { value: "IMPORT", label: "Toujours importer (pas de détection)" },
+// ];

@@ -116,7 +116,7 @@ public class AlertService {
         private List<AlertDTO> pebAlertsToDTO(UUID estateId) {
                 int warningMonths = estateConfigService.getIntValue(
                                 estateId,
-                                EstateConfigDTOs.KEY_ALERT_PEB_EXPIRY_WARNING_MONTHS,
+                                EstateConfigDTOs.KEY_CONTRACTS_ALERT_PEB_EXPIRY_WARNING_MONTHS,
                                 3);
                 LocalDate threshold = LocalDate.now().plusMonths(warningMonths);
 

@@ -128,7 +128,7 @@ public class BoilerService {
             return DEFAULT_WARNING_MONTHS;
         return platformConfigService.getIntValue(
                 estateId,
-                EstateConfigDTOs.KEY_BOILER_ALERT_THRESHOLD_MONTHS,
+                EstateConfigDTOs.KEY_BOILERS_ALERT_THRESHOLD_MONTHS,
                 DEFAULT_WARNING_MONTHS);
     }
 

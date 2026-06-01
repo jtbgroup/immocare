@@ -39,7 +39,9 @@
 
       <!-- Direction -->
       <div class="panel-section">
-        <label class="field-label">{{ "GLOBAL.DIRECTION" | transloco }} </label>
+        <label class="field-label"
+          >{{ "TRANSACTION.DIRECTION" | transloco }}
+        </label>
         <div class="direction-toggle">
           <button
             class="dir-btn"
@@ -120,14 +122,16 @@
           class="form-control mt-xs"
           [(ngModel)]="selectedLeaseId"
           (ngModelChange)="onLeaseChange($event)"
-          [disabled]="filteredLeases.length === 0"
+          [disabled]="sortedLeases().length === 0"
         >
           <option [ngValue]="null">— {{ "GLOBAL.NONE" | transloco }} —</option>
-          @for (l of filteredLeases; track l.id) {
-            <option [ngValue]="l.id">
-              {{ l.housingUnitNumber }} · {{ l.buildingName }} ({{
-                l.tenantNames.join(", ")
-              }})
+
+          @for (l of sortedLeases(); track l.id) {
+            <option [ngValue]="l.id" class="lease-selector-{{ l.status }}">
+              {{ l.startDate }} -> {{ l.endDate || "En cours" }} - N°{{
+                l.housingUnitNumber
+              }}
+              ({{ l.tenantNames.join(", ") }} ({{ l.status }}))
             </option>
           }
         </select>

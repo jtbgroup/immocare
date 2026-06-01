@@ -21,7 +21,6 @@
 
   @if (!loading && form) {
     <div class="settings-layout">
-
       <!-- ── Sidebar nav ──────────────────────────────────────────────────── -->
       <aside class="settings-nav">
         @for (section of sections; track section.id) {
@@ -38,12 +37,11 @@
       <!-- ── Main content ─────────────────────────────────────────────────── -->
       <div class="settings-content">
         <form [formGroup]="form" (ngSubmit)="save()">
-
           <!-- ═══ GÉNÉRAL ══════════════════════════════════════════════════ -->
-          @if (activeSection === 'general') {
+          @if (activeSection === "general") {
             <div class="info-card">
               <div class="section-header">
-                <h2>🌐 Général</h2>
+                <h2>🌐 {{ "GLOBAL.GENERAL" }}</h2>
               </div>
               <p class="section-desc">
                 Ces paramètres s'appliquent à l'ensemble de la plateforme,
@@ -85,12 +83,11 @@
                   class="btn btn-primary"
                   [disabled]="saving"
                 >
-                  {{ saving ? 'Enregistrement…' : 'Enregistrer' }}
+                  {{ saving ? "Enregistrement…" : "Enregistrer" }}
                 </button>
               </div>
             </div>
           }
-
         </form>
       </div>
     </div>

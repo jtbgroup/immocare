@@ -31,7 +31,9 @@
             }})</label
           >
           <select class="form-control" [(ngModel)]="selectedBankAccountId">
-            <option value="">— {{ "GLOBAL.NONE" | transloco }} —</option>
+            <option [ngValue]="null">
+              — {{ "GLOBAL.NONE" | transloco }} —
+            </option>
             @for (a of bankAccounts(); track a.id) {
               <option [value]="a.id">{{ a.label }}</option>
             }
@@ -95,10 +97,13 @@
   @if (step === "preview") {
     <div class="details-content">
       <div class="header">
-        <h1>Preview — {{ previewRows.length }} rows</h1>
+        <h1>
+          {{ "GLOBAL.PREVIEW" | transloco }} — {{ previewRows.length }}
+          {{ "GLOBAL.ROWS" | transloco }}
+        </h1>
         <div class="actions">
           <button class="btn btn-secondary" (click)="backToForm()">
-            ← Back
+            ← {{ "GLOBAL.BACK" | transloco }}
           </button>
           <button
             class="btn btn-primary"
@@ -107,8 +112,12 @@
           >
             {{
               loading
-                ? "⏳ Importing…"
-                : "⬆️ Import selected (" + selectedRows.length + ")"
+                ? "⏳ " + ("GLOBAL.IMPORTING" | transloco) + "…"
+                : "⬆️ " +
+                  ("TRANSACTION.IMPORT_SELECTED" | transloco) +
+                  " (" +
+                  selectedRows.length +
+                  ")"
             }}
           </button>
         </div>
@@ -117,7 +126,9 @@
 
     <!-- Summary bar -->
     <div class="preview-summary">
-      <span class="preview-summary__item">{{ validRows.length }} valid</span>
+      <span class="preview-summary__item"
+        >{{ validRows.length }} {{ "GLOBAL.VALID" | transloco }}</span
+      >
       @if (duplicateCount > 0) {
         <span class="preview-summary__item preview-summary__item--dup">
           ⚠️ {{ duplicateCount }} {{ "GLOBAL.ALREADY_PRESENT" | transloco }}
@@ -166,13 +177,13 @@
                 </span>
               </th>
               <th class="col-amount sortable" (click)="sortBy('amount')">
-                Amount
+                {{ "GLOBAL.AMOUNT" | transloco }}
                 <span class="sort-icon" [class.active]="sortField === 'amount'">
                   {{ sortIcon("amount") }}
                 </span>
               </th>
               <th class="col-dir sortable" (click)="sortBy('direction')">
-                Dir.
+                {{ "TRANSACTION.DIRECTION" | transloco }}
                 <span
                   class="sort-icon"
                   [class.active]="sortField === 'direction'"
@@ -305,13 +316,13 @@
                 <td class="col-status">
                   @if (row.parseError) {
                     <span class="badge badge--error" [title]="row.parseError"
-                      >❌ Error</span
+                      >❌ {{ "GLOBAL.ERROR" | transloco }}</span
                     >
                   } @else if (
                     !row.parseError && row.duplicateInDb && !row.selected
                   ) {
                     <span class="badge badge--warning" title="Already in DB"
-                      >⚠️ Dup.</span
+                      >⚠️ {{ "GLOBAL.DUPLICATE" | transloco }}</span
                     >
                   } @else if (
                     !row.parseError && row.duplicateInDb && row.selected
@@ -319,10 +330,12 @@
                     <span
                       class="badge badge--override"
                       title="Duplicate — will be imported anyway"
-                      >⚠️ Override</span
+                      >⚠️ {{ "GLOBAL.OVERRIDE" | transloco }}</span
                     >
                   } @else {
-                    <span class="badge badge--ok">✓ New</span>
+                    <span class="badge badge--ok"
+                      >✓ {{ "GLOBAL.NEW" | transloco }}</span
+                    >
                   }
                 </td>
                 <td class="col-actions">

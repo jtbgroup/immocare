@@ -15,10 +15,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.immocare.model.dto.EstateConfigDTOs.AddBoilerServiceValidityRuleRequest;
-import com.immocare.model.dto.EstateConfigDTOs.AssetTypeMappingDTO;
 import com.immocare.model.dto.EstateConfigDTOs.BoilerServiceValidityRuleDTO;
 import com.immocare.model.dto.EstateConfigDTOs.EstateConfigDTO;
-import com.immocare.model.dto.EstateConfigDTOs.UpdateAssetTypeMappingRequest;
 import com.immocare.model.dto.EstateConfigDTOs.UpdateEstateConfigRequest;
 import com.immocare.service.BoilerServiceValidityRuleService;
 import com.immocare.service.EstateConfigService;
@@ -117,31 +115,31 @@ public class EstateConfigController {
                 .body(validityRuleService.addRule(estateId, req));
     }
 
-    // ─── Asset Type Mappings ──────────────────────────────────────────────────
+    // // ─── Asset Type Mappings ──────────────────────────────────────────────────
 
-    /**
-     * GET /api/v1/estates/{estateId}/config/asset-type-mappings
-     * Returns all asset-type → subcategory mappings for the estate.
-     */
-    @GetMapping("/asset-type-mappings")
-    @PreAuthorize("@security.isMemberOf(#estateId)")
-    public ResponseEntity<List<AssetTypeMappingDTO>> getAssetTypeMappings(
-            @PathVariable UUID estateId) {
-        return ResponseEntity.ok(configService.getAssetTypeMappings(estateId));
-    }
+    // /**
+    // * GET /api/v1/estates/{estateId}/config/asset-type-mappings
+    // * Returns all asset-type → subcategory mappings for the estate.
+    // */
+    // @GetMapping("/asset-type-mappings")
+    // @PreAuthorize("@security.isMemberOf(#estateId)")
+    // public ResponseEntity<List<AssetTypeMappingDTO>> getAssetTypeMappings(
+    // @PathVariable UUID estateId) {
+    // return ResponseEntity.ok(configService.getAssetTypeMappings(estateId));
+    // }
 
-    /**
-     * PUT /api/v1/estates/{estateId}/config/asset-type-mappings/{assetType}
-     * Updates the subcategory mapping for the given asset type.
-     * Pass null subcategoryId to clear the mapping.
-     */
-    @PutMapping("/asset-type-mappings/{assetType}")
-    @PreAuthorize("@security.isManagerOf(#estateId)")
-    public ResponseEntity<AssetTypeMappingDTO> updateAssetTypeMapping(
-            @PathVariable UUID estateId,
-            @PathVariable String assetType,
-            @RequestBody UpdateAssetTypeMappingRequest req) {
-        return ResponseEntity.ok(
-                configService.updateAssetTypeMapping(estateId, assetType, req));
-    }
+    // /**
+    // * PUT /api/v1/estates/{estateId}/config/asset-type-mappings/{assetType}
+    // * Updates the subcategory mapping for the given asset type.
+    // * Pass null subcategoryId to clear the mapping.
+    // */
+    // @PutMapping("/asset-type-mappings/{assetType}")
+    // @PreAuthorize("@security.isManagerOf(#estateId)")
+    // public ResponseEntity<AssetTypeMappingDTO> updateAssetTypeMapping(
+    // @PathVariable UUID estateId,
+    // @PathVariable String assetType,
+    // @RequestBody UpdateAssetTypeMappingRequest req) {
+    // return ResponseEntity.ok(
+    // configService.updateAssetTypeMapping(estateId, assetType, req));
+    // }
 }

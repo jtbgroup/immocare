@@ -1,5 +1,6 @@
 package com.immocare.service;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 import org.springframework.stereotype.Service;
@@ -8,6 +9,7 @@ import org.springframework.transaction.annotation.Transactional;
 import com.immocare.model.dto.PlatformConfigDTOs.PlatformConfigDTO;
 import com.immocare.model.dto.PlatformConfigDTOs.UpdatePlatformConfigRequest;
 import com.immocare.model.entity.PlatformConfig;
+import com.immocare.model.enums.PlatformConfigKey;
 import com.immocare.repository.PlatformConfigRepository;
 
 import lombok.RequiredArgsConstructor;
@@ -48,8 +50,22 @@ public class PlatformConfigService {
      */
     public PlatformConfigDTO getOne(String key) {
         return configRepository.findByConfigKey(key)
-                .map(this::toDTO)
-                .orElse(null);
+                .map(this::toDTO) // 1. Si trouvé en DB, on transforme en DTO normalement
+                .orElseGet(() -> { // 2. Si absent en DB, on entre ici
+                    // On cherche la valeur par défaut dans notre Enum
+                    String defaultValue = PlatformConfigKey.getDefaultValueOrNull(key);
+
+                    if (defaultValue != null) {
+                        // On fabrique un DTO "virtuel" à la volée
+                        PlatformConfigDTO defaultDto = new PlatformConfigDTO(key, defaultValue, "string",
+                                "default value", LocalDateTime.now());
+                        return defaultDto;
+                    }
+
+                    // Si la clé n'existe pas non plus dans l'Enum, on renvoie null (déclenchera le
+                    // 404)
+                    return null;
+                });
     }
 
     /**

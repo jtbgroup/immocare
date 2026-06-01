@@ -9,6 +9,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.immocare.model.dto.PlatformConfigDTOs.PlatformConfigDTO;
@@ -52,7 +53,6 @@ public class PlatformConfigController {
      * Returns all platform config entries, sorted by key.
      */
     @GetMapping("/settings")
-    @PreAuthorize("hasRole('PLATFORM_ADMIN')")
     public ResponseEntity<List<PlatformConfigDTO>> getAll() {
         return ResponseEntity.ok(configService.getAll());
     }
@@ -61,9 +61,8 @@ public class PlatformConfigController {
      * GET /api/v1/platform-config/settings/{key}
      * Returns a single entry, or 404 if the key has never been set.
      */
-    @GetMapping("/settings/{key}")
-    @PreAuthorize("hasRole('PLATFORM_ADMIN')")
-    public ResponseEntity<PlatformConfigDTO> getOne(@PathVariable String key) {
+    @GetMapping("/settings/get")
+    public ResponseEntity<PlatformConfigDTO> getOne(@RequestParam String key) {
         PlatformConfigDTO dto = configService.getOne(key);
         return dto != null ? ResponseEntity.ok(dto) : ResponseEntity.notFound().build();
     }

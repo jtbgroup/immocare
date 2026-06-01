@@ -9,7 +9,7 @@ export class AppNameService {
 
   load(): Promise<void> {
     return new Promise((resolve) => {
-      this.platformConfigService.getOne("app_name").subscribe({
+      this.platformConfigService.getOne("app.name").subscribe({
         next: (cfg) => {
           if (cfg?.configValue) this.appName.set(cfg.configValue);
           resolve();
