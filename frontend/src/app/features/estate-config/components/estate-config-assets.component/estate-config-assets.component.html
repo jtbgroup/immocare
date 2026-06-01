@@ -1,0 +1,51 @@
+<form [formGroup]="form" (ngSubmit)="save()">
+  @if (!mappingsLoading) {
+    <div class="asset-mappings-list">
+      @for (asset of ASSETS_KEYS; track asset) {
+        <div class="asset-mapping-row">
+          <div class="asset-mapping-label">
+            {{ CONFIG_LABELS_I18N_KEYS[asset] | transloco }}
+          </div>
+
+          <div class="asset-mapping-select">
+            <select [formControlName]="toFormKey(asset)">
+              <option [ngValue]="-1">
+                — {{ "GLOBAL.NONE" | transloco }} —
+              </option>
+              @for (sub of subcategories; track sub.id) {
+                <option [ngValue]="sub.id">
+                  {{ sub.categoryName }} / {{ sub.name }}
+                </option>
+              }
+            </select>
+          </div>
+
+          @let currentVal = form.get(toFormKey(asset))?.value;
+          @if (
+            currentVal !== null &&
+            currentVal !== undefined &&
+            currentVal !== "" &&
+            subcategoryName(currentVal)
+          ) {
+            <div class="asset-mapping-current">
+              <span class="badge badge-current">
+                {{ subcategoryName(currentVal) }}
+              </span>
+            </div>
+          }
+        </div>
+      }
+    </div>
+  }
+  @if (canEdit) {
+    <div class="form-actions">
+      <button type="submit" class="btn btn-primary" [disabled]="saving">
+        {{
+          saving
+            ? ("GLOBAL.SAVING" | transloco) + "..."
+            : ("GLOBAL.SAVE" | transloco)
+        }}
+      </button>
+    </div>
+  }
+</form>

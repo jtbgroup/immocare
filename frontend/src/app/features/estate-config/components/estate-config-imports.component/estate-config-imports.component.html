@@ -1,0 +1,53 @@
+<form [formGroup]="form" (ngSubmit)="save()">
+  <div class="settings-fields">
+    @for (configKey of IMPORTS_KEYS; track configKey) {
+      @if (isIntegerKey(configKey)) {
+        <div class="form-group">
+          <label [for]="configKey">{{
+            CONFIG_LABELS_I18N_KEYS[configKey] | transloco
+          }}</label>
+          <input
+            [id]="configKey"
+            type="number"
+            [formControlName]="toFormKey(configKey)"
+          />
+          @if (configDescription(configKey)) {
+            <span class="field-hint">{{ configDescription(configKey) }}</span>
+          }
+          @if (fieldError(configKey)) {
+            <div class="field-error">
+              {{ fieldError(configKey) }}
+            </div>
+          }
+        </div>
+      } @else {
+        <div class="form-group">
+          <label [for]="configDescription(configKey)">{{
+            CONFIG_LABELS_I18N_KEYS[configKey] | transloco
+          }}</label>
+          <input
+            [id]="configKey"
+            type="text"
+            [formControlName]="toFormKey(configKey)"
+          />
+          @if (configDescription(configKey)) {
+            <span class="field-hint">{{ configDescription(configKey) }}</span>
+          }
+          @if (fieldError(configKey)) {
+            <div class="field-error">
+              {{ fieldError(configKey) }}
+            </div>
+          }
+        </div>
+      }
+    }
+  </div>
+
+  @if (canEdit) {
+    <div class="form-actions">
+      <button type="submit" class="btn btn-primary" [disabled]="saving">
+        {{ saving ? "Enregistrement…" : "Enregistrer" }}
+      </button>
+    </div>
+  }
+</form>

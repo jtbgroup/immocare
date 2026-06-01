@@ -1,0 +1,167 @@
+<form [formGroup]="form" (ngSubmit)="save()">
+  <div class="info-card">
+    <div class="settings-fields">
+      @for (configKey of BOILER_KEYS; track configKey) {
+        <div class="form-group">
+          <label [for]="configKey">
+            {{ CONFIG_LABELS_I18N_KEYS[configKey] | transloco }}</label
+          >
+          <div class="input-with-unit">
+            <input
+              [id]="configKey"
+              type="number"
+              min="1"
+              [formControlName]="toFormKey(configKey)"
+            />
+            <span class="unit">{{ "GLOBAL.MONTHS" | transloco }}</span>
+          </div>
+          <span class="field-hint">
+            {{ "SETTING.DESC.BOILER_ALERT" | transloco }}
+          </span>
+          @if (fieldError(configKey)) {
+            <div class="field-error">
+              {{ fieldError(configKey) }}
+            </div>
+          }
+        </div>
+      }
+    </div>
+    @if (canEdit) {
+      <div class="form-actions">
+        <button type="submit" class="btn btn-primary" [disabled]="saving">
+          {{
+            saving ? ("GLOBAL.SAVING" | transloco) : ("GLOBAL.SAVE" | transloco)
+          }}
+        </button>
+      </div>
+    }
+  </div>
+</form>
+
+<!-- Validity rules -->
+<div class="info-card">
+  <div class="section-header">
+    <h2>📋 {{ "SETTING.BOILER.VALIDITY_RULES" | transloco }}</h2>
+    @if (canEdit) {
+      <button
+        type="button"
+        class="btn btn-sm btn-primary"
+        (click)="openAddRuleForm()"
+      >
+        + {{ "GLOBAL.ADD" | transloco }}
+      </button>
+    }
+  </div>
+  <p class="section-desc">
+    {{ "SETTING.DESC.BOILER_SV_VALIDITY_RULES" | transloco }}
+  </p>
+
+  @if (ruleError) {
+    <div class="alert alert-error">{{ ruleError }}</div>
+  }
+
+  @if (showAddRuleForm) {
+    <div class="rule-form-panel">
+      <div class="form-row">
+        <div class="form-group">
+          <label
+            >{{ "GLOBAL.VALID_FROM" | transloco }}
+            <span class="required">*</span></label
+          >
+          <input
+            type="date"
+            [formControl]="$any(ruleForm.controls['validFrom'])"
+          />
+          @if (ruleFieldError("validFrom")) {
+            <div class="field-error">
+              {{ ruleFieldError("validFrom") }}
+            </div>
+          }
+        </div>
+        <div class="form-group">
+          <label>
+            {{ "GLOBAL.VALIDITY_DURATION" | transloco }} ({{
+              "GLOBAL.MONTHS" | transloco
+            }}) <span class="required">*</span></label
+          >
+          <input
+            type="number"
+            min="1"
+            [formControl]="$any(ruleForm.controls['validityDurationMonths'])"
+          />
+          @if (ruleFieldError("validityDurationMonths")) {
+            <div class="field-error">
+              {{ ruleFieldError("validityDurationMonths") }}
+            </div>
+          }
+        </div>
+        <div class="form-group">
+          <label>{{ "GLOBAL.DESCRIPTION" | transloco }}</label>
+          <input
+            type="text"
+            [formControl]="$any(ruleForm.controls['description'])"
+            [placeholder]="'SETTING.BOILER_RULE_DESC_PLACEHOLDER' | transloco"
+          />
+        </div>
+      </div>
+      <div class="form-actions">
+        <button
+          type="button"
+          class="btn btn-secondary btn-sm"
+          (click)="cancelAddRule()"
+        >
+          {{ "GLOBAL.CANCEL" | transloco }}
+        </button>
+        <button
+          type="button"
+          class="btn btn-primary btn-sm"
+          (click)="saveRule()"
+          [disabled]="ruleSaving"
+        >
+          {{
+            ruleSaving
+              ? ("GLOBAL.SAVING" | transloco) + "..."
+              : ("GLOBAL.SAVE" | transloco)
+          }}
+        </button>
+      </div>
+    </div>
+  }
+
+  @if (rulesLoading) {
+    <div class="loading">{{ "GLOBAL.LOADING" | transloco }}...</div>
+  }
+
+  @if (!rulesLoading && validityRules.length === 0) {
+    <p class="empty-message">
+      {{ "SETTING.BOILER_RULE_DEFAULT" | transloco }}
+    </p>
+  }
+
+  @if (!rulesLoading && validityRules.length > 0) {
+    <div class="data-table">
+      <table>
+        <thead>
+          <tr>
+            <th>{{ "GLOBAL.VALID_FROM" | transloco }}</th>
+            <th>
+              {{ "GLOBAL.DURATION" | transloco }} ({{
+                "GLOBAL.MONTHS" | transloco
+              }})
+            </th>
+            <th>{{ "GLOBAL.DESCRIPTION" | transloco }}</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (rule of validityRules; track rule.id) {
+            <tr>
+              <td>{{ rule.validFrom | date: "dd/MM/yyyy" }}</td>
+              <td>{{ rule.validityDurationMonths }}</td>
+              <td>{{ rule.description || "—" }}</td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+  }
+</div>
