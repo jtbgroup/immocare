@@ -1,6 +1,10 @@
-<form [formGroup]="form" (ngSubmit)="save()">
-  @if (!mappingsLoading) {
-    <div class="asset-mappings-list">
+@if (canEdit) {
+  <app-estate-config-section-wrapper
+    [form]="form"
+    [saveRequest]="saveTab"
+    [canEdit]="canEdit"
+  >
+    <div class="asset-mappings-list" [formGroup]="form">
       @for (asset of ASSETS_KEYS; track asset) {
         <div class="asset-mapping-row">
           <div class="asset-mapping-label">
@@ -36,16 +40,5 @@
         </div>
       }
     </div>
-  }
-  @if (canEdit) {
-    <div class="form-actions">
-      <button type="submit" class="btn btn-primary" [disabled]="saving">
-        {{
-          saving
-            ? ("GLOBAL.SAVING" | transloco) + "..."
-            : ("GLOBAL.SAVE" | transloco)
-        }}
-      </button>
-    </div>
-  }
-</form>
+  </app-estate-config-section-wrapper>
+}

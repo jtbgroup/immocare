@@ -1,0 +1,98 @@
+// ─── Categories section ───────────────────────────────────────────────────────
+
+.categories-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  margin-top: 0.5rem;
+}
+
+.category-block {
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+  overflow: hidden;
+  transition: box-shadow 0.15s;
+
+  &--expanded {
+    box-shadow: 0 2px 8px rgba(79, 70, 229, 0.08);
+    border-color: #c4b5fd;
+  }
+}
+
+.category-row {
+  display: flex;
+  align-items: center;
+  background: #fafafa;
+  padding: 0 0.75rem 0 0;
+
+  &:hover {
+    background: #f5f3ff;
+  }
+}
+
+.category-toggle {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  flex: 1;
+  padding: 0.75rem 1rem;
+  border: none;
+  background: none;
+  cursor: pointer;
+  text-align: left;
+  font-family: inherit;
+}
+
+.category-chevron {
+  font-size: 0.8rem;
+  color: #6b7280;
+  width: 1rem;
+  flex-shrink: 0;
+}
+
+.category-name {
+  font-size: 0.925rem;
+  font-weight: 600;
+  color: #1f2937;
+}
+
+.category-count {
+  font-size: 0.78rem;
+  color: #9ca3af;
+  margin-left: 0.5rem;
+}
+
+.category-actions {
+  display: flex;
+  gap: 0.25rem;
+  flex-shrink: 0;
+}
+
+// ─── Subcategories panel ──────────────────────────────────────────────────────
+
+.subcategories-panel {
+  border-top: 1px solid #e5e7eb;
+  background: #fff;
+  padding: 1rem 1.25rem;
+}
+
+.subcat-form-panel {
+  background: #f0f4ff;
+  border: 1px solid #c7d2fe;
+  border-radius: 6px;
+  padding: 0.875rem 1rem;
+  margin-bottom: 1rem;
+}
+
+.form-panel-title {
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: #374151;
+  margin: 0 0 0.75rem;
+}
+
+.subcat-add-row {
+  margin-top: 0.75rem;
+  padding-top: 0.75rem;
+  border-top: 1px dashed #e5e7eb;
+}

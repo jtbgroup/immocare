@@ -1,24 +1,26 @@
 // features/management/components/bank-accounts/bank-accounts.component.ts — UC004_ESTATE_PLACEHOLDER Phase 6
 import { CommonModule } from "@angular/common";
-import { Component, OnInit } from "@angular/core";
+import { Component, input, OnInit } from "@angular/core";
 import { FormsModule } from "@angular/forms";
 import { TranslocoModule } from "@ngneat/transloco";
-import { ActiveEstateService } from "../../core/services/active-estate.service";
-import { BankAccountService } from "../../core/services/bank-account.service";
+import { ActiveEstateService } from "../../../../core/services/active-estate.service";
+import { BankAccountService } from "../../../../core/services/bank-account.service";
 import {
   BankAccount,
   BankAccountType,
   SaveBankAccountRequest,
-} from "../../models/transaction.model";
+} from "../../../../models/transaction.model";
 
 @Component({
-  selector: "app-bank-accounts",
+  selector: "app-estate-config-bank-accounts",
   standalone: true,
   imports: [CommonModule, FormsModule, TranslocoModule],
-  templateUrl: "./bank-accounts.component.html",
-  styleUrls: ["./bank-accounts.component.scss"],
+  templateUrl: "./estate-config-bank-accounts.component.html",
+  styleUrls: ["./estate-config-bank-accounts.component.scss"],
 })
-export class BankAccountsComponent implements OnInit {
+export class EstateConfigBankAccountsComponent implements OnInit {
+  canEdit = input<boolean>(false);
+
   accounts: BankAccount[] = [];
   loading = false;
   error: string | null = null;

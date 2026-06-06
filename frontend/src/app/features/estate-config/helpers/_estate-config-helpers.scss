@@ -1,0 +1,48 @@
+// Le conteneur qui gère la grille principale (les 2 colonnes)
+@mixin config-grid-container {
+  display: grid;
+  grid-template-columns: 1fr; // Par défaut sur mobile : 1 seule colonne
+  gap: 2rem; // Espace entre les deux colonnes
+  margin-bottom: 2rem;
+
+  // À partir des tablettes / écrans d'ordinateurs, on passe sur 2 colonnes
+  @media (min-width: 768px) {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+// Style de chaque colonne individuelle
+@mixin config-column {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+// Style du titre de la colonne
+@mixin config-column-title {
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: #1f2937; // Un gris foncé/noir pro
+  margin: 0 0 0.5rem 0;
+  padding-bottom: 0.5rem;
+  border-bottom: 2px solid #e5e7eb; // Petite ligne de séparation sous le titre
+}
+
+// Le conteneur interne qui empile les composants app-config-row
+@mixin config-column-content {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem; // Espace vertical entre chaque ligne d'alerte
+}
+
+// Optionnel : Conserver ou ajuster ton style existant pour les lignes si nécessaire
+@mixin config-row {
+  display: grid;
+  grid-template-columns: 200px 1fr auto;
+  align-items: center;
+  gap: 1rem;
+  padding: 0.75rem 1rem;
+  background: #f8f9fa;
+  border: 1px solid #e9ecef;
+  border-radius: 6px;
+}

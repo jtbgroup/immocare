@@ -1,61 +1,14 @@
-<form [formGroup]="form" (ngSubmit)="save()">
-  <div class="info-card">
-    <div class="settings-fields">
-      @for (configKey of BOILER_KEYS; track configKey) {
-        <div class="form-group">
-          <label [for]="configKey">
-            {{ CONFIG_LABELS_I18N_KEYS[configKey] | transloco }}</label
-          >
-          <div class="input-with-unit">
-            <input
-              [id]="configKey"
-              type="number"
-              min="1"
-              [formControlName]="toFormKey(configKey)"
-            />
-            <span class="unit">{{ "GLOBAL.MONTHS" | transloco }}</span>
-          </div>
-          <span class="field-hint">
-            {{ "SETTING.DESC.BOILER_ALERT" | transloco }}
-          </span>
-          @if (fieldError(configKey)) {
-            <div class="field-error">
-              {{ fieldError(configKey) }}
-            </div>
-          }
-        </div>
-      }
-    </div>
-    @if (canEdit) {
-      <div class="form-actions">
-        <button type="submit" class="btn btn-primary" [disabled]="saving">
-          {{
-            saving ? ("GLOBAL.SAVING" | transloco) : ("GLOBAL.SAVE" | transloco)
-          }}
-        </button>
-      </div>
-    }
-  </div>
-</form>
-
 <!-- Validity rules -->
-<div class="info-card">
-  <div class="section-header">
-    <h2>📋 {{ "SETTING.BOILER.VALIDITY_RULES" | transloco }}</h2>
-    @if (canEdit) {
-      <button
-        type="button"
-        class="btn btn-sm btn-primary"
-        (click)="openAddRuleForm()"
-      >
-        + {{ "GLOBAL.ADD" | transloco }}
-      </button>
-    }
-  </div>
-  <p class="section-desc">
-    {{ "SETTING.DESC.BOILER_SV_VALIDITY_RULES" | transloco }}
-  </p>
-
+<div>
+  @if (canEdit) {
+    <button
+      type="button"
+      class="btn btn-sm btn-primary"
+      (click)="openAddRuleForm()"
+    >
+      + {{ "GLOBAL.ADD" | transloco }}
+    </button>
+  }
   @if (ruleError) {
     <div class="alert alert-error">{{ ruleError }}</div>
   }

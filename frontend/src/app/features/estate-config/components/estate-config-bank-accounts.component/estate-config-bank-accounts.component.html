@@ -1,18 +1,13 @@
-<div class="bank-accounts-page page-container">
-  <div class="details-content">
-    <div class="header">
-      <h1>{{ "GLOBAL.BANK_ACCOUNTS" | transloco }}</h1>
-      <div class="actions">
-        <button
-          class="btn btn-primary"
-          (click)="
-            showForm = !showForm; editingAccount = undefined; resetForm()
-          "
-        >
-          + {{ "GLOBAL.ADD_ACCOUNT" | transloco }}
-        </button>
-      </div>
-    </div>
+<div>
+  <div class="actions">
+    @if (canEdit()) {
+      <button
+        class="btn btn-primary"
+        (click)="showForm = !showForm; editingAccount = undefined; resetForm()"
+      >
+        + {{ "GLOBAL.ADD_ACCOUNT" | transloco }}
+      </button>
+    }
   </div>
 
   @if (error) {
@@ -111,7 +106,9 @@
               <th>{{ "GLOBAL.IBAN" | transloco }}</th>
               <th>{{ "GLOBAL.TYPE" | transloco }}</th>
               <th class="text-center">{{ "GLOBAL.STATUS" | transloco }}</th>
-              <th></th>
+              @if (canEdit()) {
+                <th></th>
+              }
             </tr>
           </thead>
           <tbody>
@@ -135,15 +132,17 @@
                     }}
                   </span>
                 </td>
-                <td class="actions-cell">
-                  <button
-                    class="icon-btn"
-                    [title]="'GLOBAL.NO_BANK_ACCOUNT' | transloco"
-                    (click)="edit(ba)"
-                  >
-                    ✏️
-                  </button>
-                </td>
+                @if (canEdit()) {
+                  <td class="actions-cell">
+                    <button
+                      class="icon-btn"
+                      [title]="'GLOBAL.NO_BANK_ACCOUNT' | transloco"
+                      (click)="edit(ba)"
+                    >
+                      ✏️
+                    </button>
+                  </td>
+                }
               </tr>
             }
             @if (accounts.length === 0) {

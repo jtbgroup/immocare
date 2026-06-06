@@ -1,0 +1,49 @@
+<div class="config-item-row">
+  <div
+    class="config-item-label"
+    [title]="tooltip() !== undefined ? tooltip() : ''"
+  >
+    {{ label() }}
+  </div>
+
+  <div class="input-with-unit">
+    @if (valueType() === "number") {
+      <input
+        [id]="id()"
+        [formControl]="control()"
+        type="number"
+        [attr.min]="min() !== undefined ? min() : null"
+        [attr.max]="max() !== undefined ? max() : null"
+      />
+    } @else if (valueType() === "boolean") {
+      <input [id]="id()" [formControl]="control()" type="checkbox" />
+    } @else {
+      <input [id]="id()" [formControl]="control()" type="text" />
+    }
+
+    @if (
+      control() && control().invalid && (control().touched || control().dirty)
+    ) {
+      <div class="config-row-error-messages">
+        @if (control().hasError("required")) {
+          <span>Ce champ est obligatoire.</span>
+        }
+
+        @if (control().hasError("pattern")) {
+          <span>Veuillez entrer un nombre entier valide.</span>
+        }
+
+        @if (control().hasError("min")) {
+          <span>
+            La valeur minimale autorisée est
+            {{ control().getError("min").min }}.
+          </span>
+        }
+      </div>
+    }
+  </div>
+
+  @if (unit() !== undefined && unit() !== "") {
+    <div class="unit">{{ unit() }}</div>
+  }
+</div>

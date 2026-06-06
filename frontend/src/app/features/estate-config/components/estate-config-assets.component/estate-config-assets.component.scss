@@ -1,0 +1,60 @@
+.asset-mappings-list {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.asset-mapping-row {
+  display: grid;
+  grid-template-columns: 200px 1fr auto;
+  align-items: center;
+  gap: 1rem;
+  padding: 0.75rem 1rem;
+  background: #f8f9fa;
+  border: 1px solid #e9ecef;
+  border-radius: 6px;
+}
+
+.asset-mapping-label {
+  font-weight: 600;
+  font-size: 0.9rem;
+  color: #374151;
+}
+
+.asset-mapping-select {
+  select {
+    width: 100%;
+    padding: 0.45rem 0.65rem;
+    border: 1px solid #dee2e6;
+    border-radius: 4px;
+    font-size: 0.875rem;
+    font-family: inherit;
+    background: #fff;
+    cursor: pointer;
+
+    &:disabled {
+      background: #f5f5f5;
+      color: #888;
+      cursor: default;
+    }
+
+    &:focus {
+      outline: none;
+      border-color: #80bdff;
+    }
+  }
+}
+
+.asset-mapping-current {
+  white-space: nowrap;
+}
+
+.badge-current {
+  display: inline-block;
+  padding: 0.2em 0.6em;
+  background: #e3f2fd;
+  color: #1565c0;
+  border-radius: 4px;
+  font-size: 0.75rem;
+  font-weight: 600;
+}

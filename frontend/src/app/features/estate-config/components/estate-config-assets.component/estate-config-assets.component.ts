@@ -10,24 +10,34 @@ import {
 } from "@angular/core";
 import { FormGroup, ReactiveFormsModule } from "@angular/forms";
 import { TranslocoModule } from "@ngneat/transloco";
-import { forkJoin, Subject, takeUntil } from "rxjs";
+import { Subject, takeUntil } from "rxjs";
 import { EstateConfigService } from "../../../../core/services/estate-config.service";
 import { TagSubcategoryService } from "../../../../core/services/tag-subcategory.service";
-import { EstateConfigDTO } from "../../../../models/estate-config.model";
+import {
+  CONFIG_KEYS,
+  EstateConfigDTO,
+} from "../../../../models/estate-config.model";
 import { TagSubcategory } from "../../../../models/transaction.model";
 import {
-  ASSETS_KEYS,
   CONFIG_LABELS_I18N_KEYS,
+  createConfigSaveRequest,
   toFormKey,
 } from "../../helpers/estate-config.helpers";
+import { EstateConfigSectionWrapperComponent } from "../estate-config-section-wrapper.component";
 
 @Component({
   selector: "app-estate-config-assets",
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule, TranslocoModule],
+  imports: [
+    CommonModule,
+    ReactiveFormsModule,
+    TranslocoModule,
+    EstateConfigSectionWrapperComponent,
+  ],
   templateUrl: "./estate-config-assets.component.html",
+  styleUrl: "./estate-config-assets.component.scss",
 })
-export class EstateSettingsAssetsComponent
+export class EstateConfigAssetsComponent
   implements OnInit, OnDestroy, OnChanges
 {
   private configService = inject(EstateConfigService);
@@ -41,9 +51,14 @@ export class EstateSettingsAssetsComponent
   subcategories: TagSubcategory[] = [];
   saving = false;
 
-  readonly ASSETS_KEYS = ASSETS_KEYS;
   readonly CONFIG_LABELS_I18N_KEYS = CONFIG_LABELS_I18N_KEYS;
   readonly toFormKey = toFormKey;
+
+  readonly ASSETS_KEYS = new Set<string>([
+    CONFIG_KEYS.CONTACTS_ALERT_PEB_EXPIRY_WARNING_MONTHS,
+    CONFIG_KEYS.CONTACTS_ALERT_LEASE_END_NOTICE_DAYS,
+    CONFIG_KEYS.CONTACTS_ALERT_LEASE_INDEXATION_DAYS,
+  ]);
 
   private destroy$ = new Subject<void>();
 
@@ -130,66 +145,11 @@ export class EstateSettingsAssetsComponent
     return sub ? `${sub.categoryName} / ${sub.name}` : "--";
   }
 
-  save(): void {
-    // 1. On isole uniquement les contrôles de CET onglet
-    const currentTabControls = Array.from(ASSETS_KEYS).map((key) =>
-      this.form.get(toFormKey(key)),
+  saveTab = () =>
+    createConfigSaveRequest(
+      this.form,
+      this.ASSETS_KEYS,
+      this.configService,
+      this.canEdit,
     );
-
-    // 2. Validation tolérante : on ne bloque que si un champ pose problème,
-    // en ignorant volontairement les erreurs de validation si le champ est sur NONE (-1)
-    const isCurrentTabInvalid = currentTabControls.some((control) => {
-      if (!control) return false;
-
-      // Si le contrôle est invalide mais qu'il est configuré sur NONE (-1), on l'accepte
-      if (control.invalid && (control.value === -1 || control.value === "")) {
-        return false;
-      }
-      return control.invalid;
-    });
-
-    if (isCurrentTabInvalid || !this.canEdit) {
-      currentTabControls.forEach((control) => control?.markAsTouched());
-      return;
-    }
-
-    this.saving = true;
-
-    // 4. Préparation et nettoyage des données pour l'API
-    const updates = Array.from(ASSETS_KEYS).map((key) => {
-      const value = this.form.get(toFormKey(key))?.value;
-
-      // Si la valeur est un ID valide (différent de -1 et non nul), on l'envoie en string.
-      // Sinon, on envoie explicitement la string "-1" attendue par votre DB pour le NONE.
-      const cleanValue =
-        value !== null &&
-        value !== undefined &&
-        value !== -1 &&
-        String(value).trim() !== ""
-          ? String(value).trim()
-          : "-1";
-
-      return this.configService.updateOne(key, {
-        configValue: cleanValue,
-      });
-    });
-
-    // 5. Envoi des requêtes via forkJoin
-    if (updates.length > 0) {
-      forkJoin(updates).subscribe({
-        next: () => {
-          this.saving = false;
-        },
-        error: (err) => {
-          this.saving = false;
-          console.error(
-            "Erreur lors de la sauvegarde générale des assets :",
-            err,
-          );
-        },
-      });
-    } else {
-      this.saving = false;
-    }
-  }
 }

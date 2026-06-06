@@ -340,16 +340,6 @@ export const routes: Routes = [
       ),
   },
 
-  // ─── Management ──────────────────────────────────────────────────────────
-  {
-    path: "bank-accounts",
-    canActivate: [AuthGuard],
-    loadComponent: () =>
-      import("./features/bank-accounts/bank-accounts.component").then(
-        (m) => m.BankAccountsComponent,
-      ),
-  },
-
   // ─── Legacy global settings ──────────────────────────────────────────────
   {
     path: "settings",

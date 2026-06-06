@@ -24,14 +24,14 @@
     <div class="settings-layout">
       <!-- Sidebar nav -->
       <aside class="settings-nav">
-        @for (section of sectionsI18N; track section.id) {
+        @for (section of SECTIONS; track section) {
           <button
             class="settings-nav__item"
-            [class.settings-nav__item--active]="activeSection === section.id"
-            (click)="setSection(section.id)"
+            [class.settings-nav__item--active]="activeSection === section"
+            (click)="setSection(section)"
           >
-            {{ section.icon }}
-            {{ "SETTING.HEAD." + (section.id | uppercase) | transloco }}
+            {{ getSectionIcon(section) }}
+            {{ "SETTING.SECTION.MENU." + (section | uppercase) | transloco }}
           </button>
         }
       </aside>
@@ -43,29 +43,42 @@
             <h2>
               {{ getSectionIcon(activeSection) }}
               {{
-                "SETTING.HEAD_TITLE." + (activeSection | uppercase) | transloco
+                "SETTING.SECTION.HEAD_TITLE." + (activeSection | uppercase)
+                  | transloco
               }}
             </h2>
           </div>
-          @if (keyExists("SETTING.HEAD_DESC." + activeSection.toUpperCase())) {
+          @if (
+            keyExists(
+              "SETTING.SECTION.HEAD_DESC." + activeSection.toUpperCase()
+            )
+          ) {
             <p class="section-desc">
               {{
-                "SETTING.HEAD_DESC." + (activeSection | uppercase) | transloco
+                "SETTING.SECTION.HEAD_DESC." + (activeSection | uppercase)
+                  | transloco
               }}
             </p>
           }
 
+          <!-- ═══ BANK ACCOUNT ══════════════════════════════════════════════════ -->
+          @if (activeSection === SECTION_KEYS.SECTION_BANK_ACCOUNTS) {
+            <app-estate-config-bank-accounts
+              [canEdit]="canEdit"
+            ></app-estate-config-bank-accounts>
+          }
+
           <!-- ═══ ALERTS ══════════════════════════════════════════════════ -->
-          @if (activeSection === "contracts") {
-            <app-estate-config-contracts
+          @if (activeSection === SECTION_KEYS.SECTION_ALERTS) {
+            <app-estate-config-alerts
               [form]="form"
               [configs]="configs"
               [canEdit]="canEdit"
-            ></app-estate-config-contracts>
+            ></app-estate-config-alerts>
           }
 
           <!-- ═══ IMPORT CSV ════════════════════════════════════════════════ -->
-          @if (activeSection === "imports") {
+          @if (activeSection === SECTION_KEYS.SECTION_IMPORTS) {
             <app-estate-config-imports
               [form]="form"
               [configs]="configs"
@@ -73,16 +86,14 @@
             ></app-estate-config-imports>
           }
           <!-- ═══ BOILERS ════════════════════════════════════════════════ -->
-          @if (activeSection === "boilers") {
+          @if (activeSection === SECTION_KEYS.SECTION_BOILERS) {
             <app-estate-config-boilers
-              [form]="form"
-              [configs]="configs"
               [canEdit]="canEdit"
             ></app-estate-config-boilers>
           }
 
           <!-- ═══ ASSET MAPPINGS (hors form principal) ═════════════════════════ -->
-          @if (activeSection === "assets") {
+          @if (activeSection === SECTION_KEYS.SECTION_ASSETS) {
             <app-estate-config-assets
               [form]="form"
               [configs]="configs"
@@ -91,356 +102,10 @@
           }
 
           <!-- ═══ CATEGORIES & SUBCATEGORIES ═════════════════════════════════ -->
-          @if (activeSection === "categories") {
-            @if (categoriesError) {
-              <div class="alert alert-error">{{ categoriesError }}</div>
-            }
-            @if (categoriesSuccess) {
-              <div class="alert alert-success">✅ {{ categoriesSuccess }}</div>
-            }
-            @if (canEdit) {
-              <button
-                type="button"
-                class="btn btn-sm btn-primary"
-                (click)="openAddCategoryForm()"
-              >
-                + {{ "SETTING.CATEGORY_ADD" | transloco }}
-              </button>
-            }
-            <!-- Category form (create / edit) -->
-            @if (showCategoryForm) {
-              <div class="rule-form-panel">
-                <h3 class="form-panel-title">
-                  {{
-                    editingCategory
-                      ? ("SETTING.CATEGORY_MODIFY" | transloco)
-                      : ("SETTING.CATEGORY_ADD" | transloco)
-                  }}
-                </h3>
-                <div class="form-row">
-                  <div class="form-group">
-                    <label
-                      >{{ "GLOBAL.NAME" | transloco }}
-                      <span class="required">*</span></label
-                    >
-                    <input
-                      type="text"
-                      [formControl]="$any(categoryForm.controls['name'])"
-                      [placeholder]="'SETTING.CHARGES_PLACEHOLDER' | transloco"
-                    />
-                    @if (categoryFieldError("name")) {
-                      <div class="field-error">
-                        {{ categoryFieldError("name") }}
-                      </div>
-                    }
-                  </div>
-                  <div class="form-group">
-                    <label>{{ "GLOBAL.DESCRIPTION" | transloco }}</label>
-                    <input
-                      type="text"
-                      [formControl]="$any(categoryForm.controls['description'])"
-                      [placeholder]="'GLOBAL.OPTIONAL' | transloco"
-                    />
-                  </div>
-                </div>
-                <div class="form-actions">
-                  <button
-                    type="button"
-                    class="btn btn-secondary btn-sm"
-                    (click)="cancelCategoryForm()"
-                  >
-                    {{ "GLOBAL.CANCEL" | transloco }}
-                  </button>
-                  <button
-                    type="button"
-                    class="btn btn-primary btn-sm"
-                    (click)="saveCategory()"
-                    [disabled]="categorySaving"
-                  >
-                    {{
-                      categorySaving
-                        ? ("GLOBAL.SAVING" | transloco)
-                        : ("GLOBAL.SAVE" | transloco)
-                    }}
-                  </button>
-                </div>
-              </div>
-            }
-
-            @if (categoriesLoading) {
-              <div class="loading">{{ "GLOBAL.LOADING" | transloco }}...</div>
-            }
-
-            @if (!categoriesLoading && categories.length === 0) {
-              <p class="empty-message">
-                {{ "SETTING.CATEGORY_NONE" | transloco }}
-              </p>
-            }
-
-            <!-- Categories accordion list -->
-            @if (!categoriesLoading && categories.length > 0) {
-              <div class="categories-list">
-                @for (cat of categories; track cat.id) {
-                  <div
-                    class="category-block"
-                    [class.category-block--expanded]="
-                      expandedCategoryId === cat.id
-                    "
-                  >
-                    <!-- Category row -->
-                    <div class="category-row">
-                      <button
-                        type="button"
-                        class="category-toggle"
-                        (click)="toggleCategory(cat.id)"
-                        [attr.aria-expanded]="expandedCategoryId === cat.id"
-                      >
-                        <span class="category-chevron">{{
-                          expandedCategoryId === cat.id ? "▾" : "▸"
-                        }}</span>
-                        <span class="category-name">{{ cat.name }}</span>
-                        <span class="category-count"
-                          >{{ subcategoryCount(cat) }} sous-catégorie(s)</span
-                        >
-                      </button>
-                      @if (canEdit) {
-                        <div class="category-actions">
-                          <button
-                            type="button"
-                            class="btn-icon"
-                            title="Modifier"
-                            (click)="openEditCategoryForm(cat)"
-                          >
-                            ✏️
-                          </button>
-                          <button
-                            type="button"
-                            class="btn-icon btn-icon--danger"
-                            title="Supprimer"
-                            (click)="deleteCategory(cat)"
-                          >
-                            🗑️
-                          </button>
-                        </div>
-                      }
-                    </div>
-
-                    <!-- Expanded subcategories panel -->
-                    @if (expandedCategoryId === cat.id) {
-                      <div class="subcategories-panel">
-                        @if (subcategoryError[cat.id]) {
-                          <div class="alert alert-error">
-                            {{ subcategoryError[cat.id] }}
-                          </div>
-                        }
-
-                        <!-- Subcategory form -->
-                        @if (showSubcategoryForm[cat.id]) {
-                          <div class="subcat-form-panel">
-                            <h4 class="form-panel-title">
-                              {{
-                                editingSubcategory[cat.id]
-                                  ? ("SETTING.SUBCATEGORY_MODIFY" | transloco)
-                                  : ("SETTING.SUBCATEGORY_ADD" | transloco)
-                              }}
-                            </h4>
-                            <div class="form-row">
-                              <div class="form-group">
-                                <label
-                                  >{{ "GLOBAL.NAME" | transloco }}
-                                  <span class="required">*</span></label
-                                >
-                                <input
-                                  type="text"
-                                  [formControl]="
-                                    getSubcategoryControl(cat.id, 'name')
-                                  "
-                                  placeholder="ex: Eau"
-                                />
-                                @if (subcategoryFieldError(cat.id, "name")) {
-                                  <div class="field-error">
-                                    {{ subcategoryFieldError(cat.id, "name") }}
-                                  </div>
-                                }
-                              </div>
-                              <div class="form-group">
-                                <label
-                                  >{{ "TRANSACTION.DIRECTION" | transloco }}
-                                  <span class="required">*</span></label
-                                >
-                                <select
-                                  [formControl]="
-                                    getSubcategoryControl(cat.id, 'direction')
-                                  "
-                                >
-                                  @for (
-                                    opt of DIRECTION_OPTIONS;
-                                    track opt.value
-                                  ) {
-                                    <option [value]="opt.value">
-                                      {{ opt.label }}
-                                    </option>
-                                  }
-                                </select>
-                                @if (
-                                  subcategoryFieldError(cat.id, "direction")
-                                ) {
-                                  <div class="field-error">
-                                    {{
-                                      subcategoryFieldError(cat.id, "direction")
-                                    }}
-                                  </div>
-                                }
-                              </div>
-                              <div class="form-group">
-                                <label>{{
-                                  "GLOBAL.DESCRIPTION" | transloco
-                                }}</label>
-                                <input
-                                  type="text"
-                                  [formControl]="
-                                    getSubcategoryControl(cat.id, 'description')
-                                  "
-                                  [placeholder]="'GLOBAL.OPTIONAL' | transloco"
-                                />
-                              </div>
-                            </div>
-                            <div class="form-actions">
-                              <button
-                                type="button"
-                                class="btn btn-secondary btn-sm"
-                                (click)="cancelSubcategoryForm(cat.id)"
-                              >
-                                {{ "GLOBAL.CANCEL" | transloco }}
-                              </button>
-                              <button
-                                type="button"
-                                class="btn btn-primary btn-sm"
-                                (click)="saveSubcategory(cat.id)"
-                                [disabled]="subcategorySaving[cat.id]"
-                              >
-                                {{
-                                  subcategorySaving[cat.id]
-                                    ? ("GLOBAL.SAVING" | transloco)
-                                    : ("GLOBAL.SAVE" | transloco)
-                                }}
-                              </button>
-                            </div>
-                          </div>
-                        }
-
-                        @if (subcategoriesLoading[cat.id]) {
-                          <div class="loading">
-                            {{ "GLOBAL.LOADING" | transloco }}...
-                          </div>
-                        }
-
-                        @if (!subcategoriesLoading[cat.id]) {
-                          @if (
-                            categorySubcategories[cat.id].length === 0 &&
-                            !showSubcategoryForm[cat.id]
-                          ) {
-                            <p class="empty-message empty-message--sm">
-                              Aucune sous-catégorie. Ajoutez-en une ci-dessous.
-                            </p>
-                          }
-
-                          @if (categorySubcategories[cat.id].length > 0) {
-                            <div class="data-table">
-                              <table>
-                                <thead>
-                                  <tr>
-                                    <th>{{ "GLOBAL.NAME" | transloco }}</th>
-                                    <th>
-                                      {{ "TRANSACTION.DIRECTION" | transloco }}
-                                    </th>
-                                    <th>
-                                      {{ "GLOBAL.DESCRIPTION" | transloco }}
-                                    </th>
-                                    <th>{{ "GLOBAL.USAGES" | transloco }}</th>
-                                    @if (canEdit) {
-                                      <th></th>
-                                    }
-                                  </tr>
-                                </thead>
-                                <tbody>
-                                  @for (
-                                    sub of categorySubcategories[cat.id];
-                                    track sub.id
-                                  ) {
-                                    <tr>
-                                      <td>{{ sub.name }}</td>
-                                      <td>
-                                        <span
-                                          class="badge"
-                                          [class]="
-                                            directionBadgeClass(sub.direction)
-                                          "
-                                        >
-                                          {{ directionLabel(sub.direction) }}
-                                        </span>
-                                      </td>
-                                      <td class="text-muted">
-                                        {{ subDescription(sub) }}
-                                      </td>
-                                      <td class="text-center">
-                                        {{ subUsage(sub) }}
-                                      </td>
-                                      @if (canEdit) {
-                                        <td class="actions-cell">
-                                          <button
-                                            type="button"
-                                            class="btn-icon"
-                                            [title]="'GLOBAL.EDIT' | transloco"
-                                            (click)="
-                                              openEditSubcategoryForm(
-                                                cat.id,
-                                                sub
-                                              )
-                                            "
-                                          >
-                                            ✏️
-                                          </button>
-                                          <button
-                                            type="button"
-                                            class="btn-icon btn-icon--danger"
-                                            [title]="
-                                              'GLOBAL.DELETE' | transloco
-                                            "
-                                            (click)="
-                                              deleteSubcategory(cat.id, sub)
-                                            "
-                                            [disabled]="subUsage(sub) > 0"
-                                          >
-                                            🗑️
-                                          </button>
-                                        </td>
-                                      }
-                                    </tr>
-                                  }
-                                </tbody>
-                              </table>
-                            </div>
-                          }
-
-                          @if (canEdit && !showSubcategoryForm[cat.id]) {
-                            <div class="subcat-add-row">
-                              <button
-                                type="button"
-                                class="btn btn-sm btn-secondary"
-                                (click)="openAddSubcategoryForm(cat.id)"
-                              >
-                                + {{ "SETTING.SUBCATEGORY_ADD" | transloco }}
-                              </button>
-                            </div>
-                          }
-                        }
-                      </div>
-                    }
-                  </div>
-                }
-              </div>
-            }
+          @if (activeSection === SECTION_KEYS.SECTION_CATEGORIES) {
+            <app-estate-config-categories
+              [canEdit]="canEdit"
+            ></app-estate-config-categories>
           }
         </div>
       </div>

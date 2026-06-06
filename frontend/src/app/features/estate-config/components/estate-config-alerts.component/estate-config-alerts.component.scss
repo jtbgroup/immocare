@@ -1,0 +1,16 @@
+@use "../../helpers/estate-config-helpers" as layout;
+
+.alerts-grid-container {
+  @include layout.config-grid-container;
+}
+
+.alert-column {
+  @include layout.config-column;
+}
+.alerts-column-title {
+  @include layout.config-column-title;
+}
+
+.alerts-column-content {
+  @include layout.config-column-content;
+}
