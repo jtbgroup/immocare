@@ -4,7 +4,7 @@ import { FormGroup } from "@angular/forms";
 import { TranslocoModule } from "@ngneat/transloco";
 import { Observable } from "rxjs";
 @Component({
-  selector: "app-estate-config-section-wrapper",
+  selector: "app-config-section-wrapper",
   standalone: true,
   imports: [CommonModule, TranslocoModule],
   template: `
@@ -30,7 +30,7 @@ import { Observable } from "rxjs";
     </div>
   `,
 })
-export class EstateConfigSectionWrapperComponent {
+export class ConfigSectionWrapperComponent {
   @Input({ required: true }) form!: FormGroup;
   @Input({ required: true }) saveRequest!: () => Observable<any>;
   @Input() canEdit = false;

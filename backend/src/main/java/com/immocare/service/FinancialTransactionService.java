@@ -43,6 +43,7 @@ import com.immocare.model.entity.Estate;
 import com.immocare.model.entity.FinancialTransaction;
 import com.immocare.model.entity.FireExtinguisher;
 import com.immocare.model.entity.HousingUnit;
+import com.immocare.model.entity.PropertyEquipment;
 import com.immocare.model.entity.TagSubcategory;
 import com.immocare.model.entity.TransactionAssetLink;
 import com.immocare.model.enums.AssetType;
@@ -618,33 +619,22 @@ public class FinancialTransactionService {
     }
 
     private void resolveAssetLinkContext(TransactionAssetLink link) {
-        switch (link.getAssetType()) {
-            case BOILER -> boilerRepository.findById(link.getAssetId()).ifPresent(boiler -> {
-                if ("HOUSING_UNIT".equals(boiler.getOwnerType())) {
-                    housingUnitRepository.findById(boiler.getOwnerId()).ifPresent(unit -> {
-                        link.setHousingUnit(unit);
-                        link.setBuilding(unit.getBuilding());
-                    });
-                } else if ("BUILDING".equals(boiler.getOwnerType())) {
-                    buildingRepository.findById(boiler.getOwnerId()).ifPresent(link::setBuilding);
-                }
+        PropertyEquipment equipment = switch (link.getAssetType()) {
+            case BOILER -> boilerRepository.findById(link.getAssetId()).orElse(null);
+            case FIRE_EXTINGUISHER -> fireExtinguisherRepository.findById(link.getAssetId()).orElse(null);
+            case METER -> meterRepository.findById(link.getAssetId()).orElse(null);
+        };
+        if (equipment == null) {
+            return;
+        }
+
+        if ("HOUSING_UNIT".equals(equipment.getOwnerType())) {
+            housingUnitRepository.findById(equipment.getOwnerId()).ifPresent(unit -> {
+                link.setHousingUnit(unit);
+                link.setBuilding(unit.getBuilding());
             });
-            case FIRE_EXTINGUISHER -> fireExtinguisherRepository.findById(link.getAssetId()).ifPresent(ext -> {
-                link.setBuilding(ext.getBuilding());
-                if (ext.getUnit() != null) {
-                    link.setHousingUnit(ext.getUnit());
-                }
-            });
-            case METER -> meterRepository.findById(link.getAssetId()).ifPresent(meter -> {
-                if ("HOUSING_UNIT".equals(meter.getOwnerType())) {
-                    housingUnitRepository.findById(meter.getOwnerId()).ifPresent(unit -> {
-                        link.setHousingUnit(unit);
-                        link.setBuilding(unit.getBuilding());
-                    });
-                } else if ("BUILDING".equals(meter.getOwnerType())) {
-                    buildingRepository.findById(meter.getOwnerId()).ifPresent(link::setBuilding);
-                }
-            });
+        } else if ("BUILDING".equals(equipment.getOwnerType())) {
+            buildingRepository.findById(equipment.getOwnerId()).ifPresent(link::setBuilding);
         }
     }
 

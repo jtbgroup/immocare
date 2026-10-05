@@ -19,6 +19,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import com.immocare.exception.EstateNotFoundException;
 import com.immocare.exception.ParseException;
+import com.immocare.model.dto.EstateConfigDTOs;
 import com.immocare.model.dto.ImportBatchResultDTO;
 import com.immocare.model.dto.ImportBatchSummaryDTO;
 import com.immocare.model.dto.ImportPreviewRowDTO;
@@ -74,6 +75,7 @@ public class TransactionImportService {
     private final LeaseRepository leaseRepository;
     private final HousingUnitRepository housingUnitRepository;
     private final EstateRepository estateRepository;
+    private final EstateConfigService estateConfigService;
 
     // ─── Import history ───────────────────────────────────────────────────────
 
@@ -133,6 +135,10 @@ public class TransactionImportService {
         TransactionParser parser = parserRegistry.getOrThrow(parserCode);
         List<ParsedTransaction> parsed = parseFile(file, parser);
 
+        // Load estate-scoped confidence threshold
+        int minConfidence = estateConfigService.getIntValue(estateId,
+                EstateConfigDTOs.KEY_IMPORTS_CSV_SUGGESTION_CONFIDENCE, 3);
+
         Map<String, ImportRowEnrichmentDTO> enrichmentMap = enrichments.stream()
                 .collect(Collectors.toMap(ImportRowEnrichmentDTO::fingerprint, Function.identity(),
                         (a, b) -> b));
@@ -172,7 +178,8 @@ public class TransactionImportService {
 
             try {
                 ImportRowEnrichmentDTO enrichment = enrichmentMap.get(row.getFingerprint());
-                FinancialTransaction tx = buildTransaction(estate, row, enrichment, bankAccount, batch, currentUser);
+                FinancialTransaction tx = buildTransaction(estate, row, enrichment, bankAccount, batch, currentUser,
+                        minConfidence);
                 transactionRepository.save(tx);
 
                 if (tx.getSubcategory() != null) {
@@ -222,7 +229,11 @@ public class TransactionImportService {
                 ? transactionRepository.findIdByImportFingerprintAndEstateId(row.getFingerprint(), estateId)
                 : null;
 
-        SubcategorySuggestionDTO suggestion = suggestSubcategory(row);
+        // Load estate-scoped confidence threshold for preview
+        int minConfidence = estateConfigService.getIntValue(estateId,
+                EstateConfigDTOs.KEY_IMPORTS_CSV_SUGGESTION_CONFIDENCE, 3);
+
+        SubcategorySuggestionDTO suggestion = suggestSubcategory(row, minConfidence);
         ImportPreviewRowDTO.SuggestedLeaseDTO leaseSuggestion = suggestLease(estateId, row);
 
         TransactionDirection direction = toApiDirection(row.getDirection());
@@ -253,7 +264,8 @@ public class TransactionImportService {
             ImportRowEnrichmentDTO enrichment,
             BankAccount bankAccount,
             ImportBatch batch,
-            AppUser currentUser) {
+            AppUser currentUser,
+            int minConfidence) {
 
         FinancialTransaction tx = new FinancialTransaction();
 
@@ -279,7 +291,7 @@ public class TransactionImportService {
             applyEnrichment(tx, enrichment);
         } else {
             // Auto-apply subcategory suggestion even for DRAFT
-            SubcategorySuggestionDTO suggestion = suggestSubcategory(row);
+            SubcategorySuggestionDTO suggestion = suggestSubcategory(row, minConfidence);
             if (suggestion != null) {
                 subcategoryRepository.findById(suggestion.subcategoryId())
                         .ifPresent(tx::setSubcategory);
@@ -339,12 +351,11 @@ public class TransactionImportService {
      * rules for now).
      * Learning rules will be estate-scoped in Phase 5.
      */
-    private SubcategorySuggestionDTO suggestSubcategory(ParsedTransaction row) {
-        int minConf = 1;
+    private SubcategorySuggestionDTO suggestSubcategory(ParsedTransaction row, int minConfidence) {
 
         if (row.getCounterpartyAccount() != null) {
             var rules = learningRuleRepository.findSuggestions(
-                    TagMatchField.COUNTERPARTY_ACCOUNT, row.getCounterpartyAccount(), minConf);
+                    TagMatchField.COUNTERPARTY_ACCOUNT, row.getCounterpartyAccount(), minConfidence);
             if (!rules.isEmpty()) {
                 var rule = rules.get(0);
                 var sub = rule.getSubcategory();
@@ -357,7 +368,7 @@ public class TransactionImportService {
 
         if (row.getDescription() != null && !row.getDescription().isBlank()) {
             var rules = learningRuleRepository.findSuggestions(
-                    TagMatchField.DESCRIPTION, row.getDescription(), minConf);
+                    TagMatchField.DESCRIPTION, row.getDescription(), minConfidence);
             if (!rules.isEmpty()) {
                 var rule = rules.get(0);
                 var sub = rule.getSubcategory();

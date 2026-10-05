@@ -14,7 +14,9 @@ public class FireExtinguisherDTO {
         String notes,
         List<FireExtinguisherRevisionResponse> revisions,
         LocalDateTime createdAt,
-        LocalDateTime updatedAt
+        LocalDateTime updatedAt,
+        String ownerType,
+        Long ownerId
     ) {}
 
     public record FireExtinguisherRevisionResponse(

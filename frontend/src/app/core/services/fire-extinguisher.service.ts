@@ -4,6 +4,7 @@ import { Observable } from "rxjs";
 import { environment } from "../../../environments/environment.prod";
 import {
   AddRevisionRequest,
+  EquipmentOwnerType,
   FireExtinguisher,
   SaveFireExtinguisherRequest,
 } from "../../models/fire-extinguisher.model";
@@ -46,8 +47,26 @@ export class FireExtinguisherService {
     );
   }
 
+  private baseByUnit(unitId: number): string {
+    return (
+      environment.apiUrl +
+      `/estates/${this.estateId}/housing-units/${unitId}/fire-extinguishers`
+    );
+  }
+
+  getByOwner(
+    ownerType: EquipmentOwnerType,
+    ownerId: number,
+  ): Observable<FireExtinguisher[]> {
+    return this.http.get<FireExtinguisher[]>(
+      ownerType === "BUILDING"
+        ? this.baseByBuilding(ownerId)
+        : this.baseByUnit(ownerId),
+    );
+  }
+
   getByBuilding(buildingId: number): Observable<FireExtinguisher[]> {
-    return this.http.get<FireExtinguisher[]>(this.baseByBuilding(buildingId));
+    return this.getByOwner("BUILDING", buildingId);
   }
 
   getById(id: number): Observable<FireExtinguisher> {
@@ -55,11 +74,14 @@ export class FireExtinguisherService {
   }
 
   create(
-    buildingId: number,
+    ownerType: EquipmentOwnerType,
+    ownerId: number,
     req: SaveFireExtinguisherRequest,
   ): Observable<FireExtinguisher> {
     return this.http.post<FireExtinguisher>(
-      this.baseByBuilding(buildingId),
+      ownerType === "BUILDING"
+        ? this.baseByBuilding(ownerId)
+        : this.baseByUnit(ownerId),
       req,
     );
   }

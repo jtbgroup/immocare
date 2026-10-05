@@ -1,16 +1,16 @@
-@use "../../helpers/estate-config-helpers" as layout;
+@use "../../helpers/platform-config-helpers" as layout;
 
-.imports-grid-container {
+.general-grid-container {
   @include layout.config-grid-container;
 }
 
-.imports-column {
+.general-column {
   @include layout.config-column;
 }
-.imports-column-title {
+.general-column-title {
   @include layout.config-column-title;
 }
 
-.imports-column-content {
+.general-column-content {
   @include layout.config-column-content;
 }

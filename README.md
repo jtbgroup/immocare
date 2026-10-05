@@ -389,7 +389,7 @@ See [POSTGRESQL_SETUP.md](./POSTGRESQL_SETUP.md) for local PostgreSQL setup.
 - Lease contracts
 - Payment tracking
 
-See [docs/analysis/backlog.md](./docs/analysis/backlog.md) for full roadmap.
+See the [project backlog](./backlog/backlog.md) for planned evolutions, and [open questions](./backlog/open_questions.md) for decisions that still need treatment.
 
 ---
 

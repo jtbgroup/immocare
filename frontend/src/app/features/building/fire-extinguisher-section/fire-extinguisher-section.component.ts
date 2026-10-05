@@ -15,6 +15,7 @@ import { TranslocoModule } from "@ngneat/transloco";
 import { FireExtinguisherService } from "../../../core/services/fire-extinguisher.service";
 import {
   AddRevisionRequest,
+  EquipmentOwnerType,
   FireExtinguisher,
   SaveFireExtinguisherRequest,
 } from "../../../models/fire-extinguisher.model";
@@ -34,8 +35,8 @@ import { AppDatePipe } from "../../../shared/pipes/app-date.pipe";
   styleUrls: ["./fire-extinguisher-section.component.scss"],
 })
 export class FireExtinguisherSectionComponent implements OnInit, OnDestroy {
-  @Input() buildingId!: number;
-  @Input() buildingUnits: { id: number; unitNumber: string }[] = [];
+  @Input({ required: true }) ownerType!: EquipmentOwnerType;
+  @Input({ required: true }) ownerId!: number;
 
   extinguishers: FireExtinguisher[] = [];
   loading = false;
@@ -82,7 +83,6 @@ export class FireExtinguisherSectionComponent implements OnInit, OnDestroy {
         "",
         [Validators.required, Validators.maxLength(50)],
       ],
-      unitId: [null],
       notes: ["", Validators.maxLength(2000)],
     });
 
@@ -103,7 +103,7 @@ export class FireExtinguisherSectionComponent implements OnInit, OnDestroy {
     this.loading = true;
     this.error = null;
     this.service
-      .getByBuilding(this.buildingId)
+      .getByOwner(this.ownerType, this.ownerId)
       .pipe(takeUntil(this.destroy$))
       .subscribe({
         next: (data) => {
@@ -119,7 +119,7 @@ export class FireExtinguisherSectionComponent implements OnInit, OnDestroy {
   }
 
   openAddForm(): void {
-    this.form.reset({ identificationNumber: "", unitId: null, notes: "" });
+    this.form.reset({ identificationNumber: "", notes: "" });
     this.editingId = null;
     this.saveError = null;
     this.showForm = true;
@@ -128,7 +128,6 @@ export class FireExtinguisherSectionComponent implements OnInit, OnDestroy {
   openEditForm(ext: FireExtinguisher): void {
     this.form.patchValue({
       identificationNumber: ext.identificationNumber,
-      unitId: ext.unitId,
       notes: ext.notes ?? "",
     });
     this.editingId = ext.id;
@@ -148,7 +147,6 @@ export class FireExtinguisherSectionComponent implements OnInit, OnDestroy {
     }
     const req: SaveFireExtinguisherRequest = {
       identificationNumber: this.form.value.identificationNumber,
-      unitId: this.form.value.unitId ?? null,
       notes: this.form.value.notes || null,
     };
     this.saving = true;
@@ -157,7 +155,7 @@ export class FireExtinguisherSectionComponent implements OnInit, OnDestroy {
     const call$ =
       this.editingId !== null
         ? this.service.update(this.editingId, req)
-        : this.service.create(this.buildingId, req);
+        : this.service.create(this.ownerType, this.ownerId, req);
 
     call$.pipe(takeUntil(this.destroy$)).subscribe({
       next: () => {

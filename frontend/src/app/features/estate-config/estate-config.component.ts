@@ -24,7 +24,6 @@ import { EstateConfigAssetsComponent } from "./components/estate-config-assets.c
 import { EstateConfigBankAccountsComponent } from "./components/estate-config-bank-accounts.component/estate-config-bank-accounts.component";
 import { EstateConfigBoilersComponent } from "./components/estate-config-boilers.component/estate-config-boilers.component";
 import { EstateConfigCategoriesComponent } from "./components/estate-config-categories.component/estate-config-categories.component";
-import { EstateConfigImportsComponent } from "./components/estate-config-imports.component/estate-config-imports.component";
 import {
   CONFIG_LABELS_I18N_KEYS,
   CONFIG_UNITS_I18N_KEYS,
@@ -42,7 +41,6 @@ import {
     CommonModule,
     ReactiveFormsModule,
     TranslocoModule,
-    EstateConfigImportsComponent,
     EstateConfigBoilersComponent,
     EstateConfigAssetsComponent,
     EstateConfigAlertsComponent,
@@ -60,7 +58,7 @@ export class EstateSettingsComponent implements OnInit, OnDestroy {
   error: string | null = null;
   successMessage: string | null = null;
   form!: FormGroup;
-  activeSection: string = "ALERTS";
+  activeSection: string = Object.values(SECTION_KEYS)[0];
 
   readonly CONFIG_UNITS_I18N_KEYS = CONFIG_UNITS_I18N_KEYS;
   readonly CONFIG_LABELS_I18N_KEYS = CONFIG_LABELS_I18N_KEYS;
@@ -89,7 +87,6 @@ export class EstateSettingsComponent implements OnInit, OnDestroy {
 
   ngOnInit(): void {
     const s = this.route.snapshot.queryParamMap.get("section") as string;
-    this.activeSection = Object.values(SECTION_KEYS)[0];
     if (s && Object.values(SECTIONS).includes(s)) this.activeSection = s;
 
     // this.buildRuleForm();

@@ -56,6 +56,14 @@ public class FireExtinguisherController {
         return ResponseEntity.ok(service.getByBuilding(estateId, buildingId));
     }
 
+    @GetMapping("/api/v1/estates/{estateId}/housing-units/{unitId}/fire-extinguishers")
+    @PreAuthorize("@security.isMemberOf(#estateId)")
+    public ResponseEntity<List<FireExtinguisherResponse>> getByUnit(
+            @PathVariable UUID estateId,
+            @PathVariable Long unitId) {
+        return ResponseEntity.ok(service.getByUnit(estateId, unitId));
+    }
+
     @GetMapping("/api/v1/estates/{estateId}/fire-extinguishers/{id}")
     @PreAuthorize("@security.isMemberOf(#estateId)")
     public ResponseEntity<FireExtinguisherResponse> getById(
@@ -71,6 +79,16 @@ public class FireExtinguisherController {
             @PathVariable Long buildingId,
             @Valid @RequestBody SaveFireExtinguisherRequest req) {
         return ResponseEntity.status(HttpStatus.CREATED).body(service.create(estateId, buildingId, req));
+    }
+
+    @PostMapping("/api/v1/estates/{estateId}/housing-units/{unitId}/fire-extinguishers")
+    @PreAuthorize("@security.isManagerOf(#estateId)")
+    public ResponseEntity<FireExtinguisherResponse> createForUnit(
+            @PathVariable UUID estateId,
+            @PathVariable Long unitId,
+            @Valid @RequestBody SaveFireExtinguisherRequest req) {
+        return ResponseEntity.status(HttpStatus.CREATED)
+                .body(service.createForUnit(estateId, unitId, req));
     }
 
     @PutMapping("/api/v1/estates/{estateId}/fire-extinguishers/{id}")
@@ -132,7 +150,7 @@ public class FireExtinguisherController {
         String term = q.trim().toLowerCase();
 
         List<FireExtinguisherSearchResultDTO> results = (buildingId != null
-                ? fireExtinguisherRepository.findByBuildingIdOrderByIdentificationNumberAsc(buildingId)
+                ? fireExtinguisherRepository.findByBuildingContextIdOrderByIdentificationNumberAsc(buildingId)
                 : fireExtinguisherRepository.findAll())
                 .stream()
                 .filter(ext -> term.length() < 2 ||
@@ -140,8 +158,8 @@ public class FireExtinguisherController {
                 .map(ext -> new FireExtinguisherSearchResultDTO(
                         ext.getId(),
                         ext.getIdentificationNumber(),
-                        ext.getBuilding().getId(),
-                        ext.getBuilding().getName(),
+                        ext.getBuildingContext().getId(),
+                        ext.getBuildingContext().getName(),
                         ext.getUnit() != null ? ext.getUnit().getId() : null,
                         ext.getUnit() != null ? ext.getUnit().getUnitNumber() : null))
                 .limit(20)

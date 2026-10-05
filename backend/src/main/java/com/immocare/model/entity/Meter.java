@@ -4,9 +4,11 @@ import jakarta.persistence.*;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 
+import com.immocare.model.enums.AssetType;
+
 @Entity
 @Table(name = "meter")
-public class Meter {
+public class Meter implements PropertyEquipment {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -85,4 +87,7 @@ public class Meter {
     public void setEndDate(LocalDate endDate) { this.endDate = endDate; }
 
     public LocalDateTime getCreatedAt() { return createdAt; }
+
+    @Override
+    public AssetType getAssetType() { return AssetType.METER; }
 }

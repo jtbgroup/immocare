@@ -13,6 +13,10 @@
     </div>
   }
 
+  @if (loading) {
+    <div class="loading">{{ "GLOBAL.LOADING" | transloco }}</div>
+  }
+
   @if (error) {
     <div class="alert alert-error">{{ error }}</div>
   }
@@ -77,14 +81,6 @@
             ></app-estate-config-alerts>
           }
 
-          <!-- ═══ IMPORT CSV ════════════════════════════════════════════════ -->
-          @if (activeSection === SECTION_KEYS.SECTION_IMPORTS) {
-            <app-estate-config-imports
-              [form]="form"
-              [configs]="configs"
-              [canEdit]="canEdit"
-            ></app-estate-config-imports>
-          }
           <!-- ═══ BOILERS ════════════════════════════════════════════════ -->
           @if (activeSection === SECTION_KEYS.SECTION_BOILERS) {
             <app-estate-config-boilers
@@ -110,9 +106,5 @@
         </div>
       </div>
     </div>
-  }
-
-  @if (loading) {
-    <div class="loading">{{ "GLOBAL.LOADING" | transloco }}</div>
   }
 </div>

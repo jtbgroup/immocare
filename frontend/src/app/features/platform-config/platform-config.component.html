@@ -1,0 +1,76 @@
+<!-- features/settings/components/settings/settings.component.html -->
+<!-- Platform-wide settings — PLATFORM_ADMIN only.                   -->
+<!-- Layout mirrors estate-platform-settings.component.html.         -->
+<div class="settings-page">
+  <div class="details-content">
+    <div class="header">
+      <h1>⚙️ Paramètres de la plateforme</h1>
+    </div>
+  </div>
+
+  @if (loading) {
+    <div class="loading">Chargement des paramètres…</div>
+  }
+
+  @if (error) {
+    <div class="alert alert-error">{{ error }}</div>
+  }
+  @if (successMessage) {
+    <div class="alert alert-success">✅ {{ successMessage }}</div>
+  }
+
+  @if (!loading && form) {
+    <div class="settings-layout">
+      <!-- ── Sidebar nav ──────────────────────────────────────────────────── -->
+      <aside class="settings-nav">
+        @for (section of SECTIONS; track section) {
+          <button
+            class="settings-nav__item"
+            [class.settings-nav__item--active]="activeSection === section"
+            (click)="setSection(section)"
+          >
+            <!-- {{ section.icon }} {{ section.label }} -->
+            {{ getSectionIcon(section) }}
+            {{ "SETTING.SECTION.MENU." + (section | uppercase) | transloco }}
+          </button>
+        }
+      </aside>
+
+      <!-- ── Main content ─────────────────────────────────────────────────── -->
+      <div class="settings-content">
+        <div class="info-card">
+          <div class="section-header">
+            <h2>
+              {{ getSectionIcon(activeSection) }}
+              {{
+                "SETTING.SECTION.HEAD_TITLE." + (activeSection | uppercase)
+                  | transloco
+              }}
+            </h2>
+          </div>
+          @if (
+            keyExists(
+              "SETTING.SECTION.HEAD_DESC." + activeSection.toUpperCase()
+            )
+          ) {
+            <p class="section-desc">
+              {{
+                "SETTING.SECTION.HEAD_DESC." + (activeSection | uppercase)
+                  | transloco
+              }}
+            </p>
+          }
+
+          <!-- ═══ GENERAL ══════════════════════════════════════════════════ -->
+          @if (activeSection === SECTION_KEYS.SECTION_GENERAL) {
+            <app-platform-config-general
+              [form]="form"
+              [configs]="configs"
+              [canEdit]="canEdit"
+            ></app-platform-config-general>
+          }
+        </div>
+      </div>
+    </div>
+  }
+</div>

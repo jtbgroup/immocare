@@ -17,7 +17,23 @@ public interface FireExtinguisherRepository extends JpaRepository<FireExtinguish
 
     List<FireExtinguisher> findByBuildingIdOrderByIdentificationNumberAsc(Long buildingId);
 
+    List<FireExtinguisher> findByUnitIdOrderByIdentificationNumberAsc(Long unitId);
+
+    long countByUnitId(Long unitId);
+
+    @Query("""
+            SELECT e FROM FireExtinguisher e
+            LEFT JOIN e.building b
+            LEFT JOIN e.unit u
+            WHERE b.id = :buildingId OR u.building.id = :buildingId
+            ORDER BY e.identificationNumber
+            """)
+    List<FireExtinguisher> findByBuildingContextIdOrderByIdentificationNumberAsc(
+            @Param("buildingId") Long buildingId);
+
     boolean existsByBuildingIdAndIdentificationNumberIgnoreCase(Long buildingId, String identificationNumber);
+
+    boolean existsByUnitIdAndIdentificationNumberIgnoreCase(Long unitId, String identificationNumber);
 
     @Query("SELECT COUNT(e) > 0 FROM FireExtinguisher e " +
            "WHERE e.building.id = :buildingId " +
@@ -28,6 +44,17 @@ public interface FireExtinguisherRepository extends JpaRepository<FireExtinguish
         @Param("num") String num,
         @Param("excludeId") Long excludeId);
 
+    @Query("""
+            SELECT COUNT(e) > 0 FROM FireExtinguisher e
+            WHERE e.unit.id = :unitId
+              AND LOWER(e.identificationNumber) = LOWER(:num)
+              AND e.id <> :excludeId
+            """)
+    boolean existsByUnitIdAndNumberIgnoreCaseExcluding(
+            @Param("unitId") Long unitId,
+            @Param("num") String num,
+            @Param("excludeId") Long excludeId);
+
     /**
      * All fire extinguishers in buildings belonging to the given estate,
      * with revisions eagerly fetched (needed for alert computation without N+1).
@@ -36,7 +63,10 @@ public interface FireExtinguisherRepository extends JpaRepository<FireExtinguish
     @Query("""
             SELECT DISTINCT e FROM FireExtinguisher e
             LEFT JOIN FETCH e.revisions
-            WHERE e.building.estate.id = :estateId
+            LEFT JOIN e.building b
+            LEFT JOIN e.unit u
+            WHERE b.estate.id = :estateId
+               OR u.building.estate.id = :estateId
             """)
     List<FireExtinguisher> findByBuildingEstateId(@Param("estateId") UUID estateId);
 }

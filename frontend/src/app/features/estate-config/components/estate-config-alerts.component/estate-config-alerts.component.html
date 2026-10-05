@@ -1,18 +1,17 @@
 @if (canEdit) {
-  <app-estate-config-section-wrapper
+  <app-config-section-wrapper
     [form]="form"
     [saveRequest]="saveTab"
     [canEdit]="canEdit"
   >
-    <div class="alerts-grid-container">
-      <!-- Colonne Contrats -->
+    <div class="alerts-grid-container" [formGroup]="form">
       <div class="alerts-column">
         <h3 class="alerts-column-title">{{ "GLOBAL.CONTRACT" | transloco }}</h3>
         <div class="alerts-column-content">
           @for (alert of ALERT_KEYS_CONTRACTS; track alert) {
             <app-config-row
               [label]="getKeyI18NValue(alert) | transloco"
-              [id]="alert"
+              [id]="toFormKey(alert)"
               [control]="getControl(alert)"
               [unit]="getKeyI18NUnit(alert) | transloco"
               [tooltip]="getKeyI18NValue(alert) | transloco"
@@ -23,14 +22,13 @@
         </div>
       </div>
 
-      <!-- Colonne Boiler -->
       <div class="alerts-column">
         <h3 class="alerts-column-title">{{ "GLOBAL.BOILER" | transloco }}</h3>
         <div class="alerts-column-content">
           @for (alert of ALERT_KEYS_BOILER; track alert) {
             <app-config-row
               [label]="getKeyI18NValue(alert) | transloco"
-              [id]="alert"
+              [id]="toFormKey(alert)"
               [control]="getControl(alert)"
               [unit]="getKeyI18NUnit(alert) | transloco"
               [valueType]="getKeyValueType(alert)"
@@ -40,5 +38,5 @@
         </div>
       </div>
     </div>
-  </app-estate-config-section-wrapper>
+  </app-config-section-wrapper>
 }

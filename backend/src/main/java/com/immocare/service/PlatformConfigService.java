@@ -1,15 +1,18 @@
 package com.immocare.service;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.immocare.model.dto.PlatformConfigDTOs;
 import com.immocare.model.dto.PlatformConfigDTOs.PlatformConfigDTO;
 import com.immocare.model.dto.PlatformConfigDTOs.UpdatePlatformConfigRequest;
 import com.immocare.model.entity.PlatformConfig;
-import com.immocare.model.enums.PlatformConfigKey;
 import com.immocare.repository.PlatformConfigRepository;
 
 import lombok.RequiredArgsConstructor;
@@ -37,12 +40,31 @@ public class PlatformConfigService {
 
     /**
      * Returns all platform config entries, sorted by key.
+     * Includes both DB entries and default values from the seed that aren't in DB.
      */
     public List<PlatformConfigDTO> getAll() {
-        return configRepository.findAllByOrderByConfigKeyAsc()
+        List<PlatformConfigDTO> dbConfigs = configRepository.findAllByOrderByConfigKeyAsc()
                 .stream()
                 .map(this::toDTO)
                 .toList();
+
+        Set<String> existingKeys = dbConfigs.stream()
+                .map(PlatformConfigDTO::configKey)
+                .collect(Collectors.toSet());
+
+        List<PlatformConfigDTO> allConfigs = new ArrayList<>(dbConfigs);
+
+        // Add default values from the seed that aren't in DB
+        PlatformConfigDTOs.DEFAULT_CONFIG.stream()
+                .filter(seed -> !existingKeys.contains(seed.key()))
+                .forEach(seed -> allConfigs.add(new PlatformConfigDTO(
+                        seed.key(),
+                        seed.value(),
+                        seed.valueType(),
+                        "default value",
+                        LocalDateTime.now())));
+
+        return allConfigs;
     }
 
     /**
@@ -52,8 +74,12 @@ public class PlatformConfigService {
         return configRepository.findByConfigKey(key)
                 .map(this::toDTO) // 1. Si trouvé en DB, on transforme en DTO normalement
                 .orElseGet(() -> { // 2. Si absent en DB, on entre ici
-                    // On cherche la valeur par défaut dans notre Enum
-                    String defaultValue = PlatformConfigKey.getDefaultValueOrNull(key);
+                    // On cherche la valeur par défaut dans le seed
+                    String defaultValue = PlatformConfigDTOs.DEFAULT_CONFIG.stream()
+                            .filter(seed -> seed.key().equals(key))
+                            .findFirst()
+                            .map(PlatformConfigDTOs.PlatformConfigSeed::value)
+                            .orElse(null);
 
                     if (defaultValue != null) {
                         // On fabrique un DTO "virtuel" à la volée

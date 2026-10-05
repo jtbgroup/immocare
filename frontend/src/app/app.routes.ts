@@ -340,13 +340,13 @@ export const routes: Routes = [
       ),
   },
 
-  // ─── Legacy global settings ──────────────────────────────────────────────
+  // ─── Global Config ──────────────────────────────────────────────
   {
     path: "settings",
-    canActivate: [AuthGuard],
+    canActivate: [AuthGuard, PlatformAdminGuard],
     loadComponent: () =>
-      import("./features/settings/settings.component").then(
-        (m) => m.SettingsComponent,
+      import("./features/platform-config/platform-config.component").then(
+        (m) => m.PlatformConfigComponent,
       ),
   },
 

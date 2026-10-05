@@ -1,0 +1,47 @@
+# Project Backlog
+
+## To do
+
+- [x] Search for tenants by first or last name; currently, search only uses the first name.
+- [x] Review the header menus.
+- [x] Review the rent and lease documentation.
+- [x] Add a "deposit held in my account" rental-guarantee type.
+- [x] Add a view that groups all contracts.
+- [x] Fix person creation when no national register number is available; the current key setup prevents it.
+- [x] Fix housing-unit validation when a unit has a terrace but no garden orientation.
+- [x] Add fire extinguishers.
+- [x] Track boilers.
+- [ ] Add expense management.
+- [x] Review the alerts view.
+- [ ] Decide whether alerts can be dismissed individually.
+- [ ] Add document attachments, such as energy performance certificates and boiler-maintenance records.
+- [x] Make alerts cross-cutting.
+- [ ] Review roles and security.
+- [x] Fix alerts that are not displayed.
+- [ ] Fix date formatting and make the date settings visible.
+- [ ] Return to PostgreSQL-only support.
+- [ ] Resume the boilerplate versioning system.
+- [x] Fix Flyway migration ordering so estates are created before dependent objects; consolidate the migrations.
+- [ ] Make the application multilingual.
+- [x] Add bank accounts to people to support reconciliation with financial transactions.
+- [x] In transaction editing, replace manually entered building, unit, and lease IDs with linked, human-readable selectors.
+- [x] Align the transaction form layout with other forms; apply the global width styling to the bank-account form and list.
+- [x] Move transaction categories into Settings and integrate catalogue management there, removing the transaction-screen button.
+- [x] Add a transaction-import review flow: select rows, confirm imports, link rows to properties or people, identify potential duplicates, and use known data or learning to suggest links such as leases, units, buildings, and meters.
+- [ ] Verify the financial-transaction documentation against the current code.
+- [ ] Make the imported-transaction review action work and provide decisions for potential duplicates.
+- [ ] Use European rather than US formatting for monetary amounts.
+- [ ] Show expected and paid rent in financial views; include all related income and expenses on unit and building pages, including allocation of grouped invoices.
+- [ ] Fix the financial dashboard.
+- [ ] Support bulk updates and deletion from lists using row selection.
+- [x] Add rooms and energy-performance ratings to the seed scripts.
+- [ ] Generate API documentation, for example with Swagger.
+- [x] Make the frontend component structure more consistent.
+- [ ] Review Settings following the introduction of estates.
+- [ ] Update GitHub Actions to account for release numbers.
+- [ ] Review how the application version is displayed.
+- [ ] Generalize boilers, fire extinguishers, and meters as devices, including support for generic device types.
+
+## To evaluate
+
+- [ ] Decide whether a user account should be linked to a person.

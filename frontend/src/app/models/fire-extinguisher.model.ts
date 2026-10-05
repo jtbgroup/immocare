@@ -11,6 +11,8 @@ export interface FireExtinguisher {
   buildingId: number;
   unitId: number | null;
   unitNumber: string | null;
+  ownerType: "BUILDING" | "HOUSING_UNIT";
+  ownerId: number;
   identificationNumber: string;
   notes: string | null;
   revisions: FireExtinguisherRevision[];
@@ -20,9 +22,11 @@ export interface FireExtinguisher {
 
 export interface SaveFireExtinguisherRequest {
   identificationNumber: string;
-  unitId: number | null;
+  unitId?: number | null;
   notes: string | null;
 }
+
+export type EquipmentOwnerType = "BUILDING" | "HOUSING_UNIT";
 
 export interface AddRevisionRequest {
   revisionDate: string; // ISO date 'yyyy-MM-dd'

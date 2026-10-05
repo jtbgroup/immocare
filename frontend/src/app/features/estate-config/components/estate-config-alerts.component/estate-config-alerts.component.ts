@@ -4,6 +4,8 @@ import { FormControl, FormGroup, ReactiveFormsModule } from "@angular/forms";
 import { TranslocoModule } from "@ngneat/transloco";
 import { EstateConfigService } from "../../../../core/services/estate-config.service";
 import { CONFIG_KEYS } from "../../../../models/estate-config.model";
+import { ConfigRowComponent } from "../../../../shared/components/config-row.component/config-row.component";
+import { ConfigSectionWrapperComponent } from "../../../../shared/components/config-section-wrapper.component";
 import {
   createConfigSaveRequest,
   getKeyI18NUnit,
@@ -12,8 +14,6 @@ import {
   getMinIfExists,
   toFormKey,
 } from "../../helpers/estate-config.helpers";
-import { ConfigRowComponent } from "../config-row.component/config-row.component";
-import { EstateConfigSectionWrapperComponent } from "../estate-config-section-wrapper.component";
 
 @Component({
   selector: "app-estate-config-alerts",
@@ -23,7 +23,7 @@ import { EstateConfigSectionWrapperComponent } from "../estate-config-section-wr
     ReactiveFormsModule,
     TranslocoModule,
     ConfigRowComponent,
-    EstateConfigSectionWrapperComponent,
+    ConfigSectionWrapperComponent,
   ],
   templateUrl: "./estate-config-alerts.component.html",
   styleUrl: "./estate-config-alerts.component.scss",
@@ -68,49 +68,4 @@ export class EstateConfigAlertsComponent {
       this.configService,
       this.canEdit,
     );
-  // /**
-  //  * Cette méthode prépare la requête de sauvegarde de l'onglet actuel.
-  //  * Elle est passée sous forme d'Observable au wrapper qui se chargera de la souscription et du statut "saving".
-  //  */
-  // saveTab = (): Observable<any> => {
-  //   const ALL_ALERT_KEYS = new Set<string>([
-  //     ...this.ALERT_KEYS_CONTRACTS,
-  //     ...this.ALERT_KEYS_BOILER,
-  //   ]);
-
-  //   const currentTabControls = Array.from(ALL_ALERT_KEYS).map((key) =>
-  //     this.form.get(toFormKey(key)),
-  //   );
-
-  //   // Validation
-  //   const isCurrentTabInvalid = currentTabControls.some((control) => {
-  //     if (!control) return false;
-  //     if (control.invalid && (control.value === -1 || control.value === "")) {
-  //       return false;
-  //     }
-  //     return control.invalid;
-  //   });
-
-  //   if (isCurrentTabInvalid || !this.canEdit) {
-  //     currentTabControls.forEach((control) => control?.markAsTouched());
-  //     // On retourne un flux vide si le formulaire de l'onglet est invalide
-  //     return of(null);
-  //   }
-
-  //   // Préparation des requêtes API
-  //   const updates = Array.from(ALL_ALERT_KEYS).map((key) => {
-  //     const value = this.form.get(toFormKey(key))?.value;
-  //     const cleanValue =
-  //       value !== null &&
-  //       value !== undefined &&
-  //       value !== -1 &&
-  //       String(value).trim() !== ""
-  //         ? String(value).trim()
-  //         : "-1";
-
-  //     return this.configService.updateOne(key, { configValue: cleanValue });
-  //   });
-
-  //   return updates.length > 0 ? forkJoin(updates) : of(null);
-  // };
 }

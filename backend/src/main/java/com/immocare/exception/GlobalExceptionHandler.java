@@ -52,6 +52,7 @@ public class GlobalExceptionHandler {
     body.put("error", "Cannot delete housing unit");
     body.put("message", ex.getMessage());
     body.put("roomCount", ex.getRoomCount());
+    body.put("fireExtinguisherCount", ex.getFireExtinguisherCount());
     body.put("timestamp", LocalDateTime.now());
     return ResponseEntity.status(HttpStatus.CONFLICT).body(body);
   }

@@ -283,22 +283,6 @@
         </div>
         <div class="form-row">
           <label
-            >{{ "GLOBAL.HOUSING_UNIT" | transloco }}
-            <span class="hint"
-              >({{ "GLOBAL.OPTIONAL" | transloco }})</span
-            ></label
-          >
-          <select formControlName="unitId">
-            <option [ngValue]="null">
-              — {{ "GLOBAL.NOT_ASSIGNED" | transloco }} —
-            </option>
-            @for (u of buildingUnits; track u.id) {
-              <option [ngValue]="u.id">Unit {{ u.unitNumber }}</option>
-            }
-          </select>
-        </div>
-        <div class="form-row">
-          <label
             >{{ "GLOBAL.NOTES" | transloco }}
             <span class="hint"
               >({{ "GLOBAL.OPTIONAL" | transloco }})</span

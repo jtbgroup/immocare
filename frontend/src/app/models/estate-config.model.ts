@@ -53,16 +53,16 @@ export const CONFIG_KEYS = {
   CONTACTS_ALERT_LEASE_INDEXATION_DAYS: "contracts.alert.lease.indexation.days",
 
   // ── IMPORTS ───────────────────────────────────────────────────────
-  IMPORTS_CSV_COL_DATE: "imports.csv.col.date",
-  IMPORTS_CSV_COL_AMOUNT: "imports.csv.col.amount",
-  IMPORTS_CSV_COL_DESCRIPTION: "imports.csv.col.description",
-  IMPORTS_CSV_COL_COUNTERPARTY: "imports.csv.col.counterparty_account",
-  IMPORTS_CSV_COL_EXTERNAL_REF: "imports.csv.col.external_reference",
-  IMPORTS_CSV_COL_BANK_ACCOUNT: "imports.csv.col.bank_account",
-  IMPORTS_CSV_COL_VALUE_DATE: "imports.csv.col.value_date",
-  IMPORTS_CSV_SKIP_HEADER_ROWS: "imports.csv.skip_header_rows",
-  IMPORTS_CSV_DELIMITER: "imports.csv.delimiter",
-  IMPORTS_CSV_DATE_FORMAT: "imports.csv.date_format",
+  // IMPORTS_CSV_COL_DATE: "imports.csv.col.date",
+  // IMPORTS_CSV_COL_AMOUNT: "imports.csv.col.amount",
+  // IMPORTS_CSV_COL_DESCRIPTION: "imports.csv.col.description",
+  // IMPORTS_CSV_COL_COUNTERPARTY: "imports.csv.col.counterparty_account",
+  // IMPORTS_CSV_COL_EXTERNAL_REF: "imports.csv.col.external_reference",
+  // IMPORTS_CSV_COL_BANK_ACCOUNT: "imports.csv.col.bank_account",
+  // IMPORTS_CSV_COL_VALUE_DATE: "imports.csv.col.value_date",
+  // IMPORTS_CSV_SKIP_HEADER_ROWS: "imports.csv.skip_header_rows",
+  // IMPORTS_CSV_DELIMITER: "imports.csv.delimiter",
+  // IMPORTS_CSV_DATE_FORMAT: "imports.csv.date_format",
   IMPORTS_CSV_SUGGESTION_CONFIDENCE:
     "imports.csv.suggestion.confidence.threshold",
 
@@ -89,9 +89,3 @@ export const DATE_FORMAT_PRESETS: { value: string; label: string }[] = [
   { value: "MM/dd/yyyy", label: "Américain  —  MM/dd/yyyy" },
   { value: "yyyy-MM-dd", label: "ISO 8601  —  yyyy-MM-dd" },
 ];
-
-// export const ON_DUPLICATE_OPTIONS: { value: string; label: string }[] = [
-//   { value: "WARN", label: "Importer et signaler comme doublon potentiel" },
-//   { value: "SKIP", label: "Ignorer silencieusement les doublons" },
-//   { value: "IMPORT", label: "Toujours importer (pas de détection)" },
-// ];

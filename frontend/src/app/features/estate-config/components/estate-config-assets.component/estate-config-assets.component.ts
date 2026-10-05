@@ -8,7 +8,7 @@ import {
   OnInit,
   SimpleChanges,
 } from "@angular/core";
-import { FormGroup, ReactiveFormsModule } from "@angular/forms";
+import { FormControl, FormGroup, ReactiveFormsModule } from "@angular/forms";
 import { TranslocoModule } from "@ngneat/transloco";
 import { Subject, takeUntil } from "rxjs";
 import { EstateConfigService } from "../../../../core/services/estate-config.service";
@@ -18,12 +18,17 @@ import {
   EstateConfigDTO,
 } from "../../../../models/estate-config.model";
 import { TagSubcategory } from "../../../../models/transaction.model";
+import { ConfigRowComponent } from "../../../../shared/components/config-row.component/config-row.component";
+import { ConfigSectionWrapperComponent } from "../../../../shared/components/config-section-wrapper.component";
 import {
   CONFIG_LABELS_I18N_KEYS,
   createConfigSaveRequest,
+  getKeyI18NUnit,
+  getKeyI18NValue,
+  getKeyValueType,
+  getMinIfExists,
   toFormKey,
 } from "../../helpers/estate-config.helpers";
-import { EstateConfigSectionWrapperComponent } from "../estate-config-section-wrapper.component";
 
 @Component({
   selector: "app-estate-config-assets",
@@ -32,7 +37,8 @@ import { EstateConfigSectionWrapperComponent } from "../estate-config-section-wr
     CommonModule,
     ReactiveFormsModule,
     TranslocoModule,
-    EstateConfigSectionWrapperComponent,
+    ConfigSectionWrapperComponent,
+    ConfigRowComponent,
   ],
   templateUrl: "./estate-config-assets.component.html",
   styleUrl: "./estate-config-assets.component.scss",
@@ -53,11 +59,24 @@ export class EstateConfigAssetsComponent
 
   readonly CONFIG_LABELS_I18N_KEYS = CONFIG_LABELS_I18N_KEYS;
   readonly toFormKey = toFormKey;
+  readonly getMinIfExists = getMinIfExists;
+  readonly getKeyI18NUnit = getKeyI18NUnit;
+  readonly getKeyI18NValue = getKeyI18NValue;
+  readonly getKeyValueType = getKeyValueType;
 
-  readonly ASSETS_KEYS = new Set<string>([
+  readonly ASSETS_MAPPING_KEYS = new Set<string>([
     CONFIG_KEYS.CONTACTS_ALERT_PEB_EXPIRY_WARNING_MONTHS,
     CONFIG_KEYS.CONTACTS_ALERT_LEASE_END_NOTICE_DAYS,
     CONFIG_KEYS.CONTACTS_ALERT_LEASE_INDEXATION_DAYS,
+  ]);
+
+  readonly ASSETS_GENERAL_KEYS = new Set<string>([
+    CONFIG_KEYS.IMPORTS_CSV_SUGGESTION_CONFIDENCE,
+  ]);
+
+  private readonly ALL_ASSETS_KEYS = new Set<string>([
+    ...this.ASSETS_GENERAL_KEYS,
+    ...this.ASSETS_GENERAL_KEYS,
   ]);
 
   private destroy$ = new Subject<void>();
@@ -89,7 +108,7 @@ export class EstateConfigAssetsComponent
   private sanitizeInitialValues(): void {
     if (!this.form) return;
 
-    this.ASSETS_KEYS.forEach((key) => {
+    this.ASSETS_MAPPING_KEYS.forEach((key) => {
       const control = this.form.get(toFormKey(key));
       if (control) {
         const rawValue = control.value;
@@ -115,7 +134,7 @@ export class EstateConfigAssetsComponent
   }
 
   private toggleFormState(): void {
-    this.ASSETS_KEYS.forEach((key) => {
+    this.ASSETS_MAPPING_KEYS.forEach((key) => {
       const control = this.form.get(toFormKey(key));
       if (control) {
         if (this.canEdit) {
@@ -148,8 +167,12 @@ export class EstateConfigAssetsComponent
   saveTab = () =>
     createConfigSaveRequest(
       this.form,
-      this.ASSETS_KEYS,
+      this.ALL_ASSETS_KEYS,
       this.configService,
       this.canEdit,
     );
+
+  getControl(alertKey: string): FormControl {
+    return this.form.get(this.toFormKey(alertKey)) as FormControl;
+  }
 }

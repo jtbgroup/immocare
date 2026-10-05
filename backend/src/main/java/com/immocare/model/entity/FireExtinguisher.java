@@ -4,6 +4,7 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.immocare.model.enums.AssetType;
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -27,14 +28,14 @@ import lombok.Setter;
 @Getter
 @Setter
 @NoArgsConstructor
-public class FireExtinguisher {
+public class FireExtinguisher implements PropertyEquipment {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @ManyToOne(fetch = FetchType.LAZY, optional = false)
-    @JoinColumn(name = "building_id", nullable = false)
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "building_id")
     private Building building;
 
     @ManyToOne(fetch = FetchType.LAZY)
@@ -74,5 +75,24 @@ public class FireExtinguisher {
     @PreUpdate
     protected void onUpdate() {
         updatedAt = LocalDateTime.now();
+    }
+
+    @Override
+    public AssetType getAssetType() {
+        return AssetType.FIRE_EXTINGUISHER;
+    }
+
+    @Override
+    public String getOwnerType() {
+        return unit != null ? "HOUSING_UNIT" : "BUILDING";
+    }
+
+    @Override
+    public Long getOwnerId() {
+        return unit != null ? unit.getId() : building != null ? building.getId() : null;
+    }
+
+    public Building getBuildingContext() {
+        return unit != null ? unit.getBuilding() : building;
     }
 }

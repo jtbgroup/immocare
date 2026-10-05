@@ -22,6 +22,7 @@ import com.immocare.model.entity.HousingUnit;
 import com.immocare.model.entity.Person;
 import com.immocare.model.enums.LeaseStatus;
 import com.immocare.repository.BuildingRepository;
+import com.immocare.repository.FireExtinguisherRepository;
 import com.immocare.repository.HousingUnitRepository;
 import com.immocare.repository.LeaseRepository;
 import com.immocare.repository.PebScoreRepository;
@@ -47,6 +48,8 @@ public class HousingUnitService {
     private RentHistoryRepository rentHistoryRepository;
     @Autowired
     private PebScoreRepository pebScoreRepository;
+    @Autowired
+    private FireExtinguisherRepository fireExtinguisherRepository;
 
     public HousingUnitService(HousingUnitRepository housingUnitRepository,
             BuildingRepository buildingRepository,
@@ -168,8 +171,9 @@ public class HousingUnitService {
         verifyUnitBelongsToEstate(estateId, id);
         HousingUnit unit = findEntityById(id);
         long roomCount = roomRepository.countByHousingUnitId(id);
-        if (roomCount > 0) {
-            throw new HousingUnitHasDataException(id, roomCount);
+        long fireExtinguisherCount = fireExtinguisherRepository.countByUnitId(id);
+        if (roomCount > 0 || fireExtinguisherCount > 0) {
+            throw new HousingUnitHasDataException(id, roomCount, fireExtinguisherCount);
         }
         housingUnitRepository.delete(unit);
     }

@@ -66,7 +66,7 @@ public class EstateService {
     private final BoilerRepository boilerRepository;
     private final FireExtinguisherRepository fireExtinguisherRepository;
     private final LeaseService leaseService;
-    private final EstateConfigService platformConfigService;
+    private final EstateConfigService estateConfigService;
     private final BoilerServiceValidityRuleService validityRuleService;
 
     public EstateService(EstateRepository estateRepository,
@@ -78,7 +78,7 @@ public class EstateService {
             BoilerRepository boilerRepository,
             FireExtinguisherRepository fireExtinguisherRepository,
             LeaseService leaseService,
-            EstateConfigService platformConfigService,
+            EstateConfigService estateConfigService,
             BoilerServiceValidityRuleService validityRuleService) {
         this.estateRepository = estateRepository;
         this.estateMemberRepository = estateMemberRepository;
@@ -89,7 +89,7 @@ public class EstateService {
         this.boilerRepository = boilerRepository;
         this.fireExtinguisherRepository = fireExtinguisherRepository;
         this.leaseService = leaseService;
-        this.platformConfigService = platformConfigService;
+        this.estateConfigService = estateConfigService;
         this.validityRuleService = validityRuleService;
     }
 
@@ -257,7 +257,7 @@ public class EstateService {
         Estate saved = estateRepository.save(estate);
 
         // Seed default platform config and boiler validity rule
-        platformConfigService.seedDefaultConfig(saved, EstateConfigDTOs.DEFAULT_CONFIG);
+        estateConfigService.seedDefaultConfig(saved, EstateConfigDTOs.DEFAULT_CONFIG);
         validityRuleService.seedDefaultRule(saved);
 
         // Bulk-add members preserving order; detect duplicates
@@ -308,7 +308,7 @@ public class EstateService {
     // ─── Phase 6: Alert computation ───────────────────────────────────────────
 
     private int computeBoilerAlerts(UUID estateId) {
-        int warningMonths = platformConfigService.getIntValue(
+        int warningMonths = estateConfigService.getIntValue(
                 estateId,
                 EstateConfigDTOs.KEY_BOILERS_ALERT_THRESHOLD_MONTHS,
                 3);

@@ -1,11 +1,25 @@
 @if (canEdit) {
-  <app-estate-config-section-wrapper
+  <app-config-section-wrapper
     [form]="form"
     [saveRequest]="saveTab"
     [canEdit]="canEdit"
   >
+    <div class="key-column-content">
+      @for (key of ASSETS_GENERAL_KEYS; track key) {
+        <app-config-row
+          [label]="getKeyI18NValue(key) | transloco"
+          [id]="toFormKey(key)"
+          [control]="getControl(key)"
+          [unit]="getKeyI18NUnit(key) | transloco"
+          [tooltip]="getKeyI18NValue(key) | transloco"
+          [valueType]="getKeyValueType(key)"
+          [min]="getMinIfExists(key)"
+        />
+      }
+    </div>
+
     <div class="asset-mappings-list" [formGroup]="form">
-      @for (asset of ASSETS_KEYS; track asset) {
+      @for (asset of ASSETS_MAPPING_KEYS; track asset) {
         <div class="asset-mapping-row">
           <div class="asset-mapping-label">
             {{ CONFIG_LABELS_I18N_KEYS[asset] | transloco }}
@@ -40,5 +54,5 @@
         </div>
       }
     </div>
-  </app-estate-config-section-wrapper>
+  </app-config-section-wrapper>
 }

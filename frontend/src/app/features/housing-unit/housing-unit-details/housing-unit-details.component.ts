@@ -7,6 +7,7 @@ import { HousingUnitService } from "../../../core/services/housing-unit.service"
 import { HousingUnit } from "../../../models/housing-unit.model";
 import { BoilerSectionComponent } from "../../../shared/components/boiler-section/boiler-section.component";
 import { MeterSectionComponent } from "../../../shared/components/meter-section/meter-section.component";
+import { FireExtinguisherSectionComponent } from "../../building/fire-extinguisher-section/fire-extinguisher-section.component";
 import { LeaseSectionComponent } from "../../lease/components/lease-section/lease-section.component";
 import { PebSectionComponent } from "../components/peb-section/peb-section.component";
 import { RentSectionComponent } from "../components/rent-section/rent-section.component";
@@ -23,6 +24,7 @@ import { RoomSectionComponent } from "../components/room-section/room-section.co
     CommonModule,
     RouterLink,
     MeterSectionComponent,
+    FireExtinguisherSectionComponent,
     BoilerSectionComponent,
     RoomSectionComponent,
     PebSectionComponent,

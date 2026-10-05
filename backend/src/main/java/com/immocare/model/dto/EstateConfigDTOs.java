@@ -75,20 +75,10 @@ public final class EstateConfigDTOs {
         public static final String KEY_ASSET_MAPPING_BOILER = "assets.type.subcategory.mapping.boiler";
         public static final String KEY_ASSET_MAPPING_FIRE_EXTINGUISHER = "assets.type.subcategory.mapping.fire_extinguisher";
         public static final String KEY_ASSET_MAPPING_METER = "assets.type.subcategory.mapping.meter";
+        // IMPORTS
+        public static final String KEY_IMPORTS_CSV_SUGGESTION_CONFIDENCE = "imports.csv.suggestion.confidence.threshold";
         // BOILERS
         public static final String KEY_BOILERS_ALERT_THRESHOLD_MONTHS = "boilers.service.alert.threshold.months";
-        // IMPORTS
-        public static final String KEY_IMPORTS_CSV_COL_DATE = "imports.csv.col.date";
-        public static final String KEY_IMPORTS_CSV_COL_AMOUNT = "imports.csv.col.amount";
-        public static final String KEY_IMPORTS_CSV_COL_DESCRIPTION = "imports.csv.col.description";
-        public static final String KEY_IMPORTS_CSV_COL_COUNTERPARTY_ACCOUNT = "imports.csv.col.counterparty_account";
-        public static final String KEY_IMPORTS_CSV_COL_EXTERNAL_REFERENCE = "imports.csv.col.external_reference";
-        public static final String KEY_IMPORTS_CSV_COL_BANK_ACCOUNT = "imports.csv.col.bank_account";
-        public static final String KEY_IMPORTS_CSV_COL_VALUE_DATE = "imports.csv.col.value_date";
-        public static final String KEY_IMPORTS_CSV_SKIP_HEADER_ROWS = "imports.csv.skip_header_rows";
-        public static final String KEY_IMPORTS_CSV_DELIMITER = "imports.csv.delimiter";
-        public static final String KEY_IMPORTS_CSV_DATE_FORMAT = "imports.csv.date_format";
-        public static final String KEY_IMPORTS_CSV_SUGGESTION_CONFIDENCE = "imports.csv.suggestion.confidence.threshold";
         // CONTACTS
         public static final String KEY_CONTRACTS_ALERT_LEASE_END_NOTICE_DAYS = "contracts.alert.lease.end.notice.days";
         public static final String KEY_CONTRACTS_ALERT_LEASE_INDEXATION_DAYS = "contracts.alert.lease.indexation.days";
@@ -99,6 +89,8 @@ public final class EstateConfigDTOs {
         }
 
         public static final List<EstateConfigSeed> DEFAULT_CONFIG = List.of(
+                        new EstateConfigSeed(KEY_IMPORTS_CSV_SUGGESTION_CONFIDENCE, "3", "INTEGER",
+                                        "Minimum confidence threshold for transaction import suggestions (1-5)"),
                         new EstateConfigSeed(KEY_ASSET_MAPPING_BOILER, "", "STRING",
                                         "Subcategory ID to pre-fill when a BOILER asset link is added (empty = no mapping)"),
                         new EstateConfigSeed(KEY_ASSET_MAPPING_FIRE_EXTINGUISHER, "", "STRING",
@@ -107,28 +99,6 @@ public final class EstateConfigDTOs {
                                         "Subcategory ID to pre-fill when a METER asset link is added"),
                         new EstateConfigSeed(KEY_BOILERS_ALERT_THRESHOLD_MONTHS, "3", "INTEGER",
                                         "Months before service expiry to display a warning alert"),
-                        new EstateConfigSeed(KEY_IMPORTS_CSV_DELIMITER, ";", "STRING",
-                                        "CSV column delimiter"),
-                        new EstateConfigSeed(KEY_IMPORTS_CSV_DATE_FORMAT, "dd/MM/yyyy", "STRING",
-                                        "Date format in CSV"),
-                        new EstateConfigSeed(KEY_IMPORTS_CSV_SKIP_HEADER_ROWS, "1", "INTEGER",
-                                        "Header rows to skip"),
-                        new EstateConfigSeed(KEY_IMPORTS_CSV_COL_DATE, "0", "INTEGER",
-                                        "Column index for date"),
-                        new EstateConfigSeed(KEY_IMPORTS_CSV_COL_AMOUNT, "1", "INTEGER",
-                                        "Column index for amount"),
-                        new EstateConfigSeed(KEY_IMPORTS_CSV_COL_DESCRIPTION, "2", "INTEGER",
-                                        "Column index for description"),
-                        new EstateConfigSeed(KEY_IMPORTS_CSV_COL_COUNTERPARTY_ACCOUNT, "3", "INTEGER",
-                                        "Column index for counterparty IBAN"),
-                        new EstateConfigSeed(KEY_IMPORTS_CSV_COL_EXTERNAL_REFERENCE, "4", "INTEGER",
-                                        "Column index for bank reference"),
-                        new EstateConfigSeed(KEY_IMPORTS_CSV_COL_BANK_ACCOUNT, "5", "INTEGER",
-                                        "Column index for own IBAN"),
-                        new EstateConfigSeed(KEY_IMPORTS_CSV_COL_VALUE_DATE, "-1", "INTEGER",
-                                        "Column index for value date (-1 = absent)"),
-                        new EstateConfigSeed(KEY_IMPORTS_CSV_SUGGESTION_CONFIDENCE, "3", "INTEGER",
-                                        "Min confidence for tag suggestion"),
                         new EstateConfigSeed(KEY_CONTRACTS_ALERT_LEASE_END_NOTICE_DAYS, "30", "INTEGER",
                                         "Days before lease end to display a warning alert"),
                         new EstateConfigSeed(KEY_CONTRACTS_ALERT_LEASE_INDEXATION_DAYS, "30", "INTEGER",

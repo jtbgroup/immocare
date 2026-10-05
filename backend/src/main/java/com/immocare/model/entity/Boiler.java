@@ -3,6 +3,7 @@ package com.immocare.model.entity;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 
+import com.immocare.model.enums.AssetType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
@@ -26,7 +27,7 @@ import lombok.Setter;
 @Table(name = "boiler")
 @Getter
 @Setter
-public class Boiler {
+public class Boiler implements PropertyEquipment {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -81,5 +82,10 @@ public class Boiler {
     @PreUpdate
     void onUpdate() {
         updatedAt = LocalDateTime.now();
+    }
+
+    @Override
+    public AssetType getAssetType() {
+        return AssetType.BOILER;
     }
 }

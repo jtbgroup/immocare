@@ -12,6 +12,7 @@ import com.immocare.exception.FireExtinguisherDuplicateNumberException;
 import com.immocare.exception.FireExtinguisherNotFoundException;
 import com.immocare.exception.FireExtinguisherRevisionNotFoundException;
 import com.immocare.exception.BuildingNotFoundException;
+import com.immocare.exception.HousingUnitNotFoundException;
 import com.immocare.model.dto.AddRevisionRequest;
 import com.immocare.model.dto.FireExtinguisherDTO.FireExtinguisherResponse;
 import com.immocare.model.dto.FireExtinguisherDTO.FireExtinguisherRevisionResponse;
@@ -60,6 +61,15 @@ public class FireExtinguisherService {
                 .toList();
     }
 
+    public List<FireExtinguisherResponse> getByUnit(UUID estateId, Long unitId) {
+        HousingUnit unit = findUnitInEstate(estateId, unitId);
+        return extinguisherRepository
+                .findByUnitIdOrderByIdentificationNumberAsc(unit.getId())
+                .stream()
+                .map(this::toDTO)
+                .toList();
+    }
+
     public FireExtinguisherResponse getById(UUID estateId, Long id) {
         FireExtinguisher ext = findById(id);
         verifyExtinguisherBelongsToEstate(estateId, ext);
@@ -71,20 +81,52 @@ public class FireExtinguisherService {
     @Transactional
     public FireExtinguisherResponse create(UUID estateId, Long buildingId, SaveFireExtinguisherRequest req) {
         verifyBuildingBelongsToEstate(estateId, buildingId);
-        Building building = buildingRepository.findById(buildingId)
-                .orElseThrow(() -> new BuildingNotFoundException(buildingId));
-
-        if (extinguisherRepository.existsByBuildingIdAndIdentificationNumberIgnoreCase(
-                buildingId, req.identificationNumber())) {
-            throw new FireExtinguisherDuplicateNumberException();
+        if (req.unitId() != null) {
+            HousingUnit unit = findUnitInEstate(estateId, req.unitId());
+            if (!unit.getBuilding().getId().equals(buildingId)) {
+                throw new IllegalArgumentException("The specified unit does not belong to this building");
+            }
+            return createForUnit(unit, req);
         }
 
+        Building building = buildingRepository.findById(buildingId)
+                .orElseThrow(() -> new BuildingNotFoundException(buildingId));
+        return createForBuilding(building, req);
+    }
+
+    @Transactional
+    public FireExtinguisherResponse createForUnit(
+            UUID estateId, Long unitId, SaveFireExtinguisherRequest req) {
+        HousingUnit unit = findUnitInEstate(estateId, unitId);
+        if (req.unitId() != null && !req.unitId().equals(unitId)) {
+            throw new IllegalArgumentException("The request unit does not match the target housing unit");
+        }
+        return createForUnit(unit, req);
+    }
+
+    private FireExtinguisherResponse createForBuilding(
+            Building building, SaveFireExtinguisherRequest req) {
+        if (extinguisherRepository.existsByBuildingIdAndIdentificationNumberIgnoreCase(
+                building.getId(), req.identificationNumber())) {
+            throw new FireExtinguisherDuplicateNumberException();
+        }
         FireExtinguisher entity = new FireExtinguisher();
         entity.setBuilding(building);
         entity.setIdentificationNumber(req.identificationNumber());
         entity.setNotes(req.notes());
-        entity.setUnit(resolveUnit(req.unitId(), buildingId));
+        return toDTO(extinguisherRepository.save(entity));
+    }
 
+    private FireExtinguisherResponse createForUnit(
+            HousingUnit unit, SaveFireExtinguisherRequest req) {
+        if (extinguisherRepository.existsByUnitIdAndIdentificationNumberIgnoreCase(
+                unit.getId(), req.identificationNumber())) {
+            throw new FireExtinguisherDuplicateNumberException();
+        }
+        FireExtinguisher entity = new FireExtinguisher();
+        entity.setUnit(unit);
+        entity.setIdentificationNumber(req.identificationNumber());
+        entity.setNotes(req.notes());
         return toDTO(extinguisherRepository.save(entity));
     }
 
@@ -92,15 +134,22 @@ public class FireExtinguisherService {
     public FireExtinguisherResponse update(UUID estateId, Long id, SaveFireExtinguisherRequest req) {
         FireExtinguisher entity = findById(id);
         verifyExtinguisherBelongsToEstate(estateId, entity);
+        if (req.unitId() != null
+                && (entity.getUnit() == null || !req.unitId().equals(entity.getUnit().getId()))) {
+            throw new IllegalArgumentException("Changing an extinguisher's owner is not supported by this request");
+        }
 
-        if (extinguisherRepository.existsByBuildingIdAndNumberIgnoreCaseExcluding(
-                entity.getBuilding().getId(), req.identificationNumber(), id)) {
+        boolean duplicate = entity.getUnit() != null
+                ? extinguisherRepository.existsByUnitIdAndNumberIgnoreCaseExcluding(
+                        entity.getUnit().getId(), req.identificationNumber(), id)
+                : extinguisherRepository.existsByBuildingIdAndNumberIgnoreCaseExcluding(
+                        entity.getBuilding().getId(), req.identificationNumber(), id);
+        if (duplicate) {
             throw new FireExtinguisherDuplicateNumberException();
         }
 
         entity.setIdentificationNumber(req.identificationNumber());
         entity.setNotes(req.notes());
-        entity.setUnit(resolveUnit(req.unitId(), entity.getBuilding().getId()));
 
         return toDTO(extinguisherRepository.save(entity));
     }
@@ -160,26 +209,24 @@ public class FireExtinguisherService {
      * Verifies the fire extinguisher's building belongs to the given estate.
      */
     private void verifyExtinguisherBelongsToEstate(UUID estateId, FireExtinguisher ext) {
-        if (!buildingRepository.existsByEstateIdAndId(estateId, ext.getBuilding().getId())) {
+        if (!buildingRepository.existsByEstateIdAndId(
+                estateId, ext.getBuildingContext().getId())) {
             throw new EstateAccessDeniedException();
         }
+    }
+
+    private HousingUnit findUnitInEstate(UUID estateId, Long unitId) {
+        HousingUnit unit = housingUnitRepository.findById(unitId)
+                .orElseThrow(() -> new HousingUnitNotFoundException(unitId));
+        if (!unit.getBuilding().getEstate().getId().equals(estateId)) {
+            throw new EstateAccessDeniedException();
+        }
+        return unit;
     }
 
     private FireExtinguisher findById(Long id) {
         return extinguisherRepository.findById(id)
                 .orElseThrow(() -> new FireExtinguisherNotFoundException(id));
-    }
-
-    private HousingUnit resolveUnit(Long unitId, Long buildingId) {
-        if (unitId == null) {
-            return null;
-        }
-        HousingUnit unit = housingUnitRepository.findById(unitId)
-                .orElseThrow(() -> new IllegalArgumentException("Housing unit not found: " + unitId));
-        if (!unit.getBuilding().getId().equals(buildingId)) {
-            throw new IllegalArgumentException("The specified unit does not belong to this building");
-        }
-        return unit;
     }
 
     private FireExtinguisherResponse toDTO(FireExtinguisher entity) {
@@ -194,13 +241,15 @@ public class FireExtinguisherService {
 
         return new FireExtinguisherResponse(
                 entity.getId(),
-                entity.getBuilding().getId(),
+                entity.getBuildingContext().getId(),
                 entity.getUnit() != null ? entity.getUnit().getId() : null,
                 entity.getUnit() != null ? entity.getUnit().getUnitNumber() : null,
                 entity.getIdentificationNumber(),
                 entity.getNotes(),
                 revisionDTOs,
                 entity.getCreatedAt(),
-                entity.getUpdatedAt());
+                entity.getUpdatedAt(),
+                entity.getOwnerType(),
+                entity.getOwnerId());
     }
 }

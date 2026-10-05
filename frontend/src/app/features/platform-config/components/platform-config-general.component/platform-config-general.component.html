@@ -1,0 +1,26 @@
+<app-config-section-wrapper
+  [form]="form"
+  [saveRequest]="saveTab"
+  [canEdit]="canEdit"
+>
+  <div class="general-grid-container" [formGroup]="form">
+    <div class="general-column">
+      <h3 class="general-column-title">
+        {{ "GLOBAL.CONTRACT" | transloco }}
+      </h3>
+      <div class="general-column-content">
+        @for (key of GENERAL_KEYS; track key) {
+          <app-config-row
+            [label]="getKeyI18NValue(key) | transloco"
+            [id]="toFormKey(key)"
+            [control]="getControl(key)"
+            [unit]="getKeyI18NUnit(key) | transloco"
+            [tooltip]="getKeyI18NValue(key) | transloco"
+            [valueType]="getKeyValueType(key)"
+            [min]="getMinIfExists(key)"
+          />
+        }
+      </div>
+    </div>
+  </div>
+</app-config-section-wrapper>
