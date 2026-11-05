@@ -1,3 +1,10 @@
+---
+title: Documentation Methodology
+type: project methodology
+status: current
+last_verified: 2026-11-05
+---
+
 # Documentation Methodology
 
 This document defines the rules for creating and maintaining the project's canonical documentation.
@@ -53,7 +60,7 @@ The canonical documentation is organized by purpose:
 
 Each document must have a clear, single purpose. Keep domain definitions, implemented behavior, unresolved decisions, and future work in their respective categories rather than mixing them.
 
-Each document must have a header that summarizes, labels the content.
+Every canonical documentation file must begin with a metadata header in YAML front matter, followed by a descriptive Markdown title (`# ...`). The header must include at least `title` and `type`; include `status`, `last_verified`, and `verified_against` when applicable to the document.
 
 ## Single source of truth
 
