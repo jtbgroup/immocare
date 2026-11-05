@@ -17,6 +17,7 @@ public record CreateTransactionRequest(
         @NotNull LocalDate accountingMonth,
         @NotNull @Positive BigDecimal amount,
         String description,
+        @Size(max = 200) String externalReference,
         @Size(max = 50) String counterpartyAccount,
         Long bankAccountId,
         Long subcategoryId,

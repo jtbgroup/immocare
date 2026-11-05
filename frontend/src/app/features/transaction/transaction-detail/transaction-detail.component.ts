@@ -21,6 +21,7 @@ import {
 export class TransactionDetailComponent implements OnInit {
   transaction?: FinancialTransaction;
   loading = false;
+  loadError = false;
 
   readonly DIRECTION_LABELS = DIRECTION_LABELS;
   readonly STATUS_LABELS = STATUS_LABELS;
@@ -35,6 +36,7 @@ export class TransactionDetailComponent implements OnInit {
   ngOnInit(): void {
     const id = Number(this.route.snapshot.paramMap.get("id"));
     this.loading = true;
+    this.loadError = false;
     this.transactionService.getById(id).subscribe({
       next: (tx) => {
         this.transaction = tx;
@@ -42,6 +44,7 @@ export class TransactionDetailComponent implements OnInit {
       },
       error: () => {
         this.loading = false;
+        this.loadError = true;
       },
     });
   }

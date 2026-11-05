@@ -1,6 +1,7 @@
 package com.immocare.repository;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
 import org.springframework.data.domain.Page;
@@ -57,6 +58,8 @@ public interface BuildingRepository extends JpaRepository<Building, Long> {
         List<String> findDistinctCitiesByEstateId(@Param("estateId") UUID estateId);
 
         boolean existsByEstateIdAndId(UUID estateId, Long buildingId);
+
+        Optional<Building> findByEstateIdAndId(UUID estateId, Long buildingId);
 
         /** Used by EstateService.getDashboard() and deleteEstate() — Phase 6. */
         long countByEstateId(UUID estateId);

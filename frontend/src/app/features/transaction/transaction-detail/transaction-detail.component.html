@@ -195,10 +195,26 @@
           <div class="detail-divider"></div>
           <label>{{ "ASSET.RELATED" | transloco }}</label>
           <ul class="asset-list">
-            @for (link of transaction.assetLinks; track link.assetType) {
+            @for (link of transaction.assetLinks; track link.id) {
               <li class="asset-item">
                 <span class="badge badge--asset">{{ link.assetType }}</span>
                 <span>{{ link.assetLabel }}</span>
+                @if (link.unitNumber || link.buildingName) {
+                  <span class="asset-location">
+                    @if (link.unitNumber) {
+                      {{ "GLOBAL.HOUSING_UNIT" | transloco }} {{ link.unitNumber }}
+                    }
+                    @if (link.unitNumber && link.buildingName) {
+                      ·
+                    }
+                    @if (link.buildingName) {
+                      {{ link.buildingName }}
+                    }
+                  </span>
+                }
+                @if (link.amount != null) {
+                  <span>{{ link.amount.toFixed(2) }} €</span>
+                }
                 @if (link.notes) {
                   <span class="asset-notes">— {{ link.notes }}</span>
                 }
@@ -224,4 +240,10 @@
 
 @if (loading) {
   <div class="loading">{{ "GLOBAL.LOADING" | transloco }}...</div>
+}
+
+@if (loadError) {
+  <div class="error-container" role="alert">
+    <p class="error">{{ "TRANSACTION.LOAD_FAILED" | transloco }}</p>
+  </div>
 }

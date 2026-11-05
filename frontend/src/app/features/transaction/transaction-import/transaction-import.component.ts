@@ -107,7 +107,10 @@ export class TransactionImportComponent implements OnInit {
 
   get enrichedCount(): number {
     return this.previewRows.filter(
-      (r) => r.enrichedSubcategoryId || r.enrichedLeaseId,
+      (r) =>
+        r.enrichedSubcategoryId ||
+        r.enrichedLeaseId ||
+        r.enrichedBuildingId,
     ).length;
   }
 
@@ -295,6 +298,8 @@ export class TransactionImportComponent implements OnInit {
           (r.enrichedSubcategoryId ||
             r.enrichedLeaseId ||
             r.enrichedUnitId ||
+            r.enrichedBuildingId ||
+            (r.enrichedAssetLinks?.length ?? 0) > 0 ||
             r.direction),
       )
       .map((r) => ({
@@ -304,6 +309,7 @@ export class TransactionImportComponent implements OnInit {
         housingUnitId: r.enrichedUnitId,
         buildingId: r.enrichedBuildingId,
         directionOverride: r.direction ?? undefined,
+        assetLinks: r.enrichedAssetLinks,
       }));
 
     const selectedFingerprints: string[] = this.selectedRows

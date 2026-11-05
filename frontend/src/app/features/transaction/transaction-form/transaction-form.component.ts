@@ -14,17 +14,19 @@ import { BankAccountService } from "../../../core/services/bank-account.service"
 import { BuildingService } from "../../../core/services/building.service";
 import { HousingUnitService } from "../../../core/services/housing-unit.service";
 import { LeaseService } from "../../../core/services/lease.service";
-import { TagCategoryService } from "../../../core/services/tag-category.service";
+import { PersonService } from "../../../core/services/person.service";
 import { TagSubcategoryService } from "../../../core/services/tag-subcategory.service";
 import { TransactionService } from "../../../core/services/transaction.service";
 import { Building } from "../../../models/building.model";
 import { HousingUnit } from "../../../models/housing-unit.model";
-import { LeaseSummary } from "../../../models/lease.model";
+import { LeaseSummary, LeaseTenant } from "../../../models/lease.model";
 import {
   BankAccount,
+  CreateTransactionRequest,
   FinancialTransaction,
-  TagCategory,
   TagSubcategory,
+  TransactionAssetLink,
+  TransactionStatus,
 } from "../../../models/transaction.model";
 import { AssetLinkEditorComponent } from "../components/asset-link-editor/asset-link-editor.component";
 
@@ -48,26 +50,28 @@ export class TransactionFormComponent implements OnInit {
   loading = false;
   error: string | null = null;
 
-  categories: TagCategory[] = [];
   subcategories: TagSubcategory[] = [];
   bankAccounts: BankAccount[] = [];
-  assetLinks: any[] = [];
+  assetLinks: TransactionAssetLink[] = [];
+  subcategorySearch = "";
+  leaseAccountError: string | null = null;
 
   buildings: Building[] = [];
   units: HousingUnit[] = [];
   leases: LeaseSummary[] = [];
+  private leaseLookupVersion = 0;
 
   constructor(
     private fb: FormBuilder,
     private route: ActivatedRoute,
     private router: Router,
     private transactionService: TransactionService,
-    private tagCategoryService: TagCategoryService,
     private tagSubcategoryService: TagSubcategoryService,
     private bankAccountService: BankAccountService,
     private buildingService: BuildingService,
     private housingUnitService: HousingUnitService,
     private leaseService: LeaseService,
+    private personService: PersonService,
     readonly activeEstateService: ActiveEstateService,
   ) {}
 
@@ -90,15 +94,30 @@ export class TransactionFormComponent implements OnInit {
   }
 
   private setupCascadeListeners(): void {
-    this.form.get("categoryId")?.valueChanges.subscribe((catId) => {
-      if (catId) {
-        const dir = this.form.get("direction")?.value;
-        this.tagSubcategoryService
-          .getAll(catId, dir || undefined)
-          .subscribe((s) => (this.subcategories = s));
-      } else {
-        this.subcategories = [];
-        this.form.patchValue({ subcategoryId: null }, { emitEvent: false });
+    this.form.get("subcategoryId")?.valueChanges.subscribe((subcategoryId) => {
+      const subcategory = this.subcategories.find(
+        (item) => item.id === subcategoryId,
+      );
+      this.form.patchValue(
+        { categoryId: subcategory?.categoryId ?? null },
+        { emitEvent: false },
+      );
+    });
+
+    this.form.get("direction")?.valueChanges.subscribe((direction) => {
+      const selected = this.subcategories.find(
+        (subcategory) =>
+          subcategory.id === this.form.get("subcategoryId")?.value,
+      );
+      if (
+        selected &&
+        selected.direction !== "BOTH" &&
+        selected.direction !== direction
+      ) {
+        this.form.patchValue(
+          { categoryId: null, subcategoryId: null },
+          { emitEvent: false },
+        );
       }
     });
 
@@ -125,6 +144,10 @@ export class TransactionFormComponent implements OnInit {
           .subscribe((leases) => (this.leases = leases));
       }
     });
+
+    this.form.get("leaseId")?.valueChanges.subscribe((leaseId) => {
+      this.fillCounterpartyAccountFromLease(leaseId);
+    });
   }
 
   buildForm(): void {
@@ -133,9 +156,10 @@ export class TransactionFormComponent implements OnInit {
       direction: ["INCOME", Validators.required],
       transactionDate: [today, Validators.required],
       valueDate: [null],
-      accountingMonth: [today.substring(0, 7) + "-01", Validators.required],
+      accountingMonth: [today.substring(0, 7), Validators.required],
       amount: [null, [Validators.required, Validators.min(0.01)]],
       description: [null],
+      externalReference: [null, Validators.maxLength(200)],
       counterpartyAccount: [null, Validators.maxLength(50)],
       bankAccountId: [null],
       categoryId: [null],
@@ -147,7 +171,9 @@ export class TransactionFormComponent implements OnInit {
   }
 
   loadRefData(): void {
-    this.tagCategoryService.getAll().subscribe((c) => (this.categories = c));
+    this.tagSubcategoryService
+      .getAll()
+      .subscribe((subcategories) => (this.subcategories = subcategories));
     this.bankAccountService
       .getAll(true)
       .subscribe((b) => (this.bankAccounts = b));
@@ -162,20 +188,16 @@ export class TransactionFormComponent implements OnInit {
       next: (tx) => {
         this.existing = tx;
         this.assetLinks = tx.assetLinks || [];
-        if (tx.categoryId) {
-          this.tagSubcategoryService
-            .getAll(tx.categoryId)
-            .subscribe((s) => (this.subcategories = s));
-        }
         const patchAndFinish = () => {
           this.form.patchValue(
             {
               direction: tx.direction,
               transactionDate: tx.transactionDate,
               valueDate: tx.valueDate,
-              accountingMonth: tx.accountingMonth,
+              accountingMonth: tx.accountingMonth.substring(0, 7),
               amount: tx.amount,
               description: tx.description,
+              externalReference: tx.externalReference,
               counterpartyAccount: tx.counterpartyAccount,
               bankAccountId: tx.bankAccountId,
               categoryId: tx.categoryId,
@@ -241,10 +263,125 @@ export class TransactionFormComponent implements OnInit {
     });
   }
 
+  onSubcategorySearch(event: Event): void {
+    this.subcategorySearch = (event.target as HTMLInputElement).value;
+  }
+
   onAssetSubcategoryPreFill(subcategoryId: number): void {
     if (!this.form.get("subcategoryId")?.value) {
-      this.form.patchValue({ subcategoryId }, { emitEvent: false });
+      this.form.patchValue(
+        {
+          subcategoryId,
+          categoryId: this.subcategories.find((item) => item.id === subcategoryId)
+            ?.categoryId ?? null,
+        },
+        { emitEvent: false },
+      );
     }
+  }
+
+  get filteredSubcategoryGroups(): {
+    categoryName: string;
+    subcategories: TagSubcategory[];
+  }[] {
+    const direction = this.form.get("direction")?.value;
+    const query = this.subcategorySearch.trim().toLocaleLowerCase();
+    const groups = new Map<string, TagSubcategory[]>();
+    for (const subcategory of this.subcategories) {
+      if (
+        subcategory.direction !== "BOTH" &&
+        subcategory.direction !== direction
+      ) {
+        continue;
+      }
+      if (
+        query &&
+        !subcategory.categoryName.toLocaleLowerCase().includes(query) &&
+        !subcategory.name.toLocaleLowerCase().includes(query)
+      ) {
+        continue;
+      }
+      const group = groups.get(subcategory.categoryName) ?? [];
+      group.push(subcategory);
+      groups.set(subcategory.categoryName, group);
+    }
+    return Array.from(groups, ([categoryName, subcategories]) => ({
+      categoryName,
+      subcategories,
+    }));
+  }
+
+  get currentStatus(): TransactionStatus {
+    return this.existing?.status ?? "CONFIRMED";
+  }
+
+  private fillCounterpartyAccountFromLease(
+    leaseId: number | string | null,
+  ): void {
+    const lookupVersion = ++this.leaseLookupVersion;
+    this.leaseAccountError = null;
+    if (
+      leaseId == null ||
+      String(leaseId).length === 0 ||
+      this.hasCounterpartyAccount()
+    ) {
+      return;
+    }
+
+    this.leaseService.getById(Number(leaseId)).subscribe({
+      next: (lease) => {
+        if (!this.isCurrentLeaseLookup(lookupVersion, leaseId)) return;
+        const tenant =
+          lease.tenants.find((item: LeaseTenant) => item.role === "PRIMARY") ??
+          lease.tenants[0];
+        if (!tenant) return;
+
+        this.personService.getPersonById(tenant.personId).subscribe({
+          next: (person) => {
+            if (
+              !this.isCurrentLeaseLookup(lookupVersion, leaseId) ||
+              this.hasCounterpartyAccount()
+            ) {
+              return;
+            }
+            const account =
+              person.bankAccounts?.find((item) => item.primary) ??
+              person.bankAccounts?.[0];
+            if (account?.iban) {
+              this.form.patchValue(
+                { counterpartyAccount: account.iban },
+                { emitEvent: false },
+              );
+            }
+          },
+          error: () => {
+            if (this.isCurrentLeaseLookup(lookupVersion, leaseId)) {
+              this.leaseAccountError =
+                "TRANSACTION.LEASE_ACCOUNT_LOOKUP_FAILED";
+            }
+          },
+        });
+      },
+      error: () => {
+        if (this.isCurrentLeaseLookup(lookupVersion, leaseId)) {
+          this.leaseAccountError = "TRANSACTION.LEASE_ACCOUNT_LOOKUP_FAILED";
+        }
+      },
+    });
+  }
+
+  private hasCounterpartyAccount(): boolean {
+    return !!this.form.get("counterpartyAccount")?.value?.trim();
+  }
+
+  private isCurrentLeaseLookup(
+    lookupVersion: number,
+    leaseId: number | string,
+  ): boolean {
+    return (
+      lookupVersion === this.leaseLookupVersion &&
+      String(this.form.get("leaseId")?.value) === String(leaseId)
+    );
   }
 
   onSubmit(): void {
@@ -252,7 +389,23 @@ export class TransactionFormComponent implements OnInit {
       this.form.markAllAsTouched();
       return;
     }
-    const req = { ...this.form.value, assetLinks: this.assetLinks };
+    const value = this.form.getRawValue();
+    const req: CreateTransactionRequest = {
+      direction: value.direction,
+      transactionDate: value.transactionDate,
+      accountingMonth: `${value.accountingMonth}-01`,
+      amount: Number(value.amount),
+      description: value.description || undefined,
+      externalReference: value.externalReference || undefined,
+      valueDate: value.valueDate || undefined,
+      counterpartyAccount: value.counterpartyAccount || undefined,
+      bankAccountId: value.bankAccountId ?? undefined,
+      subcategoryId: value.subcategoryId ?? undefined,
+      leaseId: value.leaseId ?? undefined,
+      housingUnitId: value.housingUnitId ?? undefined,
+      buildingId: value.buildingId ?? undefined,
+      assetLinks: this.assetLinks,
+    };
     const obs = this.isEdit
       ? this.transactionService.update(this.transactionId!, req)
       : this.transactionService.create(req);

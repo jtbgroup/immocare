@@ -2,8 +2,7 @@ export type TransactionDirection = "INCOME" | "EXPENSE";
 export type TransactionStatus =
   | "DRAFT"
   | "CONFIRMED"
-  | "RECONCILED"
-  | "CANCELLED";
+  | "RECONCILED";
 export type TransactionSource = "MANUAL" | "IMPORT";
 export type AssetType = "BOILER" | "FIRE_EXTINGUISHER" | "METER";
 export type SubcategoryDirection = "INCOME" | "EXPENSE" | "BOTH";
@@ -240,6 +239,7 @@ export interface ImportPreviewRow {
   enrichedUnitNumber?: string;
   enrichedBuildingId?: number;
   enrichedBuildingName?: string;
+  enrichedAssetLinks?: SaveAssetLinkRequest[];
 }
 
 // ─── Enrichment payload sent to /import ──────────────────────────────────────
@@ -252,6 +252,7 @@ export interface ImportRowEnrichment {
   housingUnitId?: number;
   buildingId?: number;
   directionOverride?: string;
+  assetLinks?: SaveAssetLinkRequest[];
 }
 
 // ─── Filters ──────────────────────────────────────────────────────────────────
@@ -295,6 +296,7 @@ export interface CreateTransactionRequest {
   accountingMonth: string;
   amount: number;
   description?: string;
+  externalReference?: string;
   counterpartyAccount?: string;
   bankAccountId?: number;
   subcategoryId?: number;
@@ -342,7 +344,6 @@ export const STATUS_LABELS: Record<TransactionStatus, string> = {
   DRAFT: "Draft",
   CONFIRMED: "Confirmed",
   RECONCILED: "Reconciled",
-  CANCELLED: "Cancelled",
 };
 
 export const BANK_ACCOUNT_TYPE_LABELS: Record<BankAccountType, string> = {

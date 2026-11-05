@@ -1,5 +1,7 @@
 package com.immocare.model.dto;
 
+import java.util.List;
+
 /**
  * Per-row enrichment provided by the user during the preview step.
  *
@@ -11,6 +13,7 @@ package com.immocare.model.dto;
  * @param leaseId         lease to link — income only (optional)
  * @param housingUnitId   housing unit to link (optional)
  * @param buildingId      building to link — derived from unit when unitId is set (optional)
+ * @param assetLinks      physical assets covered by the transaction (optional)
  * @param directionOverride  "INCOME" or "EXPENSE" — overrides parser-detected direction (optional)
  */
 public record ImportRowEnrichmentDTO(
@@ -19,5 +22,6 @@ public record ImportRowEnrichmentDTO(
     Long leaseId,
     Long housingUnitId,
     Long buildingId,
-    String directionOverride
+    String directionOverride,
+    List<SaveAssetLinkRequest> assetLinks
 ) {}

@@ -20,7 +20,7 @@ Classification follows a **category → subcategory** hierarchy. A subcategory i
 
 ## Context and links
 
-A transaction belongs to a portfolio. It may be associated with a bank account, building, housing unit, or lease. The observed management service only allows a lease to be associated with income.
+A transaction belongs to an estate. It may be associated with a bank account, building, housing unit, or lease. The observed management service only allows a lease to be associated with income.
 
 Separate links can associate a transaction with one or more tracked pieces of equipment: a boiler, fire extinguisher, or meter. A partial amount may be assigned to an item of equipment. The code accepts a sum of partial amounts that does not exceed the transaction total.
 
@@ -33,12 +33,12 @@ Separate links can associate a transaction with one or more tracked pieces of eq
 
 These are application states observed in the code. In particular, the observed code does not define the business meaning of reconciliation or the process by which it is achieved.
 
-An import is tracked as a batch, and its rows may be identified as duplicates by fingerprint within the same portfolio. Classification and lease suggestions are processing aids; they should not be treated as business decisions until reviewed.
+An import is tracked as a batch, and its rows may be identified as duplicates by fingerprint within the same estate. Classification and lease suggestions are processing aids; they should not be treated as business decisions until reviewed.
 
 ## Conceptual relationships
 
 ```text
-Transaction → Portfolio
+Transaction → Estate
 Transaction → Direction + Date + Accounting month + Amount
 Transaction → Category → Subcategory
 Transaction → Bank account (optional)

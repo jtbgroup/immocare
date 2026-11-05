@@ -1,6 +1,6 @@
 # Concept — Property Equipment and Assets
 
-Tracked equipment is associated with a building or a housing unit. Any supported equipment type can be associated with either kind of property; the type must not determine whether it can be attached to a building or a unit. This is a business requirement, even though the current application does not yet support it consistently.
+Tracked equipment is associated with a building or a housing unit. Any supported equipment type can be associated with either kind of property; the type must not determine whether it can be attached to a building or a unit.
 
 The equipment currently represented is:
 

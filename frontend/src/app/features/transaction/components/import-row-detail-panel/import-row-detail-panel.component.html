@@ -136,6 +136,15 @@
           }
         </select>
       </div>
+
+      <div class="panel-section">
+        <label class="field-label">{{ "ASSET.RELATED" | transloco }}</label>
+        <app-asset-link-editor
+          [links]="assetEditorLinks"
+          [transactionAmount]="row.amount"
+          (linksChanged)="onAssetLinksChange($event)"
+        />
+      </div>
     </div>
   </div>
 }

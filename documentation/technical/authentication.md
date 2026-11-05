@@ -1,10 +1,18 @@
+---
+title: Authentication
+type: technical reference
+status: current
+last_verified: 2026-11-04
+verified_against: f295fb241898d79e75455198680219471509fcde
+---
+
 # Authentication
 
 This document describes the authentication behavior currently implemented by the application. It consolidates the login, logout, and current-user behavior without preserving the former use-case or story breakdown.
 
 ## Authentication and authorization
 
-Authentication establishes the identity of the signed-in application user and maintains that identity in a server-side session. Authorization is a separate concern: platform administrator status and estate membership determine which operations the authenticated user may perform. See [Roles and Responsibilities](../business/roles.md) for the current application access roles.
+Authentication establishes the identity of the signed-in [user account](../business/concepts/user-account.md) and maintains that identity in a server-side session. Authorization is a separate concern: platform administrator status and estate membership determine which operations the authenticated user may perform. See [Roles and Responsibilities](../business/roles.md) for the current application access roles.
 
 ## Authentication lifecycle
 
@@ -48,6 +56,8 @@ The session cookie's `Secure=false` setting is the value currently present in co
 ## Related access behavior
 
 Authentication does not select or store the active estate in the server session. After sign-in, the frontend chooses an estate context; access to estate-scoped resources is authorized separately using the authenticated user's platform-admin status or estate membership. The estate context and role rules are described in [Roles and Responsibilities](../business/roles.md).
+
+Platform administrators manage user accounts separately from authentication; see [User Account Management](./user-management.md).
 
 ## Implementation references
 

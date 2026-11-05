@@ -267,7 +267,7 @@ export const routes: Routes = [
   // ─── Transactions (legacy flat routes) ───────────────────────────────────
   {
     path: "transactions",
-    canActivate: [AuthGuard],
+    canActivate: [AuthGuard, EstateGuard],
     loadComponent: () =>
       import("./features/transaction/transactions-page/transactions-page.component").then(
         (m) => m.TransactionsPageComponent,
@@ -275,7 +275,7 @@ export const routes: Routes = [
   },
   {
     path: "transactions/new",
-    canActivate: [AuthGuard],
+    canActivate: [AuthGuard, EstateGuard],
     loadComponent: () =>
       import("./features/transaction/transaction-form/transaction-form.component").then(
         (m) => m.TransactionFormComponent,
@@ -283,7 +283,7 @@ export const routes: Routes = [
   },
   {
     path: "transactions/import/:batchId",
-    canActivate: [AuthGuard],
+    canActivate: [AuthGuard, EstateGuard],
     loadComponent: () =>
       import("./features/transaction/transaction-review/transaction-review.component").then(
         (m) => m.TransactionReviewComponent,
@@ -291,7 +291,7 @@ export const routes: Routes = [
   },
   {
     path: "transactions/:id/edit",
-    canActivate: [AuthGuard],
+    canActivate: [AuthGuard, EstateGuard],
     loadComponent: () =>
       import("./features/transaction/transaction-form/transaction-form.component").then(
         (m) => m.TransactionFormComponent,
@@ -299,7 +299,7 @@ export const routes: Routes = [
   },
   {
     path: "transactions/:id",
-    canActivate: [AuthGuard],
+    canActivate: [AuthGuard, EstateGuard],
     loadComponent: () =>
       import("./features/transaction/transaction-detail/transaction-detail.component").then(
         (m) => m.TransactionDetailComponent,

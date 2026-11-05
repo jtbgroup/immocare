@@ -64,7 +64,6 @@ export class TransactionListComponent implements OnInit {
     "DRAFT",
     "CONFIRMED",
     "RECONCILED",
-    "CANCELLED",
   ];
   readonly bulkStatuses: TransactionStatus[] = [
     "DRAFT",

@@ -11,16 +11,21 @@ The rules for creating and maintaining the documentation are defined in [methodo
 - [Roles and responsibilities](./business/roles.md) — who is involved, what each role owns, and how access is separated from business responsibilities.
 - [Concise glossary](./business/glossary.md) — shared vocabulary and canonical terms used throughout the domain.
 - [Concept map](./business/concept-map.md) — relationships between core business objects and their main interactions.
-- [Portfolio and rental concepts](./business/concepts/portfolio-and-rental.md) — portfolio structure, properties, people, and lease-related concepts.
+- [User account concept](./business/concepts/user-account.md) — application identity, platform administration, and its distinction from a person.
+- [Estate and rental concepts](./business/concepts/estate-and-rental.md) — estate structure, properties, people, and lease-related concepts.
 - [Property equipment and assets](./business/concepts/property-equipment.md) — equipment, fixtures, and tracked property assets.
 - [Equipment rules](./business/rules/equipment.md) — rules governing equipment attachment, lifecycle, and validity.
+- [User account rules](./business/rules/users.md) — observed account and access constraints requiring business validation.
 - [Financial transaction concept](./business/concepts/financial-transaction.md) — income, expense, classification, and linkage concepts for financial operations.
-- [Initial portfolio rules](./business/rules/portfolio.md) — validated or observed portfolio-level business rules.
+- [Initial estate rules](./business/rules/estate.md) — validated or observed estate-level business rules.
 - [Initial transaction rules](./business/rules/financial-transactions.md) — rules governing financial transaction behavior and classification.
 
 ## Technical references
 
 - [Authentication](./technical/authentication.md) — current sign-in, sign-out, session, and current-user behavior, plus its boundary with authorization.
+- [User account management](./technical/user-management.md) — current account administration, validation, platform-admin access, and deletion rules.
+- [User data dictionary](./technical/data-dictionary.md) — current implemented fields and constraints for the user account only.
+- [User data model](./technical/data-model.md) — current implemented data model for the user account only.
 
 ## Backlog
 

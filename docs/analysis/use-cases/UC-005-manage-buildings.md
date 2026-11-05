@@ -2,14 +2,14 @@
 
 ## Overview
 
-| Attribute | Value |
-|---|---|
-| ID | UC001 |
-| Name | Manage Buildings |
-| Actor | Admin |
-| Module | Buildings |
-| Stack | Spring Boot · Angular · PostgreSQL |
-| Branch | develop |
+| Attribute | Value                              |
+| --------- | ---------------------------------- |
+| ID        | UC001                              |
+| Name      | Manage Buildings                   |
+| Actor     | Admin                              |
+| Module    | Buildings                          |
+| Stack     | Spring Boot · Angular · PostgreSQL |
+| Branch    | develop                            |
 
 ## Description
 
@@ -24,6 +24,7 @@ Allows an administrator to create, read, update, and delete buildings. A buildin
 **As an** admin, **I want to** create a new building **so that** I can register a property in the system.
 
 **Acceptance Criteria:**
+
 - AC1: The form requires `name`, `streetAddress`, `postalCode`, `city`, `country`.
 - AC2: `country` defaults to `Belgium` if not provided.
 - AC3: `ownerId` is optional; when provided it must reference an existing `Person`.
@@ -39,6 +40,7 @@ Allows an administrator to create, read, update, and delete buildings. A buildin
 **As an** admin, **I want to** update a building's information **so that** I can keep the registry accurate.
 
 **Acceptance Criteria:**
+
 - AC1: All fields from UC005.001 can be updated.
 - AC2: `ownerId` can be set, changed, or cleared (null removes the owner link).
 - AC3: If the building does not exist, returns HTTP 404.
@@ -53,6 +55,7 @@ Allows an administrator to create, read, update, and delete buildings. A buildin
 **As an** admin, **I want to** delete a building **so that** I can remove obsolete entries.
 
 **Acceptance Criteria:**
+
 - AC1: Deletion succeeds when the building has no housing units.
 - AC2: If the building still has housing units, returns HTTP 400 with `unitCount` in the response body.
 - AC3: If the building does not exist, returns HTTP 404.
@@ -65,9 +68,10 @@ Allows an administrator to create, read, update, and delete buildings. A buildin
 
 ### UC005.004 — List Buildings
 
-**As an** admin, **I want to** view a paginated list of buildings **so that** I can browse the property portfolio.
+**As an** admin, **I want to** view a paginated list of buildings **so that** I can browse the property estate.
 
 **Acceptance Criteria:**
+
 - AC1: Returns a paginated result (default page size: 20).
 - AC2: Can be filtered by `city` (exact match).
 - AC3: Can be combined with a `search` term (matches name, address, or city — case-insensitive).
@@ -82,6 +86,7 @@ Allows an administrator to create, read, update, and delete buildings. A buildin
 **As an** admin, **I want to** search buildings by name or address **so that** I can quickly find a specific property.
 
 **Acceptance Criteria:**
+
 - AC1: The `search` parameter performs a case-insensitive partial match on `name`, `streetAddress`, and `city`.
 - AC2: Can be combined with the `city` filter.
 - AC3: Returns an empty page if no match is found (not a 404).
@@ -102,30 +107,32 @@ Allows an administrator to create, read, update, and delete buildings. A buildin
 
 ### Table: `building`
 
-| Column | Type | Constraints |
-|---|---|---|
-| `id` | BIGSERIAL | PK |
-| `name` | VARCHAR(100) | NOT NULL |
-| `street_address` | VARCHAR(200) | NOT NULL |
-| `postal_code` | VARCHAR(20) | NOT NULL |
-| `city` | VARCHAR(100) | NOT NULL |
-| `country` | VARCHAR(100) | NOT NULL, DEFAULT `'Belgium'` |
-| `owner_id` | BIGINT | FK → `person.id` ON DELETE SET NULL, nullable |
-| `created_by` | BIGINT | FK → `app_user.id` ON DELETE SET NULL, nullable |
-| `created_at` | TIMESTAMP | NOT NULL, DEFAULT NOW() |
-| `updated_at` | TIMESTAMP | NOT NULL, DEFAULT NOW() |
+| Column           | Type         | Constraints                                     |
+| ---------------- | ------------ | ----------------------------------------------- |
+| `id`             | BIGSERIAL    | PK                                              |
+| `name`           | VARCHAR(100) | NOT NULL                                        |
+| `street_address` | VARCHAR(200) | NOT NULL                                        |
+| `postal_code`    | VARCHAR(20)  | NOT NULL                                        |
+| `city`           | VARCHAR(100) | NOT NULL                                        |
+| `country`        | VARCHAR(100) | NOT NULL, DEFAULT `'Belgium'`                   |
+| `owner_id`       | BIGINT       | FK → `person.id` ON DELETE SET NULL, nullable   |
+| `created_by`     | BIGINT       | FK → `app_user.id` ON DELETE SET NULL, nullable |
+| `created_at`     | TIMESTAMP    | NOT NULL, DEFAULT NOW()                         |
+| `updated_at`     | TIMESTAMP    | NOT NULL, DEFAULT NOW()                         |
 
 ---
 
 ## DTOs
 
 ### `BuildingDTO` (response)
+
 ```
 id, name, streetAddress, postalCode, city, country,
 ownerId, ownerName, createdByUsername, unitCount
 ```
 
 ### `CreateBuildingRequest` (POST body)
+
 ```
 name*         VARCHAR(100)
 streetAddress* VARCHAR(200)
@@ -136,28 +143,29 @@ ownerId       Long          nullable
 ```
 
 ### `UpdateBuildingRequest` (PUT body)
+
 Same fields as `CreateBuildingRequest`.
 
 ---
 
 ## Business Rules
 
-| ID | Rule |
-|---|---|
-| BR-UC001-01 | `name`, `streetAddress`, `postalCode`, `city` are required |
+| ID          | Rule                                                        |
+| ----------- | ----------------------------------------------------------- |
+| BR-UC001-01 | `name`, `streetAddress`, `postalCode`, `city` are required  |
 | BR-UC001-02 | `ownerId`, if provided, must reference an existing `Person` |
 | BR-UC001-03 | Cannot delete a building that has at least one housing unit |
-| BR-UC001-04 | `country` defaults to `Belgium` when null or blank |
+| BR-UC001-04 | `country` defaults to `Belgium` when null or blank          |
 
 ---
 
 ## Error Responses
 
-| Condition | HTTP | Error key |
-|---|---|---|
-| Building not found | 404 | `Building not found` |
-| Has housing units on delete | 400 | `Cannot delete building` + `unitCount` |
-| `ownerId` not found | 409 | `PersonNotFoundException` message |
+| Condition                   | HTTP | Error key                              |
+| --------------------------- | ---- | -------------------------------------- |
+| Building not found          | 404  | `Building not found`                   |
+| Has housing units on delete | 400  | `Cannot delete building` + `unitCount` |
+| `ownerId` not found         | 409  | `PersonNotFoundException` message      |
 
 ---
 

@@ -2,7 +2,7 @@
 
 Full-stack application for managing buildings, housing units, and rental operations.
 
-**Stack**: Spring Boot 3.2 + Angular 17 + PostgreSQL 15 + Docker
+**Stack**: Java 21 + Spring Boot 4 + Angular 19 + PostgreSQL 15 + Docker
 
 ---
 

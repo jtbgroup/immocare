@@ -35,11 +35,12 @@ Business documentation must reflect the reality of the current code and validate
 5. Business rules receive stable identifiers and can be referenced without duplication.
 6. Rules inferred from current code or product behavior must be marked as **Needs business validation** until confirmed by a business stakeholder.
 7. Technical details belong in separate technical documentation.
-8. The glossary is the shared vocabulary for the entire project.
+8. The glossary is the shared vocabulary for the entire project. The terms are alphabetically ordered.
+9. Each documented fact or constraint has one canonical home. Avoid copying its full definition into other pages; link to the canonical entry instead.
 
 ## Language policy
 
-The project documentation must be written in English. French content is not considered canonical unless explicitly retained as historical context.
+The project documentation must be written in English. Other language content is not considered canonical unless explicitly retained as historical context.
 
 ## Documentation structure
 
@@ -51,6 +52,16 @@ The canonical documentation is organized by purpose:
 - The repository-root `/backlog` folder contains two separate files: `backlog.md` for future evolutions and `open_questions.md` for concrete, unresolved items that still need treatment.
 
 Each document must have a clear, single purpose. Keep domain definitions, implemented behavior, unresolved decisions, and future work in their respective categories rather than mixing them.
+
+Each document must have a header that summarizes, labels the content.
+
+## Single source of truth
+
+- The glossary owns concise term definitions; concept pages explain domain concepts and relationships.
+- `business/rules/` owns the canonical wording and status of business constraints. Give each rule a stable ID.
+- Technical pages describe how the application stores or enforces a rule, including implementation-specific behavior and API responses. When describing a business constraint, reference its rule ID instead of restating its complete criteria.
+- Data dictionaries own persisted fields, types, defaults, and database constraints. They do not duplicate application validation policies; link to the relevant business rules.
+- If the same subject needs to appear in more than one document, keep one authoritative definition and make the other appearance a short summary or link that clearly points to it.
 
 ## Separation between backlog and open questions
 
@@ -73,6 +84,7 @@ When adding or updating business documentation, the author must ensure that the 
 - respects the English-only policy,
 - avoids use-case or story-style decomposition,
 - distinguishes business rules from technical implementation.
+- gives every rule one canonical definition and uses links or stable rule IDs elsewhere.
 
 ## Validation rule
 

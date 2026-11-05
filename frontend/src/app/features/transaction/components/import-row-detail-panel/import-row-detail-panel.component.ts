@@ -24,14 +24,22 @@ import {
 } from "../../../../models/lease.model";
 import {
   ImportPreviewRow,
+  SaveAssetLinkRequest,
   TagSubcategory,
+  TransactionAssetLink,
   TransactionDirection,
 } from "../../../../models/transaction.model";
+import { AssetLinkEditorComponent } from "../asset-link-editor/asset-link-editor.component";
 
 @Component({
   selector: "app-import-row-detail-panel",
   standalone: true,
-  imports: [CommonModule, FormsModule, TranslocoModule],
+  imports: [
+    CommonModule,
+    FormsModule,
+    AssetLinkEditorComponent,
+    TranslocoModule,
+  ],
   templateUrl: "./import-row-detail-panel.component.html",
   styleUrls: ["./import-row-detail-panel.component.scss"],
 })
@@ -64,6 +72,7 @@ export class ImportRowDetailPanelComponent implements OnInit, OnChanges {
   });
   filterBuildingId: number | null = null;
   selectedLeaseId: number | null = null;
+  assetEditorLinks: TransactionAssetLink[] = [];
 
   ngOnInit(): void {
     this.loadSubcategories();
@@ -73,6 +82,20 @@ export class ImportRowDetailPanelComponent implements OnInit, OnChanges {
 
   ngOnChanges(changes: SimpleChanges): void {
     if (changes["row"] && this.row) {
+      const previousRow = changes["row"].previousValue as
+        | ImportPreviewRow
+        | undefined;
+      if (!previousRow || previousRow.rowNumber !== this.row.rowNumber) {
+        this.assetEditorLinks = (this.row.enrichedAssetLinks ?? []).map(
+          (link) => ({
+            assetType: link.assetType,
+            assetId: link.assetId,
+            assetLabel: `#${link.assetId}`,
+            amount: link.amount,
+            notes: link.notes,
+          }),
+        );
+      }
       this.syncFromRow();
     }
   }
@@ -116,7 +139,13 @@ export class ImportRowDetailPanelComponent implements OnInit, OnChanges {
   onBuildingFilterChange(buildingId: number | null): void {
     this.filterBuildingId = buildingId;
     this.selectedLeaseId = null;
-    this.onLeaseChange(null);
+    this.row.enrichedLeaseId = undefined;
+    this.row.enrichedUnitId = undefined;
+    this.row.enrichedUnitNumber = undefined;
+    const building = this.buildings.find((item) => item.id === buildingId);
+    this.row.enrichedBuildingId = buildingId ?? undefined;
+    this.row.enrichedBuildingName = building?.name;
+    this.emit();
     this.applyBuildingFilter();
   }
 
@@ -138,6 +167,11 @@ export class ImportRowDetailPanelComponent implements OnInit, OnChanges {
     this.emit();
   }
 
+  onAssetLinksChange(links: SaveAssetLinkRequest[]): void {
+    this.row.enrichedAssetLinks = links;
+    this.emit();
+  }
+
   // ── Private helpers ─────────────────────────────────────────────────────────
 
   private syncFromRow(): void {
@@ -145,7 +179,9 @@ export class ImportRowDetailPanelComponent implements OnInit, OnChanges {
     this.selectedLeaseId = this.row.enrichedLeaseId ?? null;
 
     const suggestedLeaseId = this.row.suggestedLease?.leaseId ?? null;
-    const targetLeaseId = this.selectedLeaseId ?? suggestedLeaseId;
+    const targetLeaseId =
+      this.selectedLeaseId ??
+      (this.row.enrichedBuildingId ? null : suggestedLeaseId);
 
     if (targetLeaseId && this.allLeases.length) {
       const lease = this.allLeases.find((l) => l.id === targetLeaseId);
@@ -154,6 +190,9 @@ export class ImportRowDetailPanelComponent implements OnInit, OnChanges {
         this.applyBuildingFilter();
         this.selectedLeaseId = targetLeaseId;
       }
+    } else if (this.row.enrichedBuildingId) {
+      this.filterBuildingId = this.row.enrichedBuildingId;
+      this.applyBuildingFilter();
     } else if (this.row.suggestedLease?.buildingId) {
       this.filterBuildingId = this.row.suggestedLease.buildingId;
     }

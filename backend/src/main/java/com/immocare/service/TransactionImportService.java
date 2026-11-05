@@ -27,9 +27,11 @@ import com.immocare.model.dto.ImportRowEnrichmentDTO;
 import com.immocare.model.dto.SubcategorySuggestionDTO;
 import com.immocare.model.entity.AppUser;
 import com.immocare.model.entity.BankAccount;
+import com.immocare.model.entity.Building;
 import com.immocare.model.entity.Estate;
 import com.immocare.model.entity.FinancialTransaction;
 import com.immocare.model.entity.ImportBatch;
+import com.immocare.model.entity.Lease;
 import com.immocare.model.entity.ParsedTransaction;
 import com.immocare.model.entity.PersonBankAccount;
 import com.immocare.model.entity.TagSubcategory;
@@ -39,6 +41,7 @@ import com.immocare.model.enums.TransactionDirection;
 import com.immocare.model.enums.TransactionSource;
 import com.immocare.model.enums.TransactionStatus;
 import com.immocare.repository.BankAccountRepository;
+import com.immocare.repository.BuildingRepository;
 import com.immocare.repository.EstateRepository;
 import com.immocare.repository.FinancialTransactionRepository;
 import com.immocare.repository.HousingUnitRepository;
@@ -74,8 +77,10 @@ public class TransactionImportService {
     private final PersonBankAccountRepository personBankAccountRepository;
     private final LeaseRepository leaseRepository;
     private final HousingUnitRepository housingUnitRepository;
+    private final BuildingRepository buildingRepository;
     private final EstateRepository estateRepository;
     private final EstateConfigService estateConfigService;
+    private final TransactionAssetLinkService transactionAssetLinkService;
 
     // ─── Import history ───────────────────────────────────────────────────────
 
@@ -287,22 +292,32 @@ public class TransactionImportService {
         boolean hasEnrichment = enrichment != null;
         tx.setStatus(hasEnrichment ? TransactionStatus.CONFIRMED : TransactionStatus.DRAFT);
 
-        if (hasEnrichment) {
-            applyEnrichment(tx, enrichment);
-        } else {
-            // Auto-apply subcategory suggestion even for DRAFT
+        if (enrichment == null || enrichment.subcategoryId() == null) {
             SubcategorySuggestionDTO suggestion = suggestSubcategory(row, minConfidence);
             if (suggestion != null) {
                 subcategoryRepository.findById(suggestion.subcategoryId())
                         .ifPresent(tx::setSubcategory);
             }
-            // Auto-apply lease suggestion (scoped to estate)
+        }
+
+        if (enrichment == null || enrichment.leaseId() == null) {
             ImportPreviewRowDTO.SuggestedLeaseDTO leaseSuggestion = suggestLease(estate.getId(), row);
             if (leaseSuggestion != null) {
-                leaseRepository.findById(leaseSuggestion.leaseId())
+                leaseRepository.findByEstateIdAndId(estate.getId(), leaseSuggestion.leaseId())
                         .ifPresent(tx::setSuggestedLease);
-                housingUnitRepository.findById(leaseSuggestion.unitId())
-                        .ifPresent(tx::setHousingUnit);
+                if (enrichment == null
+                        || (enrichment.housingUnitId() == null && enrichment.buildingId() == null)) {
+                    housingUnitRepository.findById(leaseSuggestion.unitId())
+                            .ifPresent(tx::setHousingUnit);
+                }
+            }
+        }
+
+        if (hasEnrichment) {
+            applyEnrichment(tx, enrichment);
+            if (enrichment.assetLinks() != null && !enrichment.assetLinks().isEmpty()) {
+                transactionAssetLinkService.attachAssetLinks(
+                        estate.getId(), tx, enrichment.assetLinks());
             }
         }
 
@@ -333,12 +348,32 @@ public class TransactionImportService {
                     .ifPresent(tx::setSubcategory);
         }
         if (enrichment.leaseId() != null) {
-            leaseRepository.findById(enrichment.leaseId())
-                    .ifPresent(tx::setLease);
+            Lease lease = leaseRepository.findByEstateIdAndId(
+                            tx.getEstate().getId(), enrichment.leaseId())
+                    .orElseThrow(() -> new IllegalArgumentException(
+                            "Lease does not belong to this estate."));
+            tx.setLease(lease);
         }
         if (enrichment.housingUnitId() != null) {
-            housingUnitRepository.findById(enrichment.housingUnitId())
-                    .ifPresent(tx::setHousingUnit);
+            if (!housingUnitRepository.existsByBuilding_Estate_IdAndId(
+                    tx.getEstate().getId(), enrichment.housingUnitId())) {
+                throw new IllegalArgumentException("Housing unit does not belong to this estate.");
+            }
+            var housingUnit = housingUnitRepository.getReferenceById(enrichment.housingUnitId());
+            tx.setHousingUnit(housingUnit);
+            tx.setBuilding(housingUnit.getBuilding());
+        }
+        if (enrichment.buildingId() != null) {
+            Building building = buildingRepository.findByEstateIdAndId(
+                            tx.getEstate().getId(), enrichment.buildingId())
+                    .orElseThrow(() -> new IllegalArgumentException(
+                            "Building does not belong to this estate."));
+            if (tx.getHousingUnit() != null
+                    && !tx.getHousingUnit().getBuilding().getId().equals(building.getId())) {
+                throw new IllegalArgumentException(
+                        "Building must match the selected housing unit.");
+            }
+            tx.setBuilding(building);
         }
     }
 

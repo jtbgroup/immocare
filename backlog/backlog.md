@@ -17,6 +17,9 @@
 - [ ] Add document attachments, such as energy performance certificates and boiler-maintenance records.
 - [x] Make alerts cross-cutting.
 - [ ] Review roles and security.
+- [ ] Invalidate a user's active sessions when their password changes or their account is deleted (UC002.004 AC3 and UC002.005 AC7).
+- [ ] Align user-account deletion controls with backend restrictions: populate the current-user identity for self-delete prevention and disable deletion of the last platform administrator (UC002.005 AC4–AC5).
+- [ ] Restrict the user-management frontend routes to platform administrators; they currently check authentication only.
 - [x] Fix alerts that are not displayed.
 - [ ] Fix date formatting and make the date settings visible.
 - [ ] Return to PostgreSQL-only support.
@@ -41,7 +44,5 @@
 - [ ] Update GitHub Actions to account for release numbers.
 - [ ] Review how the application version is displayed.
 - [ ] Generalize boilers, fire extinguishers, and meters as devices, including support for generic device types.
-
-## To evaluate
-
-- [ ] Decide whether a user account should be linked to a person.
+- [ ] An asset can be associated to a building or a unit whatever the tye of asset. This is a business requirement, even though the current application does not yet support it consistently. >> Verify this is implemented everywhere.
+- [ ] Review code linked to BR-PORT-002

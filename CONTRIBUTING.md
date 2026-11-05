@@ -35,29 +35,29 @@ Thank you for your interest in contributing to ImmoCare! This document provides 
 
 ## Development Workflow
 
-### 1. Pick a User Story
+### 1. Define the Change
 
-- Check the Sprint board (GitHub Projects or Jira)
-- Assign yourself to an unassigned user story
-- Move card to "In Progress"
+- Clarify the business concepts, rules, and behavior affected by the change.
+- Review the relevant business documentation and existing implementation.
+- Track work in the project's issue system when applicable.
 
 ### 2. Create Feature Branch
 
 ```bash
 git checkout main
 git pull origin main
-git checkout -b feature/US###-short-description
+git checkout -b feature/short-description
 ```
 
 **Branch naming convention:**
-- `feature/UC005.001-create-building` - New features
+- `feature/add-building-capability` - New features
 - `bugfix/fix-validation-error` - Bug fixes
 - `hotfix/critical-security-patch` - Urgent fixes
 - `refactor/improve-service-layer` - Code improvements
 
-### 3. Implement the Feature
+### 3. Implement the Change
 
-Follow the acceptance criteria in the user story document.
+Follow the relevant business rules and agreed behavior. Update business documentation when a change alters a business concept or rule.
 
 ### 4. Write Tests
 
@@ -69,18 +69,21 @@ Follow the acceptance criteria in the user story document.
 
 ```bash
 # Backend tests
-cd code/backend
+cd backend
 mvn test
 
 # Frontend tests
-cd code/frontend
-npm test
+cd ../frontend
+npm test -- --watch=false
+npm run test:e2e
 
 # Run application
 docker-compose up -d postgres
-mvn spring-boot:run  # Backend
-npm start            # Frontend
+cd ../backend && mvn spring-boot:run
+cd ../frontend && npm start
 ```
+
+The Java tests currently live under `backend/src/test/com`, rather than Maven's conventional `backend/src/test/java`; verify that Maven Surefire reports tests were actually executed. The Angular project configures Jasmine/Karma and Playwright, but currently has no unit-test spec files. Add and run relevant tests for changed behavior.
 
 ### 6. Create Pull Request
 
@@ -94,10 +97,9 @@ See [Pull Request Process](#pull-request-process)
 
 #### Code Style
 
-- **Formatter**: Google Java Format
-- **Indentation**: 2 spaces
-- **Line length**: Max 100 characters
-- **Imports**: No wildcard imports
+- No Java formatter or linter is currently configured in the Maven build. Follow nearby code formatting; do not claim Google Java Format is enforced.
+- Follow the existing Java style and avoid wildcard imports.
+- To enforce formatting, first add a pinned Maven formatter plugin, a check-only CI command, and a separately documented auto-fix command.
 
 #### Naming Conventions
 
@@ -106,7 +108,8 @@ See [Pull Request Process](#pull-request-process)
 public class BuildingService { }
 
 // Methods: camelCase
-public Building createBuilding(BuildingDTO dto) { }
+public BuildingDTOs.BuildingResponse createBuilding(
+    BuildingDTOs.CreateBuildingRequest request) { }
 
 // Constants: UPPER_SNAKE_CASE
 private static final String DEFAULT_COUNTRY = "Belgium";
@@ -145,28 +148,30 @@ public class BuildingService {
 }
 ```
 
-**2. Use DTOs for API:**
+**2. Use DTO records grouped by domain:**
 ```java
-// Controller
+// BuildingDTOs.java
+public final class BuildingDTOs {
+    private BuildingDTOs() {}
+
+    public record CreateBuildingRequest(
+        @NotBlank @Size(max = 100) String name
+    ) {}
+
+    public record BuildingResponse(Long id, String name) {}
+}
+
+// Map entities to DTOs in the service layer; never return entities from controllers.
 @PostMapping("/buildings")
-public ResponseEntity<BuildingDTO> create(@Valid @RequestBody BuildingDTO dto) {
-    Building building = buildingService.create(dto);
-    return ResponseEntity.ok(mapper.toDTO(building));
+public ResponseEntity<BuildingDTOs.BuildingResponse> create(
+        @Valid @RequestBody BuildingDTOs.CreateBuildingRequest request) {
+    return ResponseEntity.status(HttpStatus.CREATED).body(buildingService.create(request));
 }
 ```
 
-**3. Validate Input:**
+**3. Handle Exceptions:**
 ```java
-public record BuildingDTO(
-    @NotBlank @Size(max = 100) String name,
-    @NotBlank @Size(max = 200) String streetAddress,
-    // ...
-) { }
-```
-
-**4. Handle Exceptions:**
-```java
-@ControllerAdvice
+@RestControllerAdvice
 public class GlobalExceptionHandler {
     @ExceptionHandler(ResourceNotFoundException.class)
     public ResponseEntity<ErrorDTO> handle(ResourceNotFoundException ex) {
@@ -181,10 +186,10 @@ public class GlobalExceptionHandler {
 
 #### Code Style
 
-- **Formatter**: Prettier
-- **Linter**: ESLint
+- No frontend formatter or linter is currently configured by `package.json`. Follow nearby code formatting; do not assume Prettier or ESLint is installed or enforced.
+- To enforce linting/formatting, configure Angular ESLint and Prettier, add `lint` and `format:check` npm scripts plus a separate auto-fix script, then run the checks in CI.
 - **Indentation**: 2 spaces
-- **Quotes**: Single quotes
+- **Quotes**: Double quotes, matching the existing application code
 
 #### Naming Conventions
 
@@ -228,7 +233,12 @@ src/
 
 #### Best Practices
 
-**1. Use Reactive Forms:**
+- Use standalone components and Signals for new component/application state. RxJS state patterns are legacy; do not expand them without an observable integration need.
+- Prefer functional `inject()` in new code. Existing constructor injection can remain until intentionally refactored.
+- Use Transloco for user-visible strings and update both English and French translation files.
+- Use Angular's built-in template control flow (`@if`, `@for`, `@switch`) for new templates.
+
+**Reactive forms:**
 ```typescript
 buildingForm = this.fb.group({
   name: ['', [Validators.required, Validators.maxLength(100)]],
@@ -237,40 +247,30 @@ buildingForm = this.fb.group({
 });
 ```
 
-**2. Unsubscribe from Observables:**
+**Signal state:**
 ```typescript
-export class BuildingListComponent implements OnDestroy {
-  private destroy$ = new Subject<void>();
-  
-  ngOnInit() {
-    this.buildingService.getAll()
-      .pipe(takeUntil(this.destroy$))
-      .subscribe(buildings => this.buildings = buildings);
-  }
-  
-  ngOnDestroy() {
-    this.destroy$.next();
-    this.destroy$.complete();
-  }
-}
-```
-
-**3. Use Smart/Dumb Component Pattern:**
-```typescript
-// Smart Component (Container)
-@Component({ selector: 'app-building-list-container' })
-export class BuildingListContainerComponent {
-  buildings$ = this.service.getAll();
-  constructor(private service: BuildingService) {}
-}
-
-// Dumb Component (Presentational)
-@Component({ selector: 'app-building-list' })
 export class BuildingListComponent {
-  @Input() buildings: Building[];
-  @Output() buildingSelected = new EventEmitter<Building>();
+  private readonly buildingService = inject(BuildingService);
+  readonly buildings = signal<Building[]>([]);
+  readonly isLoading = signal(false);
+  readonly errorKey = signal<string | null>(null);
+
+  load(): void {
+    this.isLoading.set(true);
+    this.errorKey.set(null);
+    this.buildingService.getAll().subscribe({
+      next: (buildings) => this.buildings.set(buildings),
+      error: () => {
+        this.errorKey.set('building.loadFailed');
+        this.isLoading.set(false);
+      },
+      complete: () => this.isLoading.set(false),
+    });
+  }
 }
 ```
+
+Keep HTTP services typed and observable-based where appropriate, but make Signals the state model in new UI code. Surface failures through established error and localization patterns; do not silently swallow them.
 
 ---
 
@@ -279,14 +279,14 @@ export class BuildingListComponent {
 #### Migration Naming
 
 ```
-V001__create_users_table.sql
-V002__create_buildings_table.sql
-V003__add_owner_to_building.sql
+V018__add_building_external_reference.sql
+V019__enforce_equipment_owner.sql
 ```
 
 - Always sequential version numbers
 - Double underscore after version
-- Descriptive name in snake_case
+- Descriptive business/domain name in snake_case; do not use use-case or story identifiers
+- Migrations are forward-only. Preserve existing data and explicitly handle legacy rows when changing constraints or ownership
 
 #### SQL Style
 
@@ -309,92 +309,35 @@ COMMENT ON TABLE building IS 'Physical buildings containing housing units';
 
 ## Testing Guidelines
 
-### Backend Tests
+### Backend
 
-#### Unit Tests
+The project uses JUnit 5 and Spring Boot Test. Use MockMvc for HTTP behavior and estate authorization/isolation tests; use Mockito and AssertJ when appropriate.
 
-```java
-@ExtendWith(MockitoExtension.class)
-class BuildingServiceTest {
-    
-    @Mock
-    private BuildingRepository repository;
-    
-    @InjectMocks
-    private BuildingService service;
-    
-    @Test
-    void createBuilding_WithValidData_ReturnsSavedBuilding() {
-        // Given
-        BuildingDTO dto = new BuildingDTO("Test Building", ...);
-        Building expected = new Building();
-        when(repository.save(any())).thenReturn(expected);
-        
-        // When
-        Building result = service.create(dto);
-        
-        // Then
-        assertNotNull(result);
-        verify(repository).save(any());
-    }
-}
+```bash
+cd backend
+mvn test
 ```
 
-#### Integration Tests
+Existing tests are currently under `backend/src/test/com`, rather than Maven's conventional `backend/src/test/java`. Verify Surefire reports a non-zero executed-test count. If tests are not discovered, move them to the conventional test source root or explicitly configure Maven and validate that CI executes them.
 
-```java
-@SpringBootTest
-@AutoConfigureMockMvc
-class BuildingControllerIntegrationTest {
-    
-    @Autowired
-    private MockMvc mockMvc;
-    
-    @Test
-    void createBuilding_ReturnsCreated() throws Exception {
-        String json = """
-            {
-                "name": "Test Building",
-                "streetAddress": "123 Test St"
-            }
-        """;
-        
-        mockMvc.perform(post("/api/v1/buildings")
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(json))
-            .andExpect(status().isCreated())
-            .andExpect(jsonPath("$.name").value("Test Building"));
-    }
-}
+### Frontend
+
+The configured unit test runner is Angular CLI with Jasmine/Karma. No `*.spec.ts` unit-test files currently exist. Add focused specs alongside changed UI code and verify the command reports executed tests:
+
+```bash
+cd frontend
+npm test -- --watch=false
+npm run test:e2e
 ```
 
-### Frontend Tests
+Playwright E2E tests are under `frontend/e2e/`. Cover critical user journeys and verify API-backed behavior, not only static rendering.
 
-#### Component Tests
+### Tooling gaps to resolve before enforcing style checks
 
-```typescript
-describe('BuildingListComponent', () => {
-  let component: BuildingListComponent;
-  let fixture: ComponentFixture<BuildingListComponent>;
-  
-  beforeEach(() => {
-    TestBed.configureTestingModule({
-      declarations: [BuildingListComponent]
-    });
-    fixture = TestBed.createComponent(BuildingListComponent);
-    component = fixture.componentInstance;
-  });
-  
-  it('should display buildings', () => {
-    component.buildings = [{ id: 1, name: 'Test' }];
-    fixture.detectChanges();
-    
-    const compiled = fixture.nativeElement;
-    expect(compiled.querySelector('.building-name').textContent)
-      .toContain('Test');
-  });
-});
-```
+- There are no configured formatter or lint commands in either project manifest. Do not describe Google Java Format, Prettier, or ESLint as active requirements until the tools are installed and configured.
+- For Java formatting, add a pinned Maven formatter plugin with separate check and apply goals, and run the check goal in CI.
+- For Angular linting and formatting, configure Angular ESLint and Prettier, add `lint`, `format:check`, and a separate auto-fix script to `package.json`, and run the check scripts in CI.
+- Update these instructions and the root contributor documentation with the exact verified commands only after the configuration is in place.
 
 ---
 
@@ -425,7 +368,6 @@ Follow [Conventional Commits](https://www.conventionalcommits.org/):
 ```
 feat(building): add create building endpoint
 
-Implements UC005.001 - Create Building.
 - Add BuildingController with POST /api/v1/buildings
 - Add BuildingService.create() method
 - Add validation for required fields
@@ -466,13 +408,13 @@ Fixes #456
 
 **Title format:**
 ```
-[US###] Short description
+<type>(<scope>): <short description>
 ```
 
 **Description template:**
 ```markdown
-## User Story
-Closes #123 (link to user story issue)
+## Business behavior
+Describe the business concept or rule affected and the expected behavior.
 
 ## Changes
 - Added BuildingController
@@ -519,33 +461,19 @@ Closes #123 (link to user story issue)
  * @return the created building entity
  * @throws ValidationException if dto validation fails
  */
-public Building create(BuildingDTO dto) {
+public BuildingDTOs.BuildingResponse create(
+        BuildingDTOs.CreateBuildingRequest request) {
     // Implementation
 }
 ```
 
 ### API Documentation
 
-Use Swagger/OpenAPI annotations:
-
-```java
-@Operation(summary = "Create a new building")
-@ApiResponses(value = {
-    @ApiResponse(responseCode = "201", description = "Building created"),
-    @ApiResponse(responseCode = "400", description = "Invalid input")
-})
-@PostMapping("/buildings")
-public ResponseEntity<BuildingDTO> create(@RequestBody BuildingDTO dto) {
-    // Implementation
-}
-```
+The project does not currently configure OpenAPI generation or an API documentation library. Keep API contracts synchronized in backend DTOs/routes, frontend models/services, and relevant tests. Do not add Swagger/OpenAPI annotations as a presumed existing convention; introduce the dependency and workflow deliberately if API generation is adopted.
 
 ### Update Analysis Docs
 
-When implementing features, update:
-- Mark user story as "Completed"
-- Add technical notes if needed
-- Update README if architecture changes
+When business behavior or domain meaning changes, update the relevant business concept/rule documentation. Update technical documentation when API contracts, data structures, or architecture change.
 
 ---
 

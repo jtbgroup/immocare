@@ -15,7 +15,6 @@ import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.immocare.exception.AssetLinkValidationException;
 import com.immocare.exception.EstateAccessDeniedException;
 import com.immocare.exception.EstateNotFoundException;
 import com.immocare.exception.SubcategoryDirectionMismatchException;
@@ -37,13 +36,11 @@ import com.immocare.model.dto.TransactionFilter;
 import com.immocare.model.dto.TransactionStatisticsDTO;
 import com.immocare.model.dto.UpdateTransactionRequest;
 import com.immocare.model.entity.AppUser;
-import com.immocare.model.entity.Boiler;
 import com.immocare.model.entity.Building;
 import com.immocare.model.entity.Estate;
 import com.immocare.model.entity.FinancialTransaction;
 import com.immocare.model.entity.FireExtinguisher;
 import com.immocare.model.entity.HousingUnit;
-import com.immocare.model.entity.PropertyEquipment;
 import com.immocare.model.entity.TagSubcategory;
 import com.immocare.model.entity.TransactionAssetLink;
 import com.immocare.model.enums.AssetType;
@@ -80,6 +77,7 @@ public class FinancialTransactionService {
     private final TagSubcategoryRepository tagSubcategoryRepository;
     private final BankAccountRepository bankAccountRepository;
     private final TransactionAssetLinkRepository assetLinkRepository;
+    private final TransactionAssetLinkService transactionAssetLinkService;
     private final LearningService learningService;
     private final BoilerRepository boilerRepository;
     private final FireExtinguisherRepository fireExtinguisherRepository;
@@ -93,6 +91,7 @@ public class FinancialTransactionService {
             TagSubcategoryRepository tagSubcategoryRepository,
             BankAccountRepository bankAccountRepository,
             TransactionAssetLinkRepository assetLinkRepository,
+            TransactionAssetLinkService transactionAssetLinkService,
             LearningService learningService,
             BoilerRepository boilerRepository,
             FireExtinguisherRepository fireExtinguisherRepository,
@@ -105,6 +104,7 @@ public class FinancialTransactionService {
         this.tagSubcategoryRepository = tagSubcategoryRepository;
         this.bankAccountRepository = bankAccountRepository;
         this.assetLinkRepository = assetLinkRepository;
+        this.transactionAssetLinkService = transactionAssetLinkService;
         this.learningService = learningService;
         this.boilerRepository = boilerRepository;
         this.fireExtinguisherRepository = fireExtinguisherRepository;
@@ -153,6 +153,7 @@ public class FinancialTransactionService {
         tx.setAccountingMonth(req.accountingMonth().withDayOfMonth(1));
         tx.setAmount(req.amount());
         tx.setDescription(req.description());
+        tx.setExternalReference(req.externalReference());
         tx.setCounterpartyAccount(req.counterpartyAccount());
         tx.setStatus(TransactionStatus.CONFIRMED);
         tx.setSource(TransactionSource.MANUAL);
@@ -171,7 +172,7 @@ public class FinancialTransactionService {
         tx.setReference(reference);
 
         if (req.assetLinks() != null && !req.assetLinks().isEmpty()) {
-            applyAssetLinks(tx, req.assetLinks(), req.amount());
+            transactionAssetLinkService.attachAssetLinks(estateId, tx, req.assetLinks());
         }
 
         FinancialTransaction saved = transactionRepository.save(tx);
@@ -196,6 +197,7 @@ public class FinancialTransactionService {
         tx.setAccountingMonth(req.accountingMonth().withDayOfMonth(1));
         tx.setAmount(req.amount());
         tx.setDescription(req.description());
+        tx.setExternalReference(req.externalReference());
         tx.setCounterpartyAccount(req.counterpartyAccount());
 
         applyRelations(tx, req.bankAccountId(), req.subcategoryId(),
@@ -206,7 +208,7 @@ public class FinancialTransactionService {
 
         tx.getAssetLinks().clear();
         if (req.assetLinks() != null && !req.assetLinks().isEmpty()) {
-            applyAssetLinks(tx, req.assetLinks(), req.amount());
+            transactionAssetLinkService.attachAssetLinks(estateId, tx, req.assetLinks());
         }
 
         FinancialTransaction saved = transactionRepository.save(tx);
@@ -582,72 +584,6 @@ public class FinancialTransactionService {
         tx.setLease(leaseId != null ? leaseRepository.getReferenceById(leaseId) : null);
         tx.setHousingUnit(housingUnitId != null ? housingUnitRepository.getReferenceById(housingUnitId) : null);
         tx.setBuilding(buildingId != null ? buildingRepository.getReferenceById(buildingId) : null);
-    }
-
-    private void applyAssetLinks(FinancialTransaction tx, List<SaveAssetLinkRequest> linkRequests,
-            BigDecimal txAmount) {
-        BigDecimal partialSum = linkRequests.stream()
-                .map(SaveAssetLinkRequest::amount)
-                .filter(a -> a != null)
-                .reduce(BigDecimal.ZERO, BigDecimal::add);
-        if (partialSum.compareTo(txAmount) > 0) {
-            throw new AssetLinkValidationException(
-                    "Sum of asset link amounts (" + partialSum + ") exceeds transaction total (" + txAmount + ")");
-        }
-
-        for (SaveAssetLinkRequest linkReq : linkRequests) {
-            if (linkReq.assetType() == AssetType.BOILER && tx.getBuilding() != null) {
-                boilerRepository.findById(linkReq.assetId()).ifPresent(boiler -> {
-                    Long boilerBuildingId = resolveBuildingIdFromBoiler(boiler);
-                    if (boilerBuildingId != null && !boilerBuildingId.equals(tx.getBuilding().getId())) {
-                        throw new AssetLinkValidationException(
-                                "Boiler " + linkReq.assetId() + " does not belong to building "
-                                        + tx.getBuilding().getId());
-                    }
-                });
-            }
-
-            TransactionAssetLink link = new TransactionAssetLink();
-            link.setTransaction(tx);
-            link.setAssetType(linkReq.assetType());
-            link.setAssetId(linkReq.assetId());
-            link.setAmount(linkReq.amount());
-            link.setNotes(linkReq.notes());
-            resolveAssetLinkContext(link);
-            tx.getAssetLinks().add(link);
-        }
-    }
-
-    private void resolveAssetLinkContext(TransactionAssetLink link) {
-        PropertyEquipment equipment = switch (link.getAssetType()) {
-            case BOILER -> boilerRepository.findById(link.getAssetId()).orElse(null);
-            case FIRE_EXTINGUISHER -> fireExtinguisherRepository.findById(link.getAssetId()).orElse(null);
-            case METER -> meterRepository.findById(link.getAssetId()).orElse(null);
-        };
-        if (equipment == null) {
-            return;
-        }
-
-        if ("HOUSING_UNIT".equals(equipment.getOwnerType())) {
-            housingUnitRepository.findById(equipment.getOwnerId()).ifPresent(unit -> {
-                link.setHousingUnit(unit);
-                link.setBuilding(unit.getBuilding());
-            });
-        } else if ("BUILDING".equals(equipment.getOwnerType())) {
-            buildingRepository.findById(equipment.getOwnerId()).ifPresent(link::setBuilding);
-        }
-    }
-
-    private Long resolveBuildingIdFromBoiler(Boiler boiler) {
-        if ("BUILDING".equals(boiler.getOwnerType())) {
-            return boiler.getOwnerId();
-        }
-        if ("HOUSING_UNIT".equals(boiler.getOwnerType())) {
-            return housingUnitRepository.findById(boiler.getOwnerId())
-                    .map(unit -> unit.getBuilding().getId())
-                    .orElse(null);
-        }
-        return null;
     }
 
     private void validateTransactionRequest(UUID estateId, TransactionDirection direction, Long leaseId,

@@ -115,7 +115,9 @@ export class AssetLinkEditorComponent implements OnChanges, OnDestroy {
   // ── Lifecycle ────────────────────────────────────────────────────────────────
 
   ngOnChanges(changes: SimpleChanges): void {
-    if (changes["links"] && this.links?.length) {
+    if (changes["links"]) {
+      this.searchSubjects.forEach((subject) => subject.complete());
+      this.searchSubjects.clear();
       this.rows = this.links.map((link) => this.linkToRow(link));
       this.rows.forEach((_, idx) => this.ensureSearchSubject(idx));
     }

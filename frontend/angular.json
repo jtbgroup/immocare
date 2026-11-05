@@ -97,6 +97,10 @@
     }
   },
   "cli": {
-    "analytics": false
+    "analytics": false,
+    "cache": {
+      "enabled": true,
+      "path": "/tmp/immocare-angular-cache-20261020"
+    }
   }
 }
