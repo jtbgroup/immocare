@@ -8,11 +8,11 @@ verified_against: f295fb241898d79e75455198680219471509fcde
 
 # Concepts — Estate and Rental
 
-This page describes the property-management objects represented in the current model. It does not define the estate's legal or organizational structure, which still needs business validation.
+This page describes the property-management objects represented in the current model. The meaning of an estate as a property-management entity is defined in [Estate and Access](./estate-and-access.md).
 
 ## Estate scope
 
-Buildings, people, leases, transactions, and other estate-specific management data are assigned to an [estate](./estate-and-access.md). Its legal or organizational meaning is not established by the code.
+Buildings, people, leases, transactions, and other estate-specific management data are assigned to an [estate](./estate-and-access.md).
 
 ## Building, housing unit, and room
 
@@ -30,7 +30,7 @@ A **person** (`Person`) is recorded within an estate and may be referenced as th
 
 The model stores identifying and contact information; this page does not detail those attributes. A person may appear in multiple estates, but is then considered as a 2 distinct persons as the management around the person is estate-based.
 
-A person record is separate from a user account: the current model has no dedicated identity link identifying them as the same human, though domain records may separately retain user audit references. User accounts and their access scopes are described in [User Account](./user-account.md); whether a person record should be linked to an account remains an open question.
+A person record is separate from a user account: the current model has no dedicated identity link identifying them as the same human, though domain records may separately retain user audit references. User accounts and their access scopes are described in [User Account](./user-account.md); assessing a possible identity link is tracked in the [backlog](../../../backlog/backlog.md).
 
 ## Lease and associated people
 

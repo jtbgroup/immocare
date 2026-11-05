@@ -2,7 +2,7 @@
 title: User Account
 type: business concepts
 status: draft
-last_verified: 2026-11-04
+last_verified: 2026-11-05
 verified_against: f295fb241898d79e75455198680219471509fcde
 ---
 
@@ -10,7 +10,7 @@ verified_against: f295fb241898d79e75455198680219471509fcde
 
 A **user account** is an application identity used to sign in and access ImmoCare. It is not the same concept as a [person](./estate-and-rental.md): person records describe people in the property-management domain, while a user account represents access to the application.
 
-The current model has no dedicated identity link between a user account and a person record, though domain records may separately retain user audit references. Whether an explicit account-to-person link is needed remains an [open question](../../../backlog/open_questions.md#user-accounts).
+The current model has no dedicated identity link between a user account and a person record, though domain records may separately retain user audit references. The concepts remain separate for now; assessing whether an explicit identity link would be useful is a [backlog opportunity](../../../backlog/backlog.md).
 
 ## Access scope
 
@@ -19,7 +19,7 @@ The application distinguishes platform-wide administration from estate-specific 
 - A **platform administrator** has global administrative access to user accounts and platform-level operations.
 - **Manager** and **viewer** are access roles assigned to a user account for an estate; they do not describe the user's business identity or relationship to a property.
 
-The application currently stores platform-administrator status on the user account. Estate-specific membership is separate. These observed access rules are not yet confirmed business policy; see the [user account rules](../rules/users.md).
+The application currently stores platform-administrator status on the user account. Estate-specific memberships are separate, and a platform administrator may also hold a role in an estate. The current estate-list API returns `myRole = null` to platform administrators even when they have an explicit membership; this behavior and the unresolved display choice are documented in [Estate Management](../../technical/estate-management.md).
 
 ## Current account information
 

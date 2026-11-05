@@ -2,7 +2,7 @@
 title: Authentication
 type: technical reference
 status: current
-last_verified: 2026-11-04
+last_verified: 2026-11-05
 verified_against: f295fb241898d79e75455198680219471509fcde
 ---
 
@@ -19,6 +19,7 @@ Authentication establishes the identity of the signed-in [user account](../busin
 ### Sign in
 
 - The client sends a username and password to `POST /api/v1/auth/login`.
+- The current backend looks up the username using the exact entered case. Account creation and updates prevent usernames that differ only by case, but sign-in is currently case-sensitive; the confirmed case-insensitive sign-in rule is BR-USER-010 and the implementation alignment is tracked in the [backlog](../../backlog/backlog.md).
 - On successful authentication, the server invalidates any existing session for the request, creates a new session, stores the security context, and responds with HTTP 200 and an empty body.
 - Invalid credentials produce HTTP 401.
 - The client then retrieves the current user and the estates available to that user to determine the appropriate destination:

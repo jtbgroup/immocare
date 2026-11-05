@@ -32,6 +32,7 @@ User account
 
 Platform administrator
 └── Transversal access to estates (membership not required)
+    └── May also have an estate membership and role
 ```
 
 ## How to read this map and its limitations
@@ -41,7 +42,7 @@ Platform administrator
 - A lease is associated with a housing unit and people.
 - Any tracked equipment type can be associated with either a building or a housing unit. Equipment-specific maintenance, revision, usage, and alert histories remain distinct.
 - A transaction may be contextualized by a building, housing unit, or lease, and may separately be linked to equipment.
-- A user account is an application identity; estate memberships are separate from person records managed in an estate. A platform administrator can access an estate without being a member.
+- A user account is an application identity; estate memberships are separate from person records managed in an estate. A platform administrator can access an estate without being a member and may also hold an estate membership.
 - The links above reflect relationships represented in the model. They do not, by themselves, define legal ownership, management responsibility, or all business cardinalities.
 
 See the [user account](./concepts/user-account.md), [estate and access](./concepts/estate-and-access.md), [estate and rental](./concepts/estate-and-rental.md), [property equipment and assets](./concepts/property-equipment.md), and [financial transaction](./concepts/financial-transaction.md) pages.

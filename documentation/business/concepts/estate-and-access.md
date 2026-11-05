@@ -10,7 +10,7 @@ verified_against: f295fb241898d79e75455198680219471509fcde
 
 ## Estate
 
-An **estate** is the application scope to which property and related management data are assigned. Buildings, people, leases, transactions, and estate-specific configuration are associated with an estate. The code does not establish whether an estate corresponds to a company, a property portfolio, a management mandate, or another legal or organizational unit; this remains an [open question](../../../backlog/open_questions.md#scope-and-roles).
+An **estate** is a property-management entity to which properties and their related management data are assigned. It may represent a real-estate agency or an individual who owns several properties.
 
 ## Estate membership
 
@@ -21,11 +21,11 @@ The application currently defines two estate roles:
 - **Manager** — estate-scoped access that permits management operations.
 - **Viewer** — estate-scoped read access.
 
-These are application access roles, not an approved description of business responsibilities. Their observed access boundaries are summarized in [Roles and Responsibilities](../roles.md); implementation behavior is documented in [Estate Management](../../technical/estate-management.md).
+These are application access roles only; they do not define separate business responsibilities. Their observed access boundaries are summarized in [Roles and Responsibilities](../roles.md); implementation behavior is documented in [Estate Management](../../technical/estate-management.md).
 
 ## Platform administrator
 
-A **platform administrator** has global account-level access. The application allows platform administrators to access estates without an estate membership; the estate list represents this transversal access with no estate-specific role. This access model is independent of whether the platform administrator also has an estate membership.
+A **platform administrator** has global account-level access. A platform administrator may also have an estate membership with an estate-specific role. The application allows platform administrators to access estates without membership; currently, the estate-list response represents their global access with no estate-specific role (`myRole = null`), even if an explicit membership exists. Whether to expose that explicit role in the response remains an [open question](../../../backlog/open_questions.md#scope-and-roles).
 
 The distinction between user accounts and people recorded in property management is described in the [user account concept](./user-account.md).
 

@@ -4,25 +4,15 @@ This file contains concrete business or product decisions that still need to be 
 
 ## User accounts
 
-- Does the global `PLATFORM_ADMIN` account flag intentionally replace the legacy per-account `ADMIN` role described in UC-002 and its user stories?
-- Should sign-in usernames be case-sensitive? Account creation and update check username uniqueness without regard to case, while the login lookup uses the entered username as-is.
-- Should changing `isPlatformAdmin` be prevented when it would leave no platform administrator, as account deletion is currently prevented for the last platform administrator?
-- Should a user account be linked to a `Person` record, or should the two remain separate?
+- When a platform administrator also has an explicit estate membership, should the estate-list response expose that membership's role instead of returning `myRole = null`?
 
 ## Scope and roles
 
-- What does an "estate" represent in the organization: a company, estate, management mandate, client, or another scope?
-- What specific responsibilities distinguish a manager from a viewer? Are there other business roles?
-- Must every estate always have a manager, including on creation without members and after the last manager's user account is deleted? If so, what should happen when deleting that account? (see BR-ESTATE-002 and BR-ESTATE-003)
-- When an estate has no buildings but still has people, configuration, or other linked records, should deletion be blocked, cascade those records, or require another process? (see BR-ESTATE-004)
-- When a user has several estates and selects one, should the application restore that selection after a page reload, or return to the estate selector?
-- The parser registry is global and currently has an authenticated read-only endpoint. Which parser registry operations, if any, should be restricted to platform administrators?
+- What data should move with a building when it is transferred to another estate? Decide this using a concrete transfer scenario.
 - Should counterparties be modeled as a managed business concept, and which counterparty categories are relevant?
 - Is an owner always an individual in the documented scope? Could the owner be a company or a condominium association?
 - What is a guarantor's business status in a lease, distinct from a tenant or co-tenant?
-- Beyond the existing building check and linked-data constraints, should any other business conditions apply when deleting an estate?
 - Should one person be allowed to have multiple roles or belong to multiple portfolios?
-- Should duplicate member entries in an initial estate-creation request be rejected or ignored? The create form blocks them and the service silently skips duplicate IDs.
 
 ## Property and rental
 

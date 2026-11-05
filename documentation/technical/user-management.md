@@ -14,13 +14,13 @@ This document describes the user-account administration behavior currently imple
 
 All `/api/v1/users` operations require an authenticated `PLATFORM_ADMIN`, enforced by the backend controller. The frontend `/users` routes currently use only the authentication guard, not the platform-admin guard, so a non-admin can open the screens but cannot retrieve or change account data through the API. Other authenticated users cannot administer accounts.
 
-Platform administration is represented by the global `isPlatformAdmin` flag. `MANAGER` and `VIEWER` are separate estate-membership roles; they are not account roles. See [Roles and Responsibilities](../business/roles.md) and [Authentication](./authentication.md).
+Platform administration is represented by the global `isPlatformAdmin` flag. `MANAGER` and `VIEWER` are separate estate-membership roles; a platform administrator can also have an explicit estate membership. See [Roles and Responsibilities](../business/roles.md) and [Authentication](./authentication.md).
 
 ## Account information
 
 A user account contains an identifier, username, email address, password hash, platform-administrator flag, creation time, and update time. Passwords are encoded with BCrypt strength 12. User API responses return the identifier, username, email, `isPlatformAdmin`, `createdAt`, and `updatedAt`; they do not expose the password or its hash. Account validation policies are defined in the [user account rules](../business/rules/users.md), not repeated here.
 
-The current model is not the legacy single-`ADMIN` role model. A platform administrator can access platform-wide administration; estate-specific roles are assigned separately. There is no dedicated identity link between an account and a `Person` record, although domain records may store user audit references.
+The current model is not the legacy single-`ADMIN` role model. A platform administrator can access platform-wide administration; estate-specific roles are assigned separately. User accounts and `Person` records remain separate, with no dedicated identity link; assessing a possible link is tracked in the [backlog](../../backlog/backlog.md).
 
 ## Available operations
 
@@ -41,6 +41,7 @@ The frontend displays username, email, platform-admin status, and creation time 
 
 - Account input and password policies are enforced by the backend according to BR-USER-001 and BR-USER-003–BR-USER-008; see the [canonical rule definitions](../business/rules/users.md).
 - The create and update requests carry `isPlatformAdmin`. Updating account details does not change the password.
+- Updating `isPlatformAdmin` currently has no guard against demoting the last platform administrator. The confirmed policy is in BR-USER-009; implementation alignment is tracked in the [backlog](../../backlog/backlog.md).
 - Creation and update timestamps are assigned and maintained by the persistence entity lifecycle.
 
 ### Change password
@@ -54,6 +55,7 @@ The frontend displays username, email, platform-admin status, and creation time 
 
 - Deleting the currently authenticated account is prohibited.
 - Deleting the last platform administrator is prohibited.
+- Deleting a user account removes its estate memberships through the database foreign-key cascade. This can leave an estate without a manager, contrary to BR-ESTATE-008; the invariant is tracked for enforcement in the [backlog](../../backlog/backlog.md).
 - The backend enforces both restrictions; the last-platform-administrator restriction is returned as a conflict.
 - The application code does not explicitly invalidate the deleted user's active session. The details page also does not currently enforce both deletion guards in its controls: its current-user name is not populated, and its last-administrator check is passed as `false`; the backend still enforces the self-delete and last-administrator restrictions. These gaps differ from UC002.005 AC4, AC5, and AC7 and are listed in the [backlog](../../backlog/backlog.md).
 
@@ -73,7 +75,7 @@ Two password-validation paths do not currently return the expected client-error 
 
 ## Differences from the legacy specification
 
-The historical UC-002 use case and UC002.001–UC002.005 user stories describe a single `ADMIN` role and role selection on accounts. The implementation now uses a global platform-admin flag and separate estate roles. Its endpoint and backend validation behavior are described above; unimplemented presentation details or requirements from the legacy specification are not assumed to be current behavior. Decisions about the role-model change and username case sensitivity are recorded in [open questions](../../backlog/open_questions.md#user-accounts).
+The historical UC-002 use case and UC002.001–UC002.005 user stories describe a single `ADMIN` role and role selection on accounts. The implementation now uses a global platform-admin flag and separate estate roles. Its endpoint and backend validation behavior are described above; unimplemented presentation details or requirements from the legacy specification are not assumed to be current behavior. The confirmed sign-in case policy and last-platform-admin invariant are defined in the [user account rules](../business/rules/users.md); the gaps between those rules and the current implementation are tracked in the [backlog](../../backlog/backlog.md).
 
 ## Implementation references
 

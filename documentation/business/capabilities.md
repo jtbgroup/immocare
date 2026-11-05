@@ -24,8 +24,8 @@ backlog).
 | Capability                                                    | Status      | Details                                                                   | Rules             | Main sources                                  |
 | ------------------------------------------------------------- | ----------- | ------------------------------------------------------------------------- | ----------------- | --------------------------------------------- |
 | Sign in, sign out, restore the current session                | Implemented | [Authentication](../technical/authentication.md)                          | —                 | `AuthController`, `SecurityConfig`            |
-| Manage user accounts and platform-administrator access         | Partial     | [User account](./concepts/user-account.md), [account management](../technical/user-management.md) | BR-USER-001 to 005 | `UserController`, `UserService`, user frontend |
-| Create estates and manage their memberships (`MANAGER`, `VIEWER`) | Partial | [Estate and access](./concepts/estate-and-access.md), [Estate management](../technical/estate-management.md) | BR-ESTATE-001 to 007 | `EstateService`, `EstateMember`, estate frontend |
+| Manage user accounts and platform-administrator access         | Partial     | [User account](./concepts/user-account.md), [account management](../technical/user-management.md) | BR-USER-001 to 010 | `UserController`, `UserService`, user frontend |
+| Create estates and manage their memberships (`MANAGER`, `VIEWER`) | Partial | [Estate and access](./concepts/estate-and-access.md), [Estate management](../technical/estate-management.md) | BR-ESTATE-001 to 010 | `EstateService`, `EstateMember`, estate frontend |
 | Select and switch between estates after sign-in                | Implemented | [Estate management](../technical/estate-management.md)                    | —                 | frontend `AuthService`, `ActiveEstateService`  |
 | Platform-wide administration of estates                       | Implemented | [Roles](./roles.md)                                                       | —                 | `EstateSecurityService`                       |
 
