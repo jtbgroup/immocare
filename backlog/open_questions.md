@@ -13,13 +13,16 @@ This file contains concrete business or product decisions that still need to be 
 
 - What does an "estate" represent in the organization: a company, estate, management mandate, client, or another scope?
 - What specific responsibilities distinguish a manager from a viewer? Are there other business roles?
+- Must every estate always have a manager, including on creation without members and after the last manager's user account is deleted? If so, what should happen when deleting that account? (see BR-ESTATE-002 and BR-ESTATE-003)
+- When an estate has no buildings but still has people, configuration, or other linked records, should deletion be blocked, cascade those records, or require another process? (see BR-ESTATE-004)
+- When a user has several estates and selects one, should the application restore that selection after a page reload, or return to the estate selector?
+- The parser registry is global and currently has an authenticated read-only endpoint. Which parser registry operations, if any, should be restricted to platform administrators?
 - Should counterparties be modeled as a managed business concept, and which counterparty categories are relevant?
 - Is an owner always an individual in the documented scope? Could the owner be a company or a condominium association?
 - What is a guarantor's business status in a lease, distinct from a tenant or co-tenant?
-- Must a estate always have at least one manager, including when it contains no members or properties?
-- What business conditions and consequences should apply when deleting a estate?
+- Beyond the existing building check and linked-data constraints, should any other business conditions apply when deleting an estate?
 - Should one person be allowed to have multiple roles or belong to multiple portfolios?
-- Should duplicate member entries in an initial estate-creation request be rejected or ignored?
+- Should duplicate member entries in an initial estate-creation request be rejected or ignored? The create form blocks them and the service silently skips duplicate IDs.
 
 ## Property and rental
 

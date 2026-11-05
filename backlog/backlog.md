@@ -17,6 +17,11 @@
 - [ ] Add document attachments, such as energy performance certificates and boiler-maintenance records.
 - [x] Make alerts cross-cutting.
 - [ ] Review roles and security.
+- [ ] Fix estate creation navigation: use the created estate returned by the API instead of the unset edit-mode estate ID.
+- [ ] Provide a manager-authorized user search for estate membership screens without granting managers access to platform-wide user administration; current searches call the platform-admin-only user-list API and turn failures into empty results.
+- [ ] Populate the current user in the estate edit form so its inline membership controls can disable self-role changes and self-removal.
+- [ ] Enforce manager access in the estate membership and edit-page frontend routes, rather than relying only on backend rejection after the page opens.
+- [ ] Make estate deletion handle all linked data consistently with the chosen retention policy; the current service checks buildings but other foreign keys can prevent deletion.
 - [ ] Invalidate a user's active sessions when their password changes or their account is deleted (UC002.004 AC3 and UC002.005 AC7).
 - [ ] Align user-account deletion controls with backend restrictions: populate the current-user identity for self-delete prevention and disable deletion of the last platform administrator (UC002.005 AC4–AC5).
 - [ ] Restrict the user-management frontend routes to platform administrators; they currently check authentication only.
@@ -45,4 +50,5 @@
 - [ ] Review how the application version is displayed.
 - [ ] Generalize boilers, fire extinguishers, and meters as devices, including support for generic device types.
 - [ ] An asset can be associated to a building or a unit whatever the tye of asset. This is a business requirement, even though the current application does not yet support it consistently. >> Verify this is implemented everywhere.
-- [ ] Review code linked to BR-PORT-002
+- [ ] Review code linked to BR-ESTATE-002
+- [ ] Have a technical documentation file summarizing the API endpoints

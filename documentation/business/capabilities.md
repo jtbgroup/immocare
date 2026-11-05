@@ -2,7 +2,7 @@
 title: Capabilities
 type: capability-catalog
 status: draft
-last_verified: 2026-11-04
+last_verified: 2026-11-05
 verified_against: "f295fb241898d79e75455198680219471509fcde"
 sources: "Derived from existing documentation and backlog; to be checked against the code"
 ---
@@ -25,9 +25,11 @@ backlog).
 | ------------------------------------------------------------- | ----------- | ------------------------------------------------------------------------- | ----------------- | --------------------------------------------- |
 | Sign in, sign out, restore the current session                | Implemented | [Authentication](../technical/authentication.md)                          | —                 | `AuthController`, `SecurityConfig`            |
 | Manage user accounts and platform-administrator access         | Partial     | [User account](./concepts/user-account.md), [account management](../technical/user-management.md) | BR-USER-001 to 005 | `UserController`, `UserService`, user frontend |
-| Create an estate and manage its members (`MANAGER`, `VIEWER`) | Implemented | [Estate and rental](./concepts/estate-and-rental.md), [Roles](./roles.md) | BR-EST-001 to 005 | `EstateService`, `EstateMember`, `EstateRole` |
-| Switch between estates after sign-in                          | Implemented | [Authentication](../technical/authentication.md)                          | —                 | frontend `AuthService`                        |
+| Create estates and manage their memberships (`MANAGER`, `VIEWER`) | Partial | [Estate and access](./concepts/estate-and-access.md), [Estate management](../technical/estate-management.md) | BR-ESTATE-001 to 007 | `EstateService`, `EstateMember`, estate frontend |
+| Select and switch between estates after sign-in                | Implemented | [Estate management](../technical/estate-management.md)                    | —                 | frontend `AuthService`, `ActiveEstateService`  |
 | Platform-wide administration of estates                       | Implemented | [Roles](./roles.md)                                                       | —                 | `EstateSecurityService`                       |
+
+Known gaps in estate creation, member search, estate deletion, and manager-facing controls are listed in the [backlog](../../backlog/backlog.md); unsettled policy decisions are in [open questions](../../backlog/open_questions.md).
 
 ## Properties
 

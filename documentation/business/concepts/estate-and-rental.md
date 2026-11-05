@@ -2,7 +2,7 @@
 title: Estate and Rental
 type: business concepts
 status: draft
-last_verified: 2026-11-04
+last_verified: 2026-11-05
 verified_against: f295fb241898d79e75455198680219471509fcde
 ---
 
@@ -10,11 +10,9 @@ verified_against: f295fb241898d79e75455198680219471509fcde
 
 This page describes the property-management objects represented in the current model. It does not define the estate's legal or organizational structure, which still needs business validation.
 
-## Estate
+## Estate scope
 
-The **estate** (`Estate`) is the scope to which buildings, people, leases, and transactions are assigned. Bank accounts and classification reference data are also associated with this scope.
-
-In the application, membership and roles are specific to each estate. The corresponding business concept—company, owner, client, estate, or something else—cannot be determined from the code.
+Buildings, people, leases, transactions, and other estate-specific management data are assigned to an [estate](./estate-and-access.md). Its legal or organizational meaning is not established by the code.
 
 ## Building, housing unit, and room
 
@@ -50,4 +48,4 @@ Estate → Building → Housing unit → Room
 Person → may own a building or housing unit
 ```
 
-Estate assignment constraints visible in the implementation are documented in the [estate rules](../rules/estate.md).
+Estate membership and access concepts are documented in [Estate and Access](./estate-and-access.md). Estate assignment constraints visible in the implementation are documented in the [estate rules](../rules/estate.md).

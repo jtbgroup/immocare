@@ -1,5 +1,7 @@
 # UC003 — Manage Estates
 
+> **Historical analysis source — superseded for current behavior.** Use the canonical [Estate and Access concept](../../../documentation/business/concepts/estate-and-access.md), [Estate Rules](../../../documentation/business/rules/estate.md), [Roles and Responsibilities](../../../documentation/business/roles.md), and [Estate Management technical reference](../../../documentation/technical/estate-management.md). The linked pages were checked against current backend and frontend code. This use case and its `UC003.*` stories are retained as historical requirements, not as the source of truth for implemented behavior.
+
 ## Overview
 
 | Attribute | Value |
@@ -32,19 +34,20 @@ A user can cumulate roles freely: `PLATFORM_ADMIN` globally, `MANAGER` in estate
 
 | Story | Title |
 |---|---|
-| [UC003.001](user-stories/UC003.001-create-estate.md) | Create Estate |
-| [UC003.002](user-stories/UC003.002-edit-estate.md) | Edit Estate |
-| [UC003.003](user-stories/UC003.003-delete-estate.md) | Delete Estate |
-| [UC003.004](user-stories/UC003.004-list-all-estates.md) | List All Estates |
-| [UC003.005](user-stories/UC003.005-assign-members-at-creation.md) | Assign Members at Estate Creation |
-| [UC003.006](user-stories/UC003.006-view-estate-members.md) | View Estate Members |
-| [UC003.007](user-stories/UC003.007-add-member.md) | Add Member to Estate |
-| [UC003.008](user-stories/UC003.008-edit-member-role.md) | Edit Member Role |
-| [UC003.009](user-stories/UC003.009-remove-member.md) | Remove Member from Estate |
-| [UC003.010](user-stories/UC003.010-select-active-estate.md) | Select Active Estate |
-| [UC003.011](user-stories/UC003.011-view-estate-dashboard.md) | View Estate Dashboard |
-| [UC003.012](user-stories/UC003.012-view-my-estates.md) | View My Estates |
-| [UC003.013](user-stories/UC003.013-enforce-estate-scoped-access.md) | Enforce Estate-scoped Data Access |
+| [UC003.001](../user-stories/UC003.001-create-estate.md) | Create Estate |
+| [UC003.002](../user-stories/UC003.002-edit-estate.md) | Edit Estate |
+| [UC003.003](../user-stories/UC003.003-delete-estate.md) | Delete Estate |
+| [UC003.004](../user-stories/UC003.004-list-all-estates.md) | List All Estates |
+| [UC003.005](../user-stories/UC003.005-assign-members-at-creation.md) | Assign Members at Estate Creation |
+| [UC003.005](../user-stories/UC003.005-assign-first-manager.md) | Assign First Manager to Estate — conflicting legacy variant |
+| [UC003.006](../user-stories/UC003.006-view-estate-members.md) | View Estate Members |
+| [UC003.007](../user-stories/UC003.007-add-member-to-estate.md) | Add Member to Estate |
+| [UC003.008](../user-stories/UC003.008-edit-member-role.md) | Edit Member Role |
+| [UC003.009](../user-stories/UC003.009-remove-member.md) | Remove Member from Estate |
+| [UC003.010](../user-stories/UC003.010-select-active-estate.md) | Select Active Estate |
+| [UC003.011](../user-stories/UC003.011-view-estate-dashboard.md) | View Estate Dashboard |
+| [UC003.012](../user-stories/UC003.012-view-my-estates.md) | View My Estates |
+| [UC003.013](../user-stories/UC003.013-enforce-estate-scoped-access.md) | Enforce Estate-scoped Data Access |
 
 ---
 
