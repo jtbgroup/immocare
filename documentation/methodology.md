@@ -2,7 +2,7 @@
 title: Documentation Methodology
 type: project methodology
 status: current
-last_verified: 2026-11-05
+last_verified: 2026-11-07
 ---
 
 # Documentation Methodology
@@ -62,12 +62,23 @@ Each document must have a clear, single purpose. Keep domain definitions, implem
 
 Every canonical documentation file must begin with a metadata header in YAML front matter, followed by a descriptive Markdown title (`# ...`). The header must include at least `title` and `type`; include `status`, `last_verified`, and `verified_against` when applicable to the document.
 
+## Domain taxonomy and approval
+
+Domains are the shared organizing structure for business and technical documentation. The same approved domain names and boundaries must be used under both `business/` and `technical/`, and as the high-level groupings in `business/capabilities.md`. Cross-domain references, such as the glossary, capability catalog, concept map, roles, alerts, overall data model, and technology-stack reference, remain cross-cutting rather than being assigned arbitrarily to one domain.
+
+A domain must not be created, renamed, split, merged, or have its scope changed without the user's explicit approval. Before restructuring documentation around domains, prepare a proposal based primarily on the existing canonical content and request approval for the domain names, boundaries, and placement of cross-cutting material. Do not infer approval from a request to analyze or propose a taxonomy.
+
+After approval, each domain has a dedicated directory under both `business/` and `technical/`, using the same domain name. Place a document in a domain only when its primary subject belongs to that domain; place cross-cutting business and technical references in their respective `cross-cutting/` directories. Keep global navigation documents such as the glossary and capability catalog at the `business/` root. Organize documents within a domain by their purpose, without requiring identical page types or a one-to-one mapping between business and technical files.
+
+Capabilities remain a catalog of implemented application behavior, not a second definition of domains. Their top-level groupings must use the approved domain names. A genuinely cross-domain capability may be placed under a separate `Cross-cutting capabilities` heading and should explicitly reference the affected domains; do not force it under a single domain merely to match the taxonomy.
+
 ## Single source of truth
 
 - The glossary owns concise term definitions; concept pages explain domain concepts and relationships.
-- `business/rules/` owns the canonical wording and status of business constraints. Give each rule a stable ID.
+- The business rule reference within the relevant approved domain owns the canonical wording and status of business constraints. Give each rule a stable ID.
 - Technical pages describe how the application stores or enforces a rule, including implementation-specific behavior and API responses. When describing a business constraint, reference its rule ID instead of restating its complete criteria.
 - Data dictionaries own persisted fields, types, defaults, and database constraints. They do not duplicate application validation policies; link to the relevant business rules.
+- A data dictionary belongs to one approved domain and may cover related persisted entities within that domain. A domain does not require a data dictionary or a matching management page; create either reference only when its content is useful and substantial enough to warrant a separate document. Do not combine unrelated domains in one dictionary.
 - If the same subject needs to appear in more than one document, keep one authoritative definition and make the other appearance a short summary or link that clearly points to it.
 
 ## Separation between backlog and open questions

@@ -16,6 +16,15 @@ This file contains concrete business or product decisions that still need to be 
 
 ## Property and rental
 
+### Buildings
+
+- Should the building API require country on every request, or should an omitted or blank country default to Belgium as the legacy specification and creation form suggest?
+- Which status code should the API return when building deletion is blocked by housing units? The UC says `400`, its delete story says `409`, and current code returns `400`.
+- When city and free-text search are combined, should the search term also match the city, or only the building name and street address? The UC and search story specify different fields.
+- Should an unknown building owner ID return `404` as the current person-not-found handler does, or `409` as the legacy building requirements specify?
+
+### Housing units and leases
+
 - Does a housing unit inherit the building's owner when no unit-specific owner is recorded, or does the missing owner mean ownership is unknown?
 - Can a building or housing unit have multiple owners? If so, should ownership shares and their changes over time be documented?
 - What is the ownership rule when a building and one of its housing units have different owners?
