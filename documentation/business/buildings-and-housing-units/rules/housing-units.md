@@ -3,12 +3,12 @@ title: Housing Unit Rules
 type: business rules
 status: draft
 last_verified: 2026-11-07
-verified_against: "HousingUnit, Room, PebScore, PebScoreHistory, CreateHousingUnitRequest, UpdateHousingUnitRequest, CreateRoomRequest, UpdateRoomRequest, BatchCreateRoomsRequest, CreatePebScoreRequest, HousingUnitService, RoomService, PebScoreService, PebScoreController, AlertService, V006__uc006_manage_housing_units.sql, V007__uc007_manage_rooms.sql, V008__uc008_manage_peb_scores.sql"
+verified_against: "HousingUnit, Room, PebScore, PebScoreHistory, CreateHousingUnitRequest, UpdateHousingUnitRequest, CreateRoomRequest, UpdateRoomRequest, BatchCreateRoomsRequest, CreatePebScoreRequest, HousingUnitService, RoomService, PebScoreService, PebScoreController, EstateSecurityService, AlertService, V006__uc006_manage_housing_units.sql, V007__uc007_manage_rooms.sql, V008__uc008_manage_peb_scores.sql, stakeholder confirmation 2026-11-07"
 ---
 
 # Business Rules — Housing Units
 
-These rules describe constraints enforced by the current implementation. Code-derived rules need business validation; implementation alone does not establish business intent.
+These rules describe constraints enforced by the current implementation or established by confirmed business policy. Code-derived rules need business validation; implementation alone does not establish business intent.
 
 | ID | Rule | Status |
 |---|---|---|
@@ -30,13 +30,14 @@ These rules describe constraints enforced by the current implementation. Code-de
 | BR-HUNIT-016 | A recorded energy performance rating must be one of A++, A+, A, B, C, D, E, F, or G. | Needs business validation |
 | BR-HUNIT-017 | An energy performance rating date cannot be in the future. | Needs business validation |
 | BR-HUNIT-018 | If a certificate validity end date is provided, it must be after the rating date. | Needs business validation |
-| BR-HUNIT-019 | The current energy performance rating is selected from the housing unit's records with the most recent rating date. | Needs business validation |
-| BR-HUNIT-020 | Estate managers can edit or delete recorded energy performance ratings, although product analysis describes the history as append-only. | Needs clarification |
-| BR-HUNIT-021 | Multiple energy performance records can have the same rating date, but the application does not define a unique current record when the latest dates tie. | Needs clarification |
+| BR-HUNIT-019 | The active energy performance rating is the record with the most recent certificate validity end date. | Confirmed |
+| BR-HUNIT-020 | An estate manager may modify only the active energy performance rating. | Confirmed |
+| BR-HUNIT-021 | A PEB record without a validity end date, or a tie for the most recent validity end date, has no defined active-record selection outcome. | Needs clarification |
 | BR-HUNIT-022 | A certificate is marked expired when its validity end date is before the current date; a non-expired certificate receives an expiring-soon detail warning when its end date is before the date three calendar months from today. | Needs business validation |
-| BR-HUNIT-023 | An estate alert is raised for a current certificate whose validity end date is on or before the date obtained by adding that estate's configured warning period to today. | Needs business validation |
+| BR-HUNIT-023 | The application raises an estate alert for a PEB record with the most recent rating date when its validity end date is on or before the date obtained by adding that estate's configured warning period to today. | Needs business validation |
+| BR-HUNIT-024 | A platform administrator may modify any energy performance rating in a housing unit's history. | Confirmed |
 
-Creation does not apply the same required-surface check as updating; housing-unit deletion also has different effects depending on associated data. The intended behavior for mixed-validity room batches is inconsistent between the use-case analysis and a related story. PEB history editability, tied rating dates, and warning-period consistency also remain unresolved; see [Open Questions](../../../../backlog/open_questions.md#housing-units-and-leases) and [PEB scores](../../../../backlog/open_questions.md#peb-scores).
+The PEB active-record and modification policies in BR-HUNIT-019, BR-HUNIT-020, and BR-HUNIT-024 were confirmed by the user on 2026-11-07. The application currently selects records by rating date and does not enforce the confirmed edit permissions. Creation does not apply the same required-surface check as updating; housing-unit deletion also has different effects depending on associated data. The intended behavior for mixed-validity room batches is inconsistent between the use-case analysis and a related story. PEB active-record selection for missing or tied validity dates and deletion permissions remain unresolved; see [Open Questions](../../../../backlog/open_questions.md#housing-units-and-leases) and [PEB scores](../../../../backlog/open_questions.md#peb-scores).
 
 ## Observed sources
 

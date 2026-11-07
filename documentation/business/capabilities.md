@@ -3,7 +3,7 @@ title: Capabilities
 type: capability-catalog
 status: draft
 last_verified: 2026-11-07
-verified_against: "HousingUnitController, HousingUnitService, HousingUnitFormComponent, HousingUnitDetailsComponent, RoomController, RoomService, RoomSectionComponent"
+verified_against: "HousingUnitController, HousingUnitService, HousingUnitFormComponent, HousingUnitDetailsComponent, RoomController, RoomService, RoomSectionComponent, PebScoreController, PebScoreService, PebScoreRepository, PebSectionComponent, PebHistoryComponent, AlertService, stakeholder confirmation 2026-11-07"
 sources: "Aligned to the approved domain taxonomy"
 ---
 
@@ -41,7 +41,7 @@ Known gaps in estate creation, member search, estate deletion, and manager-facin
 | -------------------------------------------------- | ----------- | ---------------------------------------------------- | ----- | --------------------------------- |
 | Manage buildings, housing units and rooms          | Partial | [Buildings and housing units](./buildings-and-housing-units/concepts/buildings-and-housing-units.md), [Building Management](../technical/buildings-and-housing-units/building-management.md), [Housing Unit Management](../technical/buildings-and-housing-units/housing-unit-management.md), [Room Management](../technical/buildings-and-housing-units/room-management.md) | BR-BUILD-001 to 003; BR-HUNIT-001 to 015 | `Building`, `HousingUnit`, `Room` |
 | Record owners on buildings and housing units       | Implemented | [Buildings and housing units](./buildings-and-housing-units/concepts/buildings-and-housing-units.md), [Person](./people/concepts/person.md) | — | `Person`                          |
-| Record and review PEB ratings, certificate validity, and rating improvements for housing units | Partial | [Buildings and housing units](./buildings-and-housing-units/concepts/buildings-and-housing-units.md), [PEB Score Management](../technical/buildings-and-housing-units/peb-score-management.md), [Alerts](./cross-cutting/concepts/alerts.md) | BR-HUNIT-016 to 023 | `PebScoreHistory`, `PebScoreService`, `AlertService` |
+| Record and review PEB ratings, certificate validity, and rating improvements for housing units | Partial | [Buildings and housing units](./buildings-and-housing-units/concepts/buildings-and-housing-units.md), [PEB Score Management](../technical/buildings-and-housing-units/peb-score-management.md), [Alerts](./cross-cutting/concepts/alerts.md) | BR-HUNIT-016 to 024 | `PebScoreHistory`, `PebScoreService`, `AlertService` |
 
 ## People
 
@@ -93,10 +93,11 @@ Known people-management gaps include owner references that are not validated aga
 The current alert list includes boiler service, lease, and PEB certificate expiry alerts. The estate dashboard separately reports pending boiler, fire-extinguisher, lease-end, and indexation alert counts.
 
 Known gaps for the `Partial` rows: see the matching items in the backlog (room
-and PEB estate scoping, room not-found handling, PEB rating palette and
-load-error presentation, import review action and duplicate decisions,
-financial dashboard, generalized devices, and user-account session
-invalidation and deletion controls).
+and PEB estate scoping, room not-found handling, PEB active-record selection,
+record-specific permissions, deletion policy, rating palette and load-error
+presentation, import review action and duplicate decisions, financial
+dashboard, generalized devices, and user-account session invalidation and
+deletion controls).
 
 ## Planned but not implemented
 

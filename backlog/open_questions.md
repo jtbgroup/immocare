@@ -43,8 +43,8 @@ This file contains concrete business or product decisions that still need to be 
 
 ### PEB scores
 
-- Should PEB history be append-only, or may estate managers edit and delete recorded scores? The product analysis describes append-only history, but the current API and interface support both operations (BR-HUNIT-020).
-- Should multiple PEB records be allowed to have the same rating date, and, if so, how should the current rating be selected when the latest dates tie? The current query has no tie-breaker (BR-HUNIT-021).
+- How should the active PEB record be selected when a record has no validity end date or multiple records share the most recent validity end date? The confirmed active-record definition uses the most recent validity end date (BR-HUNIT-019), but the request permits a missing date and no tie-breaker is defined (BR-HUNIT-021).
+- Does the rule that only platform administrators may modify PEB history also apply to deleting records, or may estate managers delete the active record? The current API lets estate managers delete any record (BR-HUNIT-020, BR-HUNIT-024).
 - Should the housing-unit detail warning use the estate-configured PEB alert threshold, or remain fixed at three months? The detail response uses three months while estate alerts use the configurable setting (BR-HUNIT-022, BR-HUNIT-023).
 
 ## People and bank accounts

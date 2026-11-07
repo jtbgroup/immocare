@@ -46,6 +46,9 @@
 - [ ] Enforce estate ownership checks for room operations: the room controller checks membership of the route estate, but the service does not verify that the housing unit belongs to that estate.
 - [ ] Map missing or mismatched room IDs to the documented not-found response instead of the generic server-error handler.
 - [ ] Enforce estate ownership checks for PEB score operations: the controller checks membership of the route estate, but the service does not verify that the housing unit belongs to that estate.
+- [ ] Align the active PEB selection in housing-unit summaries, current-rating queries, improvement summaries, and certificate alerts with BR-HUNIT-019, using the latest certificate validity end date.
+- [ ] Enforce PEB modification permissions: estate managers may modify only the active record, while platform administrators may modify any record in its history (BR-HUNIT-020, BR-HUNIT-024).
+- [ ] Resolve and enforce who may delete PEB records; the current API permits estate managers to delete any record (BR-HUNIT-020, BR-HUNIT-024).
 - [ ] Change the PEB grade `G` badge color from purple to dark red to match the documented rating palette.
 - [ ] Apply the rating colors to the PEB grade options and surface failures when loading the current rating, history, or improvement summary instead of presenting empty states.
 - [ ] Return a structured deletion conflict for people referenced by finished or cancelled leases, after confirming the intended deletion policy.
