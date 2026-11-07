@@ -3,7 +3,7 @@ title: Capabilities
 type: capability-catalog
 status: draft
 last_verified: 2026-11-07
-verified_against: "HousingUnitController, HousingUnitService, HousingUnitFormComponent, HousingUnitDetailsComponent, RoomController, RoomService, RoomSectionComponent, PebScoreController, PebScoreService, PebScoreRepository, PebSectionComponent, PebHistoryComponent, RentHistoryController, RentHistoryService, RentSectionComponent, Lease, LeaseRentAdjustment, BoilerController, BoilerService, BoilerServiceHistoryService, FireExtinguisherController, FireExtinguisherService, MeterController, MeterService, MeterSectionComponent, AlertController, AlertService, EstateService, V010__uc010_manage_rents.sql, V014__uc014_manage_leases.sql, stakeholder-confirmed domain taxonomy, stakeholder confirmation 2026-11-07"
+verified_against: "HousingUnitController, HousingUnitService, HousingUnitFormComponent, HousingUnitDetailsComponent, RoomController, RoomService, RoomSectionComponent, PebScoreController, PebScoreService, PebScoreRepository, PebSectionComponent, PebHistoryComponent, RentHistoryController, RentHistoryService, RentSectionComponent, Lease, LeaseRentAdjustment, PlatformConfigController, PlatformConfigService, EstateConfigController, EstateConfigService, EstateConfig component, EstateConfigAssetsComponent, BoilerServiceValidityRuleService, BoilerController, BoilerService, BoilerServiceHistoryService, FireExtinguisherController, FireExtinguisherService, MeterController, MeterService, MeterSectionComponent, AlertController, AlertService, EstateService, V010__uc010_manage_rents.sql, V011__uc011_manage_boilers.sql, V013__uc013_manage_config.sql, V014__uc014_manage_leases.sql, stakeholder-confirmed domain taxonomy, stakeholder confirmation 2026-11-07"
 sources: "Aligned to the approved domain taxonomy"
 ---
 
@@ -59,7 +59,7 @@ Known people-management gaps include owner references that are not validated aga
 
 | Capability                                                                               | Status      | Details                                              | Rules                  | Main sources |
 | ---------------------------------------------------------------------------------------- | ----------- | ---------------------------------------------------- | ---------------------- | ------------ |
-| Manage leases (draft, active, finished, cancelled) with rent, charges and guarantee type | Implemented | [Lease](./leases/concepts/lease.md), [technical references](../technical/leases/README.md) | Not yet documented | `Lease`, `LeaseController`, `LeaseService`, `LeaseRentAdjustment` |
+| Manage leases (draft, active, finished, cancelled) with rent, charges and guarantee type | Implemented | [Lease](./leases/concepts/lease.md), [technical references](../technical/leases/README.md) | BR-LEASE-001; other lease rules not yet documented | `Lease`, `LeaseController`, `LeaseService`, `LeaseRentAdjustment` |
 | Attach people to a lease as `PRIMARY`, `CO_TENANT` or `GUARANTOR`                        | Implemented | [Lease](./leases/concepts/lease.md), [Person](./people/concepts/person.md) | Not yet documented | `Lease`      |
 | View all leases in one list                                                              | Implemented | [Lease](./leases/concepts/lease.md) | — | `LeaseController`, `LeaseService` |
 
@@ -90,6 +90,7 @@ Known people-management gaps include owner references that are not validated aga
 | Capability | Status | Details | Rules | Main sources |
 |---|---|---|---|---|
 | View pending alerts across business domains, including PEB certificate expiry | Implemented | [Alerts](./cross-cutting/concepts/alerts.md), [PEB Score Management](../technical/buildings-and-housing-units/peb-score-management.md), [Estate Management](../technical/estates-and-access/estate-management.md) | BR-HUNIT-023 | `AlertService`, `AlertController`, `EstateService` |
+| Manage platform-wide settings and estate-scoped configuration | Partial | [Cross-Cutting Configuration Management](../technical/cross-cutting/configuration-management.md) | — | `PlatformConfigController`, `EstateConfigController`, estate settings UI |
 
 The current alert list includes boiler service, lease indexation, and PEB certificate expiry alerts; it does not generate alerts from housing-unit rent history. The estate dashboard separately reports pending boiler, fire-extinguisher, lease-end, and indexation alert counts.
 
@@ -97,6 +98,7 @@ Known gaps for the `Partial` rows: see the matching items in the backlog (room,
 PEB, meter, and boiler estate scoping; room not-found handling; PEB active-record
 selection, record-specific permissions, deletion policy, rating palette and
 load-error presentation; rent-timeline overlap and rent-history estate scoping;
+configuration-key governance and the equipment-to-subcategory mapping editor;
 meter history access and replacement-reason handling;
 boiler replacement/history behavior; fire-extinguisher identifier uniqueness
 scope, revision ownership and deletion, search scope, and alert policy; meter

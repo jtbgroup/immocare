@@ -3,7 +3,7 @@ title: Business Concept Map
 type: business reference
 status: draft
 last_verified: 2026-11-07
-verified_against: "HousingUnit, Room, PebScoreHistory, RentHistory, LeaseRentAdjustment, V008__uc008_manage_peb_scores.sql, V010__uc010_manage_rents.sql, V014__uc014_manage_leases.sql"
+verified_against: "HousingUnit, Room, PebScoreHistory, RentHistory, LeaseRentAdjustment, V008__uc008_manage_peb_scores.sql, V010__uc010_manage_rents.sql, V014__uc014_manage_leases.sql, stakeholder confirmation 2026-11-07"
 ---
 
 # Business Concept Map
@@ -43,8 +43,9 @@ Platform administrator
 
 - The estate is the observed scope to which properties and financial data are assigned.
 - In the current conceptual model, a building contains one or more housing units; a housing unit may contain rooms, PEB rating history, and rent history.
-- The intended relationship between housing-unit rent history and rent recorded on a lease needs clarification.
+- The housing-unit rent history is separate from the lease's contractual rent; the former serves as a basis for setting the latter.
 - A lease is associated with a housing unit and people, and has its own dated rent and charge adjustments.
+- External regulation may govern lease terms, but a regulated reference rent is not directly associated with a lease ([BR-LEASE-001](../leases/rules/leases.md)).
 - People may be associated with buildings or housing units as owners, participate in leases, and have bank accounts used to suggest lease links during transaction import.
 - Any tracked equipment type can be associated with either a building or a housing unit. Equipment-specific maintenance, revision, usage, and alert histories remain distinct.
 - A transaction may be contextualized by a building, housing unit, or lease, and may separately be linked to equipment.

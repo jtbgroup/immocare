@@ -2,13 +2,15 @@
 title: Estate Management
 type: technical reference
 status: current
-last_verified: 2026-10-28
-verified_against: "EstateController, EstateService, BoilerRepository, FireExtinguisherRepository, EstateConfigService, AlertService, AlertController"
+last_verified: 2026-11-07
+verified_against: "EstateController, EstateService, BoilerRepository, FireExtinguisherRepository, EstateConfigController, EstateConfigService, AlertService, AlertController"
 ---
 
 # Estate Management
 
 This page documents current estate administration, estate selection, membership, dashboard, and access-control behavior in the backend and frontend. Domain concepts are described in [Estate and Access](../../business/estates-and-access/concepts/estate-and-access.md); canonical rule statements and statuses are in the [estate rules](../../business/estates-and-access/rules/estate.md).
+
+Estate-scoped settings are readable by estate members and writable by estate managers. Their current storage and API behavior are documented in [Cross-Cutting Configuration Management](../cross-cutting/configuration-management.md); how the setting registry and defaults should be defined remains open for review.
 
 ## Access model
 

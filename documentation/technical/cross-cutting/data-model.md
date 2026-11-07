@@ -1,14 +1,14 @@
 ---
-title: User, Estate, Person, Room, Rent, PEB, Equipment, and Property Data Model
+title: User, Estate, Configuration, Person, Room, Rent, PEB, Equipment, and Property Data Model
 type: technical reference
 status: current
 last_verified: 2026-11-07
-verified_against: "Room, PebScoreHistory, RentHistory, Lease, LeaseRentAdjustment, Boiler, BoilerServiceRecord, BoilerServiceValidityRule, FireExtinguisher, FireExtinguisherRevision, Meter, V007__uc007_manage_rooms.sql, V008__uc008_manage_peb_scores.sql, V009__uc009_manage_meters.sql, V010__uc010_manage_rents.sql, V011__uc011_manage_boilers.sql, V012__uc012_manage_fire_extinguishers.sql, V014__uc014_manage_leases.sql, V017__generalize_fire_extinguisher_ownership.sql"
+verified_against: "Room, PebScoreHistory, RentHistory, Lease, LeaseRentAdjustment, Boiler, BoilerServiceRecord, BoilerServiceValidityRule, PlatformConfig, EstateConfig, FireExtinguisher, FireExtinguisherRevision, Meter, V007__uc007_manage_rooms.sql, V008__uc008_manage_peb_scores.sql, V009__uc009_manage_meters.sql, V010__uc010_manage_rents.sql, V011__uc011_manage_boilers.sql, V012__uc012_manage_fire_extinguishers.sql, V013__uc013_manage_config.sql, V014__uc014_manage_leases.sql, V017__generalize_fire_extinguisher_ownership.sql"
 ---
 
-# User, Estate, Person, Room, Rent, PEB, Equipment, and Property Data Model
+# User, Estate, Configuration, Person, Room, Rent, PEB, Equipment, and Property Data Model
 
-This page shows the current account and estate relationships, together with person, property, room, rent-history, PEB-history, ownership, lease-membership, lease rent-adjustment, and person-bank-account relationships.
+This page shows the current account, estate, and configuration relationships, together with person, property, room, rent-history, PEB-history, ownership, lease-membership, lease rent-adjustment, and person-bank-account relationships.
 
 ## Account, estate, person, room, and property entities
 
@@ -35,6 +35,23 @@ erDiagram
         bigint user_id PK, FK
         string role
         timestamp added_at
+    }
+    PLATFORM_CONFIG {
+        string config_key PK
+        string config_value
+        string value_type
+        text description
+        timestamp updated_at
+        bigint updated_by FK
+    }
+    ESTATE_CONFIG {
+        uuid estate_id PK, FK
+        string config_key PK
+        string config_value
+        string value_type
+        text description
+        timestamp updated_at
+        bigint updated_by FK
     }
     PERSON {
         bigint id PK
@@ -140,7 +157,10 @@ erDiagram
     }
     APP_USER ||--o{ ESTATE_MEMBER : has
     ESTATE ||--o{ ESTATE_MEMBER : includes
+    ESTATE ||--o{ ESTATE_CONFIG : configures
     APP_USER o|--o{ ESTATE : creates
+    APP_USER o|--o{ PLATFORM_CONFIG : updates
+    APP_USER o|--o{ ESTATE_CONFIG : updates
     ESTATE ||--o{ PERSON : scopes
     PERSON ||--o{ PERSON_BANK_ACCOUNT : has
     ESTATE ||--o{ PERSON_BANK_ACCOUNT : scopes
@@ -162,7 +182,11 @@ erDiagram
     LEASE ||--o{ LEASE_TENANT : includes
 ```
 
-`APP_USER`, `ESTATE`, `ESTATE_MEMBER`, `PERSON`, `PERSON_BANK_ACCOUNT`, `BUILDING`, `HOUSING_UNIT`, `ROOM`, `RENT_HISTORY`, `PEB_SCORE_HISTORY`, `METER`, `BOILER`, `BOILER_SERVICE`, `BOILER_SERVICE_VALIDITY_RULE`, `FIRE_EXTINGUISHER`, `FIRE_EXTINGUISHER_REVISION`, `LEASE`, `LEASE_TENANT`, and `LEASE_RENT_ADJUSTMENT` are persisted as `app_user`, `estate`, `estate_member`, `person`, `person_bank_account`, `building`, `housing_unit`, `room`, `rent_history`, `peb_score_history`, `meter`, `boiler`, `boiler_service`, `boiler_service_validity_rule`, `fire_extinguisher`, `fire_extinguisher_revision`, `lease`, `lease_tenant`, and `lease_rent_adjustment`. An estate membership has the composite key `(estate_id, user_id)`. Lease membership has the composite key `(lease_id, person_id)`. Deleting a user account cascades to its membership rows; deleting a person cascades to person bank accounts, while lease membership references restrict person deletion. A room, rent-history record, and PEB-history record each reference one housing unit; the database cascades their deletion when the housing unit is deleted, although the housing-unit service currently blocks deletion if rooms remain. Lease rent adjustments reference one lease and cascade when that lease is deleted.
+`APP_USER`, `ESTATE`, `ESTATE_MEMBER`, `PLATFORM_CONFIG`, `ESTATE_CONFIG`, `PERSON`, `PERSON_BANK_ACCOUNT`, `BUILDING`, `HOUSING_UNIT`, `ROOM`, `RENT_HISTORY`, `PEB_SCORE_HISTORY`, `METER`, `BOILER`, `BOILER_SERVICE`, `BOILER_SERVICE_VALIDITY_RULE`, `FIRE_EXTINGUISHER`, `FIRE_EXTINGUISHER_REVISION`, `LEASE`, `LEASE_TENANT`, and `LEASE_RENT_ADJUSTMENT` are persisted as `app_user`, `estate`, `estate_member`, `platform_config`, `estate_config`, `person`, `person_bank_account`, `building`, `housing_unit`, `room`, `rent_history`, `peb_score_history`, `meter`, `boiler`, `boiler_service`, `boiler_service_validity_rule`, `fire_extinguisher`, `fire_extinguisher_revision`, `lease`, `lease_tenant`, and `lease_rent_adjustment`. `platform_config` is keyed by `config_key`; `estate_config` has the composite key `(estate_id, config_key)`. An estate membership has the composite key `(estate_id, user_id)`. Lease membership has the composite key `(lease_id, person_id)`. Deleting a user account cascades to its membership rows; deleting a person cascades to person bank accounts, while lease membership references restrict person deletion. A room, rent-history record, and PEB-history record each reference one housing unit; the database cascades their deletion when the housing unit is deleted, although the housing-unit service currently blocks deletion if rooms remain. Lease rent adjustments reference one lease and cascade when that lease is deleted.
+
+The domain model does not associate a regulated reference rent directly with a lease; external regulation may govern lease terms without creating that relationship ([BR-LEASE-001](../../business/leases/rules/leases.md)). The current application does not persist regulated reference-rent data.
+
+Platform-wide configuration has no estate relationship; estate key/value configuration belongs to an estate. See [Cross-Cutting Configuration Management](./configuration-management.md). Boiler-service validity rules are a separate dated history documented in [Boiler Management](../equipment/boiler-management.md).
 
 Meters store an `owner_type` and `owner_id` pair to refer to either a building or a housing unit. This polymorphic association is not represented by a foreign key or an entity relationship in the diagram. There is no separate meter-event table: replacement preserves the previous meter as a closed meter record, while readings and maintenance events are not stored. See the [meter data dictionary](../equipment/meter-data-dictionary.md) and [meter management reference](../equipment/meter-management.md).
 

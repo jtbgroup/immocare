@@ -28,7 +28,7 @@ This file contains concrete business or product decisions that still need to be 
 - Should durations in housing-unit rent history count complete elapsed calendar months or count calendar months inclusively? For example, should 2024-01-01 through 2024-06-30 be five or six months?
 - May estate managers edit and delete existing housing-unit rent-history records, or should history be append-only?
 - Should two housing-unit rent-history records be allowed to have the same effective-from date?
-- Which regulated reference-rent schemes should the application support, and should their amounts be looked up, calculated, or entered manually?
+- Which external lease-regulation schemes and jurisdictions should the application support, and how should their requirements be represented without directly associating a regulated reference rent with a lease (BR-LEASE-001)?
 - Does a housing unit inherit the building's owner when no unit-specific owner is recorded, or does the missing owner mean ownership is unknown?
 - Can a building or housing unit have multiple owners? If so, should ownership shares and their changes over time be documented?
 - What is the ownership rule when a building and one of its housing units have different owners?
@@ -75,6 +75,11 @@ This file contains concrete business or product decisions that still need to be 
 - Which lease should an IBAN match suggest during transaction import: only a lease in the transaction's estate, a lease covering the transaction date, an active lease preference, or a closest-date fallback? The current implementation selects the latest-starting lease and does not use transaction date.
 - Should valid IBAN input be accepted with lowercase letters and/or whitespace and normalized before storage?
 - Is a primary bank account optional, and should there be at most one primary account per person (BR-PERSON-006)?
+
+## Application and estate configuration
+
+- How should the estate-configuration registry be defined and governed: where should supported keys, data types, defaults, validation, editability, and any platform fallback or override behavior be declared? These definitions are currently distributed across `EstateConfigDTOs.DEFAULT_CONFIG`, the configuration services, and their consumers.
+- Should equipment-to-subcategory mappings be configured per estate or globally? Mapping keys are currently seeded per estate, but the mapping API operations and editor are not implemented.
 
 ## Transactions
 

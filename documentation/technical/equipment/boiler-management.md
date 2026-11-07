@@ -8,7 +8,7 @@ verified_against: "BoilerController, BoilerServiceController, BoilerService, Boi
 
 # Boiler Management
 
-This page describes the implemented boiler APIs, service records, validity rules, alerts, and interface behavior. Equipment rules are defined in [Equipment Rules](../../business/equipment/rules/equipment.md); persisted fields are listed in the [Boiler Data Dictionary](./boiler-data-dictionary.md).
+This page describes the implemented boiler APIs, service records, validity rules, alerts, and interface behavior. Equipment rules are defined in [Equipment Rules](../../business/equipment/rules/equipment.md); persisted fields are listed in the [Boiler Data Dictionary](./boiler-data-dictionary.md). The shared overview of global and estate-scoped settings is in [Cross-Cutting Configuration Management](../cross-cutting/configuration-management.md).
 
 ## API
 

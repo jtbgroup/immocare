@@ -42,6 +42,7 @@ This documentation describes the property-management domain independently of the
 ### Leases
 
 - [Lease concept](./business/leases/concepts/lease.md)
+- [Lease rules](./business/leases/rules/leases.md)
 
 ### Equipment
 
@@ -106,6 +107,7 @@ This documentation describes the property-management domain independently of the
 
 ### Cross-cutting technical references
 
+- [Cross-cutting configuration management](./technical/cross-cutting/configuration-management.md)
 - [Data model](./technical/cross-cutting/data-model.md)
 - [Technology stack and deployment](./technical/cross-cutting/technology-stack-and-deployment.md)
 
