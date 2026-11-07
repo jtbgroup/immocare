@@ -3,12 +3,12 @@ title: Housing Unit Data Dictionary
 type: technical reference
 status: current
 last_verified: 2026-11-07
-verified_against: "HousingUnit, Room, PebScoreHistory, V006__uc006_manage_housing_units.sql, V007__uc007_manage_rooms.sql, V008__uc008_manage_peb_scores.sql"
+verified_against: "HousingUnit, Room, PebScoreHistory, RentHistory, V006__uc006_manage_housing_units.sql, V007__uc007_manage_rooms.sql, V008__uc008_manage_peb_scores.sql, V010__uc010_manage_rents.sql"
 ---
 
 # Housing Unit Data Dictionary
 
-This page documents persisted housing-unit, room, and PEB-history fields and database constraints. Business concepts are defined in [Buildings and Housing Units](../../business/buildings-and-housing-units/concepts/buildings-and-housing-units.md); application behavior is described in [Housing Unit Management](./housing-unit-management.md), [Room Management](./room-management.md), and [PEB Score Management](./peb-score-management.md). Relationships across the model are shown in the cross-cutting [data model](../cross-cutting/data-model.md).
+This page documents persisted housing-unit, room, PEB-history, and housing-unit rent-history fields and database constraints. Business concepts are defined in [Buildings and Housing Units](../../business/buildings-and-housing-units/concepts/buildings-and-housing-units.md); application behavior is described in [Housing Unit Management](./housing-unit-management.md), [Room Management](./room-management.md), [PEB Score Management](./peb-score-management.md), and [Housing-Unit Rent History Management](./rent-history-management.md). Relationships across the model are shown in the cross-cutting [data model](../cross-cutting/data-model.md).
 
 ## Entity: `housing_unit`
 
@@ -71,6 +71,22 @@ Persisted room fields and constraints are based on migration `V007__uc007_manage
 
 The database does not enforce that `score_date` is not in the future or that `valid_until` follows it; those checks are performed by the application. Application behavior is documented in [PEB Score Management](./peb-score-management.md), and the corresponding constraints are listed in the [housing-unit rules](../../business/buildings-and-housing-units/rules/housing-units.md).
 
+## Entity: `rent_history`
+
+**Purpose:** Stores dated monthly-rent records for a housing unit. It is separate from the rent and charge adjustments attached to a lease.
+
+| Attribute | Data type | Persisted constraints | Nullable | Default | Description |
+|---|---|---|---|---|---|
+| `id` | `BIGINT` | Primary key, generated identity | No | Generated | Rent-history record identifier |
+| `housing_unit_id` | `BIGINT` | Foreign key to `housing_unit(id)`, `ON DELETE CASCADE` | No | — | Housing unit the record belongs to |
+| `monthly_rent` | `NUMERIC(10,2)` | Check constraint: greater than zero | No | — | Monthly rent amount |
+| `effective_from` | `DATE` | — | No | — | First date the amount applies |
+| `effective_to` | `DATE` | Unique with `housing_unit_id` when non-null | Yes | — | Last date the amount applies; null is treated by the application as current |
+| `notes` | `VARCHAR(500)` | — | Yes | — | Optional notes about the record |
+| `created_at` | `TIMESTAMP` | — | No | Current timestamp | Record creation time |
+
+The database has a unique constraint on `(housing_unit_id, effective_to)`. Under PostgreSQL's ordinary unique-constraint semantics, multiple rows with null `effective_to` are permitted; the constraint alone therefore does not guarantee a single current record per housing unit. Application timeline behavior and its known gaps are described in [Housing-Unit Rent History Management](./rent-history-management.md).
+
 ## Sources
 
-Housing-unit fields and constraints are based on migration `V006__uc006_manage_housing_units.sql` and entity `HousingUnit`. Room fields and constraints are based on migration `V007__uc007_manage_rooms.sql` and entity `Room`. PEB-history fields and constraints are based on migration `V008__uc008_manage_peb_scores.sql` and entity `PebScoreHistory`. Application-level constraints are documented in the [housing-unit rules](../../business/buildings-and-housing-units/rules/housing-units.md).
+Housing-unit fields and constraints are based on migration `V006__uc006_manage_housing_units.sql` and entity `HousingUnit`. Room fields and constraints are based on migration `V007__uc007_manage_rooms.sql` and entity `Room`. PEB-history fields and constraints are based on migration `V008__uc008_manage_peb_scores.sql` and entity `PebScoreHistory`. Rent-history fields and constraints are based on migration `V010__uc010_manage_rents.sql` and entity `RentHistory`. Application-level constraints are documented in the [housing-unit rules](../../business/buildings-and-housing-units/rules/housing-units.md).

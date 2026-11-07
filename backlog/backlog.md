@@ -44,6 +44,9 @@
 - [ ] Enforce estate consistency when assigning a person as a building or housing-unit owner, and scope owner association lookups to that estate.
 - [ ] Order housing units within a building by floor and then unit number; the current query does not specify an ordering.
 - [ ] Enforce estate ownership checks for room operations: the room controller checks membership of the route estate, but the service does not verify that the housing unit belongs to that estate.
+- [ ] Enforce estate ownership checks for housing-unit rent-history operations: the controller checks the route estate, but the service does not verify that the housing unit belongs to that estate.
+- [ ] Recalculate housing-unit rent-history periods consistently when inserting a record before an existing record; current behavior can leave overlapping effective periods.
+- [ ] Support recording or presenting any regulated reference rent applicable to a housing unit (for example, a municipality-specific reference rent), separately from the theoretical housing-unit rent and the contractual lease rent; no dedicated field, API, or interface support exists in the current application.
 - [ ] Map missing or mismatched room IDs to the documented not-found response instead of the generic server-error handler.
 - [ ] Enforce estate ownership checks for PEB score operations: the controller checks membership of the route estate, but the service does not verify that the housing unit belongs to that estate.
 - [ ] Align the active PEB selection in housing-unit summaries, current-rating queries, improvement summaries, and certificate alerts with BR-HUNIT-019, using the latest certificate validity end date.
@@ -51,6 +54,23 @@
 - [ ] Resolve and enforce who may delete PEB records; the current API permits estate managers to delete any record (BR-HUNIT-020, BR-HUNIT-024).
 - [ ] Change the PEB grade `G` badge color from purple to dark red to match the documented rating palette.
 - [ ] Apply the rating colors to the PEB grade options and surface failures when loading the current rating, history, or improvement summary instead of presenting empty states.
+- [ ] Enforce estate and owner scoping for meter list, add, replace, and close operations; route-level estate membership alone does not ensure the building or housing unit and meter belong to that estate and owner.
+- [ ] Enforce estate ownership checks on boiler list, create, read, update, delete, and alert operations; current boiler services trust the route estate and boiler IDs.
+- [ ] Require estate-scoped authorization for boiler service-history reads and writes; the current endpoints require authentication only and do not restrict service-record creation to managers.
+- [ ] Pass the requested estate to the boiler service-alert query; the current contextual alert endpoint omits it and returns results across estates.
+- [ ] Scope meter, boiler, and fire-extinguisher search and transaction-count endpoints to authorized estate data; the current endpoints are authenticated but not estate-scoped.
+- [ ] Verify that a fire-extinguisher revision belongs to the extinguisher in the route before deleting it.
+- [ ] Keep transaction-asset links consistent when a boiler or fire extinguisher is deleted; the asset ID has no foreign key and deletion currently leaves links behind.
+- [ ] Enforce estate membership on cross-domain alert reads; the current alert controller requires authentication but does not check membership in the requested estate.
+- [ ] Align the boiler API and interface with the decided boiler lifecycle, including replacement/history, active-boiler constraints, required fields, and deletion policy; current code allows edits and deletes and does not implement the analyzed replacement flow.
+- [ ] Implement the boiler service-validity preview and visible error handling described by the earlier requirements; the interface currently submits an empty validity date for server-side calculation and hides history-load failures.
+- [ ] Clarify the building fire-extinguisher list behavior and include unit-owned extinguishers there if that is the intended building-level view.
+- [ ] Configure fire-extinguisher revision alert timing if the fixed one-year dashboard threshold is confirmed as business policy (BR-EQ-031).
+- [ ] Implement alerts for any approved meter validity or maintenance intervals (BR-EQ-032); the current application has no meter validity or maintenance alerts.
+- [ ] Extend meter history to include any additional events confirmed as necessary; current history retains active and closed meter records but does not store readings or maintenance events (BR-EQ-032).
+- [ ] Keep meter history accessible when all meters are closed, and surface history-loading failures in the interface.
+- [ ] Decide whether to persist the optional meter replacement reason and implement it if required; the current API accepts the field but discards it.
+- [ ] Calculate displayed meter duration using the intended elapsed-month convention rather than simply subtracting calendar month numbers.
 - [ ] Return a structured deletion conflict for people referenced by finished or cancelled leases, after confirming the intended deletion policy.
 - [ ] Update the person picker to match the confirmed search and national-ID display policy.
 - [ ] Align IBAN-based lease suggestions with the confirmed estate scope, transaction-date, and lease-status selection policy.

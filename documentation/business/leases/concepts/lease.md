@@ -3,7 +3,7 @@ title: Lease
 type: business concepts
 status: draft
 last_verified: 2026-11-07
-verified_against: b99e38fb08888ee0973fc560a27258b15da926b0
+verified_against: "Lease, LeaseRentAdjustment, LeaseService, LeaseController, V014__uc014_manage_leases.sql, stakeholder confirmation 2026-11-07"
 ---
 
 # Concept — Lease
@@ -14,4 +14,6 @@ The statuses currently represented are `DRAFT`, `ACTIVE`, `FINISHED`, and `CANCE
 
 People associated with a lease have one of the technical roles `PRIMARY`, `CO_TENANT`, or `GUARANTOR`. The precise meaning and responsibilities of these roles, and the rules governing changes to the people on a lease, need validation.
 
-Lease statuses and participant roles are represented in the cross-cutting [data model](../../../technical/cross-cutting/data-model.md). Current lease-end and indexation alert counts shown on the estate dashboard are described in [Estate Management](../../../technical/estates-and-access/estate-management.md); alert handling can span multiple domains, as described in [Alerts](../../cross-cutting/concepts/alerts.md).
+The lease records its own contractual monthly rent and charges, with dated adjustment records. Its rent is distinct from the theoretical housing-unit rent, which serves as a basis for setting it ([BR-HUNIT-027](../../buildings-and-housing-units/rules/housing-units.md)).
+
+Lease statuses, participant roles, and rent-adjustment relationships are represented in the cross-cutting [data model](../../../technical/cross-cutting/data-model.md). Current lease-end and indexation alert counts shown on the estate dashboard are described in [Estate Management](../../../technical/estates-and-access/estate-management.md); alert handling can span multiple domains, as described in [Alerts](../../cross-cutting/concepts/alerts.md).

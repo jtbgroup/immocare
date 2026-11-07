@@ -3,12 +3,12 @@ title: Housing Unit Management
 type: technical reference
 status: current
 last_verified: 2026-11-07
-verified_against: "HousingUnitController, HousingUnitService, CreateHousingUnitRequest, UpdateHousingUnitRequest, HousingUnitFormComponent, HousingUnitDetailsComponent, RoomSectionComponent, PebScoreController, PebSectionComponent"
+verified_against: "HousingUnitController, HousingUnitService, CreateHousingUnitRequest, UpdateHousingUnitRequest, HousingUnitFormComponent, HousingUnitDetailsComponent, RoomSectionComponent, PebScoreController, PebSectionComponent, RentHistoryController, RentHistoryService, RentSectionComponent"
 ---
 
 # Housing Unit Management
 
-This page describes the current housing-unit API, access control, validation, and deletion behavior. Business concepts are in [Buildings and Housing Units](../../business/buildings-and-housing-units/concepts/buildings-and-housing-units.md), constraints are in [Housing Unit Rules](../../business/buildings-and-housing-units/rules/housing-units.md), and persisted fields are in the [Housing Unit Data Dictionary](./housing-unit-data-dictionary.md). Room operations are described in [Room Management](./room-management.md), and PEB rating history and certificate alerts are described in [PEB Score Management](./peb-score-management.md).
+This page describes the current housing-unit API, access control, validation, and deletion behavior. Business concepts are in [Buildings and Housing Units](../../business/buildings-and-housing-units/concepts/buildings-and-housing-units.md), constraints are in [Housing Unit Rules](../../business/buildings-and-housing-units/rules/housing-units.md), and persisted fields are in the [Housing Unit Data Dictionary](./housing-unit-data-dictionary.md). Room operations are described in [Room Management](./room-management.md), PEB rating history and certificate alerts in [PEB Score Management](./peb-score-management.md), and housing-unit rent history in [Housing-Unit Rent History Management](./rent-history-management.md).
 
 ## Access and estate scope
 

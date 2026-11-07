@@ -25,6 +25,10 @@ This file contains concrete business or product decisions that still need to be 
 
 ### Housing units and leases
 
+- Should durations in housing-unit rent history count complete elapsed calendar months or count calendar months inclusively? For example, should 2024-01-01 through 2024-06-30 be five or six months?
+- May estate managers edit and delete existing housing-unit rent-history records, or should history be append-only?
+- Should two housing-unit rent-history records be allowed to have the same effective-from date?
+- Which regulated reference-rent schemes should the application support, and should their amounts be looked up, calculated, or entered manually?
 - Does a housing unit inherit the building's owner when no unit-specific owner is recorded, or does the missing owner mean ownership is unknown?
 - Can a building or housing unit have multiple owners? If so, should ownership shares and their changes over time be documented?
 - What is the ownership rule when a building and one of its housing units have different owners?
@@ -37,7 +41,20 @@ This file contains concrete business or product decisions that still need to be 
 - Which maintenance or inspection obligations apply to boilers and fire extinguishers, and who is responsible for meeting them?
 - Can a piece of equipment be associated with both a building and one of its housing units at the same time, or must it have exactly one management context?
 - Are the currently supported boiler fuel and utility-meter categories complete?
-- What validity and alerting rules should apply to fire-extinguisher revisions?
+- Do meters have validity, inspection, or maintenance intervals that should trigger alerts, and what warning period should apply?
+- Should meter history include readings or maintenance events beyond the active and closed meter records retained during replacement?
+- Should an extinguisher with no revision, or whose latest revision is more than one year old, count as needing attention on the estate dashboard (BR-EQ-031)? If so, should that interval be configurable?
+- Should boilers follow the analyzed append-only replacement history, or may users edit and delete boiler records as the current application allows? The database has a `removal_date` column, but the current entity and API do not use it.
+- Is a boiler brand required, and must its installation date be today or earlier? The earlier requirements specify both, while the current API permits a missing brand and a future installation date (BR-EQ-029, BR-EQ-030).
+- Is the current validation that rejects a last-service date before an out-of-service date intentional (BR-EQ-018)?
+- May a boiler service's explicitly supplied validity end date be before its service date? The current API accepts the override without a date-order check (BR-EQ-021).
+- Must a fire extinguisher be owned either by a building or by a housing unit, or should a building-owned extinguisher also support an optional unit assignment? The current schema requires exactly one owner, unlike the earlier analysis (BR-EQ-026).
+- Should fire-extinguisher revision history be append-only, or may individual revision records be deleted? The analysis describes append-only history, while a related requirement and the current API permit deletion (BR-EQ-028).
+- Should a fire-extinguisher identification number be unique per direct owner, or across a building and all of its housing units? The current implementation checks uniqueness within the direct owner context (BR-EQ-024).
+- Should the building-level extinguisher list include extinguishers assigned directly to its housing units, or remain limited to extinguishers owned by the building?
+- Should multiple active meters of the same type be allowed for one building or housing unit (BR-EQ-011)?
+- Should the optional meter replacement reason be retained as part of meter history?
+- How should meter duration be calculated when the start and end dates do not fall on the same day of the month?
 - check the statuses of the leases. See business concept documentation.
 - In a lease, changing the role of a person needs validation. Is that correct?
 

@@ -3,7 +3,7 @@ title: Capabilities
 type: capability-catalog
 status: draft
 last_verified: 2026-11-07
-verified_against: "HousingUnitController, HousingUnitService, HousingUnitFormComponent, HousingUnitDetailsComponent, RoomController, RoomService, RoomSectionComponent, PebScoreController, PebScoreService, PebScoreRepository, PebSectionComponent, PebHistoryComponent, AlertService, stakeholder confirmation 2026-11-07"
+verified_against: "HousingUnitController, HousingUnitService, HousingUnitFormComponent, HousingUnitDetailsComponent, RoomController, RoomService, RoomSectionComponent, PebScoreController, PebScoreService, PebScoreRepository, PebSectionComponent, PebHistoryComponent, RentHistoryController, RentHistoryService, RentSectionComponent, Lease, LeaseRentAdjustment, BoilerController, BoilerService, BoilerServiceHistoryService, FireExtinguisherController, FireExtinguisherService, MeterController, MeterService, MeterSectionComponent, AlertController, AlertService, EstateService, V010__uc010_manage_rents.sql, V014__uc014_manage_leases.sql, stakeholder-confirmed domain taxonomy, stakeholder confirmation 2026-11-07"
 sources: "Aligned to the approved domain taxonomy"
 ---
 
@@ -42,6 +42,7 @@ Known gaps in estate creation, member search, estate deletion, and manager-facin
 | Manage buildings, housing units and rooms          | Partial | [Buildings and housing units](./buildings-and-housing-units/concepts/buildings-and-housing-units.md), [Building Management](../technical/buildings-and-housing-units/building-management.md), [Housing Unit Management](../technical/buildings-and-housing-units/housing-unit-management.md), [Room Management](../technical/buildings-and-housing-units/room-management.md) | BR-BUILD-001 to 003; BR-HUNIT-001 to 015 | `Building`, `HousingUnit`, `Room` |
 | Record owners on buildings and housing units       | Implemented | [Buildings and housing units](./buildings-and-housing-units/concepts/buildings-and-housing-units.md), [Person](./people/concepts/person.md) | — | `Person`                          |
 | Record and review PEB ratings, certificate validity, and rating improvements for housing units | Partial | [Buildings and housing units](./buildings-and-housing-units/concepts/buildings-and-housing-units.md), [PEB Score Management](../technical/buildings-and-housing-units/peb-score-management.md), [Alerts](./cross-cutting/concepts/alerts.md) | BR-HUNIT-016 to 024 | `PebScoreHistory`, `PebScoreService`, `AlertService` |
+| Record and review dated theoretical rent history for a housing unit | Partial | [Buildings and housing units](./buildings-and-housing-units/concepts/buildings-and-housing-units.md), [Housing-Unit Rent History Management](../technical/buildings-and-housing-units/rent-history-management.md) | BR-HUNIT-025 to 027 | `RentHistory`, `RentHistoryService`, `RentHistoryController` |
 
 ## People
 
@@ -58,7 +59,7 @@ Known people-management gaps include owner references that are not validated aga
 
 | Capability                                                                               | Status      | Details                                              | Rules                  | Main sources |
 | ---------------------------------------------------------------------------------------- | ----------- | ---------------------------------------------------- | ---------------------- | ------------ |
-| Manage leases (draft, active, finished, cancelled) with rent, charges and guarantee type | Implemented | [Lease](./leases/concepts/lease.md) | Not yet documented | `Lease`, `LeaseController`, `LeaseService` |
+| Manage leases (draft, active, finished, cancelled) with rent, charges and guarantee type | Implemented | [Lease](./leases/concepts/lease.md), [technical references](../technical/leases/README.md) | Not yet documented | `Lease`, `LeaseController`, `LeaseService`, `LeaseRentAdjustment` |
 | Attach people to a lease as `PRIMARY`, `CO_TENANT` or `GUARANTOR`                        | Implemented | [Lease](./leases/concepts/lease.md), [Person](./people/concepts/person.md) | Not yet documented | `Lease`      |
 | View all leases in one list                                                              | Implemented | [Lease](./leases/concepts/lease.md) | — | `LeaseController`, `LeaseService` |
 
@@ -66,11 +67,11 @@ Known people-management gaps include owner references that are not validated aga
 
 | Capability                                                      | Status      | Details                                                | Rules     | Main sources                    |
 | --------------------------------------------------------------- | ----------- | ------------------------------------------------------ | --------- | ------------------------------- |
-| Track boilers: fuel, installation, service history              | Implemented | [Property equipment](./equipment/concepts/property-equipment.md) | — | `Boiler` |
-| Track fire extinguishers and their revisions                    | Implemented | [Property equipment](./equipment/concepts/property-equipment.md) | — | `FireExtinguisher` |
-| Track meters (gas, electricity, water): replace, close, history | Implemented | [Property equipment](./equipment/concepts/property-equipment.md) | — | `Meter` |
+| Track boilers: fuel, installation, and service history          | Partial | [Property equipment](./equipment/concepts/property-equipment.md), [Boiler Management](../technical/equipment/boiler-management.md) | BR-EQ-014 to 022, BR-EQ-029, BR-EQ-030, BR-EQ-032 | `BoilerService`, `BoilerServiceHistoryService` |
+| Track fire extinguishers and their revision history              | Partial | [Property equipment](./equipment/concepts/property-equipment.md), [Fire Extinguisher Management](../technical/equipment/fire-extinguisher-management.md) | BR-EQ-023 to 028, BR-EQ-031, BR-EQ-032 | `FireExtinguisherService` |
+| Track meters (water, gas, electricity): add, replace, close, and retain lifecycle history | Partial | [Property equipment](./equipment/concepts/property-equipment.md), [Meter Management](../technical/equipment/meter-management.md) | BR-EQ-002 to 013, BR-EQ-032 | `MeterController`, `MeterService` |
 | Attach any equipment type to a building or a housing unit       | Partial     | [Equipment rules](./equipment/rules/equipment.md) | BR-EQ-001 | see backlog: generalize devices |
-| Raise alerts when a boiler service is due or overdue             | Implemented | [Property equipment](./equipment/concepts/property-equipment.md), [Alerts](./cross-cutting/concepts/alerts.md) | — | `AlertService`, `BoilerService` |
+| Raise applicable validity and maintenance alerts for equipment | Partial | [Alerts](./cross-cutting/concepts/alerts.md), [Boiler Management](../technical/equipment/boiler-management.md), [Fire Extinguisher Management](../technical/equipment/fire-extinguisher-management.md), [Meter Management](../technical/equipment/meter-management.md), [Estate Management](../technical/estates-and-access/estate-management.md) | BR-EQ-022, BR-EQ-031, BR-EQ-032 | `AlertService`, `EstateService` |
 
 ## Financial Transactions
 
@@ -90,14 +91,19 @@ Known people-management gaps include owner references that are not validated aga
 |---|---|---|---|---|
 | View pending alerts across business domains, including PEB certificate expiry | Implemented | [Alerts](./cross-cutting/concepts/alerts.md), [PEB Score Management](../technical/buildings-and-housing-units/peb-score-management.md), [Estate Management](../technical/estates-and-access/estate-management.md) | BR-HUNIT-023 | `AlertService`, `AlertController`, `EstateService` |
 
-The current alert list includes boiler service, lease, and PEB certificate expiry alerts. The estate dashboard separately reports pending boiler, fire-extinguisher, lease-end, and indexation alert counts.
+The current alert list includes boiler service, lease indexation, and PEB certificate expiry alerts; it does not generate alerts from housing-unit rent history. The estate dashboard separately reports pending boiler, fire-extinguisher, lease-end, and indexation alert counts.
 
-Known gaps for the `Partial` rows: see the matching items in the backlog (room
-and PEB estate scoping, room not-found handling, PEB active-record selection,
-record-specific permissions, deletion policy, rating palette and load-error
-presentation, import review action and duplicate decisions, financial
-dashboard, generalized devices, and user-account session invalidation and
-deletion controls).
+Known gaps for the `Partial` rows: see the matching items in the backlog (room,
+PEB, meter, and boiler estate scoping; room not-found handling; PEB active-record
+selection, record-specific permissions, deletion policy, rating palette and
+load-error presentation; rent-timeline overlap and rent-history estate scoping;
+meter history access and replacement-reason handling;
+boiler replacement/history behavior; fire-extinguisher identifier uniqueness
+scope, revision ownership and deletion, search scope, and alert policy; meter
+history scope and any applicable validity/maintenance alerts; import review
+action and duplicate decisions;
+financial dashboard; generalized devices; and user-account session invalidation
+and deletion controls).
 
 ## Planned but not implemented
 

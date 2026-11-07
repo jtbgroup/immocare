@@ -1,3 +1,11 @@
+---
+title: Property Equipment and Assets
+type: business concepts
+status: draft
+last_verified: 2026-11-07
+verified_against: "Boiler, BoilerServiceRecord, BoilerServiceValidityRule, FireExtinguisher, FireExtinguisherRevision, Meter, BoilerService, BoilerServiceHistoryService, FireExtinguisherService, MeterService, AlertService, EstateService, V009__uc009_manage_meters.sql, V011__uc011_manage_boilers.sql, V012__uc012_manage_fire_extinguishers.sql, V017__generalize_fire_extinguisher_ownership.sql"
+---
+
 # Concept — Property Equipment and Assets
 
 Tracked equipment is associated with a building or a housing unit. Any supported equipment type can be associated with either kind of property; the type must not determine whether it can be attached to a building or a unit.
@@ -8,7 +16,7 @@ The equipment currently represented is:
 - **Fire extinguisher** (`FireExtinguisher`)
 - **Meter** (`Meter`)
 
-Equipment records describe items that may need identification, operational history, maintenance, inspection, alerting, or financial cost tracking. They are distinct from the building and housing-unit concepts themselves.
+Equipment records describe items that need lifecycle and maintenance history, and may need validity or maintenance alerts, as well as identification and financial cost tracking. These shared expectations apply across equipment types; see confirmed [BR-EQ-032](../rules/equipment.md). Equipment records are distinct from the building and housing-unit concepts themselves.
 
 The association with a building or housing unit identifies the item's management context. It does not, by itself, establish legal ownership, responsibility for maintenance, or whether the equipment is included in a lease. See [equipment rule BR-EQ-001](../rules/equipment.md).
 
@@ -16,15 +24,15 @@ The association with a building or housing unit identifies the item's management
 
 Equipment types share the need to be identified and associated with a property context. Beyond that common foundation, each type has its own characteristics, lifecycle, history, validation, and alerting needs. A common concept must not erase those differences:
 
-- Boilers have service records, service-validity rules, and service-due alerts. Alert concepts and shared presentation are cross-cutting; see [Alerts](../../cross-cutting/concepts/alerts.md).
-- Fire extinguishers have revision records; the business rules for revision validity and alerting still need to be established.
-- Meters have usage periods and replacement history.
+- Boilers have service records, estate-specific service-validity rules, and service-due alerts. Current API and lifecycle behavior is described in [Boiler Management](../../../technical/equipment/boiler-management.md).
+- Fire extinguishers have revision records. The current model associates each extinguisher with either a building or a housing unit, but not both; this behavior needs business clarification under [BR-EQ-026](../rules/equipment.md). See [Fire Extinguisher Management](../../../technical/equipment/fire-extinguisher-management.md) for the implemented API and lifecycle.
+- **Meters** (`Meter`): current history consists of the active and closed meter records, including replacement lifecycle; no maintenance or validity alert is implemented. See [Meter Management](../../../technical/equipment/meter-management.md) for observed behavior and [Meter Data Dictionary](../../../technical/equipment/meter-data-dictionary.md) for persisted fields.
 
-The shared association rule applies to all equipment types; it does not require every type to have the same history or maintenance process.
+The shared association and history expectations apply to all equipment types; equipment-specific history events and applicable validity or maintenance alerts remain type-specific under [BR-EQ-001 and BR-EQ-032](../rules/equipment.md).
 
 ## Boiler
 
-A boiler is a heating appliance associated with either a building or a housing unit. The current model records its fuel type, installation and out-of-service dates, and last and next service dates.
+A boiler is a heating appliance associated with either a building or a housing unit. The current model records its fuel type, installation and out-of-service dates, and last and next service dates. Its API accepts creation, updates, and deletion; the historical analysis's replacement and append-only lifecycle is not fully implemented.
 
 Service events are recorded as a history linked to the boiler. Each observed service record has a service date and a validity end date. The application also supports an estate-scoped rule for calculating service validity duration and can raise alerts as the next service date approaches or becomes overdue.
 
@@ -32,17 +40,13 @@ The model currently recognizes gas, oil, electric, and heat-pump fuel types. Whe
 
 ## Fire extinguisher
 
-A fire extinguisher is associated with a building and may additionally be associated with a housing unit. It has an identification number and can have a history of revisions, each recorded with a date and optional notes.
+A fire extinguisher is associated with either a building or a housing unit. It has an identification number and can have a history of revisions, each recorded with a date and optional notes. The historical analysis describes a building association with an optional housing-unit assignment, so the current exactly-one-owner model still needs business clarification.
 
-The observed model does not define a validity period, next revision date, inspection outcome, or the rules for determining when another revision is due. Those should not be inferred from the existence of a revision history.
+The model does not store a validity period, next revision date, or inspection outcome. The estate dashboard currently counts an alert when no revision exists or the latest revision is more than one year old ([BR-EQ-031](../rules/equipment.md)); whether this fixed threshold represents the intended inspection policy remains unresolved. The API and persistence behavior are described in [Fire Extinguisher Management](../../../technical/equipment/fire-extinguisher-management.md).
 
 ## Meter
 
-A meter is associated with either a building or a housing unit. The model records a meter type and number, a start date, and an optional end date; additional identifiers depend on the utility type.
-
-The application distinguishes active meters (those without an end date) from historical meters. Replacing a meter closes the current record and creates a new one, preserving the usage history. A meter can also be closed without a replacement.
-
-Observed utility types include gas, electricity, and water. Which meter types and identifiers are required depends on the type and whether the meter is associated with a building or a housing unit.
+A meter represents a water, gas, or electricity connection associated with a building or a housing unit. The application's API and lifecycle behavior are described in [Meter Management](../../../technical/equipment/meter-management.md); persisted fields are listed in the [Meter Data Dictionary](../../../technical/equipment/meter-data-dictionary.md).
 
 ## Equipment and financial transactions
 

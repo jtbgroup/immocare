@@ -3,7 +3,7 @@ title: Project Documentation
 type: documentation index
 status: current
 last_verified: 2026-11-07
-verified_against: b99e38fb08888ee0973fc560a27258b15da926b0
+verified_against: "Documentation pages listed in this index"
 ---
 
 # Project Documentation
@@ -78,6 +78,7 @@ This documentation describes the property-management domain independently of the
 - [Housing-unit management](./technical/buildings-and-housing-units/housing-unit-management.md)
 - [Room management](./technical/buildings-and-housing-units/room-management.md)
 - [PEB score management](./technical/buildings-and-housing-units/peb-score-management.md)
+- [Housing-unit rent history management](./technical/buildings-and-housing-units/rent-history-management.md)
 - [Housing-unit data dictionary](./technical/buildings-and-housing-units/housing-unit-data-dictionary.md)
 
 ### People
@@ -92,6 +93,12 @@ This documentation describes the property-management domain independently of the
 ### Equipment
 
 - [Technical references for equipment](./technical/equipment/README.md)
+- [Boiler management](./technical/equipment/boiler-management.md)
+- [Boiler data dictionary](./technical/equipment/boiler-data-dictionary.md)
+- [Fire extinguisher management](./technical/equipment/fire-extinguisher-management.md)
+- [Fire extinguisher data dictionary](./technical/equipment/fire-extinguisher-data-dictionary.md)
+- [Meter management](./technical/equipment/meter-management.md)
+- [Meter data dictionary](./technical/equipment/meter-data-dictionary.md)
 
 ### Financial Transactions
 

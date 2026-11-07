@@ -3,7 +3,7 @@ title: Buildings and Housing Units
 type: business concepts
 status: draft
 last_verified: 2026-11-07
-verified_against: "HousingUnit, Room, PebScoreHistory, HousingUnitService, RoomService, PebScoreService, Building, Person"
+verified_against: "HousingUnit, Room, PebScoreHistory, RentHistory, Lease, LeaseRentAdjustment, HousingUnitService, RoomService, PebScoreService, RentHistoryService, V010__uc010_manage_rents.sql, V014__uc014_manage_leases.sql, stakeholder confirmation 2026-11-07"
 ---
 
 # Concept — Buildings and Housing Units
@@ -15,6 +15,8 @@ A **housing unit** (`HousingUnit`) belongs to exactly one building. It represent
 Rooms are classified by type and may record an approximate surface. The sum of room surfaces describes the room composition; the application also stores the housing unit's total surface separately.
 
 An energy performance rating (PEB) is recorded against a housing unit as a dated history that may include certificate details and a validity end date. The current rating is derived from that history. Observed rating and certificate behavior is described in the [housing-unit rules](../rules/housing-units.md) and [PEB Score Management](../../../technical/buildings-and-housing-units/peb-score-management.md); PEB expiry alerts are part of the cross-cutting [Alerts](../../cross-cutting/concepts/alerts.md) concept.
+
+The application records dated rent history directly on a housing unit. This is a theoretical monthly amount used as a basis for setting a lease's contractual rent, which remains a separate amount ([BR-HUNIT-027](../rules/housing-units.md)).
 
 The model permits a housing unit to have a direct owner different from the building's owner. When no direct owner is recorded, the application displays the building owner's name as the unit's effective owner; whether this display fallback represents business ownership inheritance remains unresolved.
 
