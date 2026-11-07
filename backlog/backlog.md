@@ -17,6 +17,7 @@
 - [ ] Add document attachments, such as energy performance certificates and boiler-maintenance records.
 - [x] Make alerts cross-cutting.
 - [ ] Review roles and security.
+- [ ] Evaluate adding OAuth2/Keycloak as an alternative to database-backed session authentication; decide the required security configuration changes during implementation.
 - [ ] Make sign-in username matching case-insensitive, consistent with the confirmed rule, and update the technical authentication documentation to reflect the implemented behavior.
 - [ ] Prevent demoting the last platform administrator, in the backend and account-management UI, consistent with the confirmed at-least-one-platform-admin rule.
 - [ ] Enforce the estate manager invariant on creation and user-account deletion; deleting an account must not leave an estate without a manager.
@@ -36,9 +37,15 @@
 - [ ] Fix date formatting and make the date settings visible.
 - [ ] Return to PostgreSQL-only support.
 - [ ] Resume the boilerplate versioning system.
+- [ ] Consolidate the development and production Docker Compose setups into one supported environment while retaining Docker Compose; define which development and production behaviors must remain.
 - [x] Fix Flyway migration ordering so estates are created before dependent objects; consolidate the migrations.
 - [ ] Make the application multilingual.
 - [x] Add bank accounts to people to support reconciliation with financial transactions.
+- [ ] Enforce estate consistency when assigning a person as a building or housing-unit owner, and scope owner association lookups to that estate.
+- [ ] Return a structured deletion conflict for people referenced by finished or cancelled leases, after confirming the intended deletion policy.
+- [ ] Update the person picker to match the confirmed search and national-ID display policy.
+- [ ] Align IBAN-based lease suggestions with the confirmed estate scope, transaction-date, and lease-status selection policy.
+- [ ] Normalize accepted IBAN input before validation if lowercase and whitespace-separated values are intended to be supported.
 - [x] In transaction editing, replace manually entered building, unit, and lease IDs with linked, human-readable selectors.
 - [x] Align the transaction form layout with other forms; apply the global width styling to the bank-account form and list.
 - [x] Move transaction categories into Settings and integrate catalogue management there, removing the transaction-screen button.

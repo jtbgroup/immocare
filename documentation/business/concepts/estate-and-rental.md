@@ -3,7 +3,7 @@ title: Estate and Rental
 type: business concepts
 status: draft
 last_verified: 2026-11-05
-verified_against: f295fb241898d79e75455198680219471509fcde
+verified_against: b99e38fb08888ee0973fc560a27258b15da926b0
 ---
 
 # Concepts — Estate and Rental
@@ -31,6 +31,8 @@ A **person** (`Person`) is recorded within an estate and may be referenced as th
 The model stores identifying and contact information; this page does not detail those attributes. A person may appear in multiple estates, but is then considered as a 2 distinct persons as the management around the person is estate-based.
 
 A person record is separate from a user account: the current model has no dedicated identity link identifying them as the same human, though domain records may separately retain user audit references. User accounts and their access scopes are described in [User Account](./user-account.md); assessing a possible identity link is tracked in the [backlog](../../../backlog/backlog.md).
+
+A person may have one or more registered bank accounts. Their IBANs can be used to suggest a related lease during transaction import; account management and current suggestion behavior are documented in [Person Management](../../technical/person-management.md).
 
 ## Lease and associated people
 

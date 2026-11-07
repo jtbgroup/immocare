@@ -28,6 +28,18 @@ This file contains concrete business or product decisions that still need to be 
 - check the statuses of the leases. See business concept documentation.
 - In a lease, changing the role of a person needs validation. Is that correct?
 
+## People and bank accounts
+
+- Should the same natural person be represented by one shared record across estates or by a separate estate-scoped record in each estate? The current model scopes each person record to one estate (BR-PERSON-001).
+- Should national IDs be unique globally, or only within an estate? The service checks within an estate, while the legacy requirement says global uniqueness and the entity/schema constraints disagree (BR-PERSON-003).
+- Should IBANs be unique globally, or only within an estate? The application and Flyway constraint are estate-scoped, while the legacy requirement says global uniqueness and the entity mapping disagrees (BR-PERSON-005).
+- Must a building or housing-unit owner belong to the same estate as that property? Current owner assignment accepts a person ID without checking estate ownership (BR-PERSON-001).
+- Should a person remain undeletable while referenced by any lease, including finished or cancelled leases, or should those historical associations be removable/archivable? The service blocks draft and active leases, but the database restricts all lease memberships (BR-PERSON-004).
+- Should person autocomplete search include email, and should it expose the full national ID or only a masked suffix?
+- Which lease should an IBAN match suggest during transaction import: only a lease in the transaction's estate, a lease covering the transaction date, an active lease preference, or a closest-date fallback? The current implementation selects the latest-starting lease and does not use transaction date.
+- Should valid IBAN input be accepted with lowercase letters and/or whitespace and normalized before storage?
+- Is a primary bank account optional, and should there be at most one primary account per person (BR-PERSON-006)?
+
 ## Transactions
 
 - What exactly do `DRAFT`, `CONFIRMED`, and `RECONCILED` mean for the business? Who confirms or reconciles a movement, and what evidence is required?

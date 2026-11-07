@@ -1,3 +1,11 @@
+---
+title: Financial Transaction
+type: business concepts
+status: draft
+last_verified: 2026-11-05
+verified_against: b99e38fb08888ee0973fc560a27258b15da926b0
+---
+
 # Concept — Financial Transaction
 
 A financial transaction represents a movement of money tracked as part of property management. It helps distinguish income from expenses, classify them, and associate them with the relevant property or activity.
@@ -33,7 +41,7 @@ Separate links can associate a transaction with one or more tracked pieces of eq
 
 These are application states observed in the code. In particular, the observed code does not define the business meaning of reconciliation or the process by which it is achieved.
 
-An import is tracked as a batch, and its rows may be identified as duplicates by fingerprint within the same estate. Classification and lease suggestions are processing aids; they should not be treated as business decisions until reviewed.
+An import is tracked as a batch, and its rows may be identified as duplicates by fingerprint within the same estate. Classification and lease suggestions are processing aids; they should not be treated as business decisions until reviewed. The current IBAN-based lease suggestion behavior is described in [Person Management](../../technical/person-management.md).
 
 ## Conceptual relationships
 

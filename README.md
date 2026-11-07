@@ -2,7 +2,7 @@
 
 Full-stack application for managing buildings, housing units, and rental operations.
 
-**Stack**: Java 21 + Spring Boot 4 + Angular 19 + PostgreSQL 15 + Docker
+**Stack**: Java 21 + Spring Boot 4 + Angular 19 + PostgreSQL + Docker
 
 ---
 
@@ -297,31 +297,40 @@ make up
 
 ```
 immocare/
-├── backend/                    # Spring Boot backend
+├── backend/                    # Spring Boot backend and Flyway migrations
+│   ├── .dockerignore
+│   ├── Dockerfile.dev
 │   ├── src/
-│   ├── Dockerfile              # Production image
-│   ├── Dockerfile.dev          # Development image
 │   └── pom.xml
 │
-├── frontend/                   # Angular frontend
+├── frontend/                   # Angular frontend and end-to-end tests
 │   ├── src/
-│   ├── Dockerfile              # Production image (Nginx)
-│   ├── Dockerfile.dev          # Development image (ng serve)
+│   ├── e2e/
 │   └── package.json
 │
-├── docker compose.yml          # Production orchestration
-├── docker compose.dev.yml      # Development orchestration
-├── Makefile                    # Simplified commands
+├── .github/                    # Copilot instructions, agents, skills, templates
+├── backlog/                    # Current backlog and open questions
+├── docker/                     # Nginx and container startup configuration
+├── documentation/              # Canonical business and technical documentation
+├── docs/                       # Retained historical analysis artifacts
+├── project_config/             # Project configuration references
+├── scripts/                    # Project scripts
+├── .gitignore
+├── CONTRIBUTING.md
+├── DOCKER_GUIDE.md
+├── docker-compose.yml          # Production orchestration
+├── docker-compose.dev.yml      # Development orchestration
+├── Dockerfile                  # Multi-stage production image
+├── Dockerfile.dev              # Development image
+├── Makefile                    # Common development commands
+├── README.md
+├── VERSION
+├── release-note.md
 │
-├── .vscode/                    # VS Code configuration
+└── .vscode/                    # VS Code configuration
 │   ├── tasks.json              # Custom tasks
 │   ├── launch.json             # Debug configs
 │   └── extensions.json         # Recommended extensions
-│
-└── docs/                       # Documentation
-    ├── DOCKER_GUIDE.md         # Detailed Docker guide
-    ├── POSTGRESQL_SETUP.md     # Database setup
-    └── IMPLEMENTATION_README.md # Implementation details
 ```
 
 ---
@@ -329,9 +338,9 @@ immocare/
 ## 📚 Documentation
 
 - **[DOCKER_GUIDE.md](./DOCKER_GUIDE.md)** - Complete Docker documentation
-- **[POSTGRESQL_SETUP.md](./POSTGRESQL_SETUP.md)** - Database setup alternatives
-- **[IMPLEMENTATION_README.md](./IMPLEMENTATION_README.md)** - Implementation details
-- **[CORRECTIONS.md](./CORRECTIONS.md)** - Bug fixes and updates
+- **[documentation/README.md](./documentation/README.md)** - Canonical business and technical documentation
+- **[CONTRIBUTING.md](./CONTRIBUTING.md)** - Development and contribution guidance
+- **[release-note.md](./release-note.md)** - Release history
 
 ---
 
@@ -360,7 +369,7 @@ cd backend && mvn spring-boot:run
 
 ### 4. Everything local (no Docker)
 
-See [POSTGRESQL_SETUP.md](./POSTGRESQL_SETUP.md) for local PostgreSQL setup.
+See [DOCKER_GUIDE.md](./DOCKER_GUIDE.md) for database and Docker setup.
 
 ---
 

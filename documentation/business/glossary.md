@@ -3,7 +3,7 @@ title: Business Glossary
 type: business reference
 status: draft
 last_verified: 2026-11-05
-verified_against: f295fb241898d79e75455198680219471509fcde
+verified_against: b99e38fb08888ee0973fc560a27258b15da926b0
 ---
 
 # Business Glossary
@@ -25,6 +25,7 @@ Concise definitions of terms used in this reference. Structurally important conc
 | Manager / viewer           | Estate-scoped application access roles; they do not, by themselves, define business roles.                                                  | [Roles](./roles.md)                                               |
 | Meter                      | A utility meter associated with a building or housing unit and tracked over a period of use.                                              | [Property equipment and assets](./concepts/property-equipment.md) |
 | Person                     | An individual recorded within the management scope who may own property or be associated with a lease.                                    | [Estate and rental](./concepts/estate-and-rental.md)              |
+| Person bank account        | An IBAN record associated with a person and used to help match transaction counterparties.                                                 | [Estate and rental](./concepts/estate-and-rental.md)              |
 | Platform administrator     | A user account with platform-wide administrative access, separate from estate-specific membership roles.                                  | [User account](./concepts/user-account.md)                        |
 | Property equipment / asset | A tracked physical item associated with a building or housing unit, such as a boiler, fire extinguisher, or meter.                        | [Property equipment and assets](./concepts/property-equipment.md) |
 | Room                       | A space or room represented as part of a housing unit.                                                                                    | [Estate and rental](./concepts/estate-and-rental.md)              |

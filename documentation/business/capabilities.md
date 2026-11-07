@@ -3,8 +3,8 @@ title: Capabilities
 type: capability-catalog
 status: draft
 last_verified: 2026-11-05
-verified_against: "f295fb241898d79e75455198680219471509fcde"
-sources: "Derived from existing documentation and backlog; to be checked against the code"
+verified_against: "b99e38fb08888ee0973fc560a27258b15da926b0"
+sources: "Checked against current person, ownership, and bank-account implementation"
 ---
 
 # Capabilities
@@ -16,8 +16,7 @@ it. Future work is in [`backlog/backlog.md`](../../backlog/backlog.md), not here
 **Status values**: `Implemented`, `Partial` (works with a known gap listed in the
 backlog).
 
-> Status and sources below were inferred from the documentation and the backlog.
-> Verify each row against the code, then update `last_verified`.
+> Status and known gaps reflect behavior checked against the current code.
 
 ## Access and estates
 
@@ -31,6 +30,8 @@ backlog).
 
 Known gaps in estate creation, member search, estate deletion, and manager-facing controls are listed in the [backlog](../../backlog/backlog.md); unsettled policy decisions are in [open questions](../../backlog/open_questions.md).
 
+Known people-management gaps include owner references that are not validated against the estate, picker search that omits email, person deletion failures for historical lease memberships, and IBAN uniqueness and lease-suggestion behavior that differ from the legacy specification. See the [backlog](../../backlog/backlog.md) and [open questions](../../backlog/open_questions.md).
+
 ## Properties
 
 | Capability                                         | Status      | Details                                              | Rules | Main sources                      |
@@ -43,8 +44,10 @@ Known gaps in estate creation, member search, estate deletion, and manager-facin
 
 | Capability                                                                               | Status      | Details                                              | Rules                  | Main sources |
 | ---------------------------------------------------------------------------------------- | ----------- | ---------------------------------------------------- | ---------------------- | ------------ |
-| Manage people (owners, tenants, guarantors) with bank accounts                           | Implemented | [Estate and rental](./concepts/estate-and-rental.md) | —                      | `Person`     |
-| Search people by first or last name                                                      | Implemented | —                                                    | —                      | to fill      |
+| Manage person records and view their owner, lease, and bank-account associations         | Partial     | [Estate and rental](./concepts/estate-and-rental.md), [Person Management](../technical/person-management.md) | BR-PERSON-001 to 004 | `PersonService`, `PersonController` |
+| Search and paginate people within an estate                                               | Implemented | [Person Management](../technical/person-management.md) | —                   | `PersonRepository`, `PersonController` |
+| Select people through the owner and lease autocomplete                                   | Partial     | [Person Management](../technical/person-management.md) | —                   | `PersonRepository`, `PersonPickerComponent` |
+| Manage person bank accounts and mark a primary account                                   | Partial     | [Person Management](../technical/person-management.md) | BR-PERSON-005, 006  | `PersonBankAccountService`, `PersonBankAccountController` |
 | Manage leases (draft, active, finished, cancelled) with rent, charges and guarantee type | Implemented | [Estate and rental](./concepts/estate-and-rental.md) | BR-LEASE-\* (to write) | `Lease`      |
 | Attach people to a lease as `PRIMARY`, `CO_TENANT` or `GUARANTOR`                        | Implemented | [Estate and rental](./concepts/estate-and-rental.md) | BR-LEASE-\* (to write) | `Lease`      |
 | View all leases in one list                                                              | Implemented | —                                                    | —                      | to fill      |
