@@ -3,7 +3,7 @@ title: Capabilities
 type: capability-catalog
 status: draft
 last_verified: 2026-11-07
-verified_against: "b99e38fb08888ee0973fc560a27258b15da926b0"
+verified_against: "HousingUnitController, HousingUnitService, HousingUnitFormComponent, HousingUnitDetailsComponent, RoomController, RoomService, RoomSectionComponent"
 sources: "Aligned to the approved domain taxonomy"
 ---
 
@@ -39,9 +39,9 @@ Known gaps in estate creation, member search, estate deletion, and manager-facin
 
 | Capability                                         | Status      | Details                                              | Rules | Main sources                      |
 | -------------------------------------------------- | ----------- | ---------------------------------------------------- | ----- | --------------------------------- |
-| Manage buildings, housing units and rooms          | Implemented | [Buildings and housing units](./buildings-and-housing-units/concepts/buildings-and-housing-units.md), [Building Management](../technical/buildings-and-housing-units/building-management.md) | BR-BUILD-001 to 003 | `Building`, `HousingUnit`, `Room` |
+| Manage buildings, housing units and rooms          | Partial | [Buildings and housing units](./buildings-and-housing-units/concepts/buildings-and-housing-units.md), [Building Management](../technical/buildings-and-housing-units/building-management.md), [Housing Unit Management](../technical/buildings-and-housing-units/housing-unit-management.md), [Room Management](../technical/buildings-and-housing-units/room-management.md) | BR-BUILD-001 to 003; BR-HUNIT-001 to 015 | `Building`, `HousingUnit`, `Room` |
 | Record owners on buildings and housing units       | Implemented | [Buildings and housing units](./buildings-and-housing-units/concepts/buildings-and-housing-units.md), [Person](./people/concepts/person.md) | — | `Person`                          |
-| Record energy performance ratings per housing unit | Implemented | [Buildings and housing units](./buildings-and-housing-units/concepts/buildings-and-housing-units.md) | — | `PebScore`                       |
+| Record and review PEB ratings, certificate validity, and rating improvements for housing units | Partial | [Buildings and housing units](./buildings-and-housing-units/concepts/buildings-and-housing-units.md), [PEB Score Management](../technical/buildings-and-housing-units/peb-score-management.md), [Alerts](./cross-cutting/concepts/alerts.md) | BR-HUNIT-016 to 023 | `PebScoreHistory`, `PebScoreService`, `AlertService` |
 
 ## People
 
@@ -88,13 +88,15 @@ Known people-management gaps include owner references that are not validated aga
 
 | Capability | Status | Details | Rules | Main sources |
 |---|---|---|---|---|
-| View pending alerts across business domains | Implemented | [Alerts](./cross-cutting/concepts/alerts.md), [Estate Management](../technical/estates-and-access/estate-management.md) | — | `AlertService`, `AlertController`, `EstateService` |
+| View pending alerts across business domains, including PEB certificate expiry | Implemented | [Alerts](./cross-cutting/concepts/alerts.md), [PEB Score Management](../technical/buildings-and-housing-units/peb-score-management.md), [Estate Management](../technical/estates-and-access/estate-management.md) | BR-HUNIT-023 | `AlertService`, `AlertController`, `EstateService` |
 
-Alert types can originate from equipment, leases, PEB information, and other domains. The current estate dashboard reports pending boiler, fire-extinguisher, lease-end, and indexation alert counts; listing PEB as a possible alert source does not claim that a PEB alert is currently implemented.
+The current alert list includes boiler service, lease, and PEB certificate expiry alerts. The estate dashboard separately reports pending boiler, fire-extinguisher, lease-end, and indexation alert counts.
 
-Known gaps for the `Partial` rows: see the matching items in the backlog (import
-review action and duplicate decisions, financial dashboard, generalized devices,
-and user-account session invalidation and deletion controls).
+Known gaps for the `Partial` rows: see the matching items in the backlog (room
+and PEB estate scoping, room not-found handling, PEB rating palette and
+load-error presentation, import review action and duplicate decisions,
+financial dashboard, generalized devices, and user-account session
+invalidation and deletion controls).
 
 ## Planned but not implemented
 

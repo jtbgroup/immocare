@@ -8,7 +8,7 @@ verified_against: b99e38fb08888ee0973fc560a27258b15da926b0
 
 # Person Data Dictionary
 
-This page records persisted fields for people and their bank accounts. Account, estate, and estate-membership fields remain in the [Account and Estate Data Dictionary](./data-dictionary.md). Relationships are shown in the [User, Estate, Person, and Property Data Model](../cross-cutting/data-model.md).
+This page records persisted fields for people and their bank accounts. Account fields are in the [User Account Data Dictionary](../user-accounts-and-authentication/user-account-data-dictionary.md); estate and membership fields are in the [Estate Data Dictionary](../estates-and-access/estate-data-dictionary.md). Relationships are shown in the [User, Estate, Person, and Property Data Model](../cross-cutting/data-model.md).
 
 ## Entity: `person`
 

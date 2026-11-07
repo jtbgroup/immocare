@@ -32,6 +32,7 @@ This documentation describes the property-management domain independently of the
 
 - [Buildings and housing units concept](./business/buildings-and-housing-units/concepts/buildings-and-housing-units.md)
 - [Building rules](./business/buildings-and-housing-units/rules/buildings.md)
+- [Housing-unit rules](./business/buildings-and-housing-units/rules/housing-units.md)
 
 ### People
 
@@ -74,6 +75,10 @@ This documentation describes the property-management domain independently of the
 ### Buildings and Housing Units
 
 - [Building management](./technical/buildings-and-housing-units/building-management.md)
+- [Housing-unit management](./technical/buildings-and-housing-units/housing-unit-management.md)
+- [Room management](./technical/buildings-and-housing-units/room-management.md)
+- [PEB score management](./technical/buildings-and-housing-units/peb-score-management.md)
+- [Housing-unit data dictionary](./technical/buildings-and-housing-units/housing-unit-data-dictionary.md)
 
 ### People
 

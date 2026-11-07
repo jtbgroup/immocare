@@ -28,6 +28,10 @@ This file contains concrete business or product decisions that still need to be 
 - Does a housing unit inherit the building's owner when no unit-specific owner is recorded, or does the missing owner mean ownership is unknown?
 - Can a building or housing unit have multiple owners? If so, should ownership shares and their changes over time be documented?
 - What is the ownership rule when a building and one of its housing units have different owners?
+- Should creation and update both require a positive surface when a terrace or garden is recorded? The update service enforces this, but creation does not (BR-HUNIT-008).
+- Which associated data should prevent deletion of a housing unit, and which may be deleted or detached with it? Current behavior blocks rooms and fire extinguishers, cascades PEB and rent history, is restricted by leases, detaches transaction links, and does not clean up generic boiler or meter owner references (BR-HUNIT-006).
+- Should the computed sum of room surfaces update `housing_unit.total_surface`, or remain a separate room-composition measure?
+- For a room batch with one invalid non-empty row, should the system reject the whole batch or create the valid rows? The use-case analysis requires all-or-nothing validation, while a related story says valid rows can still be saved (BR-HUNIT-015).
 - Which business events and criteria move a lease from draft to active, finished, or cancelled?
 - Can lease periods for the same housing unit overlap?
 - Which maintenance or inspection obligations apply to boilers and fire extinguishers, and who is responsible for meeting them?
@@ -36,6 +40,12 @@ This file contains concrete business or product decisions that still need to be 
 - What validity and alerting rules should apply to fire-extinguisher revisions?
 - check the statuses of the leases. See business concept documentation.
 - In a lease, changing the role of a person needs validation. Is that correct?
+
+### PEB scores
+
+- Should PEB history be append-only, or may estate managers edit and delete recorded scores? The product analysis describes append-only history, but the current API and interface support both operations (BR-HUNIT-020).
+- Should multiple PEB records be allowed to have the same rating date, and, if so, how should the current rating be selected when the latest dates tie? The current query has no tie-breaker (BR-HUNIT-021).
+- Should the housing-unit detail warning use the estate-configured PEB alert threshold, or remain fixed at three months? The detail response uses three months while estate alerts use the configurable setting (BR-HUNIT-022, BR-HUNIT-023).
 
 ## People and bank accounts
 

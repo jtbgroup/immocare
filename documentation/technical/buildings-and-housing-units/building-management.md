@@ -8,7 +8,7 @@ verified_against: b99e38fb08888ee0973fc560a27258b15da926b0
 
 # Building Management
 
-This page describes the current estate-scoped building APIs, validation, listing, and deletion behavior. Business concepts are in [Buildings and Housing Units](../../business/buildings-and-housing-units/concepts/buildings-and-housing-units.md), canonical constraints are in [Building Rules](../../business/buildings-and-housing-units/rules/buildings.md), and entity relationships are shown in the [data model](../cross-cutting/data-model.md).
+This page describes the current estate-scoped building APIs, validation, listing, and deletion behavior. Business concepts are in [Buildings and Housing Units](../../business/buildings-and-housing-units/concepts/buildings-and-housing-units.md), canonical constraints are in [Building Rules](../../business/buildings-and-housing-units/rules/buildings.md), and entity relationships are shown in the [data model](../cross-cutting/data-model.md). See [Housing Unit Management](./housing-unit-management.md) for housing-unit operations.
 
 ## Access and estate scope
 

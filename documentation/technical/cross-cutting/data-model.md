@@ -1,16 +1,16 @@
 ---
-title: User, Estate, Person, and Property Data Model
+title: User, Estate, Person, Room, PEB, and Property Data Model
 type: technical reference
 status: current
 last_verified: 2026-11-07
-verified_against: b99e38fb08888ee0973fc560a27258b15da926b0
+verified_against: "b99e38fb08888ee0973fc560a27258b15da926b0, Room, PebScoreHistory, V007__uc007_manage_rooms.sql, V008__uc008_manage_peb_scores.sql"
 ---
 
-# User, Estate, Person, and Property Data Model
+# User, Estate, Person, Room, PEB, and Property Data Model
 
-This page shows the current account and estate relationships, together with person, property, ownership, lease-membership, and person-bank-account relationships.
+This page shows the current account and estate relationships, together with person, property, room, PEB-history, ownership, lease-membership, and person-bank-account relationships.
 
-## Account, estate, person, and property entities
+## Account, estate, person, room, and property entities
 
 ```mermaid
 erDiagram
@@ -59,6 +59,21 @@ erDiagram
         bigint building_id FK
         bigint owner_id FK
     }
+    ROOM {
+        bigint id PK
+        bigint housing_unit_id FK
+        string room_type
+        decimal approximate_surface
+    }
+    PEB_SCORE_HISTORY {
+        bigint id PK
+        bigint housing_unit_id FK
+        string peb_score
+        date score_date
+        string certificate_number
+        date valid_until
+        timestamp created_at
+    }
     LEASE {
         bigint id PK
         bigint housing_unit_id FK
@@ -78,13 +93,15 @@ erDiagram
     PERSON o|--o{ HOUSING_UNIT : owns
     ESTATE ||--o{ BUILDING : contains
     BUILDING ||--o{ HOUSING_UNIT : contains
+    HOUSING_UNIT ||--o{ ROOM : contains
+    HOUSING_UNIT ||--o{ PEB_SCORE_HISTORY : has
     HOUSING_UNIT ||--o{ LEASE : has
     PERSON ||--o{ LEASE_TENANT : participates
     LEASE ||--o{ LEASE_TENANT : includes
 ```
 
-`APP_USER`, `ESTATE`, `ESTATE_MEMBER`, `PERSON`, `PERSON_BANK_ACCOUNT`, `BUILDING`, `HOUSING_UNIT`, and `LEASE_TENANT` are persisted as `app_user`, `estate`, `estate_member`, `person`, `person_bank_account`, `building`, `housing_unit`, and `lease_tenant`. An estate membership has the composite key `(estate_id, user_id)`. Lease membership has the composite key `(lease_id, person_id)`. Deleting a user account cascades to its membership rows; deleting a person cascades to person bank accounts, while lease membership references restrict person deletion.
+`APP_USER`, `ESTATE`, `ESTATE_MEMBER`, `PERSON`, `PERSON_BANK_ACCOUNT`, `BUILDING`, `HOUSING_UNIT`, `ROOM`, `PEB_SCORE_HISTORY`, and `LEASE_TENANT` are persisted as `app_user`, `estate`, `estate_member`, `person`, `person_bank_account`, `building`, `housing_unit`, `room`, `peb_score_history`, and `lease_tenant`. An estate membership has the composite key `(estate_id, user_id)`. Lease membership has the composite key `(lease_id, person_id)`. Deleting a user account cascades to its membership rows; deleting a person cascades to person bank accounts, while lease membership references restrict person deletion. A room and a PEB history record each reference one housing unit; the database cascades their deletion when the housing unit is deleted, although the housing-unit service currently blocks deletion if rooms remain.
 
 The account has a global platform-administrator flag, while estate-specific roles are stored on membership rows. A platform administrator may also have estate memberships. The model does not directly link a user account to a `Person` record, although domain records may store user audit references; assessing whether such a link would be useful is tracked in the [backlog](../../../backlog/backlog.md).
 
-The [person data dictionary](../people/person-data-dictionary.md) documents the `person` and `person_bank_account` fields and constraints. The [user account data dictionary](../user-accounts-and-authentication/user-account-data-dictionary.md) documents account fields; the [estate data dictionary](../estates-and-access/estate-data-dictionary.md) documents estate and membership fields. See [Person Management](../people/person-management.md) for person operations, [Building Management](../buildings-and-housing-units/building-management.md) for building operations, [User Account Management](../user-accounts-and-authentication/user-management.md) for account operations, and [Estate Management](../estates-and-access/estate-management.md) for estate operations.
+The [person data dictionary](../people/person-data-dictionary.md) documents the `person` and `person_bank_account` fields and constraints. The [user account data dictionary](../user-accounts-and-authentication/user-account-data-dictionary.md) documents account fields; the [estate data dictionary](../estates-and-access/estate-data-dictionary.md) documents estate and membership fields; and the [housing-unit data dictionary](../buildings-and-housing-units/housing-unit-data-dictionary.md) documents housing-unit, room, and PEB-history fields. See [Person Management](../people/person-management.md) for person operations, [Building Management](../buildings-and-housing-units/building-management.md) for building operations, [Housing Unit Management](../buildings-and-housing-units/housing-unit-management.md) for housing-unit operations, [Room Management](../buildings-and-housing-units/room-management.md) for room operations, [PEB Score Management](../buildings-and-housing-units/peb-score-management.md) for PEB rating and certificate behavior, [User Account Management](../user-accounts-and-authentication/user-management.md) for account operations, and [Estate Management](../estates-and-access/estate-management.md) for estate operations.

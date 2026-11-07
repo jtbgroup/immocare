@@ -3,7 +3,7 @@ title: Business Glossary
 type: business reference
 status: draft
 last_verified: 2026-11-07
-verified_against: b99e38fb08888ee0973fc560a27258b15da926b0
+verified_against: "HousingUnit, PebScore, PebScoreHistory, CreateHousingUnitRequest, UpdateHousingUnitRequest, CreatePebScoreRequest"
 ---
 
 # Business Glossary
@@ -17,11 +17,12 @@ Concise definitions of terms used in this reference. Structurally important conc
 | Boiler                     | A heating appliance tracked by its installation, service dates, and service history.                                                      | [Property equipment and assets](./equipment/concepts/property-equipment.md) |
 | Building                   | A property in an estate that may contain housing units.                                                                                   | [Buildings and housing units](./buildings-and-housing-units/concepts/buildings-and-housing-units.md) |
 | Category / subcategory     | Hierarchical classification levels used to classify transactions.                                                                         | [Financial transaction](./financial-transactions/concepts/financial-transaction.md) |
-| Energy performance rating (PEB) | A rating recorded for a housing unit to represent its energy performance.                                                             | [Buildings and housing units](./buildings-and-housing-units/concepts/buildings-and-housing-units.md) |
+| Energy performance rating (PEB) | A dated energy-performance grade recorded for a housing unit, optionally with certificate details and a validity end date.             | [Buildings and housing units](./buildings-and-housing-units/concepts/buildings-and-housing-units.md) |
 | Estate                     | A property-management entity, such as a real-estate agency or an individual who owns several properties.                                    | [Estate and access](./estates-and-access/concepts/estate-and-access.md) |
 | Estate membership          | The association that grants a user account a role within a specific estate.                                                                | [Estate and access](./estates-and-access/concepts/estate-and-access.md) |
 | Financial transaction      | An inflow or outflow recorded in an estate, with a date, amount, and direction.                                                           | [Financial transaction](./financial-transactions/concepts/financial-transaction.md) |
 | Fire extinguisher          | Fire-safety equipment that can be associated with a building or a housing unit and has a revision history.                                | [Property equipment and assets](./equipment/concepts/property-equipment.md) |
+| Garden                     | An outdoor garden associated with a housing unit, with an optional recorded surface and orientation.                                      | [Buildings and housing units](./buildings-and-housing-units/concepts/buildings-and-housing-units.md) |
 | Housing unit               | A dwelling or unit within a building that may be associated with a lease.                                                                 | [Buildings and housing units](./buildings-and-housing-units/concepts/buildings-and-housing-units.md) |
 | Lease                      | A rental relationship associated with a housing unit and one or more people.                                                              | [Lease](./leases/concepts/lease.md)                                |
 | Manager / viewer           | Estate-scoped application access roles; they do not, by themselves, define business roles.                                                  | [Roles](./cross-cutting/roles.md)                                 |
@@ -32,5 +33,6 @@ Concise definitions of terms used in this reference. Structurally important conc
 | Property equipment / asset | A tracked physical item associated with a building or housing unit, such as a boiler, fire extinguisher, or meter.                        | [Property equipment and assets](./equipment/concepts/property-equipment.md) |
 | Room                       | A space or room represented as part of a housing unit.                                                                                    | [Buildings and housing units](./buildings-and-housing-units/concepts/buildings-and-housing-units.md) |
 | Service / revision         | A recorded maintenance or inspection event for tracked equipment.                                                                         | [Property equipment and assets](./equipment/concepts/property-equipment.md) |
+| Terrace                    | An outdoor area associated with a housing unit, with an optional recorded surface and orientation.                                        | [Buildings and housing units](./buildings-and-housing-units/concepts/buildings-and-housing-units.md) |
 | Transaction-to-asset link  | A relationship that associates a financial transaction with tracked equipment, optionally assigning part of the transaction amount to it. | [Financial transaction](./financial-transactions/concepts/financial-transaction.md) |
 | User account               | An application identity used to sign in; it is distinct from a person record.                                                              | [User account](./user-accounts-and-authentication/concepts/user-account.md) |

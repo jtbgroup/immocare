@@ -42,6 +42,12 @@
 - [ ] Make the application multilingual.
 - [x] Add bank accounts to people to support reconciliation with financial transactions.
 - [ ] Enforce estate consistency when assigning a person as a building or housing-unit owner, and scope owner association lookups to that estate.
+- [ ] Order housing units within a building by floor and then unit number; the current query does not specify an ordering.
+- [ ] Enforce estate ownership checks for room operations: the room controller checks membership of the route estate, but the service does not verify that the housing unit belongs to that estate.
+- [ ] Map missing or mismatched room IDs to the documented not-found response instead of the generic server-error handler.
+- [ ] Enforce estate ownership checks for PEB score operations: the controller checks membership of the route estate, but the service does not verify that the housing unit belongs to that estate.
+- [ ] Change the PEB grade `G` badge color from purple to dark red to match the documented rating palette.
+- [ ] Apply the rating colors to the PEB grade options and surface failures when loading the current rating, history, or improvement summary instead of presenting empty states.
 - [ ] Return a structured deletion conflict for people referenced by finished or cancelled leases, after confirming the intended deletion policy.
 - [ ] Update the person picker to match the confirmed search and national-ID display policy.
 - [ ] Align IBAN-based lease suggestions with the confirmed estate scope, transaction-date, and lease-status selection policy.
