@@ -36,8 +36,8 @@ This file contains concrete business or product decisions that still need to be 
 - Which associated data should prevent deletion of a housing unit, and which may be deleted or detached with it? Current behavior blocks rooms and fire extinguishers, cascades PEB and rent history, is restricted by leases, detaches transaction links, and does not clean up generic boiler or meter owner references (BR-HUNIT-006).
 - Should the computed sum of room surfaces update `housing_unit.total_surface`, or remain a separate room-composition measure?
 - For a room batch with one invalid non-empty row, should the system reject the whole batch or create the valid rows? The use-case analysis requires all-or-nothing validation, while a related story says valid rows can still be saved (BR-HUNIT-015).
-- Which business events and criteria move a lease from draft to active, finished, or cancelled?
-- Can lease periods for the same housing unit overlap?
+- Are the implemented lease status transitions (`DRAFT` to `ACTIVE` or `CANCELLED`; `ACTIVE` to `FINISHED` or `CANCELLED`) the intended business lifecycle, and should finishing or cancelling retain an effective date and notes (BR-LEASE-004)? The status API accepts those fields but currently ignores them.
+- Can leases for the same housing unit have overlapping date ranges, and should activating a draft be rejected when another lease is already active (BR-LEASE-002)? Creation is blocked while a draft or active lease exists, but status activation does not repeat that check and historical date ranges are not compared.
 - Which maintenance or inspection obligations apply to boilers and fire extinguishers, and who is responsible for meeting them?
 - Can a piece of equipment be associated with both a building and one of its housing units at the same time, or must it have exactly one management context?
 - Are the currently supported boiler fuel and utility-meter categories complete?
@@ -55,8 +55,11 @@ This file contains concrete business or product decisions that still need to be 
 - Should multiple active meters of the same type be allowed for one building or housing unit (BR-EQ-011)?
 - Should the optional meter replacement reason be retained as part of meter history?
 - How should meter duration be calculated when the start and end dates do not fall on the same day of the month?
-- check the statuses of the leases. See business concept documentation.
-- In a lease, changing the role of a person needs validation. Is that correct?
+- Should a manager be able to change a person's role on a lease directly, and what validation should apply? The current API supports adding and removing participants but has no role-update operation.
+- Should leases in `DRAFT` and `CANCELLED` status be deletable, while `ACTIVE` and `FINISHED` leases remain undeletable (BR-LEASE-010)?
+- Should lease indexation retain dedicated details such as index value, index month, and notification date, or is a rent adjustment with an effective date and reason sufficient? The current implementation only stores general rent and charge adjustments.
+- Should lease end-notice alerts apply to draft leases and remain visible after the lease end date? Current detail and unit-summary flags are not status-gated, and the contextual alert query includes drafts and does not expire an alert after the end date.
+- Should cancelled leases be grouped with finished lease history on the housing-unit page? The current page places every non-finished lease, including cancelled ones, in its main list.
 
 ### PEB scores
 
@@ -83,11 +86,16 @@ This file contains concrete business or product decisions that still need to be 
 
 ## Transactions
 
-- What exactly do `DRAFT`, `CONFIRMED`, and `RECONCILED` mean for the business? Who confirms or reconciles a movement, and what evidence is required?
-- Can a `RECONCILED` transaction ever be changed?
+- What exactly do `DRAFT`, `CONFIRMED`, and `RECONCILED` mean for the business? Who confirms or reconciles a movement, and what evidence is required? The creation choices and default are settled in BR-TX-012; the status meanings and reconciliation process remain open.
+- Is `CANCELLED` an intended transaction status? The database constraint permits it, but the Java status enum does not.
+- Can a `RECONCILED` transaction ever be changed? BR-TX-005 currently reflects an implementation restriction; its business rationale has not been confirmed.
+- Should the generated transaction reference and/or transaction source be editable when a transaction is edited? The current form displays the reference but exposes neither field in the update request.
 - Can a lease be associated with an expense in some business cases, or should that association be restricted to income?
-- Are equipment links limited to expenses? Can one transaction be split across multiple equipment items?
+- Are equipment links limited to expenses? The form hides them for income, but the API currently accepts links for either direction. Can one transaction be split across multiple equipment items?
 - If several equipment items are linked, does an omitted amount assign the full amount to each one, or should there be at most one link without an amount?
-- What is the accounting-month assignment policy: bank transaction date, value date, rent period, or a category-specific rule?
+- For the confirmed allocation of a transaction across multiple costs (BR-TX-011), what should each allocation identify, and must allocation amounts sum to the full transaction amount?
+- What is the accounting-month assignment policy: bank transaction date, value date, rent period, or a category-specific rule? Manual entry currently proposes the current month on load and does not update that proposal when the subcategory or counterparty account changes.
 - What is the business rule for identifying a duplicate bank movement? Are the same date, amount, and counterparty sufficient, and what is the scope over time?
+- Should a subcategory be required for a manually entered transaction? The historical creation criteria say it is required, while the current form and API allow it to be omitted.
+- Should manually created or edited transactions reinforce automatic classification and accounting-month learning rules? The current save path does this, but the suggestion behavior is outside the current manual-entry documentation scope.
 - Must an automatically learned classification always be confirmed by a manager before it is considered reliable?

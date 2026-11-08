@@ -47,6 +47,8 @@
 - [ ] Enforce estate ownership checks for housing-unit rent-history operations: the controller checks the route estate, but the service does not verify that the housing unit belongs to that estate.
 - [ ] Recalculate housing-unit rent-history periods consistently when inserting a record before an existing record; current behavior can leave overlapping effective periods.
 - [ ] Support applicable external lease-regulation requirements, including any regulated reference rent for a housing unit, separately from its theoretical rent and the contractual lease rent; the application has no dedicated data, API, or interface support for these requirements.
+- [ ] Use the estate-configured lease indexation warning period (`contracts.alert.lease.indexation.days`) in lease alert calculations; the current lease service hard-codes a 30-day window.
+- [ ] Enforce the one-active-or-draft-lease-per-housing-unit constraint when activating a draft lease; the current creation check does not prevent activation when another lease is already active (BR-LEASE-002).
 - [ ] Complete configuration of equipment-to-subcategory mappings: establish their intended scope and implement the API and settings UI; keys are seeded per estate, but mapping API operations are commented out and the current UI scaffold is wired to unrelated alert settings and cannot save mappings.
 - [ ] Map missing or mismatched room IDs to the documented not-found response instead of the generic server-error handler.
 - [ ] Enforce estate ownership checks for PEB score operations: the controller checks membership of the route estate, but the service does not verify that the housing unit belongs to that estate.
@@ -80,10 +82,12 @@
 - [x] Align the transaction form layout with other forms; apply the global width styling to the bank-account form and list.
 - [x] Move transaction categories into Settings and integrate catalogue management there, removing the transaction-screen button.
 - [x] Add a transaction-import review flow: select rows, confirm imports, link rows to properties or people, identify potential duplicates, and use known data or learning to suggest links such as leases, units, buildings, and meters.
-- [ ] Verify the financial-transaction documentation against the current code.
+- [x] Verify the financial-transaction documentation against the current code for [manual transaction management](../documentation/technical/financial-transactions/manual-transaction-management.md); import and automated suggestion behavior remain outside that reference's scope.
 - [ ] Make the imported-transaction review action work and provide decisions for potential duplicates.
 - [ ] Use European rather than US formatting for monetary amounts.
-- [ ] Show expected and paid rent in financial views; include all related income and expenses on unit and building pages, including allocation of grouped invoices.
+- [ ] Support allocation of a single transaction across multiple distinct expenses, including costs not linked to equipment, and show those allocations in relevant financial views.
+- [ ] Keep transaction list queries paginated and limited to transaction rows; move aggregate totals to the financial dashboard to avoid calculating sums across all matching transactions.
+- [ ] Allow selecting `DRAFT` or `CONFIRMED` when manually creating a transaction (default `CONFIRMED`), and persist the choice; keep subsequent status changes on a dedicated action, not the edit operation (BR-TX-012).
 - [ ] Fix the financial dashboard.
 - [ ] Support bulk updates and deletion from lists using row selection.
 - [x] Add rooms and energy-performance ratings to the seed scripts.
@@ -95,3 +99,6 @@
 - [ ] Generalize boilers, fire extinguishers, and meters as devices, including support for generic device types.
 - [ ] An asset can be associated to a building or a unit whatever the tye of asset. This is a business requirement, even though the current application does not yet support it consistently. >> Verify this is implemented everywhere.
 - [ ] Have a technical documentation file summarizing the API endpoints
+- [ ] Verify the paging is done on server side
+- [ ] Use variables for css so we can have a theme
+- [ ] standard angular components must have shared css classes; custom components have their own css

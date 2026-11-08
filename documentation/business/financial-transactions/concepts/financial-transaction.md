@@ -2,8 +2,8 @@
 title: Financial Transaction
 type: business concepts
 status: draft
-last_verified: 2026-11-05
-verified_against: b99e38fb08888ee0973fc560a27258b15da926b0
+last_verified: 2026-11-08
+verified_against: "FinancialTransactionService, TransactionFormComponent, TransactionController, TransactionAssetLink, V015__uc015_manage_financial_transactions.sql, stakeholder confirmation 2026-11-08"
 ---
 
 # Concept — Financial Transaction
@@ -21,6 +21,10 @@ The model distinguishes two directions: **income** (`INCOME`) and **expense** (`
 - The **accounting month** is the month used for grouping and reporting. It is recorded at month granularity and may differ from the transaction date.
 
 The current import behavior defaults to the month of the transaction date; for manual entry, the accounting month is provided separately. The accounting policy to apply needs confirmation.
+The manual form initially proposes the current month, allows the user to change it,
+and does not automatically recalculate it when other fields change. See
+[Manual Transaction Management](../../../technical/financial-transactions/manual-transaction-management.md)
+for the current form and API behavior.
 
 ## Classification
 
@@ -32,14 +36,22 @@ A transaction belongs to an estate. It may be associated with a bank account, bu
 
 Separate links can associate a transaction with one or more tracked pieces of equipment: a boiler, fire extinguisher, or meter. A partial amount may be assigned to an item of equipment. The code accepts a sum of partial amounts that does not exceed the transaction total.
 
+An expense transaction may cover multiple costs, and allocating it across costs is
+not limited to equipment links ([BR-TX-011](../rules/financial-transactions.md)).
+The current implementation only persists allocations to tracked equipment; support
+for allocations to other costs is tracked in the [backlog](../../../../backlog/backlog.md).
+
 ## Origin, status, and import
 
 - A transaction originates either from manual entry or from an import.
-- A manually entered transaction is created with status `CONFIRMED`.
-- An imported transaction with enrichment is created as `CONFIRMED`; an imported row without enrichment is created as `DRAFT`.
+- The current implementation creates manually entered transactions with status `CONFIRMED`; the confirmed target permits choosing `DRAFT` or `CONFIRMED` at creation, defaulting to `CONFIRMED` ([BR-TX-012](../rules/financial-transactions.md)).
+- An imported transaction with per-row review data is created as `CONFIRMED`; an imported row without it is created as `DRAFT`. The review data may override direction or assign classification, lease, housing-unit, building, or equipment links.
 - Transactions with status `RECONCILED` cannot be modified or deleted by the observed service.
 
 These are application states observed in the code. In particular, the observed code does not define the business meaning of reconciliation or the process by which it is achieved.
+
+The current manual-entry flow and its create, list, edit, and delete behavior are
+described in [Manual Transaction Management](../../../technical/financial-transactions/manual-transaction-management.md).
 
 An import is tracked as a batch, and its rows may be identified as duplicates by fingerprint within the same estate. Classification and lease suggestions are processing aids; they should not be treated as business decisions until reviewed. The current IBAN-based lease suggestion behavior is described in [Person Management](../../../technical/people/person-management.md).
 
@@ -51,6 +63,7 @@ Transaction → Direction + Date + Accounting month + Amount
 Transaction → Category → Subcategory
 Transaction → Bank account (optional)
 Transaction → Building / housing unit / lease (optional)
+Transaction → Expense allocation → Multiple costs (equipment or other)
 Transaction → Equipment item(s) (optional)
 Import → Batch → Imported transaction(s)
 ```

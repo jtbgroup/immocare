@@ -2,8 +2,8 @@
 title: Business Glossary
 type: business reference
 status: draft
-last_verified: 2026-11-07
-verified_against: "HousingUnit, PebScore, PebScoreHistory, RentHistory, Lease, LeaseRentAdjustment, Boiler, BoilerServiceRecord, BoilerServiceValidityRule, FireExtinguisher, FireExtinguisherRevision, Meter, SaveBoilerRequest, SaveFireExtinguisherRequest, AddMeterRequest, CreateHousingUnitRequest, UpdateHousingUnitRequest, CreatePebScoreRequest, SetRentRequest, V010__uc010_manage_rents.sql, V014__uc014_manage_leases.sql, stakeholder confirmation 2026-11-07"
+last_verified: 2026-11-08
+verified_against: "HousingUnit, PebScore, PebScoreHistory, RentHistory, Lease, LeaseRentAdjustment, Boiler, BoilerServiceRecord, BoilerServiceValidityRule, FireExtinguisher, FireExtinguisherRevision, Meter, FinancialTransaction, TransactionAssetLink, FingerprintUtil, SaveBoilerRequest, SaveFireExtinguisherRequest, AddMeterRequest, CreateHousingUnitRequest, UpdateHousingUnitRequest, CreatePebScoreRequest, SetRentRequest, V010__uc010_manage_rents.sql, V014__uc014_manage_leases.sql, V015__uc015_manage_financial_transactions.sql, stakeholder confirmation 2026-11-08"
 ---
 
 # Business Glossary
@@ -27,6 +27,7 @@ Concise definitions of terms used in this reference. Structurally important conc
 | Fire extinguisher          | Fire-safety equipment associated with a building or a housing unit and tracked with revision records.                                     | [Property equipment and assets](./equipment/concepts/property-equipment.md) |
 | Garden                     | An outdoor garden associated with a housing unit, with an optional recorded surface and orientation.                                      | [Buildings and housing units](./buildings-and-housing-units/concepts/buildings-and-housing-units.md) |
 | Housing unit               | A dwelling or unit within a building that may be associated with a lease.                                                                 | [Buildings and housing units](./buildings-and-housing-units/concepts/buildings-and-housing-units.md) |
+| Import fingerprint         | A SHA-256 value derived from an imported transaction's date, amount, counterparty account, and normalized description for duplicate detection. | [Financial transaction rules](./financial-transactions/rules/financial-transactions.md) |
 | Lease                      | A rental relationship associated with a housing unit and one or more people.                                                              | [Lease](./leases/concepts/lease.md)                                |
 | Manager / viewer           | Estate-scoped application access roles; they do not, by themselves, define business roles.                                                  | [Roles](./cross-cutting/roles.md)                                 |
 | Meter                      | A water, gas, or electricity meter associated with a building or housing unit, tracked over an active or closed use period.                | [Property equipment and assets](./equipment/concepts/property-equipment.md) |
@@ -40,5 +41,6 @@ Concise definitions of terms used in this reference. Structurally important conc
 | Room                       | A space or room represented as part of a housing unit.                                                                                    | [Buildings and housing units](./buildings-and-housing-units/concepts/buildings-and-housing-units.md) |
 | Service / revision         | A recorded maintenance or inspection event for tracked equipment.                                                                         | [Property equipment and assets](./equipment/concepts/property-equipment.md) |
 | Terrace                    | An outdoor area associated with a housing unit, with an optional recorded surface and orientation.                                        | [Buildings and housing units](./buildings-and-housing-units/concepts/buildings-and-housing-units.md) |
+| Transaction allocation     | The breakdown of a financial transaction into one or more expense items, which may refer to equipment or other costs.                       | [Financial transaction](./financial-transactions/concepts/financial-transaction.md) |
 | Transaction-to-asset link  | A relationship that associates a financial transaction with tracked equipment, optionally assigning part of the transaction amount to it. | [Financial transaction](./financial-transactions/concepts/financial-transaction.md) |
 | User account               | An application identity used to sign in; it is distinct from a person record.                                                              | [User account](./user-accounts-and-authentication/concepts/user-account.md) |

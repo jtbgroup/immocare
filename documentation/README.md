@@ -90,6 +90,7 @@ This documentation describes the property-management domain independently of the
 ### Leases
 
 - [Technical references for leases](./technical/leases/README.md)
+- [Lease management](./technical/leases/lease-management.md)
 
 ### Equipment
 
@@ -104,6 +105,7 @@ This documentation describes the property-management domain independently of the
 ### Financial Transactions
 
 - [Technical references for financial transactions](./technical/financial-transactions/README.md)
+- [Manual transaction management](./technical/financial-transactions/manual-transaction-management.md)
 
 ### Cross-cutting technical references
 
