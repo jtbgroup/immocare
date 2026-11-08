@@ -146,12 +146,22 @@
           <div class="form-row">
             <div class="form-group form-group--last">
               <label>{{ "GLOBAL.STATUS" | transloco }}</label>
-              <div class="status-value">
-                {{ "TRANSACTION.STATUS_VALUES." + currentStatus | transloco }}
-              </div>
-              <span class="hint">{{
-                "TRANSACTION.STATUS_HELP" | transloco
-              }}</span>
+              @if (isEdit) {
+                <div class="status-value">
+                  {{ "TRANSACTION.STATUS_VALUES." + currentStatus | transloco }}
+                </div>
+                <span class="hint">{{
+                  "TRANSACTION.STATUS_HELP" | transloco
+                }}</span>
+              } @else {
+                <select formControlName="status">
+                  @for (status of manualTransactionStatuses; track status) {
+                    <option [ngValue]="status">
+                      {{ "TRANSACTION.STATUS_VALUES." + status | transloco }}
+                    </option>
+                  }
+                </select>
+              }
             </div>
             <div class="form-group form-group--last"></div>
           </div>

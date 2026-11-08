@@ -4,6 +4,7 @@ import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.List;
 
+import com.immocare.model.enums.ManualTransactionStatus;
 import com.immocare.model.enums.TransactionDirection;
 
 import jakarta.validation.constraints.NotNull;
@@ -24,5 +25,6 @@ public record CreateTransactionRequest(
         Long leaseId,
         Long housingUnitId,
         Long buildingId,
-        List<SaveAssetLinkRequest> assetLinks) {
+        List<SaveAssetLinkRequest> assetLinks,
+        ManualTransactionStatus status) {
 }

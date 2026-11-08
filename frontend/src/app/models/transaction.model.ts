@@ -3,6 +3,7 @@ export type TransactionStatus =
   | "DRAFT"
   | "CONFIRMED"
   | "RECONCILED";
+export type ManualTransactionStatus = "DRAFT" | "CONFIRMED";
 export type TransactionSource = "MANUAL" | "IMPORT";
 export type AssetType = "BOILER" | "FIRE_EXTINGUISHER" | "METER";
 export type SubcategoryDirection = "INCOME" | "EXPENSE" | "BOTH";
@@ -118,9 +119,6 @@ export interface PagedTransactionResponse {
   size: number;
   totalElements: number;
   totalPages: number;
-  totalIncome: number;
-  totalExpenses: number;
-  netBalance: number;
 }
 
 // ─── Statistics ───────────────────────────────────────────────────────────────
@@ -289,7 +287,7 @@ export interface StatisticsFilter {
 
 // ─── Requests ─────────────────────────────────────────────────────────────────
 
-export interface CreateTransactionRequest {
+export interface TransactionRequestFields {
   direction: TransactionDirection;
   transactionDate: string;
   valueDate?: string;
@@ -305,6 +303,14 @@ export interface CreateTransactionRequest {
   buildingId?: number;
   assetLinks?: SaveAssetLinkRequest[];
 }
+
+export interface CreateTransactionRequest extends TransactionRequestFields {
+  status?: ManualTransactionStatus;
+}
+
+export type UpdateTransactionRequest = TransactionRequestFields & {
+  status?: never;
+};
 
 export interface ConfirmTransactionRequest {
   subcategoryId?: number;

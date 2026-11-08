@@ -1,7 +1,7 @@
 ---
 name: angular-frontend
 description: "Implement, maintain, and test Angular 19 frontend features using standalone components, Signals, and Transloco."
-tools: ["codebase"]
+tools: ["codebase", "terminal", "edit"]
 ---
 
 # Agent: Angular Frontend Specialist

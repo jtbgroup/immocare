@@ -177,38 +177,9 @@
     </div>
   }
 
-  <!-- Summary bar -->
+  <!-- Result count only; financial aggregates are shown on the dashboard. -->
   @if (response) {
     <div class="summary-bar">
-      <div class="summary-item summary-item--income">
-        <span class="summary-label">{{
-          "TRANSACTION.TOTAL_INCOME" | transloco
-        }}</span>
-        <span class="summary-value">{{
-          response.totalIncome | belgianCurrency: true : "+"
-        }}</span>
-      </div>
-      <div class="summary-item summary-item--expense">
-        <span class="summary-label">{{
-          "TRANSACTION.TOTAL_EXPENSE" | transloco
-        }}</span>
-        <span class="summary-value">{{
-          response.totalExpenses | belgianCurrency: true : "-"
-        }}</span>
-      </div>
-      <div
-        class="summary-item"
-        [class.summary-item--positive]="response.netBalance >= 0"
-        [class.summary-item--negative]="response.netBalance < 0"
-      >
-        <span class="summary-label">{{
-          "TRANSACTION.NET_BALANCE" | transloco
-        }}</span>
-        <span class="summary-value">{{
-          response.netBalance
-            | belgianCurrency: true : (response.netBalance >= 0 ? "+" : "")
-        }}</span>
-      </div>
       <span class="summary-total"
         >{{ response.totalElements }}
         {{

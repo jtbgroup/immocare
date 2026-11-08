@@ -1,72 +1,105 @@
 <div class="transaction-dashboard">
-  <h2>Financial Dashboard</h2>
+  <header class="dashboard-header">
+    <div class="dashboard-header__mark" aria-hidden="true">€</div>
+    <div>
+      <h2>{{ "GLOBAL.DASHBOARD" | transloco }}</h2>
+    </div>
+  </header>
 
-  <!-- Filters -->
-  <div class="filter-bar">
-    <div class="filter-field">
-      <label>Accounting from</label>
-      <input
-        type="date"
-        [(ngModel)]="filter.accountingFrom"
-        (change)="load()"
-      />
+  <section
+    class="dashboard-filters"
+    [attr.aria-label]="'GLOBAL.FILTERS' | transloco"
+  >
+    <div class="filter-bar">
+      <div class="filter-field">
+        <label>
+          {{ "TRANSACTION.ACCOUNTING_MONTH" | transloco }} —
+          {{ "GLOBAL.DATE_FROM" | transloco }}
+        </label>
+        <input
+          type="date"
+          [(ngModel)]="filter.accountingFrom"
+          (change)="load()"
+        />
+      </div>
+      <div class="filter-field">
+        <label>
+          {{ "TRANSACTION.ACCOUNTING_MONTH" | transloco }} —
+          {{ "GLOBAL.DATE_TO" | transloco }}
+        </label>
+        <input
+          type="date"
+          [(ngModel)]="filter.accountingTo"
+          (change)="load()"
+        />
+      </div>
+      <div class="filter-field">
+        <label>{{ "TRANSACTION.DIRECTION" | transloco }}</label>
+        <select [(ngModel)]="filter.direction" (change)="load()">
+          <option value="">{{ "GLOBAL.ALL" | transloco }}</option>
+          <option value="INCOME">{{ "TRANSACTION.INCOME" | transloco }}</option>
+          <option value="EXPENSE">{{ "TRANSACTION.EXPENSE" | transloco }}</option>
+        </select>
+      </div>
     </div>
-    <div class="filter-field">
-      <label>Accounting to</label>
-      <input type="date" [(ngModel)]="filter.accountingTo" (change)="load()" />
-    </div>
-    <div class="filter-field">
-      <label>Direction</label>
-      <select [(ngModel)]="filter.direction" (change)="load()">
-        <option value="">All</option>
-        <option value="INCOME">Income</option>
-        <option value="EXPENSE">Expense</option>
-      </select>
-    </div>
-  </div>
-
+  </section>
   @if (loading) {
-    <div class="loading">Loading…</div>
+    <div class="loading">{{ "GLOBAL.LOADING" | transloco }}...</div>
+  }
+  @if (hasError) {
+    <div class="alert alert-error">{{ "GLOBAL.ERROR" | transloco }}</div>
   }
 
   @if (stats && !loading) {
     <!-- Summary cards -->
     <div class="summary-cards">
-      <div class="card card--income">
-        <div class="card-label">Total Income</div>
-        <div class="card-value">
+      <article class="summary-card summary-card--income">
+        <span class="summary-card__icon" aria-hidden="true">↗</span>
+        <div class="card-label">
+          {{ "TRANSACTION.TOTAL_INCOME" | transloco }}
+        </div>
+        <div class="card-value summary-card__value">
           {{ stats.totalIncome | belgianCurrency: true : "+" }}
         </div>
-      </div>
-      <div class="card card--expense">
-        <div class="card-label">Total Expenses</div>
-        <div class="card-value">
+      </article>
+      <article class="summary-card summary-card--expense">
+        <span class="summary-card__icon" aria-hidden="true">↘</span>
+        <div class="card-label">
+          {{ "TRANSACTION.TOTAL_EXPENSE" | transloco }}
+        </div>
+        <div class="card-value summary-card__value">
           {{ stats.totalExpenses | belgianCurrency: true : "-" }}
         </div>
-      </div>
-      <div
-        class="card"
+      </article>
+      <article
+        class="summary-card"
         [class.card--positive]="stats.netBalance >= 0"
         [class.card--negative]="stats.netBalance < 0"
       >
-        <div class="card-label">Net Balance</div>
-        <div class="card-value">{{ stats.netBalance | belgianCurrency }}</div>
-      </div>
+        <span class="summary-card__icon" aria-hidden="true">=</span>
+        <div class="card-label">
+          {{ "TRANSACTION.NET_BALANCE" | transloco }}
+        </div>
+        <div class="card-value summary-card__value">
+          {{ stats.netBalance | belgianCurrency }}
+        </div>
+      </article>
     </div>
-
     <!-- By Category -->
     @if (stats.byCategory.length) {
       <section class="dashboard-section">
-        <h3>By Category / Subcategory</h3>
-        <table class="data-table">
+        <h3>{{ "TRANSACTION.CLASSIFICATION" | transloco }}</h3>
+        <div class="data-table dashboard-table">
+          <table>
           <thead>
             <tr>
-              <th>Category / Subcategory</th>
-              <th>Direction</th>
-              <th>Amount</th>
-              <th>Tx count</th>
+              <th>{{ "GLOBAL.CATEGORY" | transloco }}</th>
+              <th>{{ "GLOBAL.SUBCATEGORY" | transloco }}</th>
+              <th>{{ "TRANSACTION.DIRECTION" | transloco }}</th>
+              <th>{{ "GLOBAL.AMOUNT" | transloco }}</th>
+              <th>{{ "TRANSACTION.TRANSACTIONS" | transloco }}</th>
               <th>%</th>
-              <th>Bar</th>
+              <th aria-hidden="true"></th>
             </tr>
           </thead>
           <tbody>
@@ -75,12 +108,13 @@
                 <td colspan="2">
                   <strong>{{ cat.categoryName }}</strong>
                 </td>
+                <td></td>
                 <td>
                   <strong>{{ cat.categoryTotal | belgianCurrency }}</strong>
                 </td>
                 <td></td>
                 <td></td>
-                <td>
+                <td aria-hidden="true">
                   <div
                     class="bar"
                     [style.width]="barWidth(cat.categoryTotal)"
@@ -89,6 +123,7 @@
               </tr>
               @for (sub of cat.subcategories; track sub.subcategoryName) {
                 <tr class="subcategory-row">
+                  <td></td>
                   <td class="indented">{{ sub.subcategoryName }}</td>
                   <td>
                     <span
@@ -105,21 +140,23 @@
               }
             }
           </tbody>
-        </table>
+          </table>
+        </div>
       </section>
     }
 
     <!-- By Building -->
     @if (stats.byBuilding.length) {
       <section class="dashboard-section">
-        <h3>By Building</h3>
-        <table class="data-table">
+        <h3>{{ "GLOBAL.BUILDING" | transloco }}</h3>
+        <div class="data-table dashboard-table">
+          <table>
           <thead>
             <tr>
-              <th>Building</th>
-              <th>Income</th>
-              <th>Expenses</th>
-              <th>Balance</th>
+              <th>{{ "GLOBAL.BUILDING" | transloco }}</th>
+              <th>{{ "TRANSACTION.INCOME" | transloco }}</th>
+              <th>{{ "TRANSACTION.EXPENSE" | transloco }}</th>
+              <th>{{ "TRANSACTION.NET_BALANCE" | transloco }}</th>
             </tr>
           </thead>
           <tbody>
@@ -141,22 +178,24 @@
               </tr>
             }
           </tbody>
-        </table>
+          </table>
+        </div>
       </section>
     }
 
     <!-- By Bank Account -->
     @if (stats.byBankAccount.length) {
       <section class="dashboard-section">
-        <h3>By Bank Account</h3>
-        <table class="data-table">
+        <h3>{{ "GLOBAL.BANK_ACCOUNT" | transloco }}</h3>
+        <div class="data-table dashboard-table">
+          <table>
           <thead>
             <tr>
-              <th>Account</th>
-              <th>Type</th>
-              <th>Income</th>
-              <th>Expenses</th>
-              <th>Balance</th>
+              <th>{{ "GLOBAL.BANK_ACCOUNT" | transloco }}</th>
+              <th>{{ "GLOBAL.TYPE" | transloco }}</th>
+              <th>{{ "TRANSACTION.INCOME" | transloco }}</th>
+              <th>{{ "TRANSACTION.EXPENSE" | transloco }}</th>
+              <th>{{ "TRANSACTION.NET_BALANCE" | transloco }}</th>
             </tr>
           </thead>
           <tbody>
@@ -179,29 +218,31 @@
               </tr>
             }
           </tbody>
-        </table>
+          </table>
+        </div>
       </section>
     }
 
     <!-- Monthly Trend -->
     @if (stats.monthlyTrend.length) {
       <section class="dashboard-section">
-        <h3>Monthly Trend</h3>
-        <table class="data-table">
+        <h3>{{ "TRANSACTION.ACCOUNTING_MONTH" | transloco }}</h3>
+        <div class="data-table dashboard-table">
+          <table>
           <thead>
             <tr>
-              <th>Year</th>
-              <th>Month</th>
-              <th>Income</th>
-              <th>Expenses</th>
-              <th>Balance</th>
+              <th>{{ "TRANSACTION.ACCOUNTING_MONTH" | transloco }}</th>
+              <th>{{ "TRANSACTION.INCOME" | transloco }}</th>
+              <th>{{ "TRANSACTION.EXPENSE" | transloco }}</th>
+              <th>{{ "TRANSACTION.NET_BALANCE" | transloco }}</th>
             </tr>
           </thead>
           <tbody>
             @for (m of stats.monthlyTrend; track m.year + "-" + m.month) {
               <tr>
-                <td>{{ m.year }}</td>
-                <td>{{ m.month.toString().padStart(2, "0") }}</td>
+                <td>
+                  {{ m.month.toString().padStart(2, "0") }}/{{ m.year }}
+                </td>
                 <td class="income">
                   {{ m.income | belgianCurrency: true : "+" }}
                 </td>
@@ -217,7 +258,8 @@
               </tr>
             }
           </tbody>
-        </table>
+          </table>
+        </div>
       </section>
     }
   }

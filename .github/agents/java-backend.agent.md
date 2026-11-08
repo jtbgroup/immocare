@@ -1,7 +1,7 @@
 ---
 name: java-backend
 description: "Implement, maintain, and test Java 21 / Spring Boot backend code, APIs, persistence, and estate authorization."
-tools: ["codebase", "terminal"]
+tools: ["codebase", "terminal", "edit"]
 ---
 
 # Agent: Java Backend Specialist

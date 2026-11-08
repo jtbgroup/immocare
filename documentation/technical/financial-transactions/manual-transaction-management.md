@@ -3,7 +3,7 @@ title: Manual Transaction Management
 type: technical reference
 status: current
 last_verified: 2026-11-08
-verified_against: "TransactionController, FinancialTransactionService, TransactionStatus, TransactionFormComponent, TransactionListComponent, TransactionDetailComponent, TransactionAssetLinkService, V015__uc015_manage_financial_transactions.sql, BR-TX-012 stakeholder confirmation 2026-11-08"
+verified_against: "TransactionController, CreateTransactionRequest, UpdateTransactionRequest, PagedTransactionResponse, FinancialTransactionService, ManualTransactionStatus, GlobalExceptionHandler, FinancialTransactionServiceTest, TransactionControllerTest, TransactionStatus, TransactionFormComponent, TransactionFormComponentSpec, TransactionsPageComponent, TransactionsPageComponentSpec, TransactionDashboardComponent, TransactionService, transaction.model.ts, TransactionListComponent, TransactionDetailComponent, TransactionAssetLinkService, V015__uc015_manage_financial_transactions.sql, BR-TX-010 and BR-TX-012 stakeholder confirmations 2026-11-08"
 ---
 
 # Manual Transaction Management
@@ -52,23 +52,27 @@ The form initially proposes the current month as the accounting month. The user 
 change it, and the server normalizes it to the first day of that month. It does not
 re-propose the month when the subcategory or counterparty account changes.
 
-On successful creation, the server sets the source to `MANUAL`, the status to
-`CONFIRMED`, and generates a `TXN-YYYY-NNNNN` reference. The sequence is generated
-for the current year across transactions, without an estate filter. A housing-unit
-link also sets the transaction's building from that unit. An expense cannot be
-linked to a lease, and a selected subcategory must be compatible with the
-transaction direction; see
+On successful creation, the server sets the source to `MANUAL` and generates a
+`TXN-YYYY-NNNNN` reference. The sequence is generated for the current year across
+transactions, without an estate filter. A housing-unit link also sets the
+transaction's building from that unit. An expense cannot be linked to a lease, and
+a selected subcategory must be compatible with the transaction direction; see
 [Financial Transaction Rules](../../business/financial-transactions/rules/financial-transactions.md).
 
-The confirmed product behavior is to let the user choose `DRAFT` or `CONFIRMED`
-when creating a manual transaction, with `CONFIRMED` selected by default.
-`RECONCILED` is not a creation choice. After creation, status changes are handled
-through a dedicated action, not by editing the transaction ([BR-TX-012](../../business/financial-transactions/rules/financial-transactions.md)).
-This behavior is not yet implemented: the current create request does not accept a
-status and the service always creates manual transactions as `CONFIRMED`. The
-implementation work is tracked in the [backlog](../../../backlog/backlog.md).
+The create API accepts an optional `status` of `DRAFT` or `CONFIRMED`; when omitted,
+the server uses `CONFIRMED`. `RECONCILED` and other unsupported values are rejected
+with HTTP 400. The manual creation form offers only `DRAFT` and `CONFIRMED`, selects
+`CONFIRMED` by default, and sends the selected status. It reuses the localized status
+labels in the English and French resources. The edit request does not contain a
+status, so editing does not change it; later changes use a dedicated action
+([BR-TX-012](../../business/financial-transactions/rules/financial-transactions.md)).
 
 ## Consulting and finding transactions
+
+The transaction area opens on the dashboard by default. Its navigation keeps the
+dashboard, paginated transaction list, and import workflow available as separate
+views. A `tab` query parameter can select a view directly, including the import
+workflow.
 
 The list defaults to 20 results per page, sorted by transaction date descending.
 The API supports filters for direction, transaction-date and accounting-month
@@ -77,13 +81,12 @@ search, import batch, and equipment link. The current list UI exposes direction,
 date ranges, accounting-month ranges, category/subcategory, bank account, status,
 and text search.
 
-Text search matches reference, description, and counterparty account. The current
-API also calculates income, expense, and net totals over all matching transactions,
-in addition to the requested page. This is not the intended list behavior: for
-performance, the list should return the paginated rows only; a broader aggregated
-view belongs in the dashboard. This implementation gap is tracked in the
-[backlog](../../../backlog/backlog.md) and the target behavior is recorded in
-[BR-TX-010](../../business/financial-transactions/rules/financial-transactions.md).
+Text search matches reference, description, and counterparty account. The list API
+returns the paginated rows and pagination metadata only; it does not calculate or
+return aggregate financial totals. The separate dashboard statistics API returns
+income, expense, and balance aggregates with category, building, unit, bank-account,
+and monthly breakdowns
+([BR-TX-010](../../business/financial-transactions/rules/financial-transactions.md)).
 Selecting a transaction opens its detail view, which shows its reference, dates,
 amount, status, source, classification, account and property links, description,
 and any linked equipment.
@@ -142,10 +145,22 @@ costs. Supporting the broader allocation is tracked in the [backlog](../../../ba
 ## Implementation sources
 
 - [TransactionController.java](../../../backend/src/main/java/com/immocare/controller/TransactionController.java)
+- [PagedTransactionResponse.java](../../../backend/src/main/java/com/immocare/model/dto/PagedTransactionResponse.java)
+- [TransactionControllerTest.java](../../../backend/src/test/java/com/immocare/controller/TransactionControllerTest.java)
+- [CreateTransactionRequest.java](../../../backend/src/main/java/com/immocare/model/dto/CreateTransactionRequest.java)
+- [UpdateTransactionRequest.java](../../../backend/src/main/java/com/immocare/model/dto/UpdateTransactionRequest.java)
 - [FinancialTransactionService.java](../../../backend/src/main/java/com/immocare/service/FinancialTransactionService.java)
+- [ManualTransactionStatus.java](../../../backend/src/main/java/com/immocare/model/enums/ManualTransactionStatus.java)
+- [GlobalExceptionHandler.java](../../../backend/src/main/java/com/immocare/exception/GlobalExceptionHandler.java)
 - [FinancialTransactionRepository.java](../../../backend/src/main/java/com/immocare/repository/FinancialTransactionRepository.java)
 - [TransactionAssetLinkService.java](../../../backend/src/main/java/com/immocare/service/TransactionAssetLinkService.java)
 - [TransactionFormComponent](../../../frontend/src/app/features/transaction/transaction-form/transaction-form.component.ts)
+- [TransactionFormComponent tests](../../../frontend/src/app/features/transaction/transaction-form/transaction-form.component.spec.ts)
+- [TransactionsPageComponent](../../../frontend/src/app/features/transaction/transactions-page/transactions-page.component.ts)
+- [TransactionsPageComponent tests](../../../frontend/src/app/features/transaction/transactions-page/transactions-page.component.spec.ts)
+- [TransactionService](../../../frontend/src/app/core/services/transaction.service.ts)
+- [transaction.model.ts](../../../frontend/src/app/models/transaction.model.ts)
 - [TransactionListComponent](../../../frontend/src/app/features/transaction/transaction-list/transaction-list.component.ts)
+- [TransactionDashboardComponent](../../../frontend/src/app/features/transaction/transaction-dashboard/transaction-dashboard.component.ts)
 - [TransactionDetailComponent](../../../frontend/src/app/features/transaction/transaction-detail/transaction-detail.component.ts)
 - [V015 transaction schema](../../../backend/src/main/resources/db/migration/V015__uc015_manage_financial_transactions.sql)

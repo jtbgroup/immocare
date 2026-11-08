@@ -1,8 +1,8 @@
 // features/transaction/components/transaction-dashboard/transaction-dashboard.component.ts — UC004_ESTATE_PLACEHOLDER Phase 4
-// No changes to component logic — TransactionService now handles estate scoping.
 import { CommonModule } from "@angular/common";
 import { Component, OnInit } from "@angular/core";
 import { FormsModule } from "@angular/forms";
+import { TranslocoModule } from "@ngneat/transloco";
 import { TransactionService } from "../../../core/services/transaction.service";
 import {
   StatisticsFilter,
@@ -13,12 +13,14 @@ import { BelgianCurrencyPipe } from "../../../shared/pipes/belgian-currency.pipe
 @Component({
   selector: "app-transaction-dashboard",
   standalone: true,
-  imports: [CommonModule, FormsModule, BelgianCurrencyPipe],
+  imports: [CommonModule, FormsModule, BelgianCurrencyPipe, TranslocoModule],
   templateUrl: "./transaction-dashboard.component.html",
+  styleUrls: ["./transaction-dashboard.component.scss"],
 })
 export class TransactionDashboardComponent implements OnInit {
   stats: TransactionStatistics | null = null;
   loading = false;
+  hasError = false;
 
   filter: StatisticsFilter = {};
 
@@ -30,6 +32,8 @@ export class TransactionDashboardComponent implements OnInit {
 
   load(): void {
     this.loading = true;
+    this.hasError = false;
+    this.stats = null;
     this.transactionService.getStatistics(this.filter).subscribe({
       next: (s) => {
         this.stats = s;
@@ -37,6 +41,7 @@ export class TransactionDashboardComponent implements OnInit {
       },
       error: () => {
         this.loading = false;
+        this.hasError = true;
       },
     });
   }

@@ -15,6 +15,7 @@ import {
   StatisticsFilter,
   TransactionFilter,
   TransactionStatistics,
+  UpdateTransactionRequest,
 } from '../../models/transaction.model';
 
 const GLOBAL_BASE = '/api/v1';
@@ -47,7 +48,7 @@ export class TransactionService {
     return this.http.post<FinancialTransaction>(this.base, req);
   }
 
-  update(id: number, req: CreateTransactionRequest): Observable<FinancialTransaction> {
+  update(id: number, req: UpdateTransactionRequest): Observable<FinancialTransaction> {
     return this.http.put<FinancialTransaction>(`${this.base}/${id}`, req);
   }
 

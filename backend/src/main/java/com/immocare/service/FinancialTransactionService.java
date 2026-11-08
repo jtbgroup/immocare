@@ -121,15 +121,11 @@ public class FinancialTransactionService {
         Specification<FinancialTransaction> spec = buildSpec(estateId, filter);
         Page<FinancialTransaction> page = transactionRepository.findAll(spec, pageable);
 
-        BigDecimal totalIncome = computeTotal(spec, TransactionDirection.INCOME);
-        BigDecimal totalExpenses = computeTotal(spec, TransactionDirection.EXPENSE);
-        BigDecimal netBalance = totalIncome.subtract(totalExpenses);
-
         List<FinancialTransactionSummaryDTO> content = page.getContent().stream()
                 .map(this::toSummaryDTO).toList();
 
         return new PagedTransactionResponse(content, pageable.getPageNumber(), pageable.getPageSize(),
-                page.getTotalElements(), page.getTotalPages(), totalIncome, totalExpenses, netBalance);
+                page.getTotalElements(), page.getTotalPages());
     }
 
     public FinancialTransactionDTO getById(UUID estateId, Long id) {
@@ -155,7 +151,9 @@ public class FinancialTransactionService {
         tx.setDescription(req.description());
         tx.setExternalReference(req.externalReference());
         tx.setCounterpartyAccount(req.counterpartyAccount());
-        tx.setStatus(TransactionStatus.CONFIRMED);
+        tx.setStatus(req.status() == null
+                ? TransactionStatus.CONFIRMED
+                : TransactionStatus.valueOf(req.status().name()));
         tx.setSource(TransactionSource.MANUAL);
 
         applyRelations(tx, req.bankAccountId(), req.subcategoryId(),
@@ -563,13 +561,6 @@ public class FinancialTransactionService {
             spec = spec.and(TransactionSpecification.withAssetLink(f.assetType(), f.assetId()));
 
         return spec;
-    }
-
-    private BigDecimal computeTotal(Specification<FinancialTransaction> baseSpec, TransactionDirection direction) {
-        Specification<FinancialTransaction> spec = baseSpec.and(TransactionSpecification.withDirection(direction));
-        return transactionRepository.findAll(spec).stream()
-                .map(FinancialTransaction::getAmount)
-                .reduce(BigDecimal.ZERO, BigDecimal::add);
     }
 
     private BigDecimal sum(List<FinancialTransaction> txs, TransactionDirection dir) {

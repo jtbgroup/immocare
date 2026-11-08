@@ -12,16 +12,20 @@ import { TagSubcategoryService } from "../../../core/services/tag-subcategory.se
 import { TransactionService } from "../../../core/services/transaction.service";
 import { Lease } from "../../../models/lease.model";
 import { Person } from "../../../models/person.model";
-import { TagSubcategory } from "../../../models/transaction.model";
+import {
+  FinancialTransaction,
+  TagSubcategory,
+} from "../../../models/transaction.model";
 import { TransactionFormComponent } from "./transaction-form.component";
 
 describe("TransactionFormComponent", () => {
   let component: TransactionFormComponent;
+  let transactionService: jasmine.SpyObj<TransactionService>;
   let leaseService: jasmine.SpyObj<LeaseService>;
   let personService: jasmine.SpyObj<PersonService>;
 
   beforeEach(() => {
-    const transactionService = jasmine.createSpyObj<TransactionService>(
+    transactionService = jasmine.createSpyObj<TransactionService>(
       "TransactionService",
       ["create", "update", "getById"],
     );
@@ -86,6 +90,51 @@ describe("TransactionFormComponent", () => {
       activeEstateService,
     );
     component.ngOnInit();
+  });
+
+  it("offers only DRAFT and CONFIRMED and defaults new transactions to CONFIRMED", () => {
+    transactionService.create.and.returnValue(
+      of({ id: 1 } as FinancialTransaction),
+    );
+    expect(component.manualTransactionStatuses).toEqual(["DRAFT", "CONFIRMED"]);
+    expect(component.form.get("status")?.value).toBe("CONFIRMED");
+
+    component.form.patchValue({ amount: 125 });
+    component.onSubmit();
+
+    expect(transactionService.create).toHaveBeenCalledWith(
+      jasmine.objectContaining({ status: "CONFIRMED" }),
+    );
+  });
+
+  it("sends the selected status when creating a transaction", () => {
+    transactionService.create.and.returnValue(
+      of({ id: 1 } as FinancialTransaction),
+    );
+    component.form.patchValue({ amount: 125, status: "DRAFT" });
+
+    component.onSubmit();
+
+    expect(transactionService.create).toHaveBeenCalledWith(
+      jasmine.objectContaining({ status: "DRAFT" }),
+    );
+  });
+
+  it("omits status from the edit form and update request", () => {
+    transactionService.update.and.returnValue(
+      of({ id: 1 } as FinancialTransaction),
+    );
+    component.isEdit = true;
+    component.transactionId = 1;
+    component.buildForm();
+    component.form.patchValue({ amount: 125 });
+
+    expect(component.form.contains("status")).toBeFalse();
+
+    component.onSubmit();
+
+    const updateRequest = transactionService.update.calls.mostRecent().args[1];
+    expect("status" in updateRequest).toBeFalse();
   });
 
   it("groups category and subcategory in one searchable selection", () => {

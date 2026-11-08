@@ -9,6 +9,7 @@ import {
 } from "@angular/forms";
 import { ActivatedRoute, Router } from "@angular/router";
 import { TranslocoModule } from "@ngneat/transloco";
+import { Observable } from "rxjs";
 import { ActiveEstateService } from "../../../core/services/active-estate.service";
 import { BankAccountService } from "../../../core/services/bank-account.service";
 import { BuildingService } from "../../../core/services/building.service";
@@ -24,8 +25,10 @@ import {
   BankAccount,
   CreateTransactionRequest,
   FinancialTransaction,
+  ManualTransactionStatus,
   TagSubcategory,
   TransactionAssetLink,
+  TransactionRequestFields,
   TransactionStatus,
 } from "../../../models/transaction.model";
 import { AssetLinkEditorComponent } from "../components/asset-link-editor/asset-link-editor.component";
@@ -45,6 +48,10 @@ import { AssetLinkEditorComponent } from "../components/asset-link-editor/asset-
 export class TransactionFormComponent implements OnInit {
   form!: FormGroup;
   isEdit = false;
+  readonly manualTransactionStatuses: readonly ManualTransactionStatus[] = [
+    "DRAFT",
+    "CONFIRMED",
+  ];
   transactionId?: number;
   existing?: FinancialTransaction;
   loading = false;
@@ -76,12 +83,12 @@ export class TransactionFormComponent implements OnInit {
   ) {}
 
   ngOnInit(): void {
+    const id = this.route.snapshot.paramMap.get("id");
+    this.isEdit = id !== null;
     this.buildForm();
     this.loadRefData();
 
-    const id = this.route.snapshot.paramMap.get("id");
     if (id) {
-      this.isEdit = true;
       this.transactionId = +id;
       this.loadExisting(+id, () => this.setupCascadeListeners());
     } else {
@@ -167,6 +174,9 @@ export class TransactionFormComponent implements OnInit {
       leaseId: [null],
       housingUnitId: [null],
       buildingId: [null],
+      ...(this.isEdit
+        ? {}
+        : { status: ["CONFIRMED", Validators.required] }),
     });
   }
 
@@ -390,7 +400,7 @@ export class TransactionFormComponent implements OnInit {
       return;
     }
     const value = this.form.getRawValue();
-    const req: CreateTransactionRequest = {
+    const req: TransactionRequestFields = {
       direction: value.direction,
       transactionDate: value.transactionDate,
       accountingMonth: `${value.accountingMonth}-01`,
@@ -406,9 +416,18 @@ export class TransactionFormComponent implements OnInit {
       buildingId: value.buildingId ?? undefined,
       assetLinks: this.assetLinks,
     };
-    const obs = this.isEdit
-      ? this.transactionService.update(this.transactionId!, req)
-      : this.transactionService.create(req);
+    let obs: Observable<FinancialTransaction>;
+    if (this.isEdit) {
+      obs = this.transactionService.update(this.transactionId!, req);
+    } else {
+      const status: unknown = value.status;
+      if (status !== "DRAFT" && status !== "CONFIRMED") {
+        this.form.get("status")?.setErrors({ invalid: true });
+        return;
+      }
+      const createRequest: CreateTransactionRequest = { ...req, status };
+      obs = this.transactionService.create(createRequest);
+    }
 
     obs.subscribe({
       next: (tx) => {

@@ -3,7 +3,7 @@ title: Financial Transaction
 type: business concepts
 status: draft
 last_verified: 2026-11-08
-verified_against: "FinancialTransactionService, TransactionFormComponent, TransactionController, TransactionAssetLink, V015__uc015_manage_financial_transactions.sql, stakeholder confirmation 2026-11-08"
+verified_against: "FinancialTransactionService, TransactionFormComponent, TransactionController, CreateTransactionRequest, UpdateTransactionRequest, ManualTransactionStatus, TransactionAssetLink, V015__uc015_manage_financial_transactions.sql, stakeholder confirmation 2026-11-08"
 ---
 
 # Concept — Financial Transaction
@@ -44,7 +44,7 @@ for allocations to other costs is tracked in the [backlog](../../../../backlog/b
 ## Origin, status, and import
 
 - A transaction originates either from manual entry or from an import.
-- The current implementation creates manually entered transactions with status `CONFIRMED`; the confirmed target permits choosing `DRAFT` or `CONFIRMED` at creation, defaulting to `CONFIRMED` ([BR-TX-012](../rules/financial-transactions.md)).
+- The manual-creation API accepts `DRAFT` or `CONFIRMED` and defaults to `CONFIRMED`; the current UI omits the optional status, so UI-created transactions use that default. Editing does not change status ([BR-TX-012](../rules/financial-transactions.md)).
 - An imported transaction with per-row review data is created as `CONFIRMED`; an imported row without it is created as `DRAFT`. The review data may override direction or assign classification, lease, housing-unit, building, or equipment links.
 - Transactions with status `RECONCILED` cannot be modified or deleted by the observed service.
 

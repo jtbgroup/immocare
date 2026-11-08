@@ -1,0 +1,9 @@
+{
+  "GLOBAL": {
+    "DATE_FROM": "From",
+    "DATE_TO": "To",
+    "FILTER": {
+      "CLEAR": "Clear filters"
+    }
+  }
+}

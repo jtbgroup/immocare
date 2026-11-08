@@ -86,8 +86,8 @@
 - [ ] Make the imported-transaction review action work and provide decisions for potential duplicates.
 - [ ] Use European rather than US formatting for monetary amounts.
 - [ ] Support allocation of a single transaction across multiple distinct expenses, including costs not linked to equipment, and show those allocations in relevant financial views.
-- [ ] Keep transaction list queries paginated and limited to transaction rows; move aggregate totals to the financial dashboard to avoid calculating sums across all matching transactions.
-- [ ] Allow selecting `DRAFT` or `CONFIRMED` when manually creating a transaction (default `CONFIRMED`), and persist the choice; keep subsequent status changes on a dedicated action, not the edit operation (BR-TX-012).
+- [x] Keep transaction list queries paginated and limited to transaction rows; move aggregate totals to the financial dashboard to avoid calculating sums across all matching transactions (BR-TX-010).
+- [x] Let users select `DRAFT` or `CONFIRMED` in the manual transaction form and send the choice on creation; keep subsequent status changes on a dedicated action, not the edit operation (BR-TX-012).
 - [ ] Fix the financial dashboard.
 - [ ] Support bulk updates and deletion from lists using row selection.
 - [x] Add rooms and energy-performance ratings to the seed scripts.

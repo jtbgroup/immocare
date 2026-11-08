@@ -160,39 +160,6 @@
   flex-wrap: wrap;
 }
 
-.summary-item {
-  display: flex;
-  flex-direction: column;
-  gap: 0.1rem;
-  &--income .summary-value {
-    color: #2e7d32;
-    font-weight: 700;
-  }
-  &--expense .summary-value {
-    color: #c62828;
-    font-weight: 700;
-  }
-  &--positive .summary-value {
-    color: #1565c0;
-    font-weight: 700;
-  }
-  &--negative .summary-value {
-    color: #c62828;
-    font-weight: 700;
-  }
-}
-.summary-label {
-  font-size: 0.72rem;
-  font-weight: 600;
-  text-transform: uppercase;
-  letter-spacing: 0.04em;
-  color: #6c757d;
-}
-.summary-value {
-  font-size: 1rem;
-  font-weight: 600;
-  color: #333;
-}
 .summary-total {
   margin-left: auto;
   font-size: 0.85rem;

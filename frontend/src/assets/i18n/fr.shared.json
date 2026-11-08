@@ -1,0 +1,9 @@
+{
+  "GLOBAL": {
+    "DATE_FROM": "À partir du",
+    "DATE_TO": "Jusqu'au",
+    "FILTER": {
+      "CLEAR": "Effacer les filtres"
+    }
+  }
+}

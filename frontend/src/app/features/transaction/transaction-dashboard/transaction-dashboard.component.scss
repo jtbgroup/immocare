@@ -1,0 +1,215 @@
+@use "../../../../styles/variables" as *;
+
+.transaction-dashboard {
+  max-width: $container-full;
+  margin: 0 auto;
+}
+
+.dashboard-header {
+  display: flex;
+  align-items: center;
+  gap: $spacing-md;
+  margin-bottom: $spacing-lg;
+
+  h2 {
+    margin: 0;
+    color: $color-text;
+    font-size: $font-size-2xl;
+    font-weight: $font-weight-bold;
+  }
+
+}
+
+.dashboard-header__mark {
+  display: grid;
+  width: 3.25rem;
+  height: 3.25rem;
+  flex: 0 0 auto;
+  place-items: center;
+  border-radius: $border-radius-md;
+  background: #eaf2ff;
+  color: $color-primary-dark;
+  font-size: $font-size-xl;
+  font-weight: $font-weight-bold;
+}
+
+.dashboard-filters {
+  margin-bottom: $spacing-lg;
+  padding: $spacing-md $spacing-lg;
+  border: 1px solid $color-border-light;
+  border-radius: $border-radius-md;
+  background: $color-bg-white;
+  box-shadow: $shadow-card;
+}
+
+.filter-bar {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: $spacing-md;
+}
+
+.filter-field {
+  display: flex;
+  min-width: 0;
+  flex-direction: column;
+  gap: $spacing-xs;
+
+  label {
+    color: $color-text-muted;
+    font-size: $font-size-sm;
+    font-weight: $font-weight-medium;
+  }
+
+  input,
+  select {
+    width: 100%;
+    min-height: 2.75rem;
+    padding: $spacing-sm $spacing-md;
+    border: 1px solid $color-border;
+    border-radius: $border-radius-sm;
+    background: $color-bg-white;
+    color: $color-text;
+    font: inherit;
+
+    &:focus-visible {
+      outline: 2px solid $color-primary;
+      outline-offset: 1px;
+    }
+  }
+}
+
+.summary-cards {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: $spacing-md;
+  margin: $spacing-lg 0;
+}
+
+.summary-card {
+  position: relative;
+  min-width: 0;
+  padding: $spacing-lg;
+  overflow: hidden;
+  border: 1px solid $color-border-light;
+  border-radius: $border-radius-md;
+  background: $color-bg-white;
+  box-shadow: $shadow-card;
+
+  &--income {
+    border-top: 3px solid $color-success;
+    background: #f0f9f2;
+  }
+
+  &--expense {
+    border-top: 3px solid $color-danger;
+    background: #fff4f3;
+  }
+
+  &.card--positive {
+    border-top: 3px solid $color-primary;
+    background: #f1f6ff;
+  }
+
+  &.card--negative {
+    border-top: 3px solid $color-danger;
+    background: #fff4f3;
+  }
+}
+
+.summary-card__icon {
+  position: absolute;
+  top: $spacing-md;
+  right: $spacing-md;
+  display: grid;
+  width: 2rem;
+  height: 2rem;
+  place-items: center;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.8);
+  color: $color-text-muted;
+  font-size: $font-size-lg;
+  font-weight: $font-weight-bold;
+}
+
+.card-label {
+  padding-right: 2.5rem;
+  color: $color-text-muted;
+  font-size: $font-size-sm;
+  font-weight: $font-weight-medium;
+}
+
+.summary-card__value {
+  margin-top: $spacing-md;
+  overflow-wrap: anywhere;
+  color: $color-text;
+  font-size: clamp(1.35rem, 2.5vw, 2rem);
+  font-weight: $font-weight-bold;
+  line-height: 1.2;
+}
+
+.dashboard-section {
+  min-width: 0;
+  margin-bottom: $spacing-md;
+  padding: $spacing-md;
+  border: 1px solid $color-border-light;
+  border-radius: $border-radius-md;
+  background: $color-bg-white;
+  box-shadow: $shadow-card;
+
+  h3 {
+    margin: 0 0 $spacing-md;
+    color: $color-text;
+    font-size: $font-size-lg;
+    font-weight: $font-weight-semibold;
+  }
+}
+
+.dashboard-table {
+  box-shadow: none;
+
+  table {
+    min-width: 28rem;
+  }
+
+  .category-row {
+    background: #f5f8ff;
+    font-weight: $font-weight-semibold;
+  }
+
+  .indented {
+    padding-left: $spacing-lg;
+  }
+
+  .bar {
+    height: 0.4rem;
+    min-width: 0.15rem;
+    border-radius: 999px;
+    background: $color-primary;
+  }
+}
+
+@media (max-width: 900px) {
+  .summary-cards {
+    gap: $spacing-sm;
+  }
+
+  .summary-card {
+    padding: $spacing-md;
+  }
+
+}
+
+@media (max-width: 640px) {
+  .filter-bar,
+  .summary-cards {
+    grid-template-columns: 1fr;
+  }
+
+  .dashboard-header h2 {
+    font-size: $font-size-xl;
+  }
+
+  .summary-card {
+    padding: $spacing-md $spacing-lg;
+  }
+}
