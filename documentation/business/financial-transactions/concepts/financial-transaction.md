@@ -3,7 +3,7 @@ title: Financial Transaction
 type: business concepts
 status: draft
 last_verified: 2026-11-08
-verified_against: "FinancialTransactionService, TransactionFormComponent, TransactionController, CreateTransactionRequest, UpdateTransactionRequest, ManualTransactionStatus, TransactionAssetLink, V015__uc015_manage_financial_transactions.sql, stakeholder confirmation 2026-11-08"
+verified_against: "FinancialTransactionService, TransactionImportService, TransactionFormComponent, TransactionImportComponent, TransactionController, CreateTransactionRequest, UpdateTransactionRequest, ManualTransactionStatus, TransactionAssetLink, V015__uc015_manage_financial_transactions.sql, stakeholder confirmations 2026-11-08"
 ---
 
 # Concept — Financial Transaction
@@ -38,13 +38,15 @@ Separate links can associate a transaction with one or more tracked pieces of eq
 
 An expense transaction may cover multiple costs, and allocating it across costs is
 not limited to equipment links ([BR-TX-011](../rules/financial-transactions.md)).
-The current implementation only persists allocations to tracked equipment; support
-for allocations to other costs is tracked in the [backlog](../../../../backlog/backlog.md).
+Allocations may identify housing units or equipment and have their own
+classification ([BR-TX-017](../rules/financial-transactions.md)); this allocation
+model is not yet implemented and is tracked in the
+[backlog](../../../../backlog/backlog.md).
 
 ## Origin, status, and import
 
 - A transaction originates either from manual entry or from an import.
-- The manual-creation API accepts `DRAFT` or `CONFIRMED` and defaults to `CONFIRMED`; the current UI omits the optional status, so UI-created transactions use that default. Editing does not change status ([BR-TX-012](../rules/financial-transactions.md)).
+- Manual creation accepts `DRAFT` or `CONFIRMED` and defaults to `CONFIRMED`; the form offers both choices and editing does not change status ([BR-TX-012](../rules/financial-transactions.md)).
 - An imported transaction with per-row review data is created as `CONFIRMED`; an imported row without it is created as `DRAFT`. The review data may override direction or assign classification, lease, housing-unit, building, or equipment links.
 - Transactions with status `RECONCILED` cannot be modified or deleted by the observed service.
 
@@ -52,8 +54,17 @@ These are application states observed in the code. In particular, the observed c
 
 The current manual-entry flow and its create, list, edit, and delete behavior are
 described in [Manual Transaction Management](../../../technical/financial-transactions/manual-transaction-management.md).
+The current import flow and its observed implementation gaps are described in
+[Transaction Import Management](../../../technical/financial-transactions/transaction-import-management.md).
 
-An import is tracked as a batch, and its rows may be identified as duplicates by fingerprint within the same estate. Classification and lease suggestions are processing aids; they should not be treated as business decisions until reviewed. The current IBAN-based lease suggestion behavior is described in [Person Management](../../../technical/people/person-management.md).
+An import is tracked as a batch, and a transaction already imported into an estate
+cannot be imported into that estate again ([BR-TX-014](../rules/financial-transactions.md)).
+Classification-learning rules and suggestions are intended to be estate-scoped
+([BR-TX-019](../rules/financial-transactions.md)); the current global learning-rule
+scope is an implementation gap.
+For an unambiguous rent match, the housing unit and building are associated
+automatically ([BR-TX-021](../rules/financial-transactions.md)); ambiguous matches
+require a prominent warning and a user choice ([BR-TX-015](../rules/financial-transactions.md)).
 
 ## Conceptual relationships
 
@@ -63,7 +74,7 @@ Transaction → Direction + Date + Accounting month + Amount
 Transaction → Category → Subcategory
 Transaction → Bank account (optional)
 Transaction → Building / housing unit / lease (optional)
-Transaction → Expense allocation → Multiple costs (equipment or other)
+Transaction → Expense allocation → Housing unit or equipment, with allocation-specific classification
 Transaction → Equipment item(s) (optional)
 Import → Batch → Imported transaction(s)
 ```

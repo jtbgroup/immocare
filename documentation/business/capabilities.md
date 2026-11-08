@@ -3,7 +3,7 @@ title: Capabilities
 type: capability-catalog
 status: draft
 last_verified: 2026-11-08
-verified_against: "HousingUnitController, HousingUnitService, HousingUnitFormComponent, HousingUnitDetailsComponent, RoomController, RoomService, RoomSectionComponent, PebScoreController, PebScoreService, PebScoreRepository, PebSectionComponent, PebHistoryComponent, RentHistoryController, RentHistoryService, RentSectionComponent, Lease, LeaseController, LeaseService, LeaseRentAdjustment, Lease details and form components, PlatformConfigController, PlatformConfigService, EstateConfigController, EstateConfigService, EstateConfig component, EstateConfigAssetsComponent, BoilerServiceValidityRuleService, BoilerController, BoilerService, BoilerServiceHistoryService, FireExtinguisherController, FireExtinguisherService, MeterController, MeterService, MeterSectionComponent, AlertController, AlertService, EstateService, FinancialTransactionService, TransactionController, TransactionFormComponent, TransactionListComponent, TransactionDetailComponent, TransactionAssetLinkService, CreateTransactionRequest, V010__uc010_manage_rents.sql, V011__uc011_manage_boilers.sql, V013__uc013_manage_config.sql, V014__uc014_manage_leases.sql, V015__uc015_manage_financial_transactions.sql, stakeholder-confirmed domain taxonomy, stakeholder confirmations 2026-11-07 and 2026-11-08"
+verified_against: "HousingUnitController, HousingUnitService, HousingUnitFormComponent, HousingUnitDetailsComponent, RoomController, RoomService, RoomSectionComponent, PebScoreController, PebScoreService, PebScoreRepository, PebSectionComponent, PebHistoryComponent, RentHistoryController, RentHistoryService, RentSectionComponent, Lease, LeaseController, LeaseService, LeaseRentAdjustment, Lease details and form components, PlatformConfigController, PlatformConfigService, EstateConfigController, EstateConfigService, EstateConfig component, EstateConfigAssetsComponent, BoilerServiceValidityRuleService, BoilerController, BoilerService, BoilerServiceHistoryService, FireExtinguisherController, FireExtinguisherService, MeterController, MeterService, MeterSectionComponent, AlertController, AlertService, EstateService, FinancialTransactionService, TransactionImportService, TransactionController, TransactionImportController, TransactionFormComponent, TransactionImportComponent, TransactionListComponent, TransactionDetailComponent, TransactionAssetLinkService, CreateTransactionRequest, V010__uc010_manage_rents.sql, V011__uc011_manage_boilers.sql, V013__uc013_manage_config.sql, V014__uc014_manage_leases.sql, V015__uc015_manage_financial_transactions.sql, stakeholder-confirmed domain taxonomy, stakeholder confirmations 2026-11-07 and 2026-11-08"
 sources: "Aligned to the approved domain taxonomy"
 ---
 
@@ -82,8 +82,8 @@ Known people-management gaps include owner references that are not validated aga
 | Link a transaction to a building, housing unit, lease or bank account                          | Implemented | [Financial transaction](./financial-transactions/concepts/financial-transaction.md) | BR-TX-003 | `FinancialTransaction` |
 | Allocate part of a transaction to equipment (cost allocation)                                  | Implemented | [Financial transaction](./financial-transactions/concepts/financial-transaction.md), [Property equipment](./equipment/concepts/property-equipment.md) | BR-TX-006 | `TransactionAssetLink` |
 | Allocate one expense transaction across multiple costs, including non-equipment costs          | Partial     | [Financial transaction](./financial-transactions/concepts/financial-transaction.md), [backlog](../../backlog/backlog.md) | BR-TX-011 | `TransactionAssetLink`; generic cost allocations are not implemented |
-| Import bank transactions in batches, skip duplicates, get classification and lease suggestions | Partial     | [Financial transaction](./financial-transactions/concepts/financial-transaction.md), [Person Management](../technical/people/person-management.md) | BR-TX-007, 009 | `TransactionImportService` |
-| Review and select imported rows; apply category, direction, building, housing-unit, lease, or equipment enrichment | Partial | [Financial transaction](./financial-transactions/concepts/financial-transaction.md) | — | `TransactionImportService`, `TransactionImportController` |
+| Import bank transactions in batches, skip duplicates, get classification and lease suggestions | Partial     | [Financial transaction](./financial-transactions/concepts/financial-transaction.md), [Transaction Import Management](../technical/financial-transactions/transaction-import-management.md) | BR-TX-007, 009, 014–016, 019–021 | `TransactionImportService` |
+| Review and select imported rows; apply category, direction, building, housing-unit, lease, or equipment enrichment | Partial | [Transaction Import Management](../technical/financial-transactions/transaction-import-management.md) | BR-TX-013, 015–017 | `TransactionImportService`, `TransactionImportController` |
 | Financial dashboard                                                                            | Partial     | [Financial transaction](./financial-transactions/concepts/financial-transaction.md) | — | `TransactionDashboardComponent` |
 
 ## Cross-cutting capabilities
@@ -104,8 +104,9 @@ meter history access and replacement-reason handling;
 boiler replacement/history behavior; fire-extinguisher identifier uniqueness
 scope, revision ownership and deletion, search scope, and alert policy; meter
 history scope and any applicable validity/maintenance alerts; import review
-action and duplicate decisions;
-financial dashboard; generalized devices; and user-account session invalidation
+action, estate-scoped learning, duplicate identity and ambiguous-match warnings;
+transaction allocation by housing unit and equipment; financial dashboard;
+generalized devices; and user-account session invalidation
 and deletion controls).
 
 ## Planned but not implemented

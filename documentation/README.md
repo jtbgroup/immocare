@@ -2,7 +2,7 @@
 title: Project Documentation
 type: documentation index
 status: current
-last_verified: 2026-11-07
+last_verified: 2026-11-08
 verified_against: "Documentation pages listed in this index"
 ---
 
@@ -106,6 +106,7 @@ This documentation describes the property-management domain independently of the
 
 - [Technical references for financial transactions](./technical/financial-transactions/README.md)
 - [Manual transaction management](./technical/financial-transactions/manual-transaction-management.md)
+- [Transaction import management](./technical/financial-transactions/transaction-import-management.md)
 
 ### Cross-cutting technical references
 

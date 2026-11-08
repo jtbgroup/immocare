@@ -2,8 +2,8 @@
 title: Person Management
 type: technical reference
 status: current
-last_verified: 2026-11-07
-verified_against: b99e38fb08888ee0973fc560a27258b15da926b0
+last_verified: 2026-11-08
+verified_against: "PersonBankAccountRepository, TransactionImportService, person bank-account rules and open questions, source reviewed 2026-11-08"
 ---
 
 # Person Management
@@ -77,11 +77,11 @@ The database restricts deletion of a person referenced by any lease membership, 
 
 ## IBAN-based lease suggestions during import
 
-During transaction preview and import, the service looks up a person bank account by case-insensitive IBAN, then checks that the matched person and the lease's building belong to the requested estate. If a person and lease are found, the current code selects the first lease ordered by start date descending. It does not choose a lease based on the transaction date or prefer an active lease.
-
-The lookup is not estate-filtered until after the IBAN search. Since the database allows the same IBAN in different estates, a matching IBAN in multiple estates may make the single-result lookup ambiguous. The account lookup also compares case-insensitively but does not remove whitespace from the imported value.
-
-This differs from the legacy specification, which describes choosing a lease that covers the transaction date, preferring an active lease, and then falling back to the closest lease end date. That behavior is not implemented; its disposition is listed in [Open Questions](../../../backlog/open_questions.md#people-and-bank-accounts).
+Transaction-import behavior for IBAN matching and lease suggestions is documented in
+[Transaction Import Management](../financial-transactions/transaction-import-management.md).
+The import lookup is not estate-filtered when searching by IBAN, so a matching IBAN
+in multiple estates can be ambiguous. The broader question of IBAN uniqueness and
+matching remains in [Open Questions](../../../backlog/open_questions.md#people-and-bank-accounts).
 
 ## API errors and implementation differences
 

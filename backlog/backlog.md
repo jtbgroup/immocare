@@ -83,9 +83,11 @@
 - [x] Move transaction categories into Settings and integrate catalogue management there, removing the transaction-screen button.
 - [x] Add a transaction-import review flow: select rows, confirm imports, link rows to properties or people, identify potential duplicates, and use known data or learning to suggest links such as leases, units, buildings, and meters.
 - [x] Verify the financial-transaction documentation against the current code for [manual transaction management](../documentation/technical/financial-transactions/manual-transaction-management.md); import and automated suggestion behavior remain outside that reference's scope.
-- [ ] Make the imported-transaction review action work and provide decisions for potential duplicates.
+- [ ] Complete imported-transaction review: make the post-import batch review action work, return clear duplicate/skip outcomes, enforce row selection at the API, automatically associate the housing unit and building for unambiguous rent matches, learn estate-specific property associations for known service-provider accounts, leave unmatched associations empty, and provide prominent warnings and keep-or-clear choices for ambiguous lease or service-provider matches.
+- [ ] Scope transaction classification-learning rules and suggestions to the owning estate; current learning rules are global (BR-TX-019).
+- [ ] Revisit duplicate identity across bank accounts so similar movements on different accounts are not incorrectly treated as duplicates; preserve the rule that an already-imported transaction cannot be imported again (BR-TX-014).
 - [ ] Use European rather than US formatting for monetary amounts.
-- [ ] Support allocation of a single transaction across multiple distinct expenses, including costs not linked to equipment, and show those allocations in relevant financial views.
+- [ ] Support expense allocations to multiple housing units and equipment items, with a category and subcategory per allocation; enforce that the allocated sum does not exceed the transaction amount, and warn in the transaction list and detail view when part remains unallocated (BR-TX-011, BR-TX-017, BR-TX-018).
 - [x] Keep transaction list queries paginated and limited to transaction rows; move aggregate totals to the financial dashboard to avoid calculating sums across all matching transactions (BR-TX-010).
 - [x] Let users select `DRAFT` or `CONFIRMED` in the manual transaction form and send the choice on creation; keep subsequent status changes on a dedicated action, not the edit operation (BR-TX-012).
 - [ ] Fix the financial dashboard.

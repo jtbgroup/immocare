@@ -91,11 +91,12 @@ This file contains concrete business or product decisions that still need to be 
 - Can a `RECONCILED` transaction ever be changed? BR-TX-005 currently reflects an implementation restriction; its business rationale has not been confirmed.
 - Should the generated transaction reference and/or transaction source be editable when a transaction is edited? The current form displays the reference but exposes neither field in the update request.
 - Can a lease be associated with an expense in some business cases, or should that association be restricted to income?
-- Are equipment links limited to expenses? The form hides them for income, but the API currently accepts links for either direction. Can one transaction be split across multiple equipment items?
+- Are equipment links limited to expenses? The form hides them for income, but the API currently accepts links for either direction.
 - If several equipment items are linked, does an omitted amount assign the full amount to each one, or should there be at most one link without an amount?
-- For the confirmed allocation of a transaction across multiple costs (BR-TX-011), what should each allocation identify, and must allocation amounts sum to the full transaction amount?
+- Beyond housing units and tracked equipment (BR-TX-017), which other cost types, if any, must an expense allocation identify?
 - What is the accounting-month assignment policy: bank transaction date, value date, rent period, or a category-specific rule? Manual entry currently proposes the current month on load and does not update that proposal when the subcategory or counterparty account changes.
-- What is the business rule for identifying a duplicate bank movement? Are the same date, amount, and counterparty sufficient, and what is the scope over time?
+- BR-TX-014 confirms that an imported transaction cannot be imported again into the same estate; which fields should identify the same movement across different bank accounts, and should the selected account be part of duplicate matching?
 - Should a subcategory be required for a manually entered transaction? The historical creation criteria say it is required, while the current form and API allow it to be omitted.
 - Should manually created or edited transactions reinforce automatic classification and accounting-month learning rules? The current save path does this, but the suggestion behavior is outside the current manual-entry documentation scope.
-- Must an automatically learned classification always be confirmed by a manager before it is considered reliable?
+- What matching or confidence conditions make a lease or service-provider property suggestion ambiguous enough to require the prominent warning and keep-or-clear decision in BR-TX-015?
+- Must an import select a bank account, or may the account remain optional as it is in the current interface?
